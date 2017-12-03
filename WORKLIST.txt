@@ -41,6 +41,7 @@ ENGINE / RENDERING:
   Once that's done, C2DRender needs to be built up into an SDL-only blitting renderer.
   Once the SDL renderer is running on Win32, move the new code over to PS2 and try it.
 - Eventually, will probably want to build a real PS2 renderer.
+- (Update 12.3.2017) ported to OSX, which required switching to SDL2. Other than rewriting CRender::initSDL(), no major changes. However, at this point, the key bindings are messed up; I think once that's complete, we will be back to wherever we were when we last left the project (in 2006?). As an aside, I also moved the code from VSS to Github git@github.com:Rushwind13/JMoria.git as part of this work.'
 
 
 STABILITY:

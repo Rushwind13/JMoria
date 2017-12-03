@@ -180,17 +180,9 @@ bool CCmdState::IsDirectional(SDL_Keysym *keysym)
 	// (arrows and numberpad keys)
 	// have sequential SDLK_ symbols,
 	// so we can handle them with this check
-	if( keysym->sym >= SDLK_KP_0 && keysym->sym <= SDLK_LEFT )
+	if( ( keysym->sym >= SDLK_KP_1  && keysym->sym <= SDLK_KP_0 ) ||
+        ( keysym->sym >= SDLK_RIGHT && keysym->sym <= SDLK_UP ) )
 	{
-		// User pressed a (possible) directional key.
-		// make sure it's a directional, then 
-		// do collision testing
-		if( keysym->sym >= SDLK_KP_PERIOD && keysym->sym <= SDLK_KP_EQUALS )
-		{
-			// oops. not a directional.
-			return false;
-		}
-
 		return true;
 	}
 

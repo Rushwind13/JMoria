@@ -1,0 +1,63 @@
+JMoria Work List
+----------------
+DATA / GAMEPLAY:
+- implement DAT file reading (XML format? INI format? passwd format?) for: dungeon, item, savefile
+- Now that monsters.txt can be read, create many new monster defs.
+- once this is done, clean up the hardcoded monster creation in Dungeon.cpp
+
+
+COMBAT:
+- AI maybe? The monsters are being read in, and just need to get monsters spawning into the dungeon again. Some kind of 
+  random picking from the monster list, starting the AIbrains going, seeing if I can watch them wander around...
+- combat is very hardcoded. make it not so much.
+- implement monster fighting back (might need HP and stuff for that, though)
+
+
+ARCHITECTURE:
+- figure out who owns the set of monsterdefs and dungeontiledefs (is dungeon good enough?)
+- load texture only once (see flipcode "Hey! It works!" article re: managers) -- 1.27.06 downloaded to E:\Work\FAQ
+- someone (who?) needs to own an "ASCIItoIndex()" functon that takes a char and returns char - ' ' - 1
+- each dungeon thing {monster, player, dungeontile} should store its tex coords and tile (write at create and onchange); 
+  saves a % and / per obj, per frame. costs 1 vector/obj.
+- continue to implement CDungeon (current level, CMonster List, CItem List)
+
+
+FONT / TEXTURE / DISPLAY / COLOR:
+- displaytext: figure out how to make background the color you want.
+  decide on some decent colors for bounding box, inverse, and regular text.
+- game crashes if you pass in a string that needs to break on whitespace but has a word that's too long.
+- make tileset complain if the damned image isn't the right shape/size.
+- make the font bitmap load only once. (perhaps tileset can handle this? by returning the handle, size, etc of the
+  already loaded bitmap?) (what if I want different fonts?)
+  (perhaps a tilemgr? maybe just all the DisplayText boxes use the same (set of) fonts?
+  foo=new DisplayText(FONT_COURIER, JRect()) maybe)
+
+
+ENGINE / RENDERING:
+- Keep the renderer you have for awhile. Concentrate on putting together a solid gameplay demo.
+- Contract art later as needed.
+- The CRender class is ready to be renamed to C3DRender,
+  with base-class stuff ripped out and put into CRenderBase.
+  Once that's done, C2DRender needs to be built up into an SDL-only blitting renderer.
+  Once the SDL renderer is running on Win32, move the new code over to PS2 and try it.
+- Eventually, will probably want to build a real PS2 renderer.
+
+
+STABILITY:
+- be able to close the game properly.
+- figure out why the game is so rickety?
+- figure out why the framerate seems to tank? unfreed resources? (4/10/03 still a problem? Haven't seen it)
+
+
+DUNGEON GENERATION: (as of 1.27.06, hardcoded 16x16 dungeon back in)
+- 1.27.06: hardcoded 16x16 dungeon back in. Get to work on gameplay. SDL crash was in Dungeon->Draw(), where 
+  I had hardcoded 256x256 instead of DUNG_WIDTH/HEIGHT. duh.
+- 1.1.05: tried to clean up a little and put the game in a state where it could be worked on. This met little success. 
+  I attempted to put back in the hardcoded 16x16 dungeon (dungeonmap.cpp/dungeonconstants,h),
+  but got an SDL crash at some point. Should probably look this up. If dungeon creation could be put on the back burner 
+  for awhile, it would be nice to work on something else;
+- The random dungeon generation is a little broken. I think this is because of weird recursion behavior.
+  It would be a lot easier to test if the generation happened visually. Try to make this happen.
+- Tried to add NewLevelState to help with stepping through dungeon generation. Add back to project at some point.
+- Also, make sure that there are enough rooms generated every time. Sometimes, it just tails out 
+  after 1 or 2 rooms.

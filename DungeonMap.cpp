@@ -533,7 +533,7 @@ void CDungeonMap::FillArea( const Uint8 type, const JRect *rcFill, const int dir
 			rcLocal.left-1 < 0 || rcLocal.right-1 > DUNG_WIDTH )
 		{
 			// badness.
-			int foo=1;
+            printf("Badness occurred; fillArea() is outside the world.\n");
 		}
 		for( y=rcLocal.top-1; y <= rcLocal.bottom+1; y++ )
 		{

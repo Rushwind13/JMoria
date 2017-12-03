@@ -10,6 +10,7 @@
 #include <string.h>
 #include <sys/time.h>
 
+#include "JMDefs.h"
 #include "Util.h"
 
 namespace Util
@@ -62,9 +63,9 @@ float Roll( int dice, int sides )
 }
 
 // function overload; pass in "2d5"
-float Roll( char *szFormat )
+float Roll( const char *szFormat )
 {
-	if( !szFormat || *szFormat == NULL )
+	if( !szFormat || *szFormat == nul )
 	{
 		// You passed in an empty or NULL string!
 		return 0.0f;
@@ -107,13 +108,13 @@ bool IsInWorld( JRect rcIn )
 	return rcIn.IsInWorld();
 }
     
-unsigned long GetTickCount()
+int GetTickCount()
 {
     struct timeval tv;
     if(gettimeofday(&tv, NULL) != 0)
         return 0;
     
-    return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
+    return (int)((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
 }
 
 }

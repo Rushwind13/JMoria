@@ -8,14 +8,14 @@ class CTileset
 	// Member Functions
 public:
 	CTileset() {};
-	CTileset( char *szName, int cellWidth, int cellHeight ) { Load( szName, cellWidth, cellHeight ); };
+	CTileset( const char *szName, int cellWidth, int cellHeight ) { Load( szName, cellWidth, cellHeight ); };
 	
-	bool IsBMP( char *szName ) { return false; };
+	bool IsBMP( const char *szName ) { return false; };
 	
 	float TexelW() { return m_vTexels.x; };
 	float TexelH() { return m_vTexels.y; };
 	
-	JResult Load( char *szName, int cellwidth, int cellheight );
+	JResult Load( const char *szName, int cellwidth, int cellheight );
 
 #ifdef RENDER_TILESET_POSTLOAD_NEEDED
 	uint32 Texture() { return m_Texture; };

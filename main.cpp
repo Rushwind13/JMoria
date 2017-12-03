@@ -20,7 +20,7 @@ int main( int argc, char **argv )
     // whether or not the window is active
     int isActive = true;
 	
-	srand( time(NULL) );
+	srand( (unsigned)time(NULL) );
 	
 	JResult result;
 	g_pGame = new CGame;
@@ -37,7 +37,6 @@ int main( int argc, char **argv )
 	int curTime = 0;
     int lastTick = Util::GetTickCount();
 	int nextTime = 0;
-	int count = 0;
 
 	bool bRetVal;
 	try

@@ -30,9 +30,9 @@ public:
 	bool Update( float fCurTime );
 	void Draw();
 	void DrawStr( int x, int y, char *szString );
-	void Printf( char *fmt, ... );
+	void Printf( const char *fmt, ... );
 
-	void Clear() { m_szText[0] = '\0'; };
+	void Clear() { m_szText[0] = nul; };
 	void SetColor( JColor in ) { m_Color.SetColor( in ); };
 	void SetFlags( int dwFlags ) { m_dwFlags = dwFlags; };
 
@@ -48,7 +48,7 @@ protected:
 	void Paginate();
 	void DrawStr( int x, int y, bool bBoundsCheck, int dwYMax, char *szString );
 	void DrawBoundingBox();
-	void DrawFormattedStr( char *str );
+	void DrawFormattedStr( const char *str );
 private:
 
 	// Member variables

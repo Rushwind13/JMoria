@@ -111,7 +111,7 @@ public:
 	
 	void Terminate()
 	{
-		if( m_lpHead = NULL )
+		if( m_lpHead == NULL )
 		{
 			return;
 		}

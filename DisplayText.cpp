@@ -31,7 +31,7 @@ m_dwFlags( FLAG_TEXT_NONE ),
 m_rcViewport( 0, 480, 640, 0 )
 {
 	m_szText = new char[TEXT_MAXCHARS];
-	memset( m_szText, 0, sizeof( m_szText ) );
+	memset( m_szText, 0, sizeof( *m_szText ) );
 	m_szDrawPtr = m_szText;
 
 	m_TileSet = new CTileset("Resources/Courier.png", 32, 32);
@@ -97,7 +97,7 @@ void CDisplayText::DrawStr(int x, int y, bool bBoundsCheck, int dwYMax, char *sz
 	m_TileSet->SetTileColor( m_Color );
 
 	// Do that string parse, baby
-	while( *ptr != NULL )
+	while( *ptr != nul )
 	{
 		if( *ptr == ' ' ) 
 		{
@@ -142,7 +142,7 @@ void CDisplayText::Paginate()
 
 	dwAddLinesMax = m_dwUsedLines + m_dwFreeLines;
 
-	ptr = strchr( m_szText, '\0' );
+	ptr = strchr( m_szText, nul );
 	while( ptr > m_szText )
 	{
 		if( *ptr == '\n' )
@@ -167,7 +167,7 @@ void CDisplayText::Paginate()
 }
 
 // Formatted Text Drawing Functions
-void CDisplayText::Printf( char *fmt, ... )
+void CDisplayText::Printf( const char *fmt, ... )
 {
 	va_list vList;
 	char szBuffer3[TEXT_MAXCHARS];
@@ -181,7 +181,7 @@ void CDisplayText::Printf( char *fmt, ... )
 	va_end(vList);
 }
 
-void CDisplayText::DrawFormattedStr(char *szString)
+void CDisplayText::DrawFormattedStr(const char *szString)
 {
 	char szBuffer[TEXT_MAXCHARS];
 	char szBuffer2[TEXT_MAXCHARS];
@@ -218,7 +218,7 @@ void CDisplayText::DrawFormattedStr(char *szString)
 
 			strcpy( szBuffer2, ptr );
 			*ptr++	= '\n';
-			*ptr	= '\0';
+			*ptr	= nul;
 
 			// Kill the leading space (if necessary)
 			if( m_dwFlags & FLAG_TEXT_WRAP_WHITESPACE && szBuffer2[0] == ' ' )
@@ -241,7 +241,7 @@ void CDisplayText::DrawFormattedStr(char *szString)
 
 	// Make sure it's going to fit in the bounding box by removing
 	// strings at the top of the bounding box
-	ptr = m_szText;	
+	ptr = m_szText;
 	while( strlen( ptr ) + strlen( szBuffer ) > TEXT_MAXCHARS )
 	{
 		ptr = strchr( ptr, '\n' );

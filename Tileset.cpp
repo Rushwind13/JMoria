@@ -5,7 +5,7 @@
 
 #include "Render.h"
 
-JResult CTileset::Load( char *szName, int dwCellWidth, int dwCellHeight )
+JResult CTileset::Load( const char *szName, int dwCellWidth, int dwCellHeight )
 {
 	SDL_Surface *TextureImage;
 	JResult retval = JSUCCESS;

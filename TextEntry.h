@@ -12,7 +12,7 @@ public:
 
 	~TextEntry() { if( m_szString != NULL ) delete [] m_szString; m_szString = NULL; };
 
-	void Init( char *szIn, int dwIn )
+	void Init( const char *szIn, int dwIn )
 	{ 
 		m_szString = new char[strlen(szIn)];
 		strcpy( m_szString, szIn );

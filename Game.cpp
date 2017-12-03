@@ -241,6 +241,7 @@ void CGame::HandleEvents(int &isActive, int &done)
                 }
                 break;
             }
+            break;
 		case SDL_KEYDOWN:
 			// handle key presses
 			retval = m_pCurState->HandleKey( &event.key.keysym );

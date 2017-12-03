@@ -150,10 +150,10 @@ void CRender::PostDraw()
     {
 		GLint t = SDL_GetTicks();
 		if (t - m_dwT0 >= 5000)
-		{
+        {
+#ifdef _DEBUG
 			GLfloat seconds = (t - m_dwT0) / 1000.0f;
 			GLfloat fps = m_dwFrames / seconds;
-#ifdef _DEBUG
 			m_fps->Printf("%g FPS\n", fps);
 #endif // _DEBUG
 			m_dwT0 = t;

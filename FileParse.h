@@ -11,7 +11,7 @@ public:
 	CDataFile() {};
 	~CDataFile() {};
 
-	bool Open( char *szFilename );
+	bool Open( const char *szFilename );
 	
 	CMonsterDef *ReadMonster(CMonsterDef &mdIn);
 protected:

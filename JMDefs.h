@@ -13,6 +13,8 @@
 typedef int JResult;
 typedef unsigned int uint32;
 
+#define nul '\0'
+
 #define JSUCCESS		0
 #define JQUITREQUEST	1
 #define JRESETSTATE		2

@@ -2,7 +2,7 @@
 #include "Monster.h"
 #include <string.h>
 
-bool CDataFile::Open( char *szFilename )
+bool CDataFile::Open( const char *szFilename )
 {
 	m_fp = fopen(szFilename, "r");
 
@@ -18,7 +18,7 @@ char *CDataFile::Strip( char *szLine )
 {
 	char *c;
 
-	if( szLine == NULL || *szLine == NULL || *szLine == '#' )
+	if( szLine == NULL || *szLine == nul || *szLine == '#' )
 	{
 		return NULL;
 	}
@@ -28,7 +28,7 @@ char *CDataFile::Strip( char *szLine )
 		szLine[strlen(szLine)-1] = NULL;
 	}
 
-	if( *szLine == NULL )
+	if( *szLine == nul )
 	{
 		return NULL;
 	}
@@ -54,7 +54,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 {
 	char szRaw[1024];
 	char *szLine;
-	char *szValue;
+	char *szValue = NULL;
 	bool bFoundMonster = false;
 	bool bStartMonster = false;
 	bool bEndMonster = false;
@@ -209,7 +209,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 
 char *CDataFile::GetValue(char *szLine, char *szIn)
 {
-	if( szLine == NULL || *szLine == NULL )
+	if( szLine == NULL || *szLine == nul )
 	{
 		return NULL;
 	}

@@ -103,10 +103,13 @@ void CDungeon::Init()
 	}
 
 	delete pmd;
-    
+
+#ifdef RANDOM_MONSTER
     int which_monster = Util::GetRandom(0, m_llMonsterDefs->length()-1);
     printf("trying to spawn monster %d\n", which_monster);
-    
+#else
+    int which_monster = m_llMonsterDefs->length()-1;
+#endif // RANDOM_MONSTER
     CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(which_monster)->m_lpData;
     
     CMonster *pMon;
@@ -270,7 +273,7 @@ void CDungeon::PreDraw()
 		//int xinitval = 16;
 		int yinitval = xinitval;
 
-#define ORIGIN_PLAYER
+//#define ORIGIN_PLAYER
 #ifdef ORIGIN_PLAYER
 		int xorigin = (int)g_pGame->GetPlayer()->m_vPos.x - DUNG_WIDTH/2;
 		int yorigin = (int)g_pGame->GetPlayer()->m_vPos.y - DUNG_HEIGHT/2;

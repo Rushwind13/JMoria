@@ -22,7 +22,7 @@ typedef unsigned int uint32;
 
 #define INVALID_LENGTH	-1
 
-#define JERROR() printf("An error occurred: %s %d\n", __FILE__, __LINE__ ); /**/
+#define JERROR() printf("An error occurred: %s %d\n", __FILE__, __LINE__ );
 #include "DungeonConstants.h"
 
 #include "Constants.h"

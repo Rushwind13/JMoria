@@ -40,14 +40,13 @@ JResult CGame::Init()
 	g_Constants.Init();
 	
 	// Init the Render
-	//*
 	m_pRender = new CRender;
 	result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
 	if( result != JSUCCESS )
 	{
 		m_pRender->Term();
 		return result;
-	}/**/
+	}
 
 	m_pMsgsDT = new CDisplayText( JRect( 0, 0, 640, 36 ) );
 	m_pMsgsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE);
@@ -80,13 +79,12 @@ JResult CGame::Init()
 
 void CGame::Quit( int returncode )
 {
-	//*
 	if( m_pRender )
 	{
 		m_pRender->Term();
 		delete m_pRender;
 		m_pRender = NULL;
-	}/**/
+	}
 	
 	if( m_pDungeon )
 	{

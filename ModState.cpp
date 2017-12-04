@@ -176,13 +176,15 @@ int CModState::OnHandleInit( SDL_Keysym *keysym )
 			mod = MOD_CLOSE;
 			break;
 		case SDLK_t:
-			if( (keysym->mod & KMOD_SHIFT) == KMOD_SHIFT )
+			if( keysym->mod & KMOD_SHIFT == KMOD_SHIFT )
 			{
 				mod = MOD_TUNNEL;
 			}
 			else
 			{
-				printf("THROW not implemented yet.\n");
+                printf("THROW not implemented yet.\n");
+                ResetToState( STATE_COMMAND );
+                return 0;
 			}
 			break;
 		default:

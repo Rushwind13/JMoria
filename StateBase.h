@@ -35,6 +35,13 @@ public:
 			
 			//SDL_WM_ToggleFullScreen( surface );
 			break;
+        case SDLK_LSHIFT:
+        case SDLK_RSHIFT:
+        case SDLK_LCTRL:
+        case SDLK_RCTRL:
+            // Just a modifier key, nothing to see here.
+            return( JSUCCESS );
+            break;
 		default:
 			break;
 		}

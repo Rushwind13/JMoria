@@ -105,6 +105,7 @@ public:
 		}
 	}
 protected:
+    void SetColor();
 private:
 	
 	// Member Functions

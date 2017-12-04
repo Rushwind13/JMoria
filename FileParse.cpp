@@ -191,8 +191,17 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
                 {
                     // multi-hued
                     // <<rgb1>,<rgb2>,...,<rgbn>>
-                    JLinkList *colorList = split(color);
-                    mdIn.m_Colors = colorList;
+                    JLinkList<char *> *colorList = split(color);
+                    
+                    CLink<char *> *curr_color = colorList->GetHead();
+                    while(curr_color)
+                    {
+                        JColor *add_color = new JColor;
+                        char *szColor = *(curr_color->m_lpData);
+                        add_color->SetColor(szColor);
+                        mdIn.m_Colors->Add(add_color);
+                        curr_color = colorList->GetNext(curr_color);
+                    }
                     
                     mdIn.m_dwFlags |= MON_COLOR_MULTI;
                 }
@@ -253,20 +262,21 @@ char *CDataFile::chomp(char *szLine, char *szIn)
 	return szIn;
 }
 
-JLinkList<JColor> * split(char *szLine)
+JLinkList<char *> * split(char *szLine)
 {
-    JLinkList<JColor> *retval = new JLinkList<JColor>;
-    int count = 0;
-    char *c = strtok( szColor, "," );
+    JLinkList<char *> *retval = new JLinkList<char *>;
+    char *c = strtok( szLine, "," );
     while( c != NULL )
     {
-      char szToken[32];
+      char *szToken;
+        szToken = (char *)malloc(strlen(c)+1);
+        memset(szToken, 0, sizeof(char));
 	strcpy(szToken, c);
-	retval->Add(szToken);
-	c = strtok( szColor, "," ); 
+	retval->Add(&szToken);
+	c = strtok( szLine, "," );
     }
 
-    return &retval;
+    return retval;
 }
 
 int CDataFile::GetValue(char *szLine, int &dwIn)

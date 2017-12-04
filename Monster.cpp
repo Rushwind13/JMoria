@@ -103,10 +103,10 @@ int CMonster::Damage( float fDamageMult )
 // draw routines
 void CMonster::SetColor()
 {
-  if( m_dwFlags |= MON_COLOR_MULTI == MON_COLOR_MULTI )
+  if( (m_md->m_dwFlags |= MON_COLOR_MULTI) == MON_COLOR_MULTI )
   {
-    int which_color = Util::GetRandom(0,m_Colors.length()-1);
-    m_Color.SetColor(m_Colors->GetLink(which_color)->m_lpData);
+    int which_color = Util::GetRandom(0,m_md->m_Colors->length()-1);
+    (m_md->m_Color).SetColor(*(m_md->m_Colors->GetLink(which_color)->m_lpData));
   }
 }
 
@@ -119,7 +119,7 @@ void CMonster::Draw()
 	SetColor();
 
 	//PreDraw();
-	g_pGame->GetDungeon()->m_TileSet->SetTileColor( m_Color );
+	g_pGame->GetDungeon()->m_TileSet->SetTileColor( m_md->m_Color );
 	g_pGame->GetDungeon()->m_TileSet->DrawTile( monster_tile, GetPos(), vSize, false );
 	//PostDraw();
 }

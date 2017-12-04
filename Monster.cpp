@@ -29,7 +29,12 @@ JResult CMonster::Init( CMonsterDef *pmd )
 	m_md = pmd;
 	m_fCurHP = pmd->m_fBaseHP;
 	m_fCurAC = pmd->m_fBaseAC;
-	
+    
+    // TODO: move to AIBrain::Init()
+    m_pBrain->m_fSpeed = pmd->m_fSpeed;
+    m_pBrain->m_dwMoveType = pmd->m_dwMoveType;
+    m_pBrain->SetState(BRAINSTATE_SEEK);
+    
 	return SpawnMonster();
 }
 

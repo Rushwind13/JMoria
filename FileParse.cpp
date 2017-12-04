@@ -102,7 +102,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 			else  if( strncasecmp( szLine, "movetype", 8 ) == 0 )
 			{
 				szValue = GetValue( szLine, szValue );
-				mdIn.m_dwFlags |= g_Constants.LookupString(szValue);
+                mdIn.m_dwMoveType = g_Constants.LookupString(szValue);
 			}
 			else if( strncasecmp( szLine, "hd", 2 ) == 0 )
 			{

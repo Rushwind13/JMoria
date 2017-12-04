@@ -64,6 +64,8 @@
 #define MON_AI_100RANDOMMOVE	0x00020000
 #define MON_AI_75RANDOMMOVE		0x00040000
 
+#define MON_COLOR_MULTI			0x01000000
+
 // Make sure you change below here if you added any flags.
 #define NUM_STRINGS				12
 #include "TextEntry.h"

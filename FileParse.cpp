@@ -186,8 +186,19 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 			}
 			else if( strncasecmp( szLine, "color", 5 ) == 0 )
 			{
-				szValue = GetValue( szLine, szValue );
-				mdIn.m_Color.SetColor(szValue);
+				char *color = chomp( szLine, szValue );
+                char *token = strchr( color, '<' );
+                while( token != NULL )
+                {
+                    // multi-hued
+                    // <<rgb1>,<rgb2>,...,<rgbn>>
+                    char *colorList[] = split(color);
+                    mdIn.m_Colors.append
+                    
+                    mdIn.m_dwFlags |= MON_COLOR_MULTI;
+                }
+                // <rgb1>
+                mdIn.m_Color.SetColor(szValue);
 			}
 			else if( *szLine == '}' )
 			{
@@ -207,7 +218,9 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 	return &mdIn;
 }
 
-char *CDataFile::GetValue(char *szLine, char *szIn)
+// Removes outermost <> from data entry
+char *CDataFile::GetValue(char *szLine, char *szIn) { return chomp(szLine, szIn); }
+char *CDataFile::chomp(char *szLine, char *szIn)
 {
 	if( szLine == NULL || *szLine == nul )
 	{
@@ -236,6 +249,22 @@ char *CDataFile::GetValue(char *szLine, char *szIn)
 	delete [] copy;
 	return szIn;
 }
+
+char *[] split(char *szLine)
+{
+    char *c;
+    while( (c = strtok( szColor, "," )) != NULL )
+    {
+        
+    }
+    m_vRG.x = atoi(c);
+    c = strtok( NULL, "," );
+    m_vRG.y = atoi(c);
+    c = strtok( NULL, "," );
+    m_vBA.x = atoi(c);
+    c = strtok( NULL, "," );
+    m_vBA.y = atoi(c);
+};
 
 int CDataFile::GetValue(char *szLine, int &dwIn)
 {

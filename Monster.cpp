@@ -98,9 +98,10 @@ int CMonster::Damage( float fDamageMult )
 // draw routines
 
 
+unsigned char MonIDs[MON_IDX_MAX+1] = ",Ji";
 void CMonster::Draw()
 {
-	Uint8 monster_tile = m_md->m_dwIndex;
+	Uint8 monster_tile = MonIDs[m_md->m_dwIndex] - ' ' - 1;
 	JVector vSize(1,1);
 
 	//PreDraw();

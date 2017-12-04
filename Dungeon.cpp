@@ -22,7 +22,6 @@ int			  ModifiedTileTypes[DUNG_IDX_MAX+1] =
 	DUNG_IDX_FLOOR,
 	DUNG_IDX_INVALID
 };
-unsigned char MonIDs[MON_IDX_MAX+1] = ",Ji";
 //extern Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH];
 
 void CDungeon::Init()
@@ -104,6 +103,21 @@ void CDungeon::Init()
 	}
 
 	delete pmd;
+    
+    int which_monster = Util::GetRandom(0, m_llMonsterDefs->length()-1);
+    printf("trying to spawn monster %d\n", which_monster);
+    
+    CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(which_monster)->m_lpData;
+    
+    CMonster *pMon;
+    pMon = new CMonster;
+    pMon->Init(chosen_monster);
+    
+    
+    pMon->m_pllLink = m_llMonsters->Add(pMon);
+    g_pGame->GetAIMgr()->m_llAIBrains->Add(pMon->m_pBrain);
+    pMon->m_pBrain->SetParent(pMon);
+    
 	/*
 	CMonster *pMon, *pMon2, *pMon3;
 	CMonsterDef *pmd, *pmd2, *pmd3;

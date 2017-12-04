@@ -65,7 +65,7 @@
 #define MON_AI_75RANDOMMOVE		0x00040000
 
 // Make sure you change below here if you added any flags.
-#define NUM_STRINGS				8
+#define NUM_STRINGS				12
 #include "TextEntry.h"
 class Constants
 {
@@ -77,19 +77,23 @@ public:
 	{
 		m_StringTable = new TextEntry[NUM_STRINGS];
 		int i=0;
-		// Monster flags
+        // Monster flags
+        // types
+        m_StringTable[i++].Init("MON_IDX_SHROOM",		MON_IDX_SHROOM);
+        m_StringTable[i++].Init("MON_IDX_JELLY",		MON_IDX_JELLY);
+        m_StringTable[i++].Init("MON_IDX_ICKY",			MON_IDX_ICKY);
 		// attack types
 		m_StringTable[i++].Init("MON_FLAG_SPORE",		MON_FLAG_SPORE);
-		m_StringTable[i++].Init("MON_FLAG_TOUCH",			MON_FLAG_TOUCH);
-		m_StringTable[i++].Init("MON_FLAG_BITE",				MON_FLAG_BITE);
-		m_StringTable[i++].Init("MON_FLAG_DROOL",			MON_FLAG_DROOL);
-		m_StringTable[i++].Init("MON_FLAG_CLAW",				MON_FLAG_CLAW);
-		m_StringTable[i++].Init("MON_FLAG_POISON",				MON_FLAG_POISON);
+		m_StringTable[i++].Init("MON_FLAG_TOUCH",		MON_FLAG_TOUCH);
+		m_StringTable[i++].Init("MON_FLAG_BITE",		MON_FLAG_BITE);
+		m_StringTable[i++].Init("MON_FLAG_DROOL",		MON_FLAG_DROOL);
+		m_StringTable[i++].Init("MON_FLAG_CLAW",		MON_FLAG_CLAW);
+		m_StringTable[i++].Init("MON_FLAG_POISON",		MON_FLAG_POISON);
 		// AI flags
 		// movement flags
-		m_StringTable[i++].Init("MON_AI_DONTMOVE",			MON_AI_DONTMOVE);
-		m_StringTable[i++].Init("MON_AI_100RANDOMMOVE",		MON_AI_100RANDOMMOVE);
-		m_StringTable[i++].Init("MON_AI_75RANDOMMOVE",		MON_AI_75RANDOMMOVE);
+		m_StringTable[i++].Init("MON_AI_DONTMOVE",		MON_AI_DONTMOVE);
+		m_StringTable[i++].Init("MON_AI_100RANDOMMOVE",	MON_AI_100RANDOMMOVE);
+		m_StringTable[i++].Init("MON_AI_75RANDOMMOVE",	MON_AI_75RANDOMMOVE);
 	};
 	TextEntry	*m_StringTable;
 

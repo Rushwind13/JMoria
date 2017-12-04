@@ -108,6 +108,20 @@ public:
 		}
 		return pLink->prev;
 	};
+    
+    CLink <T> *GetLink( int which_link )
+    {
+        int count = 0;
+        CLink <T> *curr_link = GetHead();
+        while( count < which_link )
+        {
+            if( curr_link->next == NULL ) return curr_link;
+            curr_link = GetNext(curr_link);
+            count++;
+        }
+        return curr_link;
+    }
+    int length() { return m_iNumElements; }
 	
 	void Terminate()
 	{

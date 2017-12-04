@@ -122,8 +122,8 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 			}
 			else if( strncasecmp( szLine, "type", 4 ) == 0 )
 			{
-				GetValue( szLine, szValue );
-				mdIn.m_dwFlags |= g_Constants.LookupString(szValue);
+				szValue = GetValue( szLine, szValue );
+				mdIn.m_dwIndex = g_Constants.LookupString(szValue);
 			}
 			else if( strncasecmp( szLine, "attack", 6 ) == 0 )
 			{

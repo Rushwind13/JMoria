@@ -101,7 +101,14 @@ int CMonster::Damage( float fDamageMult )
 }
 
 // draw routines
-
+void CMonster::SetColor()
+{
+  if( m_dwFlags |= MON_COLOR_MULTI == MON_COLOR_MULTI )
+  {
+    int which_color = Util::GetRandom(0,m_Colors.length()-1);
+    m_Color.SetColor(m_Colors->GetLink(which_color)->m_lpData);
+  }
+}
 
 unsigned char MonIDs[MON_IDX_MAX+1] = ",Ji";
 void CMonster::Draw()
@@ -109,8 +116,10 @@ void CMonster::Draw()
 	Uint8 monster_tile = MonIDs[m_md->m_dwIndex] - ' ' - 1;
 	JVector vSize(1,1);
 
+	SetColor();
+
 	//PreDraw();
-	g_pGame->GetDungeon()->m_TileSet->SetTileColor( m_md->m_Color );
+	g_pGame->GetDungeon()->m_TileSet->SetTileColor( m_Color );
 	g_pGame->GetDungeon()->m_TileSet->DrawTile( monster_tile, GetPos(), vSize, false );
 	//PostDraw();
 }

@@ -187,18 +187,21 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 			else if( strncasecmp( szLine, "color", 5 ) == 0 )
 			{
 				char *color = chomp( szLine, szValue );
-                char *token = strchr( color, '<' );
-                while( token != NULL )
+                if( strchr( color, '<' ) != NULL )
                 {
                     // multi-hued
                     // <<rgb1>,<rgb2>,...,<rgbn>>
-                    char *colorList[] = split(color);
-                    mdIn.m_Colors.append
+                    JLinkList *colorList = split(color);
+                    mdIn.m_Colors = colorList;
                     
                     mdIn.m_dwFlags |= MON_COLOR_MULTI;
                 }
-                // <rgb1>
-                mdIn.m_Color.SetColor(szValue);
+		else
+		{
+			// single-hued
+                	// <rgb1>
+                	mdIn.m_Color.SetColor(szValue);
+		}
 			}
 			else if( *szLine == '}' )
 			{
@@ -250,21 +253,21 @@ char *CDataFile::chomp(char *szLine, char *szIn)
 	return szIn;
 }
 
-char *[] split(char *szLine)
+JLinkList<JColor> * split(char *szLine)
 {
-    char *c;
-    while( (c = strtok( szColor, "," )) != NULL )
+    JLinkList<JColor> *retval = new JLinkList<JColor>;
+    int count = 0;
+    char *c = strtok( szColor, "," );
+    while( c != NULL )
     {
-        
+      char szToken[32];
+	strcpy(szToken, c);
+	retval->Add(szToken);
+	c = strtok( szColor, "," ); 
     }
-    m_vRG.x = atoi(c);
-    c = strtok( NULL, "," );
-    m_vRG.y = atoi(c);
-    c = strtok( NULL, "," );
-    m_vBA.x = atoi(c);
-    c = strtok( NULL, "," );
-    m_vBA.y = atoi(c);
-};
+
+    return &retval;
+}
 
 int CDataFile::GetValue(char *szLine, int &dwIn)
 {

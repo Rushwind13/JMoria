@@ -3,3 +3,8 @@
 
 # XCode
 *.xcodeproj
+DerivedData
+
+# G++
+*.o
+jmoria

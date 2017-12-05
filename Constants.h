@@ -53,7 +53,8 @@
 #define MON_IDX_ICKY            2
 #define MON_IDX_DRAGON          3
 #define MON_IDX_ANCIENT_DRAGON  4
-#define MON_IDX_MAX             5
+#define MON_IDX_SNAKE           5
+#define MON_IDX_MAX             6
 
 #define MON_FLAG_SPORE			0x00000001
 #define MON_FLAG_TOUCH			0x00000002
@@ -69,7 +70,7 @@
 #define MON_AI_75RANDOMMOVE		0x00040000
 
 // Make sure you change below here if you added any flags.
-#define NUM_STRINGS				15
+#define NUM_STRINGS				16
 #include "TextEntry.h"
 class Constants
 {
@@ -86,8 +87,9 @@ public:
         m_StringTable[i++].Init("MON_IDX_SHROOM",		MON_IDX_SHROOM);
         m_StringTable[i++].Init("MON_IDX_JELLY",		MON_IDX_JELLY);
         m_StringTable[i++].Init("MON_IDX_ICKY",			MON_IDX_ICKY);
-		m_StringTable[i++].Init("MON_IDX_ANCIENT_DRAGON",   MON_IDX_ANCIENT_DRAGON);
-        m_StringTable[i++].Init("MON_IDX_DRAGON",       MON_IDX_DRAGON);
+		m_StringTable[i++].Init("MON_IDX_DRAGON",       MON_IDX_DRAGON);
+        m_StringTable[i++].Init("MON_IDX_ANCIENT_DRAGON",       MON_IDX_ANCIENT_DRAGON);
+        m_StringTable[i++].Init("MON_IDX_SNAKE",        MON_IDX_SNAKE);
         // attack types
 		m_StringTable[i++].Init("MON_FLAG_SPORE",		MON_FLAG_SPORE);
 		m_StringTable[i++].Init("MON_FLAG_TOUCH",		MON_FLAG_TOUCH);

@@ -121,7 +121,8 @@ void CMonster::SetColor()
     m_fColorChangeInterval = 0.0f;
 }
 
-unsigned char MonIDs[MON_IDX_MAX+1] = ",JidD";
+
+unsigned char MonIDs[MON_IDX_MAX+1] = ",JidDS";
 void CMonster::Draw()
 {
 	Uint8 monster_tile = MonIDs[m_md->m_dwIndex] - ' ' - 1;

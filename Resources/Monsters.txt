@@ -43,14 +43,70 @@
 #    Color		<255,0,0,255>
 #}
 
+Monster <White Dragon>
+{
+    Plural		<White Dragons>
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD			<7d8>
+    AC          80.0
+    Level		25
+    ExpValue	300
+    Type		<MON_IDX_DRAGON>
+    Attack		<MON_FLAG_CLAW>,1d4<MON_FLAG_CLAW>,1d4,<MON_FLAG_BITE>,2d8
+    Color		<255,255,255,255>
+}
+
+Monster <Black Dragon>
+{
+    Plural		<Black Dragons>
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD			<8d8>
+    AC          80.0
+    Level		25
+    ExpValue	300
+    Type		<MON_IDX_DRAGON>
+    Attack		<MON_FLAG_CLAW>,1d4<MON_FLAG_CLAW>,1d4,<MON_FLAG_BITE>,3d6
+    Color		<0,0,0,255>
+}
+
+Monster <Green Dragon>
+{
+    Plural		<Green Dragons>
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD			<9d8>
+    AC          90.0
+    Level		25
+    ExpValue	300
+    Type		<MON_IDX_DRAGON>
+    Attack		<MON_FLAG_CLAW>,1d6<MON_FLAG_CLAW>,1d6,<MON_FLAG_BITE>,2d10
+    Color		<12,255,0,255>
+}
+
+Monster <Blue Dragon>
+{
+    Plural		<Blue Dragons>
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD			<10d8>
+    AC          90.0
+    Level		25
+    ExpValue	300
+    Type		<MON_IDX_DRAGON>
+    Attack		<MON_FLAG_CLAW>,1d6<MON_FLAG_CLAW>,1d6,<MON_FLAG_BITE>,3d8
+    Color		<13,7,81,255>
+}
+
 Monster <Red Dragon>
 {
     Plural		<Red Dragons>
-    Speed		3.0
-    MoveType	<MON_AI_75RANDOMMOVE>
-    HD			<10d10>
-    AC          50.0
-    Level		4
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD			<11d8>
+    AC          120.0
+    Level		25
     ExpValue	300
     Type		<MON_IDX_DRAGON>
     Flags       <MON_FLAG_BREATHE,MON_FLAG_FIRE>
@@ -58,10 +114,24 @@ Monster <Red Dragon>
     Color		<255,0,0,255>
 }
 
+Monster <Giant Snake>
+{
+    Plural		<Giant Snakes>
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD			<4d8>
+    AC			34.0
+    Level		2
+    ExpValue	50
+    Type		<MON_IDX_SNAKE>
+    Attack		<MON_FLAG_BITE>,1d3
+    Color		<198,142,0,255>
+}
+
 Monster <Red Jelly>
 {
     Plural		<Red Jellies>
-    Speed		0.0
+    Speed		1.0
     MoveType	<MON_AI_DONTMOVE>
     HD			<2d5>
     AC			10.0
@@ -75,7 +145,7 @@ Monster <Red Jelly>
 Monster <Green Jelly>
 {
     Plural		<Green Jellies>
-    Speed		0.0
+    Speed		1.0
     MoveType	<MON_AI_DONTMOVE>
     HD			<3d5>
     AC			10.0
@@ -83,13 +153,13 @@ Monster <Green Jelly>
     ExpValue	5
     Type		<MON_IDX_JELLY>
     Attack		<MON_FLAG_TOUCH>,1d2
-    Color		<12, 255, 0,255>
+    Color		<12,255,0,255>
 }
 
 Monster <Yellow Mushroom Patch>
 {	
 	Plural		<Yellow Mushroom Patches>
-	Speed		0.0
+	Speed		1.0
 	MoveType	<MON_AI_DONTMOVE>
 	HD			<1d4>
 	AC			50.0

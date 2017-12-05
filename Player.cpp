@@ -46,10 +46,9 @@ void CPlayer::PostDraw()
 
 JResult CPlayer::SpawnPlayer()
 {
-	bool bPlayerSpawned = false;
 	printf("Trying to spawn player...");
 	JVector vTryPos;
-	while( !bPlayerSpawned )
+	while( !m_HasSpawned )
 	{
 		vTryPos.Init( (float)Util::GetRandom(0, DUNG_WIDTH-1), (float)Util::GetRandom(0, DUNG_HEIGHT-1) );
 
@@ -57,10 +56,10 @@ JResult CPlayer::SpawnPlayer()
 		//g_pGame->GetMsgs()->Printf( "Trying to spawn player at <%.2f %.2f>...\n", vTryPos.x, vTryPos.y );
 
 		// try changing this to "iswalkable" -- might need to move that to dungeon. --Jimbo
-		if( g_pGame->GetDungeon()->IsWalkable(vTryPos) == DUNG_COLL_NO_COLLISION )
+		if( g_pGame->GetDungeon()->IsWalkableFor(vTryPos, true) == DUNG_COLL_NO_COLLISION )
 		{
 			m_vPos = vTryPos;
-			bPlayerSpawned = true;
+			m_HasSpawned = true;
 			printf("Success!\n");
 			//g_pGame->GetMsgs()->Printf( "Success!\n" );
 		}

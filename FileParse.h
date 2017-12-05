@@ -2,6 +2,7 @@
 #define __FILEPARSE_H__
 #include "TextEntry.h"
 #include "JLinkList.h"
+#include "JColor.h"
 #include <stdio.h>
 
 class CMonsterDef;
@@ -17,8 +18,8 @@ public:
 	CMonsterDef *ReadMonster(CMonsterDef &mdIn);
 protected:
     char	*Strip( char *szLine );
-    char	*chomp(char *szLine, char *szIn);
-    JLinkList<char *> * split(char *szLine);
+    char	*chomp(const char *szLine, char *szIn);
+    JLinkList<JColor> * ParseColors(char *szLine);
     char	*GetValue(char *szLine, char *szIn);
 	int		GetValue(char *szLine, int &dwIn);
 	float	GetValue(char *szLine, float &fIn);

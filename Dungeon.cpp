@@ -108,9 +108,10 @@ void CDungeon::Init()
     // Spawn a monster into dungeon
     // TODO: make this into a method on CMonster.
     int which_monster = Util::GetRandom(0, m_llMonsterDefs->length()-1);
-    printf("trying to spawn monster %d\n", which_monster);
+    //which_monster = 0;
     
     CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(which_monster)->m_lpData;
+    printf("Choosing monster %d, called %s\n", which_monster, chosen_monster->m_szName);
     
     CMonster *pMon;
     pMon = new CMonster;
@@ -252,7 +253,7 @@ void CDungeon::RemoveMonster( CMonster *pMon )
 }
 
 
-int CDungeon::IsWalkable( JVector &vPos )
+int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
 {
 	// Check for someone else standing there first (handles things that can walk thru walls)
 	CDungeonTile *curTile = GetTile(vPos);
@@ -261,10 +262,18 @@ int CDungeon::IsWalkable( JVector &vPos )
 		printf("Hey! That's a bad tile.\n");
 		return false;
 	}
-	if( curTile->m_pCurMonster != NULL )
+	if( isPlayer && curTile->m_pCurMonster != NULL )
 	{
 		return DUNG_COLL_MONSTER;
 	}
+    else if( !isPlayer
+            && g_pGame->GetPlayer()
+            && g_pGame->GetPlayer()->m_HasSpawned
+            && g_pGame->GetPlayer()->m_vPos == vPos )
+    {
+        printf("Monster attacking not implemented yet.\n");
+        return DUNG_COLL_PLAYER;
+    }
 	
 	// If you get here, the square was unoccupied. Now check for running into inanimates...
 	int type = curTile->m_dtd->m_dwType;

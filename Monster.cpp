@@ -6,7 +6,8 @@ CMonster::CMonster()
 :m_fCurHP(0.0f),
 m_fCurAC(0.0f),
 m_md(NULL),
-m_pBrain(NULL)
+m_pBrain(NULL),
+m_fColorChangeInterval(COLOR_CHANGE_TIMEOUT+1)
 {
 	m_pBrain = new CAIBrain;
 }
@@ -46,7 +47,7 @@ JResult CMonster::SpawnMonster()
 	}
 	
 	bool bMonsterSpawned = false;
-	printf("Trying to spawn monster type: %d...", m_md->m_dwType);
+	printf("Trying to spawn monster type: %s...", m_md->m_szName);
 	JVector vTryPos;
 	while( !bMonsterSpawned )
 	{
@@ -55,7 +56,7 @@ JResult CMonster::SpawnMonster()
 		//printf("Trying to spawn monster type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
 		//g_pGame->GetMsgs()->Printf( "Trying to spawn monster type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
 		
-		if( g_pGame->GetDungeon()->IsWalkable(vTryPos) == DUNG_COLL_NO_COLLISION )
+		if( g_pGame->GetDungeon()->IsWalkableFor(vTryPos) == DUNG_COLL_NO_COLLISION )
 		{
 			SetPos(vTryPos);
 			g_pGame->GetDungeon()->GetTile(GetPos())->m_pCurMonster = this;
@@ -103,11 +104,14 @@ int CMonster::Damage( float fDamageMult )
 // draw routines
 void CMonster::SetColor()
 {
-  if( (m_md->m_dwFlags |= MON_COLOR_MULTI) == MON_COLOR_MULTI )
-  {
-    int which_color = Util::GetRandom(0,m_md->m_Colors->length()-1);
-    (m_md->m_Color).SetColor(*(m_md->m_Colors->GetLink(which_color)->m_lpData));
-  }
+    if( m_fColorChangeInterval < COLOR_CHANGE_TIMEOUT ) return;
+    
+    if( (m_md->m_dwFlags & MON_COLOR_MULTI) == MON_COLOR_MULTI )
+    {
+        int which_color = Util::GetRandom(0,m_md->m_Colors->length()-1);
+        (m_md->m_Color).SetColor(*(m_md->m_Colors->GetLink(which_color)->m_lpData));
+    }
+    m_fColorChangeInterval = 0.0f;
 }
 
 unsigned char MonIDs[MON_IDX_MAX+1] = ",Ji";

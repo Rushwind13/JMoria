@@ -36,6 +36,7 @@ extern Constants g_Constants;
 
 #define DUNG_COLL_NO_COLLISION (Sint8)(-1)
 #define DUNG_COLL_MONSTER (Sint8)(-2)
+#define DUNG_COLL_PLAYER (Sint8)(-3)
 
 // SDL sees the mouse wheel as buttons 4&5
 // but has no constants for them.

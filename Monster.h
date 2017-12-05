@@ -5,6 +5,8 @@
 #include "JLinkList.h"
 #include "AIMgr.h"
 
+#define COLOR_CHANGE_TIMEOUT 0.666f
+
 class CAttack
 {
 public:
@@ -27,8 +29,9 @@ public:
 	m_fBaseHP(0.0f),
 	m_fBaseAC(0.0f),
 	m_szName(NULL)
-	{
-		m_llAttacks = new JLinkList<CAttack>;
+    {
+        m_llAttacks = new JLinkList<CAttack>;
+        m_Colors = new JLinkList<JColor>;
 	};
 	~CMonsterDef()
 	{
@@ -70,6 +73,7 @@ public:
 	float m_fCurHP;
 	float m_fCurAC;
 //	JVector m_vPos;
+    float m_fColorChangeInterval;
 	CMonsterDef *m_md;
 	CLink <CMonster> *m_pllLink;
 	CAIBrain *m_pBrain; // this is the place to get info for the AI.

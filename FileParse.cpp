@@ -191,26 +191,16 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
                 {
                     // multi-hued
                     // <<rgb1>,<rgb2>,...,<rgbn>>
-                    JLinkList<char *> *colorList = split(color);
-                    
-                    CLink<char *> *curr_color = colorList->GetHead();
-                    while(curr_color)
-                    {
-                        JColor *add_color = new JColor;
-                        char *szColor = *(curr_color->m_lpData);
-                        add_color->SetColor(szColor);
-                        mdIn.m_Colors->Add(add_color);
-                        curr_color = colorList->GetNext(curr_color);
-                    }
+                    mdIn.m_Colors = ParseColors(color);
                     
                     mdIn.m_dwFlags |= MON_COLOR_MULTI;
                 }
-		else
-		{
-			// single-hued
-                	// <rgb1>
-                	mdIn.m_Color.SetColor(szValue);
-		}
+                else
+                {
+                    // single-hued
+                            // <rgb1>
+                            mdIn.m_Color.SetColor(color);
+                }
 			}
 			else if( *szLine == '}' )
 			{
@@ -232,7 +222,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 
 // Removes outermost <> from data entry
 char *CDataFile::GetValue(char *szLine, char *szIn) { return chomp(szLine, szIn); }
-char *CDataFile::chomp(char *szLine, char *szIn)
+char *CDataFile::chomp(const char *szLine, char *szIn)
 {
 	if( szLine == NULL || *szLine == nul )
 	{
@@ -262,18 +252,28 @@ char *CDataFile::chomp(char *szLine, char *szIn)
 	return szIn;
 }
 
-JLinkList<char *> * split(char *szLine)
+JLinkList<JColor> * CDataFile::ParseColors(char *szLine)
 {
-    JLinkList<char *> *retval = new JLinkList<char *>;
-    char *c = strtok( szLine, "," );
+    JColor *outcolor=NULL;
+    char szToken[32][32];
+    int count=0;
+    char *temp = NULL;
+    JLinkList<JColor> *retval = new JLinkList<JColor>;
+    char *c = strtok( szLine, ";" );
     while( c != NULL )
     {
-      char *szToken;
-        szToken = (char *)malloc(strlen(c)+1);
-        memset(szToken, 0, sizeof(char));
-	strcpy(szToken, c);
-	retval->Add(&szToken);
-	c = strtok( szLine, "," );
+        memset(szToken[count], 0, 32);
+        strcpy(szToken[count++], c);
+        c = strtok( NULL, ";" );
+    }
+    
+    for( int i = 0; i < count; i++)
+    {
+        char *tok = szToken[i];
+        temp = chomp(tok, temp);
+        outcolor = new JColor();
+        outcolor->SetColor(temp);
+        retval->Add(outcolor);
     }
 
     return retval;

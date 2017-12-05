@@ -209,7 +209,7 @@ void CDungeon::PreDraw()
 		//int xinitval = 16;
 		int yinitval = xinitval;
 
-//#define ORIGIN_PLAYER
+#define ORIGIN_PLAYER
 #ifdef ORIGIN_PLAYER
 		int xorigin = (int)g_pGame->GetPlayer()->m_vPos.x - DUNG_WIDTH/2;
 		int yorigin = (int)g_pGame->GetPlayer()->m_vPos.y - DUNG_HEIGHT/2;

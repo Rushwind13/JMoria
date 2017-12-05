@@ -6,7 +6,8 @@
 #define DUNG_MAXHEIGHT	256
 
 // dungeon width and height
-#define FIXED_DUNGEON
+//#define FIXED_DUNGEON
+#undef FIXED_DUNGEON
 #ifdef FIXED_DUNGEON
 #define DUNG_WIDTH		16
 #define DUNG_HEIGHT		16

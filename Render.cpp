@@ -2,7 +2,8 @@
 // implementation of the SDL/OpenGL Render
 // Jimbo S. Harris 5/12/2002
 
-#define DISPLAY_FRAMERATE
+//#define DISPLAY_FRAMERATE
+//#define _DEBUG
 
 #include "Render.h"
 #include "OpenGL/gl.h"

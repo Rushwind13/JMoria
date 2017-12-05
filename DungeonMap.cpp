@@ -10,7 +10,8 @@
 #define DUNG_HALL_MINLENGTH	2
 #define DUNG_HALL_MAXLENGTH	8
 
-#define FIXED_DUNGEON
+//#define FIXED_DUNGEON
+#undef FIXED_DUNGEON
 #ifdef FIXED_DUNGEON
 Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH] = {
 	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,

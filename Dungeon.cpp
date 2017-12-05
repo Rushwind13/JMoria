@@ -104,6 +104,9 @@ void CDungeon::Init()
 	}
 
 	delete pmd;
+    
+    // Spawn a monster into dungeon
+    // TODO: make this into a method on CMonster.
 #define RANDOM_MONSTER
 #ifdef RANDOM_MONSTER
     int which_monster = Util::GetRandom(0, m_llMonsterDefs->length()-1);

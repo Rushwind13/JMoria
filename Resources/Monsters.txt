@@ -182,3 +182,17 @@ Monster <Blue Icky Thing>
 	Attack		<MON_FLAG_TOUCH>,1d2
 	Color		<0,0,255,255>
 }
+
+Monster <Opal Icky Thing>
+{	
+	Plural		<Opal Icky Things>
+	Speed		1.0
+	MoveType	<MON_AI_100RANDOMMOVE>
+	HD		    <2d3>
+	AC		    20.0
+	Level		1
+	ExpValue	4
+	Type		<MON_IDX_ICKY>
+	Attack		<MON_FLAG_TOUCH>,1d2
+    Color		<<240,240,240,255>;<135,201,190,255>;<236,161,180,255>;<205,235,238,255>;<238,203,179,255>>
+}

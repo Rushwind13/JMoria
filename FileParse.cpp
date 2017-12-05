@@ -186,8 +186,21 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 			}
 			else if( strncasecmp( szLine, "color", 5 ) == 0 )
 			{
-				szValue = GetValue( szLine, szValue );
-				mdIn.m_Color.SetColor(szValue);
+				char *color = chomp( szLine, szValue );
+                if( strchr( color, '<' ) != NULL )
+                {
+                    // multi-hued
+                    // <<rgb1>,<rgb2>,...,<rgbn>>
+                    mdIn.m_Colors = ParseColors(color);
+                    
+                    mdIn.m_dwFlags |= MON_COLOR_MULTI;
+                }
+                else
+                {
+                    // single-hued
+                            // <rgb1>
+                            mdIn.m_Color.SetColor(color);
+                }
 			}
 			else if( *szLine == '}' )
 			{
@@ -207,7 +220,9 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 	return &mdIn;
 }
 
-char *CDataFile::GetValue(char *szLine, char *szIn)
+// Removes outermost <> from data entry
+char *CDataFile::GetValue(char *szLine, char *szIn) { return chomp(szLine, szIn); }
+char *CDataFile::chomp(const char *szLine, char *szIn)
 {
 	if( szLine == NULL || *szLine == nul )
 	{
@@ -235,6 +250,33 @@ char *CDataFile::GetValue(char *szLine, char *szIn)
 
 	delete [] copy;
 	return szIn;
+}
+
+JLinkList<JColor> * CDataFile::ParseColors(char *szLine)
+{
+    JColor *outcolor=NULL;
+    char szToken[32][32];
+    int count=0;
+    char *temp = NULL;
+    JLinkList<JColor> *retval = new JLinkList<JColor>;
+    char *c = strtok( szLine, ";" );
+    while( c != NULL )
+    {
+        memset(szToken[count], 0, 32);
+        strcpy(szToken[count++], c);
+        c = strtok( NULL, ";" );
+    }
+    
+    for( int i = 0; i < count; i++)
+    {
+        char *tok = szToken[i];
+        temp = chomp(tok, temp);
+        outcolor = new JColor();
+        outcolor->SetColor(temp);
+        retval->Add(outcolor);
+    }
+
+    return retval;
 }
 
 int CDataFile::GetValue(char *szLine, int &dwIn)

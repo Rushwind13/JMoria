@@ -5,6 +5,8 @@
 #include "JLinkList.h"
 #include "AIMgr.h"
 
+#define COLOR_CHANGE_TIMEOUT 0.666f
+
 class CAttack
 {
 public:
@@ -27,8 +29,9 @@ public:
 	m_fBaseHP(0.0f),
 	m_fBaseAC(0.0f),
 	m_szName(NULL)
-	{
-		m_llAttacks = new JLinkList<CAttack>;
+    {
+        m_llAttacks = new JLinkList<CAttack>;
+        m_Colors = new JLinkList<JColor>;
 	};
 	~CMonsterDef()
 	{
@@ -45,6 +48,7 @@ public:
 	float m_fBaseAC; // what AC does this monster start with?
 	char *m_szName; // What do we call this thing?
 	JColor	m_Color; // What color do we draw this thing? (Make it appropriate to the monster name...)
+	JLinkList<JColor> *m_Colors; // for multi-hued
 	float m_fSpeed; // speed of monster (affects update rate)
     int m_dwMoveType; // movement type of monster
 	char *m_szPlural; // how to refer to more than one of this monster
@@ -69,6 +73,7 @@ public:
 	float m_fCurHP;
 	float m_fCurAC;
 //	JVector m_vPos;
+    float m_fColorChangeInterval;
 	CMonsterDef *m_md;
 	CLink <CMonster> *m_pllLink;
 	CAIBrain *m_pBrain; // this is the place to get info for the AI.
@@ -104,6 +109,7 @@ public:
 		}
 	}
 protected:
+    void SetColor();
 private:
 	
 	// Member Functions

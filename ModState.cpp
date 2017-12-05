@@ -182,7 +182,9 @@ int CModState::OnHandleInit( SDL_Keysym *keysym )
 			}
 			else
 			{
-				printf("THROW not implemented yet.\n");
+                printf("THROW not implemented yet.\n");
+                ResetToState( STATE_COMMAND );
+                return 0;
 			}
 			break;
 		default:

@@ -13,12 +13,12 @@ namespace Util
 	float GetRandom( float lo, float hi );
 	int GetRandom( int lo, int hi );
 	float Roll( int dice, int sides );
-	float Roll( char *szFormat );
+	float Roll( const char *szFormat );
 
 	bool IsInWorld( JFVector vIn );
 	bool IsInWorld( JRect rcIn );
     
-    unsigned long GetTickCount();
+    int GetTickCount();
 };
 
 #endif // __UTIL_H__

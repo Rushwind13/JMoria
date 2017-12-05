@@ -10,19 +10,9 @@
 
 extern CGame *g_pGame;
 
-/*#define TEMPSTUFF
-#ifdef TEMPSTUFF
-#include "DisplayText.h"
-#include "Dungeon.h"
-
-extern CDisplayText *msgs;
-extern CDungeon *theDungeon;
-#endif
-/**/
 void CPlayer::Init()
 {
 	// Initialize all the player stuff, baby.
-	//m_TileSet = new CTileset("JMoriaTiles256x256.png", 32, 32 );
 	m_TileSet = new CTileset("Resources/Courier.png", 32, 32 );
 
 	// This will likely get moved somewhere else. --Jimbo

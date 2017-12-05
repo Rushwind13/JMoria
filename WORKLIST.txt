@@ -7,10 +7,9 @@ DATA / GAMEPLAY:
 
 
 COMBAT:
-- AI maybe? The monsters are being read in, and just need to get monsters spawning into the dungeon again. Some kind of 
-  random picking from the monster list, starting the AIbrains going, seeing if I can watch them wander around...
 - combat is very hardcoded. make it not so much.
 - implement monster fighting back (might need HP and stuff for that, though)
+- monsters can move on top of the player (don't know if they collide with other things, either)
 
 
 ARCHITECTURE:

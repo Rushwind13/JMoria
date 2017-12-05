@@ -1,4 +1,4 @@
-#include "Monster.h"
+ #include "Monster.h"
 #include "Game.h"
 #include "DisplayText.h"
 #include "Dungeon.h"
@@ -27,9 +27,21 @@ CMonster::~CMonster()
 JResult CMonster::Init( CMonsterDef *pmd )
 {
 	m_md = pmd;
-	m_fCurHP = pmd->m_fBaseHP;
+    if( pmd->m_fBaseHP != 0.0f )
+    {
+        m_fCurHP = pmd->m_fBaseHP;
+    }
+    else
+    {
+        m_fCurHP = Util::Roll(pmd->m_szHD);
+    }
 	m_fCurAC = pmd->m_fBaseAC;
-	
+    
+    // TODO: move to AIBrain::Init()
+    m_pBrain->m_fSpeed = pmd->m_fSpeed;
+    m_pBrain->m_dwMoveType = pmd->m_dwMoveType;
+    m_pBrain->SetState(BRAINSTATE_SEEK);
+    
 	return SpawnMonster();
 }
 
@@ -98,9 +110,10 @@ int CMonster::Damage( float fDamageMult )
 // draw routines
 
 
+unsigned char MonIDs[MON_IDX_MAX+1] = ",JidD";
 void CMonster::Draw()
 {
-	Uint8 monster_tile = m_md->m_dwIndex;
+	Uint8 monster_tile = MonIDs[m_md->m_dwIndex] - ' ' - 1;
 	JVector vSize(1,1);
 
 	//PreDraw();

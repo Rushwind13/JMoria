@@ -27,19 +27,62 @@
 # Attack	string,string,string One of the MON_FLAG_ defines for attack type, followed by NdM for damage (can have more than 1 of these), followed by effect flag
 # Color		string	RGBA value for this creature's color
 #
+#
+# example monster entry follows: e.g.
+#Monster <Red Jelly>
+#{
+#    Plural		<Red Jellies>
+#    Speed		0.0
+#    MoveType	<MON_AI_DONTMOVE>
+#    HD			<2d5>
+#    AC			10.0
+#    Level		1
+#    ExpValue	5
+#    Type		<MON_IDX_JELLY>
+#    Attack		<MON_FLAG_TOUCH>,1d2
+#    Color		<255,0,0,255>
+#}
+
+Monster <Red Dragon>
+{
+Plural		<Red Dragons>
+Speed		3.0
+MoveType	<MON_AI_75RANDOMMOVE>
+HD			<10d10>
+AC          50.0
+Level		4
+ExpValue	300
+Type		<MON_IDX_DRAGON>
+Attack		<MON_FLAG_TOUCH>,1d2
+Color		<255,0,0,255>
+}
 
 Monster <Red Jelly>
-{	
-	Plural		<Red Jellies>
-	Speed		0.0
-	MoveType	<MON_AI_DONTMOVE>
-	HD			<2d5>
-	AC			10.0
-	Level		1
-	ExpValue	5
-	Type		<MON_IDX_JELLY>
-	Attack		<MON_FLAG_TOUCH>,1d2
-	Color		<255,0,0,255>
+{
+Plural		<Red Jellies>
+Speed		0.0
+MoveType	<MON_AI_DONTMOVE>
+HD			<2d5>
+AC			10.0
+Level		1
+ExpValue	5
+Type		<MON_IDX_JELLY>
+Attack		<MON_FLAG_TOUCH>,1d2
+Color		<255,0,0,255>
+}
+
+Monster <Green Jelly>
+{
+    Plural		<Green Jellies>
+    Speed		0.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD			<3d5>
+    AC			10.0
+    Level		1
+    ExpValue	5
+    Type		<MON_IDX_JELLY>
+    Attack		<MON_FLAG_TOUCH>,1d2
+    Color		<12, 255, 0,255>
 }
 
 Monster <Yellow Mushroom Patch>

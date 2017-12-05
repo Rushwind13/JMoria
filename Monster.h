@@ -46,6 +46,7 @@ public:
 	char *m_szName; // What do we call this thing?
 	JColor	m_Color; // What color do we draw this thing? (Make it appropriate to the monster name...)
 	float m_fSpeed; // speed of monster (affects update rate)
+    int m_dwMoveType; // movement type of monster
 	char *m_szPlural; // how to refer to more than one of this monster
 	char *m_szHD; // NdM form of this monster's hit dice.
 	JLinkList <CAttack> *m_llAttacks; // this monster's attacks

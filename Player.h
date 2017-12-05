@@ -7,7 +7,7 @@ class CTileset;
 class CPlayer
 {
 public:
-	CPlayer(){};
+    CPlayer():m_HasSpawned(false){};
 	~CPlayer() {};
 
 	void Init();
@@ -18,6 +18,7 @@ public:
 	void PostDraw();
 	JVector m_vPos;
 	CTileset *m_TileSet;
+    bool m_HasSpawned;
 protected:
 	JResult SpawnPlayer();
 };

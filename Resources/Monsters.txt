@@ -45,30 +45,30 @@
 
 Monster <Red Dragon>
 {
-Plural		<Red Dragons>
-Speed		3.0
-MoveType	<MON_AI_75RANDOMMOVE>
-HD			<10d10>
-AC          50.0
-Level		4
-ExpValue	300
-Type		<MON_IDX_DRAGON>
-Attack		<MON_FLAG_TOUCH>,1d2
-Color		<255,0,0,255>
+    Plural		<Red Dragons>
+    Speed		3.0
+    MoveType	<MON_AI_75RANDOMMOVE>
+    HD			<10d10>
+    AC          50.0
+    Level		4
+    ExpValue	300
+    Type		<MON_IDX_DRAGON>
+    Attack		<MON_FLAG_TOUCH>,1d2
+    Color		<255,0,0,255>
 }
 
 Monster <Red Jelly>
 {
-Plural		<Red Jellies>
-Speed		0.0
-MoveType	<MON_AI_DONTMOVE>
-HD			<2d5>
-AC			10.0
-Level		1
-ExpValue	5
-Type		<MON_IDX_JELLY>
-Attack		<MON_FLAG_TOUCH>,1d2
-Color		<255,0,0,255>
+    Plural		<Red Jellies>
+    Speed		0.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD			<2d5>
+    AC			10.0
+    Level		1
+    ExpValue	5
+    Type		<MON_IDX_JELLY>
+    Attack		<MON_FLAG_TOUCH>,1d2
+    Color		<255,0,0,255>
 }
 
 Monster <Green Jelly>
@@ -111,4 +111,18 @@ Monster <Blue Icky Thing>
 	Type		<MON_IDX_ICKY>
 	Attack		<MON_FLAG_TOUCH>,1d2
 	Color		<0,0,255,255>
+}
+
+Monster <Opal Icky Thing>
+{	
+	Plural		<Opal Icky Things>
+	Speed		1.0
+	MoveType	<MON_AI_100RANDOMMOVE>
+	HD		    <2d3>
+	AC		    20.0
+	Level		1
+	ExpValue	4
+	Type		<MON_IDX_ICKY>
+	Attack		<MON_FLAG_TOUCH>,1d2
+    Color		<<240,240,240,255>;<135,201,190,255>;<236,161,180,255>;<205,235,238,255>;<238,203,179,255>>
 }

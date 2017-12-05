@@ -107,8 +107,13 @@ void CDungeon::Init()
     
     // Spawn a monster into dungeon
     // TODO: make this into a method on CMonster.
+#define RANDOM_MONSTER
+#ifdef RANDOM_MONSTER
     int which_monster = Util::GetRandom(0, m_llMonsterDefs->length()-1);
+#else
+    int which_monster = m_llMonsterDefs->length()-1;
     //which_monster = 0;
+#endif // RANDOM_MONSTER
     
     CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(which_monster)->m_lpData;
     printf("Choosing monster %d, called %s\n", which_monster, chosen_monster->m_szName);

@@ -1,5 +1,11 @@
+.DS_Store
 *.png
 *.txt
 
 # XCode
 *.xcodeproj
+DerivedData
+
+# G++
+*.o
+jmoria

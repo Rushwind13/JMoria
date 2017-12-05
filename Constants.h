@@ -47,18 +47,22 @@
 #define DUNG_FLAG_LIT		0x00000001
 
 // Types of Monsters
-#define MON_IDX_INVALID		-1
-#define MON_IDX_SHROOM		 0
-#define MON_IDX_JELLY		 1
-#define MON_IDX_ICKY		 2
-#define MON_IDX_MAX			 3
+#define MON_IDX_INVALID        -1
+#define MON_IDX_SHROOM          0
+#define MON_IDX_JELLY           1
+#define MON_IDX_ICKY            2
+#define MON_IDX_DRAGON          3
+#define MON_IDX_ANCIENT_DRAGON  4
+#define MON_IDX_MAX             5
 
 #define MON_FLAG_SPORE			0x00000001
 #define MON_FLAG_TOUCH			0x00000002
 #define MON_FLAG_BITE			0x00000004
 #define MON_FLAG_DROOL			0x00000008
+
 #define MON_FLAG_CLAW			0x00000010
 #define MON_FLAG_POISON			0x00000020
+#define MON_FLAG_FIRE           0x00000040
 
 #define MON_AI_DONTMOVE			0x00010000
 #define MON_AI_100RANDOMMOVE	0x00020000
@@ -67,7 +71,7 @@
 #define MON_COLOR_MULTI			0x01000000
 
 // Make sure you change below here if you added any flags.
-#define NUM_STRINGS				12
+#define NUM_STRINGS				15
 #include "TextEntry.h"
 class Constants
 {
@@ -84,14 +88,17 @@ public:
         m_StringTable[i++].Init("MON_IDX_SHROOM",		MON_IDX_SHROOM);
         m_StringTable[i++].Init("MON_IDX_JELLY",		MON_IDX_JELLY);
         m_StringTable[i++].Init("MON_IDX_ICKY",			MON_IDX_ICKY);
-		// attack types
+		m_StringTable[i++].Init("MON_IDX_ANCIENT_DRAGON",   MON_IDX_ANCIENT_DRAGON);
+        m_StringTable[i++].Init("MON_IDX_DRAGON",       MON_IDX_DRAGON);
+        // attack types
 		m_StringTable[i++].Init("MON_FLAG_SPORE",		MON_FLAG_SPORE);
 		m_StringTable[i++].Init("MON_FLAG_TOUCH",		MON_FLAG_TOUCH);
 		m_StringTable[i++].Init("MON_FLAG_BITE",		MON_FLAG_BITE);
 		m_StringTable[i++].Init("MON_FLAG_DROOL",		MON_FLAG_DROOL);
 		m_StringTable[i++].Init("MON_FLAG_CLAW",		MON_FLAG_CLAW);
 		m_StringTable[i++].Init("MON_FLAG_POISON",		MON_FLAG_POISON);
-		// AI flags
+		m_StringTable[i++].Init("MON_FLAG_FIRE",		MON_FLAG_FIRE);
+        // AI flags
 		// movement flags
 		m_StringTable[i++].Init("MON_AI_DONTMOVE",		MON_AI_DONTMOVE);
 		m_StringTable[i++].Init("MON_AI_100RANDOMMOVE",	MON_AI_100RANDOMMOVE);

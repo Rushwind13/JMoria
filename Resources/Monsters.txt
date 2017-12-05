@@ -53,6 +53,7 @@ Monster <Red Dragon>
     Level		4
     ExpValue	300
     Type		<MON_IDX_DRAGON>
+    Flags       <MON_FLAG_BREATHE,MON_FLAG_FIRE>
     Attack		<MON_FLAG_TOUCH>,1d2
     Color		<255,0,0,255>
 }

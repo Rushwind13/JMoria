@@ -51,7 +51,8 @@ public:
 	JLinkList<JColor> *m_Colors; // for multi-hued
 	float m_fSpeed; // speed of monster (affects update rate)
     int m_dwMoveType; // movement type of monster
-	char *m_szPlural; // how to refer to more than one of this monster
+    char *m_szPlural; // how to refer to more than one of this monster
+    int m_dwAppear; // how many copies of this monster show up at first
 	char *m_szHD; // NdM form of this monster's hit dice.
 	JLinkList <CAttack> *m_llAttacks; // this monster's attacks
 	int	m_dwLevel; // earliest dungeon level to place this monster

@@ -9,6 +9,8 @@
 #define __CONSTANTS_H__
 #include <stdio.h>
 
+#define VERSION "0.06"
+
 // all the states which the game can run in
 // this modifies the event handling
 #define STATE_INVALID		-1

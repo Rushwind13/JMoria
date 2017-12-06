@@ -118,15 +118,7 @@ void CDungeon::Init()
     CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(which_monster)->m_lpData;
     printf("Choosing monster %d, called %s\n", which_monster, chosen_monster->m_szName);
     
-    CMonster *pMon;
-    pMon = new CMonster;
-    pMon->Init(chosen_monster);
-    
-    
-    pMon->m_pllLink = m_llMonsters->Add(pMon);
-    g_pGame->GetAIMgr()->m_llAIBrains->Add(pMon->m_pBrain);
-    pMon->m_pBrain->SetParent(pMon);
-    
+    CMonster::CreateMonster(chosen_monster);
 
 	m_TileSet = new CTileset("Resources/Courier.png", 32, 32 );
 }

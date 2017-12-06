@@ -25,9 +25,9 @@ CMonster::~CMonster()
 	}
 }
 
-JResult CMonster::Init( CMonsterDef *pmd )
+void CMonster::Init( CMonsterDef *pmd )
 {
-	m_md = pmd;
+    m_md = pmd;
     if( pmd->m_fBaseHP != 0.0f )
     {
         m_fCurHP = pmd->m_fBaseHP;
@@ -36,23 +36,45 @@ JResult CMonster::Init( CMonsterDef *pmd )
     {
         m_fCurHP = Util::Roll(pmd->m_szHD);
     }
-	m_fCurAC = pmd->m_fBaseAC;
-    
-    // TODO: move to AIBrain::Init()
+    m_fCurAC = pmd->m_fBaseAC;
+}
+
+void CMonster::InitBrain( CMonsterDef *pmd )
+{
     m_pBrain->m_fSpeed = pmd->m_fSpeed;
     m_pBrain->m_dwMoveType = pmd->m_dwMoveType;
     m_pBrain->SetState(BRAINSTATE_SEEK);
+    m_pBrain->SetParent(this);
+}
+
+JResult CMonster::CreateMonster( CMonsterDef *pmd )
+{
+    int desired = Util::Roll(pmd->m_szAppear);
+    for( int count=0; count < desired; count++ )
+    {
+        CMonster *pMon;
+        pMon = new CMonster;
+        
+        // Initialize the Monster from the MonsterDef
+        pMon->Init(pmd);
+        
+        // Initialize the Brain
+        // TODO: move to AIBrain::Init()
+        pMon->InitBrain(pmd);
+        
+        // Put the monster in the world
+        pMon->SpawnMonster();
+
+        // Now that the monster is set up, add it to the global lists (monsters, brains)
+        pMon->m_pllLink = g_pGame->GetDungeon()->m_llMonsters->Add(pMon);
+        g_pGame->GetAIMgr()->m_llAIBrains->Add(pMon->m_pBrain);
+    }
     
-	return SpawnMonster();
+    return JSUCCESS;
 }
 
 JResult CMonster::SpawnMonster()
 {
-	if( !m_md )
-	{
-		return JERROR();
-	}
-	
 	bool bMonsterSpawned = false;
 	printf("Trying to spawn monster type: %s...", m_md->m_szName);
 	JVector vTryPos;

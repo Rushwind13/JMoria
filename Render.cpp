@@ -63,7 +63,9 @@ JResult CRender::InitSDL()
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
     
     // Allocate window and context.
-    m_hWindow = SDL_CreateWindow("JMoria", 0, 0, m_dwScreenWidth, m_dwScreenHeight, m_dwWindowFlags);
+    char window_title[32];
+    sprintf(window_title, "JMoria %s", VERSION);
+    m_hWindow = SDL_CreateWindow(window_title, 0, 0, m_dwScreenWidth, m_dwScreenHeight, m_dwWindowFlags);
     if (m_hWindow != NULL) {
         SDL_GLContext glcontext = SDL_GL_CreateContext(m_hWindow);
         if (glcontext == NULL)

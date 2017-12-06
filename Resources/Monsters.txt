@@ -160,6 +160,7 @@ Monster <Yellow Mushroom Patch>
 {    
     Plural        <Yellow Mushroom Patches>
     Speed        1.0
+    Appear      <1d8>
     MoveType    <MON_AI_DONTMOVE>
     HD            <1d4>
     AC            50.0

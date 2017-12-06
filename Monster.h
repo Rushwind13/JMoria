@@ -32,6 +32,8 @@ public:
     {
         m_llAttacks = new JLinkList<CAttack>;
         m_Colors = new JLinkList<JColor>;
+        m_szAppear = new char[10];
+        sprintf(m_szAppear, "1d1");
 	};
 	~CMonsterDef()
 	{
@@ -52,7 +54,7 @@ public:
 	float m_fSpeed; // speed of monster (affects update rate)
     int m_dwMoveType; // movement type of monster
     char *m_szPlural; // how to refer to more than one of this monster
-    int m_dwAppear; // how many copies of this monster show up at first
+    char *m_szAppear; // how many copies of this monster show up at first
 	char *m_szHD; // NdM form of this monster's hit dice.
 	JLinkList <CAttack> *m_llAttacks; // this monster's attacks
 	int	m_dwLevel; // earliest dungeon level to place this monster
@@ -118,12 +120,14 @@ public:
 	CMonster();
 	~CMonster();
 	
-	JResult Init(CMonsterDef *pmd);	
+	static JResult CreateMonster(CMonsterDef *pmd);
 	JResult SpawnMonster();
 	void PreDraw();
 	void Draw();
 	void PostDraw();
 protected:
+    void Init(CMonsterDef *pmd);
+    void InitBrain(CMonsterDef *pmd);
 private:
 };
 

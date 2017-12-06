@@ -97,7 +97,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
             }
             else if( strncasecmp( szLine, "appear", 6 ) == 0 )
             {
-                mdIn.m_dwAppear = GetValue( szLine, mdIn.m_dwAppear );
+                mdIn.m_szAppear = GetValue( szLine, mdIn.m_szAppear );
             }
             else if( strncasecmp( szLine, "speed", 5 ) == 0 )
             {

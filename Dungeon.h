@@ -90,8 +90,9 @@ public:
 	};
 	int IsWalkableFor( JVector &vPos, bool isPlayer=false );
 	bool IsOpenable( JVector &vPos );
-	bool IsTunnelable( JVector &vPos );
-	bool IsCloseable( JVector &vPos );
+    bool IsTunnelable( JVector &vPos );
+    bool IsCloseable( JVector &vPos );
+    int  IsStairs( JVector &vPos );
 	void RemoveMonster( CMonster *pMon );
 	JResult Modify( JVector &vPos );
 protected:

@@ -28,8 +28,10 @@ void CPlayer::Draw()
 {
 	Uint8 player_tile = '@' - ' ' - 1;//TileIDs[TILE_IDX_PLAYER] - ' ' - 1;
 	JVector vSize(1,1);
+    JColor player_color(255,255,255,255);
 
 	PreDraw();
+    m_TileSet->SetTileColor(player_color);
 	m_TileSet->DrawTile( player_tile, m_vPos, vSize, true );
 	PostDraw();
 }

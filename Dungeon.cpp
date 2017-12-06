@@ -10,7 +10,7 @@
 #include "Player.h"
 #include "FileParse.h"
 
-unsigned char TileIDs[DUNG_IDX_MAX+1]			= ".#+'<>:@";
+unsigned char TileIDs[DUNG_IDX_MAX+1]			= ".#+'<<>>:@";
 int			  ModifiedTileTypes[DUNG_IDX_MAX+1] =
 {
 	DUNG_IDX_INVALID,
@@ -49,11 +49,13 @@ void CDungeon::Init()
 			break;
 		case DUNG_IDX_OPEN_DOOR:
 			m_dtdlist[i].m_Color.SetColor(192,192,192,255);
-			break;
-		case DUNG_IDX_UPSTAIRS:
+                break;
+        case DUNG_IDX_UPSTAIRS:
+        case DUNG_IDX_LONG_UPSTAIRS:
 			m_dtdlist[i].m_Color.SetColor(175,175,175,255);
-			break;
-		case DUNG_IDX_DOWNSTAIRS:
+                break;
+        case DUNG_IDX_DOWNSTAIRS:
+        case DUNG_IDX_LONG_DOWNSTAIRS:
 			m_dtdlist[i].m_Color.SetColor(195,195,195,255);
 			break;
 		case DUNG_IDX_RUBBLE:
@@ -342,6 +344,27 @@ bool CDungeon::IsCloseable( JVector &vPos )
 	
 	// If you get here, the square was unoccupied. Now check for running into inanimates...
 	return( curTile->m_dtd->m_dwType == DUNG_IDX_OPEN_DOOR);
+}
+
+int CDungeon::IsStairs( JVector &vPos )
+{
+    // trivial check; is this a modifiable tile at all?
+    CDungeonTile *curTile = GetTile(vPos);
+    if( curTile == NULL )
+    {
+        return DUNG_IDX_INVALID;
+    }
+    
+    if( curTile->m_dtd->m_dwType == DUNG_IDX_UPSTAIRS ||
+       curTile->m_dtd->m_dwType == DUNG_IDX_LONG_UPSTAIRS ||
+       curTile->m_dtd->m_dwType == DUNG_IDX_DOWNSTAIRS ||
+       curTile->m_dtd->m_dwType == DUNG_IDX_LONG_DOWNSTAIRS )
+    {
+        return curTile->m_dtd->m_dwType;
+    }
+    
+    // If you get here, the square was not a staircase
+    return DUNG_IDX_INVALID;
 }
 
 JResult CDungeon::Modify( JVector &vPos )

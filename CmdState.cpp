@@ -45,10 +45,14 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
     
     switch(keysym->sym)
     {
-    case SDLK_LESS:
-    case SDLK_GREATER:
-        HandleStairs( keysym );
-        return JSUCCESS;
+    case SDLK_COMMA:
+    case SDLK_PERIOD:
+        if( keysym->mod & KMOD_SHIFT )
+        {
+            m_vNewPos = g_pGame->GetPlayer()->m_vPos;
+            OnHandleStairs( keysym );
+            return JSUCCESS;
+        }
         break;
     default:
         break;
@@ -282,20 +286,58 @@ bool CCmdState::IsModifierNeeded(SDL_Keysym *keysym)
 	return false;
 }
 
-void CCmdState::HandleStairs(SDL_Keysym *keysym)
+
+#define DIR_UP 4
+#define DIR_DOWN 5
+
+int CCmdState::OnHandleStairs( SDL_Keysym *keysym )
 {
-    if( keysym->sym == SDLK_LESS)
+    int stair_dir = TestStairs();
+    if( stair_dir == DUNG_IDX_INVALID )
     {
-        // if on <, go up stairs
-        // else error
+        g_pGame->GetMsgs()->Printf("I do not see any stairs here.\n");
+        return JSUCCESS;
     }
-    else if( keysym->sym == SDLK_GREATER )
+    
+    // if on <, go up stairs
+    if( keysym->sym == SDLK_COMMA && stair_dir == DUNG_IDX_UPSTAIRS )
     {
-        // if on >, go down stairs
-        // else error
+        g_pGame->GetMsgs()->Printf("You enter a maze of up staircases.\n");
+        // dungeon_level--, make sure not to go less than 0
+        // respawn new dungeon level
+        return JSUCCESS;
+    }
+    else if( keysym->sym == SDLK_COMMA && stair_dir == DUNG_IDX_LONG_UPSTAIRS )
+    {
+        g_pGame->GetMsgs()->Printf("You enter a long maze of up staircases.\n");
+        // dungeon_level-- (a bunch), make sure not to go less than 0
+        // respawn new dungeon level
+        return JSUCCESS;
+    }
+    // if on >, go down stairs
+    else if( keysym->sym == SDLK_PERIOD && stair_dir == DUNG_IDX_DOWNSTAIRS )
+    {
+        g_pGame->GetMsgs()->Printf("You enter a maze of down staircases.\n");
+        // dungeon_level++
+        // respawn new dungeon level
+        return JSUCCESS;
+    }
+    else if( keysym->sym == SDLK_PERIOD && stair_dir == DUNG_IDX_LONG_DOWNSTAIRS )
+    {
+        g_pGame->GetMsgs()->Printf("You enter a long maze of down staircases.\n");
+        // dungeon_level++ (a bunch)
+        // respawn new dungeon level
+        return JSUCCESS;
     }
     else
     {
-        //error
+        g_pGame->GetMsgs()->Printf("You can't do that here.\n");
+        return JSUCCESS;
     }
 }
+
+int CCmdState::TestStairs()
+{
+    return( g_pGame->GetDungeon()->IsStairs(m_vNewPos) );
+}
+

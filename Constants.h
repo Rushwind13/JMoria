@@ -33,17 +33,19 @@
 #define STATUS_MAX			10
 
 // Types of Dungeon Tiles
-#define DUNG_IDX_INVALID	-1
-#define DUNG_IDX_FLOOR		 0
-#define DUNG_IDX_WALL		 1
-#define DUNG_IDX_DOOR		 2
-#define DUNG_IDX_OPEN_DOOR	 3
-#define DUNG_IDX_UPSTAIRS	 4
-#define DUNG_IDX_DOWNSTAIRS	 5
-#define DUNG_IDX_RUBBLE		 6
+#define DUNG_IDX_INVALID	    -1
+#define DUNG_IDX_FLOOR		     0
+#define DUNG_IDX_WALL		     1
+#define DUNG_IDX_DOOR		     2
+#define DUNG_IDX_OPEN_DOOR	     3
+#define DUNG_IDX_UPSTAIRS	     4
+#define DUNG_IDX_LONG_UPSTAIRS   5
+#define DUNG_IDX_DOWNSTAIRS      6
+#define DUNG_IDX_LONG_DOWNSTAIRS 7
+#define DUNG_IDX_RUBBLE		     8
 	//JUNK,
-#define DUNG_IDX_PLAYER		 7
-#define DUNG_IDX_MAX		 8
+#define DUNG_IDX_PLAYER		     9
+#define DUNG_IDX_MAX		    10
 
 // Dungeon Tile flags
 #define DUNG_FLAG_LIT		0x00000001

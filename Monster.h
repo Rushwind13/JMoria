@@ -5,7 +5,7 @@
 #include "JLinkList.h"
 #include "AIMgr.h"
 
-#define COLOR_CHANGE_TIMEOUT 0.666f
+#define COLOR_CHANGE_TIMEOUT 0.266f
 
 class CAttack
 {

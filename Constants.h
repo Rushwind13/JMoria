@@ -54,7 +54,10 @@
 #define MON_IDX_DRAGON          3
 #define MON_IDX_ANCIENT_DRAGON  4
 #define MON_IDX_SNAKE           5
-#define MON_IDX_MAX             6
+#define MON_IDX_KOBOLD          6
+#define MON_IDX_SPIDER          7
+#define MON_IDX_WORM            8
+#define MON_IDX_MAX             9
 
 #define MON_FLAG_SPORE			0x00000001
 #define MON_FLAG_TOUCH			0x00000002
@@ -64,6 +67,7 @@
 #define MON_FLAG_CLAW			0x00000010
 #define MON_FLAG_POISON			0x00000020
 #define MON_FLAG_FIRE           0x00000040
+#define MON_FLAG_BREED          0x00000080
 
 #define MON_AI_DONTMOVE			0x00010000
 #define MON_AI_100RANDOMMOVE	0x00020000
@@ -72,7 +76,7 @@
 #define MON_COLOR_MULTI			0x01000000
 
 // Make sure you change below here if you added any flags.
-#define NUM_STRINGS				16
+#define NUM_STRINGS				21
 #include "TextEntry.h"
 class Constants
 {
@@ -92,6 +96,9 @@ public:
 		m_StringTable[i++].Init("MON_IDX_DRAGON",       MON_IDX_DRAGON);
         m_StringTable[i++].Init("MON_IDX_ANCIENT_DRAGON",       MON_IDX_ANCIENT_DRAGON);
         m_StringTable[i++].Init("MON_IDX_SNAKE",        MON_IDX_SNAKE);
+        m_StringTable[i++].Init("MON_IDX_KOBOLD",       MON_IDX_KOBOLD);
+        m_StringTable[i++].Init("MON_IDX_SPIDER",       MON_IDX_SPIDER);
+        m_StringTable[i++].Init("MON_IDX_WORM",         MON_IDX_WORM);
         // attack types
 		m_StringTable[i++].Init("MON_FLAG_SPORE",		MON_FLAG_SPORE);
 		m_StringTable[i++].Init("MON_FLAG_TOUCH",		MON_FLAG_TOUCH);

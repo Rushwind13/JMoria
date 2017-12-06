@@ -33,6 +33,7 @@
 #{
 #    Plural		<Red Jellies>
 #    Speed		0.0
+#    Appear     <1d1>
 #    MoveType	<MON_AI_DONTMOVE>
 #    HD			<2d5>
 #    AC			10.0
@@ -42,6 +43,66 @@
 #    Attack		<MON_FLAG_TOUCH>,1d2
 #    Color		<255,0,0,255>
 #}
+
+Monster <Worm Mass>
+{
+Plural		<Worm Masses>
+Appear      <1d1>
+Speed		1.0
+MoveType	<MON_AI_100RANDOMMOVE>
+HD          <1d1>
+AC          40.0
+Level       1
+ExpValue	5
+Type		<MON_IDX_WORM>
+Attack		<MON_FLAG_POISON>,2d5
+Color		<0,0,0,255>
+}
+
+Monster <Huge Spider>
+{
+Plural		<Huge Spider>
+Appear      <1d1>
+Speed		1.0
+MoveType	<MON_AI_100RANDOMMOVE>
+HD          <2d2>
+AC          50.0
+Level       20
+ExpValue	100
+Type		<MON_IDX_SPIDER>
+Attack		<MON_FLAG_BITE>,1d6
+Color		<0,0,0c,255>
+}
+
+Monster <Ancient Multi-hued Dragon>
+{
+Plural		<Ancient Multi-hued Dragons>
+Appear      <1d1>
+Speed		1.0
+MoveType	<MON_AI_100RANDOMMOVE>
+HD			<7d8>
+AC          110.0
+Level		50
+ExpValue	9000
+Type		<MON_IDX_ANCIENT_DRAGON>
+Attack		<MON_FLAG_CLAW>,1d4<MON_FLAG_CLAW>,1d4,<MON_FLAG_BITE>,2d8
+Color		<<255,0,0,255>;<255,123,0,255>;<255,233,0,255>;<12,255,0,255>;<0,59,255,255>;<152,0,255,255>>
+}
+
+Monster <Kobold>
+{
+    Plural		<Kobolds>
+    Appear      <1d1>
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD			<1d4>
+    AC          40.0
+    Level		2
+    ExpValue	10
+    Type		<MON_IDX_KOBOLD>
+    Attack		<MON_FLAG_BITE>,1d4
+    Color		<124,124,124,255>
+}
 
 Monster <White Dragon>
 {

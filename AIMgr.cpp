@@ -40,6 +40,7 @@ m_eBrainState(BRAINSTATE_INVALID)
 
 bool CAIBrain::Update( float fCurTime )
 {
+    m_pParent->m_fColorChangeInterval += fCurTime;
 	switch( m_eBrainState )
 	{
 	case BRAINSTATE_REST:
@@ -126,7 +127,7 @@ bool CAIBrain::SetRandomDest(float fCurTime)
 
 	dest = m_vPos + delta;
 
-	if( Util::IsInWorld(dest) && (g_pGame->GetDungeon()->IsWalkable(dest) == DUNG_COLL_NO_COLLISION) )
+	if( Util::IsInWorld(dest) && (g_pGame->GetDungeon()->IsWalkableFor(dest) == DUNG_COLL_NO_COLLISION) )
 	{
 		//printf( "dest <%f %f> delta <%f %f>\n", VEC_EXPAND(dest), VEC_EXPAND(delta) );
 		//m_vDest = dest;

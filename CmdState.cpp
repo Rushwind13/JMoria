@@ -246,7 +246,7 @@ void CCmdState::GetDir(SDL_Keysym *keysym, JVector &vDir)
 
 int CCmdState::TestCollision( JVector &vTest )
 {
-	return (g_pGame->GetDungeon()->IsWalkable(vTest));
+	return (g_pGame->GetDungeon()->IsWalkableFor(vTest, true));
 }
 
 void CCmdState::UpdatePlayerPos( JVector &vNewPos )

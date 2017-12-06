@@ -87,7 +87,8 @@ void CDungeon::Init()
 		}
 	}
 
-	// Create the monster list
+	// Load the monster list from config
+    // TODO: Make this a method on CMonsterDef.
 	m_llMonsters = new JLinkList<CMonster>;
 	m_llMonsterDefs = new JLinkList<CMonsterDef>;
 
@@ -103,94 +104,21 @@ void CDungeon::Init()
 	}
 
 	delete pmd;
-
+    
+    // Spawn a monster into dungeon
+    // TODO: make this into a method on CMonster.
+#define RANDOM_MONSTER
 #ifdef RANDOM_MONSTER
     int which_monster = Util::GetRandom(0, m_llMonsterDefs->length()-1);
-    printf("trying to spawn monster %d\n", which_monster);
 #else
     int which_monster = m_llMonsterDefs->length()-1;
+    //which_monster = 0;
 #endif // RANDOM_MONSTER
+    
     CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(which_monster)->m_lpData;
+    printf("Choosing monster %d, called %s\n", which_monster, chosen_monster->m_szName);
     
-    CMonster *pMon;
-    pMon = new CMonster;
-    pMon->Init(chosen_monster);
-    
-    
-    pMon->m_pllLink = m_llMonsters->Add(pMon);
-    g_pGame->GetAIMgr()->m_llAIBrains->Add(pMon->m_pBrain);
-    pMon->m_pBrain->SetParent(pMon);
-    
-	/*
-	CMonster *pMon, *pMon2, *pMon3;
-	CMonsterDef *pmd, *pmd2, *pmd3;
-
-	pMon = new CMonster;
-	pMon2 = new CMonster;
-	pMon3 = new CMonster;
-
-	pmd = new CMonsterDef;
-	pmd2 = new CMonsterDef;
-	pmd3 = new CMonsterDef;
-
-	// jelly; monster 1
-	pMon2->m_pBrain->m_fSpeed = 0.0f;
-	pMon2->m_pBrain->m_dwMoveType = MON_AI_DONTMOVE;
-	pMon2->m_pBrain->SetState(BRAINSTATE_REST);
-	pmd2->m_fBaseHP = 10.0f;
-	pmd2->m_fBaseAC = 10.0f;
-	pmd2->m_dwIndex = MonIDs[MON_IDX_JELLY] - ' ' - 1;
-	pmd2->m_dwType = MON_IDX_JELLY;
-	pmd2->m_dwFlags = MON_FLAG_TOUCH;
-	pmd2->m_szName = new char[32];
-	pmd2->m_Color.SetColor(255,0,0,255);
-	sprintf( pmd2->m_szName, "Red Jelly" );
-
-	pMon2->Init(pmd2);
-
-	pMon2->m_pllLink = m_llMonsters->Add(pMon2);
-	g_pGame->GetAIMgr()->m_llAIBrains->Add(pMon2->m_pBrain);
-	pMon2->m_pBrain->SetParent(pMon2);
-
-	// mushroom patch; monster 2
-	pMon->m_pBrain->m_fSpeed = 0.0f;
-	pMon->m_pBrain->m_dwMoveType = MON_AI_DONTMOVE;
-	pMon->m_pBrain->SetState(BRAINSTATE_REST);
-	pmd->m_fBaseHP = 4.0f;
-	pmd->m_fBaseAC = 50.0f;
-	pmd->m_dwIndex = MonIDs[MON_IDX_SHROOM] - ' ' - 1;
-	pmd->m_dwType = MON_IDX_SHROOM;
-	pmd->m_dwFlags = MON_FLAG_SPORE;
-	pmd->m_szName = new char[32];
-	pmd->m_Color.SetColor(255,255,0,255);
-	sprintf( pmd->m_szName, "Yellow Mushroom Patch" );
-
-	pMon->Init(pmd);
-
-	pMon->m_pllLink = m_llMonsters->Add(pMon);
-	g_pGame->GetAIMgr()->m_llAIBrains->Add(pMon->m_pBrain);
-	pMon->m_pBrain->SetParent(pMon);
-
-	// icky thing; random mover
-	pMon3->m_pBrain->m_fSpeed = 1.0f;
-	pMon3->m_pBrain->m_dwMoveType = MON_AI_100RANDOMMOVE;
-	pMon3->m_pBrain->SetState(BRAINSTATE_SEEK);
-	pmd3->m_fBaseHP = 4.0f;
-	pmd3->m_fBaseAC = 50.0f;
-	pmd3->m_dwIndex = MonIDs[MON_IDX_ICKY] - ' ' - 1;
-	pmd3->m_dwType = MON_IDX_ICKY;
-	pmd3->m_dwFlags = MON_FLAG_TOUCH|MON_AI_100RANDOMMOVE;
-	pmd3->m_szName = new char[32];
-	pmd3->m_Color.SetColor(0,0,255,255);
-	sprintf( pmd3->m_szName, "Blue Icky Thing" );
-
-	pMon3->Init(pmd3);
-
-	pMon3->m_pllLink = m_llMonsters->Add(pMon3);
-	g_pGame->GetAIMgr()->m_llAIBrains->Add(pMon3->m_pBrain);
-	pMon3->m_pBrain->SetParent(pMon3);
-	/* */
-	//
+    CMonster::CreateMonster(chosen_monster);
 
 	m_TileSet = new CTileset("Resources/Courier.png", 32, 32 );
 }
@@ -322,7 +250,7 @@ void CDungeon::RemoveMonster( CMonster *pMon )
 }
 
 
-int CDungeon::IsWalkable( JVector &vPos )
+int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
 {
 	// Check for someone else standing there first (handles things that can walk thru walls)
 	CDungeonTile *curTile = GetTile(vPos);
@@ -331,10 +259,18 @@ int CDungeon::IsWalkable( JVector &vPos )
 		printf("Hey! That's a bad tile.\n");
 		return false;
 	}
-	if( curTile->m_pCurMonster != NULL )
+	if( isPlayer && curTile->m_pCurMonster != NULL )
 	{
 		return DUNG_COLL_MONSTER;
 	}
+    else if( !isPlayer
+            && g_pGame->GetPlayer()
+            && g_pGame->GetPlayer()->m_HasSpawned
+            && g_pGame->GetPlayer()->m_vPos == vPos )
+    {
+        printf("Monster attacking not implemented yet.\n");
+        return DUNG_COLL_PLAYER;
+    }
 	
 	// If you get here, the square was unoccupied. Now check for running into inanimates...
 	int type = curTile->m_dtd->m_dwType;

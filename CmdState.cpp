@@ -42,6 +42,17 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 		g_pGame->GetGameState()->HandleKey(keysym);
 		return 0;
 	}
+    
+    switch(keysym->sym)
+    {
+    case SDLK_LESS:
+    case SDLK_GREATER:
+        HandleStairs( keysym );
+        return JSUCCESS;
+        break;
+    default:
+        break;
+    }
 
 	/*
 	// These commands will bring up a "menu"
@@ -269,4 +280,22 @@ bool CCmdState::IsModifierNeeded(SDL_Keysym *keysym)
 	}
 
 	return false;
+}
+
+void CCmdState::HandleStairs(SDL_Keysym *keysym)
+{
+    if( keysym->sym == SDLK_LESS)
+    {
+        // if on <, go up stairs
+        // else error
+    }
+    else if( keysym->sym == SDLK_GREATER )
+    {
+        // if on >, go down stairs
+        // else error
+    }
+    else
+    {
+        //error
+    }
 }

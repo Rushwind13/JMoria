@@ -94,11 +94,15 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 			if( strncasecmp( szLine, "plural", 6 ) == 0 )
 			{
 				mdIn.m_szPlural = GetValue( szLine, mdIn.m_szPlural );
-			}
-			else if( strncasecmp( szLine, "speed", 5 ) == 0 )
-			{
-				mdIn.m_fSpeed = GetValue( szLine, mdIn.m_fSpeed );
-			}
+            }
+            else if( strncasecmp( szLine, "appear", 6 ) == 0 )
+            {
+                mdIn.m_szAppear = GetValue( szLine, mdIn.m_szAppear );
+            }
+            else if( strncasecmp( szLine, "speed", 5 ) == 0 )
+            {
+                mdIn.m_fSpeed = GetValue( szLine, mdIn.m_fSpeed );
+            }
 			else  if( strncasecmp( szLine, "movetype", 8 ) == 0 )
 			{
 				szValue = GetValue( szLine, szValue );
@@ -119,12 +123,23 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 			else if( strncasecmp( szLine, "expvalue", 8 ) == 0 )
 			{
 				GetValue( szLine, mdIn.m_dwExpValue );
-			}
-			else if( strncasecmp( szLine, "type", 4 ) == 0 )
-			{
-				szValue = GetValue( szLine, szValue );
-				mdIn.m_dwIndex = g_Constants.LookupString(szValue);
-			}
+            }
+            else if( strncasecmp( szLine, "type", 4 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                mdIn.m_dwIndex = g_Constants.LookupString(szValue);
+            }
+            else if( strncasecmp( szLine, "flags", 5 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                
+                char *c = strtok( szValue, "," );
+                while( c != NULL )
+                {
+                    mdIn.m_dwFlags |= g_Constants.LookupString(c);
+                    c = strtok( NULL, "," );
+                }
+            }
 			else if( strncasecmp( szLine, "attack", 6 ) == 0 )
 			{
 				CAttack *curAttack;

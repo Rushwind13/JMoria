@@ -9,6 +9,8 @@
 #define __CONSTANTS_H__
 #include <stdio.h>
 
+#define VERSION "0.06"
+
 // all the states which the game can run in
 // this modifies the event handling
 #define STATE_INVALID		-1
@@ -69,6 +71,8 @@
 #define MON_FLAG_FIRE           0x00000040
 #define MON_FLAG_BREED          0x00000080
 
+#define MON_FLAG_BREATHE        0x00000100
+
 #define MON_AI_DONTMOVE			0x00010000
 #define MON_AI_100RANDOMMOVE	0x00020000
 #define MON_AI_75RANDOMMOVE		0x00040000
@@ -76,7 +80,7 @@
 #define MON_COLOR_MULTI			0x01000000
 
 // Make sure you change below here if you added any flags.
-#define NUM_STRINGS				21
+#define NUM_STRINGS				22
 #include "TextEntry.h"
 class Constants
 {
@@ -105,8 +109,10 @@ public:
 		m_StringTable[i++].Init("MON_FLAG_BITE",		MON_FLAG_BITE);
 		m_StringTable[i++].Init("MON_FLAG_DROOL",		MON_FLAG_DROOL);
 		m_StringTable[i++].Init("MON_FLAG_CLAW",		MON_FLAG_CLAW);
-		m_StringTable[i++].Init("MON_FLAG_POISON",		MON_FLAG_POISON);
-		m_StringTable[i++].Init("MON_FLAG_FIRE",		MON_FLAG_FIRE);
+        m_StringTable[i++].Init("MON_FLAG_POISON",		MON_FLAG_POISON);
+        m_StringTable[i++].Init("MON_FLAG_FIRE",        MON_FLAG_FIRE);
+        m_StringTable[i++].Init("MON_FLAG_BREED",     MON_FLAG_BREED);
+        m_StringTable[i++].Init("MON_FLAG_BREATHE",     MON_FLAG_BREATHE);
         // AI flags
 		// movement flags
 		m_StringTable[i++].Init("MON_AI_DONTMOVE",		MON_AI_DONTMOVE);

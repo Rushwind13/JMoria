@@ -69,6 +69,7 @@
 
 #define MON_FLAG_CLAW			0x00000010
 #define MON_FLAG_POISON			0x00000020
+
 #define MON_FLAG_FIRE           0x00000040
 #define MON_FLAG_BREED          0x00000080
 
@@ -81,7 +82,7 @@
 #define MON_COLOR_MULTI			0x01000000
 
 // Make sure you change below here if you added any flags.
-#define NUM_STRINGS				23
+#define NUM_STRINGS				22
 #include "TextEntry.h"
 class Constants
 {
@@ -105,6 +106,7 @@ public:
         m_StringTable[i++].Init("MON_IDX_SPIDER",       MON_IDX_SPIDER);
         m_StringTable[i++].Init("MON_IDX_WORM",         MON_IDX_WORM);
         m_StringTable[i++].Init("MON_IDX_DINOSAUR",    MON_IDX_DINOSAUR);
+
                                                         
         // attack types
 		m_StringTable[i++].Init("MON_FLAG_SPORE",		MON_FLAG_SPORE);
@@ -112,6 +114,7 @@ public:
 		m_StringTable[i++].Init("MON_FLAG_BITE",		MON_FLAG_BITE);
 		m_StringTable[i++].Init("MON_FLAG_DROOL",		MON_FLAG_DROOL);
         m_StringTable[i++].Init("MON_FLAG_CLAW",		MON_FLAG_CLAW);
+
         m_StringTable[i++].Init("MON_FLAG_POISON",		MON_FLAG_POISON);
         m_StringTable[i++].Init("MON_FLAG_FIRE",        MON_FLAG_FIRE);
         m_StringTable[i++].Init("MON_FLAG_BREED",     MON_FLAG_BREED);

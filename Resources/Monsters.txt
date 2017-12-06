@@ -44,6 +44,21 @@
 #    Color		<255,0,0,255>
 #}
 
+Monster <Brontosaurus>
+{
+    Plural		<Brontosaurs>
+    Appear      <1d1>
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <5d6>
+    AC          60.0
+    Level       15
+    ExpValue	100
+    Type		<MON_IDX_DINOSAUR>
+    Attack		<MON_FLAG_CLAW>,3d6
+    Color		<0,81,4,255>
+}
+
 Monster <Tyrannosaurus Rex>
 {
     Plural		<Tyrannosaurs>
@@ -56,22 +71,87 @@ Monster <Tyrannosaurus Rex>
     ExpValue	100
     Type		<MON_IDX_DINOSAUR>
     Attack		<MON_FLAG_CLAW>,1d6,<MON_FLAG_CLAW>,1d6,<MON_FLAG_BITE>,5d8
-Color		<206,91,24,255>
+    Color		<206,91,24,255>
 }
 
 Monster <White Worm Mass>
 {
     Plural		<White Worm Masses>
     Appear      <1d1>
-    Speed		1.0
+    Speed		0.5
     MoveType	<MON_AI_100RANDOMMOVE>
-    HD          <1d1>
+    HD          <1d8>
     AC          40.0
     Level       1
     ExpValue	5
     Type		<MON_IDX_WORM>
-    Attack		<MON_FLAG_POISON>,2d5
+    Attack		<MON_FLAG_POISON>,1d5
     Color		<255,255,255,255>
+    Flags       <MON_FLAG_BREED>
+}
+
+Monster <Red Worm Mass>
+{
+    Plural		<Red Worm Masses>
+    Appear      <1d1>
+    Speed		0.5
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <1d8>
+    AC          40.0
+    Level       1
+    ExpValue	5
+    Type		<MON_IDX_WORM>
+    Attack		<MON_FLAG_FIRE>,1d5
+    Color		<255,0,0,255>
+    Flags       <MON_FLAG_BREED>
+}
+
+Monster <Blue Worm Mass>
+{
+    Plural		<Blue Worm Masses>
+    Appear      <1d1>
+    Speed		0.5
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <1d8>
+    AC          40.0
+    Level       1
+    ExpValue	5
+    Type		<MON_IDX_WORM>
+    Attack		<MON_FLAG_ICE>,1d5
+    Color		<0,0,255,255>
+    Flags       <MON_FLAG_BREED>
+}
+
+Monster <Yellow Worm Mass>
+{
+    Plural		<Yellow Worm Masses>
+    Appear      <1d1>
+    Speed		0.5
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <1d8>
+    AC          40.0
+    Level       1
+    ExpValue	5
+    Type		<MON_IDX_WORM>
+    Attack		<MON_FLAG_POISON>,1d5
+    Color		<214,201,17,255>
+    Flags       <MON_FLAG_BREED>
+}
+
+Monster <Green Worm Mass>
+{
+    Plural		<Green Worm Masses>
+    Appear      <1d1>
+    Speed		0.5
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <1d8>
+    AC          40.0
+    Level       1
+    ExpValue	5
+    Type		<MON_IDX_WORM>
+    Attack		<MON_FLAG_POISON>,1d5
+    Color		<0,255,0,255>
+    Flags       <MON_FLAG_BREED>
 }
 
 Monster <Huge Spider>
@@ -257,6 +337,20 @@ Monster <Blue Icky Thing>
 	Type		<MON_IDX_ICKY>
 	Attack		<MON_FLAG_TOUCH>,1d2
 	Color		<0,0,255,255>
+}
+
+Monster <Clear Icky Thing>
+{
+    Plural		<Clear Icky Things>
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD			<2d3>
+    AC			50.0
+    Level		1
+    ExpValue	4
+    Type		<MON_IDX_ICKY>
+    Attack		<MON_FLAG_TOUCH>,1d2
+    Color		<255,255,255,32>
 }
 
 Monster <Opal Icky Thing>

@@ -61,7 +61,8 @@
 #define MON_IDX_KOBOLD          6
 #define MON_IDX_SPIDER          7
 #define MON_IDX_WORM            8
-#define MON_IDX_MAX             9
+#define MON_IDX_DINOSAUR        9
+#define MON_IDX_MAX            10
 
 #define MON_FLAG_SPORE			0x00000001
 #define MON_FLAG_TOUCH			0x00000002
@@ -82,7 +83,7 @@
 #define MON_COLOR_MULTI			0x01000000
 
 // Make sure you change below here if you added any flags.
-#define NUM_STRINGS				22
+#define NUM_STRINGS				23
 #include "TextEntry.h"
 class Constants
 {
@@ -105,12 +106,14 @@ public:
         m_StringTable[i++].Init("MON_IDX_KOBOLD",       MON_IDX_KOBOLD);
         m_StringTable[i++].Init("MON_IDX_SPIDER",       MON_IDX_SPIDER);
         m_StringTable[i++].Init("MON_IDX_WORM",         MON_IDX_WORM);
+        m_StringTable[i++].Init("MON_IDX_DINOSAUR",    MON_IDX_DINOSAUR);
+                                                        
         // attack types
 		m_StringTable[i++].Init("MON_FLAG_SPORE",		MON_FLAG_SPORE);
 		m_StringTable[i++].Init("MON_FLAG_TOUCH",		MON_FLAG_TOUCH);
 		m_StringTable[i++].Init("MON_FLAG_BITE",		MON_FLAG_BITE);
 		m_StringTable[i++].Init("MON_FLAG_DROOL",		MON_FLAG_DROOL);
-		m_StringTable[i++].Init("MON_FLAG_CLAW",		MON_FLAG_CLAW);
+        m_StringTable[i++].Init("MON_FLAG_CLAW",		MON_FLAG_CLAW);
         m_StringTable[i++].Init("MON_FLAG_POISON",		MON_FLAG_POISON);
         m_StringTable[i++].Init("MON_FLAG_FIRE",        MON_FLAG_FIRE);
         m_StringTable[i++].Init("MON_FLAG_BREED",     MON_FLAG_BREED);
@@ -128,7 +131,8 @@ public:
 		int i;
 		for( i=0; i < NUM_STRINGS; i++ )
 		{
-			if( strcmp( m_StringTable[i].m_szString, szIn ) == 0 )
+            char *curr = m_StringTable[i].m_szString;
+			if( strcmp( curr, szIn ) == 0 )
 			{
 				return m_StringTable[i].m_dwValue;
 			}

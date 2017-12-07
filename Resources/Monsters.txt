@@ -54,7 +54,7 @@ HD          <5d8>
 AC          60.0
 Level       15
 ExpValue	100
-Type		<MON_IDX_HARPY >
+Type		<MON_IDX_HARPY>
 Attack		<MON_FLAG_CLAW>,3d6
 Color		<255,255,255,255>
 }

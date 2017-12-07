@@ -108,8 +108,8 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
             g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurMonster = NULL;
             m_vPos += m_vVel;
             g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurMonster = m_pParent;
-            SetState( BRAINSTATE_SEEK );
         }
+        SetState( BRAINSTATE_SEEK );
 	}
 	/*JVector delta;
 	delta *= (m_fSpeed * fCurTime);

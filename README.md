@@ -13,6 +13,8 @@ Keyboard commands recognized:
 * *o* - open a door
 * *c* - close a door
 * *T* - tunnel through rubble
+* *<* - go up a staircase
+* *>* - go down a staircase
 
 Monster definitions are in _Resources/Monsters.txt_
 

@@ -44,13 +44,28 @@
 #    Color		<255,0,0,255>
 #}
 
+Monster <White Harpy>
+{
+Plural		<White Harpy>
+Appear      <1d1>
+Speed		1.0
+MoveType	<MON_AI_100RANDOMMOVE>
+HD          <5d8>
+AC          60.0
+Level       15
+ExpValue	100
+Type		<MON_IDX_HARPY >
+Attack		<MON_FLAG_CLAW>,3d6
+Color		<255,255,255,255>
+}
+
 Monster <Brontosaurus>
 {
     Plural		<Brontosaurs>
     Appear      <1d1>
     Speed		1.0
     MoveType	<MON_AI_100RANDOMMOVE>
-    HD          <5d6>
+    HD          <25d8>
     AC          60.0
     Level       15
     ExpValue	100
@@ -160,9 +175,9 @@ Monster <Huge Spider>
     Appear      <1d1>
     Speed		1.0
     MoveType	<MON_AI_100RANDOMMOVE>
-    HD          <2d2>
+    HD          <2d8>
     AC          50.0
-    Level       20
+    Level       5
     ExpValue	100
     Type		<MON_IDX_SPIDER>
     Attack		<MON_FLAG_BITE>,1d6
@@ -175,7 +190,7 @@ Monster <Ancient Multi-hued Dragon>
     Appear      <1d1>
     Speed		1.0
     MoveType	<MON_AI_100RANDOMMOVE>
-    HD			<7d8>
+    HD			<15d8>
     AC          110.0
     Level		50
     ExpValue	9000
@@ -196,7 +211,7 @@ Monster <Kobold>
     ExpValue	10
     Type		<MON_IDX_KOBOLD>
     Attack		<MON_FLAG_BITE>,1d4
-    Color		<124,124,124,255>
+    Color		<170,170,170,255>
 }
 
 Monster <White Dragon>
@@ -206,7 +221,7 @@ Monster <White Dragon>
     MoveType	<MON_AI_100RANDOMMOVE>
     HD			<7d8>
     AC          80.0
-    Level		25
+    Level		15
     ExpValue	300
     Type		<MON_IDX_DRAGON>
     Attack		<MON_FLAG_CLAW>,1d4,<MON_FLAG_CLAW>,1d4,<MON_FLAG_BITE>,2d8
@@ -220,7 +235,7 @@ Monster <Black Dragon>
     MoveType	<MON_AI_100RANDOMMOVE>
     HD			<8d8>
     AC          80.0
-    Level		25
+    Level		20
     ExpValue	300
     Type		<MON_IDX_DRAGON>
     Attack		<MON_FLAG_CLAW>,1d4,<MON_FLAG_CLAW>,1d4,<MON_FLAG_BITE>,3d6
@@ -248,7 +263,7 @@ Monster <Blue Dragon>
     MoveType	<MON_AI_100RANDOMMOVE>
     HD			<10d8>
     AC          90.0
-    Level		25
+    Level		30
     ExpValue	300
     Type		<MON_IDX_DRAGON>
     Attack		<MON_FLAG_CLAW>,1d6,<MON_FLAG_CLAW>,1d6,<MON_FLAG_BITE>,3d8
@@ -262,7 +277,7 @@ Monster <Red Dragon>
     MoveType	<MON_AI_100RANDOMMOVE>
     HD			<11d8>
     AC          120.0
-    Level		25
+    Level		35
     ExpValue	300
     Type		<MON_IDX_DRAGON>
     Attack		<MON_FLAG_CLAW>,1d8,<MON_FLAG_CLAW>,1d8,<MON_FLAG_BITE>,3d10
@@ -277,7 +292,7 @@ Monster <Giant Snake>
     HD			<4d8>
     AC			34.0
     Level		2
-    ExpValue	50
+    ExpValue	3
     Type		<MON_IDX_SNAKE>
     Attack		<MON_FLAG_BITE>,1d3
     Color		<198,142,0,255>
@@ -304,7 +319,7 @@ Monster <Green Jelly>
     MoveType	<MON_AI_DONTMOVE>
     HD			<3d5>
     AC			10.0
-    Level		1
+    Level		2
     ExpValue	5
     Type		<MON_IDX_JELLY>
     Attack		<MON_FLAG_TOUCH>,1d2
@@ -330,7 +345,7 @@ Monster <Blue Icky Thing>
 	Plural		<Blue Icky Things>
 	Speed		1.0
 	MoveType	<MON_AI_100RANDOMMOVE>
-	HD			<2d3>
+	HD			<2d8>
 	AC			50.0
 	Level		1
 	ExpValue	4
@@ -344,9 +359,9 @@ Monster <Clear Icky Thing>
     Plural		<Clear Icky Things>
     Speed		1.0
     MoveType	<MON_AI_100RANDOMMOVE>
-    HD			<2d3>
+    HD			<2d8>
     AC			50.0
-    Level		1
+    Level		3
     ExpValue	4
     Type		<MON_IDX_ICKY>
     Attack		<MON_FLAG_TOUCH>,1d2
@@ -358,7 +373,7 @@ Monster <Opal Icky Thing>
 	Plural		<Opal Icky Things>
 	Speed		1.0
 	MoveType	<MON_AI_100RANDOMMOVE>
-	HD		    <2d3>
+	HD		    <2d8>
 	AC		    20.0
 	Level		1
 	ExpValue	4
@@ -372,7 +387,7 @@ Monster <Red Icky Thing>
     Plural		<Red Icky Things>
     Speed		1.0
     MoveType	<MON_AI_100RANDOMMOVE>
-    HD			<2d3>
+    HD			<2d8>
     AC			50.0
     Level		1
     ExpValue	4
@@ -386,7 +401,7 @@ Monster <Green Icky Thing>
     Plural		<Green Icky Things>
     Speed		1.0
     MoveType	<MON_AI_100RANDOMMOVE>
-    HD			<2d3>
+    HD			<2d8>
     AC			50.0
     Level		1
     ExpValue	4
@@ -400,7 +415,7 @@ Monster <White Icky Thing>
     Plural		<White Icky Things>
     Speed		1.0
     MoveType	<MON_AI_100RANDOMMOVE>
-    HD			<2d3>
+    HD			<2d8>
     AC			50.0
     Level		1
     ExpValue	4
@@ -414,7 +429,7 @@ Monster <Yellow Icky Thing>
     Plural		<Yellow Icky Things>
     Speed		1.0
     MoveType	<MON_AI_100RANDOMMOVE>
-    HD			<2d3>
+    HD			<2d8>
     AC			50.0
     Level		1
     ExpValue	4
@@ -423,12 +438,12 @@ Monster <Yellow Icky Thing>
     Color		<241,244,66,255>
 }
 
-Monster <Ant,Giant>
+Monster <Giant Ant>
 {
-    Plural		<Ants,Giant>
+    Plural		<Giant Ants>
     Speed		1.0
     MoveType	<MON_AI_100RANDOMMOVE>
-    HD			<1d2>
+    HD			<3d8>
     AC			80.0
     Level		3
     ExpValue	4

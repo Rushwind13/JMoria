@@ -37,6 +37,9 @@ private:
 	
 	void UpdatePlayerPos( JVector &vDir );
 	void HandleCollision( int dwCollideType );
+    
+    int OnHandleStairs( SDL_Keysym *keysym );
+    int TestStairs();
 
 	// This variable gets deleted a lot, but is better than 
 	// creating a vew vector every frame.

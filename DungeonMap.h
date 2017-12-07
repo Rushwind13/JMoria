@@ -60,7 +60,7 @@ private:
 	
 	// Member functions
 public:
-	void CreateDungeon();
+	void CreateDungeon(const int depth);
 	Uint8 GetdtdIndex( JIVector vPos )
 	{ 
 		if( GetTile(vPos) )

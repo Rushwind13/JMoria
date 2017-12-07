@@ -102,10 +102,14 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
 
 	if( m_fStateTicks >= 1.0f )
 	{
-		g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurMonster = NULL;
-		m_vPos += m_vVel;
-		g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurMonster = m_pParent;
-		SetState( BRAINSTATE_SEEK );
+        JVector vTryPos(m_vPos+m_vVel);
+        if( Util::IsInWorld(vTryPos) && (g_pGame->GetDungeon()->IsWalkableFor(vTryPos) == DUNG_COLL_NO_COLLISION) )
+        {
+            g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurMonster = NULL;
+            m_vPos += m_vVel;
+            g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurMonster = m_pParent;
+            SetState( BRAINSTATE_SEEK );
+        }
 	}
 	/*JVector delta;
 	delta *= (m_fSpeed * fCurTime);

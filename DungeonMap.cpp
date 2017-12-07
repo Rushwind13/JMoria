@@ -16,15 +16,15 @@ Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH] = {
 	1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,
 	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
 	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+	1,0,0,0,0,0,0,0,0,0,0,4,0,0,0,1,
 	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
-	1,0,0,6,0,0,0,0,0,0,0,0,0,0,0,1,
-	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
+	1,0,0,8,0,0,0,0,0,0,0,0,0,0,0,1,
+	1,0,0,0,0,0,0,0,0,0,0,0,0,5,0,1,
 	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
 	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
 	1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,
 	1,0,0,0,0,0,0,0,0,0,1,1,1,2,1,1,
-	1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,
+	1,0,7,0,0,0,0,0,0,0,1,0,0,0,0,1,
 	1,0,0,0,0,0,0,0,0,0,2,0,0,0,0,1,
 	1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,
 	1,0,0,6,0,0,0,0,0,0,1,0,0,0,0,1,
@@ -44,7 +44,7 @@ Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH] = {
 // 8.  Go back to step 3, until the dungeon is complete
 // 9.  Add the up and down staircases at random points in map
 // 10. Finally, sprinkle some monsters and items liberally over dungeon
-void CDungeonMap::CreateDungeon()
+void CDungeonMap::CreateDungeon(const int depth)
 {
 	JIVector vOrigin;
 	m_dmtTiles = new CDungeonMapTile[DUNG_WIDTH * DUNG_HEIGHT];
@@ -53,7 +53,37 @@ void CDungeonMap::CreateDungeon()
 	// First, fill the whole dungeon with rock
 	FillArea(DUNG_IDX_WALL, &rcWorld, DIR_NONE, &vOrigin, false );
 
+    // Do something with the depth, here...
+    if( depth > 100 )
+    {
+        printf("You have a bad feeling about this level...\n");
+    }
+    else if( depth > 75 )
+    {
+        printf("Just another walk in the park.\n");
+    }
+    else if( depth > 50 )
+    {
+        printf("It is my firm belief that this level contains monsters, of one kind or another.\n");
+    }
+    else if( depth > 25 )
+    {
+        printf("This level goes together like wham-a-lamma-lamma and bop-she-bop-she-bop.\n");
+    }
+    else if( depth > 10 )
+    {
+        printf("What was *that*?!.\n");
+    }
+    else if( depth > 5 )
+    {
+        printf("Please keep hands and arms inside the carriage.\n");
+    }
+    else if( depth <= 0 )
+    {
+        printf("Error, levels don't go below 0.\n");
+    }
 #ifdef FIXED_DUNGEON
+//    For setpiece rooms, treasure rooms, &c
 	JIVector vCurPos;
 	int type;
 	for(vCurPos.y=0;vCurPos.y<DUNG_HEIGHT;vCurPos.y++)

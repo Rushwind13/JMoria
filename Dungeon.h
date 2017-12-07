@@ -56,6 +56,7 @@ public:
 	void Init();
 	void Term();
 	bool Update( float fCurTime );
+    JResult OnChangeLevel(const int delta);
 
 	void Zoom( Uint16 dwDelta )
 	{
@@ -90,15 +91,26 @@ public:
 	};
 	int IsWalkableFor( JVector &vPos, bool isPlayer=false );
 	bool IsOpenable( JVector &vPos );
-	bool IsTunnelable( JVector &vPos );
-	bool IsCloseable( JVector &vPos );
+    bool IsTunnelable( JVector &vPos );
+    bool IsCloseable( JVector &vPos );
+    int  IsStairs( JVector &vPos );
 	void RemoveMonster( CMonster *pMon );
 	JResult Modify( JVector &vPos );
 protected:
 	JRect m_Rect;
 	JFVector m_vfTranslate;
 	CDungeonMap *m_dmCurLevel;		// Data about the curennt level (and holds dungeon gen algorithm)
-	//CDungeonMap m_dmTownLevel;	// The Dungeon remembers where you live...
+    float m_fOpenFloorArea; // How much of the current level is open?
+    void extracted();
+    
+    //CDungeonMap m_dmTownLevel;	// The Dungeon remembers where you live...
+    
+    JResult CreateNewLevel(const int delta);
+    JResult CreateMap();
+    JResult SpawnMonsters(const int depth);
+    int ChooseMonsterForDepth(const int depth);
+    
+    JResult TerminateLevel();
 private:
 
 	bool IsOnScreen(JVector vPos);

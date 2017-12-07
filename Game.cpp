@@ -195,11 +195,13 @@ bool CGame::Update( float fCurTime )
 void CGame::Draw()
 {	
 	GetRender()->PreDraw();
-	// Draw the player
-	GetPlayer()->Draw();
 	
 	// Draw the dungeon
-	GetDungeon()->Draw();
+    GetDungeon()->Draw();
+    
+    // Draw the player
+    GetPlayer()->Draw();
+    
 	GetMsgs()->Draw();
 	GetStats()->Draw();
 	

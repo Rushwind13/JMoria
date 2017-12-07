@@ -9,6 +9,7 @@
 #include "Render.h"
 #include "Player.h"
 #include "FileParse.h"
+#include "DisplayText.h"
 
 unsigned char TileIDs[DUNG_IDX_MAX+1]			= ".#+'<<>>:@";
 int			  ModifiedTileTypes[DUNG_IDX_MAX+1] =
@@ -162,7 +163,7 @@ JResult CDungeon::CreateMap()
         }
     }
     
-    m_fFillPercent = open_area;
+    m_fOpenFloorArea = open_area;
     return JSUCCESS;
 }
 
@@ -170,8 +171,8 @@ JResult CDungeon::SpawnMonsters(const int depth)
 {
     m_llMonsters = new JLinkList<CMonster>;
     
-    int desired_monsters = int (m_fFillPercent * DUNG_CFG_MONSTERS_PER_LEVEL);
-    printf("Fill pct: %0.2f  desired monsters: %d\n", m_fFillPercent, desired_monsters);
+    int desired_monsters = int (m_fOpenFloorArea * DUNG_CFG_MONSTERS_PER_LEVEL);
+    printf("Possible spawn points: %0.2f  desired monsters: %d\n", m_fOpenFloorArea, desired_monsters);
     
     while( desired_monsters > 0 )
     {
@@ -187,6 +188,7 @@ JResult CDungeon::SpawnMonsters(const int depth)
 #endif // RANDOM_MONSTER
         if( which_monster == MON_IDX_INVALID )
         {
+            printf("Couldn't find a suitable monster.\n");
             return JERROR();
         }
         CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(which_monster)->m_lpData;
@@ -203,12 +205,12 @@ JResult CDungeon::SpawnMonsters(const int depth)
 int CDungeon::ChooseMonsterForDepth(const int depth)
 {
     int which_monster = MON_IDX_INVALID;
-    bool count = 0;
+    int count = 0;
     while( count < DUNG_CFG_MAX_SPAWN_TRIES )
     {
         which_monster = Util::GetRandom(0, m_llMonsterDefs->length()-1);
         CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(which_monster)->m_lpData;
-        if( abs(depth - chosen_monster->m_dwLevel) < 10 )
+        if( abs(depth - chosen_monster->m_dwLevel) < 5 )
         {
             break;
         }
@@ -227,9 +229,8 @@ JResult CDungeon::OnChangeLevel(const int delta)
     // Create new level
     CreateNewLevel(delta);
     printf("done.\n");
-    char buffer[100];
     printf("You pass through a one-way door, to arrive on level %d.\n", depth);
-    //g_pGame->GetMsgs()->Printf(buffer);
+    g_pGame->GetMsgs()->Printf("You pass through a one-way door, to arrive on level %d.\n", depth);
     
     return JSUCCESS;
 }

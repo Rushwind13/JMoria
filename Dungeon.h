@@ -100,7 +100,7 @@ protected:
 	JRect m_Rect;
 	JFVector m_vfTranslate;
 	CDungeonMap *m_dmCurLevel;		// Data about the curennt level (and holds dungeon gen algorithm)
-    float m_fFillPercent; // How much of the current level is open?
+    float m_fOpenFloorArea; // How much of the current level is open?
     void extracted();
     
     //CDungeonMap m_dmTownLevel;	// The Dungeon remembers where you live...

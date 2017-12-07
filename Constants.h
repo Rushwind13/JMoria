@@ -67,7 +67,8 @@
 #define MON_IDX_SPIDER          7
 #define MON_IDX_WORM            8
 #define MON_IDX_DINOSAUR        9
-#define MON_IDX_MAX            10
+#define MON_IDX_ANT            10
+#define MON_IDX_MAX            11
 
 #define MON_FLAG_SPORE			0x00000001
 #define MON_FLAG_TOUCH			0x00000002
@@ -111,7 +112,8 @@ public:
         m_StringTable[i++].Init("MON_IDX_KOBOLD",       MON_IDX_KOBOLD);
         m_StringTable[i++].Init("MON_IDX_SPIDER",       MON_IDX_SPIDER);
         m_StringTable[i++].Init("MON_IDX_WORM",         MON_IDX_WORM);
-        m_StringTable[i++].Init("MON_IDX_DINOSAUR",    MON_IDX_DINOSAUR);
+        m_StringTable[i++].Init("MON_IDX_DINOSAUR",     MON_IDX_DINOSAUR);
+        m_StringTable[i++].Init("MON_IDX_ANT",          MON_IDX_ANT);
                                                         
         // attack types
 		m_StringTable[i++].Init("MON_FLAG_SPORE",		MON_FLAG_SPORE);
@@ -121,7 +123,7 @@ public:
         m_StringTable[i++].Init("MON_FLAG_CLAW",		MON_FLAG_CLAW);
         m_StringTable[i++].Init("MON_FLAG_POISON",		MON_FLAG_POISON);
         m_StringTable[i++].Init("MON_FLAG_FIRE",        MON_FLAG_FIRE);
-        m_StringTable[i++].Init("MON_FLAG_BREED",     MON_FLAG_BREED);
+        m_StringTable[i++].Init("MON_FLAG_BREED",       MON_FLAG_BREED);
         m_StringTable[i++].Init("MON_FLAG_BREATHE",     MON_FLAG_BREATHE);
         // AI flags
 		// movement flags

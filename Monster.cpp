@@ -13,14 +13,9 @@ m_fColorChangeInterval(COLOR_CHANGE_TIMEOUT+1)
 }
 CMonster::~CMonster()
 {
-	if( m_md )
-	{
-		delete m_md;
-		m_md = NULL;
-	}
 	if(m_pBrain)
 	{
-		delete m_pBrain;
+        g_pGame->GetAIMgr()->DestroyBrain(m_pBrain);
 		m_pBrain = NULL;
 	}
 }
@@ -67,7 +62,7 @@ JResult CMonster::CreateMonster( CMonsterDef *pmd )
 
         // Now that the monster is set up, add it to the global lists (monsters, brains)
         pMon->m_pllLink = g_pGame->GetDungeon()->m_llMonsters->Add(pMon);
-        g_pGame->GetAIMgr()->m_llAIBrains->Add(pMon->m_pBrain);
+        pMon->m_pBrain->m_pllLink = g_pGame->GetAIMgr()->m_llAIBrains->Add(pMon->m_pBrain);
     }
     
     return JSUCCESS;
@@ -144,7 +139,7 @@ void CMonster::SetColor()
 }
 
 
-unsigned char MonIDs[MON_IDX_MAX+1] = ",JidDSkxwd";
+unsigned char MonIDs[MON_IDX_MAX+1] = ",JidDSkxwda";
 void CMonster::Draw()
 {
 	Uint8 monster_tile = MonIDs[m_md->m_dwIndex] - ' ' - 1;

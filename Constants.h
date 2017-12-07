@@ -60,7 +60,8 @@
 #define MON_IDX_SPIDER          7
 #define MON_IDX_WORM            8
 #define MON_IDX_DINOSAUR        9
-#define MON_IDX_MAX            10
+#define MON_IDX_ANT            10
+#define MON_IDX_MAX            11
 
 #define MON_FLAG_SPORE			0x00000001
 #define MON_FLAG_TOUCH			0x00000002
@@ -69,7 +70,6 @@
 
 #define MON_FLAG_CLAW			0x00000010
 #define MON_FLAG_POISON			0x00000020
-
 #define MON_FLAG_FIRE           0x00000040
 #define MON_FLAG_BREED          0x00000080
 
@@ -82,7 +82,7 @@
 #define MON_COLOR_MULTI			0x01000000
 
 // Make sure you change below here if you added any flags.
-#define NUM_STRINGS				22
+#define NUM_STRINGS				23
 #include "TextEntry.h"
 class Constants
 {
@@ -105,8 +105,8 @@ public:
         m_StringTable[i++].Init("MON_IDX_KOBOLD",       MON_IDX_KOBOLD);
         m_StringTable[i++].Init("MON_IDX_SPIDER",       MON_IDX_SPIDER);
         m_StringTable[i++].Init("MON_IDX_WORM",         MON_IDX_WORM);
-        m_StringTable[i++].Init("MON_IDX_DINOSAUR",    MON_IDX_DINOSAUR);
-
+        m_StringTable[i++].Init("MON_IDX_DINOSAUR",     MON_IDX_DINOSAUR);
+        m_StringTable[i++].Init("MON_IDX_ANT",          MON_IDX_ANT);
                                                         
         // attack types
 		m_StringTable[i++].Init("MON_FLAG_SPORE",		MON_FLAG_SPORE);
@@ -114,10 +114,9 @@ public:
 		m_StringTable[i++].Init("MON_FLAG_BITE",		MON_FLAG_BITE);
 		m_StringTable[i++].Init("MON_FLAG_DROOL",		MON_FLAG_DROOL);
         m_StringTable[i++].Init("MON_FLAG_CLAW",		MON_FLAG_CLAW);
-
         m_StringTable[i++].Init("MON_FLAG_POISON",		MON_FLAG_POISON);
         m_StringTable[i++].Init("MON_FLAG_FIRE",        MON_FLAG_FIRE);
-        m_StringTable[i++].Init("MON_FLAG_BREED",     MON_FLAG_BREED);
+        m_StringTable[i++].Init("MON_FLAG_BREED",       MON_FLAG_BREED);
         m_StringTable[i++].Init("MON_FLAG_BREATHE",     MON_FLAG_BREATHE);
         // AI flags
 		// movement flags

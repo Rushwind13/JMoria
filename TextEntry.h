@@ -14,7 +14,7 @@ public:
 
 	void Init( const char *szIn, int dwIn )
 	{ 
-		m_szString = new char[strlen(szIn)];
+		m_szString = new char[strlen(szIn)+1];
 		strcpy( m_szString, szIn );
 		m_dwValue = dwIn;
 	};

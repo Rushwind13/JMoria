@@ -9,8 +9,9 @@
 #include "Render.h"
 #include "Player.h"
 #include "FileParse.h"
+#include "DisplayText.h"
 
-unsigned char TileIDs[DUNG_IDX_MAX+1]			= ".#+'<>:@";
+unsigned char TileIDs[DUNG_IDX_MAX+1]			= ".#+'<<>>:@";
 int			  ModifiedTileTypes[DUNG_IDX_MAX+1] =
 {
 	DUNG_IDX_INVALID,
@@ -23,6 +24,11 @@ int			  ModifiedTileTypes[DUNG_IDX_MAX+1] =
 	DUNG_IDX_INVALID
 };
 //extern Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH];
+
+// Setup - the one-time-run stuff to set up the Dungeon
+//
+// create all the dungeon tile types,
+// read the monsters config data
 
 void CDungeon::Init()
 {
@@ -49,11 +55,13 @@ void CDungeon::Init()
 			break;
 		case DUNG_IDX_OPEN_DOOR:
 			m_dtdlist[i].m_Color.SetColor(192,192,192,255);
-			break;
-		case DUNG_IDX_UPSTAIRS:
+                break;
+        case DUNG_IDX_UPSTAIRS:
+        case DUNG_IDX_LONG_UPSTAIRS:
 			m_dtdlist[i].m_Color.SetColor(175,175,175,255);
-			break;
-		case DUNG_IDX_DOWNSTAIRS:
+                break;
+        case DUNG_IDX_DOWNSTAIRS:
+        case DUNG_IDX_LONG_DOWNSTAIRS:
 			m_dtdlist[i].m_Color.SetColor(195,195,195,255);
 			break;
 		case DUNG_IDX_RUBBLE:
@@ -68,59 +76,163 @@ void CDungeon::Init()
 		}
 	}
 
-	m_Tiles = new CDungeonTile[DUNG_HEIGHT*DUNG_WIDTH];
-	JIVector vDungeon(DUNG_HEIGHT,DUNG_WIDTH);
-
-	// Create the randomized dungeon
-	m_dmCurLevel = new CDungeonMap;
-	m_dmCurLevel->CreateDungeon();
-
-	// Create the dungeon array (at the moment, there are 16*16 entries in this list)
-	for( vDungeon.y = 0; vDungeon.y < DUNG_HEIGHT; vDungeon.y++ )
-	{
-		for( vDungeon.x = 0; vDungeon.x < DUNG_WIDTH; vDungeon.x++ )
-		{
-			GetITile(vDungeon)->m_vPos.x = (float)vDungeon.x;
-			GetITile(vDungeon)->m_vPos.y = (float)vDungeon.y;
-			GetITile(vDungeon)->m_dtd = &m_dtdlist[m_dmCurLevel->GetdtdIndex(vDungeon)];
-			GetITile(vDungeon)->m_dwFlags = m_dmCurLevel->GetFlags(vDungeon);
-		}
-	}
-
-	// Load the monster list from config
+    // Load the monster list from config
     // TODO: Make this a method on CMonsterDef.
-	m_llMonsters = new JLinkList<CMonster>;
-	m_llMonsterDefs = new JLinkList<CMonsterDef>;
-
-	CMonsterDef *pmd;
-	CDataFile dfMonsters;
-	dfMonsters.Open("Resources/Monsters.txt");
-
-	pmd = new CMonsterDef;
-	while( dfMonsters.ReadMonster(*pmd) )
-	{
-		m_llMonsterDefs->Add(pmd);
-		pmd = new CMonsterDef;
-	}
-
-	delete pmd;
+    m_llMonsterDefs = new JLinkList<CMonsterDef>;
     
-    // Spawn a monster into dungeon
-    // TODO: make this into a method on CMonster.
+    CMonsterDef *pmd;
+    CDataFile dfMonsters;
+    dfMonsters.Open("Resources/Monsters.txt");
+    
+    pmd = new CMonsterDef;
+    while( dfMonsters.ReadMonster(*pmd) )
+    {
+        m_llMonsterDefs->Add(pmd);
+        pmd = new CMonsterDef;
+    }
+    
+    delete pmd;
+    
+    // Load the graphics
+    // Just one tile set at the moment.
+	m_TileSet = new CTileset("Resources/Courier.png", 32, 32 );
+    
+    CreateNewLevel(DUNG_CFG_START_LEVEL);
+}
+
+JResult CDungeon::TerminateLevel()
+{
+    if( m_Tiles )
+    {
+        delete [] m_Tiles;
+        m_Tiles = NULL;
+    }
+    if( m_dmCurLevel )
+    {
+        delete m_dmCurLevel;
+        m_dmCurLevel = NULL;
+    }
+    if( m_llMonsters )
+    {
+        m_llMonsters->Terminate();
+        delete m_llMonsters;
+        m_llMonsters = NULL;
+    }
+    
+    return JSUCCESS;
+}
+
+JResult CDungeon::CreateNewLevel(const int delta)
+{
+    depth += delta;
+    if( depth < 1 ) depth = 1;
+    if( depth > DUNG_MAXDEPTH ) depth = DUNG_MAXDEPTH;
+    
+    CreateMap();
+    
+    // Spawn monsters appropriate to this level.
+    SpawnMonsters(depth);
+    
+    return JSUCCESS;
+}
+
+JResult CDungeon::CreateMap()
+{
+    m_Tiles = new CDungeonTile[DUNG_HEIGHT*DUNG_WIDTH];
+    // Create the randomized dungeon
+    m_dmCurLevel = new CDungeonMap;
+    m_dmCurLevel->CreateDungeon(depth);
+    
+    JIVector vDungeon(DUNG_HEIGHT,DUNG_WIDTH);
+    Uint8 dung_tile_type = DUNG_IDX_INVALID;
+    float open_area = 0.0f;
+    float total_area = (float)(DUNG_HEIGHT*DUNG_WIDTH);
+    
+    // Create the dungeon array (at the moment, there are 16*16 entries in this list)
+    // Set position, Tile type, and Flags for entire dungeon
+    for( vDungeon.y = 0; vDungeon.y < DUNG_HEIGHT; vDungeon.y++ )
+    {
+        for( vDungeon.x = 0; vDungeon.x < DUNG_WIDTH; vDungeon.x++ )
+        {
+            GetITile(vDungeon)->m_vPos.x = (float)vDungeon.x;
+            GetITile(vDungeon)->m_vPos.y = (float)vDungeon.y;
+            dung_tile_type = m_dmCurLevel->GetdtdIndex(vDungeon);
+            if( dung_tile_type == DUNG_IDX_FLOOR ) open_area++;
+            GetITile(vDungeon)->m_dtd = &m_dtdlist[dung_tile_type];
+            GetITile(vDungeon)->m_dwFlags = m_dmCurLevel->GetFlags(vDungeon);
+        }
+    }
+    
+    m_fOpenFloorArea = open_area;
+    return JSUCCESS;
+}
+
+JResult CDungeon::SpawnMonsters(const int depth)
+{
+    m_llMonsters = new JLinkList<CMonster>;
+    
+    int desired_monsters = int (m_fOpenFloorArea * DUNG_CFG_MONSTERS_PER_LEVEL);
+    printf("Possible spawn points: %0.2f  desired monsters: %d\n", m_fOpenFloorArea, desired_monsters);
+    
+    while( desired_monsters > 0 )
+    {
+        
+        // Spawn a monster into dungeon
+        // TODO: make this into a method on CMonster.
 #define RANDOM_MONSTER
 #ifdef RANDOM_MONSTER
-    int which_monster = Util::GetRandom(0, m_llMonsterDefs->length()-1);
+        int which_monster = ChooseMonsterForDepth(depth);
 #else
-    int which_monster = m_llMonsterDefs->length()-1;
-    //which_monster = 0;
+        int which_monster = m_llMonsterDefs->length()-1;
+        //which_monster = 0;
 #endif // RANDOM_MONSTER
+        if( which_monster == MON_IDX_INVALID )
+        {
+            printf("Couldn't find a suitable monster.\n");
+            return JERROR();
+        }
+        CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(which_monster)->m_lpData;
+        printf("Choosing monster %d, called %s\n", which_monster, chosen_monster->m_szName);
+        
+        CMonster::CreateMonster(chosen_monster);
+        
+        desired_monsters--;
+    }
     
-    CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(which_monster)->m_lpData;
-    printf("Choosing monster %d, called %s\n", which_monster, chosen_monster->m_szName);
-    
-    CMonster::CreateMonster(chosen_monster);
+    return JSUCCESS;
+}
 
-	m_TileSet = new CTileset("Resources/Courier.png", 32, 32 );
+int CDungeon::ChooseMonsterForDepth(const int depth)
+{
+    int which_monster = MON_IDX_INVALID;
+    int count = 0;
+    while( count < DUNG_CFG_MAX_SPAWN_TRIES )
+    {
+        which_monster = Util::GetRandom(0, m_llMonsterDefs->length()-1);
+        CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(which_monster)->m_lpData;
+        if( abs(depth - chosen_monster->m_dwLevel) < 5 )
+        {
+            break;
+        }
+        count++;
+    }
+    
+    return which_monster;
+}
+
+JResult CDungeon::OnChangeLevel(const int delta)
+{
+    printf("Changing level...");
+    // Clean up old level, then
+    TerminateLevel();
+    
+    // Create new level
+    CreateNewLevel(delta);
+    printf("done.\n");
+    printf("You pass through a one-way door, to arrive on level %d.\n", depth);
+    g_pGame->GetMsgs()->Printf("You pass through a one-way door, to arrive on level %d.\n", depth);
+    
+    return JSUCCESS;
 }
 
 bool CDungeon::Update(float fCurTime)
@@ -259,8 +371,9 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
 		printf("Hey! That's a bad tile.\n");
 		return false;
 	}
-	if( isPlayer && curTile->m_pCurMonster != NULL )
+	if( curTile->m_pCurMonster != NULL )
 	{
+        // Monsters can collide with other monsters
 		return DUNG_COLL_MONSTER;
 	}
     else if( !isPlayer
@@ -268,6 +381,7 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
             && g_pGame->GetPlayer()->m_HasSpawned
             && g_pGame->GetPlayer()->m_vPos == vPos )
     {
+        // Monsters colliding with the player can be hazardous to your health.
         printf("Monster attacking not implemented yet.\n");
         return DUNG_COLL_PLAYER;
     }
@@ -342,6 +456,27 @@ bool CDungeon::IsCloseable( JVector &vPos )
 	
 	// If you get here, the square was unoccupied. Now check for running into inanimates...
 	return( curTile->m_dtd->m_dwType == DUNG_IDX_OPEN_DOOR);
+}
+
+int CDungeon::IsStairs( JVector &vPos )
+{
+    // trivial check; is this a modifiable tile at all?
+    CDungeonTile *curTile = GetTile(vPos);
+    if( curTile == NULL )
+    {
+        return DUNG_IDX_INVALID;
+    }
+    
+    if( curTile->m_dtd->m_dwType == DUNG_IDX_UPSTAIRS ||
+       curTile->m_dtd->m_dwType == DUNG_IDX_LONG_UPSTAIRS ||
+       curTile->m_dtd->m_dwType == DUNG_IDX_DOWNSTAIRS ||
+       curTile->m_dtd->m_dwType == DUNG_IDX_LONG_DOWNSTAIRS )
+    {
+        return curTile->m_dtd->m_dwType;
+    }
+    
+    // If you get here, the square was not a staircase
+    return DUNG_IDX_INVALID;
 }
 
 JResult CDungeon::Modify( JVector &vPos )

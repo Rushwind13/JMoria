@@ -3,15 +3,17 @@ JMoria Work List
 DATA / GAMEPLAY:
 - implement DAT file reading (XML format? INI format? passwd format?) for: dungeon, item, savefile
 - Now that monsters.txt can be read, create many new monster defs.
-- should monsters be able to wield items? use potions? pick stuff up off the ground?
 - need to add status effects (e.g. poison)
-- implement "flavored" attacks, e.g. a _BREATHE type should read m_dwFlags to figure out which type of breath (fire, ice, &c)
+- implement "flavored" attacks, e.g. a _BREATHE type should read m_dwFlags to figure out which type of breath (fire, ice, &c)s
 
 
 COMBAT:
 - combat is very hardcoded. make it not so much.
 - implement monster fighting back (might need HP and stuff for that, though)
 - 12.5.2017 monsters now collide with player; just add damage/hitpoints!
+- should monsters be able to wield items? use potions? pick stuff up off the ground?
+- need to add speed, somehow
+- someday, convert to turn-based, too :)
 
 
 ARCHITECTURE:
@@ -52,6 +54,7 @@ STABILITY:
 - figure out why the framerate seems to tank? unfreed resources? (4/10/03 still a problem? Haven't seen it)
 - 12.5.2017 - B reports occasionally all the text goes black on black, doesn't affect the dungeon, only the overlay.
 - 12.5.2017 - The blue icky thing seems to disappear if the player is too far away? Does this happen to other monsters?
+- 12.5.2017 - getting a lot of intermittent "bad string" complaints; wtf?! like for some reason the string lookup table sometimes isn't working right
 
 
 DUNGEON GENERATION: (as of 1.27.06, hardcoded 16x16 dungeon back in)

@@ -30,6 +30,11 @@ bool CAIMgr::Update( float fCurTime )
 	return true;
 }
 
+void CAIMgr::DestroyBrain( CAIBrain *delete_me )
+{
+    m_llAIBrains->Remove(delete_me->m_pllLink);
+}
+
 
 CAIBrain::CAIBrain()
 : m_dwMoveType(0),

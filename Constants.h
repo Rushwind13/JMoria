@@ -50,6 +50,11 @@
 // Dungeon Tile flags
 #define DUNG_FLAG_LIT		0x00000001
 
+// Dungeon Flags
+#define DUNG_CFG_MONSTERS_PER_LEVEL 0.05f
+#define DUNG_CFG_START_LEVEL 1
+#define DUNG_CFG_MAX_SPAWN_TRIES 10
+
 // Types of Monsters
 #define MON_IDX_INVALID        -1
 #define MON_IDX_SHROOM          0

@@ -305,6 +305,7 @@ int CCmdState::OnHandleStairs( SDL_Keysym *keysym )
         g_pGame->GetMsgs()->Printf("You enter a maze of up staircases.\n");
         // dungeon_level--, make sure not to go less than 0
         // respawn new dungeon level
+        g_pGame->GetDungeon()->OnChangeLevel(-Util::Roll(1, 5));
         return JSUCCESS;
     }
     else if( keysym->sym == SDLK_COMMA && stair_dir == DUNG_IDX_LONG_UPSTAIRS )
@@ -312,6 +313,7 @@ int CCmdState::OnHandleStairs( SDL_Keysym *keysym )
         g_pGame->GetMsgs()->Printf("You enter a long maze of up staircases.\n");
         // dungeon_level-- (a bunch), make sure not to go less than 0
         // respawn new dungeon level
+        g_pGame->GetDungeon()->OnChangeLevel(-1);
         return JSUCCESS;
     }
     // if on >, go down stairs
@@ -320,6 +322,7 @@ int CCmdState::OnHandleStairs( SDL_Keysym *keysym )
         g_pGame->GetMsgs()->Printf("You enter a maze of down staircases.\n");
         // dungeon_level++
         // respawn new dungeon level
+        g_pGame->GetDungeon()->OnChangeLevel(1);
         return JSUCCESS;
     }
     else if( keysym->sym == SDLK_PERIOD && stair_dir == DUNG_IDX_LONG_DOWNSTAIRS )
@@ -327,6 +330,7 @@ int CCmdState::OnHandleStairs( SDL_Keysym *keysym )
         g_pGame->GetMsgs()->Printf("You enter a long maze of down staircases.\n");
         // dungeon_level++ (a bunch)
         // respawn new dungeon level
+        g_pGame->GetDungeon()->OnChangeLevel(Util::Roll(1, 5));
         return JSUCCESS;
     }
     else

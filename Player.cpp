@@ -50,7 +50,7 @@ JResult CPlayer::SpawnPlayer()
 {
 	printf("Trying to spawn player...");
 	JVector vTryPos;
-	while( !m_HasSpawned )
+	while( !m_bHasSpawned )
 	{
 		vTryPos.Init( (float)Util::GetRandom(0, DUNG_WIDTH-1), (float)Util::GetRandom(0, DUNG_HEIGHT-1) );
 
@@ -61,7 +61,7 @@ JResult CPlayer::SpawnPlayer()
 		if( g_pGame->GetDungeon()->IsWalkableFor(vTryPos, true) == DUNG_COLL_NO_COLLISION )
 		{
 			m_vPos = vTryPos;
-			m_HasSpawned = true;
+			m_bHasSpawned = true;
 			printf("Success!\n");
 			//g_pGame->GetMsgs()->Printf( "Success!\n" );
 		}

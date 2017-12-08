@@ -5,12 +5,12 @@
 #include "Game.h"
 #include "Dungeon.h"
 #include "Player.h"
-#include "Tileset.h"
+#include "TileSet.h"
 
 #include "CmdState.h"
 #include "ModState.h"
 
-#include "render.h"
+#include "Render.h"
 #include "DisplayText.h"
 
 #include "AIMgr.h"

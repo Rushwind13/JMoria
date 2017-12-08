@@ -3,7 +3,7 @@
 // implementation of the Player
 
 #include "Player.h"
-#include "Tileset.h"
+#include "TileSet.h"
 #include "Game.h"
 #include "Dungeon.h"
 #include "DisplayText.h"

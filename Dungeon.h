@@ -7,7 +7,7 @@
 #include "DungeonTile.h"
 #include "Monster.h"
 #include "Item.h"
-#include "Tileset.h"
+#include "TileSet.h"
 #include "DungeonMap.h"
 
 //class CMonster;

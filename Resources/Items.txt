@@ -1,0 +1,77 @@
+# Items.txt
+#
+# Repository of all
+# "Things that can be placed in character inventory &c"
+#
+# Each Item entry is of the following form:
+#
+# Item <item-name>
+# {
+#    variable-name    value
+#     ...
+# }
+#
+# Note: delimit <string> values with angle brackets <>
+# Where variable-name/value are name/value pairs
+# from the following list:
+#
+# Plural    string    how to properly refer to more than one of this thingy
+# Type        string    One of the ITEM_IDX_ defines for item type
+# Value    float    base cost to buy this item in a store
+# Flags        string    comma-delimited list of additional ITEM_FLAG_ flags
+# Color        string    RGBA value for this item's color
+# AC        float    base amount this item changes the character's AC when equipped
+# ACBonus        float    magical bonus to base AC
+# Damage        float    base amount of damage this item inflicts when it hits something
+# To-HitBonus        float    magical bonus to base to-hit chance
+# To-DamBonus        float    magical bonus to base damage
+# Level        int        earliest dungeon level this item will appear at (range: 0 (town), 1( dung lvl 1) - 100 (dung lvl 100))
+# Speed        float     how quickly one can attack with this item
+# Weight       float     weight of the item in pounds
+#
+#
+# example item entry follows: e.g.
+#Item <Long sword>
+#{
+#    Plural        <Long swords>
+#    Type        <ITEM_IDX_SWORD>
+#    Value     150.0
+#    Level        1
+#    Damage       1d8
+#    Weight         6.0
+#    Speed          5.0
+#    Color        <200,200,200,255>
+#}
+
+Item <Long sword>
+{
+    Plural        <Long swords>
+    Type        <ITEM_IDX_SWORD>
+    Value     150.0
+    Level        1
+    Damage       1d8
+    Weight         6.0
+    Speed          5.0
+    Color        <200,200,200,255>
+}
+
+Item <Small Wooden Shield>
+{
+    Plural        <Small Wooden Shields>
+    Type        <ITEM_IDX_SHIELD>
+    Value     10.0
+    Level        1
+    AC       1.0
+    Weight         10.0
+    Color        <150,100,50,255>
+}
+
+Item <Ring of Invisibility>
+{
+    Plural        <Rings of Invisibility>
+    Type        <ITEM_IDX_RING>
+    Value     1000.0
+    Level        20
+    Weight         0.2
+    Color        <225,225,50,255>
+}

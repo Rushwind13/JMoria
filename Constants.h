@@ -52,6 +52,7 @@
 
 // Dungeon Flags
 #define DUNG_CFG_MONSTERS_PER_LEVEL 0.05f
+#define DUNG_CFG_ITEMS_PER_LEVEL 0.05f
 #define DUNG_CFG_START_LEVEL 1
 #define DUNG_CFG_MAX_SPAWN_TRIES 10
 
@@ -89,8 +90,35 @@
 
 #define MON_COLOR_MULTI			0x01000000
 
+#define ITEM_IDX_INVALID        -1
+#define ITEM_IDX_SWORD          0
+#define ITEM_IDX_SHIELD         1
+#define ITEM_IDX_ARMOR          2
+#define ITEM_IDX_HELMET         3
+#define ITEM_IDX_CLOAK          4
+#define ITEM_IDX_GLOVES         5
+#define ITEM_IDX_BOOTS          6
+#define ITEM_IDX_AMULET         7
+#define ITEM_IDX_RING           8
+#define ITEM_IDX_TORCH          9
+#define ITEM_IDX_BOW            10
+#define ITEM_IDX_ARROW          11
+#define ITEM_IDX_XBOW           12
+#define ITEM_IDX_BOLT           13
+#define ITEM_IDX_CHEST          14
+#define ITEM_IDX_SCROLL         15
+#define ITEM_IDX_POTION         16
+#define ITEM_IDX_WAND           17
+#define ITEM_IDX_STAFF          18
+#define ITEM_IDX_BOOK           19
+#define ITEM_IDX_MONEY          20
+#define ITEM_IDX_FOOD           21
+#define ITEM_IDX_MAX            22
+
+#define ITEM_COLOR_MULTI        0x01000000
+
 // Make sure you change below here if you added any flags.
-#define NUM_STRINGS				24
+#define NUM_STRINGS				48
 #include "TextEntry.h"
 class Constants
 {
@@ -130,8 +158,35 @@ public:
 		// movement flags
 		m_StringTable[i++].Init("MON_AI_DONTMOVE",		MON_AI_DONTMOVE);
 		m_StringTable[i++].Init("MON_AI_100RANDOMMOVE",	MON_AI_100RANDOMMOVE);
-		m_StringTable[i++].Init("MON_AI_75RANDOMMOVE",	MON_AI_75RANDOMMOVE);
-	};
+        m_StringTable[i++].Init("MON_AI_75RANDOMMOVE",    MON_AI_75RANDOMMOVE);
+        // Color flags
+        m_StringTable[i++].Init("MON_COLOR_MULTI",    MON_COLOR_MULTI);
+        // Item Types
+        m_StringTable[i++].Init("ITEM_IDX_SWORD",        ITEM_IDX_SWORD);
+        m_StringTable[i++].Init("ITEM_IDX_SHIELD",        ITEM_IDX_SHIELD);
+        m_StringTable[i++].Init("ITEM_IDX_ARMOR",        ITEM_IDX_ARMOR);
+        m_StringTable[i++].Init("ITEM_IDX_HELMET",        ITEM_IDX_HELMET);
+        m_StringTable[i++].Init("ITEM_IDX_CLOAK",        ITEM_IDX_CLOAK);
+        m_StringTable[i++].Init("ITEM_IDX_GLOVES",        ITEM_IDX_GLOVES);
+        m_StringTable[i++].Init("ITEM_IDX_BOOTS",        ITEM_IDX_BOOTS);
+        m_StringTable[i++].Init("ITEM_IDX_AMULET",        ITEM_IDX_AMULET);
+        m_StringTable[i++].Init("ITEM_IDX_RING",        ITEM_IDX_RING);
+        m_StringTable[i++].Init("ITEM_IDX_TORCH",        ITEM_IDX_TORCH);
+        m_StringTable[i++].Init("ITEM_IDX_BOW",        ITEM_IDX_BOW);
+        m_StringTable[i++].Init("ITEM_IDX_ARROW",        ITEM_IDX_ARROW);
+        m_StringTable[i++].Init("ITEM_IDX_XBOW",        ITEM_IDX_XBOW);
+        m_StringTable[i++].Init("ITEM_IDX_BOLT",        ITEM_IDX_BOLT);
+        m_StringTable[i++].Init("ITEM_IDX_CHEST",        ITEM_IDX_CHEST);
+        m_StringTable[i++].Init("ITEM_IDX_SCROLL",        ITEM_IDX_SCROLL);
+        m_StringTable[i++].Init("ITEM_IDX_POTION",        ITEM_IDX_POTION);
+        m_StringTable[i++].Init("ITEM_IDX_WAND",        ITEM_IDX_WAND);
+        m_StringTable[i++].Init("ITEM_IDX_STAFF",        ITEM_IDX_STAFF);
+        m_StringTable[i++].Init("ITEM_IDX_BOOK",        ITEM_IDX_BOOK);
+        m_StringTable[i++].Init("ITEM_IDX_MONEY",        ITEM_IDX_MONEY);
+        m_StringTable[i++].Init("ITEM_IDX_FOOD",        ITEM_IDX_FOOD);
+        // Color flags
+        m_StringTable[i++].Init("ITEM_COLOR_MULTI",    ITEM_COLOR_MULTI);
+    };
 	TextEntry	*m_StringTable;
 
 	int LookupString(char *szIn)

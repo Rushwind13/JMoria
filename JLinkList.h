@@ -130,12 +130,12 @@ public:
 			return;
 		}
 		
-		CLink<T> *pLink = m_lpHead->prev;
-		CLink<T> *pDel = m_lpHead->prev;
+		CLink<T> *pLink = m_lpHead;
+		CLink<T> *pDel = m_lpHead;
 		while( pLink )
 		{
 			pDel = pLink;
-			pLink = GetPrev(pLink);
+			pLink = GetNext(pLink);
 			Remove(pDel);
 		}
 	};

@@ -306,20 +306,26 @@ bool CDungeon::Update(float fCurTime)
 
 bool CDungeon::IsOnScreen(JVector vPos)
 {
-	if( g_pGame->GetPlayer() == NULL )
-	{
-		return false;
-	}
-
-	JVector vPlayer = g_pGame->GetPlayer()->m_vPos;
-	if( vPos.x < vPlayer.x - SCREEN_MIN_XOFF ||
-		vPos.x > vPlayer.x + SCREEN_MAX_XOFF ||
-		vPos.y < vPlayer.y - SCREEN_MIN_YOFF ||
-		vPos.y > vPlayer.y + SCREEN_MAX_YOFF )
-	{
-		return false;
-	}
-
+    // 12.7.2017 - the below code is totally broken and
+    // was causing monsters/items not to display if they were "too far"
+    // from the player. MIN/MAX offsets are set to totally bogus values
+    // which is the actual bug, but revisit this if you are either
+    // 1) trying to do sight-distance, or
+    // 2) trying to speed things up by not drawing off-screen stuff,
+    //    once big dungeons are happening.
+//    if( g_pGame->GetPlayer() == NULL )
+//    {
+//        return false;
+//    }
+//
+//    JVector vPlayer = g_pGame->GetPlayer()->m_vPos;
+//    if( vPos.x < vPlayer.x - SCREEN_MIN_XOFF ||
+//        vPos.x > vPlayer.x + SCREEN_MAX_XOFF ||
+//        vPos.y < vPlayer.y - SCREEN_MIN_YOFF ||
+//        vPos.y > vPlayer.y + SCREEN_MAX_YOFF )
+//    {
+//        return false;
+//    }
 	return true;
 }
 
@@ -327,6 +333,7 @@ void CDungeon::Draw()
 {
 	
 	PreDraw();
+    
     // Select Our Texture
     DrawDungeon();
     

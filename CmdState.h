@@ -36,6 +36,8 @@ private:
 	int TestCollision( JVector &vTestDir );
 	
 	void UpdatePlayerPos( JVector &vDir );
+    
+    void PickUpItem( JVector &vDir );
 	void HandleCollision( int dwCollideType );
     
     int OnHandleStairs( SDL_Keysym *keysym );

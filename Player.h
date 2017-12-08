@@ -9,11 +9,27 @@ class CItem;
 class CPlayer
 {
 public:
-    CPlayer():m_bHasSpawned(false){};
-	~CPlayer() {};
+    CPlayer():m_bHasSpawned(false)
+    {
+        m_llInventory = new JLinkList<CItem>;
+        m_llEquipment = new JLinkList<CItem>;
+    };
+    ~CPlayer() { Term(); };
 
 	void Init();
-	void Term() {};
+	void Term()
+    {
+        if(m_llInventory)
+        {
+            m_llInventory->Terminate();
+            m_llInventory = NULL;
+        }
+        if(m_llEquipment)
+        {
+            m_llEquipment->Terminate();
+            m_llEquipment = NULL;
+        }
+    };
 	bool Update( float fCurTime );
 	void PreDraw();
 	void Draw();
@@ -21,10 +37,10 @@ public:
 	JVector m_vPos;
 	CTileset *m_TileSet;
     bool m_bHasSpawned;
+    
+    JLinkList<CItem> *m_llInventory;
+    JLinkList<CItem> *m_llEquipment;
 protected:
 	JResult SpawnPlayer();
-    
-    JLinkList<CItem> *m_pllInventory;
-    JLinkList<CItem> *m_pllEquipment;
 };
 #endif // __PLAYER_H__

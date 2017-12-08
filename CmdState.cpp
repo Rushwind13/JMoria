@@ -24,6 +24,11 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 		{
 			UpdatePlayerPos( m_vNewPos );
 		}
+        else if( dwCollideType == DUNG_COLL_ITEM )
+        {
+            UpdatePlayerPos( m_vNewPos );
+            HandleCollision( dwCollideType );
+        }
 		else
 		{
 			HandleCollision( dwCollideType );
@@ -166,6 +171,10 @@ void CCmdState::HandleCollision( int dwCollideType )
 			}
 		}
 	}
+    else if ( dwCollideType == DUNG_COLL_ITEM )
+    {
+        PickUpItem(m_vNewPos);
+    }
 	else
 	{
 		// Ouch, you bumped into a %s.
@@ -266,7 +275,16 @@ int CCmdState::TestCollision( JVector &vTest )
 
 void CCmdState::UpdatePlayerPos( JVector &vNewPos )
 {
-	g_pGame->GetPlayer()->m_vPos = vNewPos;
+    g_pGame->GetPlayer()->m_vPos = vNewPos;
+}
+
+void CCmdState::PickUpItem( JVector &vNewPos )
+{
+    CItem *pItem = g_pGame->GetDungeon()->GetTile(vNewPos)->m_pCurItem;
+    g_pGame->GetMsgs()->Printf( "You have a %s.\n", pItem->GetName() );
+    g_pGame->GetDungeon()->m_llItems->Remove(pItem->m_pllLink);
+    pItem->m_pllLink = g_pGame->GetPlayer()->m_llInventory->Add(pItem);
+    g_pGame->GetDungeon()->GetTile(vNewPos)->m_pCurItem = NULL;
 }
 
 bool CCmdState::IsModifierNeeded(SDL_Keysym *keysym)

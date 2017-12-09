@@ -81,7 +81,7 @@ void CItem::SetColor()
 }
 
 
-unsigned char ItemIDs[ITEM_IDX_MAX+1] = "|)[](]]\"=~{}{}&?!-_?$~";
+unsigned char ItemIDs[ITEM_IDX_MAX+1] = "|)[](]]\"=~{}{}&?!-_?$~/";
 void CItem::Draw()
 {
     // Don't draw if something else is there.

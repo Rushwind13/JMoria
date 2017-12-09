@@ -42,6 +42,7 @@
 #    Speed          5.0
 #    Color        <200,200,200,255>
 #}
+
 Item <Bastard sword>
 {
 Plural        <Bastard  swords>
@@ -53,6 +54,7 @@ Weight         10.0
 Speed          6.0
 Color        <200,200,200,255>
 }
+
 Item <Battle Axe>
 {
 Plural        <Battel  Axes>
@@ -64,6 +66,7 @@ Weight         7.5
 Speed         4.0
 Color        <200,200,200,255>
 }
+
 Item <Long Bow>
 {
 Plural        <Long Bows>
@@ -75,6 +78,7 @@ Weight         10.0
 Speed          6.0
 Color        <200,200,200,255>
 }
+
 Item <Club>
 {
 Plural        <Clubs>
@@ -86,6 +90,7 @@ Weight        3.0
 Speed         4.0
 Color        <200,200,200,255>
 }
+
 Item <Mace>
 {
 Plural        <Maces>
@@ -97,6 +102,7 @@ Weight        10.0
 Speed         7.0
 Color        <200,200,200,255>
 }
+
 Item <Lance>
 {
 Plural        <Lances>
@@ -108,6 +114,7 @@ Weight        15.0
 Speed         6.0
 Color        <200,200,200,255>
 }
+
 Item <Morning Star>
 {
 Plural        <Moring Stars>
@@ -119,6 +126,7 @@ Weight        1250.0
 Speed         7.0
 Color        <200,200,200,255>
 }
+
 Item <Glaive>
 {
 Plural        <Glaives>
@@ -130,9 +138,10 @@ Weight       7.5
 Speed         8.0
 Color        <200,200,200,255>
 }
-Item <Halberg>
+
+Item <Halberd>
 {
-Plural        <Halbergs>
+Plural        <Halberds>
 Type        <ITEM_IDX_AXE>
 Value     90.0
 Level        10
@@ -141,6 +150,7 @@ Weight        1750.0
 Speed         9.0
 Color        <200,200,200,255>
 }
+
 Item <War Hammer>
 {
 Plural        <War hammers>
@@ -152,6 +162,7 @@ Weight        5.0
 Speed         4.0
 Color        <200,200,200,255>
 }
+
 Item <Spear>
 {
 Plural        <Spears>
@@ -163,9 +174,10 @@ Weight        5.0
 Speed         7.0
 Color        <200,200,200,255>
 }
-Item <Mase>
+
+Item <Mace>
 {
-Plural        <Mases>
+Plural        <Maces>
 Type        <ITEM_IDX_AXE>
 Value     80.0
 Level        10
@@ -174,13 +186,6 @@ Weight        10.0
 Speed         7.0
 Color        <200,200,200,255>
 }
-
-
-
-
-
-
-
 
 Item <Long sword>
 {
@@ -193,6 +198,7 @@ Item <Long sword>
     Speed          5.0
     Color        <200,200,200,255>
 }
+
 Item <Dagger>
 {
     Plural        <Daggers>
@@ -240,28 +246,29 @@ Item <Small Steal Shield>
 {
     Plural        <Small Steal Shields>
     Type        <ITEM_IDX_SHIELD>
-    Value     100.0
+    Value        100.0
     Level        2
-    AC       1.0
-    Weight         10.0
+    AC           1.0
+    Weight       10.0
     Color        <115,112,121,255>
 }
-Item <Larg Steal Shield>
+
+Item <Large Steel Shield>
 {
-    Plural        <Larg Steal Shields>
+    Plural        <Large Steel Shields>
     Type        <ITEM_IDX_SHIELD>
-    Value     150.0
+    Value        150.0
     Level        2
-    AC       1.0
-    Weight         10.0
+    AC           1.0
+    Weight       10.0
     Color        <115,112,121,255>
 }
-Item <Steal Shield>
-    Plural        < Steal Shields>
+Item <Steel Shield>
+    Plural      <Steel Shields>
     Type        <ITEM_IDX_SHIELD>
-    Value     125.0
+    Value        125.0
     Level        2
-    AC       1.0
-    Weight         10.0
+    AC           1.0
+    Weight       10.0
     Color        <115,112,121,255>
 }

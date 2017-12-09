@@ -4,38 +4,6 @@
 #include "JMDefs.h"
 #include "JLinkList.h"
 
-class CItemDef;
-
-class CItem
-{
-// Member Variables
-public:
-    JVector m_vPos;
-    CItemDef *m_id;
-    CLink<CItem> *m_pllLink;
-protected:
-    float m_fColorChangeInterval;
-    int m_dwFlags; // item cursed, or other specific to this instance, rather than in the general CItemDef
-private:
-
-// Member Functions
-public:
-    void Init( CItemDef *pid );
-    bool IsOpenable() { return false; } // for chests, etc.
-    bool IsCloseable() { return false; } // closeable pickup?
-    bool IsTunnelable() { return false; } // Tunnelable pickup? unlikely.
-
-    static JResult CreateItem( CItemDef *pid );
-    JResult SpawnItem();
-    
-    void PreDraw();
-    void Draw();
-    void PostDraw();
-protected:
-    void SetColor();
-private:
-};
-
 class CItemDef
 {
 	// Member Variables
@@ -99,6 +67,36 @@ class CItemDef
 	// ... need one of these per state (virt in base, defined in subclasses)?
 	protected:
 	private:
+};
+class CItem
+{
+    // Member Variables
+public:
+    JVector m_vPos;
+    CItemDef *m_id;
+    CLink<CItem> *m_pllLink;
+protected:
+    float m_fColorChangeInterval;
+    int m_dwFlags; // item cursed, or other specific to this instance, rather than in the general CItemDef
+private:
+    
+    // Member Functions
+public:
+    void Init( CItemDef *pid );
+    char *GetName() { return m_id->m_szName; }
+    bool IsOpenable() { return false; } // for chests, etc.
+    bool IsCloseable() { return false; } // closeable pickup?
+    bool IsTunnelable() { return false; } // Tunnelable pickup? unlikely.
+    
+    static JResult CreateItem( CItemDef *pid );
+    JResult SpawnItem();
+    
+    void PreDraw();
+    void Draw();
+    void PostDraw();
+protected:
+    void SetColor();
+private:
 };
 
 #endif // __ITEMTILE_H__

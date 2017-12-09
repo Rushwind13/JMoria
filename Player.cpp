@@ -69,3 +69,17 @@ JResult CPlayer::SpawnPlayer()
 
 	return JSUCCESS;
 }
+
+void CPlayer::DisplayInventory()
+{
+    CLink<CItem> *pLink = m_llInventory->GetHead();
+    CItem *pItem;
+    g_pGame->GetStats()->Printf("You are carrying:\n");
+    while(pLink != NULL)
+    {
+        pItem = pLink->m_lpData;
+        g_pGame->GetStats()->Printf("%s\n", pItem->GetName());
+        pLink = m_llInventory->GetNext(pLink);
+    }
+
+}

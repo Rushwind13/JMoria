@@ -11,10 +11,12 @@ template <class T> class CLink
 {
 public:
 	T	*m_lpData;
+    int m_dwIndex;
 	CLink *next, *prev;
 	
-	inline CLink( T *pData = NULL)
+	inline CLink( T *pData = NULL, int dwIndex=-1 )
 		:m_lpData(pData),
+        m_dwIndex(dwIndex),
 		next(NULL),
 		prev(NULL)
 	{
@@ -23,6 +25,7 @@ public:
 	inline ~CLink(void)
 	{
 		m_lpData = NULL;
+        m_dwIndex = -1;
 		next = NULL;
 		prev = NULL;
 	}
@@ -41,26 +44,72 @@ public:
 	// in other fcns, this spot is checked for,
 	// and NULL is returned in a case where you're
 	// trying to go between m_lpHead and m_lpHead->prev.
-	CLink <T> *Add( T *pData )
+	CLink <T> *Add( T *pData, int dwIndex=-1 )
 	{
-		CLink<T> *pLink = new CLink<T>(pData);
+		CLink<T> *pLink = new CLink<T>(pData, dwIndex);
 
-		pLink->prev = NULL;
-		pLink->next = m_lpHead;
-		
-		if( m_lpHead != NULL )
-		{
-			m_lpHead->prev = pLink;
-		}
-
-		m_lpHead = pLink;
+        if( dwIndex != -1 )
+        {
+            CLink <T> *curr_link = GetHead();
+            if( curr_link == NULL )
+            {
+                pLink->prev = NULL;
+                pLink->next = m_lpHead;
+                
+                m_lpHead = pLink;
+            }
+            else
+            {
+                while( curr_link )
+                {
+                    if( curr_link->m_dwIndex >= dwIndex )
+                    {
+                        // found correct spot; insert before curr_link
+                        pLink->prev = curr_link->prev;
+                        pLink->next = curr_link;
+                        if( curr_link->prev == NULL )
+                        {
+                            m_lpHead = pLink;
+                        }
+                        else
+                        {
+                            curr_link->prev->next = pLink;
+                        }
+                        curr_link->prev = pLink;
+                        break;
+                        
+                    }
+                    if( curr_link->next == NULL )
+                    {
+                        // incoming index > than all in list, insert at tail
+                        pLink->next = curr_link->next;
+                        curr_link->next = pLink;
+                        pLink->prev = curr_link;
+                        break;
+                    }
+                    curr_link = GetNext(curr_link);
+                }
+            }
+        }
+        else
+        {
+            pLink->prev = NULL;
+            pLink->next = m_lpHead;
+            
+            if( m_lpHead != NULL )
+            {
+                m_lpHead->prev = pLink;
+            }
+            
+            m_lpHead = pLink;
+        }
 		
 		m_iNumElements++;
 		return pLink;
 	};
 	
 	CLink <T> *GetHead() { return m_lpHead; };
-	void Remove( CLink <T> *pLink )
+	void Remove( CLink <T> *pLink, bool bDelete=true )
 	{
 		if( pLink->next )
 		{
@@ -85,9 +134,12 @@ public:
 			}
 		}
 
-		delete pLink->m_lpData;
-		delete pLink;
-		pLink = NULL;
+        if( bDelete )
+        {
+            delete pLink->m_lpData;
+            delete pLink;
+            pLink = NULL;
+        }
 		m_iNumElements--;
 	};
 	

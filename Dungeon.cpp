@@ -504,6 +504,10 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
         printf("Monster attacking not implemented yet.\n");
         return DUNG_COLL_PLAYER;
     }
+    else if( isPlayer && curTile->m_pCurItem != NULL )
+    {
+        return DUNG_COLL_ITEM;
+    }
 	
 	// If you get here, the square was unoccupied. Now check for running into inanimates...
 	int type = curTile->m_dtd->m_dwType;

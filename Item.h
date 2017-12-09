@@ -75,9 +75,10 @@ public:
     JVector m_vPos;
     CItemDef *m_id;
     CLink<CItem> *m_pllLink;
+    int m_dwFlags; // item cursed, or other specific to this instance, rather than in the general CItemDef
 protected:
     float m_fColorChangeInterval;
-    int m_dwFlags; // item cursed, or other specific to this instance, rather than in the general CItemDef
+    JColor m_Color;
 private:
     
     // Member Functions

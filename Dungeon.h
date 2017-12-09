@@ -14,7 +14,7 @@
 //class CItem;
 
 #define DUNG_ZOOM_MIN		4
-#define DUNG_ZOOM_NORMAL	16
+#define DUNG_ZOOM_NORMAL	20
 #define DUNG_ZOOM_MAX		100
 
 class CDungeon
@@ -101,6 +101,7 @@ public:
     int  IsStairs( JVector &vPos );
 	void RemoveMonster( CMonster *pMon );
 	JResult Modify( JVector &vPos );
+    CItem *PickUp( JVector &vPickupPos );
 protected:
 	JRect m_Rect;
 	JFVector m_vfTranslate;

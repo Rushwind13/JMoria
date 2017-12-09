@@ -648,3 +648,10 @@ JResult CDungeon::Modify( JVector &vPos )
 
 	return JSUCCESS;
 }
+
+CItem *CDungeon::PickUp( JVector &vPickupPos )
+{
+    CItem *pItem = GetTile(vPickupPos)->m_pCurItem;
+    m_llItems->Remove(pItem->m_pllLink, false);
+    return pItem;
+}

@@ -16,7 +16,8 @@
 #define STATE_INVALID		-1
 #define STATE_COMMAND		 0
 #define STATE_MODIFY		 1
-#define STATE_MAX			 2
+#define STATE_MENU           2
+#define STATE_MAX            2
 
 // Various statuses that someone could have
 #define STATUS_INVALID		-1
@@ -116,10 +117,11 @@
 #define ITEM_IDX_FOOD           21
 #define ITEM_IDX_MAX            22
 
+#define ITEM_FLAG_CURSED        0x00001000
 #define ITEM_COLOR_MULTI        0x01000000
 
 // Make sure you change below here if you added any flags.
-#define NUM_STRINGS				49
+#define NUM_STRINGS				50
 #include "TextEntry.h"
 class Constants
 {
@@ -186,6 +188,8 @@ public:
         m_StringTable[i++].Init("ITEM_IDX_BOOK",        ITEM_IDX_BOOK);
         m_StringTable[i++].Init("ITEM_IDX_MONEY",        ITEM_IDX_MONEY);
         m_StringTable[i++].Init("ITEM_IDX_FOOD",        ITEM_IDX_FOOD);
+        // Item flags
+        m_StringTable[i++].Init("ITEM_FLAG_CURSED",    ITEM_FLAG_CURSED);
         // Color flags
         m_StringTable[i++].Init("ITEM_COLOR_MULTI",    ITEM_COLOR_MULTI);
     };

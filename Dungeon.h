@@ -101,6 +101,7 @@ public:
     int  IsStairs( JVector &vPos );
 	void RemoveMonster( CMonster *pMon );
 	JResult Modify( JVector &vPos );
+    CItem *PickUp( JVector &vPickupPos );
 protected:
 	JRect m_Rect;
 	JFVector m_vfTranslate;

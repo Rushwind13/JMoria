@@ -48,6 +48,16 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 		return 0;
 	}
     
+    // Menu commands allow you to choose from lists of items:
+    // inventory, equipment, stores, chests?, bag of holding, &c
+    if( IsMenuCommand(keysym) )
+    {
+        // Add "modify" to the top of the state stack
+        g_pGame->SetState(STATE_MENU);
+        g_pGame->GetGameState()->HandleKey(keysym);
+        return 0;
+    }
+    
     switch(keysym->sym)
     {
     case SDLK_COMMA:
@@ -58,9 +68,6 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
             OnHandleStairs( keysym );
             return JSUCCESS;
         }
-        break;
-    case SDLK_i:
-        DisplayInventory();
         break;
     default:
         break;
@@ -283,11 +290,7 @@ void CCmdState::UpdatePlayerPos( JVector &vNewPos )
 
 void CCmdState::PickUpItem( JVector &vNewPos )
 {
-    CItem *pItem = g_pGame->GetDungeon()->GetTile(vNewPos)->m_pCurItem;
-    g_pGame->GetMsgs()->Printf( "You have a %s.\n", pItem->GetName() );
-    g_pGame->GetDungeon()->m_llItems->Remove(pItem->m_pllLink, false);
-    pItem->m_pllLink = g_pGame->GetPlayer()->m_llInventory->Add(pItem, pItem->m_id->m_dwIndex);
-    g_pGame->GetDungeon()->GetTile(vNewPos)->m_pCurItem = NULL;
+    g_pGame->GetPlayer()->PickUp(vNewPos);
 }
 
 bool CCmdState::IsModifierNeeded(SDL_Keysym *keysym)
@@ -305,6 +308,23 @@ bool CCmdState::IsModifierNeeded(SDL_Keysym *keysym)
 	}
 
 	return false;
+}
+
+
+bool CCmdState::IsMenuCommand(SDL_Keysym *keysym)
+{
+    switch( keysym->sym )
+    {
+        case SDLK_w:
+        case SDLK_r:
+            return true;
+            break;
+        default:
+            return false;
+            break;
+    }
+    
+    return false;
 }
 
 

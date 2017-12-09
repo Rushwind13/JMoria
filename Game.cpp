@@ -9,6 +9,7 @@
 
 #include "CmdState.h"
 #include "ModState.h"
+#include "MenuState.h"
 
 #include "Render.h"
 #include "DisplayText.h"
@@ -28,8 +29,9 @@ m_pCurState(NULL),
 m_pCmdState(NULL),
 m_eCurState(STATE_INVALID)
 {
-	m_pCmdState = new CCmdState;
-	m_pModState = new CModState;
+    m_pCmdState = new CCmdState;
+    m_pModState = new CModState;
+    m_pMenuState = new CMenuState;
 };
 
 JResult CGame::Init()
@@ -121,11 +123,15 @@ void CGame::SetState( int eNewState )
 	{
 	case STATE_COMMAND:
 		m_pCurState = reinterpret_cast<CStateBase *>(m_pCmdState);
-		break;
-	case STATE_MODIFY:
-		m_pCurState = reinterpret_cast<CStateBase *>(m_pModState);
-		break;
+            break;
+    case STATE_MODIFY:
+        m_pCurState = reinterpret_cast<CStateBase *>(m_pModState);
+        break;
+    case STATE_MENU:
+        m_pCurState = reinterpret_cast<CStateBase *>(m_pMenuState);
+        break;
 	default:
+        printf("Tried to change to unknown state.\n");
 		break;
 	}
 }

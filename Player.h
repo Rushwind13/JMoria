@@ -36,6 +36,13 @@ public:
     void PostDraw();
     void DisplayInventory();
     void DisplayEquipment();
+    void PickUp( JVector &vPickupPos );
+    
+    bool IsWieldable(CLink<CItem> *pLink);
+    bool Wield(CLink<CItem> *pItem);
+    
+    bool IsRemovable(CLink<CItem> *pLink);
+    bool Remove(CLink<CItem> *pLink);
     
 	JVector m_vPos;
 	CTileset *m_TileSet;

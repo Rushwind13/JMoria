@@ -123,3 +123,85 @@ void CPlayer::DisplayEquipment()
     }
     
 }
+
+void CPlayer::PickUp( JVector &vPickupPos )
+{
+    CItem *pItem = g_pGame->GetDungeon()->PickUp(vPickupPos);
+    pItem->m_pllLink = m_llInventory->Add(pItem, pItem->m_id->m_dwIndex);
+    g_pGame->GetDungeon()->GetTile(vPickupPos)->m_pCurItem = NULL;
+    g_pGame->GetMsgs()->Printf( "You have a %s.\n", pItem->GetName() );
+}
+
+bool CPlayer::IsWieldable(CLink<CItem> *pItem)
+{
+    bool retval = false;
+    switch( pItem->m_lpData->m_id->m_dwIndex )
+    {
+        case ITEM_IDX_SWORD:
+        case ITEM_IDX_SHIELD:
+        case ITEM_IDX_ARMOR:
+        case ITEM_IDX_BOW:
+        case ITEM_IDX_XBOW:
+        case ITEM_IDX_CLOAK:
+        case ITEM_IDX_GLOVES:
+        case ITEM_IDX_RING:
+        case ITEM_IDX_BOOTS:
+        case ITEM_IDX_TORCH:
+        case ITEM_IDX_AMULET:
+            retval = true;
+            break;
+        default:
+            retval = false;
+            break;
+    }
+    return retval;
+}
+
+bool CPlayer::Wield(CLink<CItem> *pLink)
+{
+    CItem *pItem = pLink->m_lpData;
+    
+    // You can only wield one thing of a given type at a time
+    CLink<CItem> *pCurrEquip = m_llEquipment->GetLink(pItem->m_id->m_dwIndex, true);
+    if( pCurrEquip != NULL && pCurrEquip->m_dwIndex == pLink->m_dwIndex )
+    {
+        // So if you're already wearing something of this type, remove it and put it back in inventory
+        if( Remove(pCurrEquip) )
+        {
+            g_pGame->GetMsgs()->Printf("You were wielding the %s...", pCurrEquip->m_lpData->GetName());
+        }
+        else
+        {
+            return false;
+        }
+    }
+    // Now put on the new item.
+    m_llInventory->Remove(pLink, false);
+    pItem->m_pllLink = m_llEquipment->Add(pItem, pItem->m_id->m_dwIndex);
+    
+    return true;
+}
+
+bool CPlayer::IsRemovable(CLink<CItem> *pLink)
+{
+    CItem *pItem = pLink->m_lpData;
+    if( pItem->m_dwFlags & ITEM_FLAG_CURSED )
+    {
+        return false;
+    }
+    return true;
+}
+
+bool CPlayer::Remove(CLink<CItem> *pLink)
+{
+    CItem *pItem = pLink->m_lpData;
+    if(pItem->m_dwFlags & ITEM_FLAG_CURSED)
+    {
+        g_pGame->GetMsgs()->Printf("You can't remove the %s... it seems to be cursed.\n", pItem->GetName());
+        return false;
+    }
+    m_llEquipment->Remove(pLink, false);
+    pItem->m_pllLink = m_llInventory->Add(pItem, pItem->m_id->m_dwIndex);
+    
+    return true;
+}

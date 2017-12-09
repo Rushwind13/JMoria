@@ -42,6 +42,145 @@
 #    Speed          5.0
 #    Color        <200,200,200,255>
 #}
+Item <Bastard sword>
+{
+Plural        <Bastard  swords>
+Type        <ITEM_IDX_SWORD>
+Value     250.0
+Level        5
+Damage       2d8
+Weight         10.0
+Speed          6.0
+Color        <200,200,200,255>
+}
+Item <Battle Axe>
+{
+Plural        <Battel  Axes>
+Type        <ITEM_IDX_AXE>
+Value     600.0
+Level        10
+Damage       2d4
+Weight         7.5
+Speed         4.0
+Color        <200,200,200,255>
+}
+Item <Long Bow>
+{
+Plural        <Long Bows>
+Type        <ITEM_IDX_BOW>
+Value     250.0
+Level        5
+Damage       1d8
+Weight         10.0
+Speed          6.0
+Color        <200,200,200,255>
+}
+Item <Club>
+{
+Plural        <Clubs>
+Type        <ITEM_IDX_AXE>
+Value     600.0
+Level        10
+Damage       2d3
+Weight        3.0
+Speed         4.0
+Color        <200,200,200,255>
+}
+Item <Mace>
+{
+Plural        <Maces>
+Type        <ITEM_IDX_AXE>
+Value     80.0
+Level        110
+Damage       2d3
+Weight        10.0
+Speed         7.0
+Color        <200,200,200,255>
+}
+Item <Lance>
+{
+Plural        <Lances>
+Type        <ITEM_IDX_AXE>
+Value     60.0
+Level        10
+Damage       3d6
+Weight        15.0
+Speed         6.0
+Color        <200,200,200,255>
+}
+Item <Morning Star>
+{
+Plural        <Moring Stars>
+Type        <ITEM_IDX_AXE>
+Value     50.0
+Level        10
+Damage       2d4
+Weight        1250.0
+Speed         7.0
+Color        <200,200,200,255>
+}
+Item <Glaive>
+{
+Plural        <Glaives>
+Type        <ITEM_IDX_AXE>
+Value     60.0
+Level        10
+Damage       2d5
+Weight       7.5
+Speed         8.0
+Color        <200,200,200,255>
+}
+Item <Halberg>
+{
+Plural        <Halbergs>
+Type        <ITEM_IDX_AXE>
+Value     90.0
+Level        10
+Damage       2d5
+Weight        1750.0
+Speed         9.0
+Color        <200,200,200,255>
+}
+Item <War Hammer>
+{
+Plural        <War hammers>
+Type        <ITEM_IDX_AXE>
+Value     10.0
+Level        10
+Damage       1d5
+Weight        5.0
+Speed         4.0
+Color        <200,200,200,255>
+}
+Item <Spear>
+{
+Plural        <Spears>
+Type        <ITEM_IDX_AXE>
+Value     10.0
+Level        10
+Damage       2d4
+Weight        5.0
+Speed         7.0
+Color        <200,200,200,255>
+}
+Item <Mase>
+{
+Plural        <Mases>
+Type        <ITEM_IDX_AXE>
+Value     80.0
+Level        10
+Damage       1d8
+Weight        10.0
+Speed         7.0
+Color        <200,200,200,255>
+}
+
+
+
+
+
+
+
 
 Item <Long sword>
 {
@@ -54,6 +193,17 @@ Item <Long sword>
     Speed          5.0
     Color        <200,200,200,255>
 }
+Item <Dagger>
+{
+    Plural        <Daggers>
+    Type        <ITEM_IDX_SWORD>
+    Value    20.0
+    Level        1
+    Damage       1d8
+    Weight         1.0
+    Speed          2.0
+    Color        <200,200,200,255>
+    }
 
 Item <Small Wooden Shield>
 {
@@ -75,6 +225,7 @@ Item <Ring of Invisibility>
     Weight         0.2
     Color        <225,225,50,255>
 }
+
 Item <Ring of Protection>
 {
 Plural        <Rings of Protection>
@@ -83,4 +234,33 @@ Value     1000.0
 Level        20
 Weight         0.2
 Color        <225,50,225,255>
+
+Item <Small Steal Shield>
+{
+    Plural        <Small Steal Shields>
+    Type        <ITEM_IDX_SHIELD>
+    Value     100.0
+    Level        2
+    AC       1.0
+    Weight         10.0
+    Color        <115,112,121,255>
+}
+Item <Larg Steal Shield>
+{
+    Plural        <Larg Steal Shields>
+    Type        <ITEM_IDX_SHIELD>
+    Value     150.0
+    Level        2
+    AC       1.0
+    Weight         10.0
+    Color        <115,112,121,255>
+}
+Item <Steal Shield>
+    Plural        < Steal Shields>
+    Type        <ITEM_IDX_SHIELD>
+    Value     125.0
+    Level        2
+    AC       1.0
+    Weight         10.0
+    Color        <115,112,121,255>
 }

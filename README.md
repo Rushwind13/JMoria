@@ -13,7 +13,9 @@ Keyboard commands recognized:
 * *o* - open a door
 * *c* - close a door
 * *T* - tunnel through rubble
+* *i* - show character inventory
 
 Monster definitions are in _Resources/Monsters.txt_
+Item definitions are in _Resources/Items.txt_
 
 Graphics tileset is _Resources/Courier.png_

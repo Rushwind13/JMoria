@@ -21,6 +21,8 @@ void CPlayer::Init()
 
 bool CPlayer::Update(float fCurTime)
 {
+    DisplayInventory();
+    DisplayEquipment();
 	return true;
 }
 
@@ -74,12 +76,50 @@ void CPlayer::DisplayInventory()
 {
     CLink<CItem> *pLink = m_llInventory->GetHead();
     CItem *pItem;
-    g_pGame->GetStats()->Printf("You are carrying:\n");
+    g_pGame->GetInv()->Clear();
+    g_pGame->GetInv()->Printf("You are carrying:\n");
+    char cInventoryId = 'a';
     while(pLink != NULL)
     {
         pItem = pLink->m_lpData;
-        g_pGame->GetStats()->Printf("%s\n", pItem->GetName());
+        g_pGame->GetInv()->Printf("%c - %s\n", cInventoryId, pItem->GetName());
+        
+        if( cInventoryId < 'z' )
+        {
+            cInventoryId++;
+        }
+        else
+        {
+            printf("Inventory past first page not shown.\n");
+            break;
+        }
         pLink = m_llInventory->GetNext(pLink);
     }
+    
+}
 
+void CPlayer::DisplayEquipment()
+{
+    CLink<CItem> *pLink = m_llEquipment->GetHead();
+    CItem *pItem;
+    g_pGame->GetEquip()->Clear();
+    g_pGame->GetEquip()->Printf("You are wearing:\n");
+    char cEquipmentId = 'a';
+    while(pLink != NULL)
+    {
+        pItem = pLink->m_lpData;
+        g_pGame->GetEquip()->Printf("%c - %s\n", cEquipmentId, pItem->GetName());
+        
+        if( cEquipmentId < 'z' )
+        {
+            cEquipmentId++;
+        }
+        else
+        {
+            printf("Equipment is limited to N items, one each for specific body parts.\n");
+            break;
+        }
+        pLink = m_llEquipment->GetNext(pLink);
+    }
+    
 }

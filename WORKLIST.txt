@@ -7,6 +7,42 @@ DATA / GAMEPLAY:
 - implement "flavored" attacks, e.g. a _BREATHE type should read m_dwFlags to figure out which type of breath (fire, ice, &c)s
 
 
+MONSTERS:
+- orcs
+- trolls
+- giants
+- Ettin
+- floating eye
+- Ogre
+- goblin
+- goblin shaman
+- goblin warrior
+- goblin chieftain
+- uruk-hai
+- skeletons / zombies / ghosts / ghoul / wight / vampire / lich
+- novice paladin / ranger / priest / warrior /
+- hobbit (steals your purse and runs away)
+- mind flayer
+- dzur / tiassa / hawk
+- Tiamat
+- You must defeat 17 Warriors from the Hall of Heroes in combat, before you may face Tiamat.
+
+
+ITEMS:
+- Magic items "x of Protection", "y of Resist Fire", but scramble the varieties each game of course.
+- ego items [FB] [DB] [WB] [DF] [HA] ...
+- unique items I mean Vlad had to take on a Jenoine, I'm just saying.
+- Maybe uniques can't be found until the character holding them dies.
+
+
+PLAYER:
+- create e)quipment list
+- Player can only hold one of each type (for now)
+- equipped items enhance player instrinsics; player wears ring, set the intrinsic "isInvisible" on the player.
+- equipped items are used to make attacks and to defend against attacks (raise AC, raise to-hit and damage stats, &c)
+- equippable items restricted to certain subset of all items ITEM_FLAG_EQUIPMENT
+
+
 COMBAT:
 - combat is very hardcoded. make it not so much.
 - implement monster fighting back (might need HP and stuff for that, though)
@@ -14,6 +50,7 @@ COMBAT:
 - should monsters be able to wield items? use potions? pick stuff up off the ground?
 - need to add speed, somehow
 - someday, convert to turn-based, too :)
+
 
 
 ARCHITECTURE:
@@ -24,6 +61,10 @@ ARCHITECTURE:
   saves a % and / per obj, per frame. costs 1 vector/obj.
 - continue to implement CDungeon (current level, CMonster List, CItem List)
 - some way to implement unit tests would be nice.
+- Which routines should be owned by Dungeon? Which by Player? Monster? Item?
+- Need Architecture diagram
+- Need Developer's Guide
+
 
 
 FONT / TEXTURE / DISPLAY / COLOR:
@@ -37,6 +78,7 @@ FONT / TEXTURE / DISPLAY / COLOR:
   foo=new DisplayText(FONT_COURIER, JRect()) maybe)
 
 
+
 ENGINE / RENDERING:
 - Keep the renderer you have for awhile. Concentrate on putting together a solid gameplay demo.
 - Contract art later as needed.
@@ -48,6 +90,7 @@ ENGINE / RENDERING:
 - (Update 12.3.2017) ported to OSX, which required switching to SDL2. Other than rewriting CRender::initSDL(), no major changes. we will are back to where we were when we last left the project (in 2006?). I also moved the code from VSS to Github git@github.com:Rushwind13/JMoria.git .
 
 
+
 STABILITY:
 - be able to close the game properly.
 - figure out why the game is so rickety?
@@ -55,6 +98,7 @@ STABILITY:
 - 12.5.2017 - B reports occasionally all the text goes black on black, doesn't affect the dungeon, only the overlay.
 - 12.5.2017 - The blue icky thing seems to disappear if the player is too far away? Does this happen to other monsters?
 - 12.5.2017 - getting a lot of intermittent "bad string" complaints; wtf?! like for some reason the string lookup table sometimes isn't working right
+
 
 
 DUNGEON GENERATION: (as of 1.27.06, hardcoded 16x16 dungeon back in)

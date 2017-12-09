@@ -14,7 +14,7 @@
 //class CItem;
 
 #define DUNG_ZOOM_MIN		4
-#define DUNG_ZOOM_NORMAL	16
+#define DUNG_ZOOM_NORMAL	20
 #define DUNG_ZOOM_MAX		100
 
 class CDungeon

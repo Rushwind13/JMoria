@@ -33,8 +33,9 @@ public:
 	bool Update( float fCurTime );
 	void PreDraw();
 	void Draw();
-	void PostDraw();
+    void PostDraw();
     void DisplayInventory();
+    void DisplayEquipment();
     
 	JVector m_vPos;
 	CTileset *m_TileSet;

@@ -1,8 +1,7 @@
 JMoria Work List
 ----------------
 DATA / GAMEPLAY:
-- implement DAT file reading (XML format? INI format? passwd format?) for: dungeon, item, savefile
-- Now that monsters.txt can be read, create many new monster defs.
+- implement DAT file reading (XML format? INI format? passwd format?) for: dungeon, races, classes, spells, savefile
 - need to add status effects (e.g. poison)
 - implement "flavored" attacks, e.g. a _BREATHE type should read m_dwFlags to figure out which type of breath (fire, ice, &c)s
 
@@ -33,14 +32,14 @@ ITEMS:
 - ego items [FB] [DB] [WB] [DF] [HA] ...
 - unique items I mean Vlad had to take on a Jenoine, I'm just saying.
 - Maybe uniques can't be found until the character holding them dies.
+- pickaxe / shovel
 
 
 PLAYER:
-- create e)quipment list
-- Player can only hold one of each type (for now)
+- Player can only hold one of each wieldable type (for now; two rings is an enhancement)
 - equipped items enhance player instrinsics; player wears ring, set the intrinsic "isInvisible" on the player.
 - equipped items are used to make attacks and to defend against attacks (raise AC, raise to-hit and damage stats, &c)
-- equippable items restricted to certain subset of all items ITEM_FLAG_EQUIPMENT
+- equippable items restricted to certain subset of all items ITEM_FLAG_EQUIPMENT, instead of hardcoded in CPlayer::Wield.
 
 
 COMBAT:
@@ -76,6 +75,7 @@ FONT / TEXTURE / DISPLAY / COLOR:
   already loaded bitmap?) (what if I want different fonts?)
   (perhaps a tilemgr? maybe just all the DisplayText boxes use the same (set of) fonts?
   foo=new DisplayText(FONT_COURIER, JRect()) maybe)
+- display player intrinsics as part of the texture coloration: stripes for each one, or "LEDs" or something.
 
 
 
@@ -96,13 +96,12 @@ STABILITY:
 - figure out why the game is so rickety?
 - figure out why the framerate seems to tank? unfreed resources? (4/10/03 still a problem? Haven't seen it)
 - 12.5.2017 - B reports occasionally all the text goes black on black, doesn't affect the dungeon, only the overlay.
-- 12.5.2017 - The blue icky thing seems to disappear if the player is too far away? Does this happen to other monsters?
 - 12.5.2017 - getting a lot of intermittent "bad string" complaints; wtf?! like for some reason the string lookup table sometimes isn't working right
 
 
 
 DUNGEON GENERATION: (as of 1.27.06, hardcoded 16x16 dungeon back in)
-- 12.5.2017: in lieu of full dungeon generation, maybe staircases could be implemented next, just respawn the 16x16 dungeon (but with a new monster!) each time... or have a small set of hardcoded dungeons (like the 16x16 but rotated), choose among them. Beginnings of "room type"
+- 12.5.2017: in lieu of full dungeon generation, maybe have a small set of hardcoded dungeons (like the 16x16 but rotated), choose among them. Beginnings of "room type"
 - 1.27.06: hardcoded 16x16 dungeon back in. Get to work on gameplay. SDL crash was in Dungeon->Draw(), where 
   I had hardcoded 256x256 instead of DUNG_WIDTH/HEIGHT. duh.
 - 1.1.05: tried to clean up a little and put the game in a state where it could be worked on. This met little success. 

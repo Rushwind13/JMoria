@@ -35,7 +35,7 @@ void CItem::Init( CItemDef *pid )
 {
     m_id = pid;
     m_Color.SetColor(m_id->m_Color);
-    if( Util::GetRandom(0,1) )
+    if( Util::GetRandom(1,100) < 5 )
     {
         m_dwFlags |= ITEM_FLAG_CURSED;
         m_Color.SetColor(255,0,0,255);

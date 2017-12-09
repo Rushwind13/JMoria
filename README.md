@@ -13,6 +13,8 @@ Keyboard commands recognized:
 * *o* - open a door
 * *c* - close a door
 * *T* - tunnel through rubble
+* *<* - go up a staircase
+* *>* - go down a staircase
 * *i* - show character inventory (removed this in favor of just having it onscreen all the time)
 * *w* - wield an item
 * *r* - remove a piece of equipment

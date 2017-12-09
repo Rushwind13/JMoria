@@ -60,7 +60,7 @@ public:
 	};
 	
 	CLink <T> *GetHead() { return m_lpHead; };
-	void Remove( CLink <T> *pLink )
+	void Remove( CLink <T> *pLink, bool bDelete=true )
 	{
 		if( pLink->next )
 		{
@@ -85,9 +85,12 @@ public:
 			}
 		}
 
-		delete pLink->m_lpData;
-		delete pLink;
-		pLink = NULL;
+        if( bDelete )
+        {
+            delete pLink->m_lpData;
+            delete pLink;
+            pLink = NULL;
+        }
 		m_iNumElements--;
 	};
 	

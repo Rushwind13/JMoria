@@ -42,6 +42,8 @@ private:
     
     int OnHandleStairs( SDL_Keysym *keysym );
     int TestStairs();
+    
+    void DisplayInventory();
 
 	// This variable gets deleted a lot, but is better than 
 	// creating a vew vector every frame.

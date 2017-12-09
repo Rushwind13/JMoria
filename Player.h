@@ -34,6 +34,8 @@ public:
 	void PreDraw();
 	void Draw();
 	void PostDraw();
+    void DisplayInventory();
+    
 	JVector m_vPos;
 	CTileset *m_TileSet;
     bool m_bHasSpawned;

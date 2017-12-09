@@ -70,7 +70,8 @@
 #define MON_IDX_DINOSAUR        9
 #define MON_IDX_ANT            10
 #define MON_IDX_HARPY          11
-#define MON_IDX_MAX            12
+#define MON_IDX_DOG            12
+#define MON_IDX_MAX            13
 
 #define MON_FLAG_SPORE			0x00000001
 #define MON_FLAG_TOUCH			0x00000002
@@ -118,7 +119,7 @@
 #define ITEM_COLOR_MULTI        0x01000000
 
 // Make sure you change below here if you added any flags.
-#define NUM_STRINGS				48
+#define NUM_STRINGS				49
 #include "TextEntry.h"
 class Constants
 {
@@ -144,6 +145,7 @@ public:
         m_StringTable[i++].Init("MON_IDX_DINOSAUR",     MON_IDX_DINOSAUR);
         m_StringTable[i++].Init("MON_IDX_ANT",          MON_IDX_ANT);
         m_StringTable[i++].Init("MON_IDX_HARPY",        MON_IDX_HARPY);
+        m_StringTable[i++].Init("MON_IDX_DOG",          MON_IDX_DOG);
         // attack types
 		m_StringTable[i++].Init("MON_FLAG_SPORE",		MON_FLAG_SPORE);
 		m_StringTable[i++].Init("MON_FLAG_TOUCH",		MON_FLAG_TOUCH);

@@ -13,8 +13,7 @@ MONSTERS:
 - Ettin
 - floating eye
 - Ogre
-- goblin
-- goblin shaman
+- goblin- goblin shaman
 - goblin warrior
 - goblin chieftain
 - uruk-hai
@@ -40,6 +39,8 @@ PLAYER:
 - equipped items enhance player instrinsics; player wears ring, set the intrinsic "isInvisible" on the player.
 - equipped items are used to make attacks and to defend against attacks (raise AC, raise to-hit and damage stats, &c)
 - equippable items restricted to certain subset of all items ITEM_FLAG_EQUIPMENT, instead of hardcoded in CPlayer::Wield.
+- implement DropItem()
+- implement paginated inventory
 
 
 COMBAT:

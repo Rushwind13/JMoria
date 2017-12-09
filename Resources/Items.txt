@@ -234,6 +234,7 @@ Value     1000.0
 Level        20
 Weight         0.2
 Color        <225,50,225,255>
+}
 
 Item <Small Steal Shield>
 {

@@ -5,7 +5,7 @@
 #include "DisplayText.h"
 //#include "Render.h"
 
-#include "player.h"
+#include "Player.h"
 
 // The global game pointer
 CGame *g_pGame;

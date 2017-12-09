@@ -9,6 +9,7 @@
 
 #include "CmdState.h"
 #include "ModState.h"
+#include "MenuState.h"
 
 #include "Render.h"
 #include "DisplayText.h"
@@ -28,8 +29,9 @@ m_pCurState(NULL),
 m_pCmdState(NULL),
 m_eCurState(STATE_INVALID)
 {
-	m_pCmdState = new CCmdState;
-	m_pModState = new CModState;
+    m_pCmdState = new CCmdState;
+    m_pModState = new CModState;
+    m_pMenuState = new CMenuState;
 };
 
 JResult CGame::Init()
@@ -50,9 +52,15 @@ JResult CGame::Init()
 
 	m_pMsgsDT = new CDisplayText( JRect( 0, 0, 640, 36 ) );
 	m_pMsgsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE);
-
-	m_pStatsDT = new CDisplayText( JRect( 0,50,  150,480 ) );
-	m_pStatsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
+    
+    m_pStatsDT = new CDisplayText( JRect( 0,50,  150,480 ) );
+    m_pStatsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
+    
+    m_pInvDT = new CDisplayText( JRect( 440,50,  640,340 ) );
+    m_pInvDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
+    
+    m_pEquipDT = new CDisplayText( JRect( 440,345,  640,480 ) );
+    m_pEquipDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
 
 
 	m_pAIMgr = new CAIMgr;
@@ -115,11 +123,15 @@ void CGame::SetState( int eNewState )
 	{
 	case STATE_COMMAND:
 		m_pCurState = reinterpret_cast<CStateBase *>(m_pCmdState);
-		break;
-	case STATE_MODIFY:
-		m_pCurState = reinterpret_cast<CStateBase *>(m_pModState);
-		break;
+            break;
+    case STATE_MODIFY:
+        m_pCurState = reinterpret_cast<CStateBase *>(m_pModState);
+        break;
+    case STATE_MENU:
+        m_pCurState = reinterpret_cast<CStateBase *>(m_pMenuState);
+        break;
 	default:
+        printf("Tried to change to unknown state.\n");
 		break;
 	}
 }
@@ -186,8 +198,10 @@ bool CGame::Update( float fCurTime )
 	
 	// Update the dungeon
 	GetDungeon()->Update(fCurTime);
-	GetMsgs()->Update(fCurTime);
-	GetStats()->Update(fCurTime);
+    GetMsgs()->Update(fCurTime);
+    GetStats()->Update(fCurTime);
+    GetInv()->Update(fCurTime);
+    GetEquip()->Update(fCurTime);
 
 	return true;
 }
@@ -202,8 +216,10 @@ void CGame::Draw()
     // Draw the player
     GetPlayer()->Draw();
     
-	GetMsgs()->Draw();
-	GetStats()->Draw();
+    GetMsgs()->Draw();
+    GetStats()->Draw();
+    GetInv()->Draw();
+    GetEquip()->Draw();
 	
 	GetRender()->PostDraw();
 

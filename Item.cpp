@@ -34,6 +34,12 @@ JResult CItem::CreateItem( CItemDef *pid )
 void CItem::Init( CItemDef *pid )
 {
     m_id = pid;
+    m_Color.SetColor(m_id->m_Color);
+    if( Util::GetRandom(0,1) )
+    {
+        m_dwFlags |= ITEM_FLAG_CURSED;
+        m_Color.SetColor(255,0,0,255);
+    }
 }
 
 JResult CItem::SpawnItem()
@@ -69,7 +75,7 @@ void CItem::SetColor()
     if( (m_id->m_dwFlags & ITEM_COLOR_MULTI) == ITEM_COLOR_MULTI )
     {
         int which_color = Util::GetRandom(0,m_id->m_Colors->length()-1);
-        (m_id->m_Color).SetColor(*(m_id->m_Colors->GetLink(which_color)->m_lpData));
+        m_Color.SetColor(*(m_id->m_Colors->GetLink(which_color)->m_lpData));
     }
     m_fColorChangeInterval = 0.0f;
 }
@@ -90,7 +96,7 @@ void CItem::Draw()
     SetColor();
     
     //PreDraw();
-    g_pGame->GetDungeon()->m_TileSet->SetTileColor( m_id->m_Color );
+    g_pGame->GetDungeon()->m_TileSet->SetTileColor( m_Color );
     g_pGame->GetDungeon()->m_TileSet->DrawTile( item_tile, m_vPos, vSize, false );
     //PostDraw();
 }

@@ -24,7 +24,7 @@ protected:
 private:
 	bool IsDirectional(SDL_Keysym *keysym);
 	bool IsModifierNeeded(SDL_Keysym *keysym);
-	bool IsMenuCommand(SDL_Keysym *keysym) {return false;};
+	bool IsMenuCommand(SDL_Keysym *keysym);
 	bool IsMagicCommand(SDL_Keysym *keysym) {return false;};
 	bool IsUseCommand(SDL_Keysym *keysym) {return false;};
 	bool IsHelpCommand(SDL_Keysym *keysym) {return false;};

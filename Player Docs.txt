@@ -1,16 +1,22 @@
 **JMoria**
 
+I'm making this game that I've loved for years, I'll get around to putting in all the features.
+
 *Commands*
 o - open
 c - close
 T - tunnel
-i - inventory
+i - inventory (removed this in favor of just having it onscreen all the time)
+w - wield an item
+r - remove a piece of equipment
 < - go upstairs
 > - go downstairs
 ^c - exit game
 
 *Items*
-Players will automatically pick up items they walk over. Inventory is sorted by item type. 
+Players will automatically pick up items they walk over. Inventory is sorted by item type.
+Wielded items are added to the player's equipment.
+Removed items are added to the player's inventory.
 Someday, Lady Teldra will be a sword in this game. You can count on it.
 
 *Monsters*
@@ -20,8 +26,7 @@ AD&D Monster Manual, 4th printing 1979.
 Fiend Folio and Monster Manual 2. There will probably be some Harry Potter bits, 
 I'll try to remember to keep this list up to date.
 Steven Brust, you are *so* getting some air time on this game. If you ever read this, sir; Thank you very, very much. 
- 
-I'm making this game that I've loved for years, I'll get around to putting in all the features.
+
 The Emperor Lich was really, Really, tough. The badder Faerie Dragons (Purple and up)
 were scary but fun. They gave a lot of loot. There were resists to Fire, Cold, Lightning, and Acid, 
 but none for Poison. This meant really tough creatures who could breathe poison were Very Dangerous.

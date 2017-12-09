@@ -161,13 +161,24 @@ public:
 		return pLink->prev;
 	};
     
-    CLink <T> *GetLink( int which_link )
+    CLink <T> *GetLink( int which_link, bool bForceValid=true )
     {
         int count = 0;
         CLink <T> *curr_link = GetHead();
+        if(curr_link == NULL) return NULL;
         while( count < which_link )
         {
-            if( curr_link->next == NULL ) return curr_link;
+            if( curr_link->next == NULL )
+            {
+                if( bForceValid )
+                {
+                    return curr_link;
+                }
+                else
+                {
+                    return NULL;
+                }
+            }
             curr_link = GetNext(curr_link);
             count++;
         }

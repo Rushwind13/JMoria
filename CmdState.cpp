@@ -286,7 +286,7 @@ void CCmdState::PickUpItem( JVector &vNewPos )
     CItem *pItem = g_pGame->GetDungeon()->GetTile(vNewPos)->m_pCurItem;
     g_pGame->GetMsgs()->Printf( "You have a %s.\n", pItem->GetName() );
     g_pGame->GetDungeon()->m_llItems->Remove(pItem->m_pllLink, false);
-    pItem->m_pllLink = g_pGame->GetPlayer()->m_llInventory->Add(pItem);
+    pItem->m_pllLink = g_pGame->GetPlayer()->m_llInventory->Add(pItem, pItem->m_id->m_dwIndex);
     g_pGame->GetDungeon()->GetTile(vNewPos)->m_pCurItem = NULL;
 }
 

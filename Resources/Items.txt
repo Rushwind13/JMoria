@@ -75,3 +75,12 @@ Item <Ring of Invisibility>
     Weight         0.2
     Color        <225,225,50,255>
 }
+Item <Ring of Protection>
+{
+Plural        <Rings of Protection>
+Type        <ITEM_IDX_RING>
+Value     1000.0
+Level        20
+Weight         0.2
+Color        <225,50,225,255>
+}

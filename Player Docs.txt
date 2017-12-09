@@ -1,0 +1,48 @@
+**JMoria**
+
+*Commands*
+o - open
+c - close
+T - tunnel
+i - inventory
+< - go upstairs
+> - go downstairs
+^c - exit game
+
+*Items*
+Players will automatically pick up items they walk over. Inventory is sorted by item type. 
+Someday, Lady Teldra will be a sword in this game. You can count on it.
+
+*Monsters*
+Monsters are balanced using several pieces of background literature. 
+If this is your stuff, and you want me to change the thing, let me know.
+AD&D Monster Manual, 4th printing 1979. 
+Fiend Folio and Monster Manual 2. There will probably be some Harry Potter bits, 
+I'll try to remember to keep this list up to date.
+Steven Brust, you are *so* getting some air time on this game. If you ever read this, sir; Thank you very, very much. 
+ 
+I'm making this game that I've loved for years, I'll get around to putting in all the features.
+The Emperor Lich was really, Really, tough. The badder Faerie Dragons (Purple and up)
+were scary but fun. They gave a lot of loot. There were resists to Fire, Cold, Lightning, and Acid, 
+but none for Poison. This meant really tough creatures who could breathe poison were Very Dangerous.
+If I saw an Ancient Green, I teleported off the level. No way I'm even heading for the stairs.
+
+But, tourists hiking through, taking photos of things. They're peaceful, although sometimes the flashbulbs blind you.
+Normally, you would have to answer a "Are you sure?" before being able to attack a peaceful creature. 
+The tourist becomes angry! - more -
+The tourist calls 911! - more -
+<Three Elven Mages with a couple of pet jhereg teleport in> 
+Uh, oh. 
+
+That could ruin your whole day.
+
+But, if you had a unique sword, one with a personality and a relationship with you, along with its own innate abilities, 
+it might just keep your word for you anyway.
+You are trying to attack the peaceful tourist. - more - 
+Are you sure? [y/N] (yes)
+Lady Teldra refuses to leave her sheath. - more - 
+_Now *really*, Bait. I expected better of you._ She'd never *say* it, of course. But you'd feel it anyway. 
+Because, you know,  
+
+Teldra.
+

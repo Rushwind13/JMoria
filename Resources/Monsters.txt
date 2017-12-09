@@ -44,19 +44,34 @@
 #    Color		<255,0,0,255>
 #}
 
+Monster <Shadow Mastiff>
+{
+    Plural		<Shadow Mastiffs>
+    Appear      <1d1>
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <4d8>
+    AC          50.0
+    Level       15
+    ExpValue	100
+    Type		<MON_IDX_DOG>
+    Attack		<MON_FLAG_BITE>,2d8
+    Color		<<255,255,255,32>;<0,0,0,255>>
+}
+
 Monster <White Harpy>
 {
-Plural		<White Harpy>
-Appear      <1d1>
-Speed		1.0
-MoveType	<MON_AI_100RANDOMMOVE>
-HD          <5d8>
-AC          60.0
-Level       15
-ExpValue	100
-Type		<MON_IDX_HARPY>
-Attack		<MON_FLAG_CLAW>,3d6
-Color		<255,255,255,255>
+    Plural		<White Harpy>
+    Appear      <1d1>
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <5d8>
+    AC          60.0
+    Level       15
+    ExpValue	100
+    Type		<MON_IDX_HARPY>
+    Attack		<MON_FLAG_CLAW>,3d6
+    Color		<255,255,255,255>
 }
 
 Monster <Brontosaurus>

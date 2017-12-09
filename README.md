@@ -15,7 +15,9 @@ Keyboard commands recognized:
 * *T* - tunnel through rubble
 * *<* - go up a staircase
 * *>* - go down a staircase
+* *i* - show character inventory
 
 Monster definitions are in _Resources/Monsters.txt_
+Item definitions are in _Resources/Items.txt_
 
 Graphics tileset is _Resources/Courier.png_

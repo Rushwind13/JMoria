@@ -15,10 +15,10 @@
 #define DUNG_HEIGHT		256
 #endif
 
-#define SCREEN_MIN_XOFF 8
-#define SCREEN_MAX_XOFF 16
-#define SCREEN_MIN_YOFF 12
-#define SCREEN_MAX_YOFF 14
+//#define SCREEN_MIN_XOFF 8
+//#define SCREEN_MAX_XOFF 16
+//#define SCREEN_MIN_YOFF 12
+//#define SCREEN_MAX_YOFF 14
 
 #define DUNG_ROOM_MINWIDTH	3
 #define DUNG_ROOM_MINHEIGHT	3

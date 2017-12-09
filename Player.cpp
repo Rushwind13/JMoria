@@ -3,7 +3,7 @@
 // implementation of the Player
 
 #include "Player.h"
-#include "Tileset.h"
+#include "TileSet.h"
 #include "Game.h"
 #include "Dungeon.h"
 #include "DisplayText.h"
@@ -50,7 +50,7 @@ JResult CPlayer::SpawnPlayer()
 {
 	printf("Trying to spawn player...");
 	JVector vTryPos;
-	while( !m_HasSpawned )
+	while( !m_bHasSpawned )
 	{
 		vTryPos.Init( (float)Util::GetRandom(0, DUNG_WIDTH-1), (float)Util::GetRandom(0, DUNG_HEIGHT-1) );
 
@@ -61,11 +61,25 @@ JResult CPlayer::SpawnPlayer()
 		if( g_pGame->GetDungeon()->IsWalkableFor(vTryPos, true) == DUNG_COLL_NO_COLLISION )
 		{
 			m_vPos = vTryPos;
-			m_HasSpawned = true;
+			m_bHasSpawned = true;
 			printf("Success!\n");
 			//g_pGame->GetMsgs()->Printf( "Success!\n" );
 		}
 	}
 
 	return JSUCCESS;
+}
+
+void CPlayer::DisplayInventory()
+{
+    CLink<CItem> *pLink = m_llInventory->GetHead();
+    CItem *pItem;
+    g_pGame->GetStats()->Printf("You are carrying:\n");
+    while(pLink != NULL)
+    {
+        pItem = pLink->m_lpData;
+        g_pGame->GetStats()->Printf("%s\n", pItem->GetName());
+        pLink = m_llInventory->GetNext(pLink);
+    }
+
 }

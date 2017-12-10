@@ -48,7 +48,7 @@ Monster <Flaming Bat>
 {
     Plural		<Flaming Bats>
     Appear      <1d1>
-    Speed		1.0
+    Speed		2.0
     MoveType	<MON_AI_100RANDOMMOVE>
     HD          <4d8>
     AC          50.0

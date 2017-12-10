@@ -205,6 +205,8 @@ bool CGame::Update( float fCurTime )
     {
         return false;
     }
+    // TODO: Why does the AI require 2 ticks to move the monster?
+    GetAIMgr()->Update(fCurTime);
 #endif // TURN_BASED
 	// Update the AI
 	GetAIMgr()->Update(fCurTime);

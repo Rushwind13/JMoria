@@ -98,10 +98,12 @@ bool CAIBrain::UpdateRest( float fCurTime )
 
 bool CAIBrain::UpdateGoToDest( float fCurTime )
 {
+    bool didWalk = false;
 	m_fStateTicks += fCurTime * m_fSpeed;
 
-	if( m_fStateTicks >= 1.0f )
+	while( m_fStateTicks >= 1.0f )
 	{
+        didWalk = true;
         JVector vTryPos(m_vPos+m_vVel);
         if( Util::IsInWorld(vTryPos) && (g_pGame->GetDungeon()->IsWalkableFor(vTryPos) == DUNG_COLL_NO_COLLISION) )
         {
@@ -109,7 +111,7 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
             m_vPos += m_vVel;
             g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurMonster = m_pParent;
         }
-        SetState( BRAINSTATE_SEEK );
+        m_fStateTicks -= 1.0f;
 	}
 	/*JVector delta;
 	delta *= (m_fSpeed * fCurTime);
@@ -119,7 +121,11 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
 	{
 		printf( "moving from <%f %f> to <%f %f>...\n", VEC_EXPAND(m_vPos), VEC_EXPAND(m_vPos+delta) );
 		m_vPos += delta;
-	}/* */
+     }/* */
+    if( didWalk )
+    {
+        SetState( BRAINSTATE_SEEK );
+    }
 
 	return true;
 }

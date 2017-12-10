@@ -27,6 +27,7 @@ public:
 	float m_fSpeed;
 	int m_dwMoveType;
 	JFVector m_vPos;
+    CLink <CAIBrain> *m_pllLink;
 	
 	bool Update( float fCurTime );
 
@@ -45,7 +46,7 @@ protected:
 	JVector m_vVel;
 	eBrainState m_eBrainState;
 
-	CMonster *m_pParent;
+    CMonster *m_pParent;
 };
 
 class CAIMgr
@@ -56,6 +57,7 @@ public:
 	void Init();
 
 	bool Update( float fCurTime );
+    void DestroyBrain( CAIBrain *delete_me );
 	JLinkList<CAIBrain> *m_llAIBrains;
 protected:
 private:

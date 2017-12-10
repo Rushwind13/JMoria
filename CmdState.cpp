@@ -24,6 +24,11 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 		{
 			UpdatePlayerPos( m_vNewPos );
 		}
+        else if( dwCollideType == DUNG_COLL_ITEM )
+        {
+            UpdatePlayerPos( m_vNewPos );
+            HandleCollision( dwCollideType );
+        }
 		else
 		{
 			HandleCollision( dwCollideType );
@@ -42,6 +47,31 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 		g_pGame->GetGameState()->HandleKey(keysym);
 		return 0;
 	}
+    
+    // Menu commands allow you to choose from lists of items:
+    // inventory, equipment, stores, chests?, bag of holding, &c
+    if( IsMenuCommand(keysym) )
+    {
+        // Add "modify" to the top of the state stack
+        g_pGame->SetState(STATE_MENU);
+        g_pGame->GetGameState()->HandleKey(keysym);
+        return 0;
+    }
+    
+    switch(keysym->sym)
+    {
+    case SDLK_COMMA:
+    case SDLK_PERIOD:
+        if( keysym->mod & KMOD_SHIFT )
+        {
+            m_vNewPos = g_pGame->GetPlayer()->m_vPos;
+            OnHandleStairs( keysym );
+            return JSUCCESS;
+        }
+        break;
+    default:
+        break;
+    }
 
 	/*
 	// These commands will bring up a "menu"
@@ -151,6 +181,10 @@ void CCmdState::HandleCollision( int dwCollideType )
 			}
 		}
 	}
+    else if ( dwCollideType == DUNG_COLL_ITEM )
+    {
+        PickUpItem(m_vNewPos);
+    }
 	else
 	{
 		// Ouch, you bumped into a %s.
@@ -251,7 +285,12 @@ int CCmdState::TestCollision( JVector &vTest )
 
 void CCmdState::UpdatePlayerPos( JVector &vNewPos )
 {
-	g_pGame->GetPlayer()->m_vPos = vNewPos;
+    g_pGame->GetPlayer()->m_vPos = vNewPos;
+}
+
+void CCmdState::PickUpItem( JVector &vNewPos )
+{
+    g_pGame->GetPlayer()->PickUp(vNewPos);
 }
 
 bool CCmdState::IsModifierNeeded(SDL_Keysym *keysym)
@@ -270,3 +309,85 @@ bool CCmdState::IsModifierNeeded(SDL_Keysym *keysym)
 
 	return false;
 }
+
+
+bool CCmdState::IsMenuCommand(SDL_Keysym *keysym)
+{
+    switch( keysym->sym )
+    {
+        case SDLK_w:
+        case SDLK_r:
+            return true;
+            break;
+        default:
+            return false;
+            break;
+    }
+    
+    return false;
+}
+
+
+#define DIR_UP 4
+#define DIR_DOWN 5
+
+int CCmdState::OnHandleStairs( SDL_Keysym *keysym )
+{
+    int stair_dir = TestStairs();
+    if( stair_dir == DUNG_IDX_INVALID )
+    {
+        g_pGame->GetMsgs()->Printf("I do not see any stairs here.\n");
+        return JSUCCESS;
+    }
+    
+    // if on <, go up stairs
+    if( keysym->sym == SDLK_COMMA && stair_dir == DUNG_IDX_UPSTAIRS )
+    {
+        g_pGame->GetMsgs()->Printf("You enter a maze of up staircases.\n");
+        // dungeon_level--, make sure not to go less than 0
+        // respawn new dungeon level
+        g_pGame->GetDungeon()->OnChangeLevel(-Util::Roll(1, 5));
+        return JSUCCESS;
+    }
+    else if( keysym->sym == SDLK_COMMA && stair_dir == DUNG_IDX_LONG_UPSTAIRS )
+    {
+        g_pGame->GetMsgs()->Printf("You enter a long maze of up staircases.\n");
+        // dungeon_level-- (a bunch), make sure not to go less than 0
+        // respawn new dungeon level
+        g_pGame->GetDungeon()->OnChangeLevel(-1);
+        return JSUCCESS;
+    }
+    // if on >, go down stairs
+    else if( keysym->sym == SDLK_PERIOD && stair_dir == DUNG_IDX_DOWNSTAIRS )
+    {
+        g_pGame->GetMsgs()->Printf("You enter a maze of down staircases.\n");
+        // dungeon_level++
+        // respawn new dungeon level
+        g_pGame->GetDungeon()->OnChangeLevel(1);
+        return JSUCCESS;
+    }
+    else if( keysym->sym == SDLK_PERIOD && stair_dir == DUNG_IDX_LONG_DOWNSTAIRS )
+    {
+        g_pGame->GetMsgs()->Printf("You enter a long maze of down staircases.\n");
+        // dungeon_level++ (a bunch)
+        // respawn new dungeon level
+        g_pGame->GetDungeon()->OnChangeLevel(Util::Roll(1, 5));
+        return JSUCCESS;
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf("You can't do that here.\n");
+        return JSUCCESS;
+    }
+}
+
+int CCmdState::TestStairs()
+{
+    return( g_pGame->GetDungeon()->IsStairs(m_vNewPos) );
+}
+
+void CCmdState::DisplayInventory()
+{
+    g_pGame->GetPlayer()->DisplayInventory();
+}
+

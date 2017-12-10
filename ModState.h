@@ -4,8 +4,8 @@
 #include "StateBase.h"
 
 class CModState;
-typedef int (CModState::*KeyHandler)(SDL_Keysym *keysym);
-enum eModifier
+typedef int (CModState::*ModKeyHandler)(SDL_Keysym *keysym);
+enum eModModifier
 {
 	MOD_INVALID=-1,
 	MOD_OPEN=0,
@@ -38,10 +38,10 @@ protected:
 	void	GetDir(SDL_Keysym *keysym, JVector &vDir);
 	
 private:
-	KeyHandler	m_pKeyHandlers[MOD_MAX];
-	KeyHandler	m_pCurKeyHandler;
+	ModKeyHandler	m_pKeyHandlers[MOD_MAX];
+	ModKeyHandler	m_pCurKeyHandler;
 
-	eModifier	m_eCurModifier;
+	eModModifier	m_eCurModifier;
 
 	int OnHandleOpen( SDL_Keysym *keysym );
 	int OnHandleTunnel( SDL_Keysym *keysym );

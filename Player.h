@@ -118,6 +118,9 @@ public:
     float Attack();
     float Damage( float fDamageMult );
     
+    bool Hit( float &fRoll );
+    int TakeDamage(float fDamage, char *szMon);
+    
     void OnKillMonster( CMonster *pMon );
     
 	JVector m_vPos;

@@ -94,12 +94,32 @@ JResult CMonster::SpawnMonster()
 }
 
 
+float CMonster::Attack()
+{
+    float fRoll = Util::Roll( "1d100" );
+    
+    printf( "%s rolled: %.2f\n", GetName(), fRoll );
+        
+    return fRoll;
+}
+
+float CMonster::Damage( float fDamageMult )
+{
+    char *szDamage = m_md->m_llAttacks->GetHead()->m_lpData->m_szDamage;
+    float fDamageModifier = 0.0f;
+    
+    float fDamage = ( Util::Roll( szDamage ) + fDamageModifier ) * fDamageMult;
+    printf( "%s did %.2f damage (damagemult: %.2f). ", GetName(), fDamage, fDamageMult );
+    
+    return fDamage;
+}
+
 bool CMonster::Hit( float &fRoll )
 {
 	return ( fRoll >= m_fCurAC );
 }
 
-int CMonster::Damage( float fDamage )
+int CMonster::TakeDamage( float fDamage )
 {
 	int retval = STATUS_INVALID;
 

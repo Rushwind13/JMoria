@@ -77,7 +77,7 @@ void CPlayer::DisplayStats()
 {
     g_pGame->GetStats()->Clear();
     g_pGame->GetStats()->Printf("AC:%d\n", (int)m_fArmorClass);
-    g_pGame->GetStats()->Printf("HP:%d\n", (int)m_fHitPoints);
+    g_pGame->GetStats()->Printf("HP:%d / %d\n", (int)m_fCurHitPoints, (int)m_fHitPoints);
     g_pGame->GetStats()->Printf("\n");
     g_pGame->GetStats()->Printf("Damage:%s\n", m_szDamage);
     g_pGame->GetStats()->Printf("+to Hit:%d\n", (int)m_fToHitModifier);
@@ -86,6 +86,7 @@ void CPlayer::DisplayStats()
     g_pGame->GetStats()->Printf("\n");
     g_pGame->GetStats()->Printf("Level:%d\n", (int)m_fLevel);
     g_pGame->GetStats()->Printf("Exp:%d\n", (int)m_fExperience);
+    g_pGame->GetStats()->Printf("Exp to Next:%d\n", (int)(m_pClass->m_fExpNeeded[(int)m_fLevel-1] - m_fExperience));
 }
 
 void CPlayer::DisplayInventory()
@@ -269,4 +270,33 @@ void CPlayer::GainLevel()
         // TODO: Gain Spells or &c here.
     }
     
+}
+
+bool CPlayer::Hit( float &fRoll )
+{
+    return ( fRoll >= m_fArmorClass );
+}
+
+int CPlayer::TakeDamage( float fDamage, char *szMon )
+{
+    int retval = STATUS_INVALID;
+    
+    
+    if( (int)fDamage < (int)m_fCurHitPoints )
+    {
+        m_fCurHitPoints -= fDamage;
+        retval = STATUS_ALIVE;
+    }
+    else
+    {
+        m_fCurHitPoints = 0;
+        retval = STATUS_DEAD;
+        // This is the end of the game; make the game end on next update.
+        printf("You died on dungeon level %d, while level %d, killed by a %s.\n", g_pGame->GetDungeon()->depth, (int)m_fLevel, szMon );
+        g_pGame->Quit(0);
+    }
+    
+    printf( "Remaining HP: %.2f \n", m_fCurHitPoints );
+    
+    return retval;
 }

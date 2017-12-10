@@ -176,7 +176,7 @@ void CCmdState::HandleCollision( int dwCollideType )
             
             float fDamage = g_pGame->GetPlayer()->Damage(fDamageMult);
             
-			if( pMon->Damage(fDamage) == STATUS_DEAD )
+			if( pMon->TakeDamage(fDamage) == STATUS_DEAD )
 			{
 				sprintf( szStatus, "have slain" );			
 				g_pGame->GetMsgs()->Printf( "You %s the %s.\n", szStatus, szMonster );

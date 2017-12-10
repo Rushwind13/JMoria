@@ -121,10 +121,13 @@ public:
 		}
 
 		return m_md->m_szName;
-	};
+    };
+    
+    float Attack();
+    float Damage( float fDamageMult );
 
 	bool	Hit( float &fRoll );
-	int		Damage( float fDamageMult );
+	int		TakeDamage( float fDamageMult );
 
 	JVector GetPos()
 	{

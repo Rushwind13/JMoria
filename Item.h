@@ -14,7 +14,7 @@ class CItemDef
     m_fSpeed(0.0f),
     m_fACBonus(0.0f),
     m_fBaseAC(0.0f),
-    m_fBaseDamage(0.0f),
+    m_szBaseDamage(NULL),
     m_fBonusToHit(0.0f),
     m_fBonusToDamage(0.0f),
     m_dwLevel(0),
@@ -37,6 +37,11 @@ class CItemDef
             delete [] m_szPlural;
             m_szPlural = NULL;
         }
+        if(m_szBaseDamage)
+        {
+            delete [] m_szBaseDamage;
+            m_szBaseDamage = NULL;
+        }
         if(m_Colors)
         {
             m_Colors->Terminate();
@@ -48,7 +53,7 @@ class CItemDef
     float m_fSpeed;
     float m_fACBonus;
     float m_fBaseAC;
-    float m_fBaseDamage;
+    char *m_szBaseDamage;
     float m_fBonusToHit;
     float m_fBonusToDamage;
     int m_dwLevel;

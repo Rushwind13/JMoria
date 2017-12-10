@@ -123,7 +123,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 			}
 			else if( strncasecmp( szLine, "expvalue", 8 ) == 0 )
 			{
-				GetValue( szLine, mdIn.m_dwExpValue );
+				GetValue( szLine, mdIn.m_fExpValue );
             }
             else if( strncasecmp( szLine, "type", 4 ) == 0 )
             {
@@ -295,7 +295,7 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
             }
             else  if( strncasecmp( szLine, "damage", 6 ) == 0 )
             {
-                idIn.m_fBaseDamage = GetValue( szLine, idIn.m_fBaseDamage );
+                idIn.m_szBaseDamage = GetValue( szLine, idIn.m_szBaseDamage );
             }
             else  if( strncasecmp( szLine, "to-hitbonus", 11 ) == 0 )
             {

@@ -151,7 +151,9 @@ void CCmdState::HandleCollision( int dwCollideType )
 		// When Players Attack
 		CMonster *pMon = g_pGame->GetDungeon()->GetTile(m_vNewPos)->m_pCurMonster;
 		szMonster = pMon->GetName();
-		
+        
+        
+        fRoll = g_pGame->GetPlayer()->Attack();
 		bHit = pMon->Hit(fRoll);
 		if( bHit )
 		{
@@ -171,11 +173,14 @@ void CCmdState::HandleCollision( int dwCollideType )
 				g_pGame->GetMsgs()->Printf( "(It was an excellent hit! (x2 damage)\n" );
 				fDamageMult = 2.0f;
 			}
-			
-			if( pMon->Damage(fDamageMult) == STATUS_DEAD )
+            
+            float fDamage = g_pGame->GetPlayer()->Damage(fDamageMult);
+            
+			if( pMon->TakeDamage(fDamage) == STATUS_DEAD )
 			{
 				sprintf( szStatus, "have slain" );			
 				g_pGame->GetMsgs()->Printf( "You %s the %s.\n", szStatus, szMonster );
+                g_pGame->GetPlayer()->OnKillMonster(pMon);
 				g_pGame->GetDungeon()->RemoveMonster(pMon);
 			}
 		}

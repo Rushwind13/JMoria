@@ -96,18 +96,13 @@ JResult CMonster::SpawnMonster()
 
 bool CMonster::Hit( float &fRoll )
 {
-	fRoll = Util::Roll( "1d100" );
-
-	printf( "You rolled: %.2f\n", fRoll );
-
 	return ( fRoll >= m_fCurAC );
 }
 
-int CMonster::Damage( float fDamageMult )
+int CMonster::Damage( float fDamage )
 {
 	int retval = STATUS_INVALID;
 
-	float fDamage = Util::Roll( "1d2" ) * fDamageMult;
 
 	if( (int)fDamage < (int)m_fCurHP )
 	{
@@ -120,7 +115,7 @@ int CMonster::Damage( float fDamageMult )
 		retval = STATUS_DEAD;
 	}
 
-	printf( "You did %.2f damage (damagemult: %.2f). Remaining HP: %.2f \n", fDamage, fDamageMult, m_fCurHP );
+	printf( "Remaining HP: %.2f \n", m_fCurHP );
 
 	return retval;
 }

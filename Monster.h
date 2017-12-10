@@ -27,7 +27,7 @@ public:
     m_dwType(0),
     m_dwIndex(0),
     m_dwLevel(0),
-    m_dwExpValue(0),
+    m_fExpValue(0),
     m_dwMoveType(0),
     m_fBaseHP(0.0f),
     m_fBaseAC(0.0f),
@@ -90,7 +90,7 @@ public:
 	char *m_szHD; // NdM form of this monster's hit dice.
 	JLinkList <CAttack> *m_llAttacks; // this monster's attacks
 	int	m_dwLevel; // earliest dungeon level to place this monster
-	int m_dwExpValue; // how much XP do you get for killing this monster
+	float m_fExpValue; // how much XP do you get for killing this monster
 protected:
 private:
 	

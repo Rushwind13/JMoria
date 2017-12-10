@@ -1,6 +1,8 @@
 #include "AIMgr.h"
 #include "JMDefs.h"
 #include "Dungeon.h"
+#include "Player.h"
+#include "DisplayText.h"
 
 CAIMgr::CAIMgr()
 {
@@ -98,14 +100,55 @@ bool CAIBrain::UpdateRest( float fCurTime )
 
 bool CAIBrain::UpdateGoToDest( float fCurTime )
 {
+    bool didWalk = false;
 	m_fStateTicks += fCurTime * m_fSpeed;
 
-	if( m_fStateTicks >= 1.0f )
+	while( m_fStateTicks >= 1.0f )
 	{
-		g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurMonster = NULL;
-		m_vPos += m_vVel;
-		g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurMonster = m_pParent;
-		SetState( BRAINSTATE_SEEK );
+        didWalk = true;
+        JVector vTryPos(m_vPos+m_vVel);
+        if( Util::IsInWorld(vTryPos) )
+        {
+            int dwCollideType = g_pGame->GetDungeon()->IsWalkableFor(vTryPos);
+            switch(dwCollideType)
+            {
+            case DUNG_COLL_NO_COLLISION:
+                g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurMonster = NULL;
+                m_vPos += m_vVel;
+                g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurMonster = m_pParent;
+                break;
+            case DUNG_COLL_PLAYER:
+                char szStatus[16];
+                float fDamageMult = 1.0f;
+                // TODO: make this use all the attacks, not just the first one
+                float fRoll = m_pParent->Attack();
+                bool bHit = g_pGame->GetPlayer()->Hit(fRoll);
+                if( bHit )
+                {
+                    // TODO: make this differ based on attack effect type
+                    sprintf(szStatus, "hits");
+                }
+                else
+                {
+                    sprintf(szStatus, "misses");
+                }
+                g_pGame->GetMsgs()->Printf( "The %s %s you.\n", m_pParent->GetName(), szStatus );
+
+                if(bHit)
+                {
+                    if( fRoll > 80.0f )
+                    {
+                        g_pGame->GetMsgs()->Printf( "(It was an excellent hit! (x2 damage)\n" );
+                        fDamageMult = 2.0f;
+                    }
+                    
+                    float fDamage = m_pParent->Damage(fDamageMult);
+                    g_pGame->GetPlayer()->TakeDamage(fDamage, m_pParent->GetName());
+                }
+                break;
+            }
+        }
+        m_fStateTicks -= 1.0f;
 	}
 	/*JVector delta;
 	delta *= (m_fSpeed * fCurTime);
@@ -115,7 +158,11 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
 	{
 		printf( "moving from <%f %f> to <%f %f>...\n", VEC_EXPAND(m_vPos), VEC_EXPAND(m_vPos+delta) );
 		m_vPos += delta;
-	}/* */
+     }/* */
+    if( didWalk )
+    {
+        SetState( BRAINSTATE_SEEK );
+    }
 
 	return true;
 }
@@ -132,17 +179,20 @@ bool CAIBrain::SetRandomDest(float fCurTime)
 
 	dest = m_vPos + delta;
 
-	if( Util::IsInWorld(dest) && (g_pGame->GetDungeon()->IsWalkableFor(dest) == DUNG_COLL_NO_COLLISION) )
-	{
-		//printf( "dest <%f %f> delta <%f %f>\n", VEC_EXPAND(dest), VEC_EXPAND(delta) );
-		//m_vDest = dest;
-		m_vVel = delta;
-	}
-	else
-	{
-		//printf( "velocity killed. dest <%f %f> delta <%f %f>\n", VEC_EXPAND(dest), VEC_EXPAND(delta) );
-		m_vVel.Init();
-	}
+	if( Util::IsInWorld(dest) )
+    {
+        int dwCollideType = g_pGame->GetDungeon()->IsWalkableFor(dest);
+        switch(dwCollideType)
+        {
+        case DUNG_COLL_NO_COLLISION:
+        case DUNG_COLL_PLAYER:
+            m_vVel = delta;
+            break;
+        default:
+            m_vVel.Init();
+            break;
+        }
+    }
 
 	return true;
 }

@@ -24,7 +24,8 @@ protected:
 private:
 	bool IsDirectional(SDL_Keysym *keysym);
 	bool IsModifierNeeded(SDL_Keysym *keysym);
-	bool IsMenuCommand(SDL_Keysym *keysym) {return false;};
+	bool IsMenuCommand(SDL_Keysym *keysym);
+    bool IsStairsCommand(SDL_Keysym *keysym);
 	bool IsMagicCommand(SDL_Keysym *keysym) {return false;};
 	bool IsUseCommand(SDL_Keysym *keysym) {return false;};
 	bool IsHelpCommand(SDL_Keysym *keysym) {return false;};
@@ -36,7 +37,14 @@ private:
 	int TestCollision( JVector &vTestDir );
 	
 	void UpdatePlayerPos( JVector &vDir );
+    
+    void PickUpItem( JVector &vDir );
 	void HandleCollision( int dwCollideType );
+    
+    int OnHandleStairs( SDL_Keysym *keysym );
+    int TestStairs();
+    
+    void DisplayInventory();
 
 	// This variable gets deleted a lot, but is better than 
 	// creating a vew vector every frame.

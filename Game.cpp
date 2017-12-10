@@ -5,12 +5,13 @@
 #include "Game.h"
 #include "Dungeon.h"
 #include "Player.h"
-#include "Tileset.h"
+#include "TileSet.h"
 
 #include "CmdState.h"
 #include "ModState.h"
+#include "MenuState.h"
 
-#include "render.h"
+#include "Render.h"
 #include "DisplayText.h"
 
 #include "AIMgr.h"
@@ -28,8 +29,13 @@ m_pCurState(NULL),
 m_pCmdState(NULL),
 m_eCurState(STATE_INVALID)
 {
-	m_pCmdState = new CCmdState;
-	m_pModState = new CModState;
+    m_pCmdState = new CCmdState;
+    m_pModState = new CModState;
+    m_pMenuState = new CMenuState;
+#ifdef TURN_BASED
+    m_fGameTime = 0.0f;
+    m_bReadyForUpdate = true;
+#endif // TURN_BASED
 };
 
 JResult CGame::Init()
@@ -50,9 +56,15 @@ JResult CGame::Init()
 
 	m_pMsgsDT = new CDisplayText( JRect( 0, 0, 640, 36 ) );
 	m_pMsgsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE);
-
-	m_pStatsDT = new CDisplayText( JRect( 0,50,  150,480 ) );
-	m_pStatsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
+    
+    m_pStatsDT = new CDisplayText( JRect( 0,50,  150,480 ) );
+    m_pStatsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
+    
+    m_pInvDT = new CDisplayText( JRect( 440,50,  640,340 ) );
+    m_pInvDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
+    
+    m_pEquipDT = new CDisplayText( JRect( 440,345,  640,480 ) );
+    m_pEquipDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
 
 
 	m_pAIMgr = new CAIMgr;
@@ -115,11 +127,15 @@ void CGame::SetState( int eNewState )
 	{
 	case STATE_COMMAND:
 		m_pCurState = reinterpret_cast<CStateBase *>(m_pCmdState);
-		break;
-	case STATE_MODIFY:
-		m_pCurState = reinterpret_cast<CStateBase *>(m_pModState);
-		break;
+            break;
+    case STATE_MODIFY:
+        m_pCurState = reinterpret_cast<CStateBase *>(m_pModState);
+        break;
+    case STATE_MENU:
+        m_pCurState = reinterpret_cast<CStateBase *>(m_pMenuState);
+        break;
 	default:
+        printf("Tried to change to unknown state.\n");
 		break;
 	}
 }
@@ -177,7 +193,21 @@ int CGame::Update()
 }/**/
 
 bool CGame::Update( float fCurTime )
-{	
+{
+#ifdef TURN_BASED
+    if( m_bReadyForUpdate )
+    {
+        m_fGameTime++;
+        fCurTime = 1.0f;
+        m_bReadyForUpdate = false;
+    }
+    else
+    {
+        return false;
+    }
+    // TODO: Why does the AI require 2 ticks to move the monster?
+    GetAIMgr()->Update(fCurTime);
+#endif // TURN_BASED
 	// Update the AI
 	GetAIMgr()->Update(fCurTime);
 
@@ -186,8 +216,10 @@ bool CGame::Update( float fCurTime )
 	
 	// Update the dungeon
 	GetDungeon()->Update(fCurTime);
-	GetMsgs()->Update(fCurTime);
-	GetStats()->Update(fCurTime);
+    GetMsgs()->Update(fCurTime);
+    GetStats()->Update(fCurTime);
+    GetInv()->Update(fCurTime);
+    GetEquip()->Update(fCurTime);
 
 	return true;
 }
@@ -195,13 +227,17 @@ bool CGame::Update( float fCurTime )
 void CGame::Draw()
 {	
 	GetRender()->PreDraw();
-	// Draw the player
-	GetPlayer()->Draw();
 	
 	// Draw the dungeon
-	GetDungeon()->Draw();
-	GetMsgs()->Draw();
-	GetStats()->Draw();
+    GetDungeon()->Draw();
+    
+    // Draw the player
+    GetPlayer()->Draw();
+    
+    GetMsgs()->Draw();
+    GetStats()->Draw();
+    GetInv()->Draw();
+    GetEquip()->Draw();
 	
 	GetRender()->PostDraw();
 

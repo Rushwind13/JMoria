@@ -23,6 +23,9 @@ typedef unsigned int uint32;
 #define INVALID_LENGTH	-1
 
 #define JERROR() printf("An error occurred: %s %d\n", __FILE__, __LINE__ );
+
+#define TURN_BASED
+
 #include "DungeonConstants.h"
 
 #include "Constants.h"
@@ -34,9 +37,11 @@ extern CGame *g_pGame;
 extern JIVector g_vDirDelta[];
 extern Constants g_Constants;
 
+
 #define DUNG_COLL_NO_COLLISION (Sint8)(-1)
 #define DUNG_COLL_MONSTER (Sint8)(-2)
 #define DUNG_COLL_PLAYER (Sint8)(-3)
+#define DUNG_COLL_ITEM (Sint8)(-4)
 
 // SDL sees the mouse wheel as buttons 4&5
 // but has no constants for them.

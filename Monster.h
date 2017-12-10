@@ -24,11 +24,18 @@ class CMonsterDef
 public:
 	CMonsterDef()
 	:m_dwFlags(0),
-	m_dwType(0),
-	m_dwIndex(0),
-	m_fBaseHP(0.0f),
-	m_fBaseAC(0.0f),
-	m_szName(NULL)
+    m_dwType(0),
+    m_dwIndex(0),
+    m_dwLevel(0),
+    m_fExpValue(0),
+    m_dwMoveType(0),
+    m_fBaseHP(0.0f),
+    m_fBaseAC(0.0f),
+    m_fSpeed(0.0f),
+    m_szName(NULL),
+    m_szPlural(NULL),
+    m_szAppear(NULL),
+    m_szHD(NULL)
     {
         m_llAttacks = new JLinkList<CAttack>;
         m_Colors = new JLinkList<JColor>;
@@ -42,6 +49,31 @@ public:
 			delete [] m_szName;
 			m_szName = NULL;
 		}
+        if(m_szPlural)
+        {
+            delete [] m_szPlural;
+            m_szPlural = NULL;
+        }
+        if(m_szAppear)
+        {
+            delete [] m_szAppear;
+            m_szAppear = NULL;
+        }
+        if(m_szHD)
+        {
+            delete [] m_szHD;
+            m_szHD = NULL;
+        }
+        if( m_llAttacks )
+        {
+            m_llAttacks->Terminate();
+            m_llAttacks = NULL;
+        }
+        if( m_Colors )
+        {
+            m_Colors->Terminate();
+            m_Colors = NULL;
+        }
 	}
 	int m_dwFlags;
 	int m_dwType; // MT_KOBOLD, MT_DRAGON, etc.
@@ -58,7 +90,7 @@ public:
 	char *m_szHD; // NdM form of this monster's hit dice.
 	JLinkList <CAttack> *m_llAttacks; // this monster's attacks
 	int	m_dwLevel; // earliest dungeon level to place this monster
-	int m_dwExpValue; // how much XP do you get for killing this monster
+	float m_fExpValue; // how much XP do you get for killing this monster
 protected:
 private:
 	
@@ -89,10 +121,13 @@ public:
 		}
 
 		return m_md->m_szName;
-	};
+    };
+    
+    float Attack();
+    float Damage( float fDamageMult );
 
 	bool	Hit( float &fRoll );
-	int		Damage( float fDamageMult );
+	int		TakeDamage( float fDamageMult );
 
 	JVector GetPos()
 	{

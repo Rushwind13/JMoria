@@ -1,5 +1,6 @@
 #include "FileParse.h"
 #include "Monster.h"
+#include "Item.h"
 #include <string.h>
 
 bool CDataFile::Open( const char *szFilename )
@@ -122,7 +123,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 			}
 			else if( strncasecmp( szLine, "expvalue", 8 ) == 0 )
 			{
-				GetValue( szLine, mdIn.m_dwExpValue );
+				GetValue( szLine, mdIn.m_fExpValue );
             }
             else if( strncasecmp( szLine, "type", 4 ) == 0 )
             {
@@ -233,6 +234,136 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 	}
 	
 	return &mdIn;
+}
+
+CItemDef *CDataFile::ReadItem(CItemDef &idIn)
+{
+    char szRaw[1024];
+    char *szLine;
+    char *szValue = NULL;
+    bool bFoundItem = false;
+    bool bStartItem = false;
+    bool bEndItem = false;
+    
+    while( !bEndItem && fgets( szRaw, 1024, m_fp ) != NULL )
+    {
+        szLine = Strip(szRaw);
+        if( szLine == NULL )
+        {
+            continue;
+        }
+        if( !bFoundItem )
+        {
+            if( strncasecmp( szLine, "Item", 4 ) == 0 )
+            {
+                bFoundItem = true;
+                idIn.m_szName = GetValue( szLine, idIn.m_szName );
+            }
+            continue;
+        }
+        
+        if( !bStartItem )
+        {
+            if( *szLine == '{' )
+            {
+                bStartItem = true;
+            }
+            continue;
+        }
+        
+        // Once you get here, you know that you're
+        // parsing a Item entry. Everything
+        // from here to the next } is going to be
+        // data for this Item.
+        if( !bEndItem )
+        {
+            if( strncasecmp( szLine, "plural", 6 ) == 0 )
+            {
+                idIn.m_szPlural = GetValue( szLine, idIn.m_szPlural );
+            }
+            else if( strncasecmp( szLine, "speed", 5 ) == 0 )
+            {
+                idIn.m_fSpeed = GetValue( szLine, idIn.m_fSpeed );
+            }
+            else  if( strncasecmp( szLine, "acbonus", 7 ) == 0 )
+            {
+                idIn.m_fACBonus = GetValue( szLine, idIn.m_fACBonus );
+            }
+            else  if( strncasecmp( szLine, "ac", 2 ) == 0 )
+            {
+                idIn.m_fBaseAC = GetValue( szLine, idIn.m_fBaseAC );
+            }
+            else  if( strncasecmp( szLine, "damage", 6 ) == 0 )
+            {
+                idIn.m_szBaseDamage = GetValue( szLine, idIn.m_szBaseDamage );
+            }
+            else  if( strncasecmp( szLine, "to-hitbonus", 11 ) == 0 )
+            {
+                idIn.m_fBonusToHit = GetValue( szLine, idIn.m_fBonusToHit );
+            }
+            else  if( strncasecmp( szLine, "to-dambonus", 11 ) == 0 )
+            {
+                idIn.m_fBonusToDamage = GetValue( szLine, idIn.m_fBonusToDamage );
+            }
+            else if( strncasecmp( szLine, "level", 5 ) == 0 )
+            {
+                GetValue( szLine, idIn.m_dwLevel );
+            }
+            else if( strncasecmp( szLine, "value", 5 ) == 0 )
+            {
+                GetValue( szLine, idIn.m_fValue );
+            }
+            else if( strncasecmp( szLine, "type", 4 ) == 0 )
+            {
+                // TODO: Add validation that this is ITEM_IDX_ and not...
+                szValue = GetValue( szLine, szValue );
+                idIn.m_dwIndex = g_Constants.LookupString(szValue);
+            }
+            else if( strncasecmp( szLine, "flags", 5 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                
+                char *c = strtok( szValue, "," );
+                while( c != NULL )
+                {
+                    idIn.m_dwFlags |= g_Constants.LookupString(c);
+                    c = strtok( NULL, "," );
+                }
+            }
+            else if( strncasecmp( szLine, "color", 5 ) == 0 )
+            {
+                char *color = chomp( szLine, szValue );
+                if( strchr( color, '<' ) != NULL )
+                {
+                    // multi-hued
+                    // <<rgb1>,<rgb2>,...,<rgbn>>
+                    idIn.m_Colors = ParseColors(color);
+                    
+                    idIn.m_dwFlags |= MON_COLOR_MULTI;
+                }
+                else
+                {
+                    // single-hued
+                    // <rgb1>
+                    idIn.m_Color.SetColor(color);
+                }
+            }
+            else if( *szLine == '}' )
+            {
+                bEndItem = true;
+            }
+            else
+            {
+                printf( "Unparseable line:%s\n", szLine );
+            }
+        }
+    }
+    if( !bEndItem )
+    {
+        return NULL;
+    }
+    
+    return &idIn;
 }
 
 // Removes outermost <> from data entry

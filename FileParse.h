@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 class CMonsterDef;
+class CItemDef;
 class CDataFile
 {
 	// Member variables
@@ -14,8 +15,9 @@ public:
 	~CDataFile() {};
 
 	bool Open( const char *szFilename );
-	
-	CMonsterDef *ReadMonster(CMonsterDef &mdIn);
+    
+    CMonsterDef *ReadMonster(CMonsterDef &mdIn);
+    CItemDef *ReadItem(CItemDef &idIn);
 protected:
     char	*Strip( char *szLine );
     char	*chomp(const char *szLine, char *szIn);

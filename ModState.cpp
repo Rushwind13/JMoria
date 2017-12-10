@@ -166,7 +166,7 @@ int CModState::OnHandleInit( SDL_Keysym *keysym )
 	{
 		m_cCommand = keysym->sym;
 
-		eModifier mod = MOD_INIT;
+		eModModifier mod = MOD_INIT;
 		switch(m_cCommand)
 		{
 		case SDLK_o:
@@ -176,7 +176,7 @@ int CModState::OnHandleInit( SDL_Keysym *keysym )
 			mod = MOD_CLOSE;
 			break;
 		case SDLK_t:
-			if( keysym->mod & KMOD_SHIFT == KMOD_SHIFT )
+			if( keysym->mod & KMOD_SHIFT )
 			{
 				mod = MOD_TUNNEL;
 			}

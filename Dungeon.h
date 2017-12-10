@@ -7,14 +7,14 @@
 #include "DungeonTile.h"
 #include "Monster.h"
 #include "Item.h"
-#include "Tileset.h"
+#include "TileSet.h"
 #include "DungeonMap.h"
 
 //class CMonster;
 //class CItem;
 
 #define DUNG_ZOOM_MIN		4
-#define DUNG_ZOOM_NORMAL	16
+#define DUNG_ZOOM_NORMAL	20
 #define DUNG_ZOOM_MAX		100
 
 class CDungeon
@@ -29,8 +29,9 @@ public:
 	JLinkList<CMonster> *m_llMonsters;
 	JLinkList<CItem> *m_llItems;
 protected:
-	CDungeonTileDef *m_dtdlist;
-	JLinkList <CMonsterDef> *m_llMonsterDefs;
+    CDungeonTileDef *m_dtdlist;
+    JLinkList <CMonsterDef> *m_llMonsterDefs;
+    JLinkList <CItemDef> *m_llItemDefs;
 private:
 	Uint16 m_dwZoom;
 	
@@ -52,10 +53,14 @@ public:
 	~CDungeon() { Term(); };
 	void PreDraw()	;
 	void Draw()	;
+    void DrawDungeon();
+    void DrawItems();
+    void DrawMonsters();
 	void PostDraw()	;
 	void Init();
 	void Term();
 	bool Update( float fCurTime );
+    JResult OnChangeLevel(const int delta);
 
 	void Zoom( Uint16 dwDelta )
 	{
@@ -89,16 +94,31 @@ public:
 		return (m_Tiles + ((int)vPos.y * DUNG_WIDTH) + (int)vPos.x ); // going to have to work in offsets, too, if the dungeon's bigger than the screen. --Jimbo
 	};
 	int IsWalkableFor( JVector &vPos, bool isPlayer=false );
+    int CanPlaceItemAt( JVector &vPos );
 	bool IsOpenable( JVector &vPos );
-	bool IsTunnelable( JVector &vPos );
-	bool IsCloseable( JVector &vPos );
+    bool IsTunnelable( JVector &vPos );
+    bool IsCloseable( JVector &vPos );
+    int  IsStairs( JVector &vPos );
 	void RemoveMonster( CMonster *pMon );
 	JResult Modify( JVector &vPos );
+    CItem *PickUp( JVector &vPickupPos );
 protected:
 	JRect m_Rect;
 	JFVector m_vfTranslate;
 	CDungeonMap *m_dmCurLevel;		// Data about the curennt level (and holds dungeon gen algorithm)
-	//CDungeonMap m_dmTownLevel;	// The Dungeon remembers where you live...
+    float m_fOpenFloorArea; // How much of the current level is open?
+    void extracted();
+    
+    //CDungeonMap m_dmTownLevel;	// The Dungeon remembers where you live...
+    
+    JResult CreateNewLevel(const int delta);
+    JResult CreateMap();
+    JResult PlaceItems(const int depth);
+    JResult SpawnMonsters(const int depth);
+    int ChooseMonsterForDepth(const int depth);
+    int ChooseItemForDepth(const int depth);
+    
+    JResult TerminateLevel();
 private:
 
 	bool IsOnScreen(JVector vPos);

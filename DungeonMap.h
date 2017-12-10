@@ -1,7 +1,7 @@
 #ifndef __DUNGEONMAP_H__
 #define __DUNGEONMAP_H__
-#include "jmdefs.h"
-#include "jlinklist.h"
+#include "JMDefs.h"
+#include "JLinkList.h"
 
 // CDungeonMapTile:
 // the info needed for map generation
@@ -60,7 +60,7 @@ private:
 	
 	// Member functions
 public:
-	void CreateDungeon();
+	void CreateDungeon(const int depth);
 	Uint8 GetdtdIndex( JIVector vPos )
 	{ 
 		if( GetTile(vPos) )

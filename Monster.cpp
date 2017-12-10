@@ -94,20 +94,35 @@ JResult CMonster::SpawnMonster()
 }
 
 
+float CMonster::Attack()
+{
+    float fRoll = Util::Roll( "1d100" );
+    
+    printf( "%s rolled: %.2f\n", GetName(), fRoll );
+        
+    return fRoll;
+}
+
+float CMonster::Damage( float fDamageMult )
+{
+    char *szDamage = m_md->m_llAttacks->GetHead()->m_lpData->m_szDamage;
+    float fDamageModifier = 0.0f;
+    
+    float fDamage = ( Util::Roll( szDamage ) + fDamageModifier ) * fDamageMult;
+    printf( "%s did %.2f damage (damagemult: %.2f). ", GetName(), fDamage, fDamageMult );
+    
+    return fDamage;
+}
+
 bool CMonster::Hit( float &fRoll )
 {
-	fRoll = Util::Roll( "1d100" );
-
-	printf( "You rolled: %.2f\n", fRoll );
-
 	return ( fRoll >= m_fCurAC );
 }
 
-int CMonster::Damage( float fDamageMult )
+int CMonster::TakeDamage( float fDamage )
 {
 	int retval = STATUS_INVALID;
 
-	float fDamage = Util::Roll( "1d2" ) * fDamageMult;
 
 	if( (int)fDamage < (int)m_fCurHP )
 	{
@@ -120,7 +135,7 @@ int CMonster::Damage( float fDamageMult )
 		retval = STATUS_DEAD;
 	}
 
-	printf( "You did %.2f damage (damagemult: %.2f). Remaining HP: %.2f \n", fDamage, fDamageMult, m_fCurHP );
+	printf( "Remaining HP: %.2f \n", m_fCurHP );
 
 	return retval;
 }
@@ -139,7 +154,7 @@ void CMonster::SetColor()
 }
 
 
-unsigned char MonIDs[MON_IDX_MAX+1] = ",JidDSkxwda";
+unsigned char MonIDs[MON_IDX_MAX+1] = ",JidDSkxwdaHCb";
 void CMonster::Draw()
 {
 	Uint8 monster_tile = MonIDs[m_md->m_dwIndex] - ' ' - 1;

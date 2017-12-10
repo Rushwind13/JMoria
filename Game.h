@@ -39,6 +39,10 @@ public:
 	void Quit( int returncode );
 	void SetState( int eNewState );
 	CStateBase *GetGameState() { return m_pCurState; };
+    
+#ifdef TURN_BASED
+    void SetReadyForUpdate( const bool isReady ) { m_bReadyForUpdate = isReady; }
+#endif
 	
 protected:
 	CDungeon	*m_pDungeon;
@@ -61,5 +65,9 @@ private:
 	CRender	*m_pRender;
 
 	int m_dwNextTime;
+#ifdef TURN_BASED
+    bool m_bReadyForUpdate;
+    float m_fGameTime;
+#endif
 };
 #endif // __GAME_H__

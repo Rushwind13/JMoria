@@ -1,7 +1,7 @@
 
 #include "DungeonMap.h"
 //#define MAX_RECURDEPTH 7
-#define MAX_RECURDEPTH 7
+#define MAX_RECURDEPTH 10
 #define DIR_NONE	-1
 #define DIR_NORTH	 0
 #define DIR_SOUTH	 1
@@ -273,14 +273,22 @@ void CDungeonMap::MakeHall( const JIVector *vPos, const int direction, const int
 			// flag it (probably close it off with a 
 			// door and kill it)
 			bEndHallway = true;
-			if( direction == DIR_NORTH || direction == DIR_SOUTH )
+            if( direction == DIR_NORTH )
+            {
+                rcHall.top = rcHall.bottom - dwLength;
+            }
+            else if( direction == DIR_SOUTH )
 			{
 				rcHall.bottom = rcHall.top + dwLength;
-			}
-			else
-			{
-				rcHall.right = rcHall.left + dwLength;
-			}
+            }
+            else if( direction == DIR_EAST )
+            {
+                rcHall.right = rcHall.left + dwLength;
+            }
+            else if( direction == DIR_WEST )
+            {
+                rcHall.left = rcHall.right - dwLength;
+            }
 			break;
 		}
 		count++;
@@ -397,35 +405,36 @@ int CDungeonMap::CheckArea( const JRect *rcCheck, int direction, bool bIsHallway
 	{		
 		// expand the search so you don't eat someone else's wall
 		// (leave ## between rooms)
-		switch( direction )
-		{
-		case DIR_NORTH:
-			rcLocal.left-=1;
-			rcLocal.right+=1;
-			rcLocal.top-=1;
-			//rcLocal.bottom+=1;
-			break;
-		case DIR_SOUTH:
-			rcLocal.left-=1;
-			rcLocal.right+=1;
-			//rcLocal.top-=1;
-			rcLocal.bottom+=1;
-			break;
-		case DIR_EAST:
-			//rcLocal.left-=1;
-			rcLocal.right+=1;
-			rcLocal.top-=1;
-			rcLocal.bottom+=1;
-			break;
-		case DIR_WEST:
-			rcLocal.left-=1;
-			//rcLocal.right+=1;
-			rcLocal.top-=1;
-			rcLocal.bottom+=1;
-			break;
-		case DIR_NONE:
-			break;
-		}
+// 12.7.2017 let's try letting rooms be closer to each other. I think hallways need to be careful on the long sides, instead.
+//        switch( direction )
+//        {
+//        case DIR_NORTH:
+//            rcLocal.left-=1;
+//            rcLocal.right+=1;
+//            rcLocal.top-=1;
+//            //rcLocal.bottom+=1;
+//            break;
+//        case DIR_SOUTH:
+//            rcLocal.left-=1;
+//            rcLocal.right+=1;
+//            //rcLocal.top-=1;
+//            rcLocal.bottom+=1;
+//            break;
+//        case DIR_EAST:
+//            //rcLocal.left-=1;
+//            rcLocal.right+=1;
+//            rcLocal.top-=1;
+//            rcLocal.bottom+=1;
+//            break;
+//        case DIR_WEST:
+//            rcLocal.left-=1;
+//            //rcLocal.right+=1;
+//            rcLocal.top-=1;
+//            rcLocal.bottom+=1;
+//            break;
+//        case DIR_NONE:
+//            break;
+//        }
 	}
 	
 	if( !rcLocal.IsInWorld() )
@@ -462,7 +471,8 @@ int CDungeonMap::CheckArea( const JRect *rcCheck, int direction, bool bIsHallway
 			y = rcLocal.top;
 			for( x=rcLocal.left; x <=rcLocal.right; x++ )
 			{
-				if( m_dmtTiles[y * DUNG_WIDTH + x].GetType() != DUNG_IDX_WALL )
+                vCurPos.x = x;
+				if( GetTile(vCurPos)->GetType() != DUNG_IDX_WALL )
 				{
 					printf( "Hallway <%d %d> got %d. (wanted %d)\n", rcCheck->left, rcCheck->top, x - rcLocal.left, rcLocal.right - rcLocal.left );
 					
@@ -477,11 +487,13 @@ int CDungeonMap::CheckArea( const JRect *rcCheck, int direction, bool bIsHallway
 	{
 		for( y = rcLocal.top; y <= rcLocal.bottom; y++ )
 		{
+            vCurPos.y = y;
 			for( x = rcLocal.left; x <= rcLocal.right; x++ )
 			{
-				if( m_dmtTiles[y * DUNG_WIDTH + x].GetType() != DUNG_IDX_WALL )
+                vCurPos.x = x;
+				if( GetTile(vCurPos)->GetType() != DUNG_IDX_WALL )
 				{
-					printf("nope. <%d %d> was %d\n", x,y, m_dmtTiles[y * DUNG_WIDTH + x].GetType() );
+					printf("nope. <%d %d> was %d\n", x,y, GetTile(vCurPos)->GetType() );
 					return INVALID_LENGTH;
 				}
 			}

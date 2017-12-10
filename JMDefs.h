@@ -24,7 +24,7 @@ typedef unsigned int uint32;
 
 #define JERROR() printf("An error occurred: %s %d\n", __FILE__, __LINE__ );
 
-#define TURN_BASED
+//#define TURN_BASED
 
 #include "DungeonConstants.h"
 

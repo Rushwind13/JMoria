@@ -32,6 +32,10 @@ m_eCurState(STATE_INVALID)
     m_pCmdState = new CCmdState;
     m_pModState = new CModState;
     m_pMenuState = new CMenuState;
+#ifdef TURN_BASED
+    m_fGameTime = 0.0f;
+    m_bReadyForUpdate = true;
+#endif // TURN_BASED
 };
 
 JResult CGame::Init()
@@ -189,7 +193,21 @@ int CGame::Update()
 }/**/
 
 bool CGame::Update( float fCurTime )
-{	
+{
+#ifdef TURN_BASED
+    if( m_bReadyForUpdate )
+    {
+        m_fGameTime++;
+        fCurTime = 1.0f;
+        m_bReadyForUpdate = false;
+    }
+    else
+    {
+        return false;
+    }
+    // TODO: Why does the AI require 2 ticks to move the monster?
+    GetAIMgr()->Update(fCurTime);
+#endif // TURN_BASED
 	// Update the AI
 	GetAIMgr()->Update(fCurTime);
 

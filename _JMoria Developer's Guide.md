@@ -21,3 +21,62 @@ c) add the new item's emoji to the *ItemIds* list in _Item.cpp_
 similar instruction for items
 
 Create a Pull request on Github when you're satisfied.
+
+## Monster Types and their tile bindings
+~~a - ant~~
+~~b - bat~~
+c - centipede
+~~d - dragon / dinosaur (lesser)~~
+e - eye
+f - Feline (tiger, &c)
+g - golem
+h - small humanoid (hobbit, gnome, elf)
+~~i - icky thing~~
+j
+~~k - kobold~~
+l - lice, leech
+m - mold
+n - naga
+~~o - orc (snaga, uruk-hai, &c)~~
+p - person (novice paladin / ranger / priest / warrior / mage)
+q - 
+r - rats and mice
+~~s - skeletons (human and animal)~~
+t - 
+u - minor demon
+v - 
+~~w - worm mass, also purple worm~~
+~~x - spider~~
+y - yeek
+z - zombie
+~~A - amphibian~~
+B - Balrog, 
+~~C - Canid (dog, wolf, dire wolf, &c)~~
+~~D - Dragon / Dinosaur (Ancient / greater)~~
+E - 
+~~F - fly but also dragon fly and faerie dragon~~
+~~G - ghost, ghoul~~
+H - large humanoid (giant, ettin) and harpy
+I - Insect
+~~J - Oozes and Jellies and Slimes~~
+K - Killer beetle
+~~L - Lich~~
+M
+N
+O - Ogre
+P - Titan and other large persons
+Q
+R - Reptile
+~~S - snake~~
+T - Troll
+U - major demon
+~~V - Vampire~~
+~~W - Wight, wraith~~
+X - Xorn
+Y - yeti
+Z
+& - mimic
+. - lurker
+~~, - mushroom~~
+$ - creeping coin
+

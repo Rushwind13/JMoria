@@ -11,6 +11,9 @@ extern CGame *g_pGame;
 
 int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 {
+    // If you haven't handled the key by the end of this function,
+    // it's an invalid key, so return an error.
+    int retval = -1;
 	if( IsDirectional( keysym ) )
 	{
 		JVector vTestDir(0,0);
@@ -33,44 +36,36 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 		{
 			HandleCollision( dwCollideType );
 		}
-		return 0;
+		retval = 0;
 	}
 	// Not a directional key; check for other commands
 	// (many will induce state changes)
 
 	// Some commands need a directional modifier:
 	// Open, Tunnel, Close, Run, Bash, Look, Search, Fire, Hurl, Disarm
-	if( IsModifierNeeded( keysym ) )
+	else if( IsModifierNeeded( keysym ) )
 	{
 		// Add "modify" to the top of the state stack
 		g_pGame->SetState(STATE_MODIFY);
 		g_pGame->GetGameState()->HandleKey(keysym);
-		return 0;
+		retval = 0;
 	}
     
     // Menu commands allow you to choose from lists of items:
     // inventory, equipment, stores, chests?, bag of holding, &c
-    if( IsMenuCommand(keysym) )
+    else if( IsMenuCommand(keysym) )
     {
         // Add "modify" to the top of the state stack
         g_pGame->SetState(STATE_MENU);
         g_pGame->GetGameState()->HandleKey(keysym);
-        return 0;
+        retval = 0;
     }
     
-    switch(keysym->sym)
+    else if( IsStairsCommand(keysym) )
     {
-    case SDLK_COMMA:
-    case SDLK_PERIOD:
-        if( keysym->mod & KMOD_SHIFT )
-        {
-            m_vNewPos = g_pGame->GetPlayer()->m_vPos;
-            OnHandleStairs( keysym );
-            return JSUCCESS;
-        }
-        break;
-    default:
-        break;
+        m_vNewPos = g_pGame->GetPlayer()->m_vPos;
+        OnHandleStairs( keysym );
+        retval = 0;
     }
 
 	/*
@@ -133,9 +128,13 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 	break;
 	}/**/
 
-	// If you haven't handled the key by now, 
-	// it's an invalid key, so return an error.
-	return -1;
+#ifdef TURN_BASED
+    if( retval != -1 )
+    {
+        g_pGame->SetReadyForUpdate(true);
+    }
+#endif // TURN_BASED
+	return retval;
 }
 
 void CCmdState::HandleCollision( int dwCollideType )
@@ -152,7 +151,9 @@ void CCmdState::HandleCollision( int dwCollideType )
 		// When Players Attack
 		CMonster *pMon = g_pGame->GetDungeon()->GetTile(m_vNewPos)->m_pCurMonster;
 		szMonster = pMon->GetName();
-		
+        
+        
+        fRoll = g_pGame->GetPlayer()->Attack();
 		bHit = pMon->Hit(fRoll);
 		if( bHit )
 		{
@@ -172,11 +173,14 @@ void CCmdState::HandleCollision( int dwCollideType )
 				g_pGame->GetMsgs()->Printf( "(It was an excellent hit! (x2 damage)\n" );
 				fDamageMult = 2.0f;
 			}
-			
-			if( pMon->Damage(fDamageMult) == STATUS_DEAD )
+            
+            float fDamage = g_pGame->GetPlayer()->Damage(fDamageMult);
+            
+			if( pMon->TakeDamage(fDamage) == STATUS_DEAD )
 			{
 				sprintf( szStatus, "have slain" );			
 				g_pGame->GetMsgs()->Printf( "You %s the %s.\n", szStatus, szMonster );
+                g_pGame->GetPlayer()->OnKillMonster(pMon);
 				g_pGame->GetDungeon()->RemoveMonster(pMon);
 			}
 		}
@@ -327,7 +331,22 @@ bool CCmdState::IsMenuCommand(SDL_Keysym *keysym)
     return false;
 }
 
-
+bool CCmdState::IsStairsCommand( SDL_Keysym *keysym )
+{
+    switch(keysym->sym)
+    {
+        case SDLK_COMMA:
+        case SDLK_PERIOD:
+            if( keysym->mod & KMOD_SHIFT )
+            {
+                return true;
+            }
+            break;
+        default:
+            break;
+    }
+    return false;
+}
 #define DIR_UP 4
 #define DIR_DOWN 5
 

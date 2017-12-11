@@ -21,6 +21,7 @@ void CPlayer::Init()
 
 bool CPlayer::Update(float fCurTime)
 {
+    DisplayStats();
     DisplayInventory();
     DisplayEquipment();
 	return true;
@@ -70,6 +71,22 @@ JResult CPlayer::SpawnPlayer()
 	}
 
 	return JSUCCESS;
+}
+
+void CPlayer::DisplayStats()
+{
+    g_pGame->GetStats()->Clear();
+    g_pGame->GetStats()->Printf("AC:%d\n", (int)m_fArmorClass);
+    g_pGame->GetStats()->Printf("HP:%d / %d\n", (int)m_fCurHitPoints, (int)m_fHitPoints);
+    g_pGame->GetStats()->Printf("\n");
+    g_pGame->GetStats()->Printf("Damage:%s\n", m_szDamage);
+    g_pGame->GetStats()->Printf("+to Hit:%d\n", (int)m_fToHitModifier);
+    g_pGame->GetStats()->Printf("+to Dam:%d\n", (int)m_fDamageModifier);
+    g_pGame->GetStats()->Printf("\n");
+    g_pGame->GetStats()->Printf("\n");
+    g_pGame->GetStats()->Printf("Level:%d\n", (int)m_fLevel);
+    g_pGame->GetStats()->Printf("Exp:%d\n", (int)m_fExperience);
+    g_pGame->GetStats()->Printf("Exp to Next:%d\n", (int)(m_pClass->m_fExpNeeded[(int)m_fLevel-1] - m_fExperience));
 }
 
 void CPlayer::DisplayInventory()
@@ -178,6 +195,10 @@ bool CPlayer::Wield(CLink<CItem> *pLink)
     // Now put on the new item.
     m_llInventory->Remove(pLink, false);
     pItem->m_pllLink = m_llEquipment->Add(pItem, pItem->m_id->m_dwIndex);
+    m_fArmorClass += pItem->m_id->m_fBaseAC + pItem->m_id->m_fACBonus;
+    if( pItem->m_id->m_szBaseDamage != NULL ) strcpy(m_szDamage, pItem->m_id->m_szBaseDamage);
+    m_fDamageModifier += pItem->m_id->m_fBonusToDamage;
+    m_fToHitModifier += pItem->m_id->m_fBonusToHit;
     
     return true;
 }
@@ -202,6 +223,80 @@ bool CPlayer::Remove(CLink<CItem> *pLink)
     }
     m_llEquipment->Remove(pLink, false);
     pItem->m_pllLink = m_llInventory->Add(pItem, pItem->m_id->m_dwIndex);
+    m_fArmorClass -= pItem->m_id->m_fBaseAC + pItem->m_id->m_fACBonus;
+    if( pItem->m_id->m_szBaseDamage != NULL ) strcpy(m_szDamage, PLAYER_BASE_DAMAGE);
+    m_fDamageModifier -= pItem->m_id->m_fBonusToDamage;
+    m_fToHitModifier -= pItem->m_id->m_fBonusToHit;
+
     
     return true;
+}
+
+float CPlayer::Attack()
+{
+    float fRoll = Util::Roll( "1d100" );
+    float fHitMod = g_pGame->GetPlayer()->m_fToHitModifier;
+    
+    printf( "You rolled: %.2f, +to-hit Bonus: %.2f = Total: %.2f\n", fRoll, fHitMod, fRoll + fHitMod );
+    
+    fRoll += fHitMod;
+    
+    return fRoll;
+}
+
+float CPlayer::Damage( float fDamageMult )
+{
+    float fDamage = ( Util::Roll( m_szDamage ) + m_fDamageModifier ) * fDamageMult;
+    printf( "You did %.2f damage (damagemult: %.2f). ", fDamage, fDamageMult );
+
+    return fDamage;
+}
+
+void CPlayer::OnKillMonster( CMonster *pMon )
+{
+    m_fExperience += pMon->m_md->m_fExpValue / m_fLevel;
+    GainLevel();
+}
+
+void CPlayer::GainLevel()
+{
+    while( (int) m_fExperience > (int) m_pClass->m_fExpNeeded[(int)m_fLevel-1] )
+    {
+        m_fLevel++;
+        float fAddedHP = Util::Roll(m_pClass->m_szHD);
+        m_fHitPoints += fAddedHP;
+        m_fCurHitPoints += fAddedHP;
+        g_pGame->GetMsgs()->Printf("Welcome to level %d.\n", (int)m_fLevel);
+        // TODO: Gain Spells or &c here.
+    }
+    
+}
+
+bool CPlayer::Hit( float &fRoll )
+{
+    return ( fRoll >= m_fArmorClass );
+}
+
+int CPlayer::TakeDamage( float fDamage, char *szMon )
+{
+    int retval = STATUS_INVALID;
+    
+    
+    if( (int)fDamage < (int)m_fCurHitPoints )
+    {
+        m_fCurHitPoints -= fDamage;
+        retval = STATUS_ALIVE;
+    }
+    else
+    {
+        m_fCurHitPoints = 0;
+        retval = STATUS_DEAD;
+        // This is the end of the game; make the game end on next update.
+        printf("You died on dungeon level %d, while level %d, killed by a %s.\n", g_pGame->GetDungeon()->depth, (int)m_fLevel, szMon );
+        g_pGame->Quit(0);
+    }
+    
+    printf( "Remaining HP: %.2f \n", m_fCurHitPoints );
+    
+    return retval;
 }

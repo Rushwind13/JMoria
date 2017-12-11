@@ -17,17 +17,17 @@ JResult CItem::CreateItem( CItemDef *pid )
     {
         CItem *pItem;
         pItem = new CItem;
-        
+
         // Initialize the Item from the ItemDef
         pItem->Init(pid);
-        
+
         // Put the item in the world
         pItem->SpawnItem();
-        
+
         // Now that the item is set up, add it to the global list of items
         pItem->m_pllLink = g_pGame->GetDungeon()->m_llItems->Add(pItem);
     }
-    
+
     return JSUCCESS;
 }
 
@@ -50,10 +50,10 @@ JResult CItem::SpawnItem()
     while( !bItemSpawned )
     {
         vTryPos.Init( (float)(Util::GetRandom(0, DUNG_WIDTH-1)), (float)(Util::GetRandom(0, DUNG_HEIGHT-1)) );
-        
+
         //printf("Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
         //g_pGame->GetMsgs()->Printf( "Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
-        
+
         if( g_pGame->GetDungeon()->CanPlaceItemAt(vTryPos) == DUNG_COLL_NO_COLLISION )
         {
             m_vPos = vTryPos;
@@ -63,7 +63,7 @@ JResult CItem::SpawnItem()
             //g_pGame->GetMsgs()->Printf( "Success!\n" );
         }
     }
-    
+
     return JSUCCESS;
 }
 
@@ -71,7 +71,7 @@ JResult CItem::SpawnItem()
 void CItem::SetColor()
 {
     if( m_fColorChangeInterval < COLOR_CHANGE_TIMEOUT ) return;
-    
+
     if( (m_id->m_dwFlags & ITEM_COLOR_MULTI) == ITEM_COLOR_MULTI )
     {
         int which_color = Util::GetRandom(0,m_id->m_Colors->length()-1);
@@ -81,7 +81,7 @@ void CItem::SetColor()
 }
 
 
-unsigned char ItemIDs[ITEM_IDX_MAX+1] = "|)[](]]\"=~{}{}&?!-_?$~/";
+unsigned char ItemIDs[ITEM_IDX_MAX+1] = "|)[](]]\"=~{}{}&?!-_?$~/\\/";
 void CItem::Draw()
 {
     // Don't draw if something else is there.
@@ -92,9 +92,9 @@ void CItem::Draw()
     }
     Uint8 item_tile = ItemIDs[m_id->m_dwIndex] - ' ' - 1;
     JVector vSize(1,1);
-    
+
     SetColor();
-    
+
     //PreDraw();
     g_pGame->GetDungeon()->m_TileSet->SetTileColor( m_Color );
     g_pGame->GetDungeon()->m_TileSet->DrawTile( item_tile, m_vPos, vSize, false );

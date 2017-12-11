@@ -79,6 +79,17 @@ Speed          6.0
 Color        <200,200,200,255>
 }
 
+Item <Quarter Staff>
+{
+Plural        <Quarter Staves>
+Type        <ITEM_IDX_AXE>
+Value     15.0
+Level        10
+Damage       1d6
+Weight        5.0
+Color        <200,200,200,255>
+}
+
 Item <Club>
 {
 Plural        <Clubs>
@@ -183,6 +194,30 @@ Value     80.0
 Level        10
 Damage       1d8
 Weight        10.0
+Speed         7.0
+Color        <200,200,200,255>
+}
+
+Item <Scimitar>
+{
+Plural        <Scimitar>>
+Type        <ITEM_IDX_SWORD>
+Value     150.0
+Level        10
+Damage       1d8
+Weight        4.0
+Speed         4.0
+Color        <200,200,200,255>
+}
+
+Item <Trident>
+{
+Plural        <Tridents>
+Type        <ITEM_IDX_POLEARM>
+Value     40.0
+Level        10
+Damage       3d4
+Weight        4.0
 Speed         7.0
 Color        <200,200,200,255>
 }

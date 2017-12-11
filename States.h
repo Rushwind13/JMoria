@@ -8,7 +8,7 @@
 #include "CmdState.h"
 #include "ModState.h"
 
-class CMenuState : public CStateBase
+class CUseState : public CStateBase
 {
 	// Member Variables
 	public:

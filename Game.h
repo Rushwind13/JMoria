@@ -14,7 +14,7 @@ class CDisplayText;
 class CStateBase;
 class CCmdState;
 class CModState;
-class CMenuState;
+class CUseState;
 class CAIMgr;
 
 class CGame
@@ -59,7 +59,7 @@ protected:
 
     CCmdState	*m_pCmdState;
     CModState    *m_pModState;
-    CMenuState   *m_pMenuState;
+    CUseState   *m_pUseState;
 
 private:
 	CRender	*m_pRender;

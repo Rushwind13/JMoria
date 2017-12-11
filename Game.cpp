@@ -9,7 +9,7 @@
 
 #include "CmdState.h"
 #include "ModState.h"
-#include "MenuState.h"
+#include "UseState.h"
 
 #include "Render.h"
 #include "DisplayText.h"
@@ -31,7 +31,7 @@ m_eCurState(STATE_INVALID)
 {
     m_pCmdState = new CCmdState;
     m_pModState = new CModState;
-    m_pMenuState = new CMenuState;
+    m_pUseState = new CUseState;
 #ifdef TURN_BASED
     m_fGameTime = 0.0f;
     m_bReadyForUpdate = true;
@@ -44,7 +44,7 @@ JResult CGame::Init()
 	// Initialize all the game stuff, baby.
 
 	g_Constants.Init();
-	
+
 	// Init the Render
 	m_pRender = new CRender;
 	result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
@@ -56,13 +56,13 @@ JResult CGame::Init()
 
 	m_pMsgsDT = new CDisplayText( JRect( 0, 0, 640, 36 ) );
 	m_pMsgsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE);
-    
+
     m_pStatsDT = new CDisplayText( JRect( 0,50,  150,480 ) );
     m_pStatsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
-    
+
     m_pInvDT = new CDisplayText( JRect( 440,50,  640,340 ) );
     m_pInvDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
-    
+
     m_pEquipDT = new CDisplayText( JRect( 440,345,  640,480 ) );
     m_pEquipDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
 
@@ -84,7 +84,7 @@ JResult CGame::Init()
 
 	// Set up the initial game state
 	SetState(STATE_COMMAND);
-	
+
 	// we're up.
 	return JSUCCESS;
 }
@@ -97,14 +97,14 @@ void CGame::Quit( int returncode )
 		delete m_pRender;
 		m_pRender = NULL;
 	}
-	
+
 	if( m_pDungeon )
 	{
 		m_pDungeon->Term();
 		delete m_pDungeon;
 		m_pDungeon = NULL;
 	}
-	
+
 	if( m_pPlayer )
 	{
 		m_pPlayer->Term();
@@ -131,8 +131,8 @@ void CGame::SetState( int eNewState )
     case STATE_MODIFY:
         m_pCurState = reinterpret_cast<CStateBase *>(m_pModState);
         break;
-    case STATE_MENU:
-        m_pCurState = reinterpret_cast<CStateBase *>(m_pMenuState);
+    case STATE_USE:
+        m_pCurState = reinterpret_cast<CStateBase *>(m_pUseState);
         break;
 	default:
         printf("Tried to change to unknown state.\n");
@@ -155,38 +155,38 @@ int CGame::Update()
 
 		// handle the events in the queue
 		g_pGame->HandleEvents(isActive, done);
-		
+
 		// draw the scene
 		if ( isActive )
 		{
 #ifdef PROFILE
 			ProfileBegin( "Graphics Draw Routine" );
 #endif // PROFILE
-			
+
 			g_pGame->GetRender()->PreDraw();
 			// Draw the player
 			g_pGame->GetPlayer()->Draw();
-			
+
 			// Draw the dungeon
 			g_pGame->GetDungeon()->Draw();
 			g_pGame->GetMsgs()->Draw();
 			g_pGame->GetStats()->Draw();
-			
+
 #ifdef PROFILE
 			ProfileDraw();
-			
+
 			ProfileEnd( "Graphics Draw Routine" );
 #endif // PROFILE
 			g_pGame->GetRender()->PostDraw();
-			
+
 			// pageflip
 			SDL_GL_SwapBuffers( );
 		} // if( isactive )
-		
+
 #ifdef PROFILE
 		ProfileEnd( "Main Loop" );
 		ProfileDumpOutputToBuffer();
-#endif PROFILE	
+#endif PROFILE
 	}
 
 	return done;
@@ -213,7 +213,7 @@ bool CGame::Update( float fCurTime )
 
 	// Update the player
 	GetPlayer()->Update(fCurTime);
-	
+
 	// Update the dungeon
 	GetDungeon()->Update(fCurTime);
     GetMsgs()->Update(fCurTime);
@@ -225,20 +225,20 @@ bool CGame::Update( float fCurTime )
 }
 
 void CGame::Draw()
-{	
+{
 	GetRender()->PreDraw();
-	
+
 	// Draw the dungeon
     GetDungeon()->Draw();
-    
+
     // Draw the player
     GetPlayer()->Draw();
-    
+
     GetMsgs()->Draw();
     GetStats()->Draw();
     GetInv()->Draw();
     GetEquip()->Draw();
-	
+
 	GetRender()->PostDraw();
 
 	//SDL_GL_SwapBuffers();
@@ -310,7 +310,7 @@ void CGame::HandleEvents(int &isActive, int &done)
 				break;
 
 			}
-			/*printf("Got up event type: %d which: %d button: %d state: %d at <%d %d>\n", 
+			/*printf("Got up event type: %d which: %d button: %d state: %d at <%d %d>\n",
 			event.button.type,
 			event.button.which,
 			event.button.button,

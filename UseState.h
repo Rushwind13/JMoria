@@ -5,18 +5,19 @@
 #include "JLinkList.h"
 #include "Item.h"
 
-class CMenuState;
-typedef int (CMenuState::*MenuKeyHandler)(SDL_Keysym *keysym);
-enum eMenuModifier
+class CUseState;
+typedef int (CUseState::*UseKeyHandler)(SDL_Keysym *keysym);
+enum eUseModifier
 {
 	MENU_INVALID=-1,
 	MENU_WIELD=0,
-	MENU_UNWIELD=1,
-    MENU_INIT,
+	MENU_REMOVE=1,
+	MENU_INIT,
+	MENU_DROP,
 	MENU_MAX
 };
 
-class CMenuState : public CStateBase
+class CUseState : public CStateBase
 {
 	// Member Variables
 public:
@@ -25,37 +26,40 @@ protected:
 	int m_dwSelected;
     CLink<CItem> *m_pSelected;
 private:
-	
+
 	// Member Functions
 public:
-	CMenuState();
-	~CMenuState() {};
+	CUseState();
+	~CUseState() {};
 
 
 	virtual void OnUpdate() {};
-	virtual int OnBaseHandleKey( SDL_Keysym *keysym, eMenuModifier whichMenu );
+	virtual int OnBaseHandleKey( SDL_Keysym *keysym, eUseModifier whichUse );
 	virtual int OnHandleKey( SDL_Keysym *keysym );
 protected:
 	bool	IsAlpha(SDL_Keysym *keysym);
-	CLink<CItem>	*GetResponse(eMenuModifier whichMenu);
-	
-private:
-	MenuKeyHandler	m_pKeyHandlers[MENU_MAX];
-	MenuKeyHandler	m_pCurKeyHandler;
+	CLink<CItem>	*GetResponse(eUseModifier whichUse);
 
-	eMenuModifier	m_eCurModifier;
+private:
+	UseKeyHandler	m_pKeyHandlers[MENU_MAX];
+	UseKeyHandler	m_pCurKeyHandler;
+
+	eUseModifier	m_eCurModifier;
 
 	int OnHandleWield( SDL_Keysym *keysym );
 	int OnHandleRemove( SDL_Keysym *keysym );
 	int OnHandleInit( SDL_Keysym *keysym );
-
-
+	int OnHandleDrop( SDL_Keysym *keysym );
+	
 	bool TestWield();
 	bool DoWield();
 
 	bool TestRemove();
 	bool DoRemove();
-	
+
+	bool TestDrop();
+	bool DoDrop();
+
 	void	ResetToState( int newstate );
 };
 

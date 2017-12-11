@@ -100,7 +100,7 @@ void CPlayer::DisplayInventory()
     {
         pItem = pLink->m_lpData;
         g_pGame->GetInv()->Printf("%c - %s\n", cInventoryId, pItem->GetName());
-        
+
         if( cInventoryId < 'z' )
         {
             cInventoryId++;
@@ -112,7 +112,7 @@ void CPlayer::DisplayInventory()
         }
         pLink = m_llInventory->GetNext(pLink);
     }
-    
+
 }
 
 void CPlayer::DisplayEquipment()
@@ -126,7 +126,7 @@ void CPlayer::DisplayEquipment()
     {
         pItem = pLink->m_lpData;
         g_pGame->GetEquip()->Printf("%c - %s\n", cEquipmentId, pItem->GetName());
-        
+
         if( cEquipmentId < 'z' )
         {
             cEquipmentId++;
@@ -138,7 +138,7 @@ void CPlayer::DisplayEquipment()
         }
         pLink = m_llEquipment->GetNext(pLink);
     }
-    
+
 }
 
 void CPlayer::PickUp( JVector &vPickupPos )
@@ -177,7 +177,7 @@ bool CPlayer::IsWieldable(CLink<CItem> *pItem)
 bool CPlayer::Wield(CLink<CItem> *pLink)
 {
     CItem *pItem = pLink->m_lpData;
-    
+
     // You can only wield one thing of a given type at a time
     CLink<CItem> *pCurrEquip = m_llEquipment->GetLink(pItem->m_id->m_dwIndex, true);
     if( pCurrEquip != NULL && pCurrEquip->m_dwIndex == pLink->m_dwIndex )
@@ -199,7 +199,7 @@ bool CPlayer::Wield(CLink<CItem> *pLink)
     if( pItem->m_id->m_szBaseDamage != NULL ) strcpy(m_szDamage, pItem->m_id->m_szBaseDamage);
     m_fDamageModifier += pItem->m_id->m_fBonusToDamage;
     m_fToHitModifier += pItem->m_id->m_fBonusToHit;
-    
+
     return true;
 }
 
@@ -228,7 +228,7 @@ bool CPlayer::Remove(CLink<CItem> *pLink)
     m_fDamageModifier -= pItem->m_id->m_fBonusToDamage;
     m_fToHitModifier -= pItem->m_id->m_fBonusToHit;
 
-    
+
     return true;
 }
 
@@ -236,11 +236,11 @@ float CPlayer::Attack()
 {
     float fRoll = Util::Roll( "1d100" );
     float fHitMod = g_pGame->GetPlayer()->m_fToHitModifier;
-    
+
     printf( "You rolled: %.2f, +to-hit Bonus: %.2f = Total: %.2f\n", fRoll, fHitMod, fRoll + fHitMod );
-    
+
     fRoll += fHitMod;
-    
+
     return fRoll;
 }
 
@@ -269,7 +269,7 @@ void CPlayer::GainLevel()
         g_pGame->GetMsgs()->Printf("Welcome to level %d.\n", (int)m_fLevel);
         // TODO: Gain Spells or &c here.
     }
-    
+
 }
 
 bool CPlayer::Hit( float &fRoll )
@@ -280,8 +280,8 @@ bool CPlayer::Hit( float &fRoll )
 int CPlayer::TakeDamage( float fDamage, char *szMon )
 {
     int retval = STATUS_INVALID;
-    
-    
+
+
     if( (int)fDamage < (int)m_fCurHitPoints )
     {
         m_fCurHitPoints -= fDamage;
@@ -295,8 +295,26 @@ int CPlayer::TakeDamage( float fDamage, char *szMon )
         printf("You died on dungeon level %d, while level %d, killed by a %s.\n", g_pGame->GetDungeon()->depth, (int)m_fLevel, szMon );
         g_pGame->Quit(0);
     }
-    
+
     printf( "Remaining HP: %.2f \n", m_fCurHitPoints );
-    
+
     return retval;
+}
+
+bool CPlayer::Drop( CItem *pItem )
+{
+		m_llInventory->Remove(pItem->m_pllLink, false);
+    g_pGame->GetDungeon()->Drop(pItem, m_vPos);
+
+		return true;
+}
+
+bool CPlayer::CanDropHere()
+{
+	if( g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurItem != NULL )
+	{
+		g_pGame->GetMsgs()->Printf("There is already an item there.\n");
+		return false;
+	}
+	return true;
 }

@@ -28,7 +28,7 @@ public:
         m_fExpNeeded[8]=5000.0f;
         m_fExpNeeded[9]=7500.0f;
         m_fExpNeeded[10]=10000.0f;
-        
+
         m_szHD = new char[10];
         sprintf(m_szHD, CLASS_HD_WARRIOR);
     };
@@ -70,7 +70,7 @@ public:
         m_llEquipment = new JLinkList<CItem>;
         m_szDamage = new char[10];
         sprintf(m_szDamage, PLAYER_BASE_DAMAGE);
-        
+
         m_fHitPoints = Util::Roll(m_pClass->m_szHD);
         m_fCurHitPoints = m_fHitPoints;
     };
@@ -108,29 +108,32 @@ public:
     void DisplayInventory();
     void DisplayEquipment();
     void PickUp( JVector &vPickupPos );
-    
+    bool Drop( CItem *pItem );
+
+    bool CanDropHere();
+
     bool IsWieldable(CLink<CItem> *pLink);
     bool Wield(CLink<CItem> *pItem);
-    
+
     bool IsRemovable(CLink<CItem> *pLink);
     bool Remove(CLink<CItem> *pLink);
-    
+
     float Attack();
     float Damage( float fDamageMult );
-    
+
     bool Hit( float &fRoll );
     int TakeDamage(float fDamage, char *szMon);
-    
+
     void OnKillMonster( CMonster *pMon );
-    
+
 	JVector m_vPos;
 	CTileset *m_TileSet;
     bool m_bHasSpawned;
-    
+
     // Inventory
     JLinkList<CItem> *m_llInventory;
     JLinkList<CItem> *m_llEquipment;
-    
+
     // Combat
     char *m_szDamage;
     float m_fDamageModifier;
@@ -138,15 +141,15 @@ public:
 protected:
     JResult SpawnPlayer();
     void GainLevel();
-    
-    
+
+
     float m_fArmorClass;
     float m_fHitPoints;
     float m_fCurHitPoints;
-    
+
     float m_fExperience;
     float m_fLevel;
-    
+
     CClass *m_pClass;
 };
 #endif // __PLAYER_H__

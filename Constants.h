@@ -16,8 +16,9 @@
 #define STATE_INVALID		-1
 #define STATE_COMMAND		 0
 #define STATE_MODIFY		 1
-#define STATE_MENU           2
-#define STATE_MAX            3
+#define STATE_MENU       2
+#define STATE_USE        3
+#define STATE_MAX        4
 
 // Various statuses that someone could have
 #define STATUS_INVALID		-1
@@ -330,7 +331,7 @@ public:
         m_StringTable[i++].Init("MON_AI_75RANDOMMOVE", MON_AI_75RANDOMMOVE);
         m_StringTable[i++].Init("MON_AI_SEEKPLAYER", MON_AI_SEEKPLAYER);
         m_StringTable[i++].Init("MON_COLOR_MULTI", MON_COLOR_MULTI);
-        
+
         // Item Types
         m_StringTable[i++].Init("ITEM_IDX_SWORD",        ITEM_IDX_SWORD);
         m_StringTable[i++].Init("ITEM_IDX_SHIELD",       ITEM_IDX_SHIELD);

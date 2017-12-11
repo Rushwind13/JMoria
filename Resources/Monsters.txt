@@ -1,7 +1,7 @@
 # Monsters.txt
 #
 # Repository of all
-# "Things that Go 
+# "Things that Go
 # Bump in the Night"
 #
 # Each Monster entry is of the following form:
@@ -13,7 +13,7 @@
 # }
 #
 # Note: delimit <string> values with angle brackets <>
-# Where variable-name/value are name/value pairs 
+# Where variable-name/value are name/value pairs
 # from the following list:
 #
 # Plural	string	how to properly refer to more than one of this beastie
@@ -44,6 +44,36 @@
 #    Color		<255,0,0,255>
 #}
 
+Monster <Giant Frog>
+{
+    Plural		<Giant Frogs>
+    Appear      <1d1>
+    Speed		2.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <3d8>
+    AC          40.0
+    Level       5
+    ExpValue	35.0
+    Type		<MON_IDX_FROG>
+    Attack		<MON_FLAG_BITE>,2d8
+    Color		<71,165,0,255  >
+}
+
+Monster <Death Slaad>
+{
+    Plural		<Death Slaads>
+    Appear      <1d1>
+    Speed		2.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <4d8>
+    AC          50.0
+    Level       5
+    ExpValue	100.0
+    Type		<MON_IDX_FROG>
+    Attack		<MON_FLAG_FIRE>,2d4
+    Color		<71,165,0,255  >
+}
+
 Monster <Flaming Bat>
 {
     Plural		<Flaming Bats>
@@ -58,6 +88,127 @@ Monster <Flaming Bat>
     Attack		<MON_FLAG_FIRE>,2d8
     Color		<255,100,0,255  >
 }
+
+# Monster <Flaming Bat>
+#{
+#    Plural		<Flaming Bats>
+#    Appear      <1d1>
+#    Speed		2.0
+#    MoveType	<MON_AI_100RANDOMMOVE>
+#    HD          <4d8>
+#    AC          50.0
+#    Level       5
+#    ExpValue	100.0
+#    Type		<MON_IDX_BAT>
+#    Attack		<MON_FLAG_FIRE>,2d8
+#    Color		<255,100,0,255  >
+#}
+#
+#Monster <Flaming Bat>
+#{
+#    Plural		<Flaming Bats>
+#    Appear      <1d1>
+#    Speed		2.0
+#    MoveType	<MON_AI_100RANDOMMOVE>
+#    HD          <4d8>
+#    AC          50.0
+#    Level       5
+#    ExpValue	100.0
+#    Type		<MON_IDX_BAT>
+#    Attack		<MON_FLAG_FIRE>,2d8
+#    Color		<255,100,0,255  >
+#}
+#
+#Monster <Flaming Bat>
+#{
+#    Plural		<Flaming Bats>
+#    Appear      <1d1>
+#    Speed		2.0
+#    MoveType	<MON_AI_100RANDOMMOVE>
+#    HD          <4d8>
+#    AC          50.0
+#    Level       5
+#    ExpValue	100.0
+#    Type		<MON_IDX_BAT>
+#    Attack		<MON_FLAG_FIRE>,2d8
+#    Color		<255,100,0,255  >
+#}
+#
+#Monster <Flaming Bat>
+#{
+#    Plural		<Flaming Bats>
+#    Appear      <1d1>
+#    Speed		2.0
+#    MoveType	<MON_AI_100RANDOMMOVE>
+#    HD          <4d8>
+#    AC          50.0
+#    Level       5
+#    ExpValue	100.0
+#    Type		<MON_IDX_BAT>
+#    Attack		<MON_FLAG_FIRE>,2d8
+#    Color		<255,100,0,255  >
+#}
+#
+#Monster <Flaming Bat>
+#{
+#    Plural		<Flaming Bats>
+#    Appear      <1d1>
+#    Speed		2.0
+#    MoveType	<MON_AI_100RANDOMMOVE>
+#    HD          <4d8>
+#    AC          50.0
+#    Level       5
+#    ExpValue	100.0
+#    Type		<MON_IDX_BAT>
+#    Attack		<MON_FLAG_FIRE>,2d8
+#    Color		<255,100,0,255  >
+#}
+#
+#Monster <Flaming Bat>
+#{
+#    Plural		<Flaming Bats>
+#    Appear      <1d1>
+#    Speed		2.0
+#    MoveType	<MON_AI_100RANDOMMOVE>
+#    HD          <4d8>
+#    AC          50.0
+#    Level       5
+#    ExpValue	100.0
+#    Type		<MON_IDX_BAT>
+#    Attack		<MON_FLAG_FIRE>,2d8
+#    Color		<255,100,0,255  >
+#}
+#
+#Monster <Flaming Bat>
+#{
+#    Plural		<Death Watch Beetle>
+#    Appear      <1d1>
+#    Speed		2.0
+#    MoveType	<MON_AI_100RANDOMMOVE>
+#    HD          <9d8>
+#
+#    AC          50.0
+#    Level       5
+#    ExpValue	100.0
+#    Type		<MON_IDX_BAT>
+#    Attack		<MON_FLAG_FIRE>,2d8
+#    Color		<255,100,0,255  >
+#}
+#
+#Monster <Flaming Bat>
+#{
+#    Plural		<Flaming Bats>
+#    Appear      <1d1>
+#    Speed		2.0
+#    MoveType	<MON_AI_100RANDOMMOVE>
+#    HD          <2d8>
+#    AC          30.0
+#    Level       5
+#    ExpValue	100.0
+#    Type		<MON_IDX_BAT>
+#    Attack		<MON_FLAG_FIRE>,2d8
+#    Color		<<255,250,0,255>;<0,0,0,255>>
+#}
 
 Monster <Shadow Mastiff>
 {
@@ -100,7 +251,7 @@ Monster <Brontosaurus>
     Level       15
     ExpValue	100.0
     Type		<MON_IDX_DINOSAUR>
-    Attack		<MON_FLAG_CLAW>,3d6
+    Attack		<MON_FLAG_TRAMPLE>,3d6
     Color		<0,81,4,255>
 }
 
@@ -162,7 +313,7 @@ Monster <Blue Worm Mass>
     Level       1
     ExpValue	5.0
     Type		<MON_IDX_WORM>
-    Attack		<MON_FLAG_ICE>,1d5
+    Attack		<MON_FLAG_COLD>,1d5
     Color		<0,0,255,255>
     Flags       <MON_FLAG_BREED>
 }
@@ -357,7 +508,7 @@ Monster <Green Jelly>
 }
 
 Monster <Yellow Mushroom Patch>
-{	
+{
 	Plural		<Yellow Mushroom Patches>
 	Speed		1.0
 	MoveType	<MON_AI_DONTMOVE>
@@ -371,7 +522,7 @@ Monster <Yellow Mushroom Patch>
 }
 
 Monster <Blue Icky Thing>
-{	
+{
 	Plural		<Blue Icky Things>
 	Speed		1.0
 	MoveType	<MON_AI_100RANDOMMOVE>
@@ -399,7 +550,7 @@ Monster <Clear Icky Thing>
 }
 
 Monster <Opal Icky Thing>
-{	
+{
 	Plural		<Opal Icky Things>
 	Speed		1.0
 	MoveType	<MON_AI_100RANDOMMOVE>

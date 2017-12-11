@@ -89,20 +89,20 @@ Monster <Flaming Bat>
     Color		<255,100,0,255  >
 }
 
-# Monster <Flaming Bat>
-#{
-#    Plural		<Flaming Bats>
-#    Appear      <1d1>
-#    Speed		2.0
-#    MoveType	<MON_AI_100RANDOMMOVE>
-#    HD          <4d8>
-#    AC          50.0
-#    Level       5
-#    ExpValue	100.0
-#    Type		<MON_IDX_BAT>
-#    Attack		<MON_FLAG_FIRE>,2d8
-#    Color		<255,100,0,255  >
-#}
+ Monster <Floating Eye>
+{
+     Plural		<Floating Eyes>
+     Appear      <1d1>
+     Speed		.25
+     MoveType	<MON_AI_100RANDOMMOVE>
+     HD          <1d4>
+     AC          20.0
+     Level       1
+     ExpValue	100.0
+     Type		<MON_IDX_EYE>
+     Attack		<MON_FLAG_TOUCH>,0d0,
+     Color		<255,100,0,255  >
+}
 #
 #Monster <Flaming Bat>
 #{
@@ -115,7 +115,7 @@ Monster <Flaming Bat>
 #    Level       5
 #    ExpValue	100.0
 #    Type		<MON_IDX_BAT>
-#    Attack		<MON_FLAG_FIRE>,2d8
+#    Attack		<MON_FLAG_FIRE>,0d0,<MON_FLAG_CONFUS>,0d0
 #    Color		<255,100,0,255  >
 #}
 #

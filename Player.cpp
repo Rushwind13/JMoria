@@ -300,18 +300,52 @@ int CPlayer::TakeDamage( float fDamage, char *szMon )
 
 bool CPlayer::Drop( CItem *pItem )
 {
-		m_llInventory->Remove(pItem->m_pllLink, false);
+    m_llInventory->Remove(pItem->m_pllLink, false);
     g_pGame->GetDungeon()->Drop(pItem, m_vPos);
-
-		return true;
+    
+    return true;
 }
 
 bool CPlayer::CanDropHere()
 {
-	if( g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurItem != NULL )
-	{
-		g_pGame->GetMsgs()->Printf("There is already an item there.\n");
-		return false;
-	}
-	return true;
+    if( g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurItem != NULL )
+    {
+        g_pGame->GetMsgs()->Printf("There is already an item there.\n");
+        return false;
+    }
+    return true;
 }
+
+bool CPlayer::Quaff( CLink<CItem> *pLink )
+{
+    CItem *pItem = pLink->m_lpData;
+    m_llInventory->Remove(pItem->m_pllLink, false);
+    CEffect *pEffect = pItem->m_id->m_llEffects->GetHead()->m_lpData;
+    if( pEffect->m_dwEffect == ITEM_FLAG_HEAL_HP )
+    {
+        m_fCurHitPoints += Util::Roll(pEffect->m_szAmount);
+        if( m_fCurHitPoints > m_fHitPoints )
+        {
+            m_fCurHitPoints = m_fHitPoints;
+        }
+        g_pGame->GetMsgs()->Printf("You feel a bit better.\n");
+    }
+    
+    return true;
+}
+
+bool CPlayer::IsDrinkable(CLink<CItem> *pLink)
+{
+    bool retval = false;
+    switch( pLink->m_lpData->m_id->m_dwIndex )
+    {
+        case ITEM_IDX_POTION:
+            retval = true;
+            break;
+        default:
+            retval = false;
+            break;
+    }
+    return retval;
+}
+

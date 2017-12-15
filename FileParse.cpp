@@ -348,6 +348,46 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
                     idIn.m_Color.SetColor(color);
                 }
             }
+            else if( strncasecmp( szLine, "effect", 6 ) == 0 )
+            {
+                CEffect *curEffect;
+                curEffect = new CEffect;
+                char *begin;
+                char *end;
+                char *cur;
+                // Effect    <ITEM_FLAG_HEAL>, 1d20
+                // Effect    <ITEM_FLAG_CURE_BLINDNESS>
+                // type
+                begin = strchr( szLine, '<' );
+                end = strchr( szLine, '>' );
+                if( begin == NULL || end == NULL )
+                {
+                    continue;
+                }
+                *end++ = NULL;
+                begin++;
+                curEffect->m_dwEffect = g_Constants.LookupString(begin);
+                cur = end;
+                
+                // amount
+                begin = strchr(cur, ',');
+                if( begin == NULL ) continue;
+                begin++;
+                cur = Strip(begin);
+                begin = strchr( cur, '<' );
+                end = strchr( cur, '>' );
+                if( begin == NULL || end == NULL )
+                {
+                    continue;
+                }
+                *end = NULL;
+                begin++;
+                curEffect->m_szAmount = new char[strlen(begin)+1];
+                strcpy( curEffect->m_szAmount, begin );
+                
+                // store it
+                idIn.m_llEffects->Add(curEffect);
+            }
             else if( *szLine == '}' )
             {
                 bEndItem = true;

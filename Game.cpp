@@ -258,11 +258,12 @@ bool CGame::Update( float fCurTime )
     {
         switch( reinterpret_cast<CUseState *>(m_pCurState)->GetModifier())
         {
-            case MENU_WIELD:
-            case MENU_DROP:
+            case USE_WIELD:
+            case USE_DROP:
+            case USE_QUAFF:
                 GetPlayer()->DisplayInventory(PLACEMENT_USE);
                 break;
-            case MENU_REMOVE:
+            case USE_REMOVE:
                 GetPlayer()->DisplayEquipment(PLACEMENT_USE);
                 break;
             default:

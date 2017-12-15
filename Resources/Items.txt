@@ -249,7 +249,9 @@ Item <Potion of Minor Healing>
 {
     Plural        <Potions of Minor Healing>
     Type        <ITEM_IDX_POTION>
-    Effect     <ITEM_FLAG_HEAL>,<1d20>,<ITEM_FLAG_CURE_POISON>,<ITEM_FLAG_CURE_BLINDNESS>
+    Effect      <ITEM_FLAG_HEAL_HP>,<1d20>
+#    Effect      <ITEM_FLAG_CURE_POISON>
+#    Effect      <ITEM_FLAG_CURE_BLINDNESS>
     Value       1000.0
     Level       2
     Weight      0.2

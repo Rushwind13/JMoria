@@ -117,7 +117,10 @@ public:
 
     bool IsRemovable(CLink<CItem> *pLink);
     bool Remove(CLink<CItem> *pLink);
-
+    
+    bool IsDrinkable(CLink<CItem> *pLink);
+    bool Quaff(CLink<CItem> *pLink);
+    
     float Attack();
     float Damage( float fDamageMult );
 

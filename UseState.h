@@ -9,12 +9,13 @@ class CUseState;
 typedef int (CUseState::*UseKeyHandler)(SDL_Keysym *keysym);
 enum eUseModifier
 {
-	MENU_INVALID=-1,
-	MENU_WIELD=0,
-	MENU_REMOVE=1,
-	MENU_INIT,
-	MENU_DROP,
-	MENU_MAX
+	USE_INVALID=-1,
+	USE_WIELD=0,
+	USE_REMOVE=1,
+	USE_INIT,
+    USE_DROP,
+    USE_QUAFF,
+	USE_MAX
 };
 
 class CUseState : public CStateBase
@@ -43,7 +44,7 @@ protected:
 	CLink<CItem>	*GetResponse(eUseModifier whichUse);
 
 private:
-	UseKeyHandler	m_pKeyHandlers[MENU_MAX];
+	UseKeyHandler	m_pKeyHandlers[USE_MAX];
 	UseKeyHandler	m_pCurKeyHandler;
 
 	eUseModifier	m_eCurModifier;
@@ -51,16 +52,20 @@ private:
 	int OnHandleWield( SDL_Keysym *keysym );
 	int OnHandleRemove( SDL_Keysym *keysym );
 	int OnHandleInit( SDL_Keysym *keysym );
-	int OnHandleDrop( SDL_Keysym *keysym );
-	
+    int OnHandleDrop( SDL_Keysym *keysym );
+    int OnHandleQuaff( SDL_Keysym *keysym );
+
 	bool TestWield();
 	bool DoWield();
 
 	bool TestRemove();
 	bool DoRemove();
-
-	bool TestDrop();
-	bool DoDrop();
+    
+    bool TestDrop();
+    bool DoDrop();
+    
+    bool TestQuaff();
+    bool DoQuaff();
 
 	void	ResetToState( int newstate );
 };

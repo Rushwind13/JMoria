@@ -331,6 +331,7 @@ bool CCmdState::IsUseCommand(SDL_Keysym *keysym)
         // t (but not T)
         case SDLK_t:
         case SDLK_d:
+        case SDLK_q:
             return true;
             break;
         default:

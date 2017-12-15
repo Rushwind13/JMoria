@@ -105,8 +105,8 @@ public:
 	void Draw();
     void PostDraw();
     void DisplayStats();
-    void DisplayInventory();
-    void DisplayEquipment();
+    void DisplayInventory(uint8 dwPlacement);
+    void DisplayEquipment(uint8 dwPlacement);
     void PickUp( JVector &vPickupPos );
     bool Drop( CItem *pItem );
 

@@ -62,9 +62,12 @@ JResult CGame::Init()
 
     m_pInvDT = new CDisplayText( JRect( 440,50,  640,340 ) );
     m_pInvDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
-
+    
     m_pEquipDT = new CDisplayText( JRect( 440,345,  640,480 ) );
     m_pEquipDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
+    
+    m_pUseDT = new CDisplayText( JRect( 200,40,  440,480 ), 200 );
+    m_pUseDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
 
 
 	m_pAIMgr = new CAIMgr;
@@ -110,13 +113,43 @@ void CGame::Quit( int returncode )
 		m_pPlayer->Term();
 		delete m_pPlayer;
 		m_pPlayer = NULL;
-	}
-
-	if( m_pCmdState )
-	{
-		delete m_pCmdState;
-		m_pCmdState = NULL;
-	}
+    }
+    
+    if( m_pCmdState )
+    {
+        delete m_pCmdState;
+        m_pCmdState = NULL;
+    }
+    
+    if( m_pMsgsDT )
+    {
+        delete m_pMsgsDT;
+        m_pMsgsDT = NULL;
+    }
+    
+    if( m_pStatsDT )
+    {
+        delete m_pStatsDT;
+        m_pStatsDT = NULL;
+    }
+    
+    if( m_pInvDT )
+    {
+        delete m_pInvDT;
+        m_pInvDT = NULL;
+    }
+    
+    if( m_pEquipDT )
+    {
+        delete m_pEquipDT;
+        m_pEquipDT = NULL;
+    }
+    
+    if( m_pUseDT )
+    {
+        delete m_pUseDT;
+        m_pUseDT = NULL;
+    }
 	exit( returncode );
 }
 
@@ -200,17 +233,18 @@ bool CGame::Update( float fCurTime )
         m_fGameTime++;
         fCurTime = 1.0f;
         m_bReadyForUpdate = false;
+        // TODO: Why does the AI require 2 ticks to move the monster?
+        GetAIMgr()->Update(fCurTime);
+        GetAIMgr()->Update(fCurTime);
     }
-    else
-    {
-        return false;
-    }
-    // TODO: Why does the AI require 2 ticks to move the monster?
+//    else
+//    {
+//        return false;
+//    }
+#else
+    // Update the AI
     GetAIMgr()->Update(fCurTime);
 #endif // TURN_BASED
-	// Update the AI
-	GetAIMgr()->Update(fCurTime);
-
 	// Update the player
 	GetPlayer()->Update(fCurTime);
 
@@ -220,6 +254,23 @@ bool CGame::Update( float fCurTime )
     GetStats()->Update(fCurTime);
     GetInv()->Update(fCurTime);
     GetEquip()->Update(fCurTime);
+    if( m_eCurState == STATE_USE )
+    {
+        switch( reinterpret_cast<CUseState *>(m_pCurState)->GetModifier())
+        {
+            case MENU_WIELD:
+            case MENU_DROP:
+                GetPlayer()->DisplayInventory(PLACEMENT_USE);
+                break;
+            case MENU_REMOVE:
+                GetPlayer()->DisplayEquipment(PLACEMENT_USE);
+                break;
+            default:
+                printf("Nothing to display for command\n");
+                break;
+        }
+        GetUse()->Update(fCurTime);
+    }
 
 	return true;
 }
@@ -238,6 +289,10 @@ void CGame::Draw()
     GetStats()->Draw();
     GetInv()->Draw();
     GetEquip()->Draw();
+    if( m_eCurState == STATE_USE )
+    {
+        GetUse()->Draw();
+    }
 
 	GetRender()->PostDraw();
 

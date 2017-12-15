@@ -36,6 +36,8 @@ public:
 	virtual void OnUpdate() {};
 	virtual int OnBaseHandleKey( SDL_Keysym *keysym, eUseModifier whichUse );
 	virtual int OnHandleKey( SDL_Keysym *keysym );
+    
+    eUseModifier GetModifier() { return m_eCurModifier; };
 protected:
 	bool	IsAlpha(SDL_Keysym *keysym);
 	CLink<CItem>	*GetResponse(eUseModifier whichUse);

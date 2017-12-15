@@ -440,5 +440,5 @@ int CCmdState::TestStairs()
 
 void CCmdState::DisplayInventory()
 {
-    g_pGame->GetPlayer()->DisplayInventory();
+    g_pGame->GetPlayer()->DisplayInventory(PLACEMENT_INV);
 }

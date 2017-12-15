@@ -7,6 +7,7 @@
 #include "Game.h"
 #include "Dungeon.h"
 #include "DisplayText.h"
+#include "JLinkList.h"
 
 extern CGame *g_pGame;
 
@@ -22,8 +23,8 @@ void CPlayer::Init()
 bool CPlayer::Update(float fCurTime)
 {
     DisplayStats();
-    DisplayInventory();
-    DisplayEquipment();
+    DisplayInventory(PLACEMENT_INV);
+    DisplayEquipment(PLACEMENT_EQUIP);
 	return true;
 }
 
@@ -89,56 +90,52 @@ void CPlayer::DisplayStats()
     g_pGame->GetStats()->Printf("Exp to Next:%d\n", (int)(m_pClass->m_fExpNeeded[(int)m_fLevel-1] - m_fExperience));
 }
 
-void CPlayer::DisplayInventory()
+void CPlayer::DisplayInventory( uint8 dwPlacement )
 {
-    CLink<CItem> *pLink = m_llInventory->GetHead();
-    CItem *pItem;
-    g_pGame->GetInv()->Clear();
-    g_pGame->GetInv()->Printf("You are carrying:\n");
-    char cInventoryId = 'a';
-    while(pLink != NULL)
+    CDisplayMeta meta;
+    sprintf( meta.header, "You are Carrying:\n");
+    meta.limit = 'z';
+    sprintf( meta.footer, "Inventory past first page not shown.\n");
+    CDisplayText *pDT = NULL;
+    switch(dwPlacement)
     {
-        pItem = pLink->m_lpData;
-        g_pGame->GetInv()->Printf("%c - %s\n", cInventoryId, pItem->GetName());
-
-        if( cInventoryId < 'z' )
-        {
-            cInventoryId++;
-        }
-        else
-        {
-            printf("Inventory past first page not shown.\n");
+        case PLACEMENT_INV:
+            pDT = g_pGame->GetInv();
             break;
-        }
-        pLink = m_llInventory->GetNext(pLink);
+        case PLACEMENT_USE:
+            pDT = g_pGame->GetUse();
+            break;
+        default:
+            printf("DisplayInventory got bad placement: %d\n", dwPlacement);
+            return;
+            break;
     }
-
+    
+    pDT->DisplayList( m_llInventory, &meta );
 }
 
-void CPlayer::DisplayEquipment()
+void CPlayer::DisplayEquipment( uint8 dwPlacement )
 {
-    CLink<CItem> *pLink = m_llEquipment->GetHead();
-    CItem *pItem;
-    g_pGame->GetEquip()->Clear();
-    g_pGame->GetEquip()->Printf("You are wearing:\n");
-    char cEquipmentId = 'a';
-    while(pLink != NULL)
+    CDisplayMeta meta;
+    sprintf( meta.header, "You are wearing:\n");
+    meta.limit = 'j';
+    sprintf( meta.footer, "Equipment is limited to 10 items, one each for specific body parts.\n");
+    CDisplayText *pDT = NULL;
+    switch(dwPlacement)
     {
-        pItem = pLink->m_lpData;
-        g_pGame->GetEquip()->Printf("%c - %s\n", cEquipmentId, pItem->GetName());
-
-        if( cEquipmentId < 'z' )
-        {
-            cEquipmentId++;
-        }
-        else
-        {
-            printf("Equipment is limited to N items, one each for specific body parts.\n");
+        case PLACEMENT_EQUIP:
+            pDT = g_pGame->GetEquip();
             break;
-        }
-        pLink = m_llEquipment->GetNext(pLink);
+        case PLACEMENT_USE:
+            pDT = g_pGame->GetUse();
+            break;
+        default:
+            printf("DisplayEquipment got bad placement: %d\n", dwPlacement);
+            return;
+            break;
     }
-
+    
+    pDT->DisplayList( m_llEquipment, &meta );
 }
 
 void CPlayer::PickUp( JVector &vPickupPos )

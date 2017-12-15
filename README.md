@@ -21,6 +21,7 @@ Keyboard commands recognized:
 * *d* - drop
 * *.* - rest one turn
 * *R* - rest indefinitely (not fully implemented)
+* *q* - quaff a potion
 
 Monster definitions are in _Resources/Monsters.txt_
 Item definitions are in _Resources/Items.txt_

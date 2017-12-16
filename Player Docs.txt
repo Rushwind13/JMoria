@@ -8,9 +8,13 @@ c - close
 T - tunnel
 i - inventory (removed this in favor of just having it onscreen all the time)
 w - wield an item
-r - remove a piece of equipment
+t - remove (take off) a piece of equipment
 < - go upstairs
 > - go downstairs
+d - drop
+. - rest one turn
+R - rest indefinitely (not fully implemented)
+q - quaff a potion
 ^c - exit game
 
 *Items*

@@ -50,17 +50,17 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 		g_pGame->GetGameState()->HandleKey(keysym);
 		retval = 0;
 	}
-    
-    // Menu commands allow you to choose from lists of items:
+
+    // Use commands allow you to choose from lists of items:
     // inventory, equipment, stores, chests?, bag of holding, &c
-    else if( IsMenuCommand(keysym) )
+    else if( IsUseCommand(keysym) )
     {
         // Add "modify" to the top of the state stack
-        g_pGame->SetState(STATE_MENU);
+        g_pGame->SetState(STATE_USE);
         g_pGame->GetGameState()->HandleKey(keysym);
         retval = 0;
     }
-    
+
     else if( IsStairsCommand(keysym) )
     {
         m_vNewPos = g_pGame->GetPlayer()->m_vPos;
@@ -68,8 +68,27 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
         retval = 0;
     }
 
+    else if( IsRestCommand( keysym ) )
+  	{
+      switch( keysym-> sym )
+      {
+      case SDLK_r:
+        printf("R)est not implemented yet.\n");
+        // g_pGame->SetState(STATE_REST);
+        // g_pGame->GetGameState()->HandleKey(keysym);
+        break;
+      case SDLK_PERIOD:
+        // Do nothing; rest one turn
+        break;
+      default:
+        break;
+      }
+
+  		retval = 0;
+  	}
+
 	/*
-	// These commands will bring up a "menu"
+	// These commands will bring up a ""
 	// Inventory, Equipment
 	if( IsMenuCommand( keysym ) )
 	{
@@ -77,7 +96,7 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 		newState.cmd(keysym);
 		return;
 	}
-	
+
 	// The following commands work with spellbooks:
 	// Magic/Music, Pray/Play, Browse (special case: doesn't cast anything)
 	// Note, each of these is class-specific.
@@ -88,28 +107,12 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 		return;
 	}
 
-	// These commands take an item (from inventory) to use:
-	// Wear/Wield, Put on, Take off, Quaff, Read, Aim, Use, Apply, Eat, Remove, Drop
-	if( IsUseCommand( keysym ) )
-	{
-		newState = STATE_USE;
-		newState.cmd(keysym);
-		return;
-	}
-
 	// These commands put the user into some part of the help system:
 	// Help, Level Info, Weapon Info, Armor Info, etc.
 	if( IsHelpCommand( keysym ) )
 	{
 		newState = STATE_HELP;
 		newState.cmd(keysym);
-		return;
-	}
-
-	if( IsRestCommand( keysym ) )
-	{
-		newState = STATE_REST;
-		newState.cmd( keysym );
 		return;
 	}
 
@@ -139,7 +142,7 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 
 void CCmdState::HandleCollision( int dwCollideType )
 {
-	// There are only 2 things to collide with; 
+	// There are only 2 things to collide with;
 	// Monsters and Walls.
 	if( IsMonster( dwCollideType ) )
 	{
@@ -151,8 +154,8 @@ void CCmdState::HandleCollision( int dwCollideType )
 		// When Players Attack
 		CMonster *pMon = g_pGame->GetDungeon()->GetTile(m_vNewPos)->m_pCurMonster;
 		szMonster = pMon->GetName();
-        
-        
+
+
         fRoll = g_pGame->GetPlayer()->Attack();
 		bHit = pMon->Hit(fRoll);
 		if( bHit )
@@ -163,22 +166,22 @@ void CCmdState::HandleCollision( int dwCollideType )
 		{
 			sprintf( szStatus, "miss" );
 		}
-		
+
 		g_pGame->GetMsgs()->Printf( "You %s the %s.\n", szStatus, szMonster );
 
 		if(bHit)
 		{
 			if( fRoll > 80.0f )
-			{		
+			{
 				g_pGame->GetMsgs()->Printf( "(It was an excellent hit! (x2 damage)\n" );
 				fDamageMult = 2.0f;
 			}
-            
+
             float fDamage = g_pGame->GetPlayer()->Damage(fDamageMult);
-            
+
 			if( pMon->TakeDamage(fDamage) == STATUS_DEAD )
 			{
-				sprintf( szStatus, "have slain" );			
+				sprintf( szStatus, "have slain" );
 				g_pGame->GetMsgs()->Printf( "You %s the %s.\n", szStatus, szMonster );
                 g_pGame->GetPlayer()->OnKillMonster(pMon);
 				g_pGame->GetDungeon()->RemoveMonster(pMon);
@@ -214,7 +217,7 @@ void CCmdState::HandleCollision( int dwCollideType )
 
 bool CCmdState::IsDirectional(SDL_Keysym *keysym)
 {
-	// All the movement keys 
+	// All the movement keys
 	// (arrows and numberpad keys)
 	// have sequential SDLK_ symbols,
 	// so we can handle them with this check
@@ -278,7 +281,7 @@ void CCmdState::GetDir(SDL_Keysym *keysym, JVector &vDir)
 	default:
 		// nothing
 		break;
-		
+
 	}
 }
 
@@ -302,10 +305,16 @@ bool CCmdState::IsModifierNeeded(SDL_Keysym *keysym)
 	switch( keysym->sym )
 	{
 	case SDLK_o:
-	case SDLK_t:
 	case SDLK_c:
 		return true;
 		break;
+  // T ( but not t )
+	case SDLK_t:
+    if( keysym->mod & KMOD_SHIFT )
+    {
+      return true;
+    }
+    break;
 	default:
 		return false;
 		break;
@@ -314,20 +323,22 @@ bool CCmdState::IsModifierNeeded(SDL_Keysym *keysym)
 	return false;
 }
 
-
-bool CCmdState::IsMenuCommand(SDL_Keysym *keysym)
+bool CCmdState::IsUseCommand(SDL_Keysym *keysym)
 {
     switch( keysym->sym )
     {
         case SDLK_w:
-        case SDLK_r:
+        // t (but not T)
+        case SDLK_t:
+        case SDLK_d:
+        case SDLK_q:
             return true;
             break;
         default:
             return false;
             break;
     }
-    
+
     return false;
 }
 
@@ -347,6 +358,29 @@ bool CCmdState::IsStairsCommand( SDL_Keysym *keysym )
     }
     return false;
 }
+
+bool CCmdState::IsRestCommand(SDL_Keysym *keysym)
+{
+    switch( keysym->sym )
+    {
+    case SDLK_PERIOD:
+      // want . not >
+      return ( keysym->mod & KMOD_SHIFT ) ? false : true;
+      break;
+    case SDLK_r:
+      // want R not r
+      return ( keysym->mod & KMOD_SHIFT ) ? true : false;
+      break;
+    default:
+      return false;
+      break;
+    }
+
+    return false;
+}
+
+
+// Handlers
 #define DIR_UP 4
 #define DIR_DOWN 5
 
@@ -358,7 +392,7 @@ int CCmdState::OnHandleStairs( SDL_Keysym *keysym )
         g_pGame->GetMsgs()->Printf("I do not see any stairs here.\n");
         return JSUCCESS;
     }
-    
+
     // if on <, go up stairs
     if( keysym->sym == SDLK_COMMA && stair_dir == DUNG_IDX_UPSTAIRS )
     {
@@ -407,6 +441,5 @@ int CCmdState::TestStairs()
 
 void CCmdState::DisplayInventory()
 {
-    g_pGame->GetPlayer()->DisplayInventory();
+    g_pGame->GetPlayer()->DisplayInventory(PLACEMENT_INV);
 }
-

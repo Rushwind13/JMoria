@@ -9,7 +9,7 @@
 
 #include "CmdState.h"
 #include "ModState.h"
-#include "MenuState.h"
+#include "UseState.h"
 
 #include "Render.h"
 #include "DisplayText.h"
@@ -31,7 +31,7 @@ m_eCurState(STATE_INVALID)
 {
     m_pCmdState = new CCmdState;
     m_pModState = new CModState;
-    m_pMenuState = new CMenuState;
+    m_pUseState = new CUseState;
 #ifdef TURN_BASED
     m_fGameTime = 0.0f;
     m_bReadyForUpdate = true;
@@ -44,7 +44,7 @@ JResult CGame::Init()
 	// Initialize all the game stuff, baby.
 
 	g_Constants.Init();
-	
+
 	// Init the Render
 	m_pRender = new CRender;
 	result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
@@ -56,15 +56,18 @@ JResult CGame::Init()
 
 	m_pMsgsDT = new CDisplayText( JRect( 0, 0, 640, 36 ) );
 	m_pMsgsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE);
-    
+
     m_pStatsDT = new CDisplayText( JRect( 0,50,  150,480 ) );
     m_pStatsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
-    
+
     m_pInvDT = new CDisplayText( JRect( 440,50,  640,340 ) );
     m_pInvDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
     
     m_pEquipDT = new CDisplayText( JRect( 440,345,  640,480 ) );
     m_pEquipDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
+    
+    m_pUseDT = new CDisplayText( JRect( 200,40,  440,480 ), 200 );
+    m_pUseDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
 
 
 	m_pAIMgr = new CAIMgr;
@@ -84,7 +87,7 @@ JResult CGame::Init()
 
 	// Set up the initial game state
 	SetState(STATE_COMMAND);
-	
+
 	// we're up.
 	return JSUCCESS;
 }
@@ -97,26 +100,56 @@ void CGame::Quit( int returncode )
 		delete m_pRender;
 		m_pRender = NULL;
 	}
-	
+
 	if( m_pDungeon )
 	{
 		m_pDungeon->Term();
 		delete m_pDungeon;
 		m_pDungeon = NULL;
 	}
-	
+
 	if( m_pPlayer )
 	{
 		m_pPlayer->Term();
 		delete m_pPlayer;
 		m_pPlayer = NULL;
-	}
-
-	if( m_pCmdState )
-	{
-		delete m_pCmdState;
-		m_pCmdState = NULL;
-	}
+    }
+    
+    if( m_pCmdState )
+    {
+        delete m_pCmdState;
+        m_pCmdState = NULL;
+    }
+    
+    if( m_pMsgsDT )
+    {
+        delete m_pMsgsDT;
+        m_pMsgsDT = NULL;
+    }
+    
+    if( m_pStatsDT )
+    {
+        delete m_pStatsDT;
+        m_pStatsDT = NULL;
+    }
+    
+    if( m_pInvDT )
+    {
+        delete m_pInvDT;
+        m_pInvDT = NULL;
+    }
+    
+    if( m_pEquipDT )
+    {
+        delete m_pEquipDT;
+        m_pEquipDT = NULL;
+    }
+    
+    if( m_pUseDT )
+    {
+        delete m_pUseDT;
+        m_pUseDT = NULL;
+    }
 	exit( returncode );
 }
 
@@ -131,8 +164,8 @@ void CGame::SetState( int eNewState )
     case STATE_MODIFY:
         m_pCurState = reinterpret_cast<CStateBase *>(m_pModState);
         break;
-    case STATE_MENU:
-        m_pCurState = reinterpret_cast<CStateBase *>(m_pMenuState);
+    case STATE_USE:
+        m_pCurState = reinterpret_cast<CStateBase *>(m_pUseState);
         break;
 	default:
         printf("Tried to change to unknown state.\n");
@@ -155,38 +188,38 @@ int CGame::Update()
 
 		// handle the events in the queue
 		g_pGame->HandleEvents(isActive, done);
-		
+
 		// draw the scene
 		if ( isActive )
 		{
 #ifdef PROFILE
 			ProfileBegin( "Graphics Draw Routine" );
 #endif // PROFILE
-			
+
 			g_pGame->GetRender()->PreDraw();
 			// Draw the player
 			g_pGame->GetPlayer()->Draw();
-			
+
 			// Draw the dungeon
 			g_pGame->GetDungeon()->Draw();
 			g_pGame->GetMsgs()->Draw();
 			g_pGame->GetStats()->Draw();
-			
+
 #ifdef PROFILE
 			ProfileDraw();
-			
+
 			ProfileEnd( "Graphics Draw Routine" );
 #endif // PROFILE
 			g_pGame->GetRender()->PostDraw();
-			
+
 			// pageflip
 			SDL_GL_SwapBuffers( );
 		} // if( isactive )
-		
+
 #ifdef PROFILE
 		ProfileEnd( "Main Loop" );
 		ProfileDumpOutputToBuffer();
-#endif PROFILE	
+#endif PROFILE
 	}
 
 	return done;
@@ -200,45 +233,68 @@ bool CGame::Update( float fCurTime )
         m_fGameTime++;
         fCurTime = 1.0f;
         m_bReadyForUpdate = false;
+        // TODO: Why does the AI require 2 ticks to move the monster?
+        GetAIMgr()->Update(fCurTime);
+        GetAIMgr()->Update(fCurTime);
     }
-    else
-    {
-        return false;
-    }
-    // TODO: Why does the AI require 2 ticks to move the monster?
+//    else
+//    {
+//        return false;
+//    }
+#else
+    // Update the AI
     GetAIMgr()->Update(fCurTime);
 #endif // TURN_BASED
-	// Update the AI
-	GetAIMgr()->Update(fCurTime);
-
 	// Update the player
 	GetPlayer()->Update(fCurTime);
-	
+
 	// Update the dungeon
 	GetDungeon()->Update(fCurTime);
     GetMsgs()->Update(fCurTime);
     GetStats()->Update(fCurTime);
     GetInv()->Update(fCurTime);
     GetEquip()->Update(fCurTime);
+    if( m_eCurState == STATE_USE )
+    {
+        switch( reinterpret_cast<CUseState *>(m_pCurState)->GetModifier())
+        {
+            case USE_WIELD:
+            case USE_DROP:
+            case USE_QUAFF:
+                GetPlayer()->DisplayInventory(PLACEMENT_USE);
+                break;
+            case USE_REMOVE:
+                GetPlayer()->DisplayEquipment(PLACEMENT_USE);
+                break;
+            default:
+                printf("Nothing to display for command\n");
+                break;
+        }
+        GetUse()->Update(fCurTime);
+    }
 
 	return true;
 }
 
 void CGame::Draw()
-{	
+{
 	GetRender()->PreDraw();
-	
+
 	// Draw the dungeon
     GetDungeon()->Draw();
-    
+
     // Draw the player
     GetPlayer()->Draw();
-    
+
     GetMsgs()->Draw();
     GetStats()->Draw();
     GetInv()->Draw();
     GetEquip()->Draw();
-	
+    if( m_eCurState == STATE_USE )
+    {
+        GetUse()->Draw();
+    }
+
 	GetRender()->PostDraw();
 
 	//SDL_GL_SwapBuffers();
@@ -310,7 +366,7 @@ void CGame::HandleEvents(int &isActive, int &done)
 				break;
 
 			}
-			/*printf("Got up event type: %d which: %d button: %d state: %d at <%d %d>\n", 
+			/*printf("Got up event type: %d which: %d button: %d state: %d at <%d %d>\n",
 			event.button.type,
 			event.button.which,
 			event.button.button,

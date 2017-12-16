@@ -100,7 +100,7 @@ Monster <Flaming Bat>
      Level       1
      ExpValue	100.0
      Type		<MON_IDX_EYE>
-     Attack		<MON_FLAG_TOUCH>,0d0,
+     Attack		<MON_FLAG_TOUCH>,0d0
      Color		<255,100,0,255  >
 }
 #

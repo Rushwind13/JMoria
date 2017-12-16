@@ -12,6 +12,7 @@
 
 typedef int JResult;
 typedef unsigned int uint32;
+typedef unsigned char uint8;
 
 #define nul '\0'
 
@@ -42,6 +43,12 @@ extern Constants g_Constants;
 #define DUNG_COLL_MONSTER (Sint8)(-2)
 #define DUNG_COLL_PLAYER (Sint8)(-3)
 #define DUNG_COLL_ITEM (Sint8)(-4)
+
+#define PLACEMENT_INVALID_PLACEMENT -1
+#define PLACEMENT_INV                1
+#define PLACEMENT_EQUIP              2
+#define PLACEMENT_USE                3
+#define PLACEMENT_MAX                4
 
 // SDL sees the mouse wheel as buttons 4&5
 // but has no constants for them.

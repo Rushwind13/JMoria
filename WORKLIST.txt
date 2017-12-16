@@ -39,17 +39,14 @@ PLAYER:
 - equipped items enhance player instrinsics; player wears ring, set the intrinsic "isInvisible" on the player.
 - equipped items are used to make attacks and to defend against attacks (raise AC, raise to-hit and damage stats, &c)
 - equippable items restricted to certain subset of all items ITEM_FLAG_EQUIPMENT, instead of hardcoded in CPlayer::Wield.
-- implement DropItem()
 - implement paginated inventory
 
 
 COMBAT:
 - combat is very hardcoded. make it not so much.
-- implement monster fighting back (might need HP and stuff for that, though)
-- 12.5.2017 monsters now collide with player; just add damage/hitpoints!
 - should monsters be able to wield items? use potions? pick stuff up off the ground?
 - need to add speed, somehow
-- someday, convert to turn-based, too :)
+- add "seek" AI (monster tries to move towards player)
 
 
 
@@ -77,6 +74,8 @@ FONT / TEXTURE / DISPLAY / COLOR:
   (perhaps a tilemgr? maybe just all the DisplayText boxes use the same (set of) fonts?
   foo=new DisplayText(FONT_COURIER, JRect()) maybe)
 - display player intrinsics as part of the texture coloration: stripes for each one, or "LEDs" or something.
+- create new PNGs for different sized fonts (the mipmapping for text output looks dumb)
+
 
 
 
@@ -98,6 +97,7 @@ STABILITY:
 - figure out why the framerate seems to tank? unfreed resources? (4/10/03 still a problem? Haven't seen it)
 - 12.5.2017 - B reports occasionally all the text goes black on black, doesn't affect the dungeon, only the overlay.
 - 12.5.2017 - getting a lot of intermittent "bad string" complaints; wtf?! like for some reason the string lookup table sometimes isn't working right
+- 12.14.2017 - Just saw Star Wars 8 tonight, woot. Also, JMoria beats the heck out of the CPU, I left it running, and it was using 90%+ CPU, caused the fan to come on... maybe if it was locked to a particular framerate (like 30fps), it would give the CPU more of a break in between cycles?
 
 
 

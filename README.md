@@ -17,7 +17,11 @@ Keyboard commands recognized:
 * *>* - go down a staircase
 * *i* - show character inventory (removed this in favor of just having it onscreen all the time)
 * *w* - wield an item
-* *r* - remove a piece of equipment
+* *t* - remove (take off) a piece of equipment
+* *d* - drop
+* *.* - rest one turn
+* *R* - rest indefinitely (not fully implemented)
+* *q* - quaff a potion
 
 Monster definitions are in _Resources/Monsters.txt_
 Item definitions are in _Resources/Items.txt_

@@ -50,20 +50,6 @@ class CSpellState : public CStateBase
 	private:
 };
 
-class CUseState : public CStateBase
-{
-	// Member Variables
-	public:
-	protected:
-	private:
-
-	// Member Functions
-	public:
-	protected:
-	virtual int OnHandleKey( SDL_keysym *keysym );
-	private:
-};
-
 class CRestState : public CStateBase
 {
 	// Member Variables

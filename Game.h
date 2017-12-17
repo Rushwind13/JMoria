@@ -15,6 +15,7 @@ class CStateBase;
 class CCmdState;
 class CModState;
 class CUseState;
+class CStringInputState;
 class CAIMgr;
 
 class CGame
@@ -62,6 +63,7 @@ protected:
     CCmdState	*m_pCmdState;
     CModState    *m_pModState;
     CUseState   *m_pUseState;
+    CStringInputState   *m_pStringInputState;
 
 private:
 	CRender	*m_pRender;

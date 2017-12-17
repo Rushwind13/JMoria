@@ -19,9 +19,11 @@ typedef unsigned char uint8;
 #define JSUCCESS		0
 #define JQUITREQUEST	1
 #define JRESETSTATE		2
+#define JCOMPLETESTATE  3
 #define JBOGUSKEY		-1
 
 #define INVALID_LENGTH	-1
+#define MAX_STRING_LENGTH 32
 
 #define JERROR() printf("An error occurred: %s %d\n", __FILE__, __LINE__ );
 

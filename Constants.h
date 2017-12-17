@@ -13,12 +13,13 @@
 
 // all the states which the game can run in
 // this modifies the event handling
-#define STATE_INVALID		-1
-#define STATE_COMMAND		 0
-#define STATE_MODIFY		 1
-#define STATE_MENU       2
-#define STATE_USE        3
-#define STATE_MAX        4
+#define STATE_INVALID    -1
+#define STATE_COMMAND     0
+#define STATE_MODIFY      1
+#define STATE_MENU        2
+#define STATE_USE         3
+#define STATE_STRINGINPUT 4
+#define STATE_MAX         5
 
 // Various statuses that someone could have
 #define STATUS_INVALID		-1

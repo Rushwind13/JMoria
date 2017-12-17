@@ -20,6 +20,7 @@ extern CGame *g_pGame;
 CStringInputState::CStringInputState()
 : m_cCommand(0)
 {
+    memset(m_szInput, 0, MAX_STRING_LENGTH);
     m_pKeyHandlers[SI_INIT]    = &CStringInputState::OnHandleInit;
     m_pKeyHandlers[SI_NAME]    = &CStringInputState::OnHandleName;
     m_pKeyHandlers[SI_HAGGLE]    = &CStringInputState::OnHandleHaggle;
@@ -46,6 +47,16 @@ int CStringInputState::OnHandleName( SDL_Keysym *keysym )
         return 0;
     }
     
+    if( retval == JCOMPLETESTATE )
+    {
+        printf( "NAME modifier resetting game state to COMMAND, NAME state to INIT\n");
+        // One way or another, we're done with this state now.
+        g_pGame->GetPlayer()->SetName(m_szInput);
+        memset(m_szInput, 0, MAX_STRING_LENGTH);
+        g_pGame->GetMsgs()->Clear();
+        ResetToState( STATE_COMMAND );
+    }
+    
     if( retval != JSUCCESS )
     {
         printf( "Name cmd still waiting for a Alphanumeric key.\n" );
@@ -55,30 +66,9 @@ int CStringInputState::OnHandleName( SDL_Keysym *keysym )
     
     // We got a alpha key; append it to the name
     printf( "NAME modifier got a alpha\n" );
-    if( TestName() )
-    {
-        if( DoName() )
-        {
-            g_pGame->GetMsgs()->Printf("Character Name: %s\n", m_szInput);
-        }
-        else
-        {
-            // shouldn't get here?
-//            g_pGame->GetMsgs()->Printf("You failed to pick the lock.\n");
-        }
-    }
-    else
-    {
-        // how to handle bad input?
-//        g_pGame->GetMsgs()->Printf("I do not see anything to open there.\n");
-    }
+    g_pGame->GetMsgs()->Clear();
+    g_pGame->GetMsgs()->Printf("Character Name: %s", m_szInput);
     
-    if( retval == JRESETSTATE )
-    {
-        printf( "NAME modifier resetting game state to COMMAND, NAME state to INIT\n");
-        // One way or another, we're done with this state now.
-        ResetToState( STATE_COMMAND );
-    }
     return 0;
 }
 
@@ -106,7 +96,7 @@ int CStringInputState::OnHandleHaggle( SDL_Keysym *keysym )
     {
         if( DoHaggle() )
         {
-            g_pGame->GetMsgs()->Printf("Your offer: %s\n", m_szInput);
+            g_pGame->GetMsgs()->Printf("Your offer: %s", m_szInput);
         }
         else
         {
@@ -141,6 +131,8 @@ int CStringInputState::OnHandleInit( SDL_Keysym *keysym )
         {
             case SDLK_n:
                 mod = SI_NAME;
+                g_pGame->GetMsgs()->Clear();
+                g_pGame->GetMsgs()->Printf("Character Name: %s", m_szInput);
                 break;
             case SDLK_p:
                 mod = SI_HAGGLE;
@@ -165,11 +157,20 @@ int CStringInputState::OnHandleInit( SDL_Keysym *keysym )
 
 int CStringInputState::OnBaseHandleKey( SDL_Keysym *keysym )
 {
-    if( IsAlpha( keysym ) )
+    char bInput = GetAlphaNumeric(keysym);
+    if( bInput != nul )
     {
-        GetInput( keysym );
-        
+        if( strlen(m_szInput) < MAX_STRING_LENGTH-1 )
+        {
+            m_szInput[strlen(m_szInput)] = bInput;
+        }
         return JSUCCESS;
+    }
+    else if( keysym->sym == SDLK_RETURN )
+    {
+        // actually set the string on the place
+        printf("you entered: <%s>\n", m_szInput);
+        return JCOMPLETESTATE;
     }
     else if( keysym->sym == SDLK_ESCAPE )
     {

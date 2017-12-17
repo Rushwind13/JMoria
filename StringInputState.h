@@ -31,7 +31,7 @@ protected:
     StringInputKeyHandler    m_pCurKeyHandler;
     
     eStringInputModifier    m_eCurModifier;
-    char m_szInput[32];
+    char m_szInput[MAX_STRING_LENGTH];
 private:
     
     // Member Functions
@@ -53,9 +53,6 @@ private:
     
     bool TestHaggle();
     bool DoHaggle();
-
-    bool IsAlpha(SDL_Keysym *keysym) {return false;};
-    char GetInput(SDL_Keysym *keysym) { return nul;};
 
     void ResetToState( int newstate );
 };

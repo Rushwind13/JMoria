@@ -22,18 +22,17 @@ public:
 protected:
 	virtual int OnHandleKey( SDL_Keysym *keysym );
 private:
-	bool IsDirectional(SDL_Keysym *keysym);
 	bool IsModifierNeeded(SDL_Keysym *keysym);
 	bool IsUseCommand(SDL_Keysym *keysym);
 	bool IsStairsCommand(SDL_Keysym *keysym);
 	bool IsMagicCommand(SDL_Keysym *keysym) {return false;};
 	bool IsMenuCommand(SDL_Keysym *keysym) {return false;};
 	bool IsHelpCommand(SDL_Keysym *keysym) {return false;};
-	bool IsRestCommand(SDL_Keysym *keysym);
+    bool IsRestCommand(SDL_Keysym *keysym);
+    bool IsStringInputCommand(SDL_Keysym *keysym);
 	bool IsMonster( int collide_type ) {return( collide_type == DUNG_COLL_MONSTER);};
 	void ResetToState( int newstate ) {};
 
-	void GetDir(SDL_Keysym *keysym, JVector &vDir);
 	int TestCollision( JVector &vTestDir );
 
 	void UpdatePlayerPos( JVector &vDir );

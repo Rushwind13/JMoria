@@ -40,7 +40,6 @@ public:
     
     eUseModifier GetModifier() { return m_eCurModifier; };
 protected:
-	bool	IsAlpha(SDL_Keysym *keysym);
 	CLink<CItem>	*GetResponse(eUseModifier whichUse);
 
 private:

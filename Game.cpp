@@ -10,6 +10,7 @@
 #include "CmdState.h"
 #include "ModState.h"
 #include "UseState.h"
+#include "StringInputState.h"
 
 #include "Render.h"
 #include "DisplayText.h"
@@ -27,11 +28,13 @@ m_pPlayer(NULL),
 m_pRender(NULL),
 m_pCurState(NULL),
 m_pCmdState(NULL),
+m_pStringInputState(NULL),
 m_eCurState(STATE_INVALID)
 {
     m_pCmdState = new CCmdState;
     m_pModState = new CModState;
     m_pUseState = new CUseState;
+    m_pStringInputState = new CStringInputState;
 #ifdef TURN_BASED
     m_fGameTime = 0.0f;
     m_bReadyForUpdate = true;
@@ -121,6 +124,24 @@ void CGame::Quit( int returncode )
         m_pCmdState = NULL;
     }
     
+    if( m_pModState )
+    {
+        delete m_pModState;
+        m_pModState = NULL;
+    }
+    
+    if( m_pUseState )
+    {
+        delete m_pUseState;
+        m_pUseState = NULL;
+    }
+    
+    if( m_pStringInputState )
+    {
+        delete m_pStringInputState;
+        m_pStringInputState = NULL;
+    }
+
     if( m_pMsgsDT )
     {
         delete m_pMsgsDT;
@@ -166,6 +187,9 @@ void CGame::SetState( int eNewState )
         break;
     case STATE_USE:
         m_pCurState = reinterpret_cast<CStateBase *>(m_pUseState);
+        break;
+    case STATE_STRINGINPUT:
+        m_pCurState = reinterpret_cast<CStateBase *>(m_pStringInputState);
         break;
 	default:
         printf("Tried to change to unknown state.\n");

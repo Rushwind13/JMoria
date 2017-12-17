@@ -77,6 +77,9 @@ JResult CPlayer::SpawnPlayer()
 void CPlayer::DisplayStats()
 {
     g_pGame->GetStats()->Clear();
+    g_pGame->GetStats()->Printf("Name:%s\n", m_szName);
+    g_pGame->GetStats()->Printf("Class:%s\n", m_pClass->m_szName);
+    g_pGame->GetStats()->Printf("\n");
     g_pGame->GetStats()->Printf("AC:%d\n", (int)m_fArmorClass);
     g_pGame->GetStats()->Printf("HP:%d / %d\n", (int)m_fCurHitPoints, (int)m_fHitPoints);
     g_pGame->GetStats()->Printf("\n");
@@ -289,7 +292,16 @@ int CPlayer::TakeDamage( float fDamage, char *szMon )
         m_fCurHitPoints = 0;
         retval = STATUS_DEAD;
         // This is the end of the game; make the game end on next update.
-        printf("You died on dungeon level %d, while level %d, killed by a %s.\n", g_pGame->GetDungeon()->depth, (int)m_fLevel, szMon );
+        char who[MAX_STRING_LENGTH];
+        if( strlen(m_szName) > 0 )
+        {
+            strcpy(who, m_szName);
+        }
+        else
+        {
+            strcpy(who, "You");
+        }
+        printf("%s died on dungeon level %d, while level %d, killed by a %s.\n", who, g_pGame->GetDungeon()->depth, (int)m_fLevel, szMon );
         g_pGame->Quit(0);
     }
 
@@ -347,5 +359,17 @@ bool CPlayer::IsDrinkable(CLink<CItem> *pLink)
             break;
     }
     return retval;
+}
+
+bool CPlayer::SetName( const char *szName )
+{
+    if(strlen(szName) > MAX_STRING_LENGTH-1)
+    {
+        return false;
+    }
+    
+    strcpy( m_szName, szName );
+    
+    return true;
 }
 

@@ -31,6 +31,9 @@ public:
 
         m_szHD = new char[10];
         sprintf(m_szHD, CLASS_HD_WARRIOR);
+        
+        memset(m_szName, 0, MAX_STRING_LENGTH);
+        strcpy(m_szName, "Warrior");
     };
     ~CClass()
     {
@@ -46,6 +49,7 @@ private:
 public:
     float m_fExpNeeded[PLAYER_MAX_LEVEL];
     char *m_szHD;
+    char m_szName[MAX_STRING_LENGTH];
 protected:
 private:
 };
@@ -65,6 +69,7 @@ public:
     m_fLevel(1.0f),
     m_pClass(NULL)
     {
+        memset(m_szName, 0, MAX_STRING_LENGTH);
         m_pClass = new CClass;
         m_llInventory = new JLinkList<CItem>;
         m_llEquipment = new JLinkList<CItem>;
@@ -121,6 +126,8 @@ public:
     bool IsDrinkable(CLink<CItem> *pLink);
     bool Quaff(CLink<CItem> *pLink);
     
+    bool SetName( const char *szName );
+    
     float Attack();
     float Damage( float fDamageMult );
 
@@ -154,5 +161,6 @@ protected:
     float m_fLevel;
 
     CClass *m_pClass;
+    char m_szName[MAX_STRING_LENGTH];
 };
 #endif // __PLAYER_H__

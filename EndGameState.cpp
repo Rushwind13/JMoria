@@ -27,7 +27,7 @@ m_szTombstone(NULL)
     m_eCurModifier = ENDGAME_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
     char tombstone[] = \
-    "\n\n\n\n\n             /----------\\    \n            /            \\   \n           /              \\  \n          /  Rest In Peace \\ \n          |                 | \n          |%17s| \n          |                 | \n          |Level %2d %8s| \n          |                 | \n          |                 | \n          |died on level %3d| \n          |                 | \n          |   killed by a   | \n          |                 | \n          |%17s| \n          |                 | \n          |_________________| \n";
+    "\n\n\n\n\n             /----------\\    \n            /            \\   \n           /              \\  \n          /  Rest In Peace \\ \n          |                 | \n          |%*s%*s| \n          |                 | \n          |Level %2d %8s| \n          |                 | \n          |                 | \n          |died on level %3d| \n          |                 | \n          |   killed by a   | \n          |                 | \n          |%*s%*s| \n          |                 | \n          |_________________| \n";
     m_szTombstone = new char[strlen(tombstone)+1];
     memset(m_szTombstone, 0, strlen(tombstone)+1);
     strcpy(m_szTombstone, tombstone);
@@ -155,12 +155,26 @@ void CEndGameState::ResetToState( int newstate )
 //// Tomb commands
 bool CEndGameState::DoTomb()
 {
+    int dwNamePadding = (17-strlen(m_pScore->m_szName))/2;
+    int dwNameExtraPad = 0;
+    if( strlen(m_pScore->m_szName) %2 == 0 ) dwNameExtraPad = 1;
+    
+    int dwKillerPadding = (17-strlen(m_pScore->m_szKilledBy))/2;
+    int dwKillerExtraPad = 0;
+    if( strlen(m_pScore->m_szKilledBy) %2 == 0 ) dwKillerExtraPad = 1;
+
     g_pGame->GetEnd()->Printf(m_szTombstone,
+                              dwNamePadding+strlen(m_pScore->m_szName),
                               m_pScore->m_szName,
+                              dwNamePadding+dwNameExtraPad,
+                              "",
                               m_pScore->m_dwLevel,
                               m_pScore->m_szClass,
                               m_pScore->m_dwDepth,
-                              m_pScore->m_szKilledBy );
+                              dwKillerPadding+strlen(m_pScore->m_szKilledBy),
+                              m_pScore->m_szKilledBy,
+                              dwKillerPadding+dwKillerExtraPad,
+                              "");
     return true;
 }
 

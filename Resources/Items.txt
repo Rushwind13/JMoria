@@ -88,7 +88,8 @@ Value     15.0
 Level        10
 Damage       1d6
 Weight        5.0
-Color        <200,200,200,255>
+Speed        4.0
+Color        <89,90,91,255>
 }
 
 Item <Club>

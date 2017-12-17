@@ -248,8 +248,11 @@ int CUseState::OnHandleInit( SDL_Keysym *keysym )
 
 int CUseState::OnBaseHandleKey( SDL_Keysym *keysym, eUseModifier whichUse )
 {
-	if( IsAlpha( keysym ) )
+    m_dwSelected = GetAlpha(keysym);
+    if( m_dwSelected != nul )
 	{
+        // convert selected item to list offset
+        m_dwSelected -= 'a';
 		m_pSelected = GetResponse(whichUse);
         if( m_pSelected == NULL )
         {
@@ -276,21 +279,6 @@ void CUseState::ResetToState( int newstate )
 	m_cCommand = NULL;
 	m_eCurModifier = USE_INIT;
 	m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
-}
-
-// TODO: Why is this exact code copied from CCmdState?! -- 12.3.2017
-bool CUseState::IsAlpha(SDL_Keysym *keysym)
-{
-    // All the alphabet keys
-    // have sequential SDLK_ symbols,
-    // so we can handle them with this check
-    if( keysym->sym >= SDLK_a  && keysym->sym <= SDLK_z )
-    {
-        m_dwSelected = keysym->sym - SDLK_a;
-        return true;
-    }
-
-    return false;
 }
 
 CLink<CItem> *CUseState::GetResponse(eUseModifier whichUse)

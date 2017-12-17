@@ -50,13 +50,22 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 		g_pGame->GetGameState()->HandleKey(keysym);
 		retval = 0;
 	}
-
+    
     // Use commands allow you to choose from lists of items:
     // inventory, equipment, stores, chests?, bag of holding, &c
     else if( IsUseCommand(keysym) )
     {
         // Add "modify" to the top of the state stack
         g_pGame->SetState(STATE_USE);
+        g_pGame->GetGameState()->HandleKey(keysym);
+        retval = 0;
+    }
+    
+    // StringInput commands allow you to enter several characters as a single string
+    else if( IsStringInputCommand(keysym) )
+    {
+        // Add "stringinput" to the top of the state stack
+        g_pGame->SetState(STATE_STRINGINPUT);
         g_pGame->GetGameState()->HandleKey(keysym);
         retval = 0;
     }
@@ -67,25 +76,25 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
         OnHandleStairs( keysym );
         retval = 0;
     }
-
+    
     else if( IsRestCommand( keysym ) )
-  	{
-      switch( keysym-> sym )
-      {
-      case SDLK_r:
-        printf("R)est not implemented yet.\n");
-        // g_pGame->SetState(STATE_REST);
-        // g_pGame->GetGameState()->HandleKey(keysym);
-        break;
-      case SDLK_PERIOD:
-        // Do nothing; rest one turn
-        break;
-      default:
-        break;
-      }
-
-  		retval = 0;
-  	}
+    {
+        switch( keysym-> sym )
+        {
+            case SDLK_r:
+                printf("R)est not implemented yet.\n");
+                // g_pGame->SetState(STATE_REST);
+                // g_pGame->GetGameState()->HandleKey(keysym);
+                break;
+            case SDLK_PERIOD:
+                // Do nothing; rest one turn
+                break;
+            default:
+                break;
+        }
+        
+        retval = 0;
+    }
 
 	/*
 	// These commands will bring up a ""
@@ -215,76 +224,6 @@ void CCmdState::HandleCollision( int dwCollideType )
 	}
 }
 
-bool CCmdState::IsDirectional(SDL_Keysym *keysym)
-{
-	// All the movement keys
-	// (arrows and numberpad keys)
-	// have sequential SDLK_ symbols,
-	// so we can handle them with this check
-	if( ( keysym->sym >= SDLK_KP_1  && keysym->sym <= SDLK_KP_0 ) ||
-        ( keysym->sym >= SDLK_RIGHT && keysym->sym <= SDLK_UP ) )
-	{
-		return true;
-	}
-
-	return false;
-}
-
-void CCmdState::GetDir(SDL_Keysym *keysym, JVector &vDir)
-{
-	switch( keysym->sym )
-	{
-	case SDLK_UP:
-	case SDLK_KP_8:
-		//up
-		vDir.y = -1;
-		break;
-	case SDLK_DOWN:
-	case SDLK_KP_2:
-		//down
-		vDir.y = 1;
-		break;
-	case SDLK_LEFT:
-	case SDLK_KP_4:
-		//left
-		vDir.x = -1;
-		break;
-	case SDLK_RIGHT:
-	case SDLK_KP_6:
-		vDir.x = 1;
-		//right
-		break;
-	case SDLK_KP_7:
-		//up + left
-		vDir.x = -1;
-		vDir.y = -1;
-		break;
-	case SDLK_KP_9:
-		//up + right
-		vDir.x =  1;
-		vDir.y = -1;
-		break;
-	case SDLK_KP_1:
-		//down + left
-		vDir.x = -1;
-		vDir.y =  1;
-		break;
-	case SDLK_KP_3:
-		//down + right
-		vDir.x = 1;
-		vDir.y = 1;
-		break;
-	case SDLK_KP_5:
-		// rest
-		break;
-	case SDLK_KP_0:
-	default:
-		// nothing
-		break;
-
-	}
-}
-
 int CCmdState::TestCollision( JVector &vTest )
 {
 	return (g_pGame->GetDungeon()->IsWalkableFor(vTest, true));
@@ -328,7 +267,7 @@ bool CCmdState::IsUseCommand(SDL_Keysym *keysym)
     switch( keysym->sym )
     {
         case SDLK_w:
-        // t (but not T)
+            // t (but not T)
         case SDLK_t:
         case SDLK_d:
         case SDLK_q:
@@ -338,7 +277,24 @@ bool CCmdState::IsUseCommand(SDL_Keysym *keysym)
             return false;
             break;
     }
+    
+    return false;
+}
 
+
+bool CCmdState::IsStringInputCommand(SDL_Keysym *keysym)
+{
+    switch( keysym->sym )
+    {
+        case SDLK_n: // name your character
+        case SDLK_p: // purchase something in a store
+            return true;
+            break;
+        default:
+            return false;
+            break;
+    }
+    
     return false;
 }
 

@@ -22,6 +22,7 @@ Keyboard commands recognized:
 * *.* - rest one turn
 * *R* - rest indefinitely (not fully implemented)
 * *q* - quaff a potion
+* *n* - set character name
 
 Monster definitions are in _Resources/Monsters.txt_
 Item definitions are in _Resources/Items.txt_

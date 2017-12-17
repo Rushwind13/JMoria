@@ -15,6 +15,7 @@ d - drop
 . - rest one turn
 R - rest indefinitely (not fully implemented)
 q - quaff a potion
+n - set character name
 ^c - exit game
 
 *Items*

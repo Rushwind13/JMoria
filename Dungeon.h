@@ -34,7 +34,7 @@ protected:
     JLinkList <CItemDef> *m_llItemDefs;
 private:
 	Uint16 m_dwZoom;
-	
+
 	// Member Functions
 public:
 	CDungeon():
@@ -94,31 +94,32 @@ public:
 		return (m_Tiles + ((int)vPos.y * DUNG_WIDTH) + (int)vPos.x ); // going to have to work in offsets, too, if the dungeon's bigger than the screen. --Jimbo
 	};
 	int IsWalkableFor( JVector &vPos, bool isPlayer=false );
-    int CanPlaceItemAt( JVector &vPos );
+	int CanPlaceItemAt( JVector &vPos );
 	bool IsOpenable( JVector &vPos );
-    bool IsTunnelable( JVector &vPos );
-    bool IsCloseable( JVector &vPos );
-    int  IsStairs( JVector &vPos );
+	bool IsTunnelable( JVector &vPos );
+	bool IsCloseable( JVector &vPos );
+	int  IsStairs( JVector &vPos );
 	void RemoveMonster( CMonster *pMon );
 	JResult Modify( JVector &vPos );
-    CItem *PickUp( JVector &vPickupPos );
+	CItem *PickUp( JVector &vPickupPos );
+	void Drop( CItem *pItem, JVector &vDropPos );
 protected:
 	JRect m_Rect;
 	JFVector m_vfTranslate;
 	CDungeonMap *m_dmCurLevel;		// Data about the curennt level (and holds dungeon gen algorithm)
-    float m_fOpenFloorArea; // How much of the current level is open?
-    void extracted();
-    
-    //CDungeonMap m_dmTownLevel;	// The Dungeon remembers where you live...
-    
-    JResult CreateNewLevel(const int delta);
-    JResult CreateMap();
-    JResult PlaceItems(const int depth);
-    JResult SpawnMonsters(const int depth);
-    int ChooseMonsterForDepth(const int depth);
-    int ChooseItemForDepth(const int depth);
-    
-    JResult TerminateLevel();
+	float m_fOpenFloorArea; // How much of the current level is open?
+	void extracted();
+
+	//CDungeonMap m_dmTownLevel;	// The Dungeon remembers where you live...
+
+	JResult CreateNewLevel(const int delta);
+	JResult CreateMap();
+	JResult PlaceItems(const int depth);
+	JResult SpawnMonsters(const int depth);
+	int ChooseMonsterForDepth(const int depth);
+	int ChooseItemForDepth(const int depth);
+
+	JResult TerminateLevel();
 private:
 
 	bool IsOnScreen(JVector vPos);

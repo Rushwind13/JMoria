@@ -80,3 +80,9 @@ Z
 ~~, - mushroom~~
 $ - creeping coin
 
+## DisplayText Placements
+Msgs - two rows at the top of the screen (for gameplay output)
+Stats - left-hand sidebar (for AC, HP, Lvl, and other stats)
+Inv - upper right-hand sidebar (displays inventory)
+Equip - lower right-hand sidebar (displays equipment)
+Use - central popup (only shown when needed) (shows inv/equip for commands that require it)

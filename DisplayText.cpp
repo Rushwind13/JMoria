@@ -10,6 +10,8 @@
 #include "JMDefs.h"
 #include "DisplayText.h"
 #include "Render.h"
+#include "Item.h"
+#include "EndGameState.h"
 
 class CGame;
 
@@ -18,7 +20,7 @@ class CGame;
 
 #define TEXT_MAXCHARS 2048
 // Constructor
-CDisplayText::CDisplayText( JRect in )
+CDisplayText::CDisplayText( JRect in, uint8 inAlpha )
 :	m_Rect(in),
 m_dwWidth(in.Width()),
 m_dwHeight( in.Height() ),
@@ -28,6 +30,7 @@ m_szText( NULL ),
 m_szDrawPtr( NULL ),
 m_vPos( m_Rect.Left(), m_Rect.Top() ),
 m_dwFlags( FLAG_TEXT_NONE ),
+m_cBoundingBoxAlpha(inAlpha),
 m_rcViewport( 0, 480, 640, 0 )
 {
 	m_szText = new char[TEXT_MAXCHARS];
@@ -131,7 +134,7 @@ void CDisplayText::DrawStr(int x, int y, bool bBoundsCheck, int dwYMax, char *sz
 
 void CDisplayText::DrawBoundingBox()
 {
-	g_pGame->GetRender()->DrawTextBoundingBox( m_Rect );
+	g_pGame->GetRender()->DrawTextBoundingBox( m_Rect, m_cBoundingBoxAlpha );
 }
 
 void CDisplayText::Paginate()
@@ -262,4 +265,57 @@ void CDisplayText::DrawFormattedStr(const char *szString)
 
 	// Now that we have the space, concatenate the new string.
 	strcat( m_szText, szBuffer );
+}
+
+void CDisplayText::DisplayList( JLinkList<CItem> *pList, const CDisplayMeta *pMeta, const uint8 dwIndex )
+{
+    // TODO: Use dwIndex to filter the
+    CLink<CItem> *pLink = pList->GetHead();
+    CItem *pItem;
+    Clear();
+    Printf(pMeta->header);
+    char cListId = 'a';
+    while(pLink != NULL)
+    {
+        pItem = pLink->m_lpData;
+        Printf("%c - %s\n", cListId, pItem->GetName());
+        
+        if( cListId < pMeta->limit )
+        {
+            cListId++;
+        }
+        else
+        {
+            printf(pMeta->footer);
+            break;
+        }
+        pLink = pList->GetNext(pLink);
+    }
+    
+}
+void CDisplayText::DisplayList( JLinkList<CScore> *pList, const CDisplayMeta *pMeta, const uint8 dwIndex )
+{
+    // TODO: Use dwIndex to filter the
+    CLink<CScore> *pLink = pList->GetHead();
+    CScore *pItem;
+    Clear();
+    Printf(pMeta->header);
+    char cListId = 1;
+    while(pLink != NULL)
+    {
+        pItem = pLink->m_lpData;
+        Printf("%d - %s\n", cListId, pItem->GetName());
+        
+        if( cListId < pMeta->limit )
+        {
+            cListId++;
+        }
+        else
+        {
+            printf(pMeta->footer);
+            break;
+        }
+        pLink = pList->GetNext(pLink);
+    }
+    
 }

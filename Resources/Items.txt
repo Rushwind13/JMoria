@@ -246,7 +246,7 @@ Item <Dagger>
     Weight      1.0
     Speed       2.0
     Color        <200,200,200,255>
-    }
+}
 
 Item <Small Wooden Shield>
 {
@@ -269,6 +269,214 @@ Item <Ring of Invisibility>
     Weight      0.2
     Color        <225,225,50,255>
 }
+Item <Ring of Levitation>
+{
+Plural        <Rings of Levitation>
+Type        <ITEM_IDX_RING>
+Flags       <ITEM_FLAG_LEVITATE>
+Value       300.0
+Level       20
+Weight      0.2
+Color        <225,225,50,255>
+}
+Item <Ring of Telepathy>
+{
+Plural        <Rings of Telepathy>
+Type        <ITEM_IDX_RING>
+Flags       <ITEM_FLAG_ESP>
+Value       300.0
+Level       20
+Weight      0.2
+Color        <225,225,50,255>
+}
+Item <Torch>
+{
+Plural        <Torches>
+Type        <ITEM_IDX_TORCH>
+Flags       <ITEM_FLAG_LIGHT>
+Value       10.0
+Level       20
+Weight     1.0
+Color        <225,225,50,255>
+}
+Item <Brass Lantern>
+{
+Plural        <Brass Lanterns>
+Type        <ITEM_IDX_TORCH>
+Flags       <ITEM_FLAG_LIGHT>
+Value       10.0
+Level       20
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Flask of Oil>
+{
+Plural        <Flasks of Oil>
+Type        <ITEM_IDX_POTION>
+Flags       <ITEM_FLAG_FUEL>
+Value       10.0
+Level       20
+Weight     0.5
+Color        <225,225,50,255>
+}
+Item <Steel Helm>
+{
+Plural        <SteelHelms>
+Type        <ITEM_IDX_HELMET>
+Value       150.0
+Level       20
+AC          5.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Steel Cap>
+{
+Plural        <SteelCaps>
+Type        <ITEM_IDX_HELMET>
+Value       150.0
+Level       1
+AC          3.0
+Weight      6.0
+Color        <225,225,50,255>
+}
+Item <Steel Boot>
+{
+Plural        <SteelBoots>
+Type        <ITEM_IDX_BOOTS>
+Value       20.0
+Level       1
+AC          5.0
+Weight      4.0
+Color        <225,225,50,255>
+}
+Item <Leather Boot>
+{
+Plural        <Leather Boots>
+Type        <ITEM_IDX_BOOTS>
+Value       20.0
+Level       1
+AC          2.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Leather Armor>
+{
+Plural        <Sets of Leather Armor>
+Type        <ITEM_IDX_ARMOR>
+Value       50.0
+Level       1
+AC          50.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Plate Mail Armor>
+{
+Plural        <Sets of Plate Mail Armor>
+Type        <ITEM_IDX_ARMOR>
+Value       40.0
+Level       7
+AC          90.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Chain Mail>
+{
+Plural        <Chain  Mails>
+Type        <ITEM_IDX_HELMET>
+Value       40.0
+Level       4
+AC          70.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Padded Armor>
+{
+Plural        <Padded Armors>
+Type        <ITEM_IDX_ARMOR>
+Value       40.0
+Level       1
+AC          40.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Splint Mail>
+{
+Plural        <Splint Mails>
+Type        <ITEM_IDX_ARMOR>
+Value       40.0
+Level       5
+AC          80.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Pair of Leather Gloves>
+{
+Plural        <Pairs of Leather Gloves>
+Type        <ITEM_IDX_GLOVES>
+Value       50.0
+Level       1
+AC          2.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Set of Gauntlets>
+{
+Plural        <Sets of Gauntlets>
+Type        <ITEM_IDX_GLOVES>
+Value       50.0
+Level       1
+AC          4.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Ring of Fire Resistance>
+{
+Plural        <Rings of Fire Resistance>
+Type        <ITEM_IDX_RING>
+Value       300.0
+Level       10
+Flag        <FLAG_IDX_FIRE RESISTANCE>
+Weight      0.2
+Color        <225,225,50,255>
+}
+Item <Cloak>
+{
+Plural        <Cloaks>
+Type        <ITEM_IDX_CLOAK>
+Value       5.0
+Level       1
+AC          1.0
+Weight      1.0
+Color        <225,225,50,255>
+}
+Item <Robe>
+{
+Plural        <Robes>
+Type        <ITEM_IDX_ARMOR>
+Value       6.0
+Level       1
+AC          1.0
+Weight      1.0
+Color        <225,225,50,255>
+}
+Item <Shovel>
+{
+Plural        <Shovels>
+Type        <ITEM_IDX_SHOVEL>
+Value       15.0
+Level       1
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Pickaxe>
+{
+Plural        <Pikaxes>
+Type        <ITEM_IDX_SHOVEL>
+Value       50.0
+Level       1
+Weight      2.0
+Color        <225,225,50,255>
+}
 
 Item <Ring of Protection>
 {
@@ -285,7 +493,9 @@ Item <Potion of Minor Healing>
 {
     Plural        <Potions of Minor Healing>
     Type        <ITEM_IDX_POTION>
-    Effect     <ITEM_FLAG_HEAL>,<1d20>,<ITEM_FLAG_CURE_POISON>,<ITEM_FLAG_CURE_BLINDNESS>
+    Effect      <ITEM_FLAG_HEAL_HP>,<1d20>
+#    Effect      <ITEM_FLAG_CURE_POISON>
+#    Effect      <ITEM_FLAG_CURE_BLINDNESS>
     Value       1000.0
     Level       2
     Weight      0.2

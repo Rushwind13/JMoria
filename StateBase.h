@@ -95,6 +95,8 @@ protected:
     
     char GetAlphaNumeric( SDL_Keysym *keysym )
     {
+        if( keysym->sym == SDLK_SPACE ) return ' ';
+        
         char retval = GetAlpha(keysym);
         if( retval == nul )
         {

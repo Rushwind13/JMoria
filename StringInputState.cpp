@@ -166,6 +166,11 @@ int CStringInputState::OnBaseHandleKey( SDL_Keysym *keysym )
         }
         return JSUCCESS;
     }
+    else if( keysym->sym == SDLK_DELETE || keysym->sym == SDLK_BACKSPACE )
+    {
+        m_szInput[strlen(m_szInput)-1] = nul;
+        return JSUCCESS;
+    }
     else if( keysym->sym == SDLK_RETURN )
     {
         // actually set the string on the place

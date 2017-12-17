@@ -49,14 +49,14 @@ JResult CMonster::CreateMonster( CMonsterDef *pmd )
     {
         CMonster *pMon;
         pMon = new CMonster;
-        
+
         // Initialize the Monster from the MonsterDef
         pMon->Init(pmd);
-        
+
         // Initialize the Brain
         // TODO: move to AIBrain::Init()
         pMon->InitBrain(pmd);
-        
+
         // Put the monster in the world
         pMon->SpawnMonster();
 
@@ -64,7 +64,7 @@ JResult CMonster::CreateMonster( CMonsterDef *pmd )
         pMon->m_pllLink = g_pGame->GetDungeon()->m_llMonsters->Add(pMon);
         pMon->m_pBrain->m_pllLink = g_pGame->GetAIMgr()->m_llAIBrains->Add(pMon->m_pBrain);
     }
-    
+
     return JSUCCESS;
 }
 
@@ -76,10 +76,10 @@ JResult CMonster::SpawnMonster()
 	while( !bMonsterSpawned )
 	{
 		vTryPos.Init( (float)(Util::GetRandom(0, DUNG_WIDTH-1)), (float)(Util::GetRandom(0, DUNG_HEIGHT-1)) );
-		
+
 		//printf("Trying to spawn monster type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
 		//g_pGame->GetMsgs()->Printf( "Trying to spawn monster type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
-		
+
 		if( g_pGame->GetDungeon()->IsWalkableFor(vTryPos) == DUNG_COLL_NO_COLLISION )
 		{
 			SetPos(vTryPos);
@@ -89,7 +89,7 @@ JResult CMonster::SpawnMonster()
 			//g_pGame->GetMsgs()->Printf( "Success!\n" );
 		}
 	}
-	
+
 	return JSUCCESS;
 }
 
@@ -97,9 +97,9 @@ JResult CMonster::SpawnMonster()
 float CMonster::Attack()
 {
     float fRoll = Util::Roll( "1d100" );
-    
+
     printf( "%s rolled: %.2f\n", GetName(), fRoll );
-        
+
     return fRoll;
 }
 
@@ -107,10 +107,10 @@ float CMonster::Damage( float fDamageMult )
 {
     char *szDamage = m_md->m_llAttacks->GetHead()->m_lpData->m_szDamage;
     float fDamageModifier = 0.0f;
-    
+
     float fDamage = ( Util::Roll( szDamage ) + fDamageModifier ) * fDamageMult;
     printf( "%s did %.2f damage (damagemult: %.2f). ", GetName(), fDamage, fDamageMult );
-    
+
     return fDamage;
 }
 
@@ -144,7 +144,7 @@ int CMonster::TakeDamage( float fDamage )
 void CMonster::SetColor()
 {
     if( m_fColorChangeInterval < COLOR_CHANGE_TIMEOUT ) return;
-    
+
     if( (m_md->m_dwFlags & MON_COLOR_MULTI) == MON_COLOR_MULTI )
     {
         int which_color = Util::GetRandom(0,m_md->m_Colors->length()-1);
@@ -154,7 +154,7 @@ void CMonster::SetColor()
 }
 
 
-unsigned char MonIDs[MON_IDX_MAX+1] = ",JidDSkxwdaHCb";
+unsigned char MonIDs[MON_IDX_MAX+1] = "abcddefghhikllmnoprsuwxyzABCDFFFGGHIJKLOPRSTUVWWXY&.,$t";
 void CMonster::Draw()
 {
 	Uint8 monster_tile = MonIDs[m_md->m_dwIndex] - ' ' - 1;

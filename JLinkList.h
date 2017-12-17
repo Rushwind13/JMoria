@@ -44,7 +44,7 @@ public:
 	// in other fcns, this spot is checked for,
 	// and NULL is returned in a case where you're
 	// trying to go between m_lpHead and m_lpHead->prev.
-	CLink <T> *Add( T *pData, int dwIndex=-1 )
+    CLink <T> *Add( T *pData, int dwIndex=-1, bool bAscending=true )
 	{
 		CLink<T> *pLink = new CLink<T>(pData, dwIndex);
 
@@ -62,7 +62,8 @@ public:
             {
                 while( curr_link )
                 {
-                    if( curr_link->m_dwIndex >= dwIndex )
+                    if( (bAscending && curr_link->m_dwIndex >= dwIndex) ||
+                       (!bAscending && curr_link->m_dwIndex <= dwIndex) )
                     {
                         // found correct spot; insert before curr_link
                         pLink->prev = curr_link->prev;

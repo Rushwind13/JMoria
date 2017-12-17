@@ -79,41 +79,41 @@ void CDungeon::Init()
     // Load the monster list from config
     // TODO: Make this a method on CMonsterDef.
     m_llMonsterDefs = new JLinkList<CMonsterDef>;
-    
+
     CMonsterDef *pmd;
     CDataFile dfMonsters;
     dfMonsters.Open("Resources/Monsters.txt");
-    
+
     pmd = new CMonsterDef;
     while( dfMonsters.ReadMonster(*pmd) )
     {
         m_llMonsterDefs->Add(pmd);
         pmd = new CMonsterDef;
     }
-    
+
     delete pmd;
-    
+
     // Load the item list from config
     // TODO: Make this a method on CItemDef.
     m_llItemDefs = new JLinkList<CItemDef>;
-    
+
     CItemDef *pid;
     CDataFile dfItems;
     dfItems.Open("Resources/Items.txt");
-    
+
     pid = new CItemDef;
     while( dfItems.ReadItem(*pid) )
     {
         m_llItemDefs->Add(pid);
         pid = new CItemDef;
     }
-    
+
     delete pid;
-    
+
     // Load the graphics
     // Just one tile set at the moment.
 	m_TileSet = new CTileset("Resources/Courier.png", 32, 32 );
-    
+
     CreateNewLevel(DUNG_CFG_START_LEVEL);
 }
 
@@ -141,7 +141,7 @@ JResult CDungeon::TerminateLevel()
         delete m_llItems;
         m_llItems = NULL;
     }
-    
+
     return JSUCCESS;
 }
 
@@ -150,15 +150,15 @@ JResult CDungeon::CreateNewLevel(const int delta)
     depth += delta;
     if( depth < 1 ) depth = 1;
     if( depth > DUNG_MAXDEPTH ) depth = DUNG_MAXDEPTH;
-    
+
     CreateMap();
-    
+
     // Place items appropriate to this level.
     PlaceItems(depth);
-    
+
     // Spawn monsters appropriate to this level.
     SpawnMonsters(depth);
-    
+
     return JSUCCESS;
 }
 
@@ -168,7 +168,7 @@ JResult CDungeon::CreateMap()
     // Create the randomized dungeon
     m_dmCurLevel = new CDungeonMap;
     m_dmCurLevel->CreateDungeon(depth);
-    
+
     JIVector vDungeon(DUNG_HEIGHT,DUNG_WIDTH);
     Uint8 dung_tile_type = DUNG_IDX_INVALID;
     float open_area = 0.0f;
@@ -186,7 +186,7 @@ JResult CDungeon::CreateMap()
             GetITile(vDungeon)->m_dwFlags = m_dmCurLevel->GetFlags(vDungeon);
         }
     }
-    
+
     m_fOpenFloorArea = open_area;
     return JSUCCESS;
 }
@@ -194,35 +194,35 @@ JResult CDungeon::CreateMap()
 JResult CDungeon::PlaceItems(const int depth)
 {
     m_llItems = new JLinkList<CItem>;
-    
+
     int desired_items = int (m_fOpenFloorArea * DUNG_CFG_MONSTERS_PER_LEVEL);
     printf("Possible spawn points: %0.2f  desired items: %d\n", m_fOpenFloorArea, desired_items);
-    
+
     while( desired_items > 0 )
     {
         int which_item = ChooseItemForDepth(depth);
-        
+
         CItemDef *chosen_item = m_llItemDefs->GetLink(which_item)->m_lpData;
         printf("Choosing item %d, called %s\n", which_item, chosen_item->m_szName);
-        
+
         CItem::CreateItem(chosen_item);
-        
+
         desired_items--;
     }
-    
+
     return JSUCCESS;
 }
 
 JResult CDungeon::SpawnMonsters(const int depth)
 {
     m_llMonsters = new JLinkList<CMonster>;
-    
+
     int desired_monsters = int (m_fOpenFloorArea * DUNG_CFG_MONSTERS_PER_LEVEL);
     printf("Possible spawn points: %0.2f  desired monsters: %d\n", m_fOpenFloorArea, desired_monsters);
-    
+
     while( desired_monsters > 0 )
     {
-        
+
         // Spawn a monster into dungeon
         // TODO: make this into a method on CMonster.
 #define RANDOM_MONSTER
@@ -239,12 +239,12 @@ JResult CDungeon::SpawnMonsters(const int depth)
         }
         CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(which_monster)->m_lpData;
         printf("Choosing monster %d, called %s\n", which_monster, chosen_monster->m_szName);
-        
+
         CMonster::CreateMonster(chosen_monster);
-        
+
         desired_monsters--;
     }
-    
+
     return JSUCCESS;
 }
 
@@ -262,7 +262,7 @@ int CDungeon::ChooseItemForDepth(const int depth)
         }
         count++;
     }
-    
+
     return which_item;
 }
 
@@ -280,7 +280,7 @@ int CDungeon::ChooseMonsterForDepth(const int depth)
         }
         count++;
     }
-    
+
     return which_monster;
 }
 
@@ -289,13 +289,13 @@ JResult CDungeon::OnChangeLevel(const int delta)
     printf("Changing level...");
     // Clean up old level, then
     TerminateLevel();
-    
+
     // Create new level
     CreateNewLevel(delta);
     printf("done.\n");
     printf("You pass through a one-way door, to arrive on level %d.\n", depth);
     g_pGame->GetMsgs()->Printf("You pass through a one-way door, to arrive on level %d.\n", depth);
-    
+
     return JSUCCESS;
 }
 
@@ -331,16 +331,16 @@ bool CDungeon::IsOnScreen(JVector vPos)
 
 void CDungeon::Draw()
 {
-	
+
 	PreDraw();
-    
+
     // Select Our Texture
     DrawDungeon();
-    
+
     DrawItems();
-    
+
     DrawMonsters();
-    
+
 	PostDraw();
 }
 
@@ -350,18 +350,18 @@ void CDungeon::DrawDungeon()
     JVector vScreen;
     JVector vSize(1,1);
     JVector vPlayer = g_pGame->GetPlayer()->m_vPos;
-    
+
     for( vScreen.x = 0; vScreen.x < DUNG_WIDTH; vScreen.x++ )
     {
         for( vScreen.y = 0; vScreen.y < DUNG_HEIGHT; vScreen.y++ )
         {/* */
-            
+
             /*for( vScreen.x = vPlayer.x - SCREEN_MIN_XOFF; vScreen.x < vPlayer.x + SCREEN_MAX_XOFF; vScreen.x++ )
              {
              for( vScreen.y = vPlayer.y - SCREEN_MIN_YOFF; vScreen.y < vPlayer.y + SCREEN_MAX_YOFF; vScreen.y++ )
              {/* */
             CDungeonTile *curTile = GetTile(vScreen);
-            
+
             // this tile doesn't exist, or it's not lit
             // or something else is standing there
             if( curTile == NULL ||
@@ -383,7 +383,7 @@ void CDungeon::DrawItems()
 {
     CLink <CItem> *pLink = m_llItems->GetHead();
     CItem *pItem;
-    
+
     while(pLink != NULL)
     {
         pItem = pLink->m_lpData;
@@ -399,7 +399,7 @@ void CDungeon::DrawMonsters()
 {
     CLink <CMonster> *pLink = m_llMonsters->GetHead();
     CMonster *pMon;
-    
+
     while(pLink != NULL)
     {
         pMon = pLink->m_lpData;
@@ -450,20 +450,20 @@ void CDungeon::Term()
 		delete [] m_Tiles;
 		m_Tiles = NULL;
     }
-    
+
     if( m_dtdlist )
     {
         delete [] m_dtdlist;
         m_dtdlist = NULL;
     }
-    
+
     if( m_llMonsterDefs )
     {
         m_llMonsterDefs->Terminate();
         delete m_llMonsterDefs;
         m_llMonsterDefs = NULL;
     }
-    
+
     if( m_llItemDefs )
     {
         m_llItemDefs->Terminate();
@@ -476,7 +476,7 @@ void CDungeon::RemoveMonster( CMonster *pMon )
 {
 	CLink <CMonster> *pLink;
 	pLink = pMon->m_pllLink;
-	
+
 	GetTile(pMon->GetPos())->m_pCurMonster = NULL;
 	m_llMonsters->Remove(pLink);
 }
@@ -508,7 +508,7 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
     {
         return DUNG_COLL_ITEM;
     }
-	
+
 	// If you get here, the square was unoccupied. Now check for running into inanimates...
 	int type = curTile->m_dtd->m_dwType;
 	switch( type )
@@ -537,7 +537,7 @@ int CDungeon::CanPlaceItemAt(JVector &vPos)
         // Items can collide with other Items
         return DUNG_COLL_ITEM;
     }
-    
+
     // If you get here, the square was unoccupied. Now check for running into inanimates...
     int type = curTile->m_dtd->m_dwType;
     switch( type )
@@ -567,12 +567,12 @@ bool CDungeon::IsOpenable( JVector &vPos )
 		return false;
 	}
 	// Check for someone else standing there first (handles things that can walk thru walls)
-	
+
 	if( curTile->m_pCurItem )
 	{
 		return( curTile->m_pCurItem->IsOpenable() );
 	}
-	
+
 	// If you get here, the square was unoccupied. Now check for running into inanimates...
 	return( curTile->m_dtd->m_dwType == DUNG_IDX_DOOR);
 }
@@ -586,12 +586,12 @@ bool CDungeon::IsTunnelable( JVector &vPos )
 		return false;
 	}
 	// Check for someone else standing there first (handles things that can walk thru walls)
-	
+
 	if( curTile->m_pCurItem )
 	{
 		return( curTile->m_pCurItem->IsTunnelable() );
 	}
-	
+
 	// If you get here, the square was unoccupied. Now check for running into inanimates...
 	return( curTile->m_dtd->m_dwType == DUNG_IDX_RUBBLE);
 }
@@ -605,12 +605,12 @@ bool CDungeon::IsCloseable( JVector &vPos )
 		return false;
 	}
 	// Check for someone else standing there first (handles things that can walk thru walls)
-	
+
 	if( curTile->m_pCurItem )
 	{
 		return( curTile->m_pCurItem->IsCloseable() );
 	}
-	
+
 	// If you get here, the square was unoccupied. Now check for running into inanimates...
 	return( curTile->m_dtd->m_dwType == DUNG_IDX_OPEN_DOOR);
 }
@@ -623,7 +623,7 @@ int CDungeon::IsStairs( JVector &vPos )
     {
         return DUNG_IDX_INVALID;
     }
-    
+
     if( curTile->m_dtd->m_dwType == DUNG_IDX_UPSTAIRS ||
        curTile->m_dtd->m_dwType == DUNG_IDX_LONG_UPSTAIRS ||
        curTile->m_dtd->m_dwType == DUNG_IDX_DOWNSTAIRS ||
@@ -631,7 +631,7 @@ int CDungeon::IsStairs( JVector &vPos )
     {
         return curTile->m_dtd->m_dwType;
     }
-    
+
     // If you get here, the square was not a staircase
     return DUNG_IDX_INVALID;
 }
@@ -654,4 +654,11 @@ CItem *CDungeon::PickUp( JVector &vPickupPos )
     CItem *pItem = GetTile(vPickupPos)->m_pCurItem;
     m_llItems->Remove(pItem->m_pllLink, false);
     return pItem;
+}
+
+void CDungeon::Drop( CItem *pItem, JVector &vDropPos )
+{
+    GetTile(vDropPos)->m_pCurItem = pItem;
+    pItem->m_vPos = vDropPos;
+    pItem->m_pllLink = m_llItems->Add(pItem, pItem->m_id->m_dwIndex);
 }

@@ -8,7 +8,7 @@
 #include "CmdState.h"
 #include "ModState.h"
 
-class CMenuState : public CStateBase
+class CUseState : public CStateBase
 {
 	// Member Variables
 	public:
@@ -37,20 +37,6 @@ class CHelpState : public CStateBase
 };
 
 class CSpellState : public CStateBase
-{
-	// Member Variables
-	public:
-	protected:
-	private:
-
-	// Member Functions
-	public:
-	protected:
-	virtual int OnHandleKey( SDL_keysym *keysym );
-	private:
-};
-
-class CUseState : public CStateBase
 {
 	// Member Variables
 	public:

@@ -29,14 +29,10 @@ public:
 	CModState();
 	~CModState() {};
 
-
 	virtual void OnUpdate() {};
 	virtual int OnBaseHandleKey( SDL_Keysym *keysym );
 	virtual int OnHandleKey( SDL_Keysym *keysym );
 protected:
-	bool	IsDirectional(SDL_Keysym *keysym);
-	void	GetDir(SDL_Keysym *keysym, JVector &vDir);
-	
 private:
 	ModKeyHandler	m_pKeyHandlers[MOD_MAX];
 	ModKeyHandler	m_pCurKeyHandler;

@@ -21,13 +21,14 @@
 # Flags        string    comma-delimited list of additional ITEM_FLAG_ flags
 # Color        string    RGBA value for this item's color
 # AC        float    base amount this item changes the character's AC when equipped
-# ACBonus        float    magical bonus to base AC
-# Damage        float    base amount of damage this item inflicts when it hits something
-# To-HitBonus        float    magical bonus to base to-hit chance
-# To-DamBonus        float    magical bonus to base damage
+# ACBonus        XdY    magical bonus to base AC
+# Damage        XdY    base amount of damage this item inflicts when it hits something
+# To-HitBonus        XdY    magical bonus to base to-hit chance
+# To-DamBonus        XdY    magical bonus to base damage
 # Level        int        earliest dungeon level this item will appear at (range: 0 (town), 1( dung lvl 1) - 100 (dung lvl 100))
 # Speed        float     how quickly one can attack with this item
 # Weight       float     weight of the item in pounds
+# Effect       string,XdY string = what it does, XdY = how much or for how long
 #
 #
 # example item entry follows: e.g.
@@ -45,145 +46,181 @@
 
 Item <Bastard sword>
 {
-Plural        <Bastard  swords>
-Type        <ITEM_IDX_SWORD>
-Value        250.0
-Level        5
-Damage       <2d8>
-Weight       10.0
-Speed        6.0
-Color        <200,200,200,255>
+    Plural        <Bastard  swords>
+    Type        <ITEM_IDX_SWORD>
+    Value        250.0
+    Level        5
+    Damage       <2d8>
+    Weight       10.0
+    Speed        6.0
+    Color        <200,200,200,255>
 }
 
 Item <Battle Axe>
 {
-Plural        <Battel  Axes>
-Type        <ITEM_IDX_AXE>
-Value        600.0
-Level        10
-Damage       <2d4>
-Weight       7.5
-Speed        4.0
-Color        <200,200,200,255>
+    Plural        <Battle  Axes>
+    Type        <ITEM_IDX_AXE>
+    Value        600.0
+    Level        10
+    Damage       <2d4>
+    Weight       7.5
+    Speed        4.0
+    Color        <200,200,200,255>
 }
 
 Item <Long Bow>
 {
-Plural        <Long Bows>
-Type        <ITEM_IDX_BOW>
-Value        250.0
-Level        5
-Damage       <1d8>
-Weight       10.0
-Speed        6.0
-Color        <200,200,200,255>
+    Plural        <Long Bows>
+    Type        <ITEM_IDX_BOW>
+    Value        250.0
+    Level        5
+    Damage       <1d8>
+    Weight       10.0
+    Speed        6.0
+    Color        <200,200,200,255>
+}
+
+Item <Quarter Staff>
+{
+Plural        <Quarter Staves>
+Type        <ITEM_IDX_AXE>
+Value     15.0
+Level        10
+Damage       1d6
+Weight        5.0
+Speed        4.0
+Color        <89,90,91,255>
 }
 
 Item <Club>
 {
-Plural        <Clubs>
-Type        <ITEM_IDX_AXE>
-Value        600.0
-Level        10
-Damage       <2d3>
-Weight       3.0
-Speed        4.0
-Color        <200,200,200,255>
+    Plural        <Clubs>
+    Type        <ITEM_IDX_AXE>
+    Value        600.0
+    Level        10
+    Damage       <2d3>
+    Weight       3.0
+    Speed        4.0
+    Color        <200,200,200,255>
 }
 
 Item <Mace>
 {
-Plural        <Maces>
-Type        <ITEM_IDX_AXE>
-Value        80.0
-Level        110
-Damage       <2d3>
-Weight       10.0
-Speed        7.0
-Color        <200,200,200,255>
+    Plural        <Maces>
+    Type        <ITEM_IDX_AXE>
+    Value        80.0
+    Level        110
+    Damage       <2d3>
+    Weight       10.0
+    Speed        7.0
+    Color        <200,200,200,255>
 }
 
 Item <Lance>
 {
-Plural        <Lances>
-Type        <ITEM_IDX_AXE>
-Value        60.0
-Level        10
-Damage       <3d6>
-Weight       15.0
-Speed        6.0
-Color        <200,200,200,255>
+    Plural        <Lances>
+    Type        <ITEM_IDX_AXE>
+    Value        60.0
+    Level        10
+    Damage       <3d6>
+    Weight       15.0
+    Speed        6.0
+    Color        <200,200,200,255>
 }
 
 Item <Morning Star>
 {
-Plural        <Moring Stars>
-Type        <ITEM_IDX_AXE>
-Value        50.0
-Level        10
-Damage       <2d4>
-Weight       12.5
-Speed        7.0
-Color        <200,200,200,255>
+    Plural        <Morning Stars>
+    Type        <ITEM_IDX_AXE>
+    Value        50.0
+    Level        10
+    Damage       <2d4>
+    Weight       12.5
+    Speed        7.0
+    Color        <200,200,200,255>
 }
 
 Item <Glaive>
 {
-Plural        <Glaives>
-Type        <ITEM_IDX_AXE>
-Value        60.0
-Level        10
-Damage       <2d5>
-Weight       7.5
-Speed        8.0
-Color        <200,200,200,255>
+    Plural        <Glaives>
+    Type        <ITEM_IDX_AXE>
+    Value        60.0
+    Level        10
+    Damage       <2d5>
+    Weight       7.5
+    Speed        8.0
+    Color        <200,200,200,255>
 }
 
 Item <Halberd>
 {
-Plural        <Halberds>
-Type        <ITEM_IDX_AXE>
-Value        90.0
-Level        10
-Damage       <2d5>
-Weight       17.5
-Speed        9.0
-Color        <200,200,200,255>
+    Plural        <Halberds>
+    Type        <ITEM_IDX_AXE>
+    Value        90.0
+    Level        10
+    Damage       <2d5>
+    Weight       17.5
+    Speed        9.0
+    Color        <200,200,200,255>
 }
 
 Item <War Hammer>
 {
-Plural        <War hammers>
-Type        <ITEM_IDX_AXE>
-Value        10.0
-Level        10
-Damage       <1d5>
-Weight       5.0
-Speed        4.0
-Color        <200,200,200,255>
+    Plural        <War hammers>
+    Type        <ITEM_IDX_AXE>
+    Value        10.0
+    Level        10
+    Damage       <1d5>
+    Weight       5.0
+    Speed        4.0
+    Color        <200,200,200,255>
 }
 
 Item <Spear>
 {
-Plural        <Spears>
-Type        <ITEM_IDX_AXE>
-Value        10.0
-Level        10
-Damage       <2d4>
-Weight       5.0
-Speed        7.0
-Color        <200,200,200,255>
+    Plural        <Spears>
+    Type        <ITEM_IDX_AXE>
+    Value        10.0
+    Level        10
+    Damage       <2d4>
+    Weight       5.0
+    Speed        7.0
+    Color        <200,200,200,255>
 }
 
 Item <Mace>
 {
-Plural        <Maces>
-Type        <ITEM_IDX_AXE>
-Value        80.0
+    Plural        <Maces>
+    Type        <ITEM_IDX_AXE>
+    Value        80.0
+    Level        10
+    Damage       <1d8>
+    Weight       10.0
+    Speed        7.0
+    Color        <200,200,200,255>
+}
+
+Item <Scimitar>
+{
+Plural        <Scimitar>>
+Type        <ITEM_IDX_SWORD>
+Value     150.0
 Level        10
-Damage       <1d8>
-Weight       10.0
-Speed        7.0
+Damage       1d8
+Weight        4.0
+Speed         4.0
+Color        <200,200,200,255>
+}
+
+Item <Trident>
+{
+Plural        <Tridents>
+Type        <ITEM_IDX_POLEARM>
+Value     40.0
+Level        10
+Damage       3d4
+Weight        4.0
+Speed         7.0
 Color        <200,200,200,255>
 }
 
@@ -209,7 +246,7 @@ Item <Dagger>
     Weight      1.0
     Speed       2.0
     Color        <200,200,200,255>
-    }
+}
 
 Item <Small Wooden Shield>
 {
@@ -226,25 +263,248 @@ Item <Ring of Invisibility>
 {
     Plural        <Rings of Invisibility>
     Type        <ITEM_IDX_RING>
+    Flags       <ITEM_FLAG_INVISIBLE>
     Value       1000.0
     Level       20
     Weight      0.2
     Color        <225,225,50,255>
 }
+Item <Ring of Levitation>
+{
+Plural        <Rings of Levitation>
+Type        <ITEM_IDX_RING>
+Flags       <ITEM_FLAG_LEVITATE>
+Value       300.0
+Level       20
+Weight      0.2
+Color        <225,225,50,255>
+}
+Item <Ring of Telepathy>
+{
+Plural        <Rings of Telepathy>
+Type        <ITEM_IDX_RING>
+Flags       <ITEM_FLAG_ESP>
+Value       300.0
+Level       20
+Weight      0.2
+Color        <225,225,50,255>
+}
+Item <Torch>
+{
+Plural        <Torches>
+Type        <ITEM_IDX_TORCH>
+Flags       <ITEM_FLAG_LIGHT>
+Value       10.0
+Level       20
+Weight     1.0
+Color        <225,225,50,255>
+}
+Item <Brass Lantern>
+{
+Plural        <Brass Lanterns>
+Type        <ITEM_IDX_TORCH>
+Flags       <ITEM_FLAG_LIGHT>
+Value       10.0
+Level       20
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Flask of Oil>
+{
+Plural        <Flasks of Oil>
+Type        <ITEM_IDX_POTION>
+Flags       <ITEM_FLAG_FUEL>
+Value       10.0
+Level       20
+Weight     0.5
+Color        <225,225,50,255>
+}
+Item <Steel Helm>
+{
+Plural        <SteelHelms>
+Type        <ITEM_IDX_HELMET>
+Value       150.0
+Level       20
+AC          5.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Steel Cap>
+{
+Plural        <SteelCaps>
+Type        <ITEM_IDX_HELMET>
+Value       150.0
+Level       1
+AC          3.0
+Weight      6.0
+Color        <225,225,50,255>
+}
+Item <Steel Boot>
+{
+Plural        <SteelBoots>
+Type        <ITEM_IDX_BOOTS>
+Value       20.0
+Level       1
+AC          5.0
+Weight      4.0
+Color        <225,225,50,255>
+}
+Item <Leather Boot>
+{
+Plural        <Leather Boots>
+Type        <ITEM_IDX_BOOTS>
+Value       20.0
+Level       1
+AC          2.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Leather Armor>
+{
+Plural        <Sets of Leather Armor>
+Type        <ITEM_IDX_ARMOR>
+Value       50.0
+Level       1
+AC          50.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Plate Mail Armor>
+{
+Plural        <Sets of Plate Mail Armor>
+Type        <ITEM_IDX_ARMOR>
+Value       40.0
+Level       7
+AC          90.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Chain Mail>
+{
+Plural        <Chain  Mails>
+Type        <ITEM_IDX_HELMET>
+Value       40.0
+Level       4
+AC          70.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Padded Armor>
+{
+Plural        <Padded Armors>
+Type        <ITEM_IDX_ARMOR>
+Value       40.0
+Level       1
+AC          40.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Splint Mail>
+{
+Plural        <Splint Mails>
+Type        <ITEM_IDX_ARMOR>
+Value       40.0
+Level       5
+AC          80.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Pair of Leather Gloves>
+{
+Plural        <Pairs of Leather Gloves>
+Type        <ITEM_IDX_GLOVES>
+Value       50.0
+Level       1
+AC          2.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Set of Gauntlets>
+{
+Plural        <Sets of Gauntlets>
+Type        <ITEM_IDX_GLOVES>
+Value       50.0
+Level       1
+AC          4.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Ring of Fire Resistance>
+{
+Plural        <Rings of Fire Resistance>
+Type        <ITEM_IDX_RING>
+Value       300.0
+Level       10
+Flag        <FLAG_IDX_FIRE RESISTANCE>
+Weight      0.2
+Color        <225,225,50,255>
+}
+Item <Cloak>
+{
+Plural        <Cloaks>
+Type        <ITEM_IDX_CLOAK>
+Value       5.0
+Level       1
+AC          1.0
+Weight      1.0
+Color        <225,225,50,255>
+}
+Item <Robe>
+{
+Plural        <Robes>
+Type        <ITEM_IDX_ARMOR>
+Value       6.0
+Level       1
+AC          1.0
+Weight      1.0
+Color        <225,225,50,255>
+}
+Item <Shovel>
+{
+Plural        <Shovels>
+Type        <ITEM_IDX_SHOVEL>
+Value       15.0
+Level       1
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Pickaxe>
+{
+Plural        <Pikaxes>
+Type        <ITEM_IDX_SHOVEL>
+Value       50.0
+Level       1
+Weight      2.0
+Color        <225,225,50,255>
+}
 
 Item <Ring of Protection>
 {
-Plural        <Rings of Protection>
-Type        <ITEM_IDX_RING>
-Value       1000.0
-Level       20
-Weight      0.2
-Color        <225,50,225,255>
+    Plural        <Rings of Protection>
+    Type        <ITEM_IDX_RING>
+    ACBonus     <1d20>
+    Value       1000.0
+    Level       20
+    Weight      0.2
+    Color        <225,50,225,255>
 }
 
-Item <Small Steal Shield>
+Item <Potion of Minor Healing>
 {
-    Plural        <Small Steal Shields>
+    Plural        <Potions of Minor Healing>
+    Type        <ITEM_IDX_POTION>
+    Effect      <ITEM_FLAG_HEAL_HP>,<1d20>
+#    Effect      <ITEM_FLAG_CURE_POISON>
+#    Effect      <ITEM_FLAG_CURE_BLINDNESS>
+    Value       1000.0
+    Level       2
+    Weight      0.2
+    Color        <225,50,225,255>
+}
+
+Item <Small Steel Shield>
+{
+    Plural        <Small Steel Shields>
     Type        <ITEM_IDX_SHIELD>
     Value        100.0
     Level        2

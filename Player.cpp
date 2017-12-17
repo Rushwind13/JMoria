@@ -7,6 +7,8 @@
 #include "Game.h"
 #include "Dungeon.h"
 #include "DisplayText.h"
+#include "JLinkList.h"
+#include "StateBase.h"
 
 extern CGame *g_pGame;
 
@@ -22,8 +24,8 @@ void CPlayer::Init()
 bool CPlayer::Update(float fCurTime)
 {
     DisplayStats();
-    DisplayInventory();
-    DisplayEquipment();
+    DisplayInventory(PLACEMENT_INV);
+    DisplayEquipment(PLACEMENT_EQUIP);
 	return true;
 }
 
@@ -76,6 +78,10 @@ JResult CPlayer::SpawnPlayer()
 void CPlayer::DisplayStats()
 {
     g_pGame->GetStats()->Clear();
+    g_pGame->GetStats()->Printf("Name:%s\n", m_szName);
+    g_pGame->GetStats()->Printf("Race:%s\n", m_pRace->m_szName);
+    g_pGame->GetStats()->Printf("Class:%s\n", m_pClass->m_szName);
+    g_pGame->GetStats()->Printf("\n");
     g_pGame->GetStats()->Printf("AC:%d\n", (int)m_fArmorClass);
     g_pGame->GetStats()->Printf("HP:%d / %d\n", (int)m_fCurHitPoints, (int)m_fHitPoints);
     g_pGame->GetStats()->Printf("\n");
@@ -89,56 +95,52 @@ void CPlayer::DisplayStats()
     g_pGame->GetStats()->Printf("Exp to Next:%d\n", (int)(m_pClass->m_fExpNeeded[(int)m_fLevel-1] - m_fExperience));
 }
 
-void CPlayer::DisplayInventory()
+void CPlayer::DisplayInventory( uint8 dwPlacement )
 {
-    CLink<CItem> *pLink = m_llInventory->GetHead();
-    CItem *pItem;
-    g_pGame->GetInv()->Clear();
-    g_pGame->GetInv()->Printf("You are carrying:\n");
-    char cInventoryId = 'a';
-    while(pLink != NULL)
+    CDisplayMeta meta;
+    sprintf( meta.header, "You are Carrying:\n");
+    meta.limit = 'z';
+    sprintf( meta.footer, "Inventory past first page not shown.\n");
+    CDisplayText *pDT = NULL;
+    switch(dwPlacement)
     {
-        pItem = pLink->m_lpData;
-        g_pGame->GetInv()->Printf("%c - %s\n", cInventoryId, pItem->GetName());
-        
-        if( cInventoryId < 'z' )
-        {
-            cInventoryId++;
-        }
-        else
-        {
-            printf("Inventory past first page not shown.\n");
+        case PLACEMENT_INV:
+            pDT = g_pGame->GetInv();
             break;
-        }
-        pLink = m_llInventory->GetNext(pLink);
+        case PLACEMENT_USE:
+            pDT = g_pGame->GetUse();
+            break;
+        default:
+            printf("DisplayInventory got bad placement: %d\n", dwPlacement);
+            return;
+            break;
     }
     
+    pDT->DisplayList( m_llInventory, &meta );
 }
 
-void CPlayer::DisplayEquipment()
+void CPlayer::DisplayEquipment( uint8 dwPlacement )
 {
-    CLink<CItem> *pLink = m_llEquipment->GetHead();
-    CItem *pItem;
-    g_pGame->GetEquip()->Clear();
-    g_pGame->GetEquip()->Printf("You are wearing:\n");
-    char cEquipmentId = 'a';
-    while(pLink != NULL)
+    CDisplayMeta meta;
+    sprintf( meta.header, "You are wearing:\n");
+    meta.limit = 'j';
+    sprintf( meta.footer, "Equipment is limited to 10 items, one each for specific body parts.\n");
+    CDisplayText *pDT = NULL;
+    switch(dwPlacement)
     {
-        pItem = pLink->m_lpData;
-        g_pGame->GetEquip()->Printf("%c - %s\n", cEquipmentId, pItem->GetName());
-        
-        if( cEquipmentId < 'z' )
-        {
-            cEquipmentId++;
-        }
-        else
-        {
-            printf("Equipment is limited to N items, one each for specific body parts.\n");
+        case PLACEMENT_EQUIP:
+            pDT = g_pGame->GetEquip();
             break;
-        }
-        pLink = m_llEquipment->GetNext(pLink);
+        case PLACEMENT_USE:
+            pDT = g_pGame->GetUse();
+            break;
+        default:
+            printf("DisplayEquipment got bad placement: %d\n", dwPlacement);
+            return;
+            break;
     }
     
+    pDT->DisplayList( m_llEquipment, &meta );
 }
 
 void CPlayer::PickUp( JVector &vPickupPos )
@@ -177,7 +179,7 @@ bool CPlayer::IsWieldable(CLink<CItem> *pItem)
 bool CPlayer::Wield(CLink<CItem> *pLink)
 {
     CItem *pItem = pLink->m_lpData;
-    
+
     // You can only wield one thing of a given type at a time
     CLink<CItem> *pCurrEquip = m_llEquipment->GetLink(pItem->m_id->m_dwIndex, true);
     if( pCurrEquip != NULL && pCurrEquip->m_dwIndex == pLink->m_dwIndex )
@@ -199,7 +201,7 @@ bool CPlayer::Wield(CLink<CItem> *pLink)
     if( pItem->m_id->m_szBaseDamage != NULL ) strcpy(m_szDamage, pItem->m_id->m_szBaseDamage);
     m_fDamageModifier += pItem->m_id->m_fBonusToDamage;
     m_fToHitModifier += pItem->m_id->m_fBonusToHit;
-    
+
     return true;
 }
 
@@ -228,7 +230,7 @@ bool CPlayer::Remove(CLink<CItem> *pLink)
     m_fDamageModifier -= pItem->m_id->m_fBonusToDamage;
     m_fToHitModifier -= pItem->m_id->m_fBonusToHit;
 
-    
+
     return true;
 }
 
@@ -236,11 +238,11 @@ float CPlayer::Attack()
 {
     float fRoll = Util::Roll( "1d100" );
     float fHitMod = g_pGame->GetPlayer()->m_fToHitModifier;
-    
+
     printf( "You rolled: %.2f, +to-hit Bonus: %.2f = Total: %.2f\n", fRoll, fHitMod, fRoll + fHitMod );
-    
+
     fRoll += fHitMod;
-    
+
     return fRoll;
 }
 
@@ -269,7 +271,7 @@ void CPlayer::GainLevel()
         g_pGame->GetMsgs()->Printf("Welcome to level %d.\n", (int)m_fLevel);
         // TODO: Gain Spells or &c here.
     }
-    
+
 }
 
 bool CPlayer::Hit( float &fRoll )
@@ -280,8 +282,7 @@ bool CPlayer::Hit( float &fRoll )
 int CPlayer::TakeDamage( float fDamage, char *szMon )
 {
     int retval = STATUS_INVALID;
-    
-    
+
     if( (int)fDamage < (int)m_fCurHitPoints )
     {
         m_fCurHitPoints -= fDamage;
@@ -291,12 +292,79 @@ int CPlayer::TakeDamage( float fDamage, char *szMon )
     {
         m_fCurHitPoints = 0;
         retval = STATUS_DEAD;
+        m_szKilledBy = new char[strlen(szMon)+1];
+        memset(m_szKilledBy,0,strlen(szMon)+1);
+        strcpy(m_szKilledBy, szMon);
         // This is the end of the game; make the game end on next update.
-        printf("You died on dungeon level %d, while level %d, killed by a %s.\n", g_pGame->GetDungeon()->depth, (int)m_fLevel, szMon );
-        g_pGame->Quit(0);
+        printf("%s died on dungeon level %d, while level %d, killed by a %s.\n", m_szName, g_pGame->GetDungeon()->depth, (int)m_fLevel, m_szKilledBy );
+        g_pGame->SetState(STATE_ENDGAME);
     }
-    
+
     printf( "Remaining HP: %.2f \n", m_fCurHitPoints );
-    
+
     return retval;
 }
+
+bool CPlayer::Drop( CItem *pItem )
+{
+    m_llInventory->Remove(pItem->m_pllLink, false);
+    g_pGame->GetDungeon()->Drop(pItem, m_vPos);
+    
+    return true;
+}
+
+bool CPlayer::CanDropHere()
+{
+    if( g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurItem != NULL )
+    {
+        g_pGame->GetMsgs()->Printf("There is already an item there.\n");
+        return false;
+    }
+    return true;
+}
+
+bool CPlayer::Quaff( CLink<CItem> *pLink )
+{
+    CItem *pItem = pLink->m_lpData;
+    m_llInventory->Remove(pItem->m_pllLink, false);
+    CEffect *pEffect = pItem->m_id->m_llEffects->GetHead()->m_lpData;
+    if( pEffect->m_dwEffect == ITEM_FLAG_HEAL_HP )
+    {
+        m_fCurHitPoints += Util::Roll(pEffect->m_szAmount);
+        if( m_fCurHitPoints > m_fHitPoints )
+        {
+            m_fCurHitPoints = m_fHitPoints;
+        }
+        g_pGame->GetMsgs()->Printf("You feel a bit better.\n");
+    }
+    
+    return true;
+}
+
+bool CPlayer::IsDrinkable(CLink<CItem> *pLink)
+{
+    bool retval = false;
+    switch( pLink->m_lpData->m_id->m_dwIndex )
+    {
+        case ITEM_IDX_POTION:
+            retval = true;
+            break;
+        default:
+            retval = false;
+            break;
+    }
+    return retval;
+}
+
+bool CPlayer::SetName( const char *szName )
+{
+    if(strlen(szName) > MAX_STRING_LENGTH-1)
+    {
+        return false;
+    }
+    
+    strcpy( m_szName, szName );
+    
+    return true;
+}
+

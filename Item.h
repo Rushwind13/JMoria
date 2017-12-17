@@ -4,6 +4,15 @@
 #include "JMDefs.h"
 #include "JLinkList.h"
 
+class CEffect
+{
+public:
+    CEffect():m_dwEffect(-1),m_szAmount(NULL){};
+    ~CEffect(){};
+    int m_dwEffect;
+    char *m_szAmount;
+};
+
 class CItemDef
 {
 	// Member Variables
@@ -24,6 +33,7 @@ class CItemDef
     m_dwBaseHP(0.0f)
     {
         m_Colors = new JLinkList<JColor>;
+        m_llEffects = new JLinkList<CEffect>;
     }
     ~CItemDef()
     {
@@ -47,6 +57,11 @@ class CItemDef
             m_Colors->Terminate();
             m_Colors = NULL;
         }
+        if(m_llEffects)
+        {
+            m_llEffects->Terminate();
+            m_llEffects = NULL;
+        }
     }
     char *m_szName; // what item is this?
     char *m_szPlural;
@@ -62,6 +77,7 @@ class CItemDef
 	int m_dwIndex; // ITEM_IDX_SWORD, ITEM_IDX_WAND, etc.
 	int m_dwBaseHP; // for busting down walls, disarming traps, etc.
     JLinkList<JColor> *m_Colors;
+    JLinkList<CEffect> *m_llEffects;
     JColor m_Color;
 	protected:
 	private:

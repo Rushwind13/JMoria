@@ -14,7 +14,9 @@ class CDisplayText;
 class CStateBase;
 class CCmdState;
 class CModState;
-class CMenuState;
+class CUseState;
+class CStringInputState;
+class CEndGameState;
 class CAIMgr;
 
 class CGame
@@ -35,6 +37,8 @@ public:
     CDisplayText *GetStats() { return m_pStatsDT; };
     CDisplayText *GetInv() { return m_pInvDT; };
     CDisplayText *GetEquip() { return m_pEquipDT; };
+    CDisplayText *GetUse() { return m_pUseDT; };
+    CDisplayText *GetEnd() { return m_pEndGameDT; };
 	CAIMgr *GetAIMgr() { return m_pAIMgr; };
 	void Quit( int returncode );
 	void SetState( int eNewState );
@@ -53,13 +57,17 @@ protected:
     CDisplayText *m_pStatsDT;
     CDisplayText *m_pInvDT;
     CDisplayText *m_pEquipDT;
-	
+    CDisplayText *m_pUseDT;
+    CDisplayText *m_pEndGameDT;
+
 	CStateBase	 *m_pCurState;
 	int			 m_eCurState;
 
     CCmdState	*m_pCmdState;
     CModState    *m_pModState;
-    CMenuState   *m_pMenuState;
+    CUseState   *m_pUseState;
+    CStringInputState   *m_pStringInputState;
+    CEndGameState   *m_pEndGameState;
 
 private:
 	CRender	*m_pRender;

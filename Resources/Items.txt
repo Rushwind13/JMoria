@@ -210,7 +210,7 @@ Item <Dagger>
     Weight      1.0
     Speed       2.0
     Color        <200,200,200,255>
-    }
+}
 
 Item <Small Wooden Shield>
 {
@@ -232,6 +232,66 @@ Item <Ring of Invisibility>
     Level       20
     Weight      0.2
     Color        <225,225,50,255>
+}
+Item <Ring of Levitation>
+{
+Plural        <Rings of Levitation>
+Type        <ITEM_IDX_RING>
+Flags       <ITEM_FLAG_LEVITATE>
+Value       300.0
+Level       20
+Weight      0.2
+Color        <225,225,50,255>
+}
+Item <Ring of Telepathy>
+{
+Plural        <Rings of Telepathy>
+Type        <ITEM_IDX_RING>
+Flags       <ITEM_FLAG_ESP>
+Value       300.0
+Level       20
+Weight      0.2
+Color        <225,225,50,255>
+}
+Item <Torch>
+{
+Plural        <Torches>
+Type        <ITEM_IDX_TORCH>
+Flags       <ITEM_FLAG_LIGHT>
+Value       10.0
+Level       20
+Weight     1.0
+Color        <225,225,50,255>
+}
+Item <Brass Lantern>
+{
+Plural        <Brass Lanterns>
+Type        <ITEM_IDX_TORCH>
+Flags       <ITEM_FLAG_LIGHT>
+Value       10.0
+Level       20
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Flask of Oil>
+{
+Plural        <Flasks of Oil>
+Type        <ITEM_IDX_POTION>
+Flags       <ITEM_FLAG_FUEL>
+Value       10.0
+Level       20
+Weight     0.5
+Color        <225,225,50,255>
+}
+Item <Steel Helm>
+{
+Plural        <SteelHelms>
+Type        <ITEM_IDX_HELMET>
+Value       150.0
+Level       20
+AC          5.0
+Weight      2.0
+Color        <225,225,50,255>
 }
 
 Item <Ring of Protection>

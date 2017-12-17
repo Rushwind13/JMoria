@@ -79,6 +79,7 @@ void CPlayer::DisplayStats()
 {
     g_pGame->GetStats()->Clear();
     g_pGame->GetStats()->Printf("Name:%s\n", m_szName);
+    g_pGame->GetStats()->Printf("Race:%s\n", m_pRace->m_szName);
     g_pGame->GetStats()->Printf("Class:%s\n", m_pClass->m_szName);
     g_pGame->GetStats()->Printf("\n");
     g_pGame->GetStats()->Printf("AC:%d\n", (int)m_fArmorClass);

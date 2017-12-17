@@ -54,6 +54,20 @@ protected:
 private:
 };
 
+class CRace
+{
+public:
+    CRace():
+    m_szName(NULL)
+    {
+        m_szName = new char[MAX_STRING_LENGTH];
+        memset(m_szName, 0, MAX_STRING_LENGTH);
+        strcpy(m_szName, "Human");
+    }
+public:
+    char *m_szName;
+};
+
 class CPlayer
 {
 public:
@@ -73,6 +87,7 @@ public:
         memset(m_szName, 0, MAX_STRING_LENGTH);
         strcpy(m_szName, "Anonymous");
         m_pClass = new CClass;
+        m_pRace = new CRace;
         m_llInventory = new JLinkList<CItem>;
         m_llEquipment = new JLinkList<CItem>;
         m_szDamage = new char[10];
@@ -110,6 +125,8 @@ public:
     char *GetName() { return m_szName; };
     float GetLevel() { return m_fLevel; };
     CClass *GetClass() { return m_pClass; };
+    CRace *GetRace() { return m_pRace; };
+    float GetExperience() { return m_fExperience; };
 	bool Update( float fCurTime );
 	void PreDraw();
 	void Draw();
@@ -168,6 +185,7 @@ protected:
     float m_fLevel;
 
     CClass *m_pClass;
+    CRace *m_pRace;
     char m_szName[MAX_STRING_LENGTH];
 };
 #endif // __PLAYER_H__

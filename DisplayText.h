@@ -22,6 +22,7 @@
 #define FLAG_TEXT_IGNORE_WHITESPACE	0x4
 #define FLAG_TEXT_WRAP_WHITESPACE	0x8
 class CItem;
+class CScore;
 
 class CDisplayMeta
 {
@@ -48,6 +49,7 @@ public:
 	void DrawStr( int x, int y, char *szString );
     void Printf( const char *fmt, ... );
     void DisplayList( JLinkList<CItem> *pList, const CDisplayMeta *pMeta, const uint8 dwIndex=DUNG_IDX_INVALID );
+    void DisplayList( JLinkList<CScore> *pList, const CDisplayMeta *pMeta, const uint8 dwIndex=DUNG_IDX_INVALID );
 
 
 	void Clear() { m_szText[0] = nul; };

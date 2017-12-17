@@ -7,6 +7,7 @@
 
 class CMonsterDef;
 class CItemDef;
+class CScore;
 class CDataFile
 {
 	// Member variables
@@ -14,17 +15,22 @@ public:
 	CDataFile() {};
 	~CDataFile() {};
 
-	bool Open( const char *szFilename );
-    
+    bool Open( const char *szFilename );
+    bool Append( const char *szFilename );
+    bool Close();
+
     CMonsterDef *ReadMonster(CMonsterDef &mdIn);
     CItemDef *ReadItem(CItemDef &idIn);
+    CScore *ReadScore(CScore &sIn);
+    bool WriteScore(CScore *sIn);
 protected:
     char	*Strip( char *szLine );
     char	*chomp(const char *szLine, char *szIn);
     JLinkList<JColor> * ParseColors(char *szLine);
     char	*GetValue(char *szLine, char *szIn);
-	int		GetValue(char *szLine, int &dwIn);
-	float	GetValue(char *szLine, float &fIn);
+    int      GetValue(char *szLine, int &dwIn);
+    int     GetValue(char *szLine, long &dwIn);
+	float	 GetValue(char *szLine, float &fIn);
 private:
 	FILE	*m_fp;
 	// Member functions

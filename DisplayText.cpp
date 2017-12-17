@@ -11,6 +11,7 @@
 #include "DisplayText.h"
 #include "Render.h"
 #include "Item.h"
+#include "EndGameState.h"
 
 class CGame;
 
@@ -278,6 +279,32 @@ void CDisplayText::DisplayList( JLinkList<CItem> *pList, const CDisplayMeta *pMe
     {
         pItem = pLink->m_lpData;
         Printf("%c - %s\n", cListId, pItem->GetName());
+        
+        if( cListId < pMeta->limit )
+        {
+            cListId++;
+        }
+        else
+        {
+            printf(pMeta->footer);
+            break;
+        }
+        pLink = pList->GetNext(pLink);
+    }
+    
+}
+void CDisplayText::DisplayList( JLinkList<CScore> *pList, const CDisplayMeta *pMeta, const uint8 dwIndex )
+{
+    // TODO: Use dwIndex to filter the
+    CLink<CScore> *pLink = pList->GetHead();
+    CScore *pItem;
+    Clear();
+    Printf(pMeta->header);
+    char cListId = 1;
+    while(pLink != NULL)
+    {
+        pItem = pLink->m_lpData;
+        Printf("%d - %s\n", cListId, pItem->GetName());
         
         if( cListId < pMeta->limit )
         {

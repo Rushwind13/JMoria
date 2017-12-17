@@ -1,6 +1,7 @@
 #include "FileParse.h"
 #include "Monster.h"
 #include "Item.h"
+#include "EndGameState.h"
 #include <string.h>
 
 bool CDataFile::Open( const char *szFilename )
@@ -13,6 +14,25 @@ bool CDataFile::Open( const char *szFilename )
 	}
 
 	return true;
+}
+
+bool CDataFile::Append( const char *szFilename )
+{
+    m_fp = fopen(szFilename, "a");
+
+    if( m_fp == NULL )
+    {
+        return false;
+    }
+
+    return true;
+}
+
+bool CDataFile::Close()
+{
+    fclose(m_fp);
+    m_fp = NULL;
+    return true;
 }
 
 char *CDataFile::Strip( char *szLine )
@@ -59,7 +79,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 	bool bFoundMonster = false;
 	bool bStartMonster = false;
 	bool bEndMonster = false;
-	
+
 	while( !bEndMonster && fgets( szRaw, 1024, m_fp ) != NULL )
 	{
 		szLine = Strip(szRaw);
@@ -86,8 +106,8 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 			continue;
 		}
 
-		// Once you get here, you know that you're 
-		// parsing a monster entry. Everything 
+		// Once you get here, you know that you're
+		// parsing a monster entry. Everything
 		// from here to the next } is going to be
 		// data for this monster.
 		if( !bEndMonster )
@@ -133,7 +153,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
             else if( strncasecmp( szLine, "flags", 5 ) == 0 )
             {
                 szValue = GetValue( szLine, szValue );
-                
+
                 char *c = strtok( szValue, "," );
                 while( c != NULL )
                 {
@@ -176,11 +196,11 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 				{
 					bDone = true;
 				}
-				
+
 				cur = Strip(begin);
 				curAttack->m_szDamage = new char[strlen(cur)+1];
 				strcpy( curAttack->m_szDamage, cur );
-				
+
 				if( !bDone )
 				{
 					cur = end;
@@ -195,7 +215,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 					begin++;
 					curAttack->m_dwEffect = g_Constants.LookupString(begin);
 				}
-				
+
 
 				// store it
 				mdIn.m_llAttacks->Add(curAttack);
@@ -208,7 +228,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
                     // multi-hued
                     // <<rgb1>,<rgb2>,...,<rgbn>>
                     mdIn.m_Colors = ParseColors(color);
-                    
+
                     mdIn.m_dwFlags |= MON_COLOR_MULTI;
                 }
                 else
@@ -232,7 +252,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 	{
 		return NULL;
 	}
-	
+
 	return &mdIn;
 }
 
@@ -244,7 +264,7 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
     bool bFoundItem = false;
     bool bStartItem = false;
     bool bEndItem = false;
-    
+
     while( !bEndItem && fgets( szRaw, 1024, m_fp ) != NULL )
     {
         szLine = Strip(szRaw);
@@ -261,7 +281,7 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
             }
             continue;
         }
-        
+
         if( !bStartItem )
         {
             if( *szLine == '{' )
@@ -270,7 +290,7 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
             }
             continue;
         }
-        
+
         // Once you get here, you know that you're
         // parsing a Item entry. Everything
         // from here to the next } is going to be
@@ -322,7 +342,7 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
             else if( strncasecmp( szLine, "flags", 5 ) == 0 )
             {
                 szValue = GetValue( szLine, szValue );
-                
+
                 char *c = strtok( szValue, "," );
                 while( c != NULL )
                 {
@@ -338,7 +358,7 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
                     // multi-hued
                     // <<rgb1>,<rgb2>,...,<rgbn>>
                     idIn.m_Colors = ParseColors(color);
-                    
+
                     idIn.m_dwFlags |= MON_COLOR_MULTI;
                 }
                 else
@@ -368,7 +388,7 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
                 begin++;
                 curEffect->m_dwEffect = g_Constants.LookupString(begin);
                 cur = end;
-                
+
                 // amount
                 begin = strchr(cur, ',');
                 if( begin == NULL ) continue;
@@ -384,7 +404,7 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
                 begin++;
                 curEffect->m_szAmount = new char[strlen(begin)+1];
                 strcpy( curEffect->m_szAmount, begin );
-                
+
                 // store it
                 idIn.m_llEffects->Add(curEffect);
             }
@@ -402,8 +422,104 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
     {
         return NULL;
     }
-    
+
     return &idIn;
+}
+
+CScore *CDataFile::ReadScore(CScore &sIn)
+{
+    char szRaw[1024];
+    char *szLine;
+    char *szValue = NULL;
+    bool bFoundScore = false;
+    bool bStartScore = false;
+    bool bEndScore = false;
+
+    while( !bEndScore && fgets( szRaw, 1024, m_fp ) != NULL )
+    {
+        szLine = Strip(szRaw);
+        if( szLine == NULL )
+        {
+            continue;
+        }
+        if( !bFoundScore )
+        {
+            if( strncasecmp( szLine, "Score", 4 ) == 0 )
+            {
+                bFoundScore = true;
+                sIn.m_szName = GetValue( szLine, sIn.m_szName );
+            }
+            continue;
+        }
+
+        if( !bStartScore )
+        {
+            if( *szLine == '{' )
+            {
+                bStartScore = true;
+            }
+            continue;
+        }
+
+        // Once you get here, you know that you're
+        // parsing a Score entry. Everything
+        // from here to the next } is going to be
+        // data for this Score.
+        if( !bEndScore )
+        {
+            if( strncasecmp( szLine, "level", 5 ) == 0 )
+            {
+                sIn.m_dwLevel = GetValue( szLine, sIn.m_dwLevel );
+            }
+            else if( strncasecmp( szLine, "depth", 5 ) == 0 )
+            {
+                sIn.m_dwDepth = GetValue( szLine, sIn.m_dwDepth );
+            }
+            else  if( strncasecmp( szLine, "reason", 6 ) == 0 )
+            {
+                sIn.m_szKilledBy = GetValue( szLine, sIn.m_szKilledBy );
+            }
+            else  if( strncasecmp( szLine, "class", 5 ) == 0 )
+            {
+                sIn.m_szClass = GetValue( szLine, sIn.m_szClass );
+            }
+            else  if( strncasecmp( szLine, "race", 4 ) == 0 )
+            {
+                sIn.m_szRace = GetValue( szLine, sIn.m_szRace );
+            }
+            else  if( strncasecmp( szLine, "score", 5 ) == 0 )
+            {
+                sIn.m_dwScore = GetValue( szLine, sIn.m_dwScore );
+            }
+            else  if( strncasecmp( szLine, "date", 4 ) == 0 )
+            {
+                sIn.m_dwDate = GetValue( szLine, sIn.m_dwDate );
+            }
+            else if( *szLine == '}' )
+            {
+                bEndScore = true;
+            }
+            else
+            {
+                printf( "Unparseable line:%s\n", szLine );
+            }
+        }
+    }
+    if( !bEndScore )
+    {
+        return NULL;
+    }
+
+    return &sIn;
+}
+
+bool CDataFile::WriteScore(CScore *sIn)
+{
+    fprintf( m_fp, "Score <%s>\n{\n\tClass\t<%s>\n\tRace\t<%s>\n\tLevel\t%d\n\tDepth\t%d\n\tReason\t<%s>\n\tScore\t%d\n\tDate\t%ld\n}\n",
+            sIn->m_szName, sIn->m_szClass, sIn->m_szRace, sIn->m_dwLevel,
+            sIn->m_dwDepth, sIn->m_szKilledBy, sIn->m_dwScore, sIn->m_dwDate);
+    fflush( m_fp );
+    return true;
 }
 
 // Removes outermost <> from data entry
@@ -452,7 +568,7 @@ JLinkList<JColor> * CDataFile::ParseColors(char *szLine)
         strcpy(szToken[count++], c);
         c = strtok( NULL, ";" );
     }
-    
+
     for( int i = 0; i < count; i++)
     {
         char *tok = szToken[i];
@@ -465,6 +581,15 @@ JLinkList<JColor> * CDataFile::ParseColors(char *szLine)
     return retval;
 }
 
+int CDataFile::GetValue(char *szLine, long &dwIn)
+{
+    char label[100];
+    char value[100];
+    sscanf( szLine, "%s %s\n", label, value );
+    dwIn = atoi(value);
+    
+    return (int)dwIn;
+}
 int CDataFile::GetValue(char *szLine, int &dwIn)
 {
 	char label[100];

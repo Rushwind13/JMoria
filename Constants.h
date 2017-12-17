@@ -356,6 +356,9 @@ public:
         m_StringTable[i++].Init("ITEM_IDX_MONEY",        ITEM_IDX_MONEY);
         m_StringTable[i++].Init("ITEM_IDX_FOOD",         ITEM_IDX_FOOD);
         m_StringTable[i++].Init("ITEM_IDX_AXE",          ITEM_IDX_AXE);
+        m_StringTable[i++].Init("ITEM_IDX_SHOVEL",       ITEM_IDX_SHOVEL);
+        m_StringTable[i++].Init("ITEM_IDX_POLEARM",      ITEM_IDX_POLEARM);
+
         // Item flags
         m_StringTable[i++].Init("ITEM_FLAG_CURE_POISON",   ITEM_FLAG_CURE_POISON);
         m_StringTable[i++].Init("ITEM_FLAG_CURE_BLIND",    ITEM_FLAG_CURE_BLIND);

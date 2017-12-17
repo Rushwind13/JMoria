@@ -321,7 +321,7 @@ Color        <225,225,50,255>
 }
 Item <Steel Helm>
 {
-Plural        <SteelHelms>
+Plural        <Steel Helms>
 Type        <ITEM_IDX_HELMET>
 Value       150.0
 Level       20
@@ -331,7 +331,7 @@ Color        <225,225,50,255>
 }
 Item <Steel Cap>
 {
-Plural        <SteelCaps>
+Plural        <Steel Caps>
 Type        <ITEM_IDX_HELMET>
 Value       150.0
 Level       1
@@ -339,9 +339,9 @@ AC          3.0
 Weight      6.0
 Color        <225,225,50,255>
 }
-Item <Steel Boot>
+Item <Pair of Steel Boots>
 {
-Plural        <SteelBoots>
+Plural        <Pairs of Steel Boots>
 Type        <ITEM_IDX_BOOTS>
 Value       20.0
 Level       1
@@ -349,9 +349,9 @@ AC          5.0
 Weight      4.0
 Color        <225,225,50,255>
 }
-Item <Leather Boot>
+Item <Pair of Leather Boots>
 {
-Plural        <Leather Boots>
+Plural        <Pairs of Leather Boots>
 Type        <ITEM_IDX_BOOTS>
 Value       20.0
 Level       1
@@ -381,7 +381,7 @@ Color        <225,225,50,255>
 }
 Item <Chain Mail>
 {
-Plural        <Chain  Mails>
+Plural        <Sets of Chain Mail>
 Type        <ITEM_IDX_HELMET>
 Value       40.0
 Level       4
@@ -391,7 +391,7 @@ Color        <225,225,50,255>
 }
 Item <Padded Armor>
 {
-Plural        <Padded Armors>
+Plural        <Sets of Padded Armor>
 Type        <ITEM_IDX_ARMOR>
 Value       40.0
 Level       1
@@ -401,7 +401,7 @@ Color        <225,225,50,255>
 }
 Item <Splint Mail>
 {
-Plural        <Splint Mails>
+Plural        <Sets of Splint Mail>
 Type        <ITEM_IDX_ARMOR>
 Value       40.0
 Level       5
@@ -470,7 +470,7 @@ Color        <225,225,50,255>
 }
 Item <Pickaxe>
 {
-Plural        <Pikaxes>
+Plural        <Pickaxes>
 Type        <ITEM_IDX_SHOVEL>
 Value       50.0
 Level       1

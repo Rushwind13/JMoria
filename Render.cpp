@@ -46,7 +46,7 @@ JResult CRender::Init( int width, int height, int bpp )
 #ifdef DISPLAY_FRAMERATE
 	m_dwFrames = 0;
 	m_dwT0 = 0;
-	m_fps = new CDisplayText( JRect(540,450,  640,480) );
+	m_fps = new CDisplayText( JRect(500,450,  640,480) );
 	m_fps->SetFlags(FLAG_TEXT_INVERSE);
 #endif
 

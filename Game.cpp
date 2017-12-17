@@ -11,6 +11,7 @@
 #include "ModState.h"
 #include "UseState.h"
 #include "StringInputState.h"
+#include "EndGameState.h"
 
 #include "Render.h"
 #include "DisplayText.h"
@@ -29,12 +30,14 @@ m_pRender(NULL),
 m_pCurState(NULL),
 m_pCmdState(NULL),
 m_pStringInputState(NULL),
+m_pEndGameState(NULL),
 m_eCurState(STATE_INVALID)
 {
     m_pCmdState = new CCmdState;
     m_pModState = new CModState;
     m_pUseState = new CUseState;
     m_pStringInputState = new CStringInputState;
+    m_pEndGameState = new CEndGameState;
 #ifdef TURN_BASED
     m_fGameTime = 0.0f;
     m_bReadyForUpdate = true;
@@ -71,6 +74,9 @@ JResult CGame::Init()
     
     m_pUseDT = new CDisplayText( JRect( 200,40,  440,480 ), 200 );
     m_pUseDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
+    
+    m_pEndGameDT = new CDisplayText( JRect( 0,0,  640,480 ), 255 );
+    m_pEndGameDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
 
 
 	m_pAIMgr = new CAIMgr;
@@ -141,6 +147,12 @@ void CGame::Quit( int returncode )
         delete m_pStringInputState;
         m_pStringInputState = NULL;
     }
+    
+    if( m_pEndGameState )
+    {
+        delete m_pEndGameState;
+        m_pEndGameState = NULL;
+    }
 
     if( m_pMsgsDT )
     {
@@ -171,6 +183,12 @@ void CGame::Quit( int returncode )
         delete m_pUseDT;
         m_pUseDT = NULL;
     }
+    
+    if( m_pEndGameDT )
+    {
+        delete m_pEndGameDT;
+        m_pEndGameDT = NULL;
+    }
 	exit( returncode );
 }
 
@@ -190,6 +208,14 @@ void CGame::SetState( int eNewState )
         break;
     case STATE_STRINGINPUT:
         m_pCurState = reinterpret_cast<CStateBase *>(m_pStringInputState);
+        break;
+    case STATE_ENDGAME:
+        {
+            m_pCurState = reinterpret_cast<CStateBase *>(m_pEndGameState);
+            SDL_Keysym *keysym = new SDL_Keysym();
+            keysym->sym = SDLK_SPACE;
+            m_pCurState->HandleKey(keysym);
+        }
         break;
 	default:
         printf("Tried to change to unknown state.\n");
@@ -296,6 +322,10 @@ bool CGame::Update( float fCurTime )
         }
         GetUse()->Update(fCurTime);
     }
+    else if( m_eCurState == STATE_ENDGAME )
+    {
+        GetEnd()->Update(fCurTime);
+    }
 
 	return true;
 }
@@ -317,6 +347,10 @@ void CGame::Draw()
     if( m_eCurState == STATE_USE )
     {
         GetUse()->Draw();
+    }
+    else if( m_eCurState == STATE_ENDGAME )
+    {
+        GetEnd()->Draw();
     }
 
 	GetRender()->PostDraw();

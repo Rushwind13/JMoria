@@ -60,6 +60,7 @@ public:
     CPlayer():
     m_bHasSpawned(false),
     m_szDamage(NULL),
+    m_szKilledBy(NULL),
     m_fDamageModifier(0.0f),
     m_fToHitModifier(0.0f),
     m_fArmorClass(1.0f),
@@ -70,6 +71,7 @@ public:
     m_pClass(NULL)
     {
         memset(m_szName, 0, MAX_STRING_LENGTH);
+        strcpy(m_szName, "Anonymous");
         m_pClass = new CClass;
         m_llInventory = new JLinkList<CItem>;
         m_llEquipment = new JLinkList<CItem>;
@@ -105,6 +107,9 @@ public:
             m_szDamage = NULL;
         }
     };
+    char *GetName() { return m_szName; };
+    float GetLevel() { return m_fLevel; };
+    CClass *GetClass() { return m_pClass; };
 	bool Update( float fCurTime );
 	void PreDraw();
 	void Draw();
@@ -148,6 +153,8 @@ public:
     char *m_szDamage;
     float m_fDamageModifier;
     float m_fToHitModifier;
+    
+    char *m_szKilledBy;
 protected:
     JResult SpawnPlayer();
     void GainLevel();

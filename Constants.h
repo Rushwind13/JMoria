@@ -19,7 +19,8 @@
 #define STATE_MENU        2
 #define STATE_USE         3
 #define STATE_STRINGINPUT 4
-#define STATE_MAX         5
+#define STATE_ENDGAME     5
+#define STATE_MAX         6
 
 // Various statuses that someone could have
 #define STATUS_INVALID		-1

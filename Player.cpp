@@ -8,6 +8,7 @@
 #include "Dungeon.h"
 #include "DisplayText.h"
 #include "JLinkList.h"
+#include "StateBase.h"
 
 extern CGame *g_pGame;
 
@@ -281,7 +282,6 @@ int CPlayer::TakeDamage( float fDamage, char *szMon )
 {
     int retval = STATUS_INVALID;
 
-
     if( (int)fDamage < (int)m_fCurHitPoints )
     {
         m_fCurHitPoints -= fDamage;
@@ -291,18 +291,12 @@ int CPlayer::TakeDamage( float fDamage, char *szMon )
     {
         m_fCurHitPoints = 0;
         retval = STATUS_DEAD;
+        m_szKilledBy = new char[strlen(szMon)+1];
+        memset(m_szKilledBy,0,strlen(szMon)+1);
+        strcpy(m_szKilledBy, szMon);
         // This is the end of the game; make the game end on next update.
-        char who[MAX_STRING_LENGTH];
-        if( strlen(m_szName) > 0 )
-        {
-            strcpy(who, m_szName);
-        }
-        else
-        {
-            strcpy(who, "You");
-        }
-        printf("%s died on dungeon level %d, while level %d, killed by a %s.\n", who, g_pGame->GetDungeon()->depth, (int)m_fLevel, szMon );
-        g_pGame->Quit(0);
+        printf("%s died on dungeon level %d, while level %d, killed by a %s.\n", m_szName, g_pGame->GetDungeon()->depth, (int)m_fLevel, m_szKilledBy );
+        g_pGame->SetState(STATE_ENDGAME);
     }
 
     printf( "Remaining HP: %.2f \n", m_fCurHitPoints );

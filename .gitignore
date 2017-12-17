@@ -1,6 +1,7 @@
 .DS_Store
-*.png
-*.txt
+#*.png
+#*.txt
+Scores.txt
 
 # XCode
 *.xcodeproj

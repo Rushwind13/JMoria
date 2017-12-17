@@ -60,7 +60,7 @@ JResult CGame::Init()
 		return result;
 	}
 
-	m_pMsgsDT = new CDisplayText( JRect( 0, 0, 640, 36 ) );
+	m_pMsgsDT = new CDisplayText( JRect( 0, 0, 640, 45 ) );
 	m_pMsgsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE);
 
     m_pStatsDT = new CDisplayText( JRect( 0,50,  150,480 ) );

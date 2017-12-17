@@ -84,7 +84,8 @@ bool CAIBrain::UpdateSeek( float fCurTime )
 		}
 		break;
 	case MON_AI_DONTMOVE:
-		{
+        {
+            SetRandomDest( fCurTime );
 		}
 		break;
 	}
@@ -113,9 +114,12 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
             switch(dwCollideType)
             {
             case DUNG_COLL_NO_COLLISION:
-                g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurMonster = NULL;
-                m_vPos += m_vVel;
-                g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurMonster = m_pParent;
+                if( m_dwMoveType != MON_AI_DONTMOVE )
+                {
+                    g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurMonster = NULL;
+                    m_vPos += m_vVel;
+                    g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurMonster = m_pParent;
+                }
                 break;
             case DUNG_COLL_PLAYER:
                 char szStatus[16];

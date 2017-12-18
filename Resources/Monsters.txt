@@ -67,7 +67,7 @@ Monster <Death Slaad>
     MoveType	<MON_AI_100RANDOMMOVE>
     HD          <4d8>
     AC          50.0
-    Level       5
+    Level       10
     ExpValue	100.0
     Type		<MON_IDX_FROG>
     Attack		<MON_FLAG_FIRE>,2d4

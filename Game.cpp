@@ -40,7 +40,7 @@ m_eCurState(STATE_INVALID)
     m_pEndGameState = new CEndGameState;
 #ifdef TURN_BASED
     m_fGameTime = 0.0f;
-    m_bReadyForUpdate = true;
+    m_bReadyForUpdate = false;
 #endif // TURN_BASED
 };
 

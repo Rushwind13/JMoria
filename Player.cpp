@@ -15,7 +15,8 @@ extern CGame *g_pGame;
 void CPlayer::Init()
 {
 	// Initialize all the player stuff, baby.
-	m_TileSet = new CTileset("Resources/Courier.png", 32, 32 );
+//    m_TileSet = new CTileset("Resources/Courier.png", 32, 32 );
+    m_TileSet = new DUNG_TILESET;
 
 	// This will likely get moved somewhere else. --Jimbo
 	SpawnPlayer();
@@ -32,7 +33,7 @@ bool CPlayer::Update(float fCurTime)
 void CPlayer::Draw()
 {
 	Uint8 player_tile = '@' - ' ' - 1;//TileIDs[TILE_IDX_PLAYER] - ' ' - 1;
-	JVector vSize(1,1);
+	JVector DUNG_ASPECT;
     JColor player_color(255,255,255,255);
 
 	PreDraw();
@@ -159,6 +160,7 @@ bool CPlayer::IsWieldable(CLink<CItem> *pItem)
         case ITEM_IDX_SWORD:
         case ITEM_IDX_SHIELD:
         case ITEM_IDX_ARMOR:
+        case ITEM_IDX_HELMET:
         case ITEM_IDX_BOW:
         case ITEM_IDX_XBOW:
         case ITEM_IDX_CLOAK:

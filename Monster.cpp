@@ -158,7 +158,7 @@ unsigned char MonIDs[MON_IDX_MAX+1] = "abcddefghhikllmnoprsuwxyzABCDFFFGGHIJKLOP
 void CMonster::Draw()
 {
 	Uint8 monster_tile = MonIDs[m_md->m_dwIndex] - ' ' - 1;
-	JVector vSize(1,1);
+	JVector DUNG_ASPECT;
 
 	SetColor();
 

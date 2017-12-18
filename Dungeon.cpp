@@ -112,7 +112,8 @@ void CDungeon::Init()
 
     // Load the graphics
     // Just one tile set at the moment.
-	m_TileSet = new CTileset("Resources/Courier.png", 32, 32 );
+    // m_TileSet = new CTileset("Resources/Courier.png", 32, 32 );
+    m_TileSet = new DUNG_TILESET;
 
     CreateNewLevel(DUNG_CFG_START_LEVEL);
 }
@@ -348,7 +349,7 @@ void CDungeon::DrawDungeon()
 {
     // Brute force method; optimize this later
     JVector vScreen;
-    JVector vSize(1,1);
+    JVector DUNG_ASPECT;
     JVector vPlayer = g_pGame->GetPlayer()->m_vPos;
 
     for( vScreen.x = 0; vScreen.x < DUNG_WIDTH; vScreen.x++ )

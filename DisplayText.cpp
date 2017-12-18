@@ -15,8 +15,8 @@
 
 class CGame;
 
-#define FONT_DRAW_W	10
-#define FONT_DRAW_H	14
+#define FONT_DRAW_W	6
+#define FONT_DRAW_H	8
 
 #define TEXT_MAXCHARS 2048
 // Constructor
@@ -37,7 +37,7 @@ m_rcViewport( 0, 480, 640, 0 )
 	memset( m_szText, 0, sizeof( *m_szText ) );
 	m_szDrawPtr = m_szText;
 
-	m_TileSet = new CTileset("Resources/SmallText.png", 10,21);
+	m_TileSet = new CTileset("Resources/SmallText6X8.png", 6,8);
 
 	m_Color.SetColor( 0, 0, 0, 255 );
 }

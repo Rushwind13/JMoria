@@ -324,7 +324,7 @@ Item <Steel Helm>
 Plural        <Steel Helms>
 Type        <ITEM_IDX_HELMET>
 Value       150.0
-Level       20
+Level       40
 AC          5.0
 Weight      2.0
 Color        <225,225,50,255>
@@ -334,7 +334,7 @@ Item <Steel Cap>
 Plural        <Steel Caps>
 Type        <ITEM_IDX_HELMET>
 Value       150.0
-Level       1
+Level       7
 AC          3.0
 Weight      6.0
 Color        <225,225,50,255>
@@ -364,8 +364,8 @@ Item <Leather Armor>
 Plural        <Sets of Leather Armor>
 Type        <ITEM_IDX_ARMOR>
 Value       50.0
-Level       1
-AC          50.0
+Level       2
+AC          8.0
 Weight      2.0
 Color        <225,225,50,255>
 }
@@ -374,18 +374,18 @@ Item <Plate Mail Armor>
 Plural        <Sets of Plate Mail Armor>
 Type        <ITEM_IDX_ARMOR>
 Value       40.0
-Level       7
-AC          90.0
+Level       48
+AC          38.0
 Weight      2.0
 Color        <225,225,50,255>
 }
 Item <Chain Mail>
 {
 Plural        <Sets of Chain Mail>
-Type        <ITEM_IDX_HELMET>
+Type        <ITEM_IDX_ARMOR>
 Value       40.0
-Level       4
-AC          70.0
+Level       26
+AC          22.0
 Weight      2.0
 Color        <225,225,50,255>
 }
@@ -394,8 +394,8 @@ Item <Padded Armor>
 Plural        <Sets of Padded Armor>
 Type        <ITEM_IDX_ARMOR>
 Value       40.0
-Level       1
-AC          40.0
+Level       7
+AC          15.0
 Weight      2.0
 Color        <225,225,50,255>
 }
@@ -404,8 +404,8 @@ Item <Splint Mail>
 Plural        <Sets of Splint Mail>
 Type        <ITEM_IDX_ARMOR>
 Value       40.0
-Level       5
-AC          80.0
+Level       24
+AC          25.0
 Weight      2.0
 Color        <225,225,50,255>
 }

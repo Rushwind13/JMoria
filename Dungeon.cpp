@@ -115,11 +115,14 @@ void CDungeon::Init()
     // m_TileSet = new CTileset("Resources/Courier.png", 32, 32 );
     m_TileSet = new DUNG_TILESET;
 
+    m_bDraw = true;
+    
     CreateNewLevel(DUNG_CFG_START_LEVEL);
 }
 
 JResult CDungeon::TerminateLevel()
 {
+    m_bDraw = false;
     if( m_Tiles )
     {
         delete [] m_Tiles;
@@ -160,6 +163,7 @@ JResult CDungeon::CreateNewLevel(const int delta)
     // Spawn monsters appropriate to this level.
     SpawnMonsters(depth);
 
+    m_bDraw = true;
     return JSUCCESS;
 }
 
@@ -169,7 +173,19 @@ JResult CDungeon::CreateMap()
     // Create the randomized dungeon
     m_dmCurLevel = new CDungeonMap;
     m_dmCurLevel->CreateDungeon(depth);
+#ifdef CLOCKSTEP
+    Tick(0);
+#else
+    while( m_dmCurLevel->CreateOneStep() );
+#endif
 
+    InitDungeonTiles();
+    
+    return JSUCCESS;
+}
+
+JResult CDungeon::InitDungeonTiles()
+{
     JIVector vDungeon(DUNG_HEIGHT,DUNG_WIDTH);
     Uint8 dung_tile_type = DUNG_IDX_INVALID;
     float open_area = 0.0f;
@@ -187,7 +203,7 @@ JResult CDungeon::CreateMap()
             GetITile(vDungeon)->m_dwFlags = m_dmCurLevel->GetFlags(vDungeon);
         }
     }
-
+    
     m_fOpenFloorArea = open_area;
     return JSUCCESS;
 }
@@ -293,11 +309,41 @@ JResult CDungeon::OnChangeLevel(const int delta)
 
     // Create new level
     CreateNewLevel(delta);
+    g_pGame->GetPlayer()->m_bHasSpawned = false;
+    g_pGame->GetPlayer()->SpawnPlayer();
     printf("done.\n");
     printf("You pass through a one-way door, to arrive on level %d.\n", depth);
     g_pGame->GetMsgs()->Printf("You pass through a one-way door, to arrive on level %d.\n", depth);
 
     return JSUCCESS;
+}
+
+int counter = 0;
+bool CDungeon::Tick( const int dwClock )
+{
+    /*if( dwClock % 2 == 1 )
+    {
+        // don't draw the dungeon this update
+        m_bDraw = false;
+    }
+    else
+    {
+        m_bDraw = true;
+    }/**/
+    
+    bool bWorking = m_dmCurLevel->CreateOneStep();
+    if(bWorking == false)
+    {
+        counter++;
+        if(counter == 10)
+        {
+            counter = 0;
+            OnChangeLevel(1);
+        }
+    }
+    
+    InitDungeonTiles();
+    return true;
 }
 
 bool CDungeon::Update(float fCurTime)
@@ -332,7 +378,11 @@ bool CDungeon::IsOnScreen(JVector vPos)
 
 void CDungeon::Draw()
 {
-
+    if( !m_bDraw )
+    {
+        return;
+    }
+    
 	PreDraw();
 
     // Select Our Texture
@@ -416,6 +466,7 @@ void CDungeon::PreDraw()
 {
 	if( g_pGame->GetPlayer() != NULL )
 	{
+        m_dwZoom = DUNG_WIDTH;
         int xinitval = m_dwZoom;
         //int xinitval = 16;
 		int yinitval = xinitval;
@@ -425,8 +476,8 @@ void CDungeon::PreDraw()
 		int xorigin = (int)g_pGame->GetPlayer()->m_vPos.x - DUNG_WIDTH/2;
 		int yorigin = (int)g_pGame->GetPlayer()->m_vPos.y - DUNG_HEIGHT/2;
 #else
-		int xorigin = 0; // + is left (?!)
-		int yorigin = 0; // + is up
+        int xorigin = 0; // + is left (?!)
+        int yorigin = 0; // + is up
 #endif
         m_Rect.Init( xorigin-xinitval,yorigin+yinitval,xorigin+xinitval,yorigin-yinitval);
 	}

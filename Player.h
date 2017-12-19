@@ -99,6 +99,7 @@ public:
     ~CPlayer() { Term(); };
 
 	void Init();
+    JResult SpawnPlayer();
 	void Term()
     {
         if(m_pClass)
@@ -173,7 +174,6 @@ public:
     
     char *m_szKilledBy;
 protected:
-    JResult SpawnPlayer();
     void GainLevel();
 
 

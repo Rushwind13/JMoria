@@ -12,6 +12,7 @@
 #include "UseState.h"
 #include "StringInputState.h"
 #include "EndGameState.h"
+#include "ClockStepState.h"
 
 #include "Render.h"
 #include "DisplayText.h"
@@ -31,6 +32,7 @@ m_pCurState(NULL),
 m_pCmdState(NULL),
 m_pStringInputState(NULL),
 m_pEndGameState(NULL),
+m_pClockStepState(NULL),
 m_eCurState(STATE_INVALID)
 {
     m_pCmdState = new CCmdState;
@@ -38,6 +40,7 @@ m_eCurState(STATE_INVALID)
     m_pUseState = new CUseState;
     m_pStringInputState = new CStringInputState;
     m_pEndGameState = new CEndGameState;
+    m_pClockStepState = new CClockStepState;
 #ifdef TURN_BASED
     m_fGameTime = 0.0f;
     m_bReadyForUpdate = false;
@@ -68,13 +71,13 @@ JResult CGame::Init()
 
     m_pInvDT = new CDisplayText( JRect( 440,50,  640,340 ) );
     m_pInvDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
-    
+
     m_pEquipDT = new CDisplayText( JRect( 440,345,  640,480 ) );
     m_pEquipDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
-    
+
     m_pUseDT = new CDisplayText( JRect( 200,40,  440,480 ), 200 );
     m_pUseDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
-    
+
     m_pEndGameDT = new CDisplayText( JRect( 0,0,  640,480 ), 255 );
     m_pEndGameDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
 
@@ -94,9 +97,13 @@ JResult CGame::Init()
 	ProfileInit();
 #endif // PROFILE
 
+#ifdef CLOCKSTEP
+  // Now, in exciting slow motion!
+  SetState(STATE_CLOCKSTEP);
+#else
 	// Set up the initial game state
 	SetState(STATE_COMMAND);
-
+#endif // CLOCKSTEP
 	// we're up.
 	return JSUCCESS;
 }
@@ -123,35 +130,41 @@ void CGame::Quit( int returncode )
 		delete m_pPlayer;
 		m_pPlayer = NULL;
     }
-    
+
     if( m_pCmdState )
     {
         delete m_pCmdState;
         m_pCmdState = NULL;
     }
-    
+
     if( m_pModState )
     {
         delete m_pModState;
         m_pModState = NULL;
     }
-    
+
     if( m_pUseState )
     {
         delete m_pUseState;
         m_pUseState = NULL;
     }
-    
+
     if( m_pStringInputState )
     {
         delete m_pStringInputState;
         m_pStringInputState = NULL;
     }
-    
+
     if( m_pEndGameState )
     {
         delete m_pEndGameState;
         m_pEndGameState = NULL;
+    }
+
+    if( m_pClockStepState )
+    {
+        delete m_pClockStepState;
+        m_pClockStepState = NULL;
     }
 
     if( m_pMsgsDT )
@@ -159,31 +172,31 @@ void CGame::Quit( int returncode )
         delete m_pMsgsDT;
         m_pMsgsDT = NULL;
     }
-    
+
     if( m_pStatsDT )
     {
         delete m_pStatsDT;
         m_pStatsDT = NULL;
     }
-    
+
     if( m_pInvDT )
     {
         delete m_pInvDT;
         m_pInvDT = NULL;
     }
-    
+
     if( m_pEquipDT )
     {
         delete m_pEquipDT;
         m_pEquipDT = NULL;
     }
-    
+
     if( m_pUseDT )
     {
         delete m_pUseDT;
         m_pUseDT = NULL;
     }
-    
+
     if( m_pEndGameDT )
     {
         delete m_pEndGameDT;
@@ -200,29 +213,73 @@ void CGame::SetState( int eNewState )
 	case STATE_COMMAND:
 		m_pCurState = reinterpret_cast<CStateBase *>(m_pCmdState);
             break;
-    case STATE_MODIFY:
-        m_pCurState = reinterpret_cast<CStateBase *>(m_pModState);
-        break;
-    case STATE_USE:
-        m_pCurState = reinterpret_cast<CStateBase *>(m_pUseState);
-        break;
-    case STATE_STRINGINPUT:
-        m_pCurState = reinterpret_cast<CStateBase *>(m_pStringInputState);
-        break;
-    case STATE_ENDGAME:
-        {
-            m_pCurState = reinterpret_cast<CStateBase *>(m_pEndGameState);
-            SDL_Keysym *keysym = new SDL_Keysym();
-            keysym->sym = SDLK_SPACE;
-            m_pCurState->HandleKey(keysym);
-        }
-        break;
+  case STATE_MODIFY:
+      m_pCurState = reinterpret_cast<CStateBase *>(m_pModState);
+      break;
+  case STATE_USE:
+      m_pCurState = reinterpret_cast<CStateBase *>(m_pUseState);
+      break;
+  case STATE_STRINGINPUT:
+      m_pCurState = reinterpret_cast<CStateBase *>(m_pStringInputState);
+      break;
+  case STATE_ENDGAME:
+      {
+          m_pCurState = reinterpret_cast<CStateBase *>(m_pEndGameState);
+          SDL_Keysym *keysym = new SDL_Keysym();
+          keysym->sym = SDLK_SPACE;
+          m_pCurState->HandleKey(keysym);
+      }
+      break;
+  case STATE_CLOCKSTEP:
+      {
+          m_pCurState = reinterpret_cast<CStateBase *>(m_pClockStepState);
+          SDL_Keysym *keysym = new SDL_Keysym();
+          keysym->sym = SDLK_SPACE;
+          m_pCurState->HandleKey(keysym);
+      }
+      break;
 	default:
         printf("Tried to change to unknown state.\n");
 		break;
 	}
 }
 
+#ifdef CLOCKSTEP
+
+float pow(float base, int exp)
+{
+  if( exp == 0 ) return 1;
+  else return base * pow(base,exp-1);
+}
+float plouffBig( int n ) //http://en.wikipedia.org/wiki/Bailey%E2%80%93Borwein%E2%80%93Plouffe_formula
+{
+  float pi = 0.0f;
+  int k = 0;
+
+  while( k < n )
+  {
+    pi += (1.0f / pow(16,k))*(4.0f/(8*k+1))-(2.0f/(8*k+4))-(1.0f/(8*k+5))-(1.0f/(8*k+6));
+    k++;
+  }
+
+  return pi*2.0f;
+}
+
+bool CGame::WaitForTick()
+{
+    int count = 0;
+    while(!m_bReadyForUpdate)
+    {
+      // Calculate Tau to some decimal places.
+      int n = Util::Roll(1,100);
+      float tau = plouffBig( n );
+      GetMsgs()->Printf("n: %d, tau: %f\n", n, tau );
+        count++;
+        if( count > 10000 ) break;
+    }
+    return true;
+}
+#endif // CLOCKSTEP
 /*
 int CGame::Update()
 {
@@ -295,6 +352,11 @@ bool CGame::Update( float fCurTime )
     // Update the AI
     GetAIMgr()->Update(fCurTime);
 #endif // TURN_BASED
+
+#ifdef CLOCKSTEP
+  GetDungeon()->Update(fCurTime);
+  GetStats()->Update(fCurTime);
+#else
 	// Update the player
 	GetPlayer()->Update(fCurTime);
 
@@ -326,7 +388,7 @@ bool CGame::Update( float fCurTime )
     {
         GetEnd()->Update(fCurTime);
     }
-
+#endif // CLOCKSTEP
 	return true;
 }
 

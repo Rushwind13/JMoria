@@ -17,6 +17,7 @@ class CModState;
 class CUseState;
 class CStringInputState;
 class CEndGameState;
+class CClockStepState;
 class CAIMgr;
 
 class CGame
@@ -43,16 +44,19 @@ public:
 	void Quit( int returncode );
 	void SetState( int eNewState );
 	CStateBase *GetGameState() { return m_pCurState; };
-    
+
 #ifdef TURN_BASED
     void SetReadyForUpdate( const bool isReady ) { m_bReadyForUpdate = isReady; }
 #endif
-	
+#ifdef CLOCKSTEP
+		bool WaitForTick();
+#endif
+
 protected:
 	CDungeon	*m_pDungeon;
 	CPlayer		*m_pPlayer;
 	CAIMgr		*m_pAIMgr;
-	
+
     CDisplayText *m_pMsgsDT;
     CDisplayText *m_pStatsDT;
     CDisplayText *m_pInvDT;
@@ -67,7 +71,8 @@ protected:
     CModState    *m_pModState;
     CUseState   *m_pUseState;
     CStringInputState   *m_pStringInputState;
-    CEndGameState   *m_pEndGameState;
+		CEndGameState   *m_pEndGameState;
+		CClockStepState   *m_pClockStepState;
 
 private:
 	CRender	*m_pRender;

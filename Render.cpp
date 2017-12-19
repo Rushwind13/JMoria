@@ -47,7 +47,7 @@ JResult CRender::Init( int width, int height, int bpp )
 #ifdef DISPLAY_FRAMERATE
 	m_dwFrames = 0;
 	m_dwT0 = 0;
-	m_fps = new CDisplayText( JRect(540,460,  640,480) );
+	m_fps = new CDisplayText( JRect(500,450,  640,480) );
 	m_fps->SetFlags(FLAG_TEXT_INVERSE);
 #endif
 
@@ -188,9 +188,9 @@ void CRender::SetTileColor( JColor color )
 	glColor4ub( COLOR_EXPAND(color) );
 }
 
-void CRender::DrawTextBoundingBox( JRect rect )
+void CRender::DrawTextBoundingBox( JRect rect, uint8 alpha )
 {
-	glColor4f( 1, 1, 1, 0.1f );
+	glColor4ub( 128,170,192, alpha );
 	glDisable(GL_TEXTURE_2D);
 	glRecti(RECT_EXPAND(rect));
 	glEnable(GL_TEXTURE_2D);

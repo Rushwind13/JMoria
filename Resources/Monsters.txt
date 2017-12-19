@@ -1,7 +1,7 @@
 # Monsters.txt
 #
 # Repository of all
-# "Things that Go 
+# "Things that Go
 # Bump in the Night"
 #
 # Each Monster entry is of the following form:
@@ -13,7 +13,7 @@
 # }
 #
 # Note: delimit <string> values with angle brackets <>
-# Where variable-name/value are name/value pairs 
+# Where variable-name/value are name/value pairs
 # from the following list:
 #
 # Plural	string	how to properly refer to more than one of this beastie
@@ -38,10 +38,176 @@
 #    HD			<2d5>
 #    AC			10.0
 #    Level		1
-#    ExpValue	5
+#    ExpValue	5.0
 #    Type		<MON_IDX_JELLY>
 #    Attack		<MON_FLAG_TOUCH>,1d2
 #    Color		<255,0,0,255>
+#}
+
+Monster <Giant Frog>
+{
+    Plural		<Giant Frogs>
+    Appear      <1d1>
+    Speed		2.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <3d8>
+    AC          40.0
+    Level       5
+    ExpValue	35.0
+    Type		<MON_IDX_FROG>
+    Attack		<MON_FLAG_BITE>,2d8
+    Color		<71,165,0,255  >
+}
+
+Monster <Death Slaad>
+{
+    Plural		<Death Slaads>
+    Appear      <1d1>
+    Speed		2.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <4d8>
+    AC          50.0
+    Level       10
+    ExpValue	100.0
+    Type		<MON_IDX_FROG>
+    Attack		<MON_FLAG_FIRE>,2d4
+    Color		<71,165,0,255  >
+}
+
+Monster <Flaming Bat>
+{
+    Plural		<Flaming Bats>
+    Appear      <1d1>
+    Speed		2.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <4d8>
+    AC          50.0
+    Level       5
+    ExpValue	100.0
+    Type		<MON_IDX_BAT>
+    Attack		<MON_FLAG_FIRE>,2d8
+    Color		<255,100,0,255  >
+}
+
+ Monster <Floating Eye>
+{
+     Plural		<Floating Eyes>
+     Appear      <1d1>
+     Speed		.25
+     MoveType	<MON_AI_100RANDOMMOVE>
+     HD          <1d4>
+     AC          20.0
+     Level       1
+     ExpValue	100.0
+     Type		<MON_IDX_EYE>
+     Attack		<MON_FLAG_TOUCH>,0d0
+     Color		<255,100,0,255  >
+}
+#
+#Monster <Flaming Bat>
+#{
+#    Plural		<Flaming Bats>
+#    Appear      <1d1>
+#    Speed		2.0
+#    MoveType	<MON_AI_100RANDOMMOVE>
+#    HD          <4d8>
+#    AC          50.0
+#    Level       5
+#    ExpValue	100.0
+#    Type		<MON_IDX_BAT>
+#    Attack		<MON_FLAG_FIRE>,0d0,<MON_FLAG_CONFUS>,0d0
+#    Color		<255,100,0,255  >
+#}
+#
+#Monster <Flaming Bat>
+#{
+#    Plural		<Flaming Bats>
+#    Appear      <1d1>
+#    Speed		2.0
+#    MoveType	<MON_AI_100RANDOMMOVE>
+#    HD          <4d8>
+#    AC          50.0
+#    Level       5
+#    ExpValue	100.0
+#    Type		<MON_IDX_BAT>
+#    Attack		<MON_FLAG_FIRE>,2d8
+#    Color		<255,100,0,255  >
+#}
+#
+#Monster <Flaming Bat>
+#{
+#    Plural		<Flaming Bats>
+#    Appear      <1d1>
+#    Speed		2.0
+#    MoveType	<MON_AI_100RANDOMMOVE>
+#    HD          <4d8>
+#    AC          50.0
+#    Level       5
+#    ExpValue	100.0
+#    Type		<MON_IDX_BAT>
+#    Attack		<MON_FLAG_FIRE>,2d8
+#    Color		<255,100,0,255  >
+#}
+#
+#Monster <Flaming Bat>
+#{
+#    Plural		<Flaming Bats>
+#    Appear      <1d1>
+#    Speed		2.0
+#    MoveType	<MON_AI_100RANDOMMOVE>
+#    HD          <4d8>
+#    AC          50.0
+#    Level       5
+#    ExpValue	100.0
+#    Type		<MON_IDX_BAT>
+#    Attack		<MON_FLAG_FIRE>,2d8
+#    Color		<255,100,0,255  >
+#}
+#
+#Monster <Flaming Bat>
+#{
+#    Plural		<Flaming Bats>
+#    Appear      <1d1>
+#    Speed		2.0
+#    MoveType	<MON_AI_100RANDOMMOVE>
+#    HD          <4d8>
+#    AC          50.0
+#    Level       5
+#    ExpValue	100.0
+#    Type		<MON_IDX_BAT>
+#    Attack		<MON_FLAG_FIRE>,2d8
+#    Color		<255,100,0,255  >
+#}
+#
+#Monster <Flaming Bat>
+#{
+#    Plural		<Death Watch Beetle>
+#    Appear      <1d1>
+#    Speed		2.0
+#    MoveType	<MON_AI_100RANDOMMOVE>
+#    HD          <9d8>
+#
+#    AC          50.0
+#    Level       5
+#    ExpValue	100.0
+#    Type		<MON_IDX_BAT>
+#    Attack		<MON_FLAG_FIRE>,2d8
+#    Color		<255,100,0,255  >
+#}
+#
+#Monster <Flaming Bat>
+#{
+#    Plural		<Flaming Bats>
+#    Appear      <1d1>
+#    Speed		2.0
+#    MoveType	<MON_AI_100RANDOMMOVE>
+#    HD          <2d8>
+#    AC          30.0
+#    Level       5
+#    ExpValue	100.0
+#    Type		<MON_IDX_BAT>
+#    Attack		<MON_FLAG_FIRE>,2d8
+#    Color		<<255,250,0,255>;<0,0,0,255>>
 #}
 
 Monster <Shadow Mastiff>
@@ -53,7 +219,7 @@ Monster <Shadow Mastiff>
     HD          <4d8>
     AC          50.0
     Level       15
-    ExpValue	100
+    ExpValue	100.0
     Type		<MON_IDX_DOG>
     Attack		<MON_FLAG_BITE>,2d8
     Color		<<255,255,255,32>;<0,0,0,255>>
@@ -68,7 +234,7 @@ Monster <White Harpy>
     HD          <5d8>
     AC          60.0
     Level       15
-    ExpValue	100
+    ExpValue	100.0
     Type		<MON_IDX_HARPY>
     Attack		<MON_FLAG_CLAW>,3d6
     Color		<255,255,255,255>
@@ -83,9 +249,9 @@ Monster <Brontosaurus>
     HD          <25d8>
     AC          60.0
     Level       15
-    ExpValue	100
+    ExpValue	100.0
     Type		<MON_IDX_DINOSAUR>
-    Attack		<MON_FLAG_CLAW>,3d6
+    Attack		<MON_FLAG_TRAMPLE>,3d6
     Color		<0,81,4,255>
 }
 
@@ -98,7 +264,7 @@ Monster <Tyrannosaurus Rex>
     HD          <18d8>
     AC          60.0
     Level       15
-    ExpValue	100
+    ExpValue	100.0
     Type		<MON_IDX_DINOSAUR>
     Attack		<MON_FLAG_CLAW>,1d6,<MON_FLAG_CLAW>,1d6,<MON_FLAG_BITE>,5d8
     Color		<206,91,24,255>
@@ -107,13 +273,13 @@ Monster <Tyrannosaurus Rex>
 Monster <White Worm Mass>
 {
     Plural		<White Worm Masses>
-    Appear      <1d1>
+    Appear      <1d3>
     Speed		0.5
     MoveType	<MON_AI_100RANDOMMOVE>
     HD          <1d8>
     AC          40.0
     Level       1
-    ExpValue	5
+    ExpValue	5.0
     Type		<MON_IDX_WORM>
     Attack		<MON_FLAG_POISON>,1d5
     Color		<255,255,255,255>
@@ -123,13 +289,13 @@ Monster <White Worm Mass>
 Monster <Red Worm Mass>
 {
     Plural		<Red Worm Masses>
-    Appear      <1d1>
+    Appear      <1d3>
     Speed		0.5
     MoveType	<MON_AI_100RANDOMMOVE>
     HD          <1d8>
     AC          40.0
     Level       1
-    ExpValue	5
+    ExpValue	5.0
     Type		<MON_IDX_WORM>
     Attack		<MON_FLAG_FIRE>,1d5
     Color		<255,0,0,255>
@@ -139,15 +305,15 @@ Monster <Red Worm Mass>
 Monster <Blue Worm Mass>
 {
     Plural		<Blue Worm Masses>
-    Appear      <1d1>
+    Appear      <1d3>
     Speed		0.5
     MoveType	<MON_AI_100RANDOMMOVE>
     HD          <1d8>
     AC          40.0
     Level       1
-    ExpValue	5
+    ExpValue	5.0
     Type		<MON_IDX_WORM>
-    Attack		<MON_FLAG_ICE>,1d5
+    Attack		<MON_FLAG_COLD>,1d5
     Color		<0,0,255,255>
     Flags       <MON_FLAG_BREED>
 }
@@ -155,13 +321,13 @@ Monster <Blue Worm Mass>
 Monster <Yellow Worm Mass>
 {
     Plural		<Yellow Worm Masses>
-    Appear      <1d1>
+    Appear      <1d8>
     Speed		0.5
     MoveType	<MON_AI_100RANDOMMOVE>
     HD          <1d8>
     AC          40.0
     Level       1
-    ExpValue	5
+    ExpValue	5.0
     Type		<MON_IDX_WORM>
     Attack		<MON_FLAG_POISON>,1d5
     Color		<214,201,17,255>
@@ -171,13 +337,13 @@ Monster <Yellow Worm Mass>
 Monster <Green Worm Mass>
 {
     Plural		<Green Worm Masses>
-    Appear      <1d1>
+    Appear      <1d3>
     Speed		0.5
     MoveType	<MON_AI_100RANDOMMOVE>
     HD          <1d8>
     AC          40.0
     Level       1
-    ExpValue	5
+    ExpValue	5.0
     Type		<MON_IDX_WORM>
     Attack		<MON_FLAG_POISON>,1d5
     Color		<0,255,0,255>
@@ -187,13 +353,13 @@ Monster <Green Worm Mass>
 Monster <Huge Spider>
 {
     Plural		<Huge Spider>
-    Appear      <1d1>
+    Appear      <1d5>
     Speed		1.0
     MoveType	<MON_AI_100RANDOMMOVE>
     HD          <2d8>
     AC          50.0
     Level       5
-    ExpValue	100
+    ExpValue	100.0
     Type		<MON_IDX_SPIDER>
     Attack		<MON_FLAG_BITE>,1d6
     Color		<0,0,0,255>
@@ -208,7 +374,7 @@ Monster <Ancient Multi-hued Dragon>
     HD			<15d8>
     AC          110.0
     Level		50
-    ExpValue	9000
+    ExpValue	9000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
     Attack		<MON_FLAG_CLAW>,1d4,<MON_FLAG_CLAW>,1d4,<MON_FLAG_BITE>,2d8
     Color		<<255,0,0,255>;<255,123,0,255>;<255,233,0,255>;<12,255,0,255>;<0,59,255,255>;<152,0,255,255>>
@@ -223,7 +389,7 @@ Monster <Kobold>
     HD			<1d4>
     AC          40.0
     Level		2
-    ExpValue	10
+    ExpValue	10.0
     Type		<MON_IDX_KOBOLD>
     Attack		<MON_FLAG_BITE>,1d4
     Color		<170,170,170,255>
@@ -237,7 +403,7 @@ Monster <White Dragon>
     HD			<7d8>
     AC          80.0
     Level		15
-    ExpValue	300
+    ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Attack		<MON_FLAG_CLAW>,1d4,<MON_FLAG_CLAW>,1d4,<MON_FLAG_BITE>,2d8
     Color		<255,255,255,255>
@@ -251,7 +417,7 @@ Monster <Black Dragon>
     HD			<8d8>
     AC          80.0
     Level		20
-    ExpValue	300
+    ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Attack		<MON_FLAG_CLAW>,1d4,<MON_FLAG_CLAW>,1d4,<MON_FLAG_BITE>,3d6
     Color		<0,0,0,255>
@@ -265,7 +431,7 @@ Monster <Green Dragon>
     HD			<9d8>
     AC          90.0
     Level		25
-    ExpValue	300
+    ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Attack		<MON_FLAG_CLAW>,1d6,<MON_FLAG_CLAW>,1d6,<MON_FLAG_BITE>,2d10
     Color		<12,255,0,255>
@@ -279,7 +445,7 @@ Monster <Blue Dragon>
     HD			<10d8>
     AC          90.0
     Level		30
-    ExpValue	300
+    ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Attack		<MON_FLAG_CLAW>,1d6,<MON_FLAG_CLAW>,1d6,<MON_FLAG_BITE>,3d8
     Color		<13,7,81,255>
@@ -293,7 +459,7 @@ Monster <Red Dragon>
     HD			<11d8>
     AC          120.0
     Level		35
-    ExpValue	300
+    ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Attack		<MON_FLAG_CLAW>,1d8,<MON_FLAG_CLAW>,1d8,<MON_FLAG_BITE>,3d10
     Color		<255,0,0,255>
@@ -307,7 +473,7 @@ Monster <Giant Snake>
     HD			<4d8>
     AC			34.0
     Level		2
-    ExpValue	3
+    ExpValue	3.0
     Type		<MON_IDX_SNAKE>
     Attack		<MON_FLAG_BITE>,1d3
     Color		<198,142,0,255>
@@ -321,7 +487,7 @@ Monster <Red Jelly>
     HD			<2d5>
     AC			10.0
     Level		1
-    ExpValue	5
+    ExpValue	5.0
     Type		<MON_IDX_JELLY>
     Attack		<MON_FLAG_TOUCH>,1d2
     Color		<255,0,0,255>
@@ -335,35 +501,35 @@ Monster <Green Jelly>
     HD			<3d5>
     AC			10.0
     Level		2
-    ExpValue	5
+    ExpValue	5.0
     Type		<MON_IDX_JELLY>
     Attack		<MON_FLAG_TOUCH>,1d2
     Color		<12,255,0,255>
 }
 
 Monster <Yellow Mushroom Patch>
-{	
+{
 	Plural		<Yellow Mushroom Patches>
 	Speed		1.0
 	MoveType	<MON_AI_DONTMOVE>
 	HD			<1d4>
 	AC			50.0
 	Level		1
-	ExpValue	2
+	ExpValue	2.0
 	Type		<MON_IDX_SHROOM>
 	Attack		<MON_FLAG_SPORE>,1d1,<MON_FLAG_POISON>
 	Color		<255,255,0,255>
 }
 
 Monster <Blue Icky Thing>
-{	
+{
 	Plural		<Blue Icky Things>
 	Speed		1.0
 	MoveType	<MON_AI_100RANDOMMOVE>
 	HD			<2d8>
 	AC			50.0
 	Level		1
-	ExpValue	4
+	ExpValue	4.0
 	Type		<MON_IDX_ICKY>
 	Attack		<MON_FLAG_TOUCH>,1d2
 	Color		<0,0,255,255>
@@ -377,21 +543,21 @@ Monster <Clear Icky Thing>
     HD			<2d8>
     AC			50.0
     Level		3
-    ExpValue	4
+    ExpValue	4.0
     Type		<MON_IDX_ICKY>
     Attack		<MON_FLAG_TOUCH>,1d2
     Color		<255,255,255,32>
 }
 
 Monster <Opal Icky Thing>
-{	
+{
 	Plural		<Opal Icky Things>
 	Speed		1.0
 	MoveType	<MON_AI_100RANDOMMOVE>
 	HD		    <2d8>
 	AC		    20.0
 	Level		1
-	ExpValue	4
+	ExpValue	4.0
 	Type		<MON_IDX_ICKY>
 	Attack		<MON_FLAG_TOUCH>,1d2
     Color		<<240,240,240,255>;<135,201,190,255>;<236,161,180,255>;<205,235,238,255>;<238,203,179,255>>
@@ -405,7 +571,7 @@ Monster <Red Icky Thing>
     HD			<2d8>
     AC			50.0
     Level		1
-    ExpValue	4
+    ExpValue	4.0
     Type		<MON_IDX_ICKY>
     Attack		<MON_FLAG_TOUCH>,1d2
     Color		<255,0,0,255>
@@ -419,7 +585,7 @@ Monster <Green Icky Thing>
     HD			<2d8>
     AC			50.0
     Level		1
-    ExpValue	4
+    ExpValue	4.0
     Type		<MON_IDX_ICKY>
     Attack		<MON_FLAG_TOUCH>,1d2
     Color		<0,255,0,255>
@@ -433,7 +599,7 @@ Monster <White Icky Thing>
     HD			<2d8>
     AC			50.0
     Level		1
-    ExpValue	4
+    ExpValue	4.0
     Type		<MON_IDX_ICKY>
     Attack		<MON_FLAG_TOUCH>,1d2
     Color		<255,255,255,255>
@@ -447,7 +613,7 @@ Monster <Yellow Icky Thing>
     HD			<2d8>
     AC			50.0
     Level		1
-    ExpValue	4
+    ExpValue	4.0
     Type		<MON_IDX_ICKY>
     Attack		<MON_FLAG_TOUCH>,1d2
     Color		<241,244,66,255>
@@ -461,9 +627,8 @@ Monster <Giant Ant>
     HD			<3d8>
     AC			80.0
     Level		3
-    ExpValue	4
+    ExpValue	4.0
     Type		<MON_IDX_ANT>
     Attack		<MON_FLAG_BITE>,1d3
     Color		<140,96,1,255>
 }
-

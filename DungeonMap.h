@@ -3,6 +3,43 @@
 #include "JMDefs.h"
 #include "JLinkList.h"
 
+#define DUNG_CREATE_STEP_INVALID -1
+#define DUNG_CREATE_STEP_MAKE_ROOM 0
+#define DUNG_CREATE_STEP_MAKE_HALLWAY 1
+#define DUNG_CREATE_STEP_MAX 2
+
+#define MAX_RECURDEPTH 10
+
+#define DIR_NONE    -1
+#define DIR_NORTH     0
+#define DIR_SOUTH     1
+#define DIR_WEST     2
+#define DIR_EAST     3
+
+#define DUNG_HALL_MINLENGTH    2
+#define DUNG_HALL_MAXLENGTH    8
+class CDungeonCreationStep
+{
+public:
+    CDungeonCreationStep():
+    m_dwIndex(DUNG_CREATE_STEP_INVALID),
+    m_dwDirection(DIR_NONE),
+    m_dwRecurDepth(MAX_RECURDEPTH)
+    {
+        m_vPos.Init();
+        m_rcArea.Init(0,0,0,0);
+        m_pdwVisited = new bool[4];
+        memset(m_pdwVisited, false, 4);
+    };
+    ~CDungeonCreationStep(){};
+    
+    int m_dwIndex;
+    int m_dwDirection;
+    int m_dwRecurDepth;
+    JIVector m_vPos;
+    JRect m_rcArea;
+    bool *m_pdwVisited;
+};
 // CDungeonMapTile:
 // the info needed for map generation
 // and display of the map, one per tile
@@ -49,18 +86,42 @@ class CDungeonMap
 	// Member variables
 public:
 	CDungeonMap():
-	  m_dmtTiles(NULL)
+	  m_dmtTiles(NULL),
+      m_llUsedSpace(NULL),
+      m_stkDungeonMapCreation(NULL)
 	{};
-	~CDungeonMap() {};
+	~CDungeonMap()
+    {
+        Term();
+    };
 	
 protected:
+    void Term()
+    {
+        if( m_dmtTiles )
+        {
+            delete [] m_dmtTiles;
+            m_dmtTiles = NULL;
+        }
+    };
 private:
 	CDungeonMapTile	*m_dmtTiles;	// 1 DungeonMapTile per tile, has "graphical" info (size, location, type, ...)
 	JLinkList<CDungeonMapTile> *m_llUsedSpace;
+    JStack<CDungeonCreationStep> *m_stkDungeonMapCreation;
 	
 	// Member functions
 public:
 	void CreateDungeon(const int depth);
+    void InitDungeonCreate( JIVector &vOrigin );
+    bool CreateOneStep();
+    int Opposite( int direction );
+    CDungeonCreationStep *MakeRoomStep( const JIVector &vPos, const int direction, const int recurdepth );
+    CDungeonCreationStep *MakeHallStep( const JIVector &vPos, const int direction, const int recurdepth );
+    void GetRoomRect(JRect &rcRoom, const int direction);
+    void GetHallRect(JRect &rcHall, const int direction);
+    JIVector &GetWallOrigin(CDungeonCreationStep *pStep, const int direction);
+    JIVector &GetHallOrigin(CDungeonCreationStep *pStep);
+    
 	Uint8 GetdtdIndex( JIVector vPos )
 	{ 
 		if( GetTile(vPos) )
@@ -80,7 +141,12 @@ public:
 	};
 protected:
 	int CheckArea( const JRect *rcCheck, const int direction, bool bIsHallway );
-	void FillArea( const Uint8 type, const JRect *rcFill, const int direction, JIVector *vOrigin, bool bIsHallway );
+    bool CheckArea( CDungeonCreationStep *pStep );
+    bool CheckInterior( CDungeonCreationStep *pStep );
+    bool CheckBorder( CDungeonCreationStep *pStep );
+
+	void FillArea( const Uint8 type, JRect *rcFill, const int direction, JIVector *vOrigin, bool bIsHallway );
+    void FillArea( const CDungeonCreationStep *pStep );
 	
 	void MakeRoom( const JIVector *vPos, const int direction, const int recurdepth );
 	void MakeHall( const JIVector *vPos, const int direction, const int recurdepth );
@@ -97,6 +163,5 @@ protected:
 		return &m_dmtTiles[vPos.y * DUNG_WIDTH + vPos.x];
 	}
 private:
-	
 };
 #endif // __DUNGEONMAP_H__

@@ -14,23 +14,43 @@
 #include "windef.h"
 #endif //__WIN32__
 #include "TileSet.h"
+#include "JLinkList.h"
 
 #define FLAG_TEXT_NONE				0x0
 #define FLAG_TEXT_BOUNDING_BOX		0x1
 #define FLAG_TEXT_INVERSE			0x2
 #define FLAG_TEXT_IGNORE_WHITESPACE	0x4
 #define FLAG_TEXT_WRAP_WHITESPACE	0x8
+class CItem;
+class CScore;
+
+class CDisplayMeta
+{
+public:
+    CDisplayMeta():
+    limit(nul)
+    {
+        memset( header, 0, 80 );
+        memset( footer, 0, 80 );
+    }
+    char header[80];
+    char footer[80];
+    char limit;
+};
 
 class CDisplayText
 {
 	// Member functions
 public:
-	CDisplayText( JRect in );
+	CDisplayText( JRect in, uint8 alpha=25 );
 
 	bool Update( float fCurTime );
 	void Draw();
 	void DrawStr( int x, int y, char *szString );
-	void Printf( const char *fmt, ... );
+    void Printf( const char *fmt, ... );
+    void DisplayList( JLinkList<CItem> *pList, const CDisplayMeta *pMeta, const uint8 dwIndex=DUNG_IDX_INVALID );
+    void DisplayList( JLinkList<CScore> *pList, const CDisplayMeta *pMeta, const uint8 dwIndex=DUNG_IDX_INVALID );
+
 
 	void Clear() { m_szText[0] = nul; };
 	void SetColor( JColor in ) { m_Color.SetColor( in ); };
@@ -70,6 +90,7 @@ private:
 	int m_dwFreeLines;
 	JIVector m_vPos;
 	JColor	m_Color;
+    uint8 m_cBoundingBoxAlpha;
 	int m_dwFlags;
 
 	// The font

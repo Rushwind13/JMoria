@@ -2,18 +2,14 @@
 #define __DUNGEONCONSTANTS_H__
 
 // Some maximums for dungeon size (per level)
-#define DUNG_MAXWIDTH	256
-#define DUNG_MAXHEIGHT	256
-
 // dungeon width and height
 //#define FIXED_DUNGEON
-#undef FIXED_DUNGEON
 #ifdef FIXED_DUNGEON
 #define DUNG_WIDTH		16
 #define DUNG_HEIGHT		16
 #else
-#define DUNG_WIDTH		256
-#define DUNG_HEIGHT		256
+#define DUNG_WIDTH		100
+#define DUNG_HEIGHT		100
 #endif
 
 //#define SCREEN_MIN_XOFF 8

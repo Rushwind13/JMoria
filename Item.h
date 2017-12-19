@@ -4,6 +4,15 @@
 #include "JMDefs.h"
 #include "JLinkList.h"
 
+class CEffect
+{
+public:
+    CEffect():m_dwEffect(-1),m_szAmount(NULL){};
+    ~CEffect(){};
+    int m_dwEffect;
+    char *m_szAmount;
+};
+
 class CItemDef
 {
 	// Member Variables
@@ -14,7 +23,7 @@ class CItemDef
     m_fSpeed(0.0f),
     m_fACBonus(0.0f),
     m_fBaseAC(0.0f),
-    m_fBaseDamage(0.0f),
+    m_szBaseDamage(NULL),
     m_fBonusToHit(0.0f),
     m_fBonusToDamage(0.0f),
     m_dwLevel(0),
@@ -24,6 +33,7 @@ class CItemDef
     m_dwBaseHP(0.0f)
     {
         m_Colors = new JLinkList<JColor>;
+        m_llEffects = new JLinkList<CEffect>;
     }
     ~CItemDef()
     {
@@ -37,10 +47,20 @@ class CItemDef
             delete [] m_szPlural;
             m_szPlural = NULL;
         }
+        if(m_szBaseDamage)
+        {
+            delete [] m_szBaseDamage;
+            m_szBaseDamage = NULL;
+        }
         if(m_Colors)
         {
             m_Colors->Terminate();
             m_Colors = NULL;
+        }
+        if(m_llEffects)
+        {
+            m_llEffects->Terminate();
+            m_llEffects = NULL;
         }
     }
     char *m_szName; // what item is this?
@@ -48,7 +68,7 @@ class CItemDef
     float m_fSpeed;
     float m_fACBonus;
     float m_fBaseAC;
-    float m_fBaseDamage;
+    char *m_szBaseDamage;
     float m_fBonusToHit;
     float m_fBonusToDamage;
     int m_dwLevel;
@@ -57,6 +77,7 @@ class CItemDef
 	int m_dwIndex; // ITEM_IDX_SWORD, ITEM_IDX_WAND, etc.
 	int m_dwBaseHP; // for busting down walls, disarming traps, etc.
     JLinkList<JColor> *m_Colors;
+    JLinkList<CEffect> *m_llEffects;
     JColor m_Color;
 	protected:
 	private:

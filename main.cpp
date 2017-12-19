@@ -47,11 +47,14 @@ int main( int argc, char **argv )
         curTime = Util::GetTickCount();
 		if( curTime > nextTime )
 		{
-			if( g_pGame->GetPlayer() != NULL )
-			{
-			g_pGame->GetStats()->Printf( "\nplayer pos:<%f %f>\n", VEC_EXPAND(g_pGame->GetPlayer()->m_vPos));
-			}
-			nextTime = curTime + 2000;
+//			if( g_pGame->GetPlayer() != NULL )
+//			{
+//			g_pGame->GetStats()->Printf( "\nplayer pos:<%f %f>\n", VEC_EXPAND(g_pGame->GetPlayer()->m_vPos));
+//			}
+#ifdef CLOCKSTEP
+            g_pGame->SetState(STATE_CLOCKSTEP);
+#endif
+			nextTime = curTime + 10;
 		}
 
 		// handle the events in the queue

@@ -14,7 +14,10 @@ class CDisplayText;
 class CStateBase;
 class CCmdState;
 class CModState;
-class CMenuState;
+class CUseState;
+class CStringInputState;
+class CEndGameState;
+class CClockStepState;
 class CAIMgr;
 
 class CGame
@@ -35,31 +38,41 @@ public:
     CDisplayText *GetStats() { return m_pStatsDT; };
     CDisplayText *GetInv() { return m_pInvDT; };
     CDisplayText *GetEquip() { return m_pEquipDT; };
+    CDisplayText *GetUse() { return m_pUseDT; };
+    CDisplayText *GetEnd() { return m_pEndGameDT; };
 	CAIMgr *GetAIMgr() { return m_pAIMgr; };
 	void Quit( int returncode );
 	void SetState( int eNewState );
 	CStateBase *GetGameState() { return m_pCurState; };
-    
+
 #ifdef TURN_BASED
     void SetReadyForUpdate( const bool isReady ) { m_bReadyForUpdate = isReady; }
 #endif
-	
+#ifdef CLOCKSTEP
+		bool WaitForTick();
+#endif
+
 protected:
 	CDungeon	*m_pDungeon;
 	CPlayer		*m_pPlayer;
 	CAIMgr		*m_pAIMgr;
-	
+
     CDisplayText *m_pMsgsDT;
     CDisplayText *m_pStatsDT;
     CDisplayText *m_pInvDT;
     CDisplayText *m_pEquipDT;
-	
+    CDisplayText *m_pUseDT;
+    CDisplayText *m_pEndGameDT;
+
 	CStateBase	 *m_pCurState;
 	int			 m_eCurState;
 
     CCmdState	*m_pCmdState;
     CModState    *m_pModState;
-    CMenuState   *m_pMenuState;
+    CUseState   *m_pUseState;
+    CStringInputState   *m_pStringInputState;
+		CEndGameState   *m_pEndGameState;
+		CClockStepState   *m_pClockStepState;
 
 private:
 	CRender	*m_pRender;

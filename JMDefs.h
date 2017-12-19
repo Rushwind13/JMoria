@@ -12,19 +12,23 @@
 
 typedef int JResult;
 typedef unsigned int uint32;
+typedef unsigned char uint8;
 
 #define nul '\0'
 
 #define JSUCCESS		0
 #define JQUITREQUEST	1
 #define JRESETSTATE		2
+#define JCOMPLETESTATE  3
 #define JBOGUSKEY		-1
 
 #define INVALID_LENGTH	-1
+#define MAX_STRING_LENGTH 32
 
 #define JERROR() printf("An error occurred: %s %d\n", __FILE__, __LINE__ );
 
-//#define TURN_BASED
+#define TURN_BASED
+//#define CLOCKSTEP
 
 #include "DungeonConstants.h"
 
@@ -42,6 +46,12 @@ extern Constants g_Constants;
 #define DUNG_COLL_MONSTER (Sint8)(-2)
 #define DUNG_COLL_PLAYER (Sint8)(-3)
 #define DUNG_COLL_ITEM (Sint8)(-4)
+
+#define PLACEMENT_INVALID_PLACEMENT -1
+#define PLACEMENT_INV                1
+#define PLACEMENT_EQUIP              2
+#define PLACEMENT_USE                3
+#define PLACEMENT_MAX                4
 
 // SDL sees the mouse wheel as buttons 4&5
 // but has no constants for them.

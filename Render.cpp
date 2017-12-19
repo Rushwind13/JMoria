@@ -189,7 +189,7 @@ void CRender::SetTileColor( JColor color )
 
 void CRender::DrawTextBoundingBox( JRect rect, uint8 alpha )
 {
-	glColor4ub( 255, 255, 255, alpha );
+	glColor4ub( 128,170,192, alpha );
 	glDisable(GL_TEXTURE_2D);
 	glRecti(RECT_EXPAND(rect));
 	glEnable(GL_TEXTURE_2D);

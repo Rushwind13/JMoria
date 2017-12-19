@@ -28,7 +28,7 @@ typedef unsigned char uint8;
 #define JERROR() printf("An error occurred: %s %d\n", __FILE__, __LINE__ );
 
 #define TURN_BASED
-#define CLOCKSTEP
+//#define CLOCKSTEP
 
 #include "DungeonConstants.h"
 

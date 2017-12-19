@@ -66,13 +66,13 @@ JResult CGame::Init()
 	m_pMsgsDT = new CDisplayText( JRect( 0, 0, 640, 45 ) );
 	m_pMsgsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE);
 
-    m_pStatsDT = new CDisplayText( JRect( 0,50,  150,480 ) );
+    m_pStatsDT = new CDisplayText( JRect( 0,50,  150,480 ), 220 );
     m_pStatsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
 
-    m_pInvDT = new CDisplayText( JRect( 440,50,  640,340 ) );
+    m_pInvDT = new CDisplayText( JRect( 440,50,  640,340 ), 180 );
     m_pInvDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
 
-    m_pEquipDT = new CDisplayText( JRect( 440,345,  640,480 ) );
+    m_pEquipDT = new CDisplayText( JRect( 440,345,  640,480 ), 180 );
     m_pEquipDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
 
     m_pUseDT = new CDisplayText( JRect( 200,40,  440,480 ), 200 );

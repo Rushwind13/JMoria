@@ -466,12 +466,14 @@ void CDungeon::PreDraw()
 {
 	if( g_pGame->GetPlayer() != NULL )
 	{
+#ifdef CLOCKSTEP
         m_dwZoom = DUNG_WIDTH;
+#endif
         int xinitval = m_dwZoom;
         //int xinitval = 16;
 		int yinitval = xinitval;
 
-//#define ORIGIN_PLAYER
+#define ORIGIN_PLAYER
 #ifdef ORIGIN_PLAYER
 		int xorigin = (int)g_pGame->GetPlayer()->m_vPos.x - DUNG_WIDTH/2;
 		int yorigin = (int)g_pGame->GetPlayer()->m_vPos.y - DUNG_HEIGHT/2;

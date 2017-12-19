@@ -244,7 +244,7 @@ bool CModState::TestOpen()
 
 bool CModState::DoOpen()
 {
-	if( Util::GetRandom(0,1) )
+	if( Util::GetRandom(1,100) > 25 )
 	{
 		g_pGame->GetDungeon()->Modify(m_vNewPos);
 		return true;

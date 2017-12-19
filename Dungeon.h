@@ -105,7 +105,8 @@ public:
 		return (m_Tiles + ((int)vPos.y * DUNG_WIDTH) + (int)vPos.x ); // going to have to work in offsets, too, if the dungeon's bigger than the screen. --Jimbo
 	};
 	int IsWalkableFor( JVector &vPos, bool isPlayer=false );
-	int CanPlaceItemAt( JVector &vPos );
+    int CanPlaceItemAt( JVector &vPos );
+    int CanPlaceStairsAt( JVector &vPos );
 	bool IsOpenable( JVector &vPos );
 	bool IsTunnelable( JVector &vPos );
 	bool IsCloseable( JVector &vPos );
@@ -126,6 +127,8 @@ protected:
 	JResult CreateNewLevel(const int delta);
 	JResult CreateMap();
     JResult InitDungeonTiles();
+    JResult PlaceScenery(const int depth);
+    JResult PlaceStairs(const int desired, const int type);
 	JResult PlaceItems(const int depth);
 	JResult SpawnMonsters(const int depth);
 	int ChooseMonsterForDepth(const int depth);

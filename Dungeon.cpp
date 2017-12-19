@@ -156,6 +156,8 @@ JResult CDungeon::CreateNewLevel(const int delta)
     if( depth > DUNG_MAXDEPTH ) depth = DUNG_MAXDEPTH;
 
     CreateMap();
+    
+    PlaceScenery(depth);
 
     // Place items appropriate to this level.
     PlaceItems(depth);
@@ -205,6 +207,49 @@ JResult CDungeon::InitDungeonTiles()
     }
     
     m_fOpenFloorArea = open_area;
+    return JSUCCESS;
+}
+
+JResult CDungeon::PlaceScenery(const int depth)
+{
+    int upstairs = (depth > 1)? Util::GetRandom(1, 5):0;
+    int long_upstairs = (depth > 1)? Util::GetRandom(0,2):0;
+    int downstairs = (depth < DUNG_MAXDEPTH)? Util::GetRandom(1, 5):0;
+    int long_downstairs = (depth < DUNG_MAXDEPTH)? Util::GetRandom(0,2):0;
+    
+    PlaceStairs(upstairs, DUNG_IDX_UPSTAIRS);
+    PlaceStairs(long_upstairs, DUNG_IDX_LONG_UPSTAIRS);
+    PlaceStairs(downstairs, DUNG_IDX_DOWNSTAIRS);
+    PlaceStairs(long_downstairs, DUNG_IDX_LONG_DOWNSTAIRS);
+    
+    return JSUCCESS;
+}
+
+JResult CDungeon::PlaceStairs(const int desired, const int type)
+{
+    int count = 0;
+    bool bStairsSpawned = false;
+    while( count < desired )
+    {
+        bStairsSpawned = false;
+        printf("Trying to spawn stairs type: %d...", type);
+        JVector vTryPos;
+        while( !bStairsSpawned )
+        {
+            vTryPos.Init( (float)(Util::GetRandom(0, DUNG_WIDTH-1)), (float)(Util::GetRandom(0, DUNG_HEIGHT-1)) );
+            
+            //printf("Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
+            //g_pGame->GetMsgs()->Printf( "Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
+            
+            if( CanPlaceStairsAt(vTryPos) == DUNG_COLL_NO_COLLISION )
+            {
+                GetTile(vTryPos)->m_dtd = &m_dtdlist[type];
+                bStairsSpawned = true;
+                printf( "Success!\n" );
+            }
+        }
+        count++;
+    }
     return JSUCCESS;
 }
 
@@ -577,6 +622,35 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
 		return DUNG_COLL_NO_COLLISION;
 		break;
 	}
+}
+
+int CDungeon::CanPlaceStairsAt(JVector &vPos)
+{
+    CDungeonTile *curTile = GetTile(vPos);
+    if( curTile == NULL )
+    {
+        printf("Hey! That's a bad tile.\n");
+        return false;
+    }
+    
+    // If you get here, the square was unoccupied. Now check for running into inanimates...
+    int type = curTile->m_dtd->m_dwType;
+    switch( type )
+    {
+        case DUNG_IDX_WALL:
+        case DUNG_IDX_DOOR:
+        case DUNG_IDX_OPEN_DOOR:
+        case DUNG_IDX_RUBBLE:
+        case DUNG_IDX_UPSTAIRS:
+        case DUNG_IDX_LONG_UPSTAIRS:
+        case DUNG_IDX_DOWNSTAIRS:
+        case DUNG_IDX_LONG_DOWNSTAIRS:
+            return type;
+            break;
+        default:
+            return DUNG_COLL_NO_COLLISION;
+            break;
+    }
 }
 
 int CDungeon::CanPlaceItemAt(JVector &vPos)

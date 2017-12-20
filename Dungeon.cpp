@@ -222,6 +222,11 @@ JResult CDungeon::PlaceScenery(const int depth)
     PlaceStairs(downstairs, DUNG_IDX_DOWNSTAIRS);
     PlaceStairs(long_downstairs, DUNG_IDX_LONG_DOWNSTAIRS);
     
+    // Doors (open, closed, locked, secret, broken)
+    // Traps
+    // Rubble (very rare)
+    // Gold Veins (only in walls, can run a couple deep)
+    
     return JSUCCESS;
 }
 

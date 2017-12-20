@@ -5,6 +5,11 @@ DATA / GAMEPLAY:
 - need to add status effects (e.g. poison)
 - implement "flavored" attacks, e.g. a _BREATHE type should read m_dwFlags to figure out which type of breath (fire, ice, &c)s
 
+DOORS / TRAPS / SCENERY:
+- make new DUNG_IDX types for locked, secret, and broken doors (are these just DUNG_FLAG? need different icon for secret)
+- make new DUNG_IDX types for secret and visible traps (DUNG_FLAG? still need a different icon... ish.) Seems like m_dtd changes secret->visible when seen, changes again visible->floor when disarmed...
+- make new DUNG_IDX type for gold vein
+- rubble has chance of treasure
 
 MONSTERS:
 - orcs
@@ -32,6 +37,7 @@ ITEMS:
 - unique items I mean Vlad had to take on a Jenoine, I'm just saying.
 - Maybe uniques can't be found until the character holding them dies.
 - pickaxe / shovel
+- monsters can carry treasure
 
 
 PLAYER:

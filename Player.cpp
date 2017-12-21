@@ -15,10 +15,11 @@ extern CGame *g_pGame;
 void CPlayer::Init()
 {
 	// Initialize all the player stuff, baby.
-	m_TileSet = new CTileset("Resources/Courier.png", 32, 32 );
+//    m_TileSet = new CTileset("Resources/Courier.png", 32, 32 );
+    m_TileSet = new DUNG_TILESET;
 
 	// This will likely get moved somewhere else. --Jimbo
-	SpawnPlayer();
+    SpawnPlayer();
 }
 
 bool CPlayer::Update(float fCurTime)
@@ -32,7 +33,7 @@ bool CPlayer::Update(float fCurTime)
 void CPlayer::Draw()
 {
 	Uint8 player_tile = '@' - ' ' - 1;//TileIDs[TILE_IDX_PLAYER] - ' ' - 1;
-	JVector vSize(1,1);
+	JVector DUNG_ASPECT;
     JColor player_color(255,255,255,255);
 
 	PreDraw();
@@ -78,21 +79,21 @@ JResult CPlayer::SpawnPlayer()
 void CPlayer::DisplayStats()
 {
     g_pGame->GetStats()->Clear();
-    g_pGame->GetStats()->Printf("Name:%s\n", m_szName);
-    g_pGame->GetStats()->Printf("Race:%s\n", m_pRace->m_szName);
-    g_pGame->GetStats()->Printf("Class:%s\n", m_pClass->m_szName);
+    g_pGame->GetStats()->Printf("Name: %s\n", m_szName);
+    g_pGame->GetStats()->Printf("Race: %s\n", m_pRace->m_szName);
+    g_pGame->GetStats()->Printf("Class: %s\n", m_pClass->m_szName);
     g_pGame->GetStats()->Printf("\n");
-    g_pGame->GetStats()->Printf("AC:%d\n", (int)m_fArmorClass);
-    g_pGame->GetStats()->Printf("HP:%d / %d\n", (int)m_fCurHitPoints, (int)m_fHitPoints);
+    g_pGame->GetStats()->Printf("AC: %d\n", (int)m_fArmorClass);
+    g_pGame->GetStats()->Printf("HP: %d / %d\n", (int)m_fCurHitPoints, (int)m_fHitPoints);
     g_pGame->GetStats()->Printf("\n");
-    g_pGame->GetStats()->Printf("Damage:%s\n", m_szDamage);
-    g_pGame->GetStats()->Printf("+to Hit:%d\n", (int)m_fToHitModifier);
-    g_pGame->GetStats()->Printf("+to Dam:%d\n", (int)m_fDamageModifier);
+    g_pGame->GetStats()->Printf("Damage: %s\n", m_szDamage);
+    g_pGame->GetStats()->Printf("+to Hit: %d\n", (int)m_fToHitModifier);
+    g_pGame->GetStats()->Printf("+to Dam: %d\n", (int)m_fDamageModifier);
     g_pGame->GetStats()->Printf("\n");
     g_pGame->GetStats()->Printf("\n");
-    g_pGame->GetStats()->Printf("Level:%d\n", (int)m_fLevel);
-    g_pGame->GetStats()->Printf("Exp:%d\n", (int)m_fExperience);
-    g_pGame->GetStats()->Printf("Exp to Next:%d\n", (int)(m_pClass->m_fExpNeeded[(int)m_fLevel-1] - m_fExperience));
+    g_pGame->GetStats()->Printf("Level: %d\n", (int)m_fLevel);
+    g_pGame->GetStats()->Printf("Exp: %d\n", (int)m_fExperience);
+    g_pGame->GetStats()->Printf("Exp to Next: %d\n", (int)(m_pClass->m_fExpNeeded[(int)m_fLevel-1] - m_fExperience));
 }
 
 void CPlayer::DisplayInventory( uint8 dwPlacement )
@@ -159,6 +160,7 @@ bool CPlayer::IsWieldable(CLink<CItem> *pItem)
         case ITEM_IDX_SWORD:
         case ITEM_IDX_SHIELD:
         case ITEM_IDX_ARMOR:
+        case ITEM_IDX_HELMET:
         case ITEM_IDX_BOW:
         case ITEM_IDX_XBOW:
         case ITEM_IDX_CLOAK:
@@ -281,6 +283,9 @@ bool CPlayer::Hit( float &fRoll )
 
 int CPlayer::TakeDamage( float fDamage, char *szMon )
 {
+#ifdef CLOCKSTEP
+    return STATUS_ALIVE;
+#endif
     int retval = STATUS_INVALID;
 
     if( (int)fDamage < (int)m_fCurHitPoints )

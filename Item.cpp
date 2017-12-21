@@ -91,7 +91,7 @@ void CItem::Draw()
         return;
     }
     Uint8 item_tile = ItemIDs[m_id->m_dwIndex] - ' ' - 1;
-    JVector vSize(1,1);
+    JVector DUNG_ASPECT;
 
     SetColor();
 

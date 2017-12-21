@@ -20,7 +20,8 @@
 #define STATE_USE         3
 #define STATE_STRINGINPUT 4
 #define STATE_ENDGAME     5
-#define STATE_MAX         6
+#define STATE_CLOCKSTEP   6
+#define STATE_MAX         7
 
 // Various statuses that someone could have
 #define STATUS_INVALID		-1
@@ -55,8 +56,8 @@
 #define DUNG_FLAG_LIT		0x00000001
 
 // Dungeon Flags
-#define DUNG_CFG_MONSTERS_PER_LEVEL 0.05f
-#define DUNG_CFG_ITEMS_PER_LEVEL 0.05f
+#define DUNG_CFG_MONSTERS_PER_LEVEL 0.005f
+#define DUNG_CFG_ITEMS_PER_LEVEL 0.01f
 #define DUNG_CFG_START_LEVEL 1
 #define DUNG_CFG_MAX_SPAWN_TRIES 10
 

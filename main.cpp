@@ -51,7 +51,10 @@ int main( int argc, char **argv )
 //			{
 //			g_pGame->GetStats()->Printf( "\nplayer pos:<%f %f>\n", VEC_EXPAND(g_pGame->GetPlayer()->m_vPos));
 //			}
-			nextTime = curTime + 2000;
+#ifdef CLOCKSTEP
+            g_pGame->SetState(STATE_CLOCKSTEP);
+#endif
+			nextTime = curTime + 10;
 		}
 
 		// handle the events in the queue

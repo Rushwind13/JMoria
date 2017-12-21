@@ -19,7 +19,7 @@ void CPlayer::Init()
     m_TileSet = new DUNG_TILESET;
 
 	// This will likely get moved somewhere else. --Jimbo
-	SpawnPlayer();
+    SpawnPlayer();
 }
 
 bool CPlayer::Update(float fCurTime)
@@ -283,6 +283,9 @@ bool CPlayer::Hit( float &fRoll )
 
 int CPlayer::TakeDamage( float fDamage, char *szMon )
 {
+#ifdef CLOCKSTEP
+    return STATUS_ALIVE;
+#endif
     int retval = STATUS_INVALID;
 
     if( (int)fDamage < (int)m_fCurHitPoints )

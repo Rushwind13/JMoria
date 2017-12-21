@@ -24,11 +24,69 @@ public:
 	
 	inline ~CLink(void)
 	{
-		m_lpData = NULL;
+        if( m_lpData )
+        {
+            delete m_lpData;
+            m_lpData = NULL;
+        }
         m_dwIndex = -1;
 		next = NULL;
 		prev = NULL;
 	}
+};
+
+template <class T> class JStack
+{
+public:
+    inline JStack< T >(): m_lpHead(NULL),m_iNumElements(0){};
+    virtual inline ~JStack(void) { Terminate(); };
+    void Push( T *pData )
+    {
+        CLink<T> *pLink = new CLink<T>( pData );
+        pLink->next = m_lpHead;
+        m_lpHead = pLink;
+        m_iNumElements++;
+    };
+    CLink<T> *Pop()
+    {
+        if( m_lpHead == NULL )
+        {
+            return NULL;
+        }
+        CLink<T> *pLink = m_lpHead;
+        m_lpHead = pLink->next;
+        m_iNumElements--;
+        
+        return pLink;
+    };
+    
+    void Remove(CLink<T> *pLink)
+    {
+        delete pLink;
+        pLink = NULL;
+    };
+    
+    void Terminate()
+    {
+        if( m_lpHead == NULL )
+        {
+            return;
+        }
+        
+        CLink<T> *pLink = m_lpHead;
+        CLink<T> *pDel = pLink;
+        while( pLink )
+        {
+            pDel = pLink;
+            pLink = Pop();
+            Remove(pDel);
+        }
+    };
+protected:
+    CLink<T>    *m_lpHead;
+    int    m_iNumElements;
+    
+private:
 };
 
 template <class T> class JLinkList
@@ -137,7 +195,6 @@ public:
 
         if( bDelete )
         {
-            delete pLink->m_lpData;
             delete pLink;
             pLink = NULL;
         }

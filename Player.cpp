@@ -333,7 +333,7 @@ bool CPlayer::Quaff( CLink<CItem> *pLink )
     CItem *pItem = pLink->m_lpData;
     m_llInventory->Remove(pItem->m_pllLink, false);
     CEffect *pEffect = pItem->m_id->m_llEffects->GetHead()->m_lpData;
-    if( pEffect->m_dwEffect == ITEM_FLAG_HEAL_HP )
+    if( pEffect->m_dwEffect == EFFECT_TYPE_HEAL )
     {
         m_fCurHitPoints += Util::Roll(pEffect->m_szAmount);
         if( m_fCurHitPoints > m_fHitPoints )

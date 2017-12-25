@@ -131,21 +131,7 @@
 #define MON_FLAG_BREATHE       0x00000040
 #define MON_FLAG_CRAWL         0x00000080
 
-#define MON_FLAG_FIRE          0x00000100
-#define MON_FLAG_COLD          0x00000200
-#define MON_FLAG_ELECTRICITY   0x00000400
-#define MON_FLAG_ACID          0x00000800
-
-#define MON_FLAG_POISON        0x00001000
-#define MON_FLAG_SPELL         0x00002000
-#define MON_FLAG_DRAIN_XP      0x00004000
 #define MON_FLAG_BREED         0x00008000
-
-#define MON_FLAG_AFRAID        0x00010000
-#define MON_FLAG_BLIND         0x00020000
-#define MON_FLAG_SLEEP         0x00040000
-#define MON_FLAG_CONFUSE       0x00080000
-
 // #define MON_FLAG_x          0x00100000
 // #define MON_FLAG_x          0x00200000
 // #define MON_FLAG_x          0x00400000
@@ -161,7 +147,74 @@
 //#define MON_COLOR_x          0x40000000
 //#define MON_COLOR_x          0x80000000
 
-#define NUM_MON_FLAGS           25
+#define NUM_MON_FLAGS           14
+
+// Effect Flags
+#define EFFECT_FLAG_FIRE          0x00000001
+#define EFFECT_FLAG_COLD          0x00000002
+#define EFFECT_FLAG_ELECTRICITY   0x00000004
+#define EFFECT_FLAG_ACID          0x00000008
+
+#define EFFECT_FLAG_POISON        0x00000010
+#define EFFECT_FLAG_SPELL         0x00000020
+#define EFFECT_FLAG_HP            0x00000040
+#define EFFECT_FLAG_XP            0x00000080
+
+#define EFFECT_FLAG_AFRAID        0x00000100
+#define EFFECT_FLAG_BLIND         0x00000200
+#define EFFECT_FLAG_SLEEP         0x00000400
+#define EFFECT_FLAG_CONFUSE       0x00000800
+
+#define EFFECT_FLAG_MP            0x00001000
+#define EFFECT_FLAG_IDENTIFY      0x00002000
+#define EFFECT_FLAG_LIGHT         0x00004000
+#define EFFECT_FLAG_ESP           0x00008000
+
+#define EFFECT_FLAG_LEVITATE      0x00010000
+#define EFFECT_FLAG_INVISIBLE     0x00020000
+#define EFFECT_FLAG_PARALYZE      0x00040000
+#define EFFECT_FLAG_FUEL          0x00080000
+
+#define EFFECT_FLAG_SUMMON        0x00100000
+#define EFFECT_FLAG_TOHIT         0x00200000
+#define EFFECT_FLAG_TODAM         0x00400000
+#define EFFECT_FLAG_AC            0x00800000
+
+#define EFFECT_FLAG_STAT          0x01000000
+#define EFFECT_FLAG_DOOR          0x02000000
+#define EFFECT_FLAG_TREASURE      0x04000000
+#define EFFECT_FLAG_HOLDING       0x08000000
+
+#define EFFECT_FLAG_MAPPING       0x10000000
+#define EFFECT_FLAG_RECALL        0x20000000
+#define EFFECT_FLAG_STONE_TO_MUD  0x40000000
+#define EFFECT_FLAG_SPEED         0x80000000
+
+
+#define NUM_EFFECT_FLAGS          32
+
+// Effect Modifiers
+#define EFFECT_MOD_RESIST        0x000000001
+#define EFFECT_MOD_SEE           0x000000002
+#define EFFECT_MOD_IMMUNE        0x000000004
+#define EFFECT_MOD_WEAK          0x000000008
+
+#define EFFECT_MOD_ENCHANT       0x000000010
+
+#define NUM_EFFECT_MODIFIERS     5
+
+// Effect Types
+#define EFFECT_TYPE_HEAL          0x00000001
+#define EFFECT_TYPE_HIT           0x00000002
+#define EFFECT_TYPE_TIMED         0x00000004
+#define EFFECT_TYPE_CAUSE         0x00000008
+
+#define EFFECT_TYPE_INTRINSIC     0x00000010
+#define EFFECT_TYPE_RESTORE       0x00000020
+#define EFFECT_TYPE_GAIN          0x00000040
+// #define EFFECT_TYPE_x          0x00000080
+
+#define NUM_EFFECT_TYPES           7
 
 // Types of items
 #define ITEM_IDX_INVALID        -1
@@ -197,50 +250,15 @@
 //       like: <hurt>, <blind>, XdY means "blind for x turns"
 //             <heal>, <blind> means "cure blindness"
 // Item flags
-#define ITEM_FLAG_CURE_POISON   0x00000001
-#define ITEM_FLAG_CURE_BLIND    0x00000002
-#define ITEM_FLAG_CURE_CONFUSE  0x00000004
-#define ITEM_FLAG_CURE_FEAR     0x00000008
 
-#define ITEM_FLAG_HEAL_HP       0x00000010
-#define ITEM_FLAG_HEAL_MP       0x00000020
-#define ITEM_FLAG_IDENTIFY      0x00000040
-#define ITEM_FLAG_LIGHT         0x00000080
+#define ITEM_FLAG_CURSED        0x00000001
 
-#define ITEM_FLAG_SUMMON        0x00000100
-#define ITEM_FLAG_ENCHANT_TOHIT 0x00000200
-#define ITEM_FLAG_ENCHANT_TODAM 0x00000400
-#define ITEM_FLAG_ENCHANT_AC    0x00000800
+#define ITEM_COLOR_MULTI        0x10000000
 
-#define ITEM_FLAG_RESIST_FIRE   0x00001000
-#define ITEM_FLAG_RESIST_COLD   0x00002000
-#define ITEM_FLAG_RESIST_ELEC   0x00004000
-#define ITEM_FLAG_RESIST_ACID   0x00008000
-
-#define ITEM_FLAG_LEVITATE      0x00010000
-#define ITEM_FLAG_RESTORE_STAT  0x00020000
-#define ITEM_FLAG_GAIN_STAT     0x00040000
-#define ITEM_FLAG_INVISIBLE     0x00080000
-
-#define ITEM_FLAG_MAPPING       0x00100000
-#define ITEM_FLAG_RECALL        0x00200000
-#define ITEM_FLAG_STONE_TO_MUD  0x00400000
-#define ITEM_FLAG_SPEED         0x00800000
-
-#define ITEM_FLAG_ESP           0x01000000
-#define ITEM_FLAG_CONFUSE       0x02000000
-#define ITEM_FLAG_FIND_DOOR     0x04000000
-#define ITEM_FLAG_FIND_TREASURE 0x08000000
-
-#define ITEM_FLAG_CURSED        0x10000000
-#define ITEM_FLAG_FUEL          0x20000000
-#define ITEM_FLAG_HOLDING       0x40000000
-#define ITEM_COLOR_MULTI        0x80000000
-
-#define NUM_ITEM_FLAGS  32
+#define NUM_ITEM_FLAGS  2
 
 // Make sure you change below here if you added any flags.
-#define NUM_STRINGS				MON_IDX_MAX + NUM_MON_FLAGS + ITEM_IDX_MAX + NUM_ITEM_FLAGS
+#define NUM_STRINGS				MON_IDX_MAX + NUM_MON_FLAGS + ITEM_IDX_MAX + NUM_ITEM_FLAGS + NUM_EFFECT_FLAGS + NUM_EFFECT_MODIFIERS + NUM_EFFECT_TYPES
 #include "TextEntry.h"
 class Constants
 {
@@ -317,23 +335,60 @@ public:
         m_StringTable[i++].Init("MON_FLAG_TRAMPLE", MON_FLAG_TRAMPLE);
         m_StringTable[i++].Init("MON_FLAG_BREATHE", MON_FLAG_BREATHE);
         m_StringTable[i++].Init("MON_FLAG_CRAWL", MON_FLAG_CRAWL);
-        m_StringTable[i++].Init("MON_FLAG_FIRE", MON_FLAG_FIRE);
-        m_StringTable[i++].Init("MON_FLAG_COLD", MON_FLAG_COLD);
-        m_StringTable[i++].Init("MON_FLAG_ELECTRICITY", MON_FLAG_ELECTRICITY);
-        m_StringTable[i++].Init("MON_FLAG_ACID", MON_FLAG_ACID);
-        m_StringTable[i++].Init("MON_FLAG_POISON", MON_FLAG_POISON);
-        m_StringTable[i++].Init("MON_FLAG_SPELL", MON_FLAG_SPELL);
-        m_StringTable[i++].Init("MON_FLAG_DRAIN_XP", MON_FLAG_DRAIN_XP);
         m_StringTable[i++].Init("MON_FLAG_BREED", MON_FLAG_BREED);
-        m_StringTable[i++].Init("MON_FLAG_AFRAID", MON_FLAG_AFRAID);
-        m_StringTable[i++].Init("MON_FLAG_BLIND", MON_FLAG_BLIND);
-        m_StringTable[i++].Init("MON_FLAG_SLEEP", MON_FLAG_SLEEP);
-        m_StringTable[i++].Init("MON_FLAG_CONFUSE", MON_FLAG_CONFUSE);
         m_StringTable[i++].Init("MON_AI_DONTMOVE", MON_AI_DONTMOVE);
         m_StringTable[i++].Init("MON_AI_100RANDOMMOVE", MON_AI_100RANDOMMOVE);
         m_StringTable[i++].Init("MON_AI_75RANDOMMOVE", MON_AI_75RANDOMMOVE);
         m_StringTable[i++].Init("MON_AI_SEEKPLAYER", MON_AI_SEEKPLAYER);
         m_StringTable[i++].Init("MON_COLOR_MULTI", MON_COLOR_MULTI);
+
+        // Effect flags (flags, modifiers, types)
+        m_StringTable[i++].Init("EFFECT_FLAG_FIRE", EFFECT_FLAG_FIRE);
+        m_StringTable[i++].Init("EFFECT_FLAG_COLD", EFFECT_FLAG_COLD);
+        m_StringTable[i++].Init("EFFECT_FLAG_ELECTRICITY", EFFECT_FLAG_ELECTRICITY);
+        m_StringTable[i++].Init("EFFECT_FLAG_ACID", EFFECT_FLAG_ACID);
+        m_StringTable[i++].Init("EFFECT_FLAG_POISON", EFFECT_FLAG_POISON);
+        m_StringTable[i++].Init("EFFECT_FLAG_SPELL", EFFECT_FLAG_SPELL);
+        m_StringTable[i++].Init("EFFECT_FLAG_HP", EFFECT_FLAG_HP);
+        m_StringTable[i++].Init("EFFECT_FLAG_XP", EFFECT_FLAG_XP);
+        m_StringTable[i++].Init("EFFECT_FLAG_AFRAID", EFFECT_FLAG_AFRAID);
+        m_StringTable[i++].Init("EFFECT_FLAG_BLIND", EFFECT_FLAG_BLIND);
+        m_StringTable[i++].Init("EFFECT_FLAG_SLEEP", EFFECT_FLAG_SLEEP );
+        m_StringTable[i++].Init("EFFECT_FLAG_CONFUSE", EFFECT_FLAG_CONFUSE );
+        m_StringTable[i++].Init("EFFECT_FLAG_MP", EFFECT_FLAG_MP);
+        m_StringTable[i++].Init("EFFECT_FLAG_IDENTIFY", EFFECT_FLAG_IDENTIFY);
+        m_StringTable[i++].Init("EFFECT_FLAG_LIGHT", EFFECT_FLAG_LIGHT );
+        m_StringTable[i++].Init("EFFECT_FLAG_ESP", EFFECT_FLAG_ESP );
+        m_StringTable[i++].Init("EFFECT_FLAG_LEVITATE", EFFECT_FLAG_LEVITATE);
+        m_StringTable[i++].Init("EFFECT_FLAG_INVISIBLE", EFFECT_FLAG_INVISIBLE);
+        m_StringTable[i++].Init("EFFECT_FLAG_PARALYZE", EFFECT_FLAG_PARALYZE );
+        m_StringTable[i++].Init("EFFECT_FLAG_FUEL",          EFFECT_FLAG_FUEL);
+        m_StringTable[i++].Init("EFFECT_FLAG_SUMMON",        EFFECT_FLAG_SUMMON);
+        m_StringTable[i++].Init("EFFECT_FLAG_TOHIT", EFFECT_FLAG_TOHIT);
+        m_StringTable[i++].Init("EFFECT_FLAG_TODAM", EFFECT_FLAG_TODAM);
+        m_StringTable[i++].Init("EFFECT_FLAG_AC",    EFFECT_FLAG_AC);
+        m_StringTable[i++].Init("EFFECT_FLAG_STAT",  EFFECT_FLAG_STAT);
+        m_StringTable[i++].Init("EFFECT_FLAG_DOOR",     EFFECT_FLAG_DOOR);
+        m_StringTable[i++].Init("EFFECT_FLAG_TREASURE", EFFECT_FLAG_TREASURE);
+        m_StringTable[i++].Init("EFFECT_FLAG_HOLDING",          EFFECT_FLAG_HOLDING);
+        m_StringTable[i++].Init("EFFECT_FLAG_MAPPING",       EFFECT_FLAG_MAPPING);
+        m_StringTable[i++].Init("EFFECT_FLAG_RECALL",        EFFECT_FLAG_RECALL);
+        m_StringTable[i++].Init("EFFECT_FLAG_STONE_TO_MUD",  EFFECT_FLAG_STONE_TO_MUD);
+        m_StringTable[i++].Init("EFFECT_FLAG_SPEED",         EFFECT_FLAG_SPEED);
+
+        m_StringTable[i++].Init("EFFECT_MOD_RESIST", EFFECT_MOD_RESIST );
+        m_StringTable[i++].Init("EFFECT_MOD_SEE", EFFECT_MOD_SEE);
+        m_StringTable[i++].Init("EFFECT_MOD_IMMUNE", EFFECT_MOD_IMMUNE);
+        m_StringTable[i++].Init("EFFECT_MOD_WEAK", EFFECT_MOD_WEAK );
+        m_StringTable[i++].Init("EFFECT_MOD_ENCHANT", EFFECT_MOD_ENCHANT );
+        
+        m_StringTable[i++].Init("EFFECT_TYPE_HEAL", EFFECT_TYPE_HEAL );
+        m_StringTable[i++].Init("EFFECT_TYPE_HIT", EFFECT_TYPE_HIT);
+        m_StringTable[i++].Init("EFFECT_TYPE_TIMED", EFFECT_TYPE_TIMED);
+        m_StringTable[i++].Init("EFFECT_TYPE_CAUSE", EFFECT_TYPE_CAUSE );
+        m_StringTable[i++].Init("EFFECT_TYPE_INTRINSIC", EFFECT_TYPE_INTRINSIC );
+        m_StringTable[i++].Init("EFFECT_TYPE_RESTORE", EFFECT_TYPE_RESTORE );
+        m_StringTable[i++].Init("EFFECT_TYPE_GAIN", EFFECT_TYPE_GAIN );
 
         // Item Types
         m_StringTable[i++].Init("ITEM_IDX_SWORD",        ITEM_IDX_SWORD);
@@ -363,37 +418,7 @@ public:
         m_StringTable[i++].Init("ITEM_IDX_POLEARM",      ITEM_IDX_POLEARM);
 
         // Item flags
-        m_StringTable[i++].Init("ITEM_FLAG_CURE_POISON",   ITEM_FLAG_CURE_POISON);
-        m_StringTable[i++].Init("ITEM_FLAG_CURE_BLIND",    ITEM_FLAG_CURE_BLIND);
-        m_StringTable[i++].Init("ITEM_FLAG_CURE_CONFUSE",  ITEM_FLAG_CURE_CONFUSE);
-        m_StringTable[i++].Init("ITEM_FLAG_CURE_FEAR",     ITEM_FLAG_CURE_FEAR);
-        m_StringTable[i++].Init("ITEM_FLAG_HEAL_HP",       ITEM_FLAG_HEAL_HP);
-        m_StringTable[i++].Init("ITEM_FLAG_HEAL_MP",       ITEM_FLAG_HEAL_MP);
-        m_StringTable[i++].Init("ITEM_FLAG_IDENTIFY",      ITEM_FLAG_IDENTIFY);
-        m_StringTable[i++].Init("ITEM_FLAG_LIGHT",         ITEM_FLAG_LIGHT);
-        m_StringTable[i++].Init("ITEM_FLAG_SUMMON",        ITEM_FLAG_SUMMON);
-        m_StringTable[i++].Init("ITEM_FLAG_ENCHANT_TOHIT", ITEM_FLAG_ENCHANT_TOHIT);
-        m_StringTable[i++].Init("ITEM_FLAG_ENCHANT_TODAM", ITEM_FLAG_ENCHANT_TODAM);
-        m_StringTable[i++].Init("ITEM_FLAG_ENCHANT_AC",    ITEM_FLAG_ENCHANT_AC);
-        m_StringTable[i++].Init("ITEM_FLAG_RESIST_FIRE",   ITEM_FLAG_RESIST_FIRE);
-        m_StringTable[i++].Init("ITEM_FLAG_RESIST_COLD",   ITEM_FLAG_RESIST_COLD);
-        m_StringTable[i++].Init("ITEM_FLAG_RESIST_ELEC",   ITEM_FLAG_RESIST_ELEC);
-        m_StringTable[i++].Init("ITEM_FLAG_RESIST_ACID",   ITEM_FLAG_RESIST_ACID);
-        m_StringTable[i++].Init("ITEM_FLAG_LEVITATE",      ITEM_FLAG_LEVITATE);
-        m_StringTable[i++].Init("ITEM_FLAG_RESTORE_STAT",  ITEM_FLAG_RESTORE_STAT);
-        m_StringTable[i++].Init("ITEM_FLAG_GAIN_STAT",     ITEM_FLAG_GAIN_STAT);
-        m_StringTable[i++].Init("ITEM_FLAG_INVISIBLE",     ITEM_FLAG_INVISIBLE);
-        m_StringTable[i++].Init("ITEM_FLAG_MAPPING",       ITEM_FLAG_MAPPING);
-        m_StringTable[i++].Init("ITEM_FLAG_RECALL",        ITEM_FLAG_RECALL);
-        m_StringTable[i++].Init("ITEM_FLAG_STONE_TO_MUD",  ITEM_FLAG_STONE_TO_MUD);
-        m_StringTable[i++].Init("ITEM_FLAG_SPEED",         ITEM_FLAG_SPEED);
-        m_StringTable[i++].Init("ITEM_FLAG_ESP",           ITEM_FLAG_ESP);
-        m_StringTable[i++].Init("ITEM_FLAG_CONFUSE",       ITEM_FLAG_CONFUSE);
-        m_StringTable[i++].Init("ITEM_FLAG_FIND_DOOR",     ITEM_FLAG_FIND_DOOR);
-        m_StringTable[i++].Init("ITEM_FLAG_FIND_TREASURE", ITEM_FLAG_FIND_TREASURE);
         m_StringTable[i++].Init("ITEM_FLAG_CURSED",        ITEM_FLAG_CURSED);
-        m_StringTable[i++].Init("ITEM_FLAG_FUEL",          ITEM_FLAG_FUEL);
-        m_StringTable[i++].Init("ITEM_G_HOLDING",          ITEM_FLAG_HOLDING);
         m_StringTable[i++].Init("ITEM_COLOR_MULTI",        ITEM_COLOR_MULTI);
     };
     TextEntry	*m_StringTable;

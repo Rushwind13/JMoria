@@ -40,7 +40,8 @@
 #    Level		1
 #    ExpValue	5.0
 #    Type		<MON_IDX_JELLY>
-#    Attack		<MON_FLAG_TOUCH>,1d2
+#    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+#    Attack     <EFFECT_TYPE_HIT>,<EFFECT_FLAG_FIRE>,1d3
 #    Color		<255,0,0,255>
 #}
 
@@ -55,7 +56,7 @@ Monster <Giant Frog>
     Level       5
     ExpValue	35.0
     Type		<MON_IDX_FROG>
-    Attack		<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
     Color		<71,165,0,255  >
 }
 
@@ -70,7 +71,7 @@ Monster <Death Slaad>
     Level       10
     ExpValue	100.0
     Type		<MON_IDX_FROG>
-    Attack		<MON_FLAG_FIRE>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<EFFECT_FLAG_FIRE>,2d4
     Color		<71,165,0,255  >
 }
 
@@ -85,7 +86,7 @@ Monster <Flaming Bat>
     Level       5
     ExpValue	100.0
     Type		<MON_IDX_BAT>
-    Attack		<MON_FLAG_FIRE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_FIRE>,2d8
     Color		<255,100,0,255  >
 }
 
@@ -100,7 +101,8 @@ Monster <Flaming Bat>
      Level       1
      ExpValue	100.0
      Type		<MON_IDX_EYE>
-     Attack		<MON_FLAG_TOUCH>,0d0
+     Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,0d0
+     Attack     <EFFECT_TYPE_TIMED>,<EFFECT_FLAG_PARALYZE>,1d20
      Color		<255,100,0,255  >
 }
 #
@@ -115,7 +117,7 @@ Monster <Flaming Bat>
 #    Level       5
 #    ExpValue	100.0
 #    Type		<MON_IDX_BAT>
-#    Attack		<MON_FLAG_FIRE>,0d0,<MON_FLAG_CONFUS>,0d0
+#    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_FIRE>,0d0
 #    Color		<255,100,0,255  >
 #}
 #
@@ -130,7 +132,7 @@ Monster <Flaming Bat>
 #    Level       5
 #    ExpValue	100.0
 #    Type		<MON_IDX_BAT>
-#    Attack		<MON_FLAG_FIRE>,2d8
+#    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_FIRE>,2d8
 #    Color		<255,100,0,255  >
 #}
 #
@@ -145,7 +147,7 @@ Monster <Flaming Bat>
 #    Level       5
 #    ExpValue	100.0
 #    Type		<MON_IDX_BAT>
-#    Attack		<MON_FLAG_FIRE>,2d8
+#    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_FIRE>,2d8
 #    Color		<255,100,0,255  >
 #}
 #
@@ -160,7 +162,7 @@ Monster <Flaming Bat>
 #    Level       5
 #    ExpValue	100.0
 #    Type		<MON_IDX_BAT>
-#    Attack		<MON_FLAG_FIRE>,2d8
+#    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_FIRE>,2d8
 #    Color		<255,100,0,255  >
 #}
 #
@@ -175,7 +177,7 @@ Monster <Flaming Bat>
 #    Level       5
 #    ExpValue	100.0
 #    Type		<MON_IDX_BAT>
-#    Attack		<MON_FLAG_FIRE>,2d8
+#    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_FIRE>,2d8
 #    Color		<255,100,0,255  >
 #}
 #
@@ -191,7 +193,7 @@ Monster <Flaming Bat>
 #    Level       5
 #    ExpValue	100.0
 #    Type		<MON_IDX_BAT>
-#    Attack		<MON_FLAG_FIRE>,2d8
+#    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_FIRE>,2d8
 #    Color		<255,100,0,255  >
 #}
 #
@@ -206,7 +208,7 @@ Monster <Flaming Bat>
 #    Level       5
 #    ExpValue	100.0
 #    Type		<MON_IDX_BAT>
-#    Attack		<MON_FLAG_FIRE>,2d8
+#    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_FIRE>,2d8
 #    Color		<<255,250,0,255>;<0,0,0,255>>
 #}
 
@@ -221,7 +223,7 @@ Monster <Shadow Mastiff>
     Level       15
     ExpValue	100.0
     Type		<MON_IDX_DOG>
-    Attack		<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
     Color		<<255,255,255,32>;<0,0,0,255>>
 }
 
@@ -236,7 +238,7 @@ Monster <White Harpy>
     Level       15
     ExpValue	100.0
     Type		<MON_IDX_HARPY>
-    Attack		<MON_FLAG_CLAW>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
     Color		<255,255,255,255>
 }
 
@@ -251,7 +253,7 @@ Monster <Brontosaurus>
     Level       15
     ExpValue	100.0
     Type		<MON_IDX_DINOSAUR>
-    Attack		<MON_FLAG_TRAMPLE>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,3d6
     Color		<0,81,4,255>
 }
 
@@ -266,7 +268,9 @@ Monster <Tyrannosaurus Rex>
     Level       15
     ExpValue	100.0
     Type		<MON_IDX_DINOSAUR>
-    Attack		<MON_FLAG_CLAW>,1d6,<MON_FLAG_CLAW>,1d6,<MON_FLAG_BITE>,5d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,5d8
     Color		<206,91,24,255>
 }
 
@@ -281,7 +285,7 @@ Monster <White Worm Mass>
     Level       1
     ExpValue	5.0
     Type		<MON_IDX_WORM>
-    Attack		<MON_FLAG_POISON>,1d5
+    Attack		<EFFECT_TYPE_TIMED>,<MON_FLAG_POISON>,1d5
     Color		<255,255,255,255>
     Flags       <MON_FLAG_BREED>
 }
@@ -297,7 +301,8 @@ Monster <Red Worm Mass>
     Level       1
     ExpValue	5.0
     Type		<MON_IDX_WORM>
-    Attack		<MON_FLAG_FIRE>,1d5
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_FIRE>,1d5
     Color		<255,0,0,255>
     Flags       <MON_FLAG_BREED>
 }
@@ -313,7 +318,8 @@ Monster <Blue Worm Mass>
     Level       1
     ExpValue	5.0
     Type		<MON_IDX_WORM>
-    Attack		<MON_FLAG_COLD>,1d5
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_COLD>,1d5
     Color		<0,0,255,255>
     Flags       <MON_FLAG_BREED>
 }
@@ -329,7 +335,8 @@ Monster <Yellow Worm Mass>
     Level       1
     ExpValue	5.0
     Type		<MON_IDX_WORM>
-    Attack		<MON_FLAG_POISON>,1d5
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_POISON>,1d5
     Color		<214,201,17,255>
     Flags       <MON_FLAG_BREED>
 }
@@ -345,7 +352,8 @@ Monster <Green Worm Mass>
     Level       1
     ExpValue	5.0
     Type		<MON_IDX_WORM>
-    Attack		<MON_FLAG_POISON>,1d5
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_ACID>,1d5
     Color		<0,255,0,255>
     Flags       <MON_FLAG_BREED>
 }
@@ -361,7 +369,7 @@ Monster <Huge Spider>
     Level       5
     ExpValue	100.0
     Type		<MON_IDX_SPIDER>
-    Attack		<MON_FLAG_BITE>,1d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
     Color		<0,0,0,255>
 }
 
@@ -376,7 +384,14 @@ Monster <Ancient Multi-hued Dragon>
     Level		50
     ExpValue	9000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Attack		<MON_FLAG_CLAW>,1d4,<MON_FLAG_CLAW>,1d4,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,15d8,5
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,15d8,5
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,15d8,5
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ACID>,15d8,5
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_POISON>,15d8,5
     Color		<<255,0,0,255>;<255,123,0,255>;<255,233,0,255>;<12,255,0,255>;<0,59,255,255>;<152,0,255,255>>
 }
 
@@ -391,7 +406,7 @@ Monster <Kobold>
     Level		2
     ExpValue	10.0
     Type		<MON_IDX_KOBOLD>
-    Attack		<MON_FLAG_BITE>,1d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
     Color		<170,170,170,255>
 }
 
@@ -405,7 +420,9 @@ Monster <White Dragon>
     Level		15
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
-    Attack		<MON_FLAG_CLAW>,1d4,<MON_FLAG_CLAW>,1d4,<MON_FLAG_BITE>,2d8
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
     Color		<255,255,255,255>
 }
 
@@ -419,7 +436,9 @@ Monster <Black Dragon>
     Level		20
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
-    Attack		<MON_FLAG_CLAW>,1d4,<MON_FLAG_CLAW>,1d4,<MON_FLAG_BITE>,3d6
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
     Color		<0,0,0,255>
 }
 
@@ -433,7 +452,9 @@ Monster <Green Dragon>
     Level		25
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
-    Attack		<MON_FLAG_CLAW>,1d6,<MON_FLAG_CLAW>,1d6,<MON_FLAG_BITE>,2d10
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d10
     Color		<12,255,0,255>
 }
 
@@ -447,7 +468,9 @@ Monster <Blue Dragon>
     Level		30
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
-    Attack		<MON_FLAG_CLAW>,1d6,<MON_FLAG_CLAW>,1d6,<MON_FLAG_BITE>,3d8
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
     Color		<13,7,81,255>
 }
 
@@ -461,7 +484,9 @@ Monster <Red Dragon>
     Level		35
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
-    Attack		<MON_FLAG_CLAW>,1d8,<MON_FLAG_CLAW>,1d8,<MON_FLAG_BITE>,3d10
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d8
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d8
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d10
     Color		<255,0,0,255>
 }
 
@@ -475,7 +500,7 @@ Monster <Giant Snake>
     Level		2
     ExpValue	3.0
     Type		<MON_IDX_SNAKE>
-    Attack		<MON_FLAG_BITE>,1d3
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d3
     Color		<198,142,0,255>
 }
 
@@ -489,7 +514,8 @@ Monster <Red Jelly>
     Level		1
     ExpValue	5.0
     Type		<MON_IDX_JELLY>
-    Attack		<MON_FLAG_TOUCH>,1d2
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_FIRE>,1d5
     Color		<255,0,0,255>
 }
 
@@ -503,7 +529,8 @@ Monster <Green Jelly>
     Level		2
     ExpValue	5.0
     Type		<MON_IDX_JELLY>
-    Attack		<MON_FLAG_TOUCH>,1d2
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_ACID>,1d5
     Color		<12,255,0,255>
 }
 
@@ -517,7 +544,8 @@ Monster <Yellow Mushroom Patch>
 	Level		1
 	ExpValue	2.0
 	Type		<MON_IDX_SHROOM>
-	Attack		<MON_FLAG_SPORE>,1d1,<MON_FLAG_POISON>
+	Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,1d1
+    Attack      <EFFECT_TYPE_TIMED>,<MON_FLAG_POISON>,1d5
 	Color		<255,255,0,255>
 }
 
@@ -531,7 +559,7 @@ Monster <Blue Icky Thing>
 	Level		1
 	ExpValue	4.0
 	Type		<MON_IDX_ICKY>
-	Attack		<MON_FLAG_TOUCH>,1d2
+	Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
 	Color		<0,0,255,255>
 }
 
@@ -545,7 +573,7 @@ Monster <Clear Icky Thing>
     Level		3
     ExpValue	4.0
     Type		<MON_IDX_ICKY>
-    Attack		<MON_FLAG_TOUCH>,1d2
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
     Color		<255,255,255,32>
 }
 
@@ -559,7 +587,7 @@ Monster <Opal Icky Thing>
 	Level		1
 	ExpValue	4.0
 	Type		<MON_IDX_ICKY>
-	Attack		<MON_FLAG_TOUCH>,1d2
+	Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
     Color		<<240,240,240,255>;<135,201,190,255>;<236,161,180,255>;<205,235,238,255>;<238,203,179,255>>
 }
 
@@ -573,7 +601,7 @@ Monster <Red Icky Thing>
     Level		1
     ExpValue	4.0
     Type		<MON_IDX_ICKY>
-    Attack		<MON_FLAG_TOUCH>,1d2
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
     Color		<255,0,0,255>
 }
 
@@ -587,7 +615,7 @@ Monster <Green Icky Thing>
     Level		1
     ExpValue	4.0
     Type		<MON_IDX_ICKY>
-    Attack		<MON_FLAG_TOUCH>,1d2
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
     Color		<0,255,0,255>
 }
 
@@ -601,7 +629,7 @@ Monster <White Icky Thing>
     Level		1
     ExpValue	4.0
     Type		<MON_IDX_ICKY>
-    Attack		<MON_FLAG_TOUCH>,1d2
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
     Color		<255,255,255,255>
 }
 
@@ -615,7 +643,7 @@ Monster <Yellow Icky Thing>
     Level		1
     ExpValue	4.0
     Type		<MON_IDX_ICKY>
-    Attack		<MON_FLAG_TOUCH>,1d2
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
     Color		<241,244,66,255>
 }
 
@@ -629,6 +657,6 @@ Monster <Giant Ant>
     Level		3
     ExpValue	4.0
     Type		<MON_IDX_ANT>
-    Attack		<MON_FLAG_BITE>,1d3
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d3
     Color		<140,96,1,255>
 }

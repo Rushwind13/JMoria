@@ -263,7 +263,7 @@ Item <Ring of Invisibility>
 {
     Plural        <Rings of Invisibility>
     Type        <ITEM_IDX_RING>
-    Flags       <ITEM_FLAG_INVISIBLE>
+    Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_INVISIBLE>
     Value       1000.0
     Level       20
     Weight      0.2
@@ -273,7 +273,7 @@ Item <Ring of Levitation>
 {
 Plural        <Rings of Levitation>
 Type        <ITEM_IDX_RING>
-Flags       <ITEM_FLAG_LEVITATE>
+Effect       <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LEVITATE>
 Value       300.0
 Level       20
 Weight      0.2
@@ -283,7 +283,7 @@ Item <Ring of Telepathy>
 {
 Plural        <Rings of Telepathy>
 Type        <ITEM_IDX_RING>
-Flags       <ITEM_FLAG_ESP>
+Effect       <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ESP>
 Value       300.0
 Level       20
 Weight      0.2
@@ -293,7 +293,7 @@ Item <Torch>
 {
 Plural        <Torches>
 Type        <ITEM_IDX_TORCH>
-Flags       <ITEM_FLAG_LIGHT>
+Effect       <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LIGHT>,3,5000,5000
 Value       10.0
 Level       20
 Weight     1.0
@@ -303,7 +303,7 @@ Item <Brass Lantern>
 {
 Plural        <Brass Lanterns>
 Type        <ITEM_IDX_TORCH>
-Flags       <ITEM_FLAG_LIGHT>
+Effect       <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LIGHT>,5,7500,15000
 Value       10.0
 Level       20
 Weight      2.0
@@ -313,7 +313,7 @@ Item <Flask of Oil>
 {
 Plural        <Flasks of Oil>
 Type        <ITEM_IDX_POTION>
-Flags       <ITEM_FLAG_FUEL>
+Effect       <EFFECT_FLAG_FUEL>,7500
 Value       10.0
 Level       20
 Weight     0.5
@@ -435,7 +435,7 @@ Plural        <Rings of Fire Resistance>
 Type        <ITEM_IDX_RING>
 Value       300.0
 Level       10
-Flag        <FLAG_IDX_FIRE RESISTANCE>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_RESIST>,<EFFECT_FLAG_FIRE>
 Weight      0.2
 Color        <225,225,50,255>
 }
@@ -493,9 +493,9 @@ Item <Potion of Minor Healing>
 {
     Plural        <Potions of Minor Healing>
     Type        <ITEM_IDX_POTION>
-    Effect      <ITEM_FLAG_HEAL_HP>,<1d20>
-#    Effect      <ITEM_FLAG_CURE_POISON>
-#    Effect      <ITEM_FLAG_CURE_BLINDNESS>
+    Effect      <EFFECT_TYPE_HEAL><EFFECT_FLAG_HP>,<1d20>
+    Effect     <EFFECT_TYPE_HEAL><EFFECT_FLAG_POISON>
+    Effect     <EFFECT_TYPE_HEAL><EFFECT_FLAG_BLIND>
     Value       1000.0
     Level       2
     Weight      0.2

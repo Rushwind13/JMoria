@@ -268,6 +268,7 @@ public:
 
     void Init()
     {
+        printf("expecting %d strings\n", NUM_STRINGS);
         m_StringTable = new TextEntry[NUM_STRINGS];
         int i=0;
         // Monster flags
@@ -324,6 +325,8 @@ public:
         m_StringTable[i++].Init("MON_IDX_XORN",                 MON_IDX_XORN);
         m_StringTable[i++].Init("MON_IDX_YETI",                 MON_IDX_YETI);
         m_StringTable[i++].Init("MON_IDX_MIMIC",                MON_IDX_MIMIC);
+        m_StringTable[i++].Init("MON_IDX_LURKER",               MON_IDX_LURKER);
+        m_StringTable[i++].Init("MON_IDX_COIN",                 MON_IDX_COIN);
         m_StringTable[i++].Init("MON_IDX_TOWNSFOLK",            MON_IDX_TOWNSFOLK);
 
         // Monster flags (attack types, ai types, color types)
@@ -420,6 +423,8 @@ public:
         // Item flags
         m_StringTable[i++].Init("ITEM_FLAG_CURSED",        ITEM_FLAG_CURSED);
         m_StringTable[i++].Init("ITEM_COLOR_MULTI",        ITEM_COLOR_MULTI);
+        
+        if( i != NUM_STRINGS ) printf("misconfiguration error, expected %d strings, got %d\n", NUM_STRINGS, i);
     };
     TextEntry	*m_StringTable;
 

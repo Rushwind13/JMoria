@@ -82,9 +82,9 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
         switch( keysym-> sym )
         {
             case SDLK_r:
-                printf("R)est not implemented yet.\n");
-                // g_pGame->SetState(STATE_REST);
-                // g_pGame->GetGameState()->HandleKey(keysym);
+                // printf("R)est not implemented yet.\n");
+                g_pGame->SetState(STATE_REST);
+                g_pGame->GetGameState()->HandleKey(keysym);
                 break;
             case SDLK_PERIOD:
                 // Do nothing; rest one turn

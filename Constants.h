@@ -21,7 +21,8 @@
 #define STATE_STRINGINPUT 4
 #define STATE_ENDGAME     5
 #define STATE_CLOCKSTEP   6
-#define STATE_MAX         7
+#define STATE_REST        7
+#define STATE_MAX         8
 
 // Various statuses that someone could have
 #define STATUS_INVALID		-1

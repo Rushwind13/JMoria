@@ -48,11 +48,11 @@ public:
 
 		return OnHandleKey(keysym);
 	};
-	void Update();
+    void Update(float fCurTime) { OnUpdate(fCurTime); };
 	
 protected:
-	virtual int OnHandleKey( SDL_Keysym *keysym ) =0;
-	virtual void OnUpdate()=0;
+    virtual int OnHandleKey( SDL_Keysym *keysym ) =0;
+    virtual void OnUpdate(float fCurTime)=0;
     virtual void ResetToState( int newstate ) =0;
     
     char GetAlpha(SDL_Keysym *keysym)

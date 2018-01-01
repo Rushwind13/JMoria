@@ -493,9 +493,9 @@ Item <Potion of Minor Healing>
 {
     Plural        <Potions of Minor Healing>
     Type        <ITEM_IDX_POTION>
-    Effect      <EFFECT_TYPE_HEAL><EFFECT_FLAG_HP>,<1d20>
-    Effect     <EFFECT_TYPE_HEAL><EFFECT_FLAG_POISON>
-    Effect     <EFFECT_TYPE_HEAL><EFFECT_FLAG_BLIND>
+    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>,<1d20>
+    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
     Value       1000.0
     Level       2
     Weight      0.2

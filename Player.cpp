@@ -30,6 +30,11 @@ bool CPlayer::Update(float fCurTime)
         if( m_fCurHitPoints > m_fHitPoints )
         {
             m_fCurHitPoints = m_fHitPoints;
+            m_bIsRested = true;
+        }
+        else
+        {
+            m_bIsRested = false;
         }
         m_fLastHPTime = g_pGame->GetTime();
     }
@@ -44,6 +49,7 @@ bool CPlayer::Update(float fCurTime)
         // }
         // m_fLastMPTime = g_pGame->GetTime();
     }
+    m_bIsDisturbed = false;
     DisplayStats();
     DisplayInventory(PLACEMENT_INV);
     DisplayEquipment(PLACEMENT_EQUIP);
@@ -311,6 +317,7 @@ int CPlayer::TakeDamage( float fDamage, char *szMon )
     if( (int)fDamage < (int)m_fCurHitPoints )
     {
         m_fCurHitPoints -= fDamage;
+        m_bIsDisturbed = true;
         retval = STATUS_ALIVE;
     }
     else

@@ -17,7 +17,7 @@ public:
 	CCmdState():m_vNewPos(0,0){};
     ~CCmdState() {};
 
-	void OnUpdate() {};
+	void OnUpdate(float fCurTime) {};
 
 protected:
 	virtual int OnHandleKey( SDL_Keysym *keysym );

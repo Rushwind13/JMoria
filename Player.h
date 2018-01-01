@@ -77,6 +77,8 @@ public:
     m_bHasSpawned(false),
     m_szDamage(NULL),
     m_szKilledBy(NULL),
+    m_bIsRested(true),
+    m_bIsDisturbed(false),
     m_fDamageModifier(0.0f),
     m_fToHitModifier(0.0f),
     m_fArmorClass(1.0f),
@@ -177,6 +179,9 @@ public:
     float m_fToHitModifier;
     
     char *m_szKilledBy;
+    
+    bool m_bIsRested;
+    bool m_bIsDisturbed;
 protected:
     void GainLevel();
 

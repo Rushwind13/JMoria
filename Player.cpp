@@ -24,6 +24,26 @@ void CPlayer::Init()
 
 bool CPlayer::Update(float fCurTime)
 {
+    if( g_pGame->GetTime() > m_fLastHPTime + PLAYER_TURNS_PER_HP )
+    {
+        m_fCurHitPoints++;
+        if( m_fCurHitPoints > m_fHitPoints )
+        {
+            m_fCurHitPoints = m_fHitPoints;
+        }
+        m_fLastHPTime = g_pGame->GetTime();
+    }
+
+    if( g_pGame->GetTime() > m_fLastMPTime + PLAYER_TURNS_PER_MP )
+    {
+        // TODO: bump mana by 1
+        // m_fCurMagicPoints++;
+        // if( m_fCurMagicPoints > m_fMagicPoints )
+        // {
+        //     m_fCurMagicPoints = m_fMagicPoints;
+        // }
+        // m_fLastMPTime = g_pGame->GetTime();
+    }
     DisplayStats();
     DisplayInventory(PLACEMENT_INV);
     DisplayEquipment(PLACEMENT_EQUIP);

@@ -33,7 +33,8 @@ m_pCmdState(NULL),
 m_pStringInputState(NULL),
 m_pEndGameState(NULL),
 m_pClockStepState(NULL),
-m_eCurState(STATE_INVALID)
+m_eCurState(STATE_INVALID),
+m_fGameTime(0.0f)
 {
     m_pCmdState = new CCmdState;
     m_pModState = new CModState;
@@ -42,7 +43,6 @@ m_eCurState(STATE_INVALID)
     m_pEndGameState = new CEndGameState;
     m_pClockStepState = new CClockStepState;
 #ifdef TURN_BASED
-    m_fGameTime = 0.0f;
     m_bReadyForUpdate = false;
 #endif // TURN_BASED
 };
@@ -349,6 +349,7 @@ bool CGame::Update( float fCurTime )
 //        return false;
 //    }
 #else
+    m_fGameTime += fCurTime;
     // Update the AI
     GetAIMgr()->Update(fCurTime);
 #endif // TURN_BASED

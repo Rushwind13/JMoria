@@ -4,6 +4,8 @@
 #include "JMDefs.h"
 #include "JLinkList.h"
 
+#define AI_TURNS_PER_HP 16
+
 // all the states which the game can run in
 // this modifies the event handling
 enum eBrainState
@@ -28,7 +30,7 @@ public:
 	int m_dwMoveType;
 	JFVector m_vPos;
     CLink <CAIBrain> *m_pllLink;
-	
+    
 	bool Update( float fCurTime );
 
 	bool SetRandomDest(float fCurTime);

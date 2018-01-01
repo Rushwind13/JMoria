@@ -6,6 +6,8 @@
 class CTileset;
 class CItem;
 class CMonster;
+#define PLAYER_TURNS_PER_HP 4
+#define PLAYER_TURNS_PER_MP 16
 #define PLAYER_BASE_DAMAGE "1d2"
 #define CLASS_HD_WARRIOR "1d10"
 #define PLAYER_MAX_LEVEL 11
@@ -79,6 +81,8 @@ public:
     m_fToHitModifier(0.0f),
     m_fArmorClass(1.0f),
     m_fHitPoints(0.0f),
+    m_fLastHPTime(0.0f),
+    m_fLastMPTime(0.0f),
     m_fCurHitPoints(0.0f),
     m_fExperience(0.0f),
     m_fLevel(1.0f),
@@ -180,6 +184,8 @@ protected:
     float m_fArmorClass;
     float m_fHitPoints;
     float m_fCurHitPoints;
+    float m_fLastHPTime;
+    float m_fLastMPTime;
 
     float m_fExperience;
     float m_fLevel;

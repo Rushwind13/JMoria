@@ -131,7 +131,15 @@ void CDisplayText::DrawStr(int x, int y, bool bBoundsCheck, int dwYMax, char *sz
 
 void CDisplayText::DrawBoundingBox()
 {
-	g_pGame->GetRender()->DrawTextBoundingBox( m_Rect, m_BoundingBoxColor );
+
+    if( m_dwFlags & FLAG_TEXT_BOUNDING_BOX )
+    {
+        g_pGame->GetRender()->DrawTextBoundingBox( m_Rect, m_BoundingBoxColor );
+    }
+    else
+    {
+        g_pGame->GetRender()->DrawTextBoundingBox( m_Rect, JColor(51, 128, 102, 255) );
+    }
 }
 
 void CDisplayText::Paginate()

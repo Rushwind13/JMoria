@@ -262,12 +262,17 @@ JResult CDungeon::PlaceItems(const int depth)
 {
     m_llItems = new JLinkList<CItem>;
 
-    int desired_items = int (m_fOpenFloorArea * DUNG_CFG_MONSTERS_PER_LEVEL);
+    int desired_items = int (m_fOpenFloorArea * DUNG_CFG_ITEMS_PER_LEVEL);
     printf("Possible spawn points: %0.2f  desired items: %d\n", m_fOpenFloorArea, desired_items);
 
     while( desired_items > 0 )
     {
         int which_item = ChooseItemForDepth(depth);
+        if( which_item == ITEM_IDX_INVALID )
+        {
+            printf("Couldn't find a suitable item.\n");
+            continue;
+        }
 
         CItemDef *chosen_item = m_llItemDefs->GetLink(which_item)->m_lpData;
         printf("Choosing item %d, called %s\n", which_item, chosen_item->m_szName);
@@ -302,7 +307,7 @@ JResult CDungeon::SpawnMonsters(const int depth)
         if( which_monster == MON_IDX_INVALID )
         {
             printf("Couldn't find a suitable monster.\n");
-            return JERROR();
+            continue;
         }
         CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(which_monster)->m_lpData;
         printf("Choosing monster %d, called %s\n", which_monster, chosen_monster->m_szName);
@@ -321,10 +326,11 @@ int CDungeon::ChooseItemForDepth(const int depth)
     int count = 0;
     while( count < DUNG_CFG_MAX_SPAWN_TRIES )
     {
-        which_item = Util::GetRandom(0, m_llItemDefs->length()-1);
-        CItemDef *chosen_item = m_llItemDefs->GetLink(which_item)->m_lpData;
+        int try_item = Util::GetRandom(0, m_llItemDefs->length()-1);
+        CItemDef *chosen_item = m_llItemDefs->GetLink(try_item)->m_lpData;
         if( abs(depth - chosen_item->m_dwLevel) < 5 )
         {
+            which_item = try_item;
             break;
         }
         count++;
@@ -339,10 +345,11 @@ int CDungeon::ChooseMonsterForDepth(const int depth)
     int count = 0;
     while( count < DUNG_CFG_MAX_SPAWN_TRIES )
     {
-        which_monster = Util::GetRandom(0, m_llMonsterDefs->length()-1);
-        CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(which_monster)->m_lpData;
+        int try_monster = Util::GetRandom(0, m_llMonsterDefs->length()-1);
+        CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(try_monster)->m_lpData;
         if( abs(depth - chosen_monster->m_dwLevel) < 5 )
         {
+            which_monster = try_monster;
             break;
         }
         count++;

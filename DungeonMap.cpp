@@ -421,8 +421,6 @@ bool CDungeonMap::CreateOneStep()
 
 void CDungeonMap::InitDungeonCreate( JIVector &vOrigin )
 {
-    m_stkDungeonMapCreation = new JStack<CDungeonCreationStep>;
-
     CDungeonCreationStep *step = MakeRoomStep( vOrigin, DIR_NONE, 0);
     m_stkDungeonMapCreation->Push(step);
 }

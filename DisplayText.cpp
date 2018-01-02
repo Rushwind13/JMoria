@@ -30,7 +30,6 @@ m_szText( NULL ),
 m_szDrawPtr( NULL ),
 m_vPos( m_Rect.Left(), m_Rect.Top() ),
 m_dwFlags( FLAG_TEXT_NONE ),
-m_cBoundingBoxAlpha(inAlpha),
 m_rcViewport( 0, 480, 640, 0 )
 {
 	m_szText = new char[TEXT_MAXCHARS];
@@ -40,6 +39,7 @@ m_rcViewport( 0, 480, 640, 0 )
 	m_TileSet = new CTileset("Resources/SmallText6X8.png", 6,8);
 
 	m_Color.SetColor( 0, 0, 0, 255 );
+    m_BoundingBoxColor.SetColor( 128,170,192, inAlpha );
 }
 
 bool CDisplayText::Update( float fCurTime )
@@ -73,10 +73,7 @@ void CDisplayText::Draw()
 {
 	Paginate();
 	PreDraw();
-		if( m_dwFlags & FLAG_TEXT_BOUNDING_BOX)
-		{
-			DrawBoundingBox();
-		}
+        DrawBoundingBox();
 		DrawStr( m_Rect.Left(), m_Rect.Top(), true, m_Rect.Bottom(), m_szDrawPtr );
 	PostDraw();
 }
@@ -102,7 +99,7 @@ void CDisplayText::DrawStr(int x, int y, bool bBoundsCheck, int dwYMax, char *sz
 	// Do that string parse, baby
 	while( *ptr != nul )
 	{
-		if( *ptr == ' ' ) 
+        if( *ptr == ' ' ) 
 		{
 			vScreen.x += FONT_DRAW_W;
 		}
@@ -111,7 +108,7 @@ void CDisplayText::DrawStr(int x, int y, bool bBoundsCheck, int dwYMax, char *sz
 			index = *ptr - ' ' - 1;
 
 			m_TileSet->DrawTile( index, vScreen, vSize, true );
-			
+            
 			vScreen.x += FONT_DRAW_W;
 		}
 
@@ -134,7 +131,7 @@ void CDisplayText::DrawStr(int x, int y, bool bBoundsCheck, int dwYMax, char *sz
 
 void CDisplayText::DrawBoundingBox()
 {
-	g_pGame->GetRender()->DrawTextBoundingBox( m_Rect, m_cBoundingBoxAlpha );
+	g_pGame->GetRender()->DrawTextBoundingBox( m_Rect, m_BoundingBoxColor );
 }
 
 void CDisplayText::Paginate()
@@ -209,7 +206,7 @@ void CDisplayText::DrawFormattedStr(const char *szString)
 		if( vPos.x > m_Rect.Right() )
 		{
 			ptr++;
-			
+            
 			if( m_dwFlags & FLAG_TEXT_WRAP_WHITESPACE )
 			{
 				// Find the last space

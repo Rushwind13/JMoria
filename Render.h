@@ -53,7 +53,7 @@ public:
 	virtual void	PreDrawObjects( JRect rcBounds, uint32 Texture, bool bTranslate=false, bool bInverse=false, JFVector *vTranslate=0 );
 	virtual void	PostDrawObjects();
 
-	virtual void	DrawTextBoundingBox( JRect rect, uint8 alpha=25 );
+	virtual void	DrawTextBoundingBox( JRect rect, JColor color );
 	
 	virtual void SwapBuffers();
 	SDL_Window *GetWindow() { return m_hWindow; };

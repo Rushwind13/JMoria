@@ -101,7 +101,6 @@ Monster <Flaming Bat>
      Level       1
      ExpValue	100.0
      Type		<MON_IDX_EYE>
-     Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,0d0
      Attack     <EFFECT_TYPE_TIMED>,<EFFECT_FLAG_PARALYZE>,1d20
      Color		<255,100,0,255  >
 }

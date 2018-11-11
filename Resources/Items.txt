@@ -295,7 +295,7 @@ Plural        <Torches>
 Type        <ITEM_IDX_TORCH>
 Effect       <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LIGHT>,3,5000,5000
 Value       10.0
-Level       20
+Level       1
 Weight     1.0
 Color        <225,225,50,255>
 }
@@ -305,7 +305,7 @@ Plural        <Brass Lanterns>
 Type        <ITEM_IDX_TORCH>
 Effect       <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LIGHT>,5,7500,15000
 Value       10.0
-Level       20
+Level       5
 Weight      2.0
 Color        <225,225,50,255>
 }
@@ -315,7 +315,7 @@ Plural        <Flasks of Oil>
 Type        <ITEM_IDX_POTION>
 Effect       <EFFECT_FLAG_FUEL>,7500
 Value       10.0
-Level       20
+Level       4
 Weight     0.5
 Color        <225,225,50,255>
 }
@@ -324,7 +324,7 @@ Item <Steel Helm>
 Plural        <Steel Helms>
 Type        <ITEM_IDX_HELMET>
 Value       150.0
-Level       40
+Level       10
 AC          5.0
 Weight      2.0
 Color        <225,225,50,255>
@@ -435,7 +435,7 @@ Plural        <Rings of Fire Resistance>
 Type        <ITEM_IDX_RING>
 Value       300.0
 Level       10
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_RESIST>,<EFFECT_FLAG_FIRE>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FIRE>,<EFFECT_MOD_RESIST>
 Weight      0.2
 Color        <225,225,50,255>
 }
@@ -493,9 +493,9 @@ Item <Potion of Minor Healing>
 {
     Plural        <Potions of Minor Healing>
     Type        <ITEM_IDX_POTION>
-    Effect      <EFFECT_TYPE_HEAL><EFFECT_FLAG_HP>,<1d20>
-    Effect     <EFFECT_TYPE_HEAL><EFFECT_FLAG_POISON>
-    Effect     <EFFECT_TYPE_HEAL><EFFECT_FLAG_BLIND>
+    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>,<1d20>
+    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
     Value       1000.0
     Level       2
     Weight      0.2

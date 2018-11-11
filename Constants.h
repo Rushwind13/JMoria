@@ -212,9 +212,9 @@
 #define EFFECT_TYPE_INTRINSIC     0x00000010
 #define EFFECT_TYPE_RESTORE       0x00000020
 #define EFFECT_TYPE_GAIN          0x00000040
-// #define EFFECT_TYPE_x          0x00000080
+#define EFFECT_TYPE_LOSE          0x00000080
 
-#define NUM_EFFECT_TYPES           7
+#define NUM_EFFECT_TYPES           8
 
 // Types of items
 #define ITEM_IDX_INVALID        -1
@@ -384,7 +384,7 @@ public:
         m_StringTable[i++].Init("EFFECT_MOD_IMMUNE", EFFECT_MOD_IMMUNE);
         m_StringTable[i++].Init("EFFECT_MOD_WEAK", EFFECT_MOD_WEAK );
         m_StringTable[i++].Init("EFFECT_MOD_ENCHANT", EFFECT_MOD_ENCHANT );
-        
+
         m_StringTable[i++].Init("EFFECT_TYPE_HEAL", EFFECT_TYPE_HEAL );
         m_StringTable[i++].Init("EFFECT_TYPE_HIT", EFFECT_TYPE_HIT);
         m_StringTable[i++].Init("EFFECT_TYPE_TIMED", EFFECT_TYPE_TIMED);
@@ -392,6 +392,7 @@ public:
         m_StringTable[i++].Init("EFFECT_TYPE_INTRINSIC", EFFECT_TYPE_INTRINSIC );
         m_StringTable[i++].Init("EFFECT_TYPE_RESTORE", EFFECT_TYPE_RESTORE );
         m_StringTable[i++].Init("EFFECT_TYPE_GAIN", EFFECT_TYPE_GAIN );
+        m_StringTable[i++].Init("EFFECT_TYPE_LOSE", EFFECT_TYPE_LOSE );
 
         // Item Types
         m_StringTable[i++].Init("ITEM_IDX_SWORD",        ITEM_IDX_SWORD);
@@ -423,7 +424,7 @@ public:
         // Item flags
         m_StringTable[i++].Init("ITEM_FLAG_CURSED",        ITEM_FLAG_CURSED);
         m_StringTable[i++].Init("ITEM_COLOR_MULTI",        ITEM_COLOR_MULTI);
-        
+
         if( i != NUM_STRINGS ) printf("misconfiguration error, expected %d strings, got %d\n", NUM_STRINGS, i);
     };
     TextEntry	*m_StringTable;

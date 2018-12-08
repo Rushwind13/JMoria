@@ -659,3 +659,17 @@ Monster <Giant Ant>
     Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d3
     Color		<140,96,1,255>
 }
+
+NPC <Tourist>
+{
+    Plural      <Tourists>
+    Speed       1
+    MoveType    <NPC_AI_100RANDOMMOVE>
+    HD          <16d20>
+    AC          8852445077
+    Level       1
+    ExpValue    0
+    Type        <NPC_IDX_TOURIST>
+    Attack      <FLASH>
+    Color       <242, 212, 171><242, 212, 171><242, 212, 171><242, 212, 171><252, 252, 252>
+}

@@ -29,7 +29,7 @@ public:
 	CModState();
 	~CModState() {};
 
-	virtual void OnUpdate() {};
+	virtual void OnUpdate(float fCurTime) {};
 	virtual int OnBaseHandleKey( SDL_Keysym *keysym );
 	virtual int OnHandleKey( SDL_Keysym *keysym );
 protected:

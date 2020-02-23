@@ -24,6 +24,32 @@ void CPlayer::Init()
 
 bool CPlayer::Update(float fCurTime)
 {
+    if( g_pGame->GetTime() > m_fLastHPTime + PLAYER_TURNS_PER_HP )
+    {
+        m_fCurHitPoints++;
+        if( m_fCurHitPoints > m_fHitPoints )
+        {
+            m_fCurHitPoints = m_fHitPoints;
+            m_bIsRested = true;
+        }
+        else
+        {
+            m_bIsRested = false;
+        }
+        m_fLastHPTime = g_pGame->GetTime();
+    }
+
+    if( g_pGame->GetTime() > m_fLastMPTime + PLAYER_TURNS_PER_MP )
+    {
+        // TODO: bump mana by 1
+        // m_fCurMagicPoints++;
+        // if( m_fCurMagicPoints > m_fMagicPoints )
+        // {
+        //     m_fCurMagicPoints = m_fMagicPoints;
+        // }
+        // m_fLastMPTime = g_pGame->GetTime();
+    }
+    m_bIsDisturbed = false;
     DisplayStats();
     DisplayInventory(PLACEMENT_INV);
     DisplayEquipment(PLACEMENT_EQUIP);
@@ -291,6 +317,7 @@ int CPlayer::TakeDamage( float fDamage, char *szMon )
     if( (int)fDamage < (int)m_fCurHitPoints )
     {
         m_fCurHitPoints -= fDamage;
+        m_bIsDisturbed = true;
         retval = STATUS_ALIVE;
     }
     else

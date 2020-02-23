@@ -90,7 +90,7 @@ private:
 	int m_dwFreeLines;
 	JIVector m_vPos;
 	JColor	m_Color;
-    uint8 m_cBoundingBoxAlpha;
+	JColor	m_BoundingBoxColor;
 	int m_dwFlags;
 
 	// The font

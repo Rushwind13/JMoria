@@ -3,8 +3,10 @@
 #include "DisplayText.h"
 #include "Dungeon.h"
 CMonster::CMonster()
-:m_fCurHP(0.0f),
+:m_fHP(0.0f),
+m_fCurHP(0.0f),
 m_fCurAC(0.0f),
+m_fLastHPTime(0.0f),
 m_md(NULL),
 m_pBrain(NULL),
 m_fColorChangeInterval(COLOR_CHANGE_TIMEOUT+1)
@@ -25,12 +27,13 @@ void CMonster::Init( CMonsterDef *pmd )
     m_md = pmd;
     if( pmd->m_fBaseHP != 0.0f )
     {
-        m_fCurHP = pmd->m_fBaseHP;
+        m_fHP = pmd->m_fBaseHP;
     }
     else
     {
-        m_fCurHP = Util::Roll(pmd->m_szHD);
+        m_fHP = Util::Roll(pmd->m_szHD);
     }
+    m_fCurHP = m_fHP;
     m_fCurAC = pmd->m_fBaseAC;
 }
 

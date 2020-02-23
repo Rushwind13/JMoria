@@ -47,6 +47,15 @@ m_eBrainState(BRAINSTATE_INVALID)
 
 bool CAIBrain::Update( float fCurTime )
 {
+    if( g_pGame->GetTime() >  m_pParent->m_fLastHPTime + AI_TURNS_PER_HP )
+    {
+        m_pParent->m_fCurHP++;
+        if( m_pParent->m_fCurHP > m_pParent->m_fHP )
+        {
+            m_pParent->m_fCurHP = m_pParent->m_fHP;
+        }
+        m_pParent->m_fLastHPTime = g_pGame->GetTime();
+    }
     m_pParent->m_fColorChangeInterval += fCurTime;
 	switch( m_eBrainState )
 	{

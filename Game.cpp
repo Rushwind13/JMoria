@@ -13,6 +13,7 @@
 #include "StringInputState.h"
 #include "EndGameState.h"
 #include "ClockStepState.h"
+#include "RestState.h"
 
 #include "Render.h"
 #include "DisplayText.h"
@@ -33,7 +34,9 @@ m_pCmdState(NULL),
 m_pStringInputState(NULL),
 m_pEndGameState(NULL),
 m_pClockStepState(NULL),
-m_eCurState(STATE_INVALID)
+m_pRestState(NULL),
+m_eCurState(STATE_INVALID),
+m_fGameTime(0.0f)
 {
     m_pCmdState = new CCmdState;
     m_pModState = new CModState;
@@ -41,8 +44,8 @@ m_eCurState(STATE_INVALID)
     m_pStringInputState = new CStringInputState;
     m_pEndGameState = new CEndGameState;
     m_pClockStepState = new CClockStepState;
+    m_pRestState = new CRestState;
 #ifdef TURN_BASED
-    m_fGameTime = 0.0f;
     m_bReadyForUpdate = false;
 #endif // TURN_BASED
 };
@@ -63,7 +66,7 @@ JResult CGame::Init()
 		return result;
 	}
 
-	m_pMsgsDT = new CDisplayText( JRect( 0, 0, 640, 45 ) );
+	m_pMsgsDT = new CDisplayText( JRect( 0, 0, 640, 40 ), 255 );
 	m_pMsgsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE);
 
     m_pStatsDT = new CDisplayText( JRect( 0,50,  150,480 ), 220 );
@@ -160,11 +163,17 @@ void CGame::Quit( int returncode )
         delete m_pEndGameState;
         m_pEndGameState = NULL;
     }
-
+    
     if( m_pClockStepState )
     {
         delete m_pClockStepState;
         m_pClockStepState = NULL;
+    }
+    
+    if( m_pRestState )
+    {
+        delete m_pRestState;
+        m_pRestState = NULL;
     }
 
     if( m_pMsgsDT )
@@ -237,6 +246,9 @@ void CGame::SetState( int eNewState )
           keysym->sym = SDLK_SPACE;
           m_pCurState->HandleKey(keysym);
       }
+      break;
+  case STATE_REST:
+      m_pCurState = reinterpret_cast<CStateBase *>(m_pRestState);
       break;
 	default:
         printf("Tried to change to unknown state.\n");
@@ -349,6 +361,7 @@ bool CGame::Update( float fCurTime )
 //        return false;
 //    }
 #else
+    m_fGameTime += fCurTime;
     // Update the AI
     GetAIMgr()->Update(fCurTime);
 #endif // TURN_BASED
@@ -388,6 +401,7 @@ bool CGame::Update( float fCurTime )
     {
         GetEnd()->Update(fCurTime);
     }
+    m_pCurState->Update(fCurTime);
 #endif // CLOCKSTEP
 	return true;
 }

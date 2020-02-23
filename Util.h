@@ -18,7 +18,7 @@ namespace Util
 	bool IsInWorld( JFVector vIn );
 	bool IsInWorld( JRect rcIn );
     
-    int GetTickCount();
+    unsigned int GetTickCount();
 };
 
 #endif // __UTIL_H__

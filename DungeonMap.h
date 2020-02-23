@@ -89,7 +89,9 @@ public:
 	  m_dmtTiles(NULL),
       m_llUsedSpace(NULL),
       m_stkDungeonMapCreation(NULL)
-	{};
+	{
+        m_stkDungeonMapCreation = new JStack<CDungeonCreationStep>;
+    };
 	~CDungeonMap()
     {
         Term();

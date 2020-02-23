@@ -15,7 +15,7 @@ private:
 public:
 	CNewLevelState() {};
 	
-	void OnUpdate() {};
+	void OnUpdate(float fCurTime) {};
 	
 protected:
 	virtual int OnHandleKey( SDL_Keysym *keysym );

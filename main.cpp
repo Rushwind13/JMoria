@@ -34,9 +34,9 @@ int main( int argc, char **argv )
 
 	atexit( Term );
 
-	int curTime = 0;
-    int lastTick = Util::GetTickCount();
-	int nextTime = 0;
+	unsigned int curTime = 0;
+    unsigned int lastTick = Util::GetTickCount();
+	unsigned int nextTime = 0;
 
 	bool bRetVal;
 	try

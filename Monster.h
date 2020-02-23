@@ -93,7 +93,7 @@ public:
 	float m_fExpValue; // how much XP do you get for killing this monster
 protected:
 private:
-	
+    
 	// Member Functions
 public:
 protected:
@@ -105,7 +105,9 @@ class CMonster
 {
 	// Member Variables
 public:
-	float m_fCurHP;
+	float m_fHP;
+    float m_fCurHP;
+    float m_fLastHPTime;
 	float m_fCurAC;
 //	JVector m_vPos;
     float m_fColorChangeInterval;
@@ -149,12 +151,12 @@ public:
 protected:
     void SetColor();
 private:
-	
+    
 	// Member Functions
 public:
 	CMonster();
 	~CMonster();
-	
+    
 	static JResult CreateMonster(CMonsterDef *pmd);
 	JResult SpawnMonster();
 	void PreDraw();

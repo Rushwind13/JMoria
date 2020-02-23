@@ -34,7 +34,7 @@ public:
 	~CUseState() {};
 
 
-	virtual void OnUpdate() {};
+	virtual void OnUpdate(float fCurTime) {};
 	virtual int OnBaseHandleKey( SDL_Keysym *keysym, eUseModifier whichUse );
 	virtual int OnHandleKey( SDL_Keysym *keysym );
     

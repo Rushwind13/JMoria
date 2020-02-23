@@ -119,22 +119,22 @@ JResult CRender::ResizeWindow( int width, int height )
 {
     // Setup our viewport.
     glViewport( 0, 0, ( GLint )m_dwScreenWidth, ( GLint )m_dwScreenHeight );
-	
+    
     // change to the projection matrix and set
     // our viewing volume.
     
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity( );
-	
+    
     // Set our perspective
 	glOrtho( -DUNG_WIDTH, DUNG_WIDTH, DUNG_HEIGHT, -DUNG_HEIGHT, -1, 1 );
-	
+    
 	// Make sure we're changing the model view and not the projection
     glMatrixMode( GL_MODELVIEW );
-	
+    
     // Reset The View
     glLoadIdentity( );
-	
+    
     return( JSUCCESS );
 }
 
@@ -145,7 +145,7 @@ void CRender::PreDraw()
 }
 
 void CRender::PostDraw()
-{	
+{    
 #ifdef DISPLAY_FRAMERATE
 	m_fps->Draw();
     // Gather our frames per second
@@ -188,9 +188,9 @@ void CRender::SetTileColor( JColor color )
 	glColor4ub( COLOR_EXPAND(color) );
 }
 
-void CRender::DrawTextBoundingBox( JRect rect, uint8 alpha )
+void CRender::DrawTextBoundingBox( JRect rect, JColor color )
 {
-	glColor4ub( 128,170,192, alpha );
+	glColor4ub(COLOR_EXPAND(color));
 	glDisable(GL_TEXTURE_2D);
 	glRecti(RECT_EXPAND(rect));
 	glEnable(GL_TEXTURE_2D);
@@ -209,10 +209,10 @@ bool CRender::DrawTile(const JFVector &vPos, JVector &vSize, JIVector &vTile, JF
 	float t = vTile.y * vTexels.y;
 	float s1 = (vTile.x+1) * vTexels.x;
 	float t1 = (vTile.y+1) * vTexels.y;
-	
-	
+    
+    
 
-	glTexCoord2f( s,  t  );	glVertex2f( vPos.x,	vPos.y	);	
+    glTexCoord2f( s,  t  );    glVertex2f( vPos.x,    vPos.y    );    
 	glTexCoord2f( s1, t  );	glVertex2f( vPos1.x,vPos.y	);
 	glTexCoord2f( s1, t1 );	glVertex2f( vPos1.x,vPos1.y	);
 	glTexCoord2f( s,  t1 );	glVertex2f( vPos.x,	vPos1.y	);
@@ -225,8 +225,8 @@ bool CRender::DrawTile(const JFVector &vPos, JVector &vSize, JIVector &vTile)
 	JFVector vPos1(vPos.x + vSize.x, vPos.y + vSize.y);
 
 	glDisable(GL_TEXTURE_2D);
-	
-	glVertex2f( vPos.x,	vPos.y	);	
+    
+    glVertex2f( vPos.x,    vPos.y    );    
 	glVertex2f( vPos1.x,vPos.y	);
 	glVertex2f( vPos1.x,vPos1.y	);
 	glVertex2f( vPos.x,	vPos1.y	);
@@ -263,7 +263,7 @@ void CRender::PreDrawObjects( JRect rcBounds, uint32 Texture, bool bTranslate, b
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	//glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); 
+    //glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); 
 	glEnable(GL_TEXTURE_2D);
 
 	// Always Draw in Front
@@ -312,7 +312,7 @@ JResult CRender::PostLoadTexture( uint32 &texture, void *data, int dwColorsPerPi
 	{
 		return JERROR();
 	}
-	
+    
 	// Generate The Texture
 	glTexImage2D( GL_TEXTURE_2D, 0, dwColorsPerPixel, dwImageWidth,
 		dwImageHeight, 0, dwColorDef,
@@ -320,14 +320,14 @@ JResult CRender::PostLoadTexture( uint32 &texture, void *data, int dwColorsPerPi
 
 #ifdef _DEBUG
 	GLint width;
-	glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width );	
+    glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width );    
 #endif // _DEBUG
 
 	// Linear Filtering
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	
-	
+    
+    
 	return JSUCCESS;
 }
 #endif // postload needed

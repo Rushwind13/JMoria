@@ -18,6 +18,7 @@ class CUseState;
 class CStringInputState;
 class CEndGameState;
 class CClockStepState;
+class CRestState;
 class CAIMgr;
 
 class CGame
@@ -44,6 +45,9 @@ public:
 	void Quit( int returncode );
 	void SetState( int eNewState );
 	CStateBase *GetGameState() { return m_pCurState; };
+	float GetFTime() { return m_fGameTime; }
+	int GetITime() { return (int)m_fGameTime; }
+	int GetTime() { return GetITime(); }
 
 #ifdef TURN_BASED
     void SetReadyForUpdate( const bool isReady ) { m_bReadyForUpdate = isReady; }
@@ -71,16 +75,17 @@ protected:
     CModState    *m_pModState;
     CUseState   *m_pUseState;
     CStringInputState   *m_pStringInputState;
-		CEndGameState   *m_pEndGameState;
-		CClockStepState   *m_pClockStepState;
+    CEndGameState   *m_pEndGameState;
+    CClockStepState   *m_pClockStepState;
+    CRestState   *m_pRestState;
 
 private:
 	CRender	*m_pRender;
 
 	int m_dwNextTime;
+	float m_fGameTime;
 #ifdef TURN_BASED
     bool m_bReadyForUpdate;
-    float m_fGameTime;
 #endif
 };
 #endif // __GAME_H__

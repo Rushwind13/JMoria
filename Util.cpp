@@ -108,13 +108,13 @@ bool IsInWorld( JRect rcIn )
 	return rcIn.IsInWorld();
 }
     
-int GetTickCount()
+unsigned int GetTickCount()
 {
     struct timeval tv;
     if(gettimeofday(&tv, NULL) != 0)
         return 0;
     
-    return (int)((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
+    return (unsigned int)((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
 }
 
 }

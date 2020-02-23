@@ -20,7 +20,7 @@ Keyboard commands recognized:
 * *t* - remove (take off) a piece of equipment
 * *d* - drop
 * *.* - rest one turn
-* *R* - rest indefinitely (not fully implemented)
+* *R* - rest until at full health, or until disturbed
 * *q* - quaff a potion
 * *n* - set character name
 

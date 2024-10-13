@@ -23,3 +23,8 @@ Feature: Utils
         Given I ask for a 3d6 dice roll
         When I call Roll
         Then The result is between 3 and 18
+
+    Scenario: Dice XdY
+        Given I ask for a 3d6 dice roll
+        When I call Roll 3d6
+        Then The result is between 3 and 18

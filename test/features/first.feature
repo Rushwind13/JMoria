@@ -9,7 +9,7 @@ Feature: First
         Then Wearing Pink
 
     Scenario: I can create positions
-        Given I have a JVector 1,2 in the house
+        Given I have a JVector 1,2 in the data
         Then It is a vector
         Then It is not a position
 

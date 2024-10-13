@@ -16,7 +16,7 @@ GIVEN("^It is Wednesday$")
   context->vec = JVector(0,0);
 }
 
-GIVEN("^I have a JVector ([0-9.-]+),([0-9.-]+) in the house$")
+GIVEN("^I have a JVector ([0-9.-]+),([0-9.-]+) in the data$")
 {
   REGEX_PARAM(float,x);
   REGEX_PARAM(float,y);
@@ -80,10 +80,10 @@ THEN("^the result should be ([0-9.-]+),([0-9.-]+) a JVector$")
   }
   else
   {
-      VEC_EXPAND(expected);
-      // std::cout << std::endl;
-      VEC_EXPAND(actual);
-      // std::cout << std::endl;
+      expected.printvec("expected");
+      std::cout << "\n";
+      actual.printvec("actual");
+      std::cout << "\n";
       result = false;
   }
 

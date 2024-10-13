@@ -168,6 +168,10 @@ public:
 			y /= len;
 		}
 	}
+	void printvec( const std::string label )
+	{
+		std::cout << label << ": " << x << " " << y << "  ";
+	}
 };
 
 typedef TVector2<int> JIVector;

@@ -1,4 +1,4 @@
 ./build.sh
-./bin/FirstSteps &
+./bin/AllSteps &
 sleep 1
 cucumber ./features/

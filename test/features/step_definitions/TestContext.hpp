@@ -16,8 +16,15 @@ struct TestCtx
 
   JRect area;
 
+  int lo;
+  int hi;
+  int lo_f;
+  int hi_f;
+
   // RESULTS
   JVector result_vec;
+  int result_int;
+  float result_float;
 
 };
 

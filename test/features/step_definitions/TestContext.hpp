@@ -1,6 +1,7 @@
 #ifndef __TEST_CONTEXT__
 #define __TEST_CONTEXT__
 
+#include "JMDefs.h"
 #include <JVector.h>
 #include <JRect.h>
 
@@ -25,6 +26,7 @@ struct TestCtx
   JVector result_vec;
   int result_int;
   float result_float;
+  JResult result;
 
 };
 

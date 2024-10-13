@@ -58,6 +58,13 @@ WHEN("^I call GetRandom as float$")
   context->result_float = Util::GetRandom(context->lo_f, context->hi_f);
 }
 
+WHEN("^I call Roll 3d6$")
+{
+  ScenarioScope<TestCtx> context;
+
+  context->result_int = Util::Roll("3d6");
+}
+
 WHEN("^I call Roll$")
 {
   ScenarioScope<TestCtx> context;

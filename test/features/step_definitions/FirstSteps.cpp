@@ -38,14 +38,34 @@ GIVEN("^I have a second JVector ([0-9.-]+),([0-9.-]+) in the data$")
 ##
 #######*/
 
-WHEN("^I press add_vector$")
+WHEN("^I press add_JVector$")
 {
   ScenarioScope<TestCtx> context;
 
   context->result_vec = context->vec_b + context->vec;
 }
 
+WHEN("^I press subtract_JVector$")
+{
+  ScenarioScope<TestCtx> context;
 
+  context->result_vec = context->vec - context->vec_b;
+}
+
+WHEN("^I press negate_JVector$")
+{
+  ScenarioScope<TestCtx> context;
+
+  context->result_vec = -context->vec;
+}
+
+WHEN("^I press scale_JVector ([0-9.-]+)$")
+{
+  REGEX_PARAM(float,scalar);
+  ScenarioScope<TestCtx> context;
+
+  context->result_vec = context->vec * scalar;
+}
 /*#######
 ##
 ## THEN
@@ -58,7 +78,7 @@ THEN("^Wearing Pink$")
     EXPECT_EQ(context->vec,JVector(0,0));
 }
 
-THEN("^It is (a vector|not a position)$")
+THEN("^It is (a JVector|not a position)$")
 {
     ScenarioScope<TestCtx> context;
     EXPECT_EQ(1,1);

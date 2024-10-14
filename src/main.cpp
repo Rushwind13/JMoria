@@ -8,7 +8,7 @@
 #include "Player.h"
 
 // The global game pointer
-CGame *g_pGame;
+CGame *g_pGame = NULL;
 JIVector g_vDirDelta[] = {JIVector(0,-1), JIVector(0,1), JIVector(-1,0), JIVector(1,0)};
 
 void Term(void);

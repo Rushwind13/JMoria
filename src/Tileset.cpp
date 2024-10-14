@@ -30,8 +30,11 @@ JResult CTileset::Load( const char *szName, int dwCellWidth, int dwCellHeight )
 
 #ifdef RENDER_TILESET_POSTLOAD_NEEDED
 	// Turn this image into an OpenGL texture
-	retval = g_pGame->GetRender()->PostLoadTexture( m_Texture, TextureImage->pixels, 4, bIsBMP,
+	if( g_pGame )
+	{
+		retval = g_pGame->GetRender()->PostLoadTexture( m_Texture, TextureImage->pixels, 4, bIsBMP,
 				   TextureImage->w, TextureImage->h, dwCellWidth, dwCellHeight );
+	}
 #endif
 
 	m_dwTilesPerRow = TextureImage->w / dwCellWidth; 

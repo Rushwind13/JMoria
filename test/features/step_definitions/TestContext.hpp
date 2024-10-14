@@ -1,9 +1,13 @@
 #ifndef __TEST_CONTEXT__
 #define __TEST_CONTEXT__
 
-#include "JMDefs.h"
+// #include <JMDefs.h>
 #include <JVector.h>
 #include <JRect.h>
+
+#include <TileSet.h>
+CGame *g_pGame = NULL;
+
 
 /*#######
 ##
@@ -16,6 +20,8 @@ struct TestCtx
   JVector vec_b;
 
   JRect area;
+
+  CTileset *tileset;
 
   int lo;
   int hi;

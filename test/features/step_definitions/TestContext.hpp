@@ -42,7 +42,6 @@ struct TestCtx
   int hi_f;
 
   // RESULTS
-  JVector result_vec;
   int result_int;
   float result_float;
   JResult result;

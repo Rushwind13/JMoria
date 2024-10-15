@@ -66,12 +66,6 @@ WHEN("^I press scale_JVector ([0-9.-]+)$")
 ##
 #######*/
 
-THEN("^It is (a JVector|not a position)$")
-{
-    ScenarioScope<TestCtx> context;
-    EXPECT_EQ(context->vec.IsZero(), false);
-}
-
 THEN("^the result should be ([0-9.-]+),([0-9.-]+) a JVector$")
 {
   REGEX_PARAM(float,x);

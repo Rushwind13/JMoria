@@ -169,18 +169,31 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 				char *end;
 				char *cur;
 				bool bDone = false;
-				// Attack	<MON_AI_TOUCH>, 1d2, <FLAG_POISON>
-				// type
-				begin = strchr( szLine, '<' );
-				end = strchr( szLine, '>' );
-				if( begin == NULL || end == NULL )
-				{
-					continue;
-				}
-				*end++ = NULL;
-				begin++;
-				curAttack->m_dwType = g_Constants.LookupString(begin);
-				cur = end;
+				// Attack <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2 -or-
+                // Attack <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,15d8,5
+				// effect type
+                begin = strchr( szLine, '<' );
+                end = strchr( szLine, '>' );
+                if( begin == NULL || end == NULL )
+                {
+                    continue;
+                }
+                *end++ = NULL;
+                begin++;
+                curAttack->m_dwEffect = g_Constants.LookupString(begin);
+                cur = end;
+                
+                // attack type
+                begin = strchr( szLine, '<' );
+                end = strchr( szLine, '>' );
+                if( begin == NULL || end == NULL )
+                {
+                    continue;
+                }
+                *end++ = NULL;
+                begin++;
+                curAttack->m_dwType = g_Constants.LookupString(begin);
+                cur = end;
 
 				// damage
 				begin = strchr(cur, ',');

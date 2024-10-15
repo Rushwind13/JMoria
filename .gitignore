@@ -11,3 +11,6 @@ DerivedData
 # G++
 *.o
 jmoria
+
+# Cucumber
+bin/

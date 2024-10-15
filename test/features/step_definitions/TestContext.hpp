@@ -2,11 +2,11 @@
 #define __TEST_CONTEXT__
 
 // #include <JMDefs.h>
-#include <JVector.h>
+#include <Constants.h>
 #include <JRect.h>
-
-#include <TileSet.h>
+#include <JVector.h>
 #include <TextEntry.h>
+#include <TileSet.h>
 
 CGame *g_pGame = NULL;
 
@@ -31,6 +31,9 @@ struct TestCtx
 
   // TextEntry
   TextEntry pair;
+
+  // TextEntry
+  Constants constants;
 
   int index;
   int lo;

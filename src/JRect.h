@@ -7,6 +7,8 @@
 #ifndef __JRECT_H__
 #define __JRECT_H__
 
+#include "JVector.h"
+
 #define RECT_EXPAND(r) (r).left, (r).top, (r).right, (r).bottom
 #define VIEWRECT_EXPAND(r) (r).left, (r).right, (r).top, (r).bottom
 

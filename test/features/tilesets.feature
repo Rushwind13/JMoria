@@ -8,4 +8,24 @@ Feature: Tilesets
         Given I load the player tileset
         When I call Load
         Then I get a successful result
-        And The tileset is loaded
+        And The player tileset is loaded
+
+    Scenario: Load a different tileset
+        Given I load the messages tileset
+        When I call Load
+        Then I get a successful result
+        And The messages tileset is loaded
+
+    Scenario: GetTile
+        Given I load the player tileset
+        When I call Load
+        And I ask for tile 50
+        Then I get tile 2,3 back
+        And The player tileset is loaded
+
+    Scenario: GetTile 2
+        Given I load the player tileset
+        When I call Load
+        And I ask for tile 150
+        Then I get tile 6,9 back
+        And The player tileset is loaded

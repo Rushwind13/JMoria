@@ -22,7 +22,11 @@ struct TestCtx
   JRect area;
 
   CTileset *tileset;
+  char szTileset[1024];
+  JIVector aspect;
+  JIVector vTile;
 
+  int index;
   int lo;
   int hi;
   int lo_f;

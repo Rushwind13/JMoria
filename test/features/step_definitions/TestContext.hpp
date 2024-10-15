@@ -6,6 +6,8 @@
 #include <JRect.h>
 
 #include <TileSet.h>
+#include <TextEntry.h>
+
 CGame *g_pGame = NULL;
 
 
@@ -21,10 +23,14 @@ struct TestCtx
 
   JRect area;
 
+  // Tileset
   CTileset *tileset;
   char szTileset[1024];
   JIVector aspect;
   JIVector vTile;
+
+  // TextEntry
+  TextEntry pair;
 
   int index;
   int lo;

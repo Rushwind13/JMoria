@@ -39,3 +39,17 @@ Feature: Rects
     Scenario: Rect is invalid vert
         Given I have a JRect 50,50,50,-1 in the data
         Then The rect is not in world
+
+    Scenario: Rect SetWidth
+        Given I have a JRect 10,10,10,10 in the data
+        When I call SetWidth 5,true
+        Then The rect corners are now 10,10,15,10
+        And The rect width is 5
+        And The rect is in world
+
+    Scenario: Rect SetWidth
+        Given I have a JRect 10,10,10,10 in the data
+        When I call SetWidth 5,false
+        Then The rect corners are now 5,10,10,10
+        And The rect width is 5
+        And The rect is in world

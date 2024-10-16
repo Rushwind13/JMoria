@@ -51,21 +51,20 @@ JResult CTileset::Load( const char *szName, int dwCellWidth, int dwCellHeight )
 		SDL_FreeSurface(TextureImage);
 	}
 #endif
-
 	return retval;
 }
 
 
 bool CTileset::DrawTile( int dwIndex, const JFVector &vPos, JVector &vSize, bool bIsTextured )
-{
+{	
 	/*if( !IsInWorld( vPos ) )
 	{
 		return false;
-	}/**/
-
+	}/**/	
+	
 	JIVector vTile;
 	GetTile( dwIndex, vTile );
-
+	
 	//if( bIsTextured )
 	{
 		g_pGame->GetRender()->DrawTile( vPos, vSize, vTile, m_vTexels );
@@ -74,8 +73,6 @@ bool CTileset::DrawTile( int dwIndex, const JFVector &vPos, JVector &vSize, bool
 	//{
 	//	g_pGame->GetRender()->DrawTile( vPos, vSize, vTile );
 	//}
-
-
 	return true;
 }
 

@@ -101,7 +101,6 @@ public:
 		{
 			return NULL;
 		}
-
 		// casting to int is *absolutely* the wrong way to do this. fix this once it inevitably breaks.
 		return (m_Tiles + ((int)vPos.y * DUNG_WIDTH) + (int)vPos.x ); // going to have to work in offsets, too, if the dungeon's bigger than the screen. --Jimbo
 	};

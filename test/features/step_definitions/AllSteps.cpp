@@ -1,4 +1,5 @@
 #include "FirstSteps.cpp"
+#include "RectSteps.cpp"
 #include "StringTableSteps.cpp"
 #include "TextEntrySteps.cpp"
 #include "TilesetSteps.cpp"

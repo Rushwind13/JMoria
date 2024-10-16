@@ -24,7 +24,7 @@ GIVEN("^I load the messages tileset$")
   ScenarioScope<TestCtx> context;
   context->tileset = new CTileset();
   memset(context->szTileset, 0, 1024);
-  strcpy(context->szTileset,"../../JMoria/Resources/SmallText6x8.png");
+  strcpy(context->szTileset,"../../JMoria/Resources/SmallText6X8.png");
   context->aspect.Init(6,8);
 }
 

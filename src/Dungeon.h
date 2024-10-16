@@ -18,7 +18,7 @@
 #define DUNG_TILESET CTileset("Resources/Courier.png", 32, 32 )
 #define DUNG_ASPECT vSize(1.0f,1.0f)
 #else
-#define DUNG_TILESET CTileset("Resources/SmallText6x8.png", 6,8 )
+#define DUNG_TILESET CTileset("Resources/SmallText6X8.png", 6,8 )
 #define DUNG_ASPECT vSize(0.75f,1.0f)
 #endif
 
@@ -88,18 +88,19 @@ public:
 
 	CDungeonTile *GetITile( JIVector &vPos )
 	{
-		/*if( !IsInWorld(vPos) )
+		if( !vPos.IsInWorld() )
 		{
 			return NULL;
-		}/**/
+		}
 		return (m_Tiles + (vPos.y * DUNG_WIDTH) + vPos.x ); // going to have to work in offsets, too, if the dungeon's bigger than the screen. --Jimbo
 	};
 	CDungeonTile *GetTile( const JVector &vPos )
 	{
-		/*if( !IsInWorld(vPos) )
+		JIVector checkPos((int)vPos.x, (int)vPos.y);
+		if( !checkPos.IsInWorld() )
 		{
 			return NULL;
-		}/**/
+		}
 
 		// casting to int is *absolutely* the wrong way to do this. fix this once it inevitably breaks.
 		return (m_Tiles + ((int)vPos.y * DUNG_WIDTH) + (int)vPos.x ); // going to have to work in offsets, too, if the dungeon's bigger than the screen. --Jimbo

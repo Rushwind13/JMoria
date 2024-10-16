@@ -1,7 +1,7 @@
 CC = g++
 CC_FLAGS = -w
 LD_FLAGS = -L/lib/x86_64-linux-gnu -lGL -lSDL2 -lSDL2_image
-TEST_CC_FLAGS = -I../JMoria/src -std=c++11 -Wno-comment -Wno-delete-non-virtual-dtor
+TEST_CC_FLAGS = -I../JMoria/src -std=c++14 -Wno-comment -Wno-delete-non-virtual-dtor
 TEST_LD_FLAGS = -L/usr/local/lib -lcucumber-cpp -lc++ -lboost_program_options -lboost_regex -lboost_filesystem -lboost_system -lgtest
 OS := $(shell uname -s)
 ifeq ($(OS),Darwin)

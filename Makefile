@@ -16,10 +16,10 @@ TEST_SOURCES = test/features/step_definitions/AllSteps.cpp
 TEST_OBJECTS = $(TEST_SOURCES:.cpp=.o)
 
 $(EXEC): $(OBJECTS)
-	$(CC) $(LD_FLAGS) $(OBJECTS) -o $(EXEC)
+	$(CC) $(OBJECTS) $(LD_FLAGS) -o $(EXEC)
 
 $(TEST_EXEC): $(TEST_OBJECTS) $(filter-out src/main.o, $(OBJECTS))
-	$(CC) $(TEST_LD_FLAGS) $(LD_FLAGS) $(TEST_OBJECTS) $(filter-out src/main.o, $(OBJECTS)) -o $(TEST_EXEC)
+	$(CC) $(TEST_OBJECTS) $(filter-out src/main.o, $(OBJECTS)) $(TEST_LD_FLAGS) $(LD_FLAGS) -o $(TEST_EXEC)
 
 test: $(TEST_EXEC)
 

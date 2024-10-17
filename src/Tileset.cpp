@@ -35,9 +35,13 @@ JResult CTileset::Load( const char *szName, int dwCellWidth, int dwCellHeight )
 		retval = g_pGame->GetRender()->PostLoadTexture( m_Texture, TextureImage->pixels, 4, bIsBMP,
 				   TextureImage->w, TextureImage->h, dwCellWidth, dwCellHeight );
 	}
+	else
+	{
+		printf("g_pGame not initialized yet, when loading %s -- m_Texture not created.\n", szName);
+	}
 #endif
 
-	m_dwTilesPerRow = TextureImage->w / dwCellWidth; 
+	m_dwTilesPerRow = TextureImage->w / dwCellWidth;
 	m_vTexels.x	= 1.0f / (float)m_dwTilesPerRow;
 	m_vTexels.y	= (float)dwCellHeight / (float)TextureImage->h;
 
@@ -47,7 +51,6 @@ JResult CTileset::Load( const char *szName, int dwCellWidth, int dwCellHeight )
 		SDL_FreeSurface(TextureImage);
 	}
 #endif
-	
 	return retval;
 }
 
@@ -70,8 +73,6 @@ bool CTileset::DrawTile( int dwIndex, const JFVector &vPos, JVector &vSize, bool
 	//{
 	//	g_pGame->GetRender()->DrawTile( vPos, vSize, vTile );
 	//}
-	
-	
 	return true;
 }
 

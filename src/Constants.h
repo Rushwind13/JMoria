@@ -435,7 +435,7 @@ public:
     };
     TextEntry	*m_StringTable;
 
-    int LookupString(char *szIn)
+    int LookupString(const char *szIn)
     {
         int i;
         for( i=0; i < NUM_STRINGS; i++ )

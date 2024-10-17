@@ -7,6 +7,8 @@
 #ifndef __JRECT_H__
 #define __JRECT_H__
 
+#include "JVector.h"
+
 #define RECT_EXPAND(r) (r).left, (r).top, (r).right, (r).bottom
 #define VIEWRECT_EXPAND(r) (r).left, (r).right, (r).top, (r).bottom
 
@@ -47,13 +49,12 @@ public:
 
 	bool IsInWorld()
     {
-        if( left < 0 || right > DUNG_WIDTH
-           || top < 0 || bottom > DUNG_HEIGHT )
+        if( left < 0 || right >= DUNG_WIDTH
+           || top < 0 || bottom >= DUNG_HEIGHT )
         {
             return false;
         }
-        if( left > DUNG_WIDTH || right < 0
-           || top > DUNG_HEIGHT || bottom < 0  )
+        if( left > right || top > bottom )
         {
             printf("JRect has bad memory allocation: <%d %d, %d %d>\n", left, top, right, bottom);
             return false;

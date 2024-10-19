@@ -11,7 +11,7 @@
 #include "FileParse.h"
 #include "DisplayText.h"
 
-unsigned char TileIDs[DUNG_IDX_MAX+1]			= ".#+'<<>>:@";
+unsigned char TileIDs[DUNG_IDX_MAX+1]			= ".#+'<<>>:#@";
 int			  ModifiedTileTypes[DUNG_IDX_MAX+1] =
 {
 	DUNG_IDX_INVALID,
@@ -48,6 +48,7 @@ void CDungeon::Init()
 			m_dtdlist[i].m_Color.SetColor(192,192,192,255);
 			break;
 		case DUNG_IDX_WALL:
+		case DUNG_IDX_SECRET_DOOR:
 			m_dtdlist[i].m_Color.SetColor(64,64,64,255);
 			break;
 		case DUNG_IDX_DOOR:
@@ -715,7 +716,17 @@ bool CDungeon::IsOpenable( JVector &vPos )
 	}
 
 	// If you get here, the square was unoccupied. Now check for running into inanimates...
-	return( curTile->m_dtd->m_dwType == DUNG_IDX_DOOR);
+    if( curTile->m_dtd->m_dwType == DUNG_IDX_SECRET_DOOR)
+    {
+        if( Util::GetRandom(1,100) > 25 )
+        {
+            g_pGame->GetMsgs()->Printf("You have found a secret door!\n");
+            curTile->m_dtd->m_dwType = DUNG_IDX_DOOR;
+            return true;
+        }
+        return false;
+    }
+	return( curTile->m_dtd->m_dwType == DUNG_IDX_DOOR );
 }
 
 bool CDungeon::IsTunnelable( JVector &vPos )

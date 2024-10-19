@@ -49,9 +49,10 @@
 #define DUNG_IDX_DOWNSTAIRS      6
 #define DUNG_IDX_LONG_DOWNSTAIRS 7
 #define DUNG_IDX_RUBBLE		     8
+#define DUNG_IDX_SECRET_DOOR     9
 //JUNK,
-#define DUNG_IDX_PLAYER		     9
-#define DUNG_IDX_MAX		    10
+#define DUNG_IDX_PLAYER		    10
+#define DUNG_IDX_MAX		    11
 
 // Dungeon Tile flags
 #define DUNG_FLAG_LIT		0x00000001

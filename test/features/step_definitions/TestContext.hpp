@@ -3,6 +3,7 @@
 
 // #include <JMDefs.h>
 #include <Constants.h>
+#include <DungeonMap.h>
 #include <JRect.h>
 #include <JVector.h>
 #include <TextEntry.h>
@@ -34,6 +35,9 @@ struct TestCtx
 
   // TextEntry
   Constants constants;
+
+  // DungeonMap
+  CDungeonMap map;
 
   int index;
   int lo;

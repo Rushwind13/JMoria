@@ -141,23 +141,22 @@ public:
 		}
 		return -1;
 	};
-protected:
+public:
 	int CheckArea( const JRect *rcCheck, const int direction, bool bIsHallway );
     bool CheckArea( CDungeonCreationStep *pStep );
-    bool CheckInterior( CDungeonCreationStep *pStep );
-    bool CheckBorder( CDungeonCreationStep *pStep );
+    bool CheckInterior( const JRect rcCheck );
+    bool CheckBorder( const JRect rcCheck, int direction );
 
-	void FillArea( const Uint8 type, JRect *rcFill, const int direction, JIVector *vOrigin, bool bIsHallway );
+	void FillArea( const Uint8 type, JRect *rcFill, const int direction, bool bIsHallway );
     void FillArea( const CDungeonCreationStep *pStep );
+	void AddDoor(JIVector vHall, int direction );
 	
 	void MakeRoom( const JIVector *vPos, const int direction, const int recurdepth );
 	void MakeHall( const JIVector *vPos, const int direction, const int recurdepth );
 
 	CDungeonMapTile	*GetTile(JIVector vPos)
 	{
-		if(	m_dmtTiles == NULL 
-			||	vPos.x < 0 || vPos.y < 0
-			|| vPos.y > DUNG_HEIGHT || vPos.x > DUNG_WIDTH )
+		if(	m_dmtTiles == NULL || !vPos.IsInWorld() )
 		{
 			return NULL;
 		}

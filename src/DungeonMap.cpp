@@ -166,7 +166,7 @@ bool CDungeonMap::CheckBorder( const JRect area, int direction )
             printf("border failed: <%d %d, %d %d>, top=0\n", RECT_EXPAND(rcCheck));
 			return false;
 		}
-		else if( rcCheck.bottom >= DUNG_HEIGHT )
+		else if( rcCheck.bottom >= DUNG_HEIGHT-1 )
 		{
 			printf("border failed: <%d %d, %d %d>, bottom=max\n", RECT_EXPAND(rcCheck));
 			return false;
@@ -176,7 +176,7 @@ bool CDungeonMap::CheckBorder( const JRect area, int direction )
 			printf("border failed: <%d %d, %d %d>, left=0\n", RECT_EXPAND(rcCheck));
 			return false;
 		}
-		else if( rcCheck.right >= DUNG_WIDTH )
+		else if( rcCheck.right >= DUNG_WIDTH-1 )
 		{
 			printf("border failed: <%d %d, %d %d>, right=max\n", RECT_EXPAND(rcCheck));
 			return false;
@@ -435,6 +435,8 @@ void CDungeonMap::AddDoor(const JIVector vHall, int direction )
     // ...X... need to turn X into a DOOR type
     // ...####
     // ...#
+    const int normal = 80;
+    const int open = 95;
     JIVector vDoor(vHall.x, vHall.y);
     switch(direction)
      {
@@ -459,11 +461,11 @@ void CDungeonMap::AddDoor(const JIVector vHall, int direction )
     // What kind of door?
     int door_type = DUNG_IDX_DOOR;
     int roll = Util::Roll("1d100");
-    if( roll <= 80 )
+    if( roll <= normal )
     {
         door_type=DUNG_IDX_DOOR;
     }
-    else if( roll <= 95 )
+    else if( roll <= open )
     {
         printf("Added an open door.\n");
         door_type = DUNG_IDX_OPEN_DOOR;

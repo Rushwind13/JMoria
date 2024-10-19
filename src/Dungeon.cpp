@@ -14,14 +14,17 @@
 unsigned char TileIDs[DUNG_IDX_MAX+1]			= ".#+'<<>>:#@";
 int			  ModifiedTileTypes[DUNG_IDX_MAX+1] =
 {
-	DUNG_IDX_INVALID,
-	DUNG_IDX_INVALID,
-	DUNG_IDX_OPEN_DOOR,
-	DUNG_IDX_DOOR,
-	DUNG_IDX_INVALID,
-	DUNG_IDX_INVALID,
-	DUNG_IDX_FLOOR,
-	DUNG_IDX_INVALID
+	DUNG_IDX_INVALID,   // floor
+	DUNG_IDX_INVALID,   // wall
+	DUNG_IDX_OPEN_DOOR, // door
+	DUNG_IDX_DOOR,      // open door
+	DUNG_IDX_INVALID,   // long stairs up
+	DUNG_IDX_INVALID,   // stairs up
+	DUNG_IDX_INVALID,   // long stairs down
+	DUNG_IDX_INVALID,   // stairs down
+	DUNG_IDX_FLOOR,     // rubble
+    DUNG_IDX_DOOR,      // secret door
+	DUNG_IDX_INVALID    // hooman
 };
 //extern Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH];
 
@@ -628,6 +631,7 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
 	{
 	case DUNG_IDX_WALL:
 	case DUNG_IDX_DOOR:
+	case DUNG_IDX_SECRET_DOOR:
 	case DUNG_IDX_RUBBLE:
 		return type;
 		break;
@@ -721,7 +725,7 @@ bool CDungeon::IsOpenable( JVector &vPos )
         if( Util::GetRandom(1,100) > 25 )
         {
             g_pGame->GetMsgs()->Printf("You have found a secret door!\n");
-            curTile->m_dtd->m_dwType = DUNG_IDX_DOOR;
+		    g_pGame->GetDungeon()->Modify(curTile->m_vPos);
             return true;
         }
         return false;

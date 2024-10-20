@@ -176,6 +176,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
                 end = strchr( szLine, '>' );
                 if( begin == NULL || end == NULL )
                 {
+                    printf("error parsing attack: effect type not found %s\n", cur);
                     continue;
                 }
                 *end++ = NULL;
@@ -184,10 +185,11 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
                 cur = end;
                 
                 // attack type
-                begin = strchr( szLine, '<' );
-                end = strchr( szLine, '>' );
+                begin = strchr( cur, '<' );
+                end = strchr( cur, '>' );
                 if( begin == NULL || end == NULL )
                 {
+                    printf("error parsing attack: attack type not found %s\n", cur);
                     continue;
                 }
                 *end++ = NULL;
@@ -195,9 +197,28 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
                 curAttack->m_dwType = g_Constants.LookupString(begin);
                 cur = end;
 
+                // effect flag (optional)
+				if( !bDone )
+				{
+					cur = end;
+					// effect
+					begin = strchr( cur, '<' );
+					end = strchr( cur, '>' );
+					if( begin != NULL && end != NULL )
+					{
+                        *end = NULL;
+                        begin++;
+                        curAttack->m_dwEffect = g_Constants.LookupString(begin);
+					}
+				}
+
 				// damage
 				begin = strchr(cur, ',');
-				if( begin == NULL ) continue;
+				if( begin == NULL )
+                {
+                    printf("error parsing attack: damage not found %s\n", cur);
+                    continue;
+                }
 				begin++;
 				// from here on out, you've got enough info to do this.
 				end = strchr(begin, ',');
@@ -214,22 +235,6 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 				curAttack->m_szDamage = new char[strlen(cur)+1];
 				strcpy( curAttack->m_szDamage, cur );
 
-				if( !bDone )
-				{
-					cur = end;
-					// effect
-					begin = strchr( cur, '<' );
-					end = strchr( cur, '>' );
-					if( begin == NULL || end == NULL )
-					{
-						continue;
-					}
-					*end = NULL;
-					begin++;
-					curAttack->m_dwEffect = g_Constants.LookupString(begin);
-				}
-
-
 				// store it
 				mdIn.m_llAttacks->Add(curAttack);
 			}
@@ -240,6 +245,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
                 {
                     // multi-hued
                     // <<rgb1>,<rgb2>,...,<rgbn>>
+                    printf("Found multi-hued monster: %s\n", color);
                     mdIn.m_Colors = ParseColors(color);
 
                     mdIn.m_dwFlags |= MON_COLOR_MULTI;
@@ -346,6 +352,10 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
             {
                 GetValue( szLine, idIn.m_fValue );
             }
+            else if( strncasecmp( szLine, "weight", 5 ) == 0 )
+            {
+                GetValue( szLine, idIn.m_fWeight );
+            }
             else if( strncasecmp( szLine, "type", 4 ) == 0 )
             {
                 // TODO: Add validation that this is ITEM_IDX_ and not...
@@ -370,9 +380,10 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
                 {
                     // multi-hued
                     // <<rgb1>,<rgb2>,...,<rgbn>>
+                    printf("Found multi-hued item: %s\n", color);
                     idIn.m_Colors = ParseColors(color);
 
-                    idIn.m_dwFlags |= MON_COLOR_MULTI;
+                    idIn.m_dwFlags |= ITEM_COLOR_MULTI;
                 }
                 else
                 {

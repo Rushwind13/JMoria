@@ -14,17 +14,15 @@
 unsigned char TileIDs[DUNG_IDX_MAX+1]			= ".#+'<<>>:#@";
 int			  ModifiedTileTypes[DUNG_IDX_MAX+1] =
 {
-	DUNG_IDX_INVALID,   // floor
-	DUNG_IDX_INVALID,   // wall
-	DUNG_IDX_OPEN_DOOR, // door
-	DUNG_IDX_DOOR,      // open door
-	DUNG_IDX_INVALID,   // long stairs up
-	DUNG_IDX_INVALID,   // stairs up
-	DUNG_IDX_INVALID,   // long stairs down
-	DUNG_IDX_INVALID,   // stairs down
-	DUNG_IDX_FLOOR,     // rubble
-    DUNG_IDX_DOOR,      // secret door
-	DUNG_IDX_INVALID    // hooman
+	DUNG_IDX_INVALID,
+	DUNG_IDX_INVALID,
+	DUNG_IDX_OPEN_DOOR,
+	DUNG_IDX_DOOR,
+	DUNG_IDX_INVALID,
+	DUNG_IDX_INVALID,
+	DUNG_IDX_FLOOR,
+    DUNG_IDX_DOOR,
+	DUNG_IDX_INVALID
 };
 //extern Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH];
 
@@ -409,6 +407,15 @@ bool CDungeon::Tick( const int dwClock )
 
 bool CDungeon::Update(float fCurTime)
 {
+    CLink <CItem> *pLink = m_llItems->GetHead();
+    CItem *pItem;
+
+    while(pLink != NULL)
+    {
+        pItem = pLink->m_lpData;
+        pItem->Update(fCurTime);
+        pLink = m_llItems->GetNext(pLink);
+    }
 	return true;
 }
 
@@ -631,7 +638,7 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
 	{
 	case DUNG_IDX_WALL:
 	case DUNG_IDX_DOOR:
-	case DUNG_IDX_SECRET_DOOR:
+    case DUNG_IDX_SECRET_DOOR:
 	case DUNG_IDX_RUBBLE:
 		return type;
 		break;
@@ -725,12 +732,11 @@ bool CDungeon::IsOpenable( JVector &vPos )
         if( Util::GetRandom(1,100) > 25 )
         {
             g_pGame->GetMsgs()->Printf("You have found a secret door!\n");
-		    g_pGame->GetDungeon()->Modify(curTile->m_vPos);
-            return true;
+            g_pGame->GetDungeon()->Modify(curTile->m_vPos);           return true;
         }
         return false;
     }
-	return( curTile->m_dtd->m_dwType == DUNG_IDX_DOOR );
+    return( curTile->m_dtd->m_dwType == DUNG_IDX_DOOR );
 }
 
 bool CDungeon::IsTunnelable( JVector &vPos )

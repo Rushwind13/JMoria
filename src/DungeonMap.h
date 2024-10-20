@@ -122,7 +122,7 @@ public:
     void GetRoomRect(JRect &rcRoom, const int direction);
     void GetHallRect(JRect &rcHall, const int direction);
     JIVector &GetWallOrigin(CDungeonCreationStep *pStep, const int direction);
-    JIVector &GetHallOrigin(CDungeonCreationStep *pStep);
+    JIVector &GetHallOrigin(CDungeonCreationStep *pStep, int step_type = DUNG_CREATE_STEP_MAKE_ROOM);
     
 	Uint8 GetdtdIndex( JIVector vPos )
 	{ 
@@ -150,6 +150,7 @@ public:
 	void FillArea( const Uint8 type, JRect *rcFill, const int direction, bool bIsHallway );
     void FillArea( const CDungeonCreationStep *pStep );
 	void AddDoor(JIVector vHall, int direction );
+	bool IsDoor( const int type );
 	
 	void MakeRoom( const JIVector *vPos, const int direction, const int recurdepth );
 	void MakeHall( const JIVector *vPos, const int direction, const int recurdepth );

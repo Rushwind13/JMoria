@@ -28,6 +28,7 @@ class CItemDef
     m_fBonusToDamage(0.0f),
     m_dwLevel(0),
     m_fValue(0.0f),
+    m_fWeight(0.0f),
     m_dwFlags(0),
     m_dwIndex(ITEM_IDX_INVALID),
     m_dwBaseHP(0.0f)
@@ -73,6 +74,7 @@ class CItemDef
     float m_fBonusToDamage;
     int m_dwLevel;
     float m_fValue;
+    float m_fWeight;
 	int m_dwFlags;
 	int m_dwIndex; // ITEM_IDX_SWORD, ITEM_IDX_WAND, etc.
 	int m_dwBaseHP; // for busting down walls, disarming traps, etc.
@@ -113,6 +115,7 @@ public:
     static JResult CreateItem( CItemDef *pid );
     JResult SpawnItem();
     
+    bool Update( float fCurTime );
     void PreDraw();
     void Draw();
     void PostDraw();

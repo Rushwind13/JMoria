@@ -293,7 +293,7 @@ void CDungeonMap::FillArea( const Uint8 type, JRect *rcFill, const int direction
 	if( type != DUNG_IDX_WALL )
 	{
         printf("filled: <%d %d, %d %d>\nlit <%d %d, %d %d>\n", RECT_EXPAND(rcLocal), RECT_EXPAND(rcEdges));
-		
+
         // L and R sides, going over-by-one in each direction
 		for( y=rcEdges.top; y <= rcEdges.bottom; y++ )
 		{
@@ -325,7 +325,6 @@ void CDungeonMap::FillArea( const Uint8 type, JRect *rcFill, const int direction
 	}
 	else if( type != DUNG_IDX_WALL )
 	{
-       
 		// GetTile(*vOrigin)->SetType(DUNG_IDX_RUBBLE);
 		GetTile(vOrigin)->SetType(DUNG_IDX_FLOOR);
 	}
@@ -492,7 +491,7 @@ void CDungeonMap::AddDoor(const JIVector vHall, int direction )
         printf("Added an open door.\n");
         door_type = DUNG_IDX_OPEN_DOOR;
     }
-    else 
+    else
     {
         printf("Added a secret door.\n");
         door_type = DUNG_IDX_SECRET_DOOR;

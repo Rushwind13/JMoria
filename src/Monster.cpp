@@ -9,7 +9,8 @@ m_fCurAC(0.0f),
 m_fLastHPTime(0.0f),
 m_md(NULL),
 m_pBrain(NULL),
-m_fColorChangeInterval(COLOR_CHANGE_TIMEOUT+1)
+m_fColorChangeInterval(COLOR_CHANGE_TIMEOUT+1),
+m_fBreedInterval(BREED_TIMEOUT+1)
 {
 	m_pBrain = new CAIBrain;
 }
@@ -141,6 +142,18 @@ int CMonster::TakeDamage( float fDamage )
 	printf( "Remaining HP: %.2f \n", m_fCurHP );
 
 	return retval;
+}
+
+// draw routines
+void CMonster::Breed()
+{
+    if( m_fBreedInterval < BREED_TIMEOUT ) return;
+
+    if( (m_md->m_dwFlags & MON_FLAG_BREED) == MON_FLAG_BREED )
+    {
+        // Spawn a new copy
+    }
+    m_fBreedInterval = 0.0f;
 }
 
 // draw routines

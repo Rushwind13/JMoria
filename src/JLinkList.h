@@ -219,14 +219,23 @@ public:
 		return pLink->prev;
 	};
     
+    // Retrieve the Nth entry in the list, or correct position to insert
     CLink <T> *GetLink( int which_link, bool bForceValid=true )
     {
         int count = 0;
         CLink <T> *curr_link = GetHead();
+
+         // empty list; no entry for you
         if(curr_link == NULL) return NULL;
-        while( count < which_link )
+
+        // You can't iterate more than N times to find Nth entry
+        while( count <= which_link )
         {
-            if( curr_link->next == NULL )
+            // Found the desired entry
+            if(curr_link->m_dwIndex == which_link ) return curr_link;
+            
+            // You've passed the target index, or hit end of list
+            if( curr_link->m_dwIndex > which_link || curr_link->next == NULL )
             {
                 if( bForceValid )
                 {
@@ -237,9 +246,12 @@ public:
                     return NULL;
                 }
             }
+
+            // try again
             curr_link = GetNext(curr_link);
             count++;
         }
+        // iterated N times and couldn't find it.
         return curr_link;
     }
     int length() { return m_iNumElements; }

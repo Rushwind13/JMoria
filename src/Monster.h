@@ -6,6 +6,7 @@
 #include "AIMgr.h"
 
 #define COLOR_CHANGE_TIMEOUT 0.266f
+#define BREED_TIMEOUT 0.75f
 
 class CAttack
 {
@@ -111,6 +112,7 @@ public:
 	float m_fCurAC;
 //	JVector m_vPos;
     float m_fColorChangeInterval;
+    float m_fBreedInterval;
 	CMonsterDef *m_md;
 	CLink <CMonster> *m_pllLink;
 	CAIBrain *m_pBrain; // this is the place to get info for the AI.

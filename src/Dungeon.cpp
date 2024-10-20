@@ -11,7 +11,7 @@
 #include "FileParse.h"
 #include "DisplayText.h"
 
-unsigned char TileIDs[DUNG_IDX_MAX+1]			= ".#+'<<>>:@";
+unsigned char TileIDs[DUNG_IDX_MAX+1]			= ".#+'<<>>:#@";
 int			  ModifiedTileTypes[DUNG_IDX_MAX+1] =
 {
 	DUNG_IDX_INVALID,
@@ -21,6 +21,7 @@ int			  ModifiedTileTypes[DUNG_IDX_MAX+1] =
 	DUNG_IDX_INVALID,
 	DUNG_IDX_INVALID,
 	DUNG_IDX_FLOOR,
+    DUNG_IDX_DOOR,
 	DUNG_IDX_INVALID
 };
 //extern Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH];
@@ -48,6 +49,7 @@ void CDungeon::Init()
 			m_dtdlist[i].m_Color.SetColor(192,192,192,255);
 			break;
 		case DUNG_IDX_WALL:
+		case DUNG_IDX_SECRET_DOOR:
 			m_dtdlist[i].m_Color.SetColor(64,64,64,255);
 			break;
 		case DUNG_IDX_DOOR:
@@ -405,6 +407,15 @@ bool CDungeon::Tick( const int dwClock )
 
 bool CDungeon::Update(float fCurTime)
 {
+    CLink <CItem> *pLink = m_llItems->GetHead();
+    CItem *pItem;
+
+    while(pLink != NULL)
+    {
+        pItem = pLink->m_lpData;
+        pItem->Update(fCurTime);
+        pLink = m_llItems->GetNext(pLink);
+    }
 	return true;
 }
 
@@ -627,6 +638,7 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
 	{
 	case DUNG_IDX_WALL:
 	case DUNG_IDX_DOOR:
+    case DUNG_IDX_SECRET_DOOR:
 	case DUNG_IDX_RUBBLE:
 		return type;
 		break;
@@ -715,7 +727,16 @@ bool CDungeon::IsOpenable( JVector &vPos )
 	}
 
 	// If you get here, the square was unoccupied. Now check for running into inanimates...
-	return( curTile->m_dtd->m_dwType == DUNG_IDX_DOOR);
+    if( curTile->m_dtd->m_dwType == DUNG_IDX_SECRET_DOOR)
+    {
+        if( Util::GetRandom(1,100) > 25 )
+        {
+            g_pGame->GetMsgs()->Printf("You have found a secret door!\n");
+            g_pGame->GetDungeon()->Modify(curTile->m_vPos);           return true;
+        }
+        return false;
+    }
+    return( curTile->m_dtd->m_dwType == DUNG_IDX_DOOR );
 }
 
 bool CDungeon::IsTunnelable( JVector &vPos )

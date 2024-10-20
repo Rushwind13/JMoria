@@ -67,6 +67,15 @@ JResult CItem::SpawnItem()
     return JSUCCESS;
 }
 
+bool CItem::Update( float fCurTime )
+{
+    if( (m_id->m_dwFlags & ITEM_COLOR_MULTI) == ITEM_COLOR_MULTI )
+    {
+        m_fColorChangeInterval += fCurTime;
+    }
+    return true;
+}
+
 // draw routines
 void CItem::SetColor()
 {

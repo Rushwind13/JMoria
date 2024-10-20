@@ -208,6 +208,7 @@ void CCmdState::HandleCollision( int dwCollideType )
 		switch( dwCollideType )
 		{
 		case DUNG_IDX_WALL:
+		case DUNG_IDX_SECRET_DOOR:
 			sprintf( what, "a wall" );
 			break;
 		case DUNG_IDX_DOOR:

@@ -6,6 +6,7 @@ DATA / GAMEPLAY:
 - implement "flavored" attacks, e.g. a _BREATHE type should read m_dwFlags to figure out which type of breath (fire, ice, &c)s
 - Implement "peaceful" monsters, (Cannot be targeted, if hit they take no damage, )
 - add town level with shops and a house to store things in (some shopkeepers may raise prices depending on your character class)
+- add an intro that explains the background / hero
 
 DOORS / TRAPS / SCENERY:
 - make new DUNG_IDX types for locked, secret, and broken doors (are these just DUNG_FLAG? need different icon for secret)
@@ -48,6 +49,10 @@ PLAYER:
 - equipped items are used to make attacks and to defend against attacks (raise AC, raise to-hit and damage stats, &c)
 - equippable items restricted to certain subset of all items ITEM_FLAG_EQUIPMENT, instead of hardcoded in CPlayer::Wield.
 - implement paginated inventory
+- how to remove cursed?
+- how to shoot bows
+- Different character classes
+- Magic spells etc?
 
 
 COMBAT:
@@ -55,7 +60,6 @@ COMBAT:
 - should monsters be able to wield items? use potions? pick stuff up off the ground?
 - need to add speed, somehow
 - add "seek" AI (monster tries to move towards player)
-
 
 
 ARCHITECTURE:
@@ -69,7 +73,6 @@ ARCHITECTURE:
 - Which routines should be owned by Dungeon? Which by Player? Monster? Item?
 - Need Architecture diagram
 - Need Developer's Guide
-
 
 
 FONT / TEXTURE / DISPLAY / COLOR:
@@ -86,7 +89,6 @@ FONT / TEXTURE / DISPLAY / COLOR:
 
 
 
-
 ENGINE / RENDERING:
 - Keep the renderer you have for awhile. Concentrate on putting together a solid gameplay demo.
 - Contract art later as needed.
@@ -98,7 +100,6 @@ ENGINE / RENDERING:
 - (Update 12.3.2017) ported to OSX, which required switching to SDL2. Other than rewriting CRender::initSDL(), no major changes. we will are back to where we were when we last left the project (in 2006?). I also moved the code from VSS to Github git@github.com:Rushwind13/JMoria.git .
 
 
-
 STABILITY:
 - be able to close the game properly.
 - figure out why the game is so rickety?
@@ -107,6 +108,9 @@ STABILITY:
 - 12.5.2017 - getting a lot of intermittent "bad string" complaints; wtf?! like for some reason the string lookup table sometimes isn't working right
 - 12.14.2017 - Just saw Star Wars 8 tonight, woot. Also, JMoria beats the heck out of the CPU, I left it running, and it was using 90%+ CPU, caused the fan to come on... maybe if it was locked to a particular framerate (like 30fps), it would give the CPU more of a break in between cycles?
 
+
+DUNGEON:
+- Should rooms further away from the stairs have tougher / more monsters? Better item drops?
 
 
 DUNGEON GENERATION: (as of 1.27.06, hardcoded 16x16 dungeon back in)
@@ -122,3 +126,6 @@ DUNGEON GENERATION: (as of 1.27.06, hardcoded 16x16 dungeon back in)
 - Tried to add NewLevelState to help with stepping through dungeon generation. Add back to project at some point.
 - Also, make sure that there are enough rooms generated every time. Sometimes, it just tails out 
   after 1 or 2 rooms.
+
+BUGS:
+- 2d8 bastard sword replaced by 1d8 long sword without choosing to wield

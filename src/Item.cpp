@@ -21,6 +21,9 @@ JResult CItem::CreateItem( CItemDef *pid )
         // Initialize the Item from the ItemDef
         pItem->Init(pid);
 
+        // Apply cursed flag
+        pItem->ApplyCursedStatus(5);
+
         // Put the item in the world
         pItem->SpawnItem();
 
@@ -35,11 +38,20 @@ void CItem::Init( CItemDef *pid )
 {
     m_id = pid;
     m_Color.SetColor(m_id->m_Color);
-    if( Util::GetRandom(1,100) < 5 )
+}
+
+void CItem::ApplyCursedStatus( int likelihood )
+{
+    if( CItem::PercentChance(likelihood) )
     {
         m_dwFlags |= ITEM_FLAG_CURSED;
         m_Color.SetColor(255,0,0,255);
-    }
+    }    
+}
+
+bool CItem::PercentChance ( int chance )
+{
+    return Util::GetRandom(1,100) < chance;
 }
 
 JResult CItem::SpawnItem()

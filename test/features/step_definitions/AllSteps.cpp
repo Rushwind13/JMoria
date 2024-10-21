@@ -7,3 +7,4 @@
 #include "UtilSteps.cpp"
 #include "VectorSteps.cpp"
 #include "ItemSteps.cpp"
+#include "MonsterSteps.cpp"

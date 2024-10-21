@@ -10,6 +10,7 @@
 #include <TileSet.h>
 #include "FileParse.h"
 #include "Item.h"
+#include "Monster.h"
 
 CGame *g_pGame = NULL;
 
@@ -40,6 +41,11 @@ struct TestCtx
 
   // DungeonMap
   CDungeonMap map;
+
+  // MonsterDef
+  CDataFile dfMonsters;
+  CMonsterDef *monsterDef;
+  CMonster *monster;
 
   // ItemDef
   CItemDef *ItemDef;

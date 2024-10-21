@@ -21,11 +21,17 @@ JResult CItem::CreateItem( CItemDef *pid )
         // Initialize the Item from the ItemDef
         pItem->Init(pid);
 
-        // Put the item in the world
-        pItem->SpawnItem();
+        // Apply cursed flag
+        pItem->ApplyCursedStatus(5);
 
-        // Now that the item is set up, add it to the global list of items
-        pItem->m_pllLink = g_pGame->GetDungeon()->m_llItems->Add(pItem);
+        if(g_pGame) 
+        {
+            // Put the item in the world
+            pItem->SpawnItem();
+
+            // Now that the item is set up, add it to the global list of items
+            pItem->m_pllLink = g_pGame->GetDungeon()->m_llItems->Add(pItem);
+        }
     }
 
     return JSUCCESS;
@@ -35,11 +41,15 @@ void CItem::Init( CItemDef *pid )
 {
     m_id = pid;
     m_Color.SetColor(m_id->m_Color);
-    if( Util::GetRandom(1,100) < 5 )
+}
+
+void CItem::ApplyCursedStatus( int likelihood )
+{
+    if( Util::GetRandom(1,100) < likelihood )
     {
         m_dwFlags |= ITEM_FLAG_CURSED;
         m_Color.SetColor(255,0,0,255);
-    }
+    }    
 }
 
 JResult CItem::SpawnItem()
@@ -54,7 +64,7 @@ JResult CItem::SpawnItem()
         //printf("Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
         //g_pGame->GetMsgs()->Printf( "Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
 
-        if( g_pGame->GetDungeon()->CanPlaceItemAt(vTryPos) == DUNG_COLL_NO_COLLISION )
+        if( g_pGame && g_pGame->GetDungeon()->CanPlaceItemAt(vTryPos) == DUNG_COLL_NO_COLLISION )
         {
             m_vPos = vTryPos;
             g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurItem = this;

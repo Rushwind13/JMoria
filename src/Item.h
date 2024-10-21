@@ -107,6 +107,8 @@ private:
     // Member Functions
 public:
     void Init( CItemDef *pid );
+    void ApplyCursedStatus( int likelihood );
+    bool PercentChance ( int chance );
     char *GetName() { return m_id->m_szName; }
     bool IsOpenable() { return false; } // for chests, etc.
     bool IsCloseable() { return false; } // closeable pickup?

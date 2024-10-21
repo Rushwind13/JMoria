@@ -8,6 +8,8 @@
 #include <JVector.h>
 #include <TextEntry.h>
 #include <TileSet.h>
+#include "FileParse.h"
+#include "Item.h"
 
 CGame *g_pGame = NULL;
 
@@ -38,6 +40,10 @@ struct TestCtx
 
   // DungeonMap
   CDungeonMap map;
+
+  // ItemDef
+  CItemDef *ItemDef;
+  JResult Success;
 
   int index;
   int lo;

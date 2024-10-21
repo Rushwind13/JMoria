@@ -5,55 +5,38 @@ using cucumber::ScenarioScope;
 #include "TestItemContext.hpp"
 
 
-GIVEN("^I have a ItemDef$")
+GIVEN("^I have an ItemDef$")
 {
-    // ScenarioScope<TestItemCtx> context;
-    // // Load the item list from config
-    // // TODO: Make this a method on CItemDef.
+    ScenarioScope<TestItemCtx> context;
+    // Load the item list from config
+    // TODO: Make this a method on CItemDef.
 
-    // m_llItemDefs = new JLinkList<CItemDef>;
+    g_Constants.Init();
+    context->m_llItemDefs = new JLinkList<CItemDef>;
 
-    // CItemDef *pid;
-    // CDataFile dfItems;
-    // dfItems.Open("../Resources/Items.txt"); //step out of the test directory
+    CItemDef *pid;
+    CDataFile dfItems;
+    printf("About to open file\n");
+    dfItems.Open("../../JMoria/Resources/Items.txt"); //step out of the test directory
+    printf("Read file %s\n", dfItems.m_fp);
 
-    // pid = new CItemDef;
-    // while( dfItems.ReadItem(*pid) )
-    // {
-    //     m_llItemDefs->Add(pid);
-    //     pid = new CItemDef;
-    // }
-    // *ItemDef = pid; // the last item, sure
-    // delete pid;
+    pid = new CItemDef;
+    printf("Created empty item def\n");
+    context->ItemDef = dfItems.ReadItem(*pid);
+    printf("This is a %s\n", pid->m_szName);
 
 }
-// WHEN("^I call GetHallRect for east from ([0-9.-]+),([0-9.-]+)$")
-// {
-//     REGEX_PARAM(int,x);
-//     REGEX_PARAM(int,y);
-//     JRect rcHall(x,y,x,y);
-//     ScenarioScope<TestItemCtx> context;
-//     context->map.GetHallRect( rcHall, DIR_EAST );
-// }
-// THEN("^The JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) is now filled with ([0-9]+)$")
-// {
-//     REGEX_PARAM(float,l);
-//     REGEX_PARAM(float,t);
-//     REGEX_PARAM(float,r);
-//     REGEX_PARAM(float,b);
-//     REGEX_PARAM(int,type);
-//     ScenarioScope<TestItemCtx> context;
 
-//     int x,y;
-//     for(y=t; y<=b; y++)
-//     {
-//         for(x=l; x<=r; x++)
-//         {
-//             JIVector vCheck(x,y);
-//             int expected = context->map.GetdtdIndex(vCheck);
-//             // printf("<%d %d>: %d/%d ", VEC_EXPAND(vCheck), expected, type);
-//             EXPECT_EQ(expected, type);
-//         }
-//         // printf("\n");
-//     }
-// }
+WHEN("^I CreateItem$")
+{
+    ScenarioScope<TestItemCtx> context;
+    context->Success = CItem::CreateItem(context->ItemDef);
+}
+
+THEN("^The item should succeed in creation.$")
+{
+    ScenarioScope<TestItemCtx> context;
+    JResult expected = JSUCCESS;
+    JResult actual = context->Success;
+    EXPECT_EQ(expected, actual);
+}

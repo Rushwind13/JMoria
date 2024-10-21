@@ -297,6 +297,7 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
             {
                 bFoundItem = true;
                 idIn.m_szName = GetValue( szLine, idIn.m_szName );
+                // printf("Found an item! %s\n", idIn.m_szName);
             }
             continue;
         }
@@ -319,6 +320,7 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
             if( strncasecmp( szLine, "plural", 6 ) == 0 )
             {
                 idIn.m_szPlural = GetValue( szLine, idIn.m_szPlural );
+                // printf("Here it is plurarlly %s\n", idIn.m_szPlural);
             }
             else if( strncasecmp( szLine, "speed", 5 ) == 0 )
             {

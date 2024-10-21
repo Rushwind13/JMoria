@@ -13,7 +13,7 @@ using cucumber::ScenarioScope;
 GIVEN("^It is Wednesday$")
 {
   ScenarioScope<TestCtx> context;
-  context->vec = JVector(0,0);
+  context->vec = JVector(0, 0);
 }
 
 /*#######
@@ -31,5 +31,5 @@ GIVEN("^It is Wednesday$")
 THEN("^Wearing Pink$")
 {
     ScenarioScope<TestCtx> context;
-    EXPECT_EQ(context->vec,JVector(0,0));
+    EXPECT_EQ(context->vec, JVector(0, 0));
 }

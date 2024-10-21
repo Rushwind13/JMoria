@@ -31,7 +31,7 @@ m_szTombstone(NULL)
     m_szTombstone = new char[strlen(tombstone)+1];
     memset(m_szTombstone, 0, strlen(tombstone)+1);
     strcpy(m_szTombstone, tombstone);
-    
+
     m_pScore = new CScore;
 }
 
@@ -120,7 +120,7 @@ int CEndGameState::OnHandleScores( SDL_Keysym *keysym )
 int CEndGameState::OnHandleInit( SDL_Keysym *keysym )
 {
     printf( "Initializing endgame state...\n" );
-    
+
     m_pScore->InitScore();
 
     g_pGame->GetEnd()->Clear();
@@ -158,7 +158,7 @@ bool CEndGameState::DoTomb()
     int dwNamePadding = (17-strlen(m_pScore->m_szName))/2;
     int dwNameExtraPad = 0;
     if( strlen(m_pScore->m_szName) %2 == 0 ) dwNameExtraPad = 1;
-    
+
     int dwKillerPadding = (17-strlen(m_pScore->m_szKilledBy))/2;
     int dwKillerExtraPad = 0;
     if( strlen(m_pScore->m_szKilledBy) %2 == 0 ) dwKillerExtraPad = 1;
@@ -185,7 +185,7 @@ bool CEndGameState::InitScores()
     dfScores.Append("Resources/Scores.txt");
     dfScores.WriteScore(m_pScore);
     dfScores.Close();
-    
+
     // Score entry should have:
     // Player name
     // User Name (login?)
@@ -200,10 +200,10 @@ bool CEndGameState::InitScores()
     // call FileParse::ReadScores to read score list (read sorted into a LL)
 
     m_llScores = new JLinkList<CScore>;
-    
+
     CScore *ps;
     dfScores.Open("Resources/Scores.txt");
-    
+
     ps = new CScore;
     while( dfScores.ReadScore(*ps) )
     {
@@ -211,7 +211,7 @@ bool CEndGameState::InitScores()
         m_llScores->Add(ps, ps->m_dwScore, false);
         ps = new CScore;
     }
-    
+
     delete ps;
     return true;
 }

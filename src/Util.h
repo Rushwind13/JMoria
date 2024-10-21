@@ -4,8 +4,8 @@
 #include "JVector.h"
 #include "JRect.h"
 
-#define MAX(a,b) (a>=b ? a : b)
-#define MIN(a,b) (a<=b ? a : b)
+#define MAX(a, b) (a>=b ? a : b)
+#define MIN(a, b) (a<=b ? a : b)
 #define CLAMP( val, lo, hi ) ( val <= lo ? lo : (val >= hi ? hi : val) )
 
 namespace Util
@@ -17,7 +17,7 @@ namespace Util
 
 	bool IsInWorld( JFVector vIn );
 	bool IsInWorld( JRect rcIn );
-    
+
     unsigned int GetTickCount();
 };
 

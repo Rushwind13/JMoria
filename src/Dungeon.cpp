@@ -24,7 +24,7 @@ int			  ModifiedTileTypes[DUNG_IDX_MAX+1] =
     DUNG_IDX_DOOR,
 	DUNG_IDX_INVALID
 };
-//extern Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH];
+// extern Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH];
 
 // Setup - the one-time-run stuff to set up the Dungeon
 //
@@ -39,41 +39,41 @@ void CDungeon::Init()
 
 	// Create the dungeon tile defs (at the moment, there are 7 or so entries in this array)
 	for( i = DUNG_IDX_FLOOR; i < DUNG_IDX_MAX; i++ )
-	{
+	 {
 		m_dtdlist[i].m_dwType = i;
 		m_dtdlist[i].m_dwModifiedType = ModifiedTileTypes[i];
 		m_dtdlist[i].m_dwIndex = TileIDs[i] - ' ' - 1;
 		switch(m_dtdlist[i].m_dwType)
-		{
+		 {
 		case DUNG_IDX_FLOOR:
-			m_dtdlist[i].m_Color.SetColor(192,192,192,255);
+			m_dtdlist[i].m_Color.SetColor(192, 192, 192, 255);
 			break;
 		case DUNG_IDX_WALL:
 		case DUNG_IDX_SECRET_DOOR:
-			m_dtdlist[i].m_Color.SetColor(64,64,64,255);
+			m_dtdlist[i].m_Color.SetColor(64, 64, 64, 255);
 			break;
 		case DUNG_IDX_DOOR:
-			m_dtdlist[i].m_Color.SetColor(64,32,128,255);
+			m_dtdlist[i].m_Color.SetColor(64, 32, 128, 255);
 			break;
 		case DUNG_IDX_OPEN_DOOR:
-			m_dtdlist[i].m_Color.SetColor(192,192,192,255);
+			m_dtdlist[i].m_Color.SetColor(192, 192, 192, 255);
                 break;
         case DUNG_IDX_UPSTAIRS:
         case DUNG_IDX_LONG_UPSTAIRS:
-			m_dtdlist[i].m_Color.SetColor(175,175,175,255);
+			m_dtdlist[i].m_Color.SetColor(175, 175, 175, 255);
                 break;
         case DUNG_IDX_DOWNSTAIRS:
         case DUNG_IDX_LONG_DOWNSTAIRS:
-			m_dtdlist[i].m_Color.SetColor(195,195,195,255);
+			m_dtdlist[i].m_Color.SetColor(195, 195, 195, 255);
 			break;
 		case DUNG_IDX_RUBBLE:
-			m_dtdlist[i].m_Color.SetColor(200,100,64,255);
+			m_dtdlist[i].m_Color.SetColor(200, 100, 64, 255);
 			break;
 		case DUNG_IDX_PLAYER:
-			m_dtdlist[i].m_Color.SetColor(255,255,255,255);
+			m_dtdlist[i].m_Color.SetColor(255, 255, 255, 255);
 			break;
 		default:
-			m_dtdlist[i].m_Color.SetColor(0,0,0,255);
+			m_dtdlist[i].m_Color.SetColor(0, 0, 0, 255);
 			break;
 		}
 	}
@@ -118,7 +118,7 @@ void CDungeon::Init()
     m_TileSet = new DUNG_TILESET;
 
     m_bDraw = true;
-    
+
     CreateNewLevel(DUNG_CFG_START_LEVEL);
 }
 
@@ -158,7 +158,7 @@ JResult CDungeon::CreateNewLevel(const int delta)
     if( depth > DUNG_MAXDEPTH ) depth = DUNG_MAXDEPTH;
 
     CreateMap();
-    
+
     PlaceScenery(depth);
 
     // Place items appropriate to this level.
@@ -184,13 +184,13 @@ JResult CDungeon::CreateMap()
 #endif
 
     InitDungeonTiles();
-    
+
     return JSUCCESS;
 }
 
 JResult CDungeon::InitDungeonTiles()
 {
-    JIVector vDungeon(DUNG_HEIGHT,DUNG_WIDTH);
+    JIVector vDungeon(DUNG_HEIGHT, DUNG_WIDTH);
     Uint8 dung_tile_type = DUNG_IDX_INVALID;
     float open_area = 0.0f;
     // Create the dungeon array (at the moment, there are 16*16 entries in this list)
@@ -207,7 +207,7 @@ JResult CDungeon::InitDungeonTiles()
             GetITile(vDungeon)->m_dwFlags = m_dmCurLevel->GetFlags(vDungeon);
         }
     }
-    
+
     m_fOpenFloorArea = open_area;
     return JSUCCESS;
 }
@@ -215,20 +215,20 @@ JResult CDungeon::InitDungeonTiles()
 JResult CDungeon::PlaceScenery(const int depth)
 {
     int upstairs = (depth > 1)? Util::GetRandom(1, 5):0;
-    int long_upstairs = (depth > 1)? Util::GetRandom(0,2):0;
+    int long_upstairs = (depth > 1)? Util::GetRandom(0, 2):0;
     int downstairs = (depth < DUNG_MAXDEPTH)? Util::GetRandom(1, 5):0;
-    int long_downstairs = (depth < DUNG_MAXDEPTH)? Util::GetRandom(0,2):0;
-    
+    int long_downstairs = (depth < DUNG_MAXDEPTH)? Util::GetRandom(0, 2):0;
+
     PlaceStairs(upstairs, DUNG_IDX_UPSTAIRS);
     PlaceStairs(long_upstairs, DUNG_IDX_LONG_UPSTAIRS);
     PlaceStairs(downstairs, DUNG_IDX_DOWNSTAIRS);
     PlaceStairs(long_downstairs, DUNG_IDX_LONG_DOWNSTAIRS);
-    
+
     // Doors (open, closed, locked, secret, broken)
     // Traps
     // Rubble (very rare)
     // Gold Veins (only in walls, can run a couple deep)
-    
+
     return JSUCCESS;
 }
 
@@ -244,10 +244,10 @@ JResult CDungeon::PlaceStairs(const int desired, const int type)
         while( !bStairsSpawned )
         {
             vTryPos.Init( (float)(Util::GetRandom(0, DUNG_WIDTH-1)), (float)(Util::GetRandom(0, DUNG_HEIGHT-1)) );
-            
-            //printf("Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
-            //g_pGame->GetMsgs()->Printf( "Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
-            
+
+            // printf("Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
+            // g_pGame->GetMsgs()->Printf( "Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
+
             if( CanPlaceStairsAt(vTryPos) == DUNG_COLL_NO_COLLISION )
             {
                 GetTile(vTryPos)->m_dtd = &m_dtdlist[type];
@@ -304,7 +304,7 @@ JResult CDungeon::SpawnMonsters(const int depth)
         int which_monster = ChooseMonsterForDepth(depth);
 #else
         int which_monster = m_llMonsterDefs->length()-1;
-        //which_monster = 0;
+        // which_monster = 0;
 #endif // RANDOM_MONSTER
         if( which_monster == MON_IDX_INVALID )
         {
@@ -389,7 +389,7 @@ bool CDungeon::Tick( const int dwClock )
     {
         m_bDraw = true;
     }/**/
-    
+
     bool bWorking = m_dmCurLevel->CreateOneStep();
     if(bWorking == false)
     {
@@ -400,7 +400,7 @@ bool CDungeon::Tick( const int dwClock )
             OnChangeLevel(1);
         }
     }
-    
+
     InitDungeonTiles();
     return true;
 }
@@ -450,7 +450,7 @@ void CDungeon::Draw()
     {
         return;
     }
-    
+
 	PreDraw();
 
     // Select Our Texture
@@ -533,12 +533,12 @@ void CDungeon::DrawMonsters()
 void CDungeon::PreDraw()
 {
 	if( g_pGame->GetPlayer() != NULL )
-	{
+	 {
 #ifdef CLOCKSTEP
         m_dwZoom = DUNG_WIDTH;
 #endif
         int xinitval = m_dwZoom;
-        //int xinitval = 16;
+        // int xinitval = 16;
 		int yinitval = xinitval;
 
 
@@ -550,7 +550,7 @@ void CDungeon::PreDraw()
         int xorigin = 0; // + is left (?!)
         int yorigin = 0; // + is up
 #endif
-        m_Rect.Init( xorigin-xinitval,yorigin+yinitval,xorigin+xinitval,yorigin-yinitval);
+        m_Rect.Init( xorigin-xinitval, yorigin+yinitval, xorigin+xinitval, yorigin-yinitval);
 	}
 	g_pGame->GetRender()->PreDrawObjects( m_Rect, m_TileSet->Texture(), true, false, &m_vfTranslate );
 
@@ -569,7 +569,7 @@ void CDungeon::PostDraw()
 void CDungeon::Term()
 {
 	if( m_Tiles )
-	{
+	 {
 		delete [] m_Tiles;
 		m_Tiles = NULL;
     }
@@ -609,12 +609,12 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
 	// Check for someone else standing there first (handles things that can walk thru walls)
 	CDungeonTile *curTile = GetTile(vPos);
 	if( curTile == NULL )
-	{
+	 {
 		printf("Hey! That's a bad tile.\n");
 		return false;
 	}
 	if( curTile->m_pCurMonster != NULL )
-	{
+	 {
         // Monsters can collide with other monsters
 		return DUNG_COLL_MONSTER;
 	}
@@ -635,7 +635,7 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
 	// If you get here, the square was unoccupied. Now check for running into inanimates...
 	int type = curTile->m_dtd->m_dwType;
 	switch( type )
-	{
+	 {
 	case DUNG_IDX_WALL:
 	case DUNG_IDX_DOOR:
     case DUNG_IDX_SECRET_DOOR:
@@ -656,7 +656,7 @@ int CDungeon::CanPlaceStairsAt(JVector &vPos)
         printf("Hey! That's a bad tile.\n");
         return false;
     }
-    
+
     // If you get here, the square was unoccupied. Now check for running into inanimates...
     int type = curTile->m_dtd->m_dwType;
     switch( type )
@@ -716,20 +716,20 @@ bool CDungeon::IsOpenable( JVector &vPos )
 	// trivial check; is this a modifiable tile at all?
 	CDungeonTile *curTile = GetTile(vPos);
 	if( curTile == NULL || curTile->m_dtd->m_dwModifiedType == DUNG_IDX_INVALID )
-	{
+	 {
 		return false;
 	}
 	// Check for someone else standing there first (handles things that can walk thru walls)
 
 	if( curTile->m_pCurItem )
-	{
+	 {
 		return( curTile->m_pCurItem->IsOpenable() );
 	}
 
 	// If you get here, the square was unoccupied. Now check for running into inanimates...
     if( curTile->m_dtd->m_dwType == DUNG_IDX_SECRET_DOOR)
     {
-        if( Util::GetRandom(1,100) > 25 )
+        if( Util::GetRandom(1, 100) > 25 )
         {
             g_pGame->GetMsgs()->Printf("You have found a secret door!\n");
             g_pGame->GetDungeon()->Modify(curTile->m_vPos);           return true;
@@ -744,13 +744,13 @@ bool CDungeon::IsTunnelable( JVector &vPos )
 	// trivial check; is this a modifiable tile at all?
 	CDungeonTile *curTile = GetTile(vPos);
 	if( curTile == NULL || curTile->m_dtd->m_dwModifiedType == DUNG_IDX_INVALID )
-	{
+	 {
 		return false;
 	}
 	// Check for someone else standing there first (handles things that can walk thru walls)
 
 	if( curTile->m_pCurItem )
-	{
+	 {
 		return( curTile->m_pCurItem->IsTunnelable() );
 	}
 
@@ -763,13 +763,13 @@ bool CDungeon::IsCloseable( JVector &vPos )
 	// trivial check; is this a modifiable tile at all?
 	CDungeonTile *curTile = GetTile(vPos);
 	if( curTile == NULL || curTile->m_dtd->m_dwModifiedType == DUNG_IDX_INVALID )
-	{
+	 {
 		return false;
 	}
 	// Check for someone else standing there first (handles things that can walk thru walls)
 
 	if( curTile->m_pCurItem )
-	{
+	 {
 		return( curTile->m_pCurItem->IsCloseable() );
 	}
 
@@ -801,7 +801,7 @@ int CDungeon::IsStairs( JVector &vPos )
 JResult CDungeon::Modify( JVector &vPos )
 {
 	if( GetTile(vPos)->m_dtd->m_dwModifiedType == DUNG_IDX_INVALID )
-	{
+	 {
 		// hey! you can't modify that tile! How did you get here?!
 		return JERROR();
 	}

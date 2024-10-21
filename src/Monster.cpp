@@ -17,7 +17,7 @@ m_fBreedInterval(BREED_TIMEOUT+1)
 CMonster::~CMonster()
 {
 	if(m_pBrain)
-	{
+	 {
         g_pGame->GetAIMgr()->DestroyBrain(m_pBrain);
 		m_pBrain = NULL;
 	}
@@ -78,19 +78,19 @@ JResult CMonster::SpawnMonster()
 	printf("Trying to spawn monster type: %s...", m_md->m_szName);
 	JVector vTryPos;
 	while( !bMonsterSpawned )
-	{
+	 {
 		vTryPos.Init( (float)(Util::GetRandom(0, DUNG_WIDTH-1)), (float)(Util::GetRandom(0, DUNG_HEIGHT-1)) );
 
-		//printf("Trying to spawn monster type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
-		//g_pGame->GetMsgs()->Printf( "Trying to spawn monster type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
+		// printf("Trying to spawn monster type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
+		// g_pGame->GetMsgs()->Printf( "Trying to spawn monster type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
 
 		if( g_pGame->GetDungeon()->IsWalkableFor(vTryPos) == DUNG_COLL_NO_COLLISION )
-		{
+		 {
 			SetPos(vTryPos);
 			g_pGame->GetDungeon()->GetTile(GetPos())->m_pCurMonster = this;
 			bMonsterSpawned = true;
 			printf( "Success!\n" );
-			//g_pGame->GetMsgs()->Printf( "Success!\n" );
+			// g_pGame->GetMsgs()->Printf( "Success!\n" );
 		}
 	}
 
@@ -129,12 +129,12 @@ int CMonster::TakeDamage( float fDamage )
 
 
 	if( (int)fDamage < (int)m_fCurHP )
-	{
+	 {
 		m_fCurHP -= fDamage;
 		retval = STATUS_ALIVE;
 	}
 	else
-	{
+	 {
 		m_fCurHP = 0;
 		retval = STATUS_DEAD;
 	}
@@ -163,7 +163,7 @@ void CMonster::SetColor()
 
     if( (m_md->m_dwFlags & MON_COLOR_MULTI) == MON_COLOR_MULTI )
     {
-        int which_color = Util::GetRandom(0,m_md->m_Colors->length()-1);
+        int which_color = Util::GetRandom(0, m_md->m_Colors->length()-1);
         (m_md->m_Color).SetColor(*(m_md->m_Colors->GetLink(which_color)->m_lpData));
     }
     m_fColorChangeInterval = 0.0f;
@@ -178,10 +178,10 @@ void CMonster::Draw()
 
 	SetColor();
 
-	//PreDraw();
+	// PreDraw();
 	g_pGame->GetDungeon()->m_TileSet->SetTileColor( m_md->m_Color );
 	g_pGame->GetDungeon()->m_TileSet->DrawTile( monster_tile, GetPos(), vSize, false );
-	//PostDraw();
+	// PostDraw();
 }
 
 void CMonster::PreDraw()

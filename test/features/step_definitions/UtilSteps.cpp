@@ -13,8 +13,8 @@ using cucumber::ScenarioScope;
 
 GIVEN("^I ask for a ([0-9-]+),([0-9-]+) result$")
 {
-  REGEX_PARAM(int,lo);
-  REGEX_PARAM(int,hi);
+  REGEX_PARAM(int, lo);
+  REGEX_PARAM(int, hi);
   ScenarioScope<TestCtx> context;
   context->lo = lo;
   context->hi = hi;
@@ -22,8 +22,8 @@ GIVEN("^I ask for a ([0-9-]+),([0-9-]+) result$")
 
 GIVEN("^I ask for a ([0-9.-]+),([0-9.-]+) float result$")
 {
-  REGEX_PARAM(float,lo);
-  REGEX_PARAM(float,hi);
+  REGEX_PARAM(float, lo);
+  REGEX_PARAM(float, hi);
   ScenarioScope<TestCtx> context;
   context->lo_f = lo;
   context->hi_f = hi;
@@ -31,8 +31,8 @@ GIVEN("^I ask for a ([0-9.-]+),([0-9.-]+) float result$")
 
 GIVEN("^I ask for a ([0-9-]+)d([0-9-]+) dice roll$")
 {
-  REGEX_PARAM(int,count);
-  REGEX_PARAM(int,sides);
+  REGEX_PARAM(int, count);
+  REGEX_PARAM(int, sides);
   ScenarioScope<TestCtx> context;
   context->lo = count;
   context->hi = sides;
@@ -81,24 +81,24 @@ WHEN("^I call Roll$")
 THEN("^I get either 0 or 1$")
 {
     ScenarioScope<TestCtx> context;
-    EXPECT_GE(context->result_int,0);
-    EXPECT_LE(context->result_int,1);
+    EXPECT_GE(context->result_int, 0);
+    EXPECT_LE(context->result_int, 1);
 }
 
 THEN("^The result is between ([0-9-]+) and ([0-9-]+)$")
 {
-    REGEX_PARAM(int,lo);
-    REGEX_PARAM(int,hi);
+    REGEX_PARAM(int, lo);
+    REGEX_PARAM(int, hi);
     ScenarioScope<TestCtx> context;
-    EXPECT_GE(context->result_int,lo);
-    EXPECT_LE(context->result_int,hi);
+    EXPECT_GE(context->result_int, lo);
+    EXPECT_LE(context->result_int, hi);
 }
 
 THEN("^The float result is between ([0-9.-]+) and ([0-9.-]+)$")
 {
-    REGEX_PARAM(float,lo);
-    REGEX_PARAM(float,hi);
+    REGEX_PARAM(float, lo);
+    REGEX_PARAM(float, hi);
     ScenarioScope<TestCtx> context;
-    EXPECT_GE(context->result_float,lo);
-    EXPECT_LE(context->result_float,hi);
+    EXPECT_GE(context->result_float, lo);
+    EXPECT_LE(context->result_float, hi);
 }

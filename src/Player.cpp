@@ -58,9 +58,9 @@ bool CPlayer::Update(float fCurTime)
 
 void CPlayer::Draw()
 {
-	Uint8 player_tile = '@' - ' ' - 1;//TileIDs[TILE_IDX_PLAYER] - ' ' - 1;
+	Uint8 player_tile = '@' - ' ' - 1;// TileIDs[TILE_IDX_PLAYER] - ' ' - 1;
 	JVector DUNG_ASPECT;
-    JColor player_color(255,255,255,255);
+    JColor player_color(255, 255, 255, 255);
 
 	PreDraw();
     m_TileSet->SetTileColor(player_color);
@@ -83,19 +83,19 @@ JResult CPlayer::SpawnPlayer()
 	printf("Trying to spawn player...");
 	JVector vTryPos;
 	while( !m_bHasSpawned )
-	{
+	 {
 		vTryPos.Init( (float)Util::GetRandom(0, DUNG_WIDTH-1), (float)Util::GetRandom(0, DUNG_HEIGHT-1) );
 
-		//printf("Trying to spawn player at <%.2f %.2f>...\n", vTryPos.x, vTryPos.y);
-		//g_pGame->GetMsgs()->Printf( "Trying to spawn player at <%.2f %.2f>...\n", vTryPos.x, vTryPos.y );
+		// printf("Trying to spawn player at <%.2f %.2f>...\n", vTryPos.x, vTryPos.y);
+		// g_pGame->GetMsgs()->Printf( "Trying to spawn player at <%.2f %.2f>...\n", vTryPos.x, vTryPos.y );
 
 		// try changing this to "iswalkable" -- might need to move that to dungeon. --Jimbo
 		if( g_pGame->GetDungeon()->IsWalkableFor(vTryPos, true) == DUNG_COLL_NO_COLLISION )
-		{
+		 {
 			m_vPos = vTryPos;
 			m_bHasSpawned = true;
 			printf("Success!\n");
-			//g_pGame->GetMsgs()->Printf( "Success!\n" );
+			// g_pGame->GetMsgs()->Printf( "Success!\n" );
 		}
 	}
 
@@ -142,7 +142,7 @@ void CPlayer::DisplayInventory( uint8 dwPlacement )
             return;
             break;
     }
-    
+
     pDT->DisplayList( m_llInventory, &meta );
 }
 
@@ -166,7 +166,7 @@ void CPlayer::DisplayEquipment( uint8 dwPlacement )
             return;
             break;
     }
-    
+
     pDT->DisplayList( m_llEquipment, &meta );
 }
 
@@ -325,7 +325,7 @@ int CPlayer::TakeDamage( float fDamage, char *szMon )
         m_fCurHitPoints = 0;
         retval = STATUS_DEAD;
         m_szKilledBy = new char[strlen(szMon)+1];
-        memset(m_szKilledBy,0,strlen(szMon)+1);
+        memset(m_szKilledBy, 0, strlen(szMon)+1);
         strcpy(m_szKilledBy, szMon);
         // This is the end of the game; make the game end on next update.
         printf("%s died on dungeon level %d, while level %d, killed by a %s.\n", m_szName, g_pGame->GetDungeon()->depth, (int)m_fLevel, m_szKilledBy );
@@ -341,7 +341,7 @@ bool CPlayer::Drop( CItem *pItem )
 {
     m_llInventory->Remove(pItem->m_pllLink, false);
     g_pGame->GetDungeon()->Drop(pItem, m_vPos);
-    
+
     return true;
 }
 
@@ -369,7 +369,7 @@ bool CPlayer::Quaff( CLink<CItem> *pLink )
         }
         g_pGame->GetMsgs()->Printf("You feel a bit better.\n");
     }
-    
+
     return true;
 }
 
@@ -394,9 +394,9 @@ bool CPlayer::SetName( const char *szName )
     {
         return false;
     }
-    
+
     strcpy( m_szName, szName );
-    
+
     return true;
 }
 

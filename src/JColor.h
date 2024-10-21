@@ -5,7 +5,7 @@
 #include "sdl.h"
 #else
 #include "SDL2/SDL.h"
-#endif //__WIN32__
+#endif // __WIN32__
 #define COLOR_EXPAND(color) (color).m_vRG.x, (color).m_vRG.y, (color).m_vBA.x, (color).m_vBA.y
 class JColor
 {
@@ -42,8 +42,8 @@ public:
 
 	void SetColor( JColor &in )
 	{
-		Uint8 r,g,b,a;
-		in.GetColor(r,g,b,a);
+		Uint8 r, g, b, a;
+		in.GetColor(r, g, b, a);
 
 		m_vRG.x = r;
 		m_vRG.y = g;

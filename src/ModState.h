@@ -23,13 +23,13 @@ protected:
 	char m_cCommand;
 	JVector m_vNewPos;
 private:
-	
+
 	// Member Functions
 public:
 	CModState();
-	~CModState() {};
+	~CModState() {}
 
-	virtual void OnUpdate(float fCurTime) {};
+	virtual void OnUpdate(float fCurTime) {}
 	virtual int OnBaseHandleKey( SDL_Keysym *keysym );
 	virtual int OnHandleKey( SDL_Keysym *keysym );
 protected:
@@ -49,11 +49,11 @@ private:
 	bool DoOpen();
 
 	bool TestTunnel();
-	bool DoTunnel();	
+	bool DoTunnel();
 
 	bool TestClose();
 	bool DoClose();
-	
+
 	void	ResetToState( int newstate );
 };
 

@@ -12,7 +12,7 @@ GIVEN("^I have an ItemDef$")
 
     CItemDef *pid;
     CDataFile dfItems;
-    dfItems.Open("../../JMoria/Resources/Items.txt"); //step out of the test directory
+    dfItems.Open("../../JMoria/Resources/Items.txt"); // step out of the test directory
 
     pid = new CItemDef;
     context->ItemDef = dfItems.ReadItem(*pid);

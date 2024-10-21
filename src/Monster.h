@@ -11,8 +11,8 @@
 class CAttack
 {
 public:
-	CAttack():m_dwType(-1),m_dwEffect(-1),m_szDamage(NULL){};
-	~CAttack(){};
+	CAttack():m_dwType(-1), m_dwEffect(-1), m_szDamage(NULL){}
+	~CAttack(){}
 	int m_dwType;
 	int m_dwEffect;
 	char *m_szDamage;
@@ -44,9 +44,9 @@ public:
         sprintf(m_szAppear, "1d1");
 	};
 	~CMonsterDef()
-	{
+	 {
 		if(m_szName)
-		{
+		 {
 			delete [] m_szName;
 			m_szName = NULL;
 		}
@@ -94,7 +94,7 @@ public:
 	float m_fExpValue; // how much XP do you get for killing this monster
 protected:
 private:
-    
+
 	// Member Functions
 public:
 protected:
@@ -110,7 +110,7 @@ public:
     float m_fCurHP;
     float m_fLastHPTime;
 	float m_fCurAC;
-//	JVector m_vPos;
+// 	JVector m_vPos;
     float m_fColorChangeInterval;
     float m_fBreedInterval;
 	CMonsterDef *m_md;
@@ -120,13 +120,13 @@ public:
 	char *GetName()
 	{
 		if( !m_md )
-		{
+		 {
 			return NULL;
 		}
 
 		return m_md->m_szName;
     };
-    
+
     float Attack();
     float Damage( float fDamageMult );
 
@@ -134,31 +134,31 @@ public:
 	int		TakeDamage( float fDamageMult );
 
 	JVector GetPos()
-	{
+	 {
 		if( m_pBrain != NULL )
-		{
+		 {
 			return m_pBrain->m_vPos;
 		}
 
-		return JVector(-9999,-9999);
+		return JVector(-9999, -9999);
 	}
 
 	void SetPos(JVector vNewPos)
-	{
+	 {
 		if( m_pBrain != NULL )
-		{
+		 {
 			m_pBrain->m_vPos = vNewPos;
 		}
 	}
 protected:
     void SetColor();
 private:
-    
+
 	// Member Functions
 public:
 	CMonster();
 	~CMonster();
-    
+
 	static JResult CreateMonster(CMonsterDef *pmd);
 	void Breed();
 	JResult SpawnMonster();

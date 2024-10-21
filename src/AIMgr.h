@@ -24,13 +24,13 @@ class CAIBrain
 {
 public:
 	CAIBrain();
-	virtual ~CAIBrain() {};
+	virtual ~CAIBrain() {}
 
 	float m_fSpeed;
 	int m_dwMoveType;
 	JFVector m_vPos;
     CLink <CAIBrain> *m_pllLink;
-    
+
 	bool Update( float fCurTime );
 
 	bool SetRandomDest(float fCurTime);
@@ -41,8 +41,8 @@ public:
 	bool UpdateGoToDest( float fCurTime );
 	bool UpdateSeek( float fCurTime );
 
-	void SetState( eBrainState newState ) { m_eBrainState = newState; m_fStateTicks = 0.0f; };
-	void SetParent( CMonster *newParent ) { m_pParent = newParent; };
+	void SetState( eBrainState newState ) { m_eBrainState = newState; m_fStateTicks = 0.0f; }
+	void SetParent( CMonster *newParent ) { m_pParent = newParent; }
 protected:
 	float m_fStateTicks;
 	JVector m_vVel;
@@ -55,7 +55,7 @@ class CAIMgr
 {
 public:
 	CAIMgr();
-	virtual ~CAIMgr() {};
+	virtual ~CAIMgr() {}
 	void Init();
 
 	bool Update( float fCurTime );

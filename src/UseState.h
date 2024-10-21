@@ -31,14 +31,14 @@ private:
 	// Member Functions
 public:
 	CUseState();
-	~CUseState() {};
+	~CUseState() {}
 
 
-	virtual void OnUpdate(float fCurTime) {};
+	virtual void OnUpdate(float fCurTime) {}
 	virtual int OnBaseHandleKey( SDL_Keysym *keysym, eUseModifier whichUse );
 	virtual int OnHandleKey( SDL_Keysym *keysym );
-    
-    eUseModifier GetModifier() { return m_eCurModifier; };
+
+    eUseModifier GetModifier() { return m_eCurModifier; }
 protected:
 	CLink<CItem>	*GetResponse(eUseModifier whichUse);
 
@@ -59,10 +59,10 @@ private:
 
 	bool TestRemove();
 	bool DoRemove();
-    
+
     bool TestDrop();
     bool DoDrop();
-    
+
     bool TestQuaff();
     bool DoQuaff();
 

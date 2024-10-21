@@ -14,7 +14,7 @@ class CMonster;
 
 class CClass
 {
-//Methods
+// Methods
 public:
     CClass():
     m_szHD(NULL)
@@ -33,7 +33,7 @@ public:
 
         m_szHD = new char[10];
         sprintf(m_szHD, CLASS_HD_WARRIOR);
-        
+
         memset(m_szName, 0, MAX_STRING_LENGTH);
         strcpy(m_szName, "Warrior");
     };
@@ -102,7 +102,7 @@ public:
         m_fHitPoints = Util::Roll(m_pClass->m_szHD);
         m_fCurHitPoints = m_fHitPoints;
     };
-    ~CPlayer() { Term(); };
+    ~CPlayer() { Term(); }
 
 	void Init();
     JResult SpawnPlayer();
@@ -129,11 +129,11 @@ public:
             m_szDamage = NULL;
         }
     };
-    char *GetName() { return m_szName; };
-    float GetLevel() { return m_fLevel; };
-    CClass *GetClass() { return m_pClass; };
-    CRace *GetRace() { return m_pRace; };
-    float GetExperience() { return m_fExperience; };
+    char *GetName() { return m_szName; }
+    float GetLevel() { return m_fLevel; }
+    CClass *GetClass() { return m_pClass; }
+    CRace *GetRace() { return m_pRace; }
+    float GetExperience() { return m_fExperience; }
 	bool Update( float fCurTime );
 	void PreDraw();
 	void Draw();
@@ -151,12 +151,12 @@ public:
 
     bool IsRemovable(CLink<CItem> *pLink);
     bool Remove(CLink<CItem> *pLink);
-    
+
     bool IsDrinkable(CLink<CItem> *pLink);
     bool Quaff(CLink<CItem> *pLink);
-    
+
     bool SetName( const char *szName );
-    
+
     float Attack();
     float Damage( float fDamageMult );
 
@@ -177,9 +177,9 @@ public:
     char *m_szDamage;
     float m_fDamageModifier;
     float m_fToHitModifier;
-    
+
     char *m_szKilledBy;
-    
+
     bool m_bIsRested;
     bool m_bIsDisturbed;
 protected:

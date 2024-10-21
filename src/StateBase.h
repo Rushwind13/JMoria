@@ -4,7 +4,7 @@
 #include "sdl.h"
 #else
 #include "SDL2/SDL.h"
-#endif //__WIN32__
+#endif // __WIN32__
 
 class CStateBase
 {
@@ -12,19 +12,19 @@ class CStateBase
 public:
 protected:
 private:
-	
+
 	// Member Functions
 public:
-	CStateBase() {};
-	~CStateBase() {};
-	
+	CStateBase() {}
+	~CStateBase() {}
+
 	int HandleKey( SDL_Keysym *keysym )
 	{
 		switch ( keysym->sym )
-		{
+		 {
 		case SDLK_c:
 			if( keysym->mod & KMOD_CTRL )
-			{
+			 {
 				// ^C was pressed; bye bye.
 				return( JQUITREQUEST );
 			}
@@ -32,8 +32,8 @@ public:
 		case SDLK_F1:
 			// F1 key was pressed
 			// this toggles fullscreen mode
-			
-			//SDL_WM_ToggleFullScreen( surface );
+
+			// SDL_WM_ToggleFullScreen( surface );
 			break;
         case SDLK_LSHIFT:
         case SDLK_RSHIFT:
@@ -48,13 +48,13 @@ public:
 
 		return OnHandleKey(keysym);
 	};
-    void Update(float fCurTime) { OnUpdate(fCurTime); };
-	
+    void Update(float fCurTime) { OnUpdate(fCurTime); }
+
 protected:
     virtual int OnHandleKey( SDL_Keysym *keysym ) =0;
     virtual void OnUpdate(float fCurTime)=0;
     virtual void ResetToState( int newstate ) =0;
-    
+
     char GetAlpha(SDL_Keysym *keysym)
     {
         char cBase = 'a';
@@ -69,10 +69,10 @@ protected:
         {
             return cBase + keysym->sym - SDLK_a;
         }
-        
+
         return nul;
     }
-    
+
     char GetNumeric(SDL_Keysym *keysym)
     {
         char cBase = '0';
@@ -89,20 +89,20 @@ protected:
         {
             return cBase + keysym->sym - SDLK_0;
         }
-        
+
         return nul;
     }
-    
+
     char GetAlphaNumeric( SDL_Keysym *keysym )
     {
         if( keysym->sym == SDLK_SPACE ) return ' ';
-        
+
         char retval = GetAlpha(keysym);
         if( retval == nul )
         {
             retval = GetNumeric(keysym);
         }
-        
+
         return retval;
     }
 
@@ -117,51 +117,51 @@ protected:
         {
             return true;
         }
-        
+
         return false;
     }
-    
+
     void GetDir(SDL_Keysym *keysym, JVector &vDir)
     {
         switch( keysym->sym )
         {
             case SDLK_UP:
             case SDLK_KP_8:
-                //up
+                // up
                 vDir.y = -1;
                 break;
             case SDLK_DOWN:
             case SDLK_KP_2:
-                //down
+                // down
                 vDir.y = 1;
                 break;
             case SDLK_LEFT:
             case SDLK_KP_4:
-                //left
+                // left
                 vDir.x = -1;
                 break;
             case SDLK_RIGHT:
             case SDLK_KP_6:
                 vDir.x = 1;
-                //right
+                // right
                 break;
             case SDLK_KP_7:
-                //up + left
+                // up + left
                 vDir.x = -1;
                 vDir.y = -1;
                 break;
             case SDLK_KP_9:
-                //up + right
+                // up + right
                 vDir.x =  1;
                 vDir.y = -1;
                 break;
             case SDLK_KP_1:
-                //down + left
+                // down + left
                 vDir.x = -1;
                 vDir.y =  1;
                 break;
             case SDLK_KP_3:
-                //down + right
+                // down + right
                 vDir.x = 1;
                 vDir.y = 1;
                 break;
@@ -172,10 +172,10 @@ protected:
             default:
                 // nothing
                 break;
-                
+
         }
     }
-	
+
 private:
 };
-#endif //__STATEBASE_H__
+#endif // __STATEBASE_H__

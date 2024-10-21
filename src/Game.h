@@ -1,11 +1,11 @@
 #ifndef __GAME_H__
 #define __GAME_H__
 #include "JMDefs.h"
-//#include "Render.h"
-//#include "Player.h"
-//#include "Dungeon.h"
-//#include "DisplayText.h"
-//#include "States.h"
+// #include "Render.h"
+// #include "Player.h"
+// #include "Dungeon.h"
+// #include "DisplayText.h"
+// #include "States.h"
 
 class CRender;
 class CDungeon;
@@ -25,26 +25,26 @@ class CGame
 {
 public:
 	CGame();
-	~CGame() { Quit(0); };
+	~CGame() { Quit(0); }
 
 	JResult Init();
 	bool Update(float fCurTime); // someday figure out why this doesn't work...
 	void HandleEvents(int &isActive, int &done);
 	void Draw();
 
-	CRender *GetRender() { return m_pRender; };
-	CDungeon *GetDungeon() { return m_pDungeon; };
-	CPlayer *GetPlayer() { return m_pPlayer; };
-    CDisplayText *GetMsgs() { return m_pMsgsDT; };
-    CDisplayText *GetStats() { return m_pStatsDT; };
-    CDisplayText *GetInv() { return m_pInvDT; };
-    CDisplayText *GetEquip() { return m_pEquipDT; };
-    CDisplayText *GetUse() { return m_pUseDT; };
-    CDisplayText *GetEnd() { return m_pEndGameDT; };
-	CAIMgr *GetAIMgr() { return m_pAIMgr; };
+	CRender *GetRender() { return m_pRender; }
+	CDungeon *GetDungeon() { return m_pDungeon; }
+	CPlayer *GetPlayer() { return m_pPlayer; }
+    CDisplayText *GetMsgs() { return m_pMsgsDT; }
+    CDisplayText *GetStats() { return m_pStatsDT; }
+    CDisplayText *GetInv() { return m_pInvDT; }
+    CDisplayText *GetEquip() { return m_pEquipDT; }
+    CDisplayText *GetUse() { return m_pUseDT; }
+    CDisplayText *GetEnd() { return m_pEndGameDT; }
+	CAIMgr *GetAIMgr() { return m_pAIMgr; }
 	void Quit( int returncode );
 	void SetState( int eNewState );
-	CStateBase *GetGameState() { return m_pCurState; };
+	CStateBase *GetGameState() { return m_pCurState; }
 	float GetFTime() { return m_fGameTime; }
 	int GetITime() { return (int)m_fGameTime; }
 	int GetTime() { return GetITime(); }

@@ -2,13 +2,13 @@
 // implementation of the SDL/OpenGL Render
 // Jimbo S. Harris 5/12/2002
 
-//#define DISPLAY_FRAMERATE
-//#define _DEBUG
+// #define DISPLAY_FRAMERATE
+// #define _DEBUG
 
 #include "Render.h"
 #include "OpenGL/gl.h"
 #include "SDL2/SDL.h"
-//#include "Game.h"
+// #include "Game.h"
 
 #ifdef DISPLAY_FRAMERATE
 #include "DisplayText.h"
@@ -26,28 +26,28 @@ JResult CRender::Init( int width, int height, int bpp )
 	// Startup SDL
 	retval = InitSDL();
 	if( retval != JSUCCESS )
-	{
+	 {
 		return retval;
 	}
 
 	// Startup OpenGL
 	retval = InitGL();
 	if( retval != JSUCCESS )
-	{
+	 {
 		return retval;
 	}
 
 	// init the window size
 	retval = ResizeWindow( width, height );
 	if( retval != JSUCCESS )
-	{
+	 {
 		return retval;
 	}
 
 #ifdef DISPLAY_FRAMERATE
 	m_dwFrames = 0;
 	m_dwT0 = 0;
-	m_fps = new CDisplayText( JRect(500,450,  640,480) );
+	m_fps = new CDisplayText( JRect(500, 450,  640, 480) );
 	m_fps->SetFlags(FLAG_TEXT_INVERSE);
 #endif
 
@@ -59,10 +59,10 @@ JResult CRender::InitSDL()
 {
     m_dwWindowFlags  = SDL_WINDOW_OPENGL; // Enable OpenGL in SDL
     m_dwWindowFlags |= SDL_WINDOW_RESIZABLE; // Enable window resizing
-    
+
     // Sets up OpenGL double buffering
     SDL_GL_SetAttribute( SDL_GL_DOUBLEBUFFER, 1 );
-    
+
     // Allocate window and context.
     char window_title[32];
     sprintf(window_title, "JMoria %s", VERSION);
@@ -103,11 +103,11 @@ JResult CRender::InitGL()
 
 	// parms are: "What color is the background?" and "What color is the picture?", respectively.
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) ;
-	//glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA) ;
-	//glBlendFunc(GL_ZERO, GL_SRC_ALPHA) ;
-	//glBlendFunc(GL_ONE, GL_DST_ALPHA) ;
-	//glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
-	//glBlendFunc( GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA );
+	// glBlendFunc(GL_SRC_ALPHA, GL_SRC_ALPHA) ;
+	// glBlendFunc(GL_ZERO, GL_SRC_ALPHA) ;
+	// glBlendFunc(GL_ONE, GL_DST_ALPHA) ;
+	// glBlendFunc( GL_ONE, GL_ONE_MINUS_SRC_ALPHA );
+	// glBlendFunc( GL_DST_ALPHA, GL_ONE_MINUS_DST_ALPHA );
 
     // The Type Of Depth Test To Do
     glDepthFunc( GL_LEQUAL );
@@ -119,22 +119,22 @@ JResult CRender::ResizeWindow( int width, int height )
 {
     // Setup our viewport.
     glViewport( 0, 0, ( GLint )m_dwScreenWidth, ( GLint )m_dwScreenHeight );
-    
+
     // change to the projection matrix and set
     // our viewing volume.
-    
+
     glMatrixMode( GL_PROJECTION );
     glLoadIdentity( );
-    
+
     // Set our perspective
 	glOrtho( -DUNG_WIDTH, DUNG_WIDTH, DUNG_HEIGHT, -DUNG_HEIGHT, -1, 1 );
-    
+
 	// Make sure we're changing the model view and not the projection
     glMatrixMode( GL_MODELVIEW );
-    
+
     // Reset The View
     glLoadIdentity( );
-    
+
     return( JSUCCESS );
 }
 
@@ -145,7 +145,7 @@ void CRender::PreDraw()
 }
 
 void CRender::PostDraw()
-{    
+{
 #ifdef DISPLAY_FRAMERATE
 	m_fps->Draw();
     // Gather our frames per second
@@ -209,12 +209,12 @@ bool CRender::DrawTile(const JFVector &vPos, JVector &vSize, JIVector &vTile, JF
 	float t = vTile.y * vTexels.y;
 	float s1 = (vTile.x+1) * vTexels.x;
 	float t1 = (vTile.y+1) * vTexels.y;
-    
-    
 
-    glTexCoord2f( s,  t  );    glVertex2f( vPos.x,    vPos.y    );    
-	glTexCoord2f( s1, t  );	glVertex2f( vPos1.x,vPos.y	);
-	glTexCoord2f( s1, t1 );	glVertex2f( vPos1.x,vPos1.y	);
+
+
+    glTexCoord2f( s,  t  );    glVertex2f( vPos.x,    vPos.y    );
+	glTexCoord2f( s1, t  );	glVertex2f( vPos1.x, vPos.y	);
+	glTexCoord2f( s1, t1 );	glVertex2f( vPos1.x, vPos1.y	);
 	glTexCoord2f( s,  t1 );	glVertex2f( vPos.x,	vPos1.y	);
 
 	return true;
@@ -225,10 +225,10 @@ bool CRender::DrawTile(const JFVector &vPos, JVector &vSize, JIVector &vTile)
 	JFVector vPos1(vPos.x + vSize.x, vPos.y + vSize.y);
 
 	glDisable(GL_TEXTURE_2D);
-    
-    glVertex2f( vPos.x,    vPos.y    );    
-	glVertex2f( vPos1.x,vPos.y	);
-	glVertex2f( vPos1.x,vPos1.y	);
+
+    glVertex2f( vPos.x,    vPos.y    );
+	glVertex2f( vPos1.x, vPos.y	);
+	glVertex2f( vPos1.x, vPos1.y	);
 	glVertex2f( vPos.x,	vPos1.y	);
 
 	glEnable(GL_TEXTURE_2D);
@@ -247,7 +247,7 @@ void CRender::PreDrawObjects( JRect rcBounds, uint32 Texture, bool bTranslate, b
 		glLoadIdentity();
 
 	if( bTranslate )
-	{
+	 {
 		glTranslatef( VEC_EXPAND(*vTranslate), 0.0f );
 	}
 
@@ -256,14 +256,14 @@ void CRender::PreDrawObjects( JRect rcBounds, uint32 Texture, bool bTranslate, b
 
 	glBindTexture(GL_TEXTURE_2D, Texture);
 	if( !glIsTexture( Texture ) )
-	{
+	 {
 		printf("Hey! That's not a texture.\n");
 	}
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    //glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE); 
+    // glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 	glEnable(GL_TEXTURE_2D);
 
 	// Always Draw in Front
@@ -272,11 +272,11 @@ void CRender::PreDrawObjects( JRect rcBounds, uint32 Texture, bool bTranslate, b
 
 	glEnable(GL_BLEND);
 	if( bInverse )
-	{
+	 {
 		glBlendFunc(GL_SRC_COLOR, GL_ONE_MINUS_SRC_ALPHA);
 	}
 	else
-	{
+	 {
 		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	}
 }
@@ -297,22 +297,22 @@ JResult CRender::PostLoadTexture( uint32 &texture, void *data, int dwColorsPerPi
 {
 	uint32 dwColorDef = GL_RGBA;
 	if( bIsBMP )
-	{
+	 {
 		dwColorDef = GL_BGRA_EXT;
 	}
 	glGenTextures( 1, &texture );
 	if( texture == 0 )
-	{
+	 {
 		return JERROR();
 	}
 
 	glBindTexture( GL_TEXTURE_2D, texture );
 
 	if( !glIsTexture( texture ) )
-	{
+	 {
 		return JERROR();
 	}
-    
+
 	// Generate The Texture
 	glTexImage2D( GL_TEXTURE_2D, 0, dwColorsPerPixel, dwImageWidth,
 		dwImageHeight, 0, dwColorDef,
@@ -320,14 +320,14 @@ JResult CRender::PostLoadTexture( uint32 &texture, void *data, int dwColorsPerPi
 
 #ifdef _DEBUG
 	GLint width;
-    glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width );    
+    glGetTexLevelParameteriv( GL_TEXTURE_2D, 0, GL_TEXTURE_WIDTH, &width );
 #endif // _DEBUG
 
 	// Linear Filtering
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-    
-    
+
+
 	return JSUCCESS;
 }
 #endif // postload needed

@@ -10,16 +10,16 @@
 #include "TileSet.h"
 #include "DungeonMap.h"
 
-//class CMonster;
-//class CItem;
+// class CMonster;
+// class CItem;
 
-//#define DUNG_FONT_COURIER
+// #define DUNG_FONT_COURIER
 #ifdef DUNG_FONT_COURIER
 #define DUNG_TILESET CTileset("Resources/Courier.png", 32, 32 )
-#define DUNG_ASPECT vSize(1.0f,1.0f)
+#define DUNG_ASPECT vSize(1.0f, 1.0f)
 #else
-#define DUNG_TILESET CTileset("Resources/SmallText6X8.png", 6,8 )
-#define DUNG_ASPECT vSize(0.75f,1.0f)
+#define DUNG_TILESET CTileset("Resources/SmallText6X8.png", 6, 8 )
+#define DUNG_ASPECT vSize(0.75f, 1.0f)
 #endif
 
 #define DUNG_ZOOM_MIN		4
@@ -52,15 +52,15 @@ public:
 	  m_dwWidth(0),
 	  m_dwHeight(0),
 	  depth(0),
-	  //m_Tileset(NULL),
+	  // m_Tileset(NULL),
 	  m_dtdlist(NULL),
 	  m_Rect( -DUNG_WIDTH, DUNG_HEIGHT, DUNG_WIDTH, -DUNG_HEIGHT ),
 	  m_vfTranslate( (int)(-DUNG_WIDTH*0.5f), (int)(-DUNG_HEIGHT*0.5f) ),
 	  m_dwZoom(DUNG_ZOOM_NORMAL),
-	  //m_dmTownLevel(NULL),
+	  // m_dmTownLevel(NULL),
 	  m_dmCurLevel(NULL)
 	  {};
-	~CDungeon() { Term(); };
+	~CDungeon() { Term(); }
 	void PreDraw()	;
 	void Draw()	;
     void DrawDungeon();
@@ -74,14 +74,14 @@ public:
     JResult OnChangeLevel(const int delta);
 
 	void Zoom( Uint16 dwDelta )
-	{
+	 {
 		m_dwZoom += dwDelta;
 		if( m_dwZoom < DUNG_ZOOM_MIN )
-		{
+		 {
 			m_dwZoom = DUNG_ZOOM_MIN;
 		}
 		else if ( m_dwZoom > DUNG_ZOOM_MAX )
-		{
+		 {
 			m_dwZoom = DUNG_ZOOM_MAX;
 		}
 	}
@@ -89,7 +89,7 @@ public:
 	CDungeonTile *GetITile( JIVector &vPos )
 	{
 		if( !vPos.IsInWorld() )
-		{
+		 {
 			return NULL;
 		}
 		return (m_Tiles + (vPos.y * DUNG_WIDTH) + vPos.x ); // going to have to work in offsets, too, if the dungeon's bigger than the screen. --Jimbo
@@ -98,7 +98,7 @@ public:
 	{
 		JIVector checkPos((int)vPos.x, (int)vPos.y);
 		if( !checkPos.IsInWorld() )
-		{
+		 {
 			return NULL;
 		}
 		// casting to int is *absolutely* the wrong way to do this. fix this once it inevitably breaks.
@@ -122,7 +122,7 @@ protected:
 	float m_fOpenFloorArea; // How much of the current level is open?
 	void extracted();
 
-	//CDungeonMap m_dmTownLevel;	// The Dungeon remembers where you live...
+	// CDungeonMap m_dmTownLevel;	// The Dungeon remembers where you live...
 
 	JResult CreateNewLevel(const int delta);
 	JResult CreateMap();

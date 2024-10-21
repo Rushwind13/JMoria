@@ -5,7 +5,7 @@
 //
 #ifdef __WIN32__
 #include <windows.h>
-#endif //__WIN32__
+#endif // __WIN32__
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
@@ -31,7 +31,7 @@ int GetRandom( int lo, int hi )
 {
 	// deal with coinflip "getrandom(0,1)"
 	if( (hi - lo) == 1 )
-	{
+	 {
 		return( (rand() & 1) ? hi : lo );
 	}
 
@@ -47,18 +47,18 @@ int GetRandom( int lo, int hi )
 float Roll( int dice, int sides )
 {
 	if( sides <= 0 )
-	{
+	 {
 		return 0.0f;
 	}
-	
+
 	float total = 0.0f;
 	int die;
-	
+
 	for( die = 0; die < dice; die++ )
-	{
+	 {
 		total += GetRandom( 1.0f, (float)sides );
 	}
-	
+
 	return total;
 }
 
@@ -66,36 +66,36 @@ float Roll( int dice, int sides )
 float Roll( const char *szFormat )
 {
 	if( !szFormat || *szFormat == nul )
-	{
+	 {
 		// You passed in an empty or NULL string!
 		return 0.0f;
 	}
-	
+
 	char *szToken;
 	int dice;
 	int sides;
 	char *c;
 	szToken = new char[strlen(szFormat)+1];
-	
+
 	strcpy( szToken, szFormat );
-	
+
 	c = strtok( szToken, "d" );
 	if( c == NULL )
-	{
+	 {
 		// You passed in a malformed string ( no 'd' )
 		return 0.0f;
 	}
-	
+
 	dice = atoi( c );
 	c = strtok( NULL, "d" );
 	if( c == NULL )
-	{
+	 {
 		// You passed in a malformed string (nothing after the 'd')
 		return 0.0f;
 	}
-	
+
 	sides = atoi( c );
-	return Roll( dice, sides ); 
+	return Roll( dice, sides );
 }
 
 bool IsInWorld( JFVector vIn )
@@ -107,13 +107,13 @@ bool IsInWorld( JRect rcIn )
 {
 	return rcIn.IsInWorld();
 }
-    
+
 unsigned int GetTickCount()
 {
     struct timeval tv;
     if(gettimeofday(&tv, NULL) != 0)
         return 0;
-    
+
     return (unsigned int)((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
 }
 

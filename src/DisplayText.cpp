@@ -36,10 +36,10 @@ m_rcViewport( 0, 480, 640, 0 )
 	memset( m_szText, 0, sizeof( *m_szText ) );
 	m_szDrawPtr = m_szText;
 
-	m_TileSet = new CTileset("Resources/SmallText6X8.png", 6,8);
+	m_TileSet = new CTileset("Resources/SmallText6X8.png", 6, 8);
 
 	m_Color.SetColor( 0, 0, 0, 255 );
-    m_BoundingBoxColor.SetColor( 128,170,192, inAlpha );
+    m_BoundingBoxColor.SetColor( 128, 170, 192, inAlpha );
 }
 
 bool CDisplayText::Update( float fCurTime )
@@ -53,11 +53,11 @@ void CDisplayText::PreDraw()
 	bool bInverse;
 
 	if( m_dwFlags & FLAG_TEXT_INVERSE )
-	{
+	 {
 		bInverse = true;
 	}
 	else
-	{
+	 {
 		bInverse = false;
 	}
 	g_pGame->GetRender()->PreDrawObjects( m_rcViewport, m_TileSet->Texture(), false, bInverse);
@@ -87,7 +87,7 @@ void CDisplayText::DrawStr( int x, int y, char *szString )
 
 void CDisplayText::DrawStr(int x, int y, bool bBoundsCheck, int dwYMax, char *szString )
 {
-	//printf("Trying to draw string: %s\n", szString);
+	// printf("Trying to draw string: %s\n", szString);
 	JVector vScreen( (float)x, (float)y );
 	JVector vSize( (float)FONT_DRAW_W, (float)FONT_DRAW_H );
 	char *ptr = szString;
@@ -98,27 +98,27 @@ void CDisplayText::DrawStr(int x, int y, bool bBoundsCheck, int dwYMax, char *sz
 
 	// Do that string parse, baby
 	while( *ptr != nul )
-	{
-        if( *ptr == ' ' ) 
-		{
+	 {
+        if( *ptr == ' ' )
+		 {
 			vScreen.x += FONT_DRAW_W;
 		}
 		else if( *ptr > ' ' && *ptr <= '~' )
-		{
+		 {
 			index = *ptr - ' ' - 1;
 
 			m_TileSet->DrawTile( index, vScreen, vSize, true );
-            
+
 			vScreen.x += FONT_DRAW_W;
 		}
 
 		if( *ptr == '\n' )
-		{
+		 {
 			vScreen.Init( (float)x, (float)(vScreen.y + FONT_DRAW_H) );
 
 			// Don't scroll off the bottom of the bounding box
 			if( bBoundsCheck && vScreen.y > dwYMax )
-			{
+			 {
 				break;
 			}
 		}
@@ -152,13 +152,13 @@ void CDisplayText::Paginate()
 
 	ptr = strchr( m_szText, nul );
 	while( ptr > m_szText )
-	{
+	 {
 		if( *ptr == '\n' )
-		{
+		 {
 			dwAddLines++;
 		}
 		if( dwAddLines == dwAddLinesMax )
-		{
+		 {
 			// ran out of room; sorry.
 			ptr++;
 			break;
@@ -167,7 +167,7 @@ void CDisplayText::Paginate()
 	}
 
 	if( ptr == m_szText && dwAddLines > m_dwUsedLines )
-	{
+	 {
 		m_dwFreeLines = dwAddLines - m_dwUsedLines + 1;
 	}
 
@@ -201,25 +201,25 @@ void CDisplayText::DrawFormattedStr(const char *szString)
 	ptr = szBuffer;
 
 	while( *ptr )
-	{
+	 {
 		if( *ptr >= ' ' && *ptr <= '~' )
-		{
+		 {
 			vPos.x += FONT_DRAW_W;
 		}
 		else if( *ptr == '\n' )
-		{
+		 {
 			vPos.x = m_Rect.Left();
 		}
 
 		if( vPos.x > m_Rect.Right() )
-		{
+		 {
 			ptr++;
-            
+
 			if( m_dwFlags & FLAG_TEXT_WRAP_WHITESPACE )
-			{
+			 {
 				// Find the last space
 				while( ptr > szBuffer && *ptr != ' ' )
-				{
+				 {
 					ptr--;
 				}
 			}
@@ -230,11 +230,11 @@ void CDisplayText::DrawFormattedStr(const char *szString)
 
 			// Kill the leading space (if necessary)
 			if( m_dwFlags & FLAG_TEXT_WRAP_WHITESPACE && szBuffer2[0] == ' ' )
-			{
+			 {
 				ptr2 = &szBuffer2[1];
 			}
 			else
-			{
+			 {
 				ptr2 = szBuffer2;
 			}
 
@@ -242,7 +242,7 @@ void CDisplayText::DrawFormattedStr(const char *szString)
 			vPos.x = m_Rect.Left();
 		}
 		else
-		{
+		 {
 			ptr++;
 		}
 	}
@@ -251,10 +251,10 @@ void CDisplayText::DrawFormattedStr(const char *szString)
 	// strings at the top of the bounding box
 	ptr = m_szText;
 	while( strlen( ptr ) + strlen( szBuffer ) > TEXT_MAXCHARS )
-	{
+	 {
 		ptr = strchr( ptr, '\n' );
 		if( !ptr )
-		{
+		 {
 			assert( !"CDisplayText::DrawFormattedString: string too long!" );
 		}
 
@@ -263,7 +263,7 @@ void CDisplayText::DrawFormattedStr(const char *szString)
 
 	// If there are strings that need to be removed, do that now.
 	if( ptr != m_szText )
-	{
+	 {
 		strcpy( szBuffer2, ptr );
 		strcpy( m_szText, szBuffer2 );
 	}
@@ -284,7 +284,7 @@ void CDisplayText::DisplayList( JLinkList<CItem> *pList, const CDisplayMeta *pMe
     {
         pItem = pLink->m_lpData;
         Printf("%c - %s\n", cListId, pItem->GetName());
-        
+
         if( cListId < pMeta->limit )
         {
             cListId++;
@@ -296,7 +296,7 @@ void CDisplayText::DisplayList( JLinkList<CItem> *pList, const CDisplayMeta *pMe
         }
         pLink = pList->GetNext(pLink);
     }
-    
+
 }
 void CDisplayText::DisplayList( JLinkList<CScore> *pList, const CDisplayMeta *pMeta, const uint8 dwIndex )
 {
@@ -310,7 +310,7 @@ void CDisplayText::DisplayList( JLinkList<CScore> *pList, const CDisplayMeta *pM
     {
         pItem = pLink->m_lpData;
         Printf("%d - %s\n", cListId, pItem->GetName());
-        
+
         if( cListId < pMeta->limit )
         {
             cListId++;
@@ -322,5 +322,5 @@ void CDisplayText::DisplayList( JLinkList<CScore> *pList, const CDisplayMeta *pM
         }
         pLink = pList->GetNext(pLink);
     }
-    
+
 }

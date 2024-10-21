@@ -62,16 +62,16 @@ public:
     {
         m_szName = new char[strlen(g_pGame->GetPlayer()->GetName())+1];
         strcpy(m_szName, g_pGame->GetPlayer()->GetName());
-        
+
         m_szClass = new char[strlen(g_pGame->GetPlayer()->GetClass()->m_szName)+1];
         strcpy(m_szClass, g_pGame->GetPlayer()->GetClass()->m_szName);
-        
+
         m_szRace = new char[strlen(g_pGame->GetPlayer()->GetRace()->m_szName)+1];
         strcpy(m_szRace, g_pGame->GetPlayer()->GetRace()->m_szName);
-        
+
         m_szKilledBy = new char[strlen(g_pGame->GetPlayer()->m_szKilledBy)+1];
         strcpy(m_szKilledBy, g_pGame->GetPlayer()->m_szKilledBy);
-        
+
         m_dwLevel = g_pGame->GetPlayer()->GetLevel();
         m_dwDepth = g_pGame->GetDungeon()->depth;
         m_dwScore = (int)g_pGame->GetPlayer()->GetExperience();
@@ -85,7 +85,7 @@ public:
         strftime( datebuffer, sizeof(datebuffer), "%Y-%m-%d", localtime(&m_dwDate));
         sprintf(m_szToString, "%d - %s, level %d %s %s, killed at %d' by a %s (%s)", m_dwScore, m_szName, m_dwLevel, m_szRace, m_szClass, (m_dwDepth*50), m_szKilledBy, datebuffer);
     };
-    char *GetName() { return m_szToString; };
+    char *GetName() { return m_szToString; }
 public:
   char *m_szName;
   char *m_szClass;
@@ -128,7 +128,7 @@ public:
     CEndGameState();
     ~CEndGameState();
 
-    virtual void OnUpdate(float fCurTime) {};
+    virtual void OnUpdate(float fCurTime) {}
     virtual int OnBaseHandleKey( SDL_Keysym *keysym );
     virtual int OnHandleKey( SDL_Keysym *keysym );
 protected:

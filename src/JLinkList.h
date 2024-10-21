@@ -13,7 +13,7 @@ public:
 	T	*m_lpData;
     int m_dwIndex;
 	CLink *next, *prev;
-	
+
 	inline CLink( T *pData = NULL, int dwIndex=-1 )
 		:m_lpData(pData),
         m_dwIndex(dwIndex),
@@ -21,7 +21,7 @@ public:
 		prev(NULL)
 	{
 	};
-	
+
 	inline ~CLink(void)
 	{
         if( m_lpData )
@@ -38,8 +38,8 @@ public:
 template <class T> class JStack
 {
 public:
-    inline JStack< T >(): m_lpHead(NULL),m_iNumElements(0){};
-    virtual inline ~JStack(void) { Terminate(); };
+    inline JStack< T >(): m_lpHead(NULL), m_iNumElements(0){}
+    virtual inline ~JStack(void) { Terminate(); }
     void Push( T *pData )
     {
         CLink<T> *pLink = new CLink<T>( pData );
@@ -56,23 +56,23 @@ public:
         CLink<T> *pLink = m_lpHead;
         m_lpHead = pLink->next;
         m_iNumElements--;
-        
+
         return pLink;
     };
-    
+
     void Remove(CLink<T> *pLink)
     {
         delete pLink;
         pLink = NULL;
     };
-    
+
     void Terminate()
     {
         if( m_lpHead == NULL )
         {
             return;
         }
-        
+
         CLink<T> *pLink = m_lpHead;
         CLink<T> *pDel = pLink;
         while( pLink )
@@ -85,14 +85,14 @@ public:
 protected:
     CLink<T>    *m_lpHead;
     int    m_iNumElements;
-    
+
 private:
 };
 
 template <class T> class JLinkList
 {
 public:
-	inline JLinkList< T >(): m_lpHead(NULL),m_iNumElements(0){};
+	inline JLinkList< T >(): m_lpHead(NULL), m_iNumElements(0){}
 	virtual inline ~JLinkList(void)
 	{
 		Terminate();
@@ -113,7 +113,7 @@ public:
             {
                 pLink->prev = NULL;
                 pLink->next = m_lpHead;
-                
+
                 m_lpHead = pLink;
             }
             else
@@ -136,7 +136,7 @@ public:
                         }
                         curr_link->prev = pLink;
                         break;
-                        
+
                     }
                     if( curr_link->next == NULL )
                     {
@@ -154,41 +154,41 @@ public:
         {
             pLink->prev = NULL;
             pLink->next = m_lpHead;
-            
+
             if( m_lpHead != NULL )
             {
                 m_lpHead->prev = pLink;
             }
-            
+
             m_lpHead = pLink;
         }
-		
+
 		m_iNumElements++;
 		return pLink;
 	};
-	
-	CLink <T> *GetHead() { return m_lpHead; };
+
+	CLink <T> *GetHead() { return m_lpHead; }
 	void Remove( CLink <T> *pLink, bool bDelete=true )
 	{
 		if( pLink->next )
-		{
+		 {
 			pLink->next->prev = pLink->prev;
 		}
 
 		if( pLink->prev )
-		{
+		 {
 			pLink->prev->next = pLink->next;
 		}
 
-		
+
 		if( pLink == m_lpHead )
-		{
+		 {
 			if( m_iNumElements == 1 )
-			{
+			 {
 				m_lpHead = NULL;
 			}
 			else
-			{
+			 {
 				m_lpHead = pLink->next;
 			}
 		}
@@ -200,25 +200,25 @@ public:
         }
 		m_iNumElements--;
 	};
-	
+
 	CLink <T> *GetNext( CLink <T> *pLink )
 	{
 		if( pLink->next == m_lpHead )
-		{
+		 {
 			return NULL;
 		}
 		return pLink->next;
 	};
-	
+
 	CLink <T> *GetPrev( CLink <T> *pLink )
 	{
 		if( pLink == m_lpHead )
-		{
+		 {
 			return NULL;
 		}
 		return pLink->prev;
 	};
-    
+
     // Retrieve the Nth entry in the list, or correct position to insert
     CLink <T> *GetLink( int which_link, bool bForceValid=true )
     {
@@ -233,7 +233,7 @@ public:
         {
             // Found the desired entry
             if(curr_link->m_dwIndex == which_link ) return curr_link;
-            
+
             // You've passed the target index, or hit end of list
             if( curr_link->m_dwIndex > which_link || curr_link->next == NULL )
             {
@@ -255,14 +255,14 @@ public:
         return curr_link;
     }
     int length() { return m_iNumElements; }
-	
+
 	void Terminate()
 	{
 		if( m_lpHead == NULL )
-		{
+		 {
 			return;
 		}
-		
+
 		CLink<T> *pLink = m_lpHead;
 		CLink<T> *pDel = m_lpHead;
 		while( pLink )
@@ -272,11 +272,11 @@ public:
 			Remove(pDel);
 		}
 	};
-	
+
 protected:
 	CLink<T>	*m_lpHead;
 	int	m_iNumElements;
-	
+
 private:
 };
 #endif // __LINKLIST_H__

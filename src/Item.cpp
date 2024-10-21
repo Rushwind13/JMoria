@@ -24,7 +24,7 @@ JResult CItem::CreateItem( CItemDef *pid )
         // Apply cursed flag
         pItem->ApplyCursedStatus(5);
 
-        if(g_pGame) 
+        if(g_pGame)
         {
             // Put the item in the world
             pItem->SpawnItem();
@@ -45,11 +45,11 @@ void CItem::Init( CItemDef *pid )
 
 void CItem::ApplyCursedStatus( int likelihood )
 {
-    if( Util::GetRandom(1,100) < likelihood )
+    if( Util::GetRandom(1, 100) < likelihood )
     {
         m_dwFlags |= ITEM_FLAG_CURSED;
-        m_Color.SetColor(255,0,0,255);
-    }    
+        m_Color.SetColor(255, 0, 0, 255);
+    }
 }
 
 JResult CItem::SpawnItem()
@@ -61,8 +61,8 @@ JResult CItem::SpawnItem()
     {
         vTryPos.Init( (float)(Util::GetRandom(0, DUNG_WIDTH-1)), (float)(Util::GetRandom(0, DUNG_HEIGHT-1)) );
 
-        //printf("Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
-        //g_pGame->GetMsgs()->Printf( "Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
+        // printf("Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
+        // g_pGame->GetMsgs()->Printf( "Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
 
         if( g_pGame && g_pGame->GetDungeon()->CanPlaceItemAt(vTryPos) == DUNG_COLL_NO_COLLISION )
         {
@@ -70,7 +70,7 @@ JResult CItem::SpawnItem()
             g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurItem = this;
             bItemSpawned = true;
             printf( "Success!\n" );
-            //g_pGame->GetMsgs()->Printf( "Success!\n" );
+            // g_pGame->GetMsgs()->Printf( "Success!\n" );
         }
     }
 
@@ -93,7 +93,7 @@ void CItem::SetColor()
 
     if( (m_id->m_dwFlags & ITEM_COLOR_MULTI) == ITEM_COLOR_MULTI )
     {
-        int which_color = Util::GetRandom(0,m_id->m_Colors->length()-1);
+        int which_color = Util::GetRandom(0, m_id->m_Colors->length()-1);
         m_Color.SetColor(*(m_id->m_Colors->GetLink(which_color)->m_lpData));
     }
     m_fColorChangeInterval = 0.0f;
@@ -114,10 +114,10 @@ void CItem::Draw()
 
     SetColor();
 
-    //PreDraw();
+    // PreDraw();
     g_pGame->GetDungeon()->m_TileSet->SetTileColor( m_Color );
     g_pGame->GetDungeon()->m_TileSet->DrawTile( item_tile, m_vPos, vSize, false );
-    //PostDraw();
+    // PostDraw();
 }
 
 void CItem::PreDraw()

@@ -10,17 +10,17 @@ public:
 protected:
 	// "temp" variables for level generation go here.
 private:
-	
+
 	// Member Functions
 public:
-	CNewLevelState() {};
-	
-	void OnUpdate(float fCurTime) {};
-	
+	CNewLevelState() {}
+
+	void OnUpdate(float fCurTime) {}
+
 protected:
 	virtual int OnHandleKey( SDL_Keysym *keysym );
 
 private:
 };
 
-#endif //__NEWLEVELSTATE_H__
+#endif // __NEWLEVELSTATE_H__

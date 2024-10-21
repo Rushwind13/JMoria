@@ -20,12 +20,12 @@ bool CAIMgr::Update( float fCurTime )
 	CLink <CAIBrain> *pLink = m_llAIBrains->GetHead();
 
 	if( pLink == NULL )
-	{
+	 {
 		return true;
 	}
 
 	while( pLink != NULL )
-	{
+	 {
 		pLink->m_lpData->Update(fCurTime);
 		pLink = m_llAIBrains->GetNext(pLink);
 	}
@@ -60,7 +60,7 @@ bool CAIBrain::Update( float fCurTime )
     m_pParent->m_fBreedInterval += fCurTime;
     m_pParent->Breed();
 	switch( m_eBrainState )
-	{
+	 {
 	case BRAINSTATE_REST:
 		return UpdateRest(fCurTime);
 		break;
@@ -84,14 +84,14 @@ bool CAIBrain::Update( float fCurTime )
 bool CAIBrain::UpdateSeek( float fCurTime )
 {
 	switch( m_dwMoveType )
-	{
+	 {
 	case MON_AI_100RANDOMMOVE:
-		{
+		 {
 			SetRandomDest( fCurTime );
 		}
 		break;
 	case MON_AI_75RANDOMMOVE:
-		{
+		 {
 		}
 		break;
 	case MON_AI_DONTMOVE:
@@ -116,7 +116,7 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
 	m_fStateTicks += fCurTime * m_fSpeed;
 
 	while( m_fStateTicks >= 1.0f )
-	{
+	 {
         didWalk = true;
         JVector vTryPos(m_vPos+m_vVel);
         if( Util::IsInWorld(vTryPos) )
@@ -156,7 +156,7 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
                         g_pGame->GetMsgs()->Printf( "(It was an excellent hit! (x2 damage)\n" );
                         fDamageMult = 2.0f;
                     }
-                    
+
                     float fDamage = m_pParent->Damage(fDamageMult);
                     g_pGame->GetPlayer()->TakeDamage(fDamage, m_pParent->GetName());
                 }
@@ -190,7 +190,7 @@ bool CAIBrain::UpdateIdle( float fCurTime )
 bool CAIBrain::SetRandomDest(float fCurTime)
 {
 	JFVector delta, dest;
-	delta.Init( (float)(Util::GetRandom(-1,1)), (float)(Util::GetRandom(-1,1)) );
+	delta.Init( (float)(Util::GetRandom(-1, 1)), (float)(Util::GetRandom(-1, 1)) );
 
 	dest = m_vPos + delta;
 

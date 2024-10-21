@@ -7,8 +7,8 @@
 class CEffect
 {
 public:
-    CEffect():m_dwEffect(-1),m_szAmount(NULL){};
-    ~CEffect(){};
+    CEffect():m_dwEffect(-1), m_szAmount(NULL){}
+    ~CEffect(){}
     int m_dwEffect;
     char *m_szAmount;
 };
@@ -103,7 +103,7 @@ protected:
     float m_fColorChangeInterval;
     JColor m_Color;
 private:
-    
+
     // Member Functions
 public:
     void Init( CItemDef *pid );
@@ -113,10 +113,10 @@ public:
     bool IsOpenable() { return false; } // for chests, etc.
     bool IsCloseable() { return false; } // closeable pickup?
     bool IsTunnelable() { return false; } // Tunnelable pickup? unlikely.
-    
+
     static JResult CreateItem( CItemDef *pid );
     JResult SpawnItem();
-    
+
     bool Update( float fCurTime );
     void PreDraw();
     void Draw();

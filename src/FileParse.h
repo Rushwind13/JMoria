@@ -12,8 +12,8 @@ class CDataFile
 {
 	// Member variables
 public:
-	CDataFile() {};
-	~CDataFile() {};
+	CDataFile() {}
+	~CDataFile() {}
 
     bool Open( const char *szFilename );
     bool Append( const char *szFilename );

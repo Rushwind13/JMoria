@@ -37,12 +37,12 @@ int CUseState::OnHandleWield( SDL_Keysym *keysym )
 	retval = OnBaseHandleKey( keysym, USE_WIELD );
 
 	if( retval == JRESETSTATE )
-	{
+	 {
 		return 0;
 	}
 
 	if( retval != JSUCCESS )
-	{
+	 {
 		printf( "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
 		g_pGame->GetMsgs()->Printf("Choose an item from inventory(a to z):\n");
 		return 0;
@@ -51,18 +51,18 @@ int CUseState::OnHandleWield( SDL_Keysym *keysym )
 	// We got a alpha key; do a "wield" of that item
 	printf( "WIELD got a selection\n" );
 	if( TestWield() )
-	{
+	 {
 		if( DoWield() )
-		{
+		 {
 			g_pGame->GetMsgs()->Printf("You are now wielding the %s.\n", m_pSelected->m_lpData->GetName());
 		}
 		else
-		{
+		 {
 			g_pGame->GetMsgs()->Printf("The %s slips from your fingers and returns to your pack!\n", m_pSelected->m_lpData->GetName());
 		}
 	}
 	else
-	{
+	 {
 		g_pGame->GetMsgs()->Printf("You can't wield a %s!\n", m_pSelected->m_lpData->GetName());
 	}
     m_pSelected = NULL;
@@ -80,7 +80,7 @@ int CUseState::OnHandleRemove( SDL_Keysym *keysym )
 	retval = OnBaseHandleKey( keysym, USE_REMOVE );
 
 	if( retval == JRESETSTATE )
-	{
+	 {
 		return 0;
 	}
 
@@ -121,19 +121,19 @@ int CUseState::OnHandleDrop( SDL_Keysym *keysym )
     int retval;
     printf( "Handling DROP \n" );
     retval = OnBaseHandleKey( keysym, USE_DROP );
-    
+
     if( retval == JRESETSTATE )
     {
         return 0;
     }
-    
+
     if( retval != JSUCCESS )
     {
         printf( "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
         g_pGame->GetMsgs()->Printf("Choose an item from inventory(a to z):\n");
         return 0;
     }
-    
+
     // We got a alpha key; do a "drop" of that item
     printf( "DROP  got a selection\n" );
     if( TestDrop() )
@@ -152,7 +152,7 @@ int CUseState::OnHandleDrop( SDL_Keysym *keysym )
         g_pGame->GetMsgs()->Printf("You can't drop a %s here!\n", m_pSelected->m_lpData->GetName());
     }
     m_pSelected = NULL;
-    
+
     printf( "DROP resetting game state to COMMAND, USE state to INIT\n");
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
@@ -164,19 +164,19 @@ int CUseState::OnHandleQuaff( SDL_Keysym *keysym )
     int retval;
     printf( "Handling QUAFF\n" );
     retval = OnBaseHandleKey( keysym, USE_QUAFF );
-    
+
     if( retval == JRESETSTATE )
     {
         return 0;
     }
-    
+
     if( retval != JSUCCESS )
     {
         printf( "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
         g_pGame->GetMsgs()->Printf("Choose an item from inventory(a to z):\n");
         return 0;
     }
-    
+
     // We got a alpha key; do a "quaff" of that item
     printf( "QUAFF  got a selection\n" );
     if( TestQuaff() )
@@ -195,7 +195,7 @@ int CUseState::OnHandleQuaff( SDL_Keysym *keysym )
         g_pGame->GetMsgs()->Printf("You can't drink a %s!\n", m_pSelected->m_lpData->GetName());
     }
     m_pSelected = NULL;
-    
+
     printf( "QUAFF resetting game state to COMMAND, USE state to INIT\n");
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
@@ -206,12 +206,12 @@ int CUseState::OnHandleInit( SDL_Keysym *keysym )
 {
 	printf( "Initializing USE state...\n" );
 	if( !m_cCommand )
-	{
+	 {
 		m_cCommand = keysym->sym;
 
 		eUseModifier mod = USE_INIT;
 		switch(m_cCommand)
-		{
+		 {
 		case SDLK_w:
 			mod = USE_WIELD;
             g_pGame->GetMsgs()->Printf("Wield which item? [a-z]\n");
@@ -250,7 +250,7 @@ int CUseState::OnBaseHandleKey( SDL_Keysym *keysym, eUseModifier whichUse )
 {
     m_dwSelected = GetAlpha(keysym);
     if( m_dwSelected != nul )
-	{
+	 {
         // convert selected item to list offset
         m_dwSelected -= 'a';
 		m_pSelected = GetResponse(whichUse);
@@ -264,7 +264,7 @@ int CUseState::OnBaseHandleKey( SDL_Keysym *keysym, eUseModifier whichUse )
 		return JSUCCESS;
 	}
 	else if( keysym->sym == SDLK_ESCAPE )
-	{
+	 {
 		// ESC key gets us out of  mode
 		ResetToState(STATE_COMMAND);
 		return JRESETSTATE;

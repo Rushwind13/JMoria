@@ -9,7 +9,7 @@ bool CDataFile::Open( const char *szFilename )
 	m_fp = fopen(szFilename, "r");
 
 	if( m_fp == NULL )
-	{
+	 {
 		return false;
 	}
 
@@ -40,30 +40,30 @@ char *CDataFile::Strip( char *szLine )
 	char *c;
 
 	if( szLine == NULL || *szLine == nul || *szLine == '#' )
-	{
+	 {
 		return NULL;
 	}
 
 	if( szLine[strlen(szLine)-1] == '\n' )
-	{
+	 {
 		szLine[strlen(szLine)-1] = NULL;
 	}
 
 	if( *szLine == nul )
-	{
+	 {
 		return NULL;
 	}
 
 	c = szLine;
 	while( *c == ' ' || *c == '\t' || *c == '\n' )
-	{
+	 {
 		c++;
 	}
 	szLine = c;
 
 	c = strtok( szLine, "#" );
 	if( c != NULL )
-	{
+	 {
 		return c;
 	}
 
@@ -81,16 +81,16 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 	bool bEndMonster = false;
 
 	while( !bEndMonster && fgets( szRaw, 1024, m_fp ) != NULL )
-	{
+	 {
 		szLine = Strip(szRaw);
 		if( szLine == NULL )
-		{
+		 {
 			continue;
 		}
 		if( !bFoundMonster )
-		{
+		 {
 			if( strncasecmp( szLine, "monster", 7 ) == 0 )
-			{
+			 {
 				bFoundMonster = true;
 				mdIn.m_szName = GetValue( szLine, mdIn.m_szName );
 			}
@@ -98,9 +98,9 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 		}
 
 		if( !bStartMonster )
-		{
+		 {
 			if( *szLine == '{' )
-			{
+			 {
 				bStartMonster = true;
 			}
 			continue;
@@ -111,9 +111,9 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 		// from here to the next } is going to be
 		// data for this monster.
 		if( !bEndMonster )
-		{
+		 {
 			if( strncasecmp( szLine, "plural", 6 ) == 0 )
-			{
+			 {
 				mdIn.m_szPlural = GetValue( szLine, mdIn.m_szPlural );
             }
             else if( strncasecmp( szLine, "appear", 6 ) == 0 )
@@ -125,24 +125,24 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
                 mdIn.m_fSpeed = GetValue( szLine, mdIn.m_fSpeed );
             }
 			else  if( strncasecmp( szLine, "movetype", 8 ) == 0 )
-			{
+			 {
 				szValue = GetValue( szLine, szValue );
                 mdIn.m_dwMoveType = g_Constants.LookupString(szValue);
 			}
 			else if( strncasecmp( szLine, "hd", 2 ) == 0 )
-			{
+			 {
 				mdIn.m_szHD = GetValue( szLine, mdIn.m_szHD );
 			}
 			else  if( strncasecmp( szLine, "ac", 2 ) == 0 )
-			{
+			 {
 				mdIn.m_fBaseAC = GetValue( szLine, mdIn.m_fBaseAC );
 			}
 			else if( strncasecmp( szLine, "level", 5 ) == 0 )
-			{
+			 {
 				GetValue( szLine, mdIn.m_dwLevel );
 			}
 			else if( strncasecmp( szLine, "expvalue", 8 ) == 0 )
-			{
+			 {
 				GetValue( szLine, mdIn.m_fExpValue );
             }
             else if( strncasecmp( szLine, "type", 4 ) == 0 )
@@ -162,7 +162,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
                 }
             }
 			else if( strncasecmp( szLine, "attack", 6 ) == 0 )
-			{
+			 {
 				CAttack *curAttack;
 				curAttack = new CAttack;
 				char *begin;
@@ -183,7 +183,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
                 begin++;
                 curAttack->m_dwEffect = g_Constants.LookupString(begin);
                 cur = end;
-                
+
                 // attack type
                 begin = strchr( cur, '<' );
                 end = strchr( cur, '>' );
@@ -199,13 +199,13 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 
                 // effect flag (optional)
 				if( !bDone )
-				{
+				 {
 					cur = end;
 					// effect
 					begin = strchr( cur, '<' );
 					end = strchr( cur, '>' );
 					if( begin != NULL && end != NULL )
-					{
+					 {
                         *end = NULL;
                         begin++;
                         curAttack->m_dwEffect = g_Constants.LookupString(begin);
@@ -223,11 +223,11 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 				// from here on out, you've got enough info to do this.
 				end = strchr(begin, ',');
 				if( end != NULL )
-				{
+				 {
 					*end++ = NULL;
 				}
 				else
-				{
+				 {
 					bDone = true;
 				}
 
@@ -239,7 +239,7 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
 				mdIn.m_llAttacks->Add(curAttack);
 			}
 			else if( strncasecmp( szLine, "color", 5 ) == 0 )
-			{
+			 {
 				char *color = chomp( szLine, szValue );
                 if( strchr( color, '<' ) != NULL )
                 {
@@ -258,17 +258,17 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
                 }
 			}
 			else if( *szLine == '}' )
-			{
+			 {
 				bEndMonster = true;
 			}
 			else
-			{
+			 {
 				printf( "Unparseable line:%s\n", szLine );
 			}
 		}
 	}
 	if( !bEndMonster )
-	{
+	 {
 		return NULL;
 	}
 
@@ -551,7 +551,7 @@ char *CDataFile::GetValue(char *szLine, char *szIn) { return chomp(szLine, szIn)
 char *CDataFile::chomp(const char *szLine, char *szIn)
 {
 	if( szLine == NULL || *szLine == nul )
-	{
+	 {
 		return NULL;
 	}
 
@@ -565,7 +565,7 @@ char *CDataFile::chomp(const char *szLine, char *szIn)
 	end = strrchr( copy, '>' );
 
 	if( begin == NULL || end == NULL )
-	{
+	 {
 		return NULL;
 	}
 	*end = NULL;
@@ -611,7 +611,7 @@ int CDataFile::GetValue(char *szLine, long &dwIn)
     char value[100];
     sscanf( szLine, "%s %s\n", label, value );
     dwIn = atoi(value);
-    
+
     return (int)dwIn;
 }
 int CDataFile::GetValue(char *szLine, int &dwIn)

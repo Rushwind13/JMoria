@@ -29,42 +29,42 @@ public:
 		m_dwWindowFlags(0),
 		m_hWindow(NULL)
 	{};
-	virtual ~CRender(){ Term(); };
-	
+	virtual ~CRender(){ Term(); }
+
 	virtual JResult Init( int width, int height, int bpp );
 	JResult InitSDL();
 	JResult InitGL();
-	
+
 	JResult ResizeWindow( int width, int height );
 	virtual void Term()
 	{
 		if( m_hWindow )
-		{
+		 {
 			SDL_DestroyWindow(m_hWindow);
 			m_hWindow = NULL;
 		}
 		SDL_Quit();
 	};
-	
-	int GetWindowFlags() { return m_dwWindowFlags; };
+
+	int GetWindowFlags() { return m_dwWindowFlags; }
 	virtual void PreDraw();
 	virtual void PostDraw();
-	
+
 	virtual void	PreDrawObjects( JRect rcBounds, uint32 Texture, bool bTranslate=false, bool bInverse=false, JFVector *vTranslate=0 );
 	virtual void	PostDrawObjects();
 
 	virtual void	DrawTextBoundingBox( JRect rect, JColor color );
-	
+
 	virtual void SwapBuffers();
-	SDL_Window *GetWindow() { return m_hWindow; };
-	void SetWindow(SDL_Window *window) { m_hWindow = window; };
-	
+	SDL_Window *GetWindow() { return m_hWindow; }
+	void SetWindow(SDL_Window *window) { m_hWindow = window; }
+
 	virtual bool	DrawTile(const JFVector &vPos, JVector &vSize, JIVector &vTile, JFVector &vTexels);
 	virtual bool	DrawTile(const JFVector &vPos, JVector &vSize, JIVector &vTile);
 	virtual void	PreDrawTile();
 	virtual void	PostDrawTile();
-	virtual void	SetTileColor( JColor color );	
-	
+	virtual void	SetTileColor( JColor color );
+
 	// Declare this if you need to do more than just "load" the texture.
 	virtual JResult	PostLoadTexture( uint32 &texture, void *data, int dwColorsPerPixel, bool bIsBMP, int dwImageWidth, int dwImageHeight, int dwCellWidth, int dwCellHeight );
 
@@ -72,18 +72,18 @@ protected:
 	int	m_dwScreenWidth;
 	int m_dwScreenHeight;
 	int m_dwScreenBPP;
-	
+
 	int m_dwWindowFlags;
-	
+
 private:
 	bool m_bHasBeenInitted;
     SDL_Window *m_hWindow;
-	
+
 #ifdef DISPLAY_FRAMERATE
 	int	m_dwFrames;
 	int m_dwT0;
 	CDisplayText *m_fps;
 #endif // DISPLAY_FRAMERATE
-	
+
 };
 #endif // __RENDER_H__

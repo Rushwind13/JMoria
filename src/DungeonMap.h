@@ -27,12 +27,12 @@ public:
     m_dwRecurDepth(MAX_RECURDEPTH)
     {
         m_vPos.Init();
-        m_rcArea.Init(0,0,0,0);
+        m_rcArea.Init(0, 0, 0, 0);
         m_pdwVisited = new bool[4];
         memset(m_pdwVisited, false, 4);
     };
-    ~CDungeonCreationStep(){};
-    
+    ~CDungeonCreationStep(){}
+
     int m_dwIndex;
     int m_dwDirection;
     int m_dwRecurDepth;
@@ -46,36 +46,36 @@ public:
 // on the current level.
 class CDungeonMapTile
 {
-	
+
 	// Member variables
-	
+
 public:
 	CDungeonMapTile():
 	  m_uiType(DUNG_IDX_INVALID),
 	  m_Rect(),
 	  m_dwFlags(0)
 	  {};
-	~CDungeonMapTile() {};
+	~CDungeonMapTile() {}
 
-	Uint8	GetType() const { return m_uiType; }; 
-	void	SetType(Uint8 type) { m_uiType = type; };
-	
-	int		GetFlags() const { return m_dwFlags; }; 
-	void	SetFlags(int type) { m_dwFlags = type; }; 
-	
+	Uint8	GetType() const { return m_uiType; }
+	void	SetType(Uint8 type) { m_uiType = type; }
+
+	int		GetFlags() const { return m_dwFlags; }
+	void	SetFlags(int type) { m_dwFlags = type; }
+
 protected:
 private:
 	Uint8	m_uiType;	// what kind of tile is this? (floor, wall, door, etc)
 	JRect	m_Rect;		// What are this tiles coordinates in world space? (ltrb)
 	int		m_dwFlags;	// 32 bits to use as you please. Please reference here what's using them (or the .h)
-	
+
 	// Member functions
-	
+
 public:
-	void SetLink( CLink <CDungeonMapTile> *link ) { m_pllLink = link; };
+	void SetLink( CLink <CDungeonMapTile> *link ) { m_pllLink = link; }
 protected:
 private:
-	CLink <CDungeonMapTile> *m_pllLink; // My link into the Used Space list (or another list)	
+	CLink <CDungeonMapTile> *m_pllLink; // My link into the Used Space list (or another list)
 };
 
 // CDungeonMap:
@@ -96,7 +96,7 @@ public:
     {
         Term();
     };
-	
+
 protected:
     void Term()
     {
@@ -110,7 +110,7 @@ private:
 	CDungeonMapTile	*m_dmtTiles;	// 1 DungeonMapTile per tile, has "graphical" info (size, location, type, ...)
 	JLinkList<CDungeonMapTile> *m_llUsedSpace;
     JStack<CDungeonCreationStep> *m_stkDungeonMapCreation;
-	
+
 	// Member functions
 public:
 	void CreateDungeon(const int depth);
@@ -123,20 +123,20 @@ public:
     void GetHallRect(JRect &rcHall, const int direction);
     JIVector &GetWallOrigin(CDungeonCreationStep *pStep, const int direction);
     JIVector &GetHallOrigin(CDungeonCreationStep *pStep, int step_type = DUNG_CREATE_STEP_MAKE_ROOM);
-    
+
 	Uint8 GetdtdIndex( JIVector vPos )
-	{ 
+	{
 		if( GetTile(vPos) )
-		{
+		 {
 			return GetTile(vPos)->GetType();
 		}
 		return (Uint8)-1;
 	};
 
 	int GetFlags( JIVector vPos )
-	{ 
+	{
 		if( GetTile(vPos) )
-		{
+		 {
 			return GetTile(vPos)->GetFlags();
 		}
 		return -1;
@@ -151,14 +151,14 @@ public:
     void FillArea( const CDungeonCreationStep *pStep );
 	void AddDoor(JIVector vHall, int direction );
 	bool IsDoor( const int type );
-	
+
 	void MakeRoom( const JIVector *vPos, const int direction, const int recurdepth );
 	void MakeHall( const JIVector *vPos, const int direction, const int recurdepth );
 
 	CDungeonMapTile	*GetTile(JIVector vPos)
-	{
+	 {
 		if(	m_dmtTiles == NULL || !vPos.IsInWorld() )
-		{
+		 {
 			return NULL;
 		}
 

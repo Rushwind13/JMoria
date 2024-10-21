@@ -50,7 +50,7 @@
 #define DUNG_IDX_LONG_DOWNSTAIRS 7
 #define DUNG_IDX_RUBBLE		     8
 #define DUNG_IDX_SECRET_DOOR     9
-//JUNK,
+// JUNK,
 #define DUNG_IDX_PLAYER		    10
 #define DUNG_IDX_MAX		    11
 
@@ -150,9 +150,9 @@
 #define MON_AI_SEEKPLAYER      0x08000000
 
 #define MON_COLOR_MULTI        0x10000000
-//#define MON_COLOR_x          0x20000000
-//#define MON_COLOR_x          0x40000000
-//#define MON_COLOR_x          0x80000000
+// #define MON_COLOR_x          0x20000000
+// #define MON_COLOR_x          0x40000000
+// #define MON_COLOR_x          0x80000000
 
 #define NUM_MON_FLAGS           14
 
@@ -270,8 +270,8 @@
 class Constants
 {
 public:
-    Constants():m_StringTable(NULL){};
-    ~Constants(){if(m_StringTable!= NULL) delete [] m_StringTable; m_StringTable = NULL;};
+    Constants():m_StringTable(NULL){}
+    ~Constants(){if(m_StringTable!= NULL) delete [] m_StringTable; m_StringTable = NULL;}
 
     void Init()
     {

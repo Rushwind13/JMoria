@@ -12,18 +12,18 @@ using cucumber::ScenarioScope;
 
 GIVEN("^I have a JVector ([0-9.-]+),([0-9.-]+) in the data$")
 {
-  REGEX_PARAM(float,x);
-  REGEX_PARAM(float,y);
+  REGEX_PARAM(float, x);
+  REGEX_PARAM(float, y);
   ScenarioScope<TestCtx> context;
-  context->vec = JVector(x,y);
+  context->vec = JVector(x, y);
 }
 
 GIVEN("^I have a second JVector ([0-9.-]+),([0-9.-]+) in the data$")
 {
-  REGEX_PARAM(float,x);
-  REGEX_PARAM(float,y);
+  REGEX_PARAM(float, x);
+  REGEX_PARAM(float, y);
   ScenarioScope<TestCtx> context;
-  context->vec_b = JVector(x,y);
+  context->vec_b = JVector(x, y);
 }
 
 /*#######
@@ -55,7 +55,7 @@ WHEN("^I press negate_JVector$")
 
 WHEN("^I press scale_JVector ([0-9.-]+)$")
 {
-  REGEX_PARAM(float,scalar);
+  REGEX_PARAM(float, scalar);
   ScenarioScope<TestCtx> context;
 
   context->vec = context->vec * scalar;
@@ -68,9 +68,9 @@ WHEN("^I press scale_JVector ([0-9.-]+)$")
 
 THEN("^the result should be ([0-9.-]+),([0-9.-]+) a JVector$")
 {
-  REGEX_PARAM(float,x);
-  REGEX_PARAM(float,y);
-  JVector expected(x,y);
+  REGEX_PARAM(float, x);
+  REGEX_PARAM(float, y);
+  JVector expected(x, y);
   ScenarioScope<TestCtx> context;
   JVector actual = context->vec;
 

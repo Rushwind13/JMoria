@@ -21,7 +21,7 @@ class CDungeonTileDef;
 class CWallDef;
 class CFloorDef;
 class CRubbleDef;
-//class CDoorDef;
+// class CDoorDef;
 
 class CDungeonTile;
 class CDungeonTileHP;
@@ -37,7 +37,7 @@ public:
 		m_dwFlags(0)
 	{
 	};
-	
+
 	JVector m_vPos;
 	CDungeonTileDef *m_dtd;
 	CMonster *m_pCurMonster;
@@ -45,7 +45,7 @@ public:
 	int m_dwFlags;	// 32 bits to do whatever you like with.
 protected:
 private:
-	
+
 	// Member Functions
 public:
 protected:
@@ -59,7 +59,7 @@ public:
 	int m_dwCurHP;	// how far have you busted through the wall, etc.
 protected:
 private:
-	
+
 	// Member Functions
 public:
 protected:
@@ -70,8 +70,8 @@ class CDungeonTileDef
 {
 	// Member Variables
 public:
-	CDungeonTileDef() {};
-	CDungeonTileDef( const CDungeonTileDef &in ):m_dwFlags(in.m_dwFlags),m_dwType(in.m_dwType),m_dwBaseHP(in.m_dwBaseHP) {};
+	CDungeonTileDef() {}
+	CDungeonTileDef( const CDungeonTileDef &in ):m_dwFlags(in.m_dwFlags), m_dwType(in.m_dwType), m_dwBaseHP(in.m_dwBaseHP) {}
 	int m_dwFlags;
 	int m_dwType; // DTD_WALL, DTD_FLOOR, etc.
 	int m_dwModifiedType; // DOOR->OPENDOOR, etc.
@@ -80,11 +80,11 @@ public:
 	JColor m_Color; // add a little color to the world
 protected:
 private:
-	
+
 	// Member Functions
 public:
-	virtual int HandleModify(/*cmd?*/) { return 0; }; // how do you deal with a modify cmd?
-	// ... need one of these per state (virt in base, defined in subclasses)?	
+	virtual int HandleModify(/*cmd?*/) { return 0; } // how do you deal with a modify cmd?
+	// ... need one of these per state (virt in base, defined in subclasses)?
 protected:
 private:
 };
@@ -95,17 +95,17 @@ class CWallDef : public CDungeonTileDef
 public:
 protected:
 private:
-	
+
 	// Member Functions
 public:
 	int HandleModify( /* cmd */ )
-	{
+	 {
 	/*if( cmd != CMD_TUNNEL )
 	{
 	Error();
 	}
 		DoTunnel();/**/
-		
+
 		return 0;
 	}
 protected:
@@ -120,7 +120,7 @@ public:
 	CItem	*m_CurItem;
 protected:
 private:
-	
+
 	// Member Functions
 public:
 protected:

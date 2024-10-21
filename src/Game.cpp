@@ -61,7 +61,7 @@ JResult CGame::Init()
 	m_pRender = new CRender;
 	result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
 	if( result != JSUCCESS )
-	{
+	 {
 		m_pRender->Term();
 		return result;
 	}
@@ -69,19 +69,19 @@ JResult CGame::Init()
 	m_pMsgsDT = new CDisplayText( JRect( 0, 0, 640, 40 ), 255 );
 	m_pMsgsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE);
 
-    m_pStatsDT = new CDisplayText( JRect( 0,50,  150,480 ), 220 );
+    m_pStatsDT = new CDisplayText( JRect( 0, 50,  150, 480 ), 220 );
     m_pStatsDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
 
-    m_pInvDT = new CDisplayText( JRect( 440,50,  640,340 ), 180 );
+    m_pInvDT = new CDisplayText( JRect( 440, 50,  640, 340 ), 180 );
     m_pInvDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
 
-    m_pEquipDT = new CDisplayText( JRect( 440,345,  640,480 ), 180 );
+    m_pEquipDT = new CDisplayText( JRect( 440, 345,  640, 480 ), 180 );
     m_pEquipDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
 
-    m_pUseDT = new CDisplayText( JRect( 200,40,  440,480 ), 200 );
+    m_pUseDT = new CDisplayText( JRect( 200, 40,  440, 480 ), 200 );
     m_pUseDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
 
-    m_pEndGameDT = new CDisplayText( JRect( 0,0,  640,480 ), 255 );
+    m_pEndGameDT = new CDisplayText( JRect( 0, 0,  640, 480 ), 255 );
     m_pEndGameDT->SetFlags(FLAG_TEXT_WRAP_WHITESPACE|FLAG_TEXT_BOUNDING_BOX);
 
 
@@ -114,21 +114,21 @@ JResult CGame::Init()
 void CGame::Quit( int returncode )
 {
 	if( m_pRender )
-	{
+	 {
 		m_pRender->Term();
 		delete m_pRender;
 		m_pRender = NULL;
 	}
 
 	if( m_pDungeon )
-	{
+	 {
 		m_pDungeon->Term();
 		delete m_pDungeon;
 		m_pDungeon = NULL;
 	}
 
 	if( m_pPlayer )
-	{
+	 {
 		m_pPlayer->Term();
 		delete m_pPlayer;
 		m_pPlayer = NULL;
@@ -163,13 +163,13 @@ void CGame::Quit( int returncode )
         delete m_pEndGameState;
         m_pEndGameState = NULL;
     }
-    
+
     if( m_pClockStepState )
     {
         delete m_pClockStepState;
         m_pClockStepState = NULL;
     }
-    
+
     if( m_pRestState )
     {
         delete m_pRestState;
@@ -218,7 +218,7 @@ void CGame::SetState( int eNewState )
 {
 	m_eCurState = eNewState;
 	switch( m_eCurState )
-	{
+	 {
 	case STATE_COMMAND:
 		m_pCurState = reinterpret_cast<CStateBase *>(m_pCmdState);
             break;
@@ -261,16 +261,16 @@ void CGame::SetState( int eNewState )
 float pow(float base, int exp)
 {
   if( exp == 0 ) return 1;
-  else return base * pow(base,exp-1);
+  else return base * pow(base, exp-1);
 }
-float plouffBig( int n ) //http://en.wikipedia.org/wiki/Bailey%E2%80%93Borwein%E2%80%93Plouffe_formula
+float plouffBig( int n ) // http://en.wikipedia.org/wiki/Bailey%E2%80%93Borwein%E2%80%93Plouffe_formula
 {
   float pi = 0.0f;
   int k = 0;
 
   while( k < n )
   {
-    pi += (1.0f / pow(16,k))*(4.0f/(8*k+1))-(2.0f/(8*k+4))-(1.0f/(8*k+5))-(1.0f/(8*k+6));
+    pi += (1.0f / pow(16, k))*(4.0f/(8*k+1))-(2.0f/(8*k+4))-(1.0f/(8*k+5))-(1.0f/(8*k+6));
     k++;
   }
 
@@ -283,7 +283,7 @@ bool CGame::WaitForTick()
     while(!m_bReadyForUpdate)
     {
       // Calculate Tau to some decimal places.
-      int n = Util::Roll(1,100);
+      int n = Util::Roll(1, 100);
       float tau = plouffBig( n );
       GetMsgs()->Printf("n: %d, tau: %f\n", n, tau );
         count++;
@@ -431,7 +431,7 @@ void CGame::Draw()
 
 	GetRender()->PostDraw();
 
-	//SDL_GL_SwapBuffers();
+	// SDL_GL_SwapBuffers();
 }
 
 void CGame::HandleEvents(int &isActive, int &done)
@@ -441,7 +441,7 @@ void CGame::HandleEvents(int &isActive, int &done)
 	JResult retval;
 
 	while ( SDL_PollEvent( &event ) )
-	{
+	 {
 		switch( event.type )
         {
         case SDL_WINDOWEVENT:
@@ -470,12 +470,12 @@ void CGame::HandleEvents(int &isActive, int &done)
 			// handle key presses
 			retval = m_pCurState->HandleKey( &event.key.keysym );
 			if( retval == JBOGUSKEY )
-			{
+			 {
 				printf("Bogus command: 0x%x\n", event.key.keysym.sym);
 				GetMsgs()->Printf("Unrecognized command: 0x%x\n", event.key.keysym.sym);
 			}
 			else if( retval == JQUITREQUEST )
-			{
+			 {
 				Quit( 0 );
 			}
 			break;
@@ -486,12 +486,12 @@ void CGame::HandleEvents(int &isActive, int &done)
 		case SDL_MOUSEBUTTONDOWN:
 		case SDL_MOUSEBUTTONUP:
 			if( event.button.state == SDL_RELEASED )
-			{
+			 {
 				// Nothing to see here.
 				break;
 			}
 			switch( event.button.button )
-			{
+			 {
 			case MOUSE_WHEEL_UP:
 				g_pGame->GetDungeon()->Zoom(3);
 				break;
@@ -509,7 +509,7 @@ void CGame::HandleEvents(int &isActive, int &done)
 			event.button.y );/* */
 			break;
 		default:
-			//printf("unhandled event type: %d\n", event.type );
+			// printf("unhandled event type: %d\n", event.type );
 			break;
 		}
 	}

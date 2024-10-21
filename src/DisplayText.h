@@ -1,6 +1,6 @@
-// 
+//
 // DisplayText.h
-// 
+//
 // Declarations of classes needed to display text in an OpenGL window
 //
 // Create multiple instances to make multiple text areas
@@ -12,7 +12,7 @@
 #include "JMDefs.h"
 #ifdef __WIN32__
 #include "windef.h"
-#endif //__WIN32__
+#endif // __WIN32__
 #include "TileSet.h"
 #include "JLinkList.h"
 
@@ -52,13 +52,13 @@ public:
     void DisplayList( JLinkList<CScore> *pList, const CDisplayMeta *pMeta, const uint8 dwIndex=DUNG_IDX_INVALID );
 
 
-	void Clear() { m_szText[0] = nul; };
-	void SetColor( JColor in ) { m_Color.SetColor( in ); };
-	void SetFlags( int dwFlags ) { m_dwFlags = dwFlags; };
+	void Clear() { m_szText[0] = nul; }
+	void SetColor( JColor in ) { m_Color.SetColor( in ); }
+	void SetFlags( int dwFlags ) { m_dwFlags = dwFlags; }
 
-	void PageUp()		{ m_dwFreeLines += m_dwUsedLines; };
-	void PageDown()		{ m_dwFreeLines -= m_dwUsedLines; if( m_dwFreeLines < 0 ) m_dwFreeLines = 0; };
-	void PageReset()	{ m_dwFreeLines = 0; };
+	void PageUp()		{ m_dwFreeLines += m_dwUsedLines; }
+	void PageDown()		{ m_dwFreeLines -= m_dwUsedLines; if( m_dwFreeLines < 0 ) m_dwFreeLines = 0; }
+	void PageReset()	{ m_dwFreeLines = 0; }
 
 
 protected:

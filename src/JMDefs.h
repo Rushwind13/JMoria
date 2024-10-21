@@ -2,7 +2,7 @@
 #define __JMDEFS_H__
 #ifdef __WIN32__
 #include "windows.h"
-#endif //__WIN32__
+#endif // __WIN32__
 #include <stdio.h>
 #include "Util.h"
 
@@ -28,7 +28,7 @@ typedef unsigned char uint8;
 #define JERROR() printf("An error occurred: %s %d\n", __FILE__, __LINE__ );
 
 #define TURN_BASED
-//#define CLOCKSTEP
+// #define CLOCKSTEP
 
 #include "DungeonConstants.h"
 

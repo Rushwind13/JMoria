@@ -24,7 +24,7 @@ CStringInputState::CStringInputState()
     m_pKeyHandlers[SI_INIT]    = &CStringInputState::OnHandleInit;
     m_pKeyHandlers[SI_NAME]    = &CStringInputState::OnHandleName;
     m_pKeyHandlers[SI_HAGGLE]    = &CStringInputState::OnHandleHaggle;
-    
+
     m_eCurModifier = SI_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }
@@ -41,12 +41,12 @@ int CStringInputState::OnHandleName( SDL_Keysym *keysym )
     int retval;
     printf( "Handling NAME modifier\n" );
     retval = OnBaseHandleKey( keysym );
-    
+
     if( retval == JRESETSTATE )
     {
         return 0;
     }
-    
+
     if( retval == JCOMPLETESTATE )
     {
         printf( "NAME modifier resetting game state to COMMAND, NAME state to INIT\n");
@@ -56,19 +56,19 @@ int CStringInputState::OnHandleName( SDL_Keysym *keysym )
         g_pGame->GetMsgs()->Clear();
         ResetToState( STATE_COMMAND );
     }
-    
+
     if( retval != JSUCCESS )
     {
         printf( "Name cmd still waiting for a Alphanumeric key.\n" );
 //        g_pGame->GetMsgs()->Printf("Direction(1 2 3 4 6 7 8 9):\n");
         return 0;
     }
-    
+
     // We got a alpha key; append it to the name
     printf( "NAME modifier got a alpha\n" );
     g_pGame->GetMsgs()->Clear();
     g_pGame->GetMsgs()->Printf("Character Name: %s", m_szInput);
-    
+
     return 0;
 }
 
@@ -77,19 +77,19 @@ int CStringInputState::OnHandleHaggle( SDL_Keysym *keysym )
     int retval;
     printf( "Handling HAGGLE modifier\n" );
     retval = OnBaseHandleKey( keysym );
-    
+
     if( retval == JRESETSTATE )
     {
         return 0;
     }
-    
+
     if( retval != JSUCCESS )
     {
         printf( "HAGGLE cmd still waiting for a Numeric key.\n" );
         g_pGame->GetMsgs()->Printf("Enter a number.\n");
         return 0;
     }
-    
+
     // We got a numeric key; add to haggle number
     printf( "HAGGLE modifier got a numeric\n" );
     if( TestHaggle() )
@@ -109,7 +109,7 @@ int CStringInputState::OnHandleHaggle( SDL_Keysym *keysym )
         // can't get here? how to handle bad input?
 //        g_pGame->GetMsgs()->Printf("I do not see anything to close there.\n");
     }
-    
+
     if( retval == JRESETSTATE )
     {
         printf( "HAGGLE modifier resetting game state to COMMAND, HAGGLE state to INIT\n");
@@ -125,7 +125,7 @@ int CStringInputState::OnHandleInit( SDL_Keysym *keysym )
     if( !m_cCommand )
     {
         m_cCommand = keysym->sym;
-        
+
         eStringInputModifier mod = SI_INIT;
         switch(m_cCommand)
         {
@@ -143,12 +143,12 @@ int CStringInputState::OnHandleInit( SDL_Keysym *keysym )
                 return 0;
                 break;
         }
-        
+
         m_eCurModifier = mod;
         m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
         return 0;
     }
-    
+
     printf( "Error: tried to init stringinput state when it was already initted...\n" );
     ResetToState( STATE_COMMAND );
     // shouldn't get here
@@ -183,7 +183,7 @@ int CStringInputState::OnBaseHandleKey( SDL_Keysym *keysym )
         ResetToState(STATE_COMMAND);
         return JRESETSTATE;
     }
-    
+
     return -1;
 }
 

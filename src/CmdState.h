@@ -14,10 +14,10 @@ private:
 
 	// Member Functions
 public:
-	CCmdState():m_vNewPos(0,0){};
-    ~CCmdState() {};
+	CCmdState():m_vNewPos(0, 0){}
+    ~CCmdState() {}
 
-	void OnUpdate(float fCurTime) {};
+	void OnUpdate(float fCurTime) {}
 
 protected:
 	virtual int OnHandleKey( SDL_Keysym *keysym );
@@ -25,13 +25,13 @@ private:
 	bool IsModifierNeeded(SDL_Keysym *keysym);
 	bool IsUseCommand(SDL_Keysym *keysym);
 	bool IsStairsCommand(SDL_Keysym *keysym);
-	bool IsMagicCommand(SDL_Keysym *keysym) {return false;};
-	bool IsMenuCommand(SDL_Keysym *keysym) {return false;};
-	bool IsHelpCommand(SDL_Keysym *keysym) {return false;};
+	bool IsMagicCommand(SDL_Keysym *keysym) {return false;}
+	bool IsMenuCommand(SDL_Keysym *keysym) {return false;}
+	bool IsHelpCommand(SDL_Keysym *keysym) {return false;}
     bool IsRestCommand(SDL_Keysym *keysym);
     bool IsStringInputCommand(SDL_Keysym *keysym);
-	bool IsMonster( int collide_type ) {return( collide_type == DUNG_COLL_MONSTER);};
-	void ResetToState( int newstate ) {};
+	bool IsMonster( int collide_type ) {return( collide_type == DUNG_COLL_MONSTER);}
+	void ResetToState( int newstate ) {}
 
 	int TestCollision( JVector &vTestDir );
 

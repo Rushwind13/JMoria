@@ -15,8 +15,8 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
     // it's an invalid key, so return an error.
     int retval = -1;
 	if( IsDirectional( keysym ) )
-	{
-		JVector vTestDir(0,0);
+	 {
+		JVector vTestDir(0, 0);
 		int dwCollideType;
 
 		GetDir( keysym, vTestDir );
@@ -24,7 +24,7 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 
 		dwCollideType = TestCollision(m_vNewPos);
 		if( dwCollideType == DUNG_COLL_NO_COLLISION )
-		{
+		 {
 			UpdatePlayerPos( m_vNewPos );
 		}
         else if( dwCollideType == DUNG_COLL_ITEM )
@@ -33,7 +33,7 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
             HandleCollision( dwCollideType );
         }
 		else
-		{
+		 {
 			HandleCollision( dwCollideType );
 		}
 		retval = 0;
@@ -44,13 +44,13 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 	// Some commands need a directional modifier:
 	// Open, Tunnel, Close, Run, Bash, Look, Search, Fire, Hurl, Disarm
 	else if( IsModifierNeeded( keysym ) )
-	{
+	 {
 		// Add "modify" to the top of the state stack
 		g_pGame->SetState(STATE_MODIFY);
 		g_pGame->GetGameState()->HandleKey(keysym);
 		retval = 0;
 	}
-    
+
     // Use commands allow you to choose from lists of items:
     // inventory, equipment, stores, chests?, bag of holding, &c
     else if( IsUseCommand(keysym) )
@@ -60,7 +60,7 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
         g_pGame->GetGameState()->HandleKey(keysym);
         retval = 0;
     }
-    
+
     // StringInput commands allow you to enter several characters as a single string
     else if( IsStringInputCommand(keysym) )
     {
@@ -76,7 +76,7 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
         OnHandleStairs( keysym );
         retval = 0;
     }
-    
+
     else if( IsRestCommand( keysym ) )
     {
         switch( keysym-> sym )
@@ -92,7 +92,7 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
             default:
                 break;
         }
-        
+
         retval = 0;
     }
 
@@ -154,7 +154,7 @@ void CCmdState::HandleCollision( int dwCollideType )
 	// There are only 2 things to collide with;
 	// Monsters and Walls.
 	if( IsMonster( dwCollideType ) )
-	{
+	 {
 		char szStatus[16];
 		char *szMonster;
 		float fRoll = 0.0f;
@@ -168,20 +168,20 @@ void CCmdState::HandleCollision( int dwCollideType )
         fRoll = g_pGame->GetPlayer()->Attack();
 		bHit = pMon->Hit(fRoll);
 		if( bHit )
-		{
+		 {
 			sprintf( szStatus, "hit" );
 		}
 		else
-		{
+		 {
 			sprintf( szStatus, "miss" );
 		}
 
 		g_pGame->GetMsgs()->Printf( "You %s the %s.\n", szStatus, szMonster );
 
 		if(bHit)
-		{
+		 {
 			if( fRoll > 80.0f )
-			{
+			 {
 				g_pGame->GetMsgs()->Printf( "(It was an excellent hit! (x2 damage)\n" );
 				fDamageMult = 2.0f;
 			}
@@ -189,7 +189,7 @@ void CCmdState::HandleCollision( int dwCollideType )
             float fDamage = g_pGame->GetPlayer()->Damage(fDamageMult);
 
 			if( pMon->TakeDamage(fDamage) == STATUS_DEAD )
-			{
+			 {
 				sprintf( szStatus, "have slain" );
 				g_pGame->GetMsgs()->Printf( "You %s the %s.\n", szStatus, szMonster );
                 g_pGame->GetPlayer()->OnKillMonster(pMon);
@@ -202,11 +202,11 @@ void CCmdState::HandleCollision( int dwCollideType )
         PickUpItem(m_vNewPos);
     }
 	else
-	{
+	 {
 		// Ouch, you bumped into a %s.
 		char what[16];
 		switch( dwCollideType )
-		{
+		 {
 		case DUNG_IDX_WALL:
 		case DUNG_IDX_SECRET_DOOR:
 			sprintf( what, "a wall" );
@@ -243,7 +243,7 @@ void CCmdState::PickUpItem( JVector &vNewPos )
 bool CCmdState::IsModifierNeeded(SDL_Keysym *keysym)
 {
 	switch( keysym->sym )
-	{
+	 {
 	case SDLK_o:
 	case SDLK_c:
 		return true;
@@ -278,7 +278,7 @@ bool CCmdState::IsUseCommand(SDL_Keysym *keysym)
             return false;
             break;
     }
-    
+
     return false;
 }
 
@@ -295,7 +295,7 @@ bool CCmdState::IsStringInputCommand(SDL_Keysym *keysym)
             return false;
             break;
     }
-    
+
     return false;
 }
 

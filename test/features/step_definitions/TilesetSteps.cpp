@@ -15,8 +15,8 @@ GIVEN("^I load the player tileset$")
   ScenarioScope<TestCtx> context;
   context->tileset = new CTileset();
   memset(context->szTileset, 0, 1024);
-  strcpy(context->szTileset,"../../JMoria/Resources/Courier.png");
-  context->aspect.Init(32,32);
+  strcpy(context->szTileset, "../../JMoria/Resources/Courier.png");
+  context->aspect.Init(32, 32);
 }
 
 GIVEN("^I load the messages tileset$")
@@ -24,8 +24,8 @@ GIVEN("^I load the messages tileset$")
   ScenarioScope<TestCtx> context;
   context->tileset = new CTileset();
   memset(context->szTileset, 0, 1024);
-  strcpy(context->szTileset,"../../JMoria/Resources/SmallText6X8.png");
-  context->aspect.Init(6,8);
+  strcpy(context->szTileset, "../../JMoria/Resources/SmallText6X8.png");
+  context->aspect.Init(6, 8);
 }
 
 /*#######
@@ -64,15 +64,15 @@ THEN("^I get a successful result$")
 THEN("^The player tileset is loaded$")
 {
     ScenarioScope<TestCtx> context;
-    EXPECT_EQ(context->tileset->IsBMP("anything"),false);
-    EXPECT_EQ(context->tileset->TexelW(),0.0625f);
+    EXPECT_EQ(context->tileset->IsBMP("anything"), false);
+    EXPECT_EQ(context->tileset->TexelW(), 0.0625f);
 }
 
 THEN("^The messages tileset is loaded$")
 {
     ScenarioScope<TestCtx> context;
-    EXPECT_EQ(context->tileset->IsBMP("anything"),false);
-    EXPECT_EQ(context->tileset->TexelW(),0.0625f);
+    EXPECT_EQ(context->tileset->IsBMP("anything"), false);
+    EXPECT_EQ(context->tileset->TexelW(), 0.0625f);
 }
 
 THEN("^I get tile ([0-9.-]+),([0-9.-]+) back$")

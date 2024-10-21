@@ -2,17 +2,13 @@
 #include <cucumber-cpp/autodetect.hpp>
 
 using cucumber::ScenarioScope;
-#include "TestItemContext.hpp"
+#include "TestContext.hpp"
 
 
 GIVEN("^I have an ItemDef$")
 {
-    ScenarioScope<TestItemCtx> context;
-    // Load the item list from config
-    // TODO: Make this a method on CItemDef.
-
+    ScenarioScope<TestCtx> context;
     g_Constants.Init();
-    context->m_llItemDefs = new JLinkList<CItemDef>;
 
     CItemDef *pid;
     CDataFile dfItems;
@@ -24,13 +20,13 @@ GIVEN("^I have an ItemDef$")
 
 WHEN("^I CreateItem$")
 {
-    ScenarioScope<TestItemCtx> context;
+    ScenarioScope<TestCtx> context;
     context->Success = CItem::CreateItem(context->ItemDef);
 }
 
 THEN("^The item should succeed in creation.$")
 {
-    ScenarioScope<TestItemCtx> context;
+    ScenarioScope<TestCtx> context;
     JResult expected = JSUCCESS;
     JResult actual = context->Success;
     EXPECT_EQ(expected, actual);

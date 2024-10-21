@@ -293,7 +293,7 @@ JResult CDungeon::SpawnMonsters(const int depth)
 
     int desired_monsters = int (m_fOpenFloorArea * DUNG_CFG_MONSTERS_PER_LEVEL);
     printf("Possible spawn points: %0.2f  desired monsters: %d\n", m_fOpenFloorArea, desired_monsters);
-
+    // desired_monsters = 0;
     while( desired_monsters > 0 )
     {
 

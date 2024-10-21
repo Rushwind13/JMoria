@@ -9,6 +9,8 @@
 #include <TextEntry.h>
 #include <TileSet.h>
 #include <AIMgr.h>
+#include "FileParse.h"
+#include "Item.h"
 
 CGame *g_pGame = NULL;
 
@@ -42,6 +44,9 @@ struct TestCtx
 
   // AI Brain
   CAIBrain *brain;
+  // ItemDef
+  CItemDef *ItemDef;
+  JResult Success;
 
   int index;
   int lo;

@@ -160,6 +160,7 @@ public:
 	~CMonster();
     
 	static JResult CreateMonster(CMonsterDef *pmd);
+	void Breed();
 	JResult SpawnMonster();
 	void PreDraw();
 	void Draw();

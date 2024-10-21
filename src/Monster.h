@@ -165,8 +165,8 @@ public:
 	void PreDraw();
 	void Draw();
 	void PostDraw();
-protected:
     void Init(CMonsterDef *pmd);
+protected:
     void InitBrain(CMonsterDef *pmd);
 private:
 };

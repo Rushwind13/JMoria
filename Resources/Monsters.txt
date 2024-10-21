@@ -50,7 +50,7 @@ Monster <Giant Frog>
     Plural		<Giant Frogs>
     Appear      <1d1>
     Speed		2.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_SEEKPLAYER>
     HD          <3d8>
     AC          40.0
     Level       5
@@ -65,7 +65,7 @@ Monster <Death Slaad>
     Plural		<Death Slaads>
     Appear      <1d1>
     Speed		2.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_SEEKPLAYER>
     HD          <4d8>
     AC          50.0
     Level       10
@@ -95,7 +95,7 @@ Monster <Flaming Bat>
      Plural		<Floating Eyes>
      Appear      <1d1>
      Speed		.25
-     MoveType	<MON_AI_100RANDOMMOVE>
+     MoveType	<MON_AI_DONTMOVE>
      HD          <1d4>
      AC          20.0
      Level       1
@@ -216,7 +216,7 @@ Monster <Shadow Mastiff>
     Plural		<Shadow Mastiffs>
     Appear      <1d1>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_SEEKPLAYER>
     HD          <4d8>
     AC          50.0
     Level       15
@@ -231,7 +231,7 @@ Monster <White Harpy>
     Plural		<White Harpy>
     Appear      <1d1>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_SEEKPLAYER>
     HD          <5d8>
     AC          60.0
     Level       15
@@ -246,7 +246,7 @@ Monster <Brontosaurus>
     Plural		<Brontosaurs>
     Appear      <1d1>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_SEEKPLAYER>
     HD          <25d8>
     AC          60.0
     Level       15
@@ -261,7 +261,7 @@ Monster <Tyrannosaurus Rex>
     Plural		<Tyrannosaurs>
     Appear      <1d1>
     Speed		2.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_SEEKPLAYER>
     HD          <18d8>
     AC          60.0
     Level       15
@@ -377,7 +377,7 @@ Monster <Ancient Multi-hued Dragon>
     Plural		<Ancient Multi-hued Dragons>
     Appear      <1d1>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_SEEKPLAYER>
     HD			<15d8>
     AC          110.0
     Level		50
@@ -399,7 +399,7 @@ Monster <Kobold>
     Plural		<Kobolds>
     Appear      <1d1>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_SEEKPLAYER>
     HD			<1d4>
     AC          40.0
     Level		2
@@ -413,7 +413,7 @@ Monster <White Dragon>
 {
     Plural		<White Dragons>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_SEEKPLAYER>
     HD			<7d8>
     AC          80.0
     Level		15
@@ -429,7 +429,7 @@ Monster <Black Dragon>
 {
     Plural		<Black Dragons>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_SEEKPLAYER>
     HD			<8d8>
     AC          80.0
     Level		20
@@ -445,7 +445,7 @@ Monster <Green Dragon>
 {
     Plural		<Green Dragons>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_SEEKPLAYER>
     HD			<9d8>
     AC          90.0
     Level		25
@@ -461,7 +461,7 @@ Monster <Blue Dragon>
 {
     Plural		<Blue Dragons>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_SEEKPLAYER>
     HD			<10d8>
     AC          90.0
     Level		30
@@ -477,7 +477,7 @@ Monster <Red Dragon>
 {
     Plural		<Red Dragons>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_SEEKPLAYER>
     HD			<11d8>
     AC          120.0
     Level		35
@@ -650,7 +650,7 @@ Monster <Giant Ant>
 {
     Plural		<Giant Ants>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_SEEKPLAYER>
     HD			<3d8>
     AC			80.0
     Level		3

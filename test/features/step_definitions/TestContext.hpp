@@ -8,6 +8,7 @@
 #include <JVector.h>
 #include <TextEntry.h>
 #include <TileSet.h>
+#include <AIMgr.h>
 
 CGame *g_pGame = NULL;
 
@@ -39,6 +40,9 @@ struct TestCtx
   // DungeonMap
   CDungeonMap map;
 
+  // AI Brain
+  CAIBrain *brain;
+
   int index;
   int lo;
   int hi;
@@ -46,6 +50,7 @@ struct TestCtx
   int hi_f;
 
   // RESULTS
+  bool result_bool;
   int result_int;
   float result_float;
   JResult result;

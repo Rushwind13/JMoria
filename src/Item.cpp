@@ -45,16 +45,11 @@ void CItem::Init( CItemDef *pid )
 
 void CItem::ApplyCursedStatus( int likelihood )
 {
-    if( CItem::PercentChance(likelihood) )
+    if( Util::GetRandom(1,100) < likelihood )
     {
         m_dwFlags |= ITEM_FLAG_CURSED;
         m_Color.SetColor(255,0,0,255);
     }    
-}
-
-bool CItem::PercentChance ( int chance )
-{
-    return Util::GetRandom(1,100) < chance;
 }
 
 JResult CItem::SpawnItem()

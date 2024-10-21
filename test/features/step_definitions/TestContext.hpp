@@ -47,6 +47,11 @@ struct TestCtx
   CMonsterDef *monsterDef;
   CMonster *monster;
 
+  // All Monsters
+  JLinkList<CMonsterDef> *m_llMonsterDefs = new JLinkList<CMonsterDef>;
+  JLinkList<CMonster> *m_llMonsters = new JLinkList<CMonster>;
+
+
   // ItemDef
   CItemDef *ItemDef;
   JResult Success;

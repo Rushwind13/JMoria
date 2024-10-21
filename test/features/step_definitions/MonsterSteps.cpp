@@ -37,3 +37,38 @@ THEN("^I can see the monster name$")
     ScenarioScope<TestCtx> context;
     EXPECT_EQ(std::string("Giant Frog"), context->monster->GetName());
 }
+GIVEN("^I read all the monsters from the config file$")
+{
+    ScenarioScope<TestCtx> context;
+    CMonsterDef *pmd;
+    pmd = new CMonsterDef;
+    while( context->dfMonsters.ReadMonster(*pmd) )
+    {
+        context->m_llMonsterDefs->Add(pmd);
+        pmd = new CMonsterDef;
+    }
+}
+WHEN("^I create a monster for each configuration$")
+{
+    ScenarioScope<TestCtx> context;
+    CLink<CMonsterDef> *pLink = context->m_llMonsterDefs->GetHead();
+    while( pLink != NULL)
+    {
+        CMonster *pMon;
+        pMon = new CMonster;
+        pMon->Init(pLink->m_lpData);
+        context->m_llMonsters->Add(pMon);
+        pLink = context->m_llMonsterDefs->GetNext(pLink);
+    }
+
+}
+THEN("^I can see all the monster names$")
+{
+    ScenarioScope<TestCtx> context;
+    CLink<CMonster> *pLink = context->m_llMonsters->GetHead(); 
+    while ( pLink != NULL )
+    {
+        printf("Monster is %s\n", pLink->m_lpData->GetName());
+        pLink = context->m_llMonsters->GetNext(pLink);
+    }
+}

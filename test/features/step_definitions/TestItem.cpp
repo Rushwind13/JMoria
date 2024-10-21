@@ -16,15 +16,10 @@ GIVEN("^I have an ItemDef$")
 
     CItemDef *pid;
     CDataFile dfItems;
-    printf("About to open file\n");
     dfItems.Open("../../JMoria/Resources/Items.txt"); //step out of the test directory
-    printf("Read file %s\n", dfItems.m_fp);
 
     pid = new CItemDef;
-    printf("Created empty item def\n");
     context->ItemDef = dfItems.ReadItem(*pid);
-    printf("This is a %s\n", pid->m_szName);
-
 }
 
 WHEN("^I CreateItem$")

@@ -23,7 +23,6 @@ public:
     CItemDef *ReadItem(CItemDef &idIn);
     CScore *ReadScore(CScore &sIn);
     bool WriteScore(CScore *sIn);
-	FILE	*m_fp;
 protected:
     char	*Strip( char *szLine );
     char	*chomp(const char *szLine, char *szIn);
@@ -33,6 +32,7 @@ protected:
     int     GetValue(char *szLine, long &dwIn);
 	float	 GetValue(char *szLine, float &fIn);
 private:
+	FILE	*m_fp;
 	// Member functions
 public:
 protected:

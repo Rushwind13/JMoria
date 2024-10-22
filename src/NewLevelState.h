@@ -5,20 +5,19 @@
 
 class CNewLevelState : public CStateBase
 {
-	// Member Variables
+    // Member Variables
 public:
 protected:
-	// "temp" variables for level generation go here.
+    // "temp" variables for level generation go here.
 private:
-
-	// Member Functions
+    // Member Functions
 public:
-	CNewLevelState() {}
+    CNewLevelState() {}
 
-	void OnUpdate(float fCurTime) {}
+    void OnUpdate( float fCurTime ) {}
 
 protected:
-	virtual int OnHandleKey( SDL_Keysym *keysym );
+    virtual int OnHandleKey( SDL_Keysym *keysym );
 
 private:
 };

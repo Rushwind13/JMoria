@@ -1,5 +1,5 @@
-#include <gtest/gtest.h>
 #include <cucumber-cpp/autodetect.hpp>
+#include <gtest/gtest.h>
 
 using cucumber::ScenarioScope;
 #include "TestContext.hpp"
@@ -10,10 +10,10 @@ using cucumber::ScenarioScope;
 ##
 #######*/
 
-GIVEN("^It is Wednesday$")
+GIVEN( "^It is Wednesday$" )
 {
-  ScenarioScope<TestCtx> context;
-  context->vec = JVector(0, 0);
+    ScenarioScope<TestCtx> context;
+    context->vec = JVector( 0, 0 );
 }
 
 /*#######
@@ -28,8 +28,8 @@ GIVEN("^It is Wednesday$")
 ##
 #######*/
 
-THEN("^Wearing Pink$")
+THEN( "^Wearing Pink$" )
 {
     ScenarioScope<TestCtx> context;
-    EXPECT_EQ(context->vec, JVector(0, 0));
+    EXPECT_EQ( context->vec, JVector( 0, 0 ) );
 }

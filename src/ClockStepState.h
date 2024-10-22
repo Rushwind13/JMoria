@@ -14,12 +14,12 @@
 #include "Dungeon.h"
 
 class CClockStepState;
-typedef int (CClockStepState::*ClockStepKeyHandler)(SDL_Keysym *keysym);
+typedef int ( CClockStepState::*ClockStepKeyHandler )( SDL_Keysym *keysym );
 enum eClockStepModifier
 {
-    CLOCKSTEP_INVALID=-1,
-    CLOCKSTEP_INIT=0,
-    CLOCKSTEP_TICK=1,
+    CLOCKSTEP_INVALID = -1,
+    CLOCKSTEP_INIT = 0,
+    CLOCKSTEP_TICK = 1,
     CLOCKSTEP_MAX
 };
 class CClockStepState : public CStateBase
@@ -28,22 +28,24 @@ class CClockStepState : public CStateBase
 public:
 protected:
     char m_cCommand;
-    ClockStepKeyHandler    m_pKeyHandlers[CLOCKSTEP_MAX];
-    ClockStepKeyHandler    m_pCurKeyHandler;
+    ClockStepKeyHandler m_pKeyHandlers[CLOCKSTEP_MAX];
+    ClockStepKeyHandler m_pCurKeyHandler;
 
-    eClockStepModifier    m_eCurModifier;
+    eClockStepModifier m_eCurModifier;
+
 private:
-  int m_dwClock;
-  int m_dwStep;
+    int m_dwClock;
+    int m_dwStep;
 
     // Member Functions
 public:
     CClockStepState();
     ~CClockStepState();
 
-    virtual void OnUpdate(float fCurTime) {}
+    virtual void OnUpdate( float fCurTime ) {}
     virtual int OnBaseHandleKey( SDL_Keysym *keysym );
     virtual int OnHandleKey( SDL_Keysym *keysym );
+
 protected:
 private:
     int OnHandleTick( SDL_Keysym *keysym );

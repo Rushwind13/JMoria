@@ -1,5 +1,5 @@
-#include <gtest/gtest.h>
 #include <cucumber-cpp/autodetect.hpp>
+#include <gtest/gtest.h>
 
 using cucumber::ScenarioScope;
 #include "TestContext.hpp"
@@ -10,20 +10,20 @@ using cucumber::ScenarioScope;
 ##
 #######*/
 
-GIVEN("^I have a JVector ([0-9.-]+),([0-9.-]+) in the data$")
+GIVEN( "^I have a JVector ([0-9.-]+),([0-9.-]+) in the data$" )
 {
-  REGEX_PARAM(float, x);
-  REGEX_PARAM(float, y);
-  ScenarioScope<TestCtx> context;
-  context->vec = JVector(x, y);
+    REGEX_PARAM( float, x );
+    REGEX_PARAM( float, y );
+    ScenarioScope<TestCtx> context;
+    context->vec = JVector( x, y );
 }
 
-GIVEN("^I have a second JVector ([0-9.-]+),([0-9.-]+) in the data$")
+GIVEN( "^I have a second JVector ([0-9.-]+),([0-9.-]+) in the data$" )
 {
-  REGEX_PARAM(float, x);
-  REGEX_PARAM(float, y);
-  ScenarioScope<TestCtx> context;
-  context->vec_b = JVector(x, y);
+    REGEX_PARAM( float, x );
+    REGEX_PARAM( float, y );
+    ScenarioScope<TestCtx> context;
+    context->vec_b = JVector( x, y );
 }
 
 /*#######
@@ -32,33 +32,33 @@ GIVEN("^I have a second JVector ([0-9.-]+),([0-9.-]+) in the data$")
 ##
 #######*/
 
-WHEN("^I press add_JVector$")
+WHEN( "^I press add_JVector$" )
 {
-  ScenarioScope<TestCtx> context;
+    ScenarioScope<TestCtx> context;
 
-  context->vec = context->vec_b + context->vec;
+    context->vec = context->vec_b + context->vec;
 }
 
-WHEN("^I press subtract_JVector$")
+WHEN( "^I press subtract_JVector$" )
 {
-  ScenarioScope<TestCtx> context;
+    ScenarioScope<TestCtx> context;
 
-  context->vec = context->vec - context->vec_b;
+    context->vec = context->vec - context->vec_b;
 }
 
-WHEN("^I press negate_JVector$")
+WHEN( "^I press negate_JVector$" )
 {
-  ScenarioScope<TestCtx> context;
+    ScenarioScope<TestCtx> context;
 
-  context->vec = -context->vec;
+    context->vec = -context->vec;
 }
 
-WHEN("^I press scale_JVector ([0-9.-]+)$")
+WHEN( "^I press scale_JVector ([0-9.-]+)$" )
 {
-  REGEX_PARAM(float, scalar);
-  ScenarioScope<TestCtx> context;
+    REGEX_PARAM( float, scalar );
+    ScenarioScope<TestCtx> context;
 
-  context->vec = context->vec * scalar;
+    context->vec = context->vec * scalar;
 }
 /*#######
 ##
@@ -66,44 +66,46 @@ WHEN("^I press scale_JVector ([0-9.-]+)$")
 ##
 #######*/
 
-THEN("^the result should be ([0-9.-]+),([0-9.-]+) a JVector$")
+THEN( "^the result should be ([0-9.-]+),([0-9.-]+) a JVector$" )
 {
-  REGEX_PARAM(float, x);
-  REGEX_PARAM(float, y);
-  JVector expected(x, y);
-  ScenarioScope<TestCtx> context;
-  JVector actual = context->vec;
+    REGEX_PARAM( float, x );
+    REGEX_PARAM( float, y );
+    JVector expected( x, y );
+    ScenarioScope<TestCtx> context;
+    JVector actual = context->vec;
 
-  bool result = false;
+    bool result = false;
 
-  if( expected == actual )
-  {
-      result = true;
-  }
-  else
-  {
-      expected.printvec("expected");
-      std::cout << "\n";
-      actual.printvec("actual");
-      std::cout << "\n";
-      result = false;
-  }
+    if( expected == actual )
+    {
+        result = true;
+    }
+    else
+    {
+        expected.printvec( "expected" );
+        std::cout << "\n";
+        actual.printvec( "actual" );
+        std::cout << "\n";
+        result = false;
+    }
 
-  EXPECT_EQ(result, true);
+    EXPECT_EQ( result, true );
 }
 
-THEN("^The vector is in world$") {
+THEN( "^The vector is in world$" )
+{
     bool expected = true;
     ScenarioScope<TestCtx> context;
     bool actual = context->vec.IsInWorld();
 
-    EXPECT_EQ(expected, actual);
+    EXPECT_EQ( expected, actual );
 }
 
-THEN("^The vector is not in world$") {
+THEN( "^The vector is not in world$" )
+{
     bool expected = false;
     ScenarioScope<TestCtx> context;
     bool actual = context->vec.IsInWorld();
 
-    EXPECT_EQ(expected, actual);
+    EXPECT_EQ( expected, actual );
 }

@@ -12,12 +12,12 @@
 #include "StateBase.h"
 
 class CStringInputState;
-typedef int (CStringInputState::*StringInputKeyHandler)(SDL_Keysym *keysym);
+typedef int ( CStringInputState::*StringInputKeyHandler )( SDL_Keysym *keysym );
 enum eStringInputModifier
 {
-    SI_INVALID=-1,
-    SI_INIT=0,
-    SI_NAME=1,
+    SI_INVALID = -1,
+    SI_INIT = 0,
+    SI_NAME = 1,
     SI_HAGGLE,
     SI_MAX
 };
@@ -27,21 +27,22 @@ class CStringInputState : public CStateBase
 public:
 protected:
     char m_cCommand;
-    StringInputKeyHandler    m_pKeyHandlers[SI_MAX];
-    StringInputKeyHandler    m_pCurKeyHandler;
+    StringInputKeyHandler m_pKeyHandlers[SI_MAX];
+    StringInputKeyHandler m_pCurKeyHandler;
 
-    eStringInputModifier    m_eCurModifier;
+    eStringInputModifier m_eCurModifier;
     char m_szInput[MAX_STRING_LENGTH];
-private:
 
+private:
     // Member Functions
 public:
     CStringInputState();
     ~CStringInputState() {}
 
-    virtual void OnUpdate(float fCurTime) {}
+    virtual void OnUpdate( float fCurTime ) {}
     virtual int OnBaseHandleKey( SDL_Keysym *keysym );
     virtual int OnHandleKey( SDL_Keysym *keysym );
+
 protected:
 private:
     int OnHandleName( SDL_Keysym *keysym );

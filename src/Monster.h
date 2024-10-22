@@ -166,9 +166,11 @@ public:
     void PreDraw();
     void Draw();
     void PostDraw();
+    // TODO: determine how to handle this for testing
+    // protected: made public for unit test
+    void Init( CMonsterDef *pmd );
 
 protected:
-    void Init( CMonsterDef *pmd );
     void InitBrain( CMonsterDef *pmd );
 
 private:

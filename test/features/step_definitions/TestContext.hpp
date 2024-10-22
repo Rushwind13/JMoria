@@ -4,6 +4,7 @@
 // #include <JMDefs.h>
 #include "FileParse.h"
 #include "Item.h"
+#include "Monster.h"
 #include <Constants.h>
 #include <DungeonMap.h>
 #include <JRect.h>
@@ -39,6 +40,15 @@ struct TestCtx
 
     // DungeonMap
     CDungeonMap map;
+
+    // MonsterDef
+    CDataFile dfMonsters;
+    CMonsterDef *monsterDef;
+    CMonster *monster;
+
+    // All Monsters
+    JLinkList<CMonsterDef> *m_llMonsterDefs = new JLinkList<CMonsterDef>;
+    JLinkList<CMonster> *m_llMonsters = new JLinkList<CMonster>;
 
     // ItemDef
     CItemDef *ItemDef;

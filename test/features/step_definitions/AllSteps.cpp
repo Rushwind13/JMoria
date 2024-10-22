@@ -3,6 +3,7 @@
 #include "DungeonMapSteps.cpp"
 #include "FirstSteps.cpp"
 #include "ItemSteps.cpp"
+#include "MonsterSteps.cpp"
 #include "RectSteps.cpp"
 #include "StringTableSteps.cpp"
 #include "TextEntrySteps.cpp"

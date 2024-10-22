@@ -1,24 +1,24 @@
 #include "FileParse.h"
-#include "Monster.h"
-#include "Item.h"
 #include "EndGameState.h"
+#include "Item.h"
+#include "Monster.h"
 #include <string.h>
 
 bool CDataFile::Open( const char *szFilename )
 {
-	m_fp = fopen(szFilename, "r");
+    m_fp = fopen( szFilename, "r" );
 
-	if( m_fp == NULL )
-	{
-		return false;
-	}
+    if( m_fp == NULL )
+    {
+        return false;
+    }
 
-	return true;
+    return true;
 }
 
 bool CDataFile::Append( const char *szFilename )
 {
-    m_fp = fopen(szFilename, "a");
+    m_fp = fopen( szFilename, "a" );
 
     if( m_fp == NULL )
     {
@@ -30,91 +30,90 @@ bool CDataFile::Append( const char *szFilename )
 
 bool CDataFile::Close()
 {
-    fclose(m_fp);
+    fclose( m_fp );
     m_fp = NULL;
     return true;
 }
 
 char *CDataFile::Strip( char *szLine )
 {
-	char *c;
+    char *c;
 
-	if( szLine == NULL || *szLine == nul || *szLine == '#' )
-	{
-		return NULL;
-	}
+    if( szLine == NULL || *szLine == nul || *szLine == '#' )
+    {
+        return NULL;
+    }
 
-	if( szLine[strlen(szLine)-1] == '\n' )
-	{
-		szLine[strlen(szLine)-1] = NULL;
-	}
+    if( szLine[strlen( szLine ) - 1] == '\n' )
+    {
+        szLine[strlen( szLine ) - 1] = NULL;
+    }
 
-	if( *szLine == nul )
-	{
-		return NULL;
-	}
+    if( *szLine == nul )
+    {
+        return NULL;
+    }
 
-	c = szLine;
-	while( *c == ' ' || *c == '\t' || *c == '\n' )
-	{
-		c++;
-	}
-	szLine = c;
+    c = szLine;
+    while( *c == ' ' || *c == '\t' || *c == '\n' )
+    {
+        c++;
+    }
+    szLine = c;
 
-	c = strtok( szLine, "#" );
-	if( c != NULL )
-	{
-		return c;
-	}
+    c = strtok( szLine, "#" );
+    if( c != NULL )
+    {
+        return c;
+    }
 
-	return szLine;
+    return szLine;
 }
 
-
-CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
+CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
 {
-	char szRaw[1024];
-	char *szLine;
-	char *szValue = NULL;
-	bool bFoundMonster = false;
-	bool bStartMonster = false;
-	bool bEndMonster = false;
+    char szRaw[1024];
+    char *szLine;
+    char *szValue = NULL;
+    bool bFoundMonster = false;
+    bool bStartMonster = false;
+    bool bEndMonster = false;
 
-	while( !bEndMonster && fgets( szRaw, 1024, m_fp ) != NULL )
-	{
-		szLine = Strip(szRaw);
-		if( szLine == NULL )
-		{
-			continue;
-		}
-		if( !bFoundMonster )
-		{
-			if( strncasecmp( szLine, "monster", 7 ) == 0 )
-			{
-				bFoundMonster = true;
-				mdIn.m_szName = GetValue( szLine, mdIn.m_szName );
-			}
-			continue;
-		}
+    while( !bEndMonster && fgets( szRaw, 1024, m_fp ) != NULL )
+    {
+        szLine = Strip( szRaw );
+        if( szLine == NULL )
+        {
+            continue;
+        }
+        if( !bFoundMonster )
+        {
+            if( strncasecmp( szLine, "monster", 7 ) == 0 )
+            {
+                bFoundMonster = true;
+                mdIn.m_szName = GetValue( szLine, mdIn.m_szName );
+            }
+            continue;
+        }
 
-		if( !bStartMonster )
-		{
-			if( *szLine == '{' )
-			{
-				bStartMonster = true;
-			}
-			continue;
-		}
+        if( !bStartMonster )
+        {
+            if( *szLine == '{' )
+            {
+                bStartMonster = true;
+            }
+            continue;
+        }
 
-		// Once you get here, you know that you're
-		// parsing a monster entry. Everything
-		// from here to the next } is going to be
-		// data for this monster.
-		if( !bEndMonster )
-		{
-			if( strncasecmp( szLine, "plural", 6 ) == 0 )
-			{
-				mdIn.m_szPlural = GetValue( szLine, mdIn.m_szPlural );
+        // Once you get here, you know that you're
+        // parsing a monster entry. Everything
+        // from here to the next } is going to be
+        // data for this monster.
+        if( !bEndMonster )
+        {
+            if( strncasecmp( szLine, "plural", 6 ) == 0 )
+            {
+                mdIn.m_szPlural = GetValue( szLine, mdIn.m_szPlural );
             }
             else if( strncasecmp( szLine, "appear", 6 ) == 0 )
             {
@@ -124,31 +123,31 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
             {
                 mdIn.m_fSpeed = GetValue( szLine, mdIn.m_fSpeed );
             }
-			else  if( strncasecmp( szLine, "movetype", 8 ) == 0 )
-			{
-				szValue = GetValue( szLine, szValue );
-                mdIn.m_dwMoveType = g_Constants.LookupString(szValue);
-			}
-			else if( strncasecmp( szLine, "hd", 2 ) == 0 )
-			{
-				mdIn.m_szHD = GetValue( szLine, mdIn.m_szHD );
-			}
-			else  if( strncasecmp( szLine, "ac", 2 ) == 0 )
-			{
-				mdIn.m_fBaseAC = GetValue( szLine, mdIn.m_fBaseAC );
-			}
-			else if( strncasecmp( szLine, "level", 5 ) == 0 )
-			{
-				GetValue( szLine, mdIn.m_dwLevel );
-			}
-			else if( strncasecmp( szLine, "expvalue", 8 ) == 0 )
-			{
-				GetValue( szLine, mdIn.m_fExpValue );
+            else if( strncasecmp( szLine, "movetype", 8 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                mdIn.m_dwMoveType = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "hd", 2 ) == 0 )
+            {
+                mdIn.m_szHD = GetValue( szLine, mdIn.m_szHD );
+            }
+            else if( strncasecmp( szLine, "ac", 2 ) == 0 )
+            {
+                mdIn.m_fBaseAC = GetValue( szLine, mdIn.m_fBaseAC );
+            }
+            else if( strncasecmp( szLine, "level", 5 ) == 0 )
+            {
+                GetValue( szLine, mdIn.m_dwLevel );
+            }
+            else if( strncasecmp( szLine, "expvalue", 8 ) == 0 )
+            {
+                GetValue( szLine, mdIn.m_fExpValue );
             }
             else if( strncasecmp( szLine, "type", 4 ) == 0 )
             {
                 szValue = GetValue( szLine, szValue );
-                mdIn.m_dwIndex = g_Constants.LookupString(szValue);
+                mdIn.m_dwIndex = g_Constants.LookupString( szValue );
             }
             else if( strncasecmp( szLine, "flags", 5 ) == 0 )
             {
@@ -157,125 +156,125 @@ CMonsterDef *CDataFile::ReadMonster(CMonsterDef &mdIn)
                 char *c = strtok( szValue, "," );
                 while( c != NULL )
                 {
-                    mdIn.m_dwFlags |= g_Constants.LookupString(c);
+                    mdIn.m_dwFlags |= g_Constants.LookupString( c );
                     c = strtok( NULL, "," );
                 }
             }
-			else if( strncasecmp( szLine, "attack", 6 ) == 0 )
-			{
-				CAttack *curAttack;
-				curAttack = new CAttack;
-				char *begin;
-				char *end;
-				char *cur;
-				bool bDone = false;
-				// Attack <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2 -or-
+            else if( strncasecmp( szLine, "attack", 6 ) == 0 )
+            {
+                CAttack *curAttack;
+                curAttack = new CAttack;
+                char *begin;
+                char *end;
+                char *cur;
+                bool bDone = false;
+                // Attack <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2 -or-
                 // Attack <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,15d8,5
-				// effect type
+                // effect type
                 begin = strchr( szLine, '<' );
                 end = strchr( szLine, '>' );
                 if( begin == NULL || end == NULL )
                 {
-                    printf("error parsing attack: effect type not found %s\n", cur);
+                    printf( "error parsing attack: effect type not found %s\n", cur );
                     continue;
                 }
                 *end++ = NULL;
                 begin++;
-                curAttack->m_dwEffect = g_Constants.LookupString(begin);
+                curAttack->m_dwEffect = g_Constants.LookupString( begin );
                 cur = end;
-                
+
                 // attack type
                 begin = strchr( cur, '<' );
                 end = strchr( cur, '>' );
                 if( begin == NULL || end == NULL )
                 {
-                    printf("error parsing attack: attack type not found %s\n", cur);
+                    printf( "error parsing attack: attack type not found %s\n", cur );
                     continue;
                 }
                 *end++ = NULL;
                 begin++;
-                curAttack->m_dwType = g_Constants.LookupString(begin);
+                curAttack->m_dwType = g_Constants.LookupString( begin );
                 cur = end;
 
                 // effect flag (optional)
-				if( !bDone )
-				{
-					cur = end;
-					// effect
-					begin = strchr( cur, '<' );
-					end = strchr( cur, '>' );
-					if( begin != NULL && end != NULL )
-					{
+                if( !bDone )
+                {
+                    cur = end;
+                    // effect
+                    begin = strchr( cur, '<' );
+                    end = strchr( cur, '>' );
+                    if( begin != NULL && end != NULL )
+                    {
                         *end = NULL;
                         begin++;
-                        curAttack->m_dwEffect = g_Constants.LookupString(begin);
-					}
-				}
+                        curAttack->m_dwEffect = g_Constants.LookupString( begin );
+                    }
+                }
 
-				// damage
-				begin = strchr(cur, ',');
-				if( begin == NULL )
+                // damage
+                begin = strchr( cur, ',' );
+                if( begin == NULL )
                 {
-                    printf("error parsing attack: damage not found %s\n", cur);
+                    printf( "error parsing attack: damage not found %s\n", cur );
                     continue;
                 }
-				begin++;
-				// from here on out, you've got enough info to do this.
-				end = strchr(begin, ',');
-				if( end != NULL )
-				{
-					*end++ = NULL;
-				}
-				else
-				{
-					bDone = true;
-				}
+                begin++;
+                // from here on out, you've got enough info to do this.
+                end = strchr( begin, ',' );
+                if( end != NULL )
+                {
+                    *end++ = NULL;
+                }
+                else
+                {
+                    bDone = true;
+                }
 
-				cur = Strip(begin);
-				curAttack->m_szDamage = new char[strlen(cur)+1];
-				strcpy( curAttack->m_szDamage, cur );
+                cur = Strip( begin );
+                curAttack->m_szDamage = new char[strlen( cur ) + 1];
+                strcpy( curAttack->m_szDamage, cur );
 
-				// store it
-				mdIn.m_llAttacks->Add(curAttack);
-			}
-			else if( strncasecmp( szLine, "color", 5 ) == 0 )
-			{
-				char *color = chomp( szLine, szValue );
+                // store it
+                mdIn.m_llAttacks->Add( curAttack );
+            }
+            else if( strncasecmp( szLine, "color", 5 ) == 0 )
+            {
+                char *color = chomp( szLine, szValue );
                 if( strchr( color, '<' ) != NULL )
                 {
                     // multi-hued
                     // <<rgb1>,<rgb2>,...,<rgbn>>
-                    printf("Found multi-hued monster: %s\n", color);
-                    mdIn.m_Colors = ParseColors(color);
+                    printf( "Found multi-hued monster: %s\n", color );
+                    mdIn.m_Colors = ParseColors( color );
 
                     mdIn.m_dwFlags |= MON_COLOR_MULTI;
                 }
                 else
                 {
                     // single-hued
-                            // <rgb1>
-                            mdIn.m_Color.SetColor(color);
+                    // <rgb1>
+                    mdIn.m_Color.SetColor( color );
                 }
-			}
-			else if( *szLine == '}' )
-			{
-				bEndMonster = true;
-			}
-			else
-			{
-				printf( "Unparseable line:%s\n", szLine );
-			}
-		}
-	}
-	if( !bEndMonster )
-	{
-		return NULL;
-	}
+            }
+            else if( *szLine == '}' )
+            {
+                bEndMonster = true;
+            }
+            else
+            {
+                printf( "Unparseable line:%s\n", szLine );
+            }
+        }
+    }
+    if( !bEndMonster )
+    {
+        return NULL;
+    }
 
-	return &mdIn;
+    return &mdIn;
 }
 
-CItemDef *CDataFile::ReadItem(CItemDef &idIn)
+CItemDef *CDataFile::ReadItem( CItemDef &idIn )
 {
     char szRaw[1024];
     char *szLine;
@@ -286,7 +285,7 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
 
     while( !bEndItem && fgets( szRaw, 1024, m_fp ) != NULL )
     {
-        szLine = Strip(szRaw);
+        szLine = Strip( szRaw );
         if( szLine == NULL )
         {
             continue;
@@ -324,23 +323,23 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
             {
                 idIn.m_fSpeed = GetValue( szLine, idIn.m_fSpeed );
             }
-            else  if( strncasecmp( szLine, "acbonus", 7 ) == 0 )
+            else if( strncasecmp( szLine, "acbonus", 7 ) == 0 )
             {
                 idIn.m_fACBonus = GetValue( szLine, idIn.m_fACBonus );
             }
-            else  if( strncasecmp( szLine, "ac", 2 ) == 0 )
+            else if( strncasecmp( szLine, "ac", 2 ) == 0 )
             {
                 idIn.m_fBaseAC = GetValue( szLine, idIn.m_fBaseAC );
             }
-            else  if( strncasecmp( szLine, "damage", 6 ) == 0 )
+            else if( strncasecmp( szLine, "damage", 6 ) == 0 )
             {
                 idIn.m_szBaseDamage = GetValue( szLine, idIn.m_szBaseDamage );
             }
-            else  if( strncasecmp( szLine, "to-hitbonus", 11 ) == 0 )
+            else if( strncasecmp( szLine, "to-hitbonus", 11 ) == 0 )
             {
                 idIn.m_fBonusToHit = GetValue( szLine, idIn.m_fBonusToHit );
             }
-            else  if( strncasecmp( szLine, "to-dambonus", 11 ) == 0 )
+            else if( strncasecmp( szLine, "to-dambonus", 11 ) == 0 )
             {
                 idIn.m_fBonusToDamage = GetValue( szLine, idIn.m_fBonusToDamage );
             }
@@ -360,7 +359,7 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
             {
                 // TODO: Add validation that this is ITEM_IDX_ and not...
                 szValue = GetValue( szLine, szValue );
-                idIn.m_dwIndex = g_Constants.LookupString(szValue);
+                idIn.m_dwIndex = g_Constants.LookupString( szValue );
             }
             else if( strncasecmp( szLine, "flags", 5 ) == 0 )
             {
@@ -369,7 +368,7 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
                 char *c = strtok( szValue, "," );
                 while( c != NULL )
                 {
-                    idIn.m_dwFlags |= g_Constants.LookupString(c);
+                    idIn.m_dwFlags |= g_Constants.LookupString( c );
                     c = strtok( NULL, "," );
                 }
             }
@@ -380,8 +379,8 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
                 {
                     // multi-hued
                     // <<rgb1>,<rgb2>,...,<rgbn>>
-                    printf("Found multi-hued item: %s\n", color);
-                    idIn.m_Colors = ParseColors(color);
+                    printf( "Found multi-hued item: %s\n", color );
+                    idIn.m_Colors = ParseColors( color );
 
                     idIn.m_dwFlags |= ITEM_COLOR_MULTI;
                 }
@@ -389,7 +388,7 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
                 {
                     // single-hued
                     // <rgb1>
-                    idIn.m_Color.SetColor(color);
+                    idIn.m_Color.SetColor( color );
                 }
             }
             else if( strncasecmp( szLine, "effect", 6 ) == 0 )
@@ -410,14 +409,15 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
                 }
                 *end++ = NULL;
                 begin++;
-                curEffect->m_dwEffect = g_Constants.LookupString(begin);
+                curEffect->m_dwEffect = g_Constants.LookupString( begin );
                 cur = end;
 
                 // amount
-                begin = strchr(cur, ',');
-                if( begin == NULL ) continue;
+                begin = strchr( cur, ',' );
+                if( begin == NULL )
+                    continue;
                 begin++;
-                cur = Strip(begin);
+                cur = Strip( begin );
                 begin = strchr( cur, '<' );
                 end = strchr( cur, '>' );
                 if( begin == NULL || end == NULL )
@@ -426,11 +426,11 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
                 }
                 *end = NULL;
                 begin++;
-                curEffect->m_szAmount = new char[strlen(begin)+1];
+                curEffect->m_szAmount = new char[strlen( begin ) + 1];
                 strcpy( curEffect->m_szAmount, begin );
 
                 // store it
-                idIn.m_llEffects->Add(curEffect);
+                idIn.m_llEffects->Add( curEffect );
             }
             else if( *szLine == '}' )
             {
@@ -450,7 +450,7 @@ CItemDef *CDataFile::ReadItem(CItemDef &idIn)
     return &idIn;
 }
 
-CScore *CDataFile::ReadScore(CScore &sIn)
+CScore *CDataFile::ReadScore( CScore &sIn )
 {
     char szRaw[1024];
     char *szLine;
@@ -461,7 +461,7 @@ CScore *CDataFile::ReadScore(CScore &sIn)
 
     while( !bEndScore && fgets( szRaw, 1024, m_fp ) != NULL )
     {
-        szLine = Strip(szRaw);
+        szLine = Strip( szRaw );
         if( szLine == NULL )
         {
             continue;
@@ -499,23 +499,23 @@ CScore *CDataFile::ReadScore(CScore &sIn)
             {
                 sIn.m_dwDepth = GetValue( szLine, sIn.m_dwDepth );
             }
-            else  if( strncasecmp( szLine, "reason", 6 ) == 0 )
+            else if( strncasecmp( szLine, "reason", 6 ) == 0 )
             {
                 sIn.m_szKilledBy = GetValue( szLine, sIn.m_szKilledBy );
             }
-            else  if( strncasecmp( szLine, "class", 5 ) == 0 )
+            else if( strncasecmp( szLine, "class", 5 ) == 0 )
             {
                 sIn.m_szClass = GetValue( szLine, sIn.m_szClass );
             }
-            else  if( strncasecmp( szLine, "race", 4 ) == 0 )
+            else if( strncasecmp( szLine, "race", 4 ) == 0 )
             {
                 sIn.m_szRace = GetValue( szLine, sIn.m_szRace );
             }
-            else  if( strncasecmp( szLine, "score", 5 ) == 0 )
+            else if( strncasecmp( szLine, "score", 5 ) == 0 )
             {
                 sIn.m_dwScore = GetValue( szLine, sIn.m_dwScore );
             }
-            else  if( strncasecmp( szLine, "date", 4 ) == 0 )
+            else if( strncasecmp( szLine, "date", 4 ) == 0 )
             {
                 sIn.m_dwDate = GetValue( szLine, sIn.m_dwDate );
             }
@@ -537,99 +537,102 @@ CScore *CDataFile::ReadScore(CScore &sIn)
     return &sIn;
 }
 
-bool CDataFile::WriteScore(CScore *sIn)
+bool CDataFile::WriteScore( CScore *sIn )
 {
-    fprintf( m_fp, "Score <%s>\n{\n\tClass\t<%s>\n\tRace\t<%s>\n\tLevel\t%d\n\tDepth\t%d\n\tReason\t<%s>\n\tScore\t%d\n\tDate\t%ld\n}\n",
-            sIn->m_szName, sIn->m_szClass, sIn->m_szRace, sIn->m_dwLevel,
-            sIn->m_dwDepth, sIn->m_szKilledBy, sIn->m_dwScore, sIn->m_dwDate);
+    fprintf( m_fp,
+             "Score "
+             "<%s>\n{\n\tClass\t<%s>\n\tRace\t<%s>\n\tLevel\t%d\n\tDepth\t%d\n\tReason\t<%s>"
+             "\n\tScore\t%d\n\tDate\t%ld\n}\n",
+             sIn->m_szName, sIn->m_szClass, sIn->m_szRace, sIn->m_dwLevel, sIn->m_dwDepth,
+             sIn->m_szKilledBy, sIn->m_dwScore, sIn->m_dwDate );
     fflush( m_fp );
     return true;
 }
 
 // Removes outermost <> from data entry
-char *CDataFile::GetValue(char *szLine, char *szIn) { return chomp(szLine, szIn); }
-char *CDataFile::chomp(const char *szLine, char *szIn)
+char *CDataFile::GetValue( char *szLine, char *szIn ) { return chomp( szLine, szIn ); }
+char *CDataFile::chomp( const char *szLine, char *szIn )
 {
-	if( szLine == NULL || *szLine == nul )
-	{
-		return NULL;
-	}
+    if( szLine == NULL || *szLine == nul )
+    {
+        return NULL;
+    }
 
-	char *copy;
+    char *copy;
 
-	copy = new char[strlen(szLine)+1];
-	strcpy( copy, szLine);
-	char *begin;
-	char *end;
-	begin = strchr( copy, '<' );
-	end = strrchr( copy, '>' );
+    copy = new char[strlen( szLine ) + 1];
+    strcpy( copy, szLine );
+    char *begin;
+    char *end;
+    begin = strchr( copy, '<' );
+    end = strrchr( copy, '>' );
 
-	if( begin == NULL || end == NULL )
-	{
-		return NULL;
-	}
-	*end = NULL;
-	begin++;
+    if( begin == NULL || end == NULL )
+    {
+        return NULL;
+    }
+    *end = NULL;
+    begin++;
 
-	szIn = new char[strlen(begin) +1];
-	strcpy( szIn, begin );
+    szIn = new char[strlen( begin ) + 1];
+    strcpy( szIn, begin );
 
-	delete [] copy;
-	return szIn;
+    delete[] copy;
+    return szIn;
 }
 
-JLinkList<JColor> * CDataFile::ParseColors(char *szLine)
+JLinkList<JColor> *CDataFile::ParseColors( char *szLine )
 {
-    JColor *outcolor=NULL;
+    JColor *outcolor = NULL;
     char szToken[32][32];
-    int count=0;
+    int count = 0;
     char *temp = NULL;
     JLinkList<JColor> *retval = new JLinkList<JColor>;
     char *c = strtok( szLine, ";" );
     while( c != NULL )
     {
-        memset(szToken[count], 0, 32);
-        strcpy(szToken[count++], c);
+        memset( szToken[count], 0, 32 );
+        strcpy( szToken[count++], c );
         c = strtok( NULL, ";" );
     }
 
-    for( int i = 0; i < count; i++)
+    for( int i = 0; i < count; i++ )
     {
         char *tok = szToken[i];
-        temp = chomp(tok, temp);
+        temp = chomp( tok, temp );
         outcolor = new JColor();
-        outcolor->SetColor(temp);
-        retval->Add(outcolor);
+        outcolor->SetColor( temp );
+        retval->Add( outcolor );
     }
 
     return retval;
 }
 
-int CDataFile::GetValue(char *szLine, long &dwIn)
+int CDataFile::GetValue( char *szLine, long &dwIn )
 {
     char label[100];
     char value[100];
     sscanf( szLine, "%s %s\n", label, value );
-    dwIn = atoi(value);
-    
+    dwIn = atoi( value );
+
     return (int)dwIn;
 }
-int CDataFile::GetValue(char *szLine, int &dwIn)
+int CDataFile::GetValue( char *szLine, int &dwIn )
 {
-	char label[100];
-	char value[100];
-	sscanf( szLine, "%s %s\n", label, value );
-	dwIn = atoi(value);
+    char label[100];
+    char value[100];
+    sscanf( szLine, "%s %s\n", label, value );
+    dwIn = atoi( value );
 
-	return dwIn;
+    return dwIn;
 }
 
-float CDataFile::GetValue(char *szLine, float &fIn)
+float CDataFile::GetValue( char *szLine, float &fIn )
 {
-	char label[100];
-	char value[100];
-	sscanf( szLine, "%s %s\n", label, value );
-	fIn = (float)atof(value);
+    char label[100];
+    char value[100];
+    sscanf( szLine, "%s %s\n", label, value );
+    fIn = (float)atof( value );
 
-	return fIn;
+    return fIn;
 }

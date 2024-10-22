@@ -13,24 +13,21 @@
 
 extern CGame *g_pGame;
 
-CRestState::CRestState()
-: m_dwClock(0)
+CRestState::CRestState() : m_dwClock( 0 )
 {
-    m_pKeyHandlers[REST_INIT]    = &CRestState::OnHandleInit;
-    m_pKeyHandlers[REST_TICK]    = &CRestState::OnHandleTick;
+    m_pKeyHandlers[REST_INIT] = &CRestState::OnHandleInit;
+    m_pKeyHandlers[REST_TICK] = &CRestState::OnHandleTick;
 
     m_eCurModifier = REST_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }
 
-CRestState::~CRestState()
-{
-}
+CRestState::~CRestState() {}
 
-int CRestState::OnHandleKey(SDL_Keysym *keysym)
+int CRestState::OnHandleKey( SDL_Keysym *keysym )
 {
     int retval;
-    retval = ((*this).*(m_pCurKeyHandler))(keysym);
+    retval = ( ( *this ).*( m_pCurKeyHandler ) )( keysym );
     return retval;
 }
 
@@ -48,7 +45,7 @@ int CRestState::OnHandleTick( SDL_Keysym *keysym )
 
     if( retval == JCOMPLETESTATE )
     {
-        printf( "TICK modifier complete, REST state to next TICK\n");
+        printf( "TICK modifier complete, REST state to next TICK\n" );
         DoTick();
         m_eCurModifier = REST_TICK;
         m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -89,12 +86,11 @@ int CRestState::OnBaseHandleKey( SDL_Keysym *keysym )
 
 void CRestState::ResetToState( int newstate )
 {
-    g_pGame->SetState(newstate);
+    g_pGame->SetState( newstate );
     m_cCommand = NULL;
     m_eCurModifier = REST_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }
-
 
 //////////////////////////////////////
 /// command-specific fcns go below
@@ -105,9 +101,9 @@ bool CRestState::DoTick()
     m_dwClock++;
     if( g_pGame->GetPlayer()->m_bIsRested || g_pGame->GetPlayer()->m_bIsDisturbed )
     {
-        printf("REST state complete, reset to CMD state.\n");
+        printf( "REST state complete, reset to CMD state.\n" );
         ResetToState( STATE_COMMAND );
     }
-    g_pGame->SetReadyForUpdate(true);
+    g_pGame->SetReadyForUpdate( true );
     return true;
 }

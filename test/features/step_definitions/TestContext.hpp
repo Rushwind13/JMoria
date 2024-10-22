@@ -1,19 +1,19 @@
 #ifndef __TEST_CONTEXT__
 #define __TEST_CONTEXT__
+#include <JMDefs.h>
 
-// #include <JMDefs.h>
+#include "FileParse.h"
+#include "Item.h"
+#include "Monster.h"
+#include <AIMgr.h>
 #include <Constants.h>
 #include <DungeonMap.h>
 #include <JRect.h>
 #include <JVector.h>
 #include <TextEntry.h>
 #include <TileSet.h>
-#include <AIMgr.h>
-#include "FileParse.h"
-#include "Item.h"
 
 CGame *g_pGame = NULL;
-
 
 /*#######
 ##
@@ -22,44 +22,52 @@ CGame *g_pGame = NULL;
 #######*/
 struct TestCtx
 {
-  JVector vec;
-  JVector vec_b;
+    JVector vec;
+    JVector vec_b;
 
-  JRect area;
+    JRect area;
 
-  // Tileset
-  CTileset *tileset;
-  char szTileset[1024];
-  JIVector aspect;
-  JIVector vTile;
+    // Tileset
+    CTileset *tileset;
+    char szTileset[1024];
+    JIVector aspect;
+    JIVector vTile;
 
-  // TextEntry
-  TextEntry pair;
+    // TextEntry
+    TextEntry pair;
 
-  // TextEntry
-  Constants constants;
+    // TextEntry
+    Constants constants;
 
-  // DungeonMap
-  CDungeonMap map;
+    // DungeonMap
+    CDungeonMap map;
 
-  // AI Brain
-  CAIBrain *brain;
-  // ItemDef
-  CItemDef *ItemDef;
-  JResult Success;
+    // AI Brain
+    CAIBrain *brain;
+    // ItemDef
+    CItemDef *ItemDef;
+    JResult Success;
 
-  int index;
-  int lo;
-  int hi;
-  int lo_f;
-  int hi_f;
+    // MonsterDef
+    CDataFile dfMonsters;
+    CMonsterDef *monsterDef;
+    CMonster *monster;
 
-  // RESULTS
-  bool result_bool;
-  int result_int;
-  float result_float;
-  JResult result;
+    // All Monsters
+    JLinkList<CMonsterDef> *m_llMonsterDefs = new JLinkList<CMonsterDef>;
+    JLinkList<CMonster> *m_llMonsters = new JLinkList<CMonster>;
 
+    // RESULTS
+    bool result_bool;
+    int result_int;
+    float result_float;
+    JResult result;
+
+    int index;
+    int lo;
+    int hi;
+    int lo_f;
+    int hi_f;
 };
 
 #endif // __TEST_CONTEXT__

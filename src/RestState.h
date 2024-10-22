@@ -14,12 +14,12 @@
 #include "Dungeon.h"
 
 class CRestState;
-typedef int (CRestState::*RestKeyHandler)(SDL_Keysym *keysym);
+typedef int ( CRestState::*RestKeyHandler )( SDL_Keysym *keysym );
 enum eRestModifier
 {
-    REST_INVALID=-1,
-    REST_INIT=0,
-    REST_TICK=1,
+    REST_INVALID = -1,
+    REST_INIT = 0,
+    REST_TICK = 1,
     REST_MAX
 };
 class CRestState : public CStateBase
@@ -28,12 +28,13 @@ class CRestState : public CStateBase
 public:
 protected:
     char m_cCommand;
-    RestKeyHandler    m_pKeyHandlers[REST_MAX];
-    RestKeyHandler    m_pCurKeyHandler;
+    RestKeyHandler m_pKeyHandlers[REST_MAX];
+    RestKeyHandler m_pCurKeyHandler;
 
-    eRestModifier    m_eCurModifier;
+    eRestModifier m_eCurModifier;
+
 private:
-  int m_dwClock;
+    int m_dwClock;
     float m_fStateTicks;
 
     // Member Functions
@@ -41,7 +42,7 @@ public:
     CRestState();
     ~CRestState();
 
-    virtual void OnUpdate(float fCurTime)
+    virtual void OnUpdate( float fCurTime )
     {
         m_fStateTicks += fCurTime;
         if( m_fStateTicks >= 1.0f )
@@ -52,6 +53,7 @@ public:
     };
     virtual int OnBaseHandleKey( SDL_Keysym *keysym );
     virtual int OnHandleKey( SDL_Keysym *keysym );
+
 protected:
 private:
     int OnHandleTick( SDL_Keysym *keysym );

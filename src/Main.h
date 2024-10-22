@@ -6,7 +6,6 @@
 //
 // Created 2/18/2002 Jimbo S. Harris
 
-
 #ifndef __MAIN_H__
 #define __MAIN_H__
 

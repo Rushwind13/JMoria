@@ -4,184 +4,171 @@
 // declaration of class JVector, a 2D vector class
 #ifndef __JVECTOR_H__
 #define __JVECTOR_H__
-//#include "JMDefs.h"
+// #include "JMDefs.h"
 #include "assert.h"
 
 #include "DungeonConstants.h"
 
-#define VEC_EXPAND(v) (v).x, (v).y
+#define VEC_EXPAND( v ) ( v ).x, ( v ).y
 
-template<class T>class TVector2
+template <class T> class TVector2
 {
-// Member variables
+    // Member variables
 public:
-	T x;
-	T y;
-	// Member functions
+    T x;
+    T y;
+    // Member functions
 public:
-	TVector2<T>() {};
-	TVector2<T>( const T inx, const T iny ):x(inx), y(iny) {};
-	TVector2<T>( const TVector2<T> &in ):x(in.x), y(in.y) {};
-	virtual ~TVector2<T>() {};
-	
-	// Array indexing
-	const T	&operator [] (unsigned int i)
-	{
-		assert (i<2);
-		return *(&x+i);
-	}
+    TVector2<T>() {}
+    TVector2<T>( const T inx, const T iny ) : x( inx ), y( iny ) {}
+    TVector2<T>( const TVector2<T> &in ) : x( in.x ), y( in.y ) {}
+    virtual ~TVector2<T>() {}
 
-	// Array indexing
-	const T	&operator [] (unsigned int i) const
-	{
-		assert (i<2);
-		return *(&x+i);
-	}
-	
-	// Add another JVector to this one
-	TVector2<T> &operator += ( const TVector2<T> &in )
-	{
-		x += in.x;
-		y += in.y;
+    // Array indexing
+    const T &operator[]( unsigned int i )
+    {
+        assert( i < 2 );
+        return *( &x + i );
+    }
 
-		return *this;
-	}
+    // Array indexing
+    const T &operator[]( unsigned int i ) const
+    {
+        assert( i < 2 );
+        return *( &x + i );
+    }
 
-	// subtract another JVector from this one
-	TVector2<T> &operator -= ( const TVector2<T> &in )
-	{
-		x -= in.x;		
-		y -= in.y;
+    // Add another JVector to this one
+    TVector2<T> &operator+=( const TVector2<T> &in )
+    {
+        x += in.x;
+        y += in.y;
 
-		return *this;
-	}
+        return *this;
+    }
 
-	// multiply vector be int scalar
-	TVector2<T> &operator *= ( T &i )
-	{
-		x *= i;		
-		y *= i;
+    // subtract another JVector from this one
+    TVector2<T> &operator-=( const TVector2<T> &in )
+    {
+        x -= in.x;
+        y -= in.y;
 
-		return *this;
-	}	
+        return *this;
+    }
 
-	// multiply vector be int scalar
-	TVector2<T> &operator *= ( T i )
-	{
-		x *= i;		
-		y *= i;
+    // multiply vector be int scalar
+    TVector2<T> &operator*=( T &i )
+    {
+        x *= i;
+        y *= i;
 
-		return *this;
-	}	
+        return *this;
+    }
 
-	// integer divide vector by scalar
-	TVector2<T> &operator /= ( T &i )
-	{
-		assert( i != 0 );
-		x /= i;		
-		y /= i;
+    // multiply vector be int scalar
+    TVector2<T> &operator*=( T i )
+    {
+        x *= i;
+        y *= i;
 
-		return *this;
-	}
+        return *this;
+    }
 
-	// negate this vector
-	friend TVector2<T> operator - ( const TVector2 &a )
-	{
-		TVector2<T> vReturn(-a.x, -a.y);
-		return(vReturn);
-	}
+    // integer divide vector by scalar
+    TVector2<T> &operator/=( T &i )
+    {
+        assert( i != 0 );
+        x /= i;
+        y /= i;
 
-	// subtract 2 vectors
-	friend TVector2<T> operator - ( const TVector2<T> &a, const TVector2<T> &b )
-	{
-		TVector2<T> vReturn(a);
-		vReturn -= b;
-		return(vReturn);
-	}
+        return *this;
+    }
 
-	// subtract 2 vectors
-	friend TVector2<T> operator + ( const TVector2<T> &a, const TVector2<T> &b )
-	{
-		TVector2<T> vReturn(a);
-		vReturn += b;
-		return(vReturn);
-	}
+    // negate this vector
+    friend TVector2<T> operator-( const TVector2 &a )
+    {
+        TVector2<T> vReturn( -a.x, -a.y );
+        return ( vReturn );
+    }
 
-	// multiply vector by scalar
-	friend TVector2<T> operator * ( const TVector2<T> &a, const T &i )
-	{
-		TVector2<T> vReturn(a);
-		vReturn *= i;
-		return(vReturn);
-	}
+    // subtract 2 vectors
+    friend TVector2<T> operator-( const TVector2<T> &a, const TVector2<T> &b )
+    {
+        TVector2<T> vReturn( a );
+        vReturn -= b;
+        return ( vReturn );
+    }
 
-	// multiply vector by scalar
-	friend TVector2<T> operator * ( const T &i, const TVector2<T> &a )
-	{
-		TVector2<T> vReturn(a);
-		vReturn *= i;
-		return(vReturn);
-	}
+    // subtract 2 vectors
+    friend TVector2<T> operator+( const TVector2<T> &a, const TVector2<T> &b )
+    {
+        TVector2<T> vReturn( a );
+        vReturn += b;
+        return ( vReturn );
+    }
 
-	// multiply vector by scalar
-	friend TVector2<T> operator / ( const TVector2<T> &a, const int &i )
-	{
-		assert( i != 0 );
-		TVector2<T> vReturn(a);
-		vReturn /= i;
-		return(vReturn);
-	}
+    // multiply vector by scalar
+    friend TVector2<T> operator*( const TVector2<T> &a, const T &i )
+    {
+        TVector2<T> vReturn( a );
+        vReturn *= i;
+        return ( vReturn );
+    }
 
-	// test equality
-	friend bool operator == ( const TVector2<T> &a, const TVector2<T> &b )
-	{
-		return((a.x == b.x) && (a.y == b.y));
-	}
+    // multiply vector by scalar
+    friend TVector2<T> operator*( const T &i, const TVector2<T> &a )
+    {
+        TVector2<T> vReturn( a );
+        vReturn *= i;
+        return ( vReturn );
+    }
 
-	// test inequality
-	friend bool operator != ( const TVector2<T> &a, const TVector2<T> &b )
-	{
-		return((a.x != b.x) || (a.y != b.y));
-	}
+    // multiply vector by scalar
+    friend TVector2<T> operator/( const TVector2<T> &a, const int &i )
+    {
+        assert( i != 0 );
+        TVector2<T> vReturn( a );
+        vReturn /= i;
+        return ( vReturn );
+    }
 
-	bool IsInWorld()
-	{
-		return( x >= 0 && x < ( DUNG_WIDTH )
-			 && y >= 0 && y < ( DUNG_HEIGHT ));
-	}
+    // test equality
+    friend bool operator==( const TVector2<T> &a, const TVector2<T> &b )
+    {
+        return ( ( a.x == b.x ) && ( a.y == b.y ) );
+    }
 
-	void Init( T inx=0, T iny=0 )
-	{
-		x = inx;
-		y = iny;
-	}
+    // test inequality
+    friend bool operator!=( const TVector2<T> &a, const TVector2<T> &b )
+    {
+        return ( ( a.x != b.x ) || ( a.y != b.y ) );
+    }
 
-	bool IsZero()
-	{
-		return((x == 0) && (y == 0));
-	}
+    bool IsInWorld() { return ( x >= 0 && x < ( DUNG_WIDTH ) && y >= 0 && y < ( DUNG_HEIGHT ) ); }
 
-	float Length()
-	{
-		return( (x*x) + (y*y) );
-	}
+    void Init( T inx = 0, T iny = 0 )
+    {
+        x = inx;
+        y = iny;
+    }
 
-	void Norm()
-	{
-		float len = Length();
-		if( len != 0.0f )
-		{
-			x /= len;
-			y /= len;
-		}
-	}
-	void printvec( const char *label )
-	{
-		printf("%s: %f %f ", label, x, y);
-	}
+    bool IsZero() { return ( ( x == 0 ) && ( y == 0 ) ); }
+
+    float Length() { return ( ( x * x ) + ( y * y ) ); }
+
+    void Norm()
+    {
+        float len = Length();
+        if( len != 0.0f )
+        {
+            x /= len;
+            y /= len;
+        }
+    }
+    void printvec( const char *label ) { printf( "%s: %f %f ", label, x, y ); }
 };
 
 typedef TVector2<int> JIVector;
 typedef TVector2<float> JVector;
 typedef TVector2<float> JFVector;
-#endif //__JVECTOR_H__
+#endif // __JVECTOR_H__

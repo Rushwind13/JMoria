@@ -1,0 +1,16 @@
+AccessModifierOffset: -4
+BinPackArguments: true
+BreakBeforeBraces: Allman
+BreakConstructorInitializers: BeforeColon
+BreakInheritanceList: BeforeColon
+ColumnLimit: 100
+IndentWidth: 4
+PackConstructorInitializers: CurrentLine
+SpacesInParens: Custom
+SpacesInParensOptions:
+  ExceptDoubleParentheses: true
+  InConditionalStatements: true
+  InCStyleCasts: false
+  InEmptyParentheses: false
+  Other: true
+SpaceBeforeParens: Never

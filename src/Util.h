@@ -1,24 +1,24 @@
 #ifndef __UTIL_H__
 #define __UTIL_H__
 
-#include "JVector.h"
 #include "JRect.h"
+#include "JVector.h"
 
-#define MAX(a,b) (a>=b ? a : b)
-#define MIN(a,b) (a<=b ? a : b)
-#define CLAMP( val, lo, hi ) ( val <= lo ? lo : (val >= hi ? hi : val) )
+#define MAX( a, b ) ( a >= b ? a : b )
+#define MIN( a, b ) ( a <= b ? a : b )
+#define CLAMP( val, lo, hi ) ( val <= lo ? lo : ( val >= hi ? hi : val ) )
 
 namespace Util
 {
-	float GetRandom( float lo, float hi );
-	int GetRandom( int lo, int hi );
-	float Roll( int dice, int sides );
-	float Roll( const char *szFormat );
+float GetRandom( float lo, float hi );
+int GetRandom( int lo, int hi );
+float Roll( int dice, int sides );
+float Roll( const char *szFormat );
 
-	bool IsInWorld( JFVector vIn );
-	bool IsInWorld( JRect rcIn );
-    
-    unsigned int GetTickCount();
-};
+bool IsInWorld( JFVector vIn );
+bool IsInWorld( JRect rcIn );
+
+unsigned int GetTickCount();
+}; // namespace Util
 
 #endif // __UTIL_H__

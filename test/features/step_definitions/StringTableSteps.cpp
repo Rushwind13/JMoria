@@ -1,5 +1,5 @@
-#include <gtest/gtest.h>
 #include <cucumber-cpp/autodetect.hpp>
+#include <gtest/gtest.h>
 
 using cucumber::ScenarioScope;
 #include "TestContext.hpp"
@@ -10,10 +10,10 @@ using cucumber::ScenarioScope;
 ##
 #######*/
 
-GIVEN("^I initialize my Constants$")
+GIVEN( "^I initialize my Constants$" )
 {
-  ScenarioScope<TestCtx> context;
-  context->constants.Init();
+    ScenarioScope<TestCtx> context;
+    context->constants.Init();
 }
 
 /*#######
@@ -22,18 +22,17 @@ GIVEN("^I initialize my Constants$")
 ##
 #######*/
 
-
 /*#######
 ##
 ## THEN
 ##
 #######*/
 
-THEN("^I get a StringTable with <([A-Z_]+)> in it with index ([0-9]+)$")
+THEN( "^I get a StringTable with <([A-Z_]+)> in it with index ([0-9]+)$" )
 {
-    REGEX_PARAM(std::string, entry);
-    REGEX_PARAM(int, index);
+    REGEX_PARAM( std::string, entry );
+    REGEX_PARAM( int, index );
     ScenarioScope<TestCtx> context;
-    int actual = context->constants.LookupString(entry.c_str());
-    EXPECT_EQ(actual, index);
+    int actual = context->constants.LookupString( entry.c_str() );
+    EXPECT_EQ( actual, index );
 }

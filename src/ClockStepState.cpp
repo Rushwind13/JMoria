@@ -8,33 +8,29 @@
 
 #include "ClockStepState.h"
 
-#include "DungeonTile.h"
 #include "DisplayText.h"
+#include "DungeonTile.h"
 #include "Game.h"
 
 #include "FileParse.h"
 
 extern CGame *g_pGame;
 
-CClockStepState::CClockStepState()
-: m_dwClock(0),
-m_dwStep(1)
+CClockStepState::CClockStepState() : m_dwClock( 0 ), m_dwStep( 1 )
 {
-    m_pKeyHandlers[CLOCKSTEP_INIT]    = &CClockStepState::OnHandleInit;
-    m_pKeyHandlers[CLOCKSTEP_TICK]    = &CClockStepState::OnHandleTick;
+    m_pKeyHandlers[CLOCKSTEP_INIT] = &CClockStepState::OnHandleInit;
+    m_pKeyHandlers[CLOCKSTEP_TICK] = &CClockStepState::OnHandleTick;
 
     m_eCurModifier = CLOCKSTEP_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }
 
-CClockStepState::~CClockStepState()
-{
-}
+CClockStepState::~CClockStepState() {}
 
-int CClockStepState::OnHandleKey(SDL_Keysym *keysym)
+int CClockStepState::OnHandleKey( SDL_Keysym *keysym )
 {
     int retval;
-    retval = ((*this).*(m_pCurKeyHandler))(keysym);
+    retval = ( ( *this ).*( m_pCurKeyHandler ) )( keysym );
     return retval;
 }
 
@@ -51,7 +47,7 @@ int CClockStepState::OnHandleTick( SDL_Keysym *keysym )
 
     if( retval == JCOMPLETESTATE )
     {
-        printf( "TICK modifier complete, CLOCKSTEP state to next TICK\n");
+        printf( "TICK modifier complete, CLOCKSTEP state to next TICK\n" );
         DoTick();
         m_eCurModifier = CLOCKSTEP_TICK;
         m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -94,12 +90,11 @@ int CClockStepState::OnBaseHandleKey( SDL_Keysym *keysym )
 
 void CClockStepState::ResetToState( int newstate )
 {
-    g_pGame->SetState(newstate);
+    g_pGame->SetState( newstate );
     m_cCommand = NULL;
     m_eCurModifier = CLOCKSTEP_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }
-
 
 //////////////////////////////////////
 /// command-specific fcns go below
@@ -108,8 +103,8 @@ void CClockStepState::ResetToState( int newstate )
 bool CClockStepState::DoTick()
 {
     m_dwClock += m_dwStep;
-    g_pGame->GetStats()->Printf("Tick! %d\n", m_dwClock);
-    g_pGame->SetReadyForUpdate(true);
-     g_pGame->GetDungeon()->Tick(m_dwClock);
+    g_pGame->GetStats()->Printf( "Tick! %d\n", m_dwClock );
+    g_pGame->SetReadyForUpdate( true );
+    g_pGame->GetDungeon()->Tick( m_dwClock );
     return true;
 }

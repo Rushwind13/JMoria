@@ -22,7 +22,7 @@ int ModifiedTileTypes[DUNG_IDX_MAX + 1] = { DUNG_IDX_INVALID, DUNG_IDX_INVALID, 
 // create all the dungeon tile types,
 // read the monsters config data
 
-void CDungeon::Init()
+void CDungeon::Init(const char *szBasedir)
 {
     int i;
     // Initialize all the Dungeon stuff, baby.
@@ -75,7 +75,9 @@ void CDungeon::Init()
 
     CMonsterDef *pmd;
     CDataFile dfMonsters;
-    dfMonsters.Open( "Resources/Monsters.txt" );
+    char szMonsterFile[256];
+    sprintf(szMonsterFile, "%s%s", szBasedir, "Resources/Monsters.txt");
+    dfMonsters.Open( szMonsterFile );
 
     pmd = new CMonsterDef;
     while( dfMonsters.ReadMonster( *pmd ) )
@@ -92,7 +94,9 @@ void CDungeon::Init()
 
     CItemDef *pid;
     CDataFile dfItems;
-    dfItems.Open( "Resources/Items.txt" );
+    char szItemFilename[256];
+    sprintf(szItemFilename, "%s%s", szBasedir, "Resources/Items.txt" );
+    dfItems.Open( szItemFilename );
 
     pid = new CItemDef;
     while( dfItems.ReadItem( *pid ) )

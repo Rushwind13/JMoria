@@ -8,9 +8,11 @@ class CTileset
     // Member Functions
 public:
     CTileset() {}
-    CTileset( const char *szName, int cellWidth, int cellHeight )
+    CTileset( const char *szBasedir, const char *szName, int cellWidth, int cellHeight )
     {
-        Load( szName, cellWidth, cellHeight );
+        char szFilename[256];
+        sprintf(szFilename, "%s%s", szBasedir, szName);
+        Load( szFilename, cellWidth, cellHeight );
     }
 
     bool IsBMP( const char *szName ) { return false; }

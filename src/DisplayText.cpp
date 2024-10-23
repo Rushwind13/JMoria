@@ -20,7 +20,7 @@ class CGame;
 
 #define TEXT_MAXCHARS 2048
 // Constructor
-CDisplayText::CDisplayText( JRect in, uint8 inAlpha )
+CDisplayText::CDisplayText( const char *szBasedir, JRect in, uint8 inAlpha )
     : m_Rect( in ),
       m_dwWidth( in.Width() ),
       m_dwHeight( in.Height() ),
@@ -36,7 +36,7 @@ CDisplayText::CDisplayText( JRect in, uint8 inAlpha )
     memset( m_szText, 0, sizeof( *m_szText ) );
     m_szDrawPtr = m_szText;
 
-    m_TileSet = new CTileset( "Resources/SmallText6X8.png", 6, 8 );
+    m_TileSet = new CTileset( szBasedir, "Resources/SmallText6X8.png", 6, 8 );
 
     m_Color.SetColor( 0, 0, 0, 255 );
     m_BoundingBoxColor.SetColor( 128, 170, 192, inAlpha );

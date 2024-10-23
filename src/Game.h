@@ -27,7 +27,7 @@ public:
     CGame();
     ~CGame() { Quit( 0 ); }
 
-    JResult Init();
+    JResult Init(const char *szBasedir);
     bool Update( float fCurTime ); // someday figure out why this doesn't work...
     void HandleEvents( int &isActive, int &done );
     void Draw();

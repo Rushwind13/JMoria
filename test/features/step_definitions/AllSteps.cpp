@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include "BrainSteps.cpp"
 #include "DungeonMapSteps.cpp"
 #include "FirstSteps.cpp"
 #include "ItemSteps.cpp"

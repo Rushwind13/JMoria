@@ -31,10 +31,10 @@ public:
     JFVector m_vPos;
     CLink<CAIBrain> *m_pllLink;
 
-    bool Update( float fCurTime );
-
     bool SetRandomDest( float fCurTime );
     bool WalkSeek( float fCurTime );
+    bool WalkSeek( float fCurTime, JVector &vPlayerPos, int dwCollideType );
+    bool Update( float fCurTime );
 
     bool UpdateRest( float fCurTime );
     bool UpdateIdle( float fCurTime );
@@ -46,7 +46,9 @@ public:
         m_eBrainState = newState;
         m_fStateTicks = 0.0f;
     }
-    void SetParent( CMonster *newParent ) { m_pParent = newParent; }
+    void SetParent( CMonster *newParent ) { m_pParent = newParent; };
+
+    eBrainState GetState() { return m_eBrainState; };
 
 protected:
     float m_fStateTicks;

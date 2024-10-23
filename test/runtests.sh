@@ -16,6 +16,7 @@ EXE_UNDER_TEST="./bin/AllSteps"
 # Find and kill any existing instances of the executable
 pid=$(ps -fe | grep "$EXE_UNDER_TEST" | grep -v grep | awk '{print $2}')
 if [[ -n "$pid" ]]; then
+  echo "found old pid running... killing"
   kill "$pid"
 fi
 

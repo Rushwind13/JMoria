@@ -85,6 +85,13 @@ bool CAIBrain::UpdateSeek( float fCurTime )
         SetRandomDest( fCurTime );
     }
     break;
+    case MON_AI_SEEKPLAYER:
+    {
+        WalkSeek( fCurTime );
+    }
+    break;
+    default:
+        return false;
     }
 
     SetState( BRAINSTATE_GOTODEST );
@@ -192,4 +199,47 @@ bool CAIBrain::SetRandomDest( float fCurTime )
     return true;
 }
 
-bool CAIBrain::WalkSeek( float fCurTime ) { return true; }
+bool CAIBrain::WalkSeek( float fCurTime )
+{
+    JVector delta( 0, 0 ), dest( 0, 0 );
+    JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
+
+    float x_delta = vPlayerPos.x - m_vPos.x;
+    float y_delta = vPlayerPos.y - m_vPos.y;
+
+    if( x_delta > 1 )
+        x_delta = 1;
+    if( x_delta < -1 )
+        x_delta = -1;
+    if( y_delta > 1 )
+        y_delta = 1;
+    if( y_delta < -1 )
+        y_delta = -1;
+
+    delta.Init( x_delta, y_delta );
+
+    dest = m_vPos + delta;
+    int dwCollideType = g_pGame->GetDungeon()->IsWalkableFor( dest );
+
+    WalkSeek( fCurTime, delta, dwCollideType );
+}
+
+bool CAIBrain::WalkSeek( float fCurTime, JVector &delta, int dwCollideType )
+{
+    // TODO: fix the below so bounds check worky
+    if( true ) // Util::IsInWorld() )
+    {
+        switch( dwCollideType )
+        {
+        case DUNG_COLL_NO_COLLISION:
+        case DUNG_COLL_PLAYER:
+            m_vVel = delta;
+            break;
+        default:
+            m_vVel.Init();
+            break;
+        }
+    }
+
+    return true;
+}

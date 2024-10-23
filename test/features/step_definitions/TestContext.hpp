@@ -1,10 +1,11 @@
 #ifndef __TEST_CONTEXT__
 #define __TEST_CONTEXT__
+#include <JMDefs.h>
 
-// #include <JMDefs.h>
 #include "FileParse.h"
 #include "Item.h"
 #include "Monster.h"
+#include <AIMgr.h>
 #include <Constants.h>
 #include <DungeonMap.h>
 #include <JRect.h>
@@ -41,6 +42,12 @@ struct TestCtx
     // DungeonMap
     CDungeonMap map;
 
+    // AI Brain
+    CAIBrain *brain;
+    // ItemDef
+    CItemDef *ItemDef;
+    JResult Success;
+
     // MonsterDef
     CDataFile dfMonsters;
     CMonsterDef *monsterDef;
@@ -50,20 +57,17 @@ struct TestCtx
     JLinkList<CMonsterDef> *m_llMonsterDefs = new JLinkList<CMonsterDef>;
     JLinkList<CMonster> *m_llMonsters = new JLinkList<CMonster>;
 
-    // ItemDef
-    CItemDef *ItemDef;
-    JResult Success;
+    // RESULTS
+    bool result_bool;
+    int result_int;
+    float result_float;
+    JResult result;
 
     int index;
     int lo;
     int hi;
     int lo_f;
     int hi_f;
-
-    // RESULTS
-    int result_int;
-    float result_float;
-    JResult result;
 };
 
 #endif // __TEST_CONTEXT__

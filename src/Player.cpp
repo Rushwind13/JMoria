@@ -12,7 +12,7 @@
 
 extern CGame *g_pGame;
 
-void CPlayer::Init()
+void CPlayer::Init(const char *szBasedir)
 {
     // Initialize all the player stuff, baby.
     //    m_TileSet = new CTileset("Resources/Courier.png", 32, 32 );

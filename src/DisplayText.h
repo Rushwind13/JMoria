@@ -41,7 +41,7 @@ class CDisplayText
 {
     // Member functions
 public:
-    CDisplayText( JRect in, uint8 alpha = 25 );
+    CDisplayText( const char *szBasedir, JRect in, uint8 alpha = 25 );
 
     bool Update( float fCurTime );
     void Draw();

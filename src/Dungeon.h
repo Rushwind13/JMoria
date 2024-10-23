@@ -15,10 +15,10 @@
 
 // #define DUNG_FONT_COURIER
 #ifdef DUNG_FONT_COURIER
-#define DUNG_TILESET CTileset( "Resources/Courier.png", 32, 32 )
+#define DUNG_TILESET CTileset( szBasedir, "Resources/Courier.png", 32, 32 )
 #define DUNG_ASPECT vSize( 1.0f, 1.0f )
 #else
-#define DUNG_TILESET CTileset( "Resources/SmallText6X8.png", 6, 8 )
+#define DUNG_TILESET CTileset( szBasedir, "Resources/SmallText6X8.png", 6, 8 )
 #define DUNG_ASPECT vSize( 0.75f, 1.0f )
 #endif
 
@@ -68,7 +68,7 @@ public:
     void DrawItems();
     void DrawMonsters();
     void PostDraw();
-    void Init();
+    void Init(const char *szBasedir);
     void Term();
     bool Tick( const int dwClock );
     bool Update( float fCurTime );

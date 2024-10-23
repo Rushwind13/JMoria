@@ -26,7 +26,7 @@ int main( int argc, char **argv )
     JResult result;
     g_pGame = new CGame;
 
-    result = g_pGame->Init();
+    result = g_pGame->Init("../JMoria/");
     if( result != JSUCCESS )
     {
         printf( "Error in game initialization. Terminating.\n" );

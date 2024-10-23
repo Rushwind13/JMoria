@@ -49,7 +49,7 @@ CGame::CGame()
 #endif // TURN_BASED
 };
 
-JResult CGame::Init()
+JResult CGame::Init(const char *szBasedir)
 {
     JResult result;
     // Initialize all the game stuff, baby.
@@ -65,22 +65,22 @@ JResult CGame::Init()
         return result;
     }
 
-    m_pMsgsDT = new CDisplayText( JRect( 0, 0, 640, 40 ), 255 );
+    m_pMsgsDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, 40 ), 255 );
     m_pMsgsDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE );
 
-    m_pStatsDT = new CDisplayText( JRect( 0, 50, 150, 480 ), 220 );
+    m_pStatsDT = new CDisplayText( szBasedir, JRect( 0, 50, 150, 480 ), 220 );
     m_pStatsDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
 
-    m_pInvDT = new CDisplayText( JRect( 440, 50, 640, 340 ), 180 );
+    m_pInvDT = new CDisplayText( szBasedir, JRect( 440, 50, 640, 340 ), 180 );
     m_pInvDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
 
-    m_pEquipDT = new CDisplayText( JRect( 440, 345, 640, 480 ), 180 );
+    m_pEquipDT = new CDisplayText( szBasedir, JRect( 440, 345, 640, 480 ), 180 );
     m_pEquipDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
 
-    m_pUseDT = new CDisplayText( JRect( 200, 40, 440, 480 ), 200 );
+    m_pUseDT = new CDisplayText( szBasedir, JRect( 200, 40, 440, 480 ), 200 );
     m_pUseDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
 
-    m_pEndGameDT = new CDisplayText( JRect( 0, 0, 640, 480 ), 255 );
+    m_pEndGameDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, 480 ), 255 );
     m_pEndGameDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
 
     m_pAIMgr = new CAIMgr;
@@ -88,11 +88,11 @@ JResult CGame::Init()
 
     // Init the Dungeon
     m_pDungeon = new CDungeon;
-    m_pDungeon->Init();
+    m_pDungeon->Init(szBasedir);
 
     // Init the Player
     m_pPlayer = new CPlayer;
-    m_pPlayer->Init();
+    m_pPlayer->Init(szBasedir);
 
 #ifdef PROFILE
     ProfileInit();
@@ -106,6 +106,7 @@ JResult CGame::Init()
     SetState( STATE_COMMAND );
 #endif // CLOCKSTEP
        // we're up.
+
     return JSUCCESS;
 }
 

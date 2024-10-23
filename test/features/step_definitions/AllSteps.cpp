@@ -2,6 +2,7 @@
 
 #include "BrainSteps.cpp"
 #include "DungeonMapSteps.cpp"
+#include "GameSteps.cpp"
 #include "FirstSteps.cpp"
 #include "ItemSteps.cpp"
 #include "MonsterSteps.cpp"

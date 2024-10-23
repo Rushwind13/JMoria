@@ -13,6 +13,7 @@
 #include <TextEntry.h>
 #include <TileSet.h>
 
+// main game pointer
 CGame *g_pGame = NULL;
 
 /*#######

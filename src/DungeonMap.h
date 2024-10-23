@@ -146,6 +146,9 @@ public:
     bool CheckBorder( const JRect rcCheck, int direction );
 
     void FillArea( const Uint8 type, JRect *rcFill, const int direction, bool bIsHallway );
+    void lightBoarders( const Uint8 type, JRect &rcLocal, JRect &rcEdges, int &y, JIVector &vCurPos,
+                        int &x );
+    void lightArea( const Uint8 type, JRect &rcLocal, JRect &rcEdges, JIVector &vOrigin );
     void FillArea( const CDungeonCreationStep *pStep );
     void AddDoor( JIVector vHall, int direction );
     bool IsDoor( const int type );

@@ -272,20 +272,27 @@ void CDungeonMap::FillArea( const Uint8 type, JRect *rcFill, const int direction
 
     int x, y;
     JIVector vCurPos( vOrigin );
-    for( y = rcLocal.top; y <= rcLocal.bottom; y++ )
-    {
-        vCurPos.y = y;
-        for( x = rcLocal.left; x <= rcLocal.right; x++ )
-        {
-            vCurPos.x = x;
-            GetTile( vCurPos )->SetType( type );
-            if( type != DUNG_IDX_WALL )
-            {
-                GetTile( vCurPos )->SetFlags( DUNG_FLAG_LIT );
-            }
-        }
-    }
+    lightArea( type, rcLocal, rcEdges, vOrigin );
 
+    // you still filled rcFill squares, just that one of them was a door.
+    printf( "filled from <%d %d> to <%d %d>\n", RECT_EXPAND( *rcFill ) );
+
+    if( bIsHallway )
+    {
+        // GetTile(*vOrigin)->SetType(DUNG_IDX_OPEN_DOOR);
+        GetTile( vOrigin )->SetType( DUNG_IDX_FLOOR );
+        // GetTile(*vOrigin)->SetFlags(~DUNG_FLAG_LIT);
+    }
+    else if( type != DUNG_IDX_WALL )
+    {
+        // GetTile(*vOrigin)->SetType(DUNG_IDX_RUBBLE);
+        GetTile( vOrigin )->SetType( DUNG_IDX_FLOOR );
+    }
+}
+
+void CDungeonMap::lightBoarders( const Uint8 type, JRect &rcLocal, JRect &rcEdges, int &y,
+                                 JIVector &vCurPos, int &x )
+{
     // Now light the borders
     if( type != DUNG_IDX_WALL )
     {
@@ -295,6 +302,7 @@ void CDungeonMap::FillArea( const Uint8 type, JRect *rcFill, const int direction
         // L and R sides, going over-by-one in each direction
         for( y = rcEdges.top; y <= rcEdges.bottom; y++ )
         {
+
             vCurPos.Init( rcEdges.left, y );
             GetTile( vCurPos )->SetFlags( DUNG_FLAG_LIT );
 
@@ -311,21 +319,26 @@ void CDungeonMap::FillArea( const Uint8 type, JRect *rcFill, const int direction
             GetTile( vCurPos )->SetFlags( DUNG_FLAG_LIT );
         }
     }
+}
 
-    // you still filled rcFill squares, just that one of them was a door.
-    printf( "filled from <%d %d> to <%d %d>\n", RECT_EXPAND( *rcFill ) );
-
-    if( bIsHallway )
+void CDungeonMap::lightArea( const Uint8 type, JRect &rcLocal, JRect &rcEdges, JIVector &vOrigin )
+{
+    int x, y;
+    JIVector vCurPos( vOrigin );
+    for( y = rcLocal.top; y <= rcLocal.bottom; y++ )
     {
-        // GetTile(*vOrigin)->SetType(DUNG_IDX_OPEN_DOOR);
-        GetTile( vOrigin )->SetType( DUNG_IDX_FLOOR );
-        // GetTile(*vOrigin)->SetFlags(~DUNG_FLAG_LIT);
+        vCurPos.y = y;
+        for( x = rcLocal.left; x <= rcLocal.right; x++ )
+        {
+            vCurPos.x = x;
+            GetTile( vCurPos )->SetType( type );
+            if( type != DUNG_IDX_WALL )
+            {
+                GetTile( vCurPos )->SetFlags( DUNG_FLAG_LIT );
+            }
+        }
     }
-    else if( type != DUNG_IDX_WALL )
-    {
-        // GetTile(*vOrigin)->SetType(DUNG_IDX_RUBBLE);
-        GetTile( vOrigin )->SetType( DUNG_IDX_FLOOR );
-    }
+    lightBoarders( type, rcLocal, rcEdges, y, vCurPos, x );
 }
 
 int CDungeonMap::Opposite( int direction )

@@ -224,7 +224,7 @@ public:
             return NULL;
 
         // You can't iterate more than N times to find Nth entry
-        while( count < which_link )
+        while( count <= which_link )
         {
             // Found the desired entry
             if( curr_link->m_dwIndex == which_link )

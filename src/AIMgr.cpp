@@ -78,6 +78,14 @@ bool CAIBrain::UpdateSeek( float fCurTime )
     break;
     case MON_AI_75RANDOMMOVE:
     {
+        if( Util::Roll( "1d100" ) <= 75 )
+        {
+            SetRandomDest( fCurTime );
+        }
+        else
+        {
+            WalkSeek( fCurTime );
+        }
     }
     break;
     case MON_AI_DONTMOVE:
@@ -219,26 +227,30 @@ bool CAIBrain::WalkSeek( float fCurTime )
     delta.Init( x_delta, y_delta );
 
     dest = m_vPos + delta;
-    int dwCollideType = g_pGame->GetDungeon()->IsWalkableFor( dest );
+    int dwCollideType = DUNG_COLL_NO_COLLISION;
+    if( dest.IsInWorld() )
+    {
+        dwCollideType = g_pGame->GetDungeon()->IsWalkableFor( dest );
+    }
+    else
+    {
+        delta.Init();
+    }
 
-    WalkSeek( fCurTime, delta, dwCollideType );
+    return WalkSeek( fCurTime, delta, dwCollideType );
 }
 
 bool CAIBrain::WalkSeek( float fCurTime, JVector &delta, int dwCollideType )
 {
-    // TODO: fix the below so bounds check worky
-    if( true ) // Util::IsInWorld() )
+    switch( dwCollideType )
     {
-        switch( dwCollideType )
-        {
-        case DUNG_COLL_NO_COLLISION:
-        case DUNG_COLL_PLAYER:
-            m_vVel = delta;
-            break;
-        default:
-            m_vVel.Init();
-            break;
-        }
+    case DUNG_COLL_NO_COLLISION:
+    case DUNG_COLL_PLAYER:
+        m_vVel = delta;
+        break;
+    default:
+        m_vVel.Init();
+        break;
     }
 
     return true;

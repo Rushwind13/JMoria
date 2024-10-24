@@ -137,3 +137,16 @@ Feature: Dungeon Creation
         Then The JRect 1,1,5,1 is now filled with 0
         Then The JRect 0,0,6,2 is now lit
         And The rect is in world
+
+    Scenario: I can create a dungeon map step
+        Given I have a DungeonMap
+        Given I have an origin 1,1
+        Given I have a DungeonCreationStep
+        Then I'll have a CDungeonCreationStep
+
+    Scenario: I can CheckArea for a Dungeon Creation step
+        Given I have a DungeonMap
+        Given I have an origin 1,1
+        Given I have a DungeonCreationStep
+        When I call CheckArea
+        Then I'll have a valid area

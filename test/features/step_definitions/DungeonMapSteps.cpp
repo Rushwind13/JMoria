@@ -36,6 +36,21 @@ GIVEN( "^I have a JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) to fill$" )
     context->area = JRect( l, t, r, b );
 }
 
+GIVEN("^I have an origin (([0-9]+),([0-9]+))$")
+{
+    REGEX_PARAM( float, x );
+    REGEX_PARAM( float, y );
+    ScenarioScope<TestCtx> context;
+    context->origin = JIVector(x,y);
+}
+
+GIVEN("^I have a DungeonCreationStep$")
+{
+    ScenarioScope<TestCtx> context;
+    CDungeonCreationStep *step = context->map.MakeRoomStep(context->origin, DIR_NONE, 0);
+    context->dungeonCreationStep = step;
+}
+
 /*#######
 ##
 ## WHEN
@@ -114,6 +129,14 @@ WHEN( "^I call FillArea for a hallway east$" )
     context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ), DIR_EAST, true );
 }
 
+WHEN( "^I call CheckArea$" )
+{
+    ScenarioScope<TestCtx> context;
+    bool areaChecked = context->map.CheckArea( context->dungeonCreationStep );
+    context->areaChecked = areaChecked;
+}
+
+
 /*#######
 ##
 ## THEN
@@ -163,4 +186,17 @@ THEN( "^The JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) is now lit$" )
         }
         // printf("\n");
     }
+}
+
+THEN("^I'll have a CDungeonCreationStep$")
+{
+    ScenarioScope<TestCtx> context;
+    // printf("Step is %d\n", context->dungeonCreationStep->m_dwIndex);
+    EXPECT_EQ( context->dungeonCreationStep->m_dwIndex, DUNG_CREATE_STEP_MAKE_ROOM );
+}
+
+THEN("^I'll have a valid area$")
+{
+    ScenarioScope<TestCtx> context;
+    EXPECT_EQ( context->areaChecked, 1 );
 }

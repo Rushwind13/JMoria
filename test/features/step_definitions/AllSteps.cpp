@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#define UNIT_TEST
+
 #include "BrainSteps.cpp"
 #include "DungeonMapSteps.cpp"
 #include "GameSteps.cpp"

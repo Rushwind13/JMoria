@@ -139,7 +139,11 @@ public:
         return -1;
     };
 
+#ifdef UNIT_TEST
 public:
+#else
+protected:
+#endif
     int CheckArea( const JRect *rcCheck, const int direction, bool bIsHallway );
     bool CheckArea( CDungeonCreationStep *pStep );
     bool CheckInterior( const JRect rcCheck );

@@ -46,7 +46,7 @@ void CMonster::InitBrain( CMonsterDef *pmd )
     m_pBrain->SetParent( this );
 }
 
-JResult CMonster::CreateMonster( CMonsterDef *pmd )
+JResult CMonster::CreateMonster( CMonsterDef *pmd, JVector vSpawnPoint )
 {
     int desired = Util::Roll( pmd->m_szAppear );
     for( int count = 0; count < desired; count++ )
@@ -62,7 +62,7 @@ JResult CMonster::CreateMonster( CMonsterDef *pmd )
         pMon->InitBrain( pmd );
 
         // Put the monster in the world
-        pMon->SpawnMonster();
+        pMon->SpawnMonster(vSpawnPoint);
 
         // Now that the monster is set up, add it to the global lists (monsters, brains)
         pMon->m_pllLink = g_pGame->GetDungeon()->m_llMonsters->Add( pMon );
@@ -72,10 +72,15 @@ JResult CMonster::CreateMonster( CMonsterDef *pmd )
     return JSUCCESS;
 }
 
-JResult CMonster::SpawnMonster()
+JResult CMonster::SpawnMonster(JVector vSpawnPoint)
 {
     bool bMonsterSpawned = false;
     printf( "Trying to spawn monster type: %s...", m_md->m_szName );
+    if( vSpawnPoint.IsInWorld())
+    {
+        return SpawnAt(vSpawnPoint) ? JSUCCESS : JERROR();
+    }
+
     JVector vTryPos;
     while( !bMonsterSpawned )
     {
@@ -86,10 +91,8 @@ JResult CMonster::SpawnMonster()
         // vTryPos.y ); g_pGame->GetMsgs()->Printf( "Trying to spawn monster type: %d at <%.2f
         // %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
 
-        if( g_pGame->GetDungeon()->IsWalkableFor( vTryPos ) == DUNG_COLL_NO_COLLISION )
+        if( SpawnAt(vTryPos) )
         {
-            SetPos( vTryPos );
-            g_pGame->GetDungeon()->GetTile( GetPos() )->m_pCurMonster = this;
             bMonsterSpawned = true;
             printf( "Success!\n" );
             // g_pGame->GetMsgs()->Printf( "Success!\n" );
@@ -97,6 +100,17 @@ JResult CMonster::SpawnMonster()
     }
 
     return JSUCCESS;
+}
+
+bool CMonster::SpawnAt(JVector vPos)
+{
+    if( g_pGame->GetDungeon()->IsWalkableFor( vPos ) == DUNG_COLL_NO_COLLISION )
+    {
+        SetPos( vPos );
+        g_pGame->GetDungeon()->GetTile( vPos )->m_pCurMonster = this;
+        return true;
+    }
+    return false;
 }
 
 float CMonster::Attack()

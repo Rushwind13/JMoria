@@ -308,20 +308,27 @@ JResult CDungeon::SpawnMonsters( const int depth )
         int which_monster = m_llMonsterDefs->length() - 1;
         // which_monster = 0;
 #endif // RANDOM_MONSTER
-        if( which_monster == MON_IDX_INVALID )
-        {
-            printf( "Couldn't find a suitable monster.\n" );
-            continue;
+       if( SpawnMonster(which_monster) )
+       {
+            desired_monsters--;
         }
-        CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink( which_monster )->m_lpData;
-        printf( "Choosing monster %d, called %s\n", which_monster, chosen_monster->m_szName );
-
-        CMonster::CreateMonster( chosen_monster );
-
-        desired_monsters--;
     }
 
     return JSUCCESS;
+}
+
+bool CDungeon::SpawnMonster( int which_monster, JVector vSpawnPoint )
+{
+    if( which_monster == MON_IDX_INVALID || which_monster >= MON_IDX_MAX )
+    {
+        printf( "Couldn't find a suitable monster.\n" );
+        return false;
+    }
+    CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink( which_monster )->m_lpData;
+    printf( "Choosing monster %d, called %s\n", which_monster, chosen_monster->m_szName );
+
+    CMonster::CreateMonster( chosen_monster, vSpawnPoint );
+    return true;
 }
 
 int CDungeon::ChooseItemForDepth( const int depth )

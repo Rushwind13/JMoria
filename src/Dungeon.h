@@ -117,6 +117,7 @@ public:
     bool IsTunnelable( JVector &vPos );
     bool IsCloseable( JVector &vPos );
     int IsStairs( JVector &vPos );
+    bool SpawnMonster( int which_monster, JVector vSpawnPoint = JVector(-1,-1) );
     void RemoveMonster( CMonster *pMon );
     JResult Modify( JVector &vPos );
     CItem *PickUp( JVector &vPickupPos );

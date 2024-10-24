@@ -7,9 +7,11 @@
 #include "Monster.h"
 #include <AIMgr.h>
 #include <Constants.h>
+#include <Dungeon.h>
 #include <DungeonMap.h>
 #include <JRect.h>
 #include <JVector.h>
+#include <Player.h>
 #include <TextEntry.h>
 #include <TileSet.h>
 

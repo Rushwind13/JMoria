@@ -150,3 +150,9 @@ Feature: Dungeon Creation
         Given I have a DungeonCreationStep
         When I call CheckArea
         Then I'll have a valid area
+
+    Scenario: I can get a north room rect
+        Given I have a DungeonMap
+        Given I have a direction north
+        When I call get room rect
+        Then I'll have a valid N room rect

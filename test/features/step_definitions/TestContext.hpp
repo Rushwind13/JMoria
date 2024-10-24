@@ -42,9 +42,10 @@ struct TestCtx
 
     // DungeonMap
     CDungeonMap map;
-
     CDungeonCreationStep *dungeonCreationStep;
     bool areaChecked;
+    int direction;
+    JRect room;
 
     // MonsterDef
     CDataFile dfMonsters;

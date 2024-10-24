@@ -51,6 +51,12 @@ GIVEN("^I have a DungeonCreationStep$")
     context->dungeonCreationStep = step;
 }
 
+GIVEN("^I have a direction north$")
+{
+    ScenarioScope<TestCtx> context;
+    context->direction = DIR_NORTH;
+}
+
 /*#######
 ##
 ## WHEN
@@ -136,6 +142,19 @@ WHEN( "^I call CheckArea$" )
     context->areaChecked = areaChecked;
 }
 
+WHEN("^I call get room rect$")
+{
+    ScenarioScope<TestCtx> context;
+    JIVector vPos;
+    vPos.Init(3, 3);
+    JRect rcRoom;
+    rcRoom.Init( vPos, 0, 0 );
+    JIVector vSize;
+    vSize.Init(10,10);
+    context->map.GetRoomRect(context->direction, rcRoom, vSize);
+    context->room = rcRoom;
+}
+
 
 /*#######
 ##
@@ -199,4 +218,13 @@ THEN("^I'll have a valid area$")
 {
     ScenarioScope<TestCtx> context;
     EXPECT_EQ( context->areaChecked, 1 );
+}
+
+THEN("^I'll have a valid N room rect$")
+{
+    ScenarioScope<TestCtx> context;
+    JRect expected = context->room;
+    printf("JRect is <%d, %d, %d, %d>\n", RECT_EXPAND(expected) );
+    EXPECT_EQ( expected.Width(), 6 );
+    EXPECT_EQ( expected.Height(), 2 );
 }

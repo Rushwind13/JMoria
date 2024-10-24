@@ -115,7 +115,8 @@ public:
                                         const int recurdepth );
     CDungeonCreationStep *MakeHallStep( const JIVector &vPos, const int direction,
                                         const int recurdepth );
-    void GetRoomRect( JRect &rcRoom, const int direction );
+    void GetRandomRoomRect( JRect &rcRoom, const int direction );
+    void GetRoomRect( const int direction, JRect &rcRoom, JIVector &vSize );
     void GetHallRect( JRect &rcHall, const int direction );
     JIVector &GetWallOrigin( CDungeonCreationStep *pStep, const int direction );
     JIVector &GetHallOrigin( CDungeonCreationStep *pStep,

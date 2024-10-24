@@ -36,6 +36,27 @@ GIVEN( "^I have a JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) to fill$" )
     context->area = JRect( l, t, r, b );
 }
 
+GIVEN("^I have an origin (([0-9]+),([0-9]+))$")
+{
+    REGEX_PARAM( float, x );
+    REGEX_PARAM( float, y );
+    ScenarioScope<TestCtx> context;
+    context->origin = JIVector(x,y);
+}
+
+GIVEN("^I have a DungeonCreationStep$")
+{
+    ScenarioScope<TestCtx> context;
+    CDungeonCreationStep *step = context->map.MakeRoomStep(context->origin, DIR_NONE, 0);
+    context->dungeonCreationStep = step;
+}
+
+GIVEN("^I have a direction north$")
+{
+    ScenarioScope<TestCtx> context;
+    context->direction = DIR_NORTH;
+}
+
 /*#######
 ##
 ## WHEN
@@ -114,6 +135,27 @@ WHEN( "^I call FillArea for a hallway east$" )
     context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ), DIR_EAST, true );
 }
 
+WHEN( "^I call CheckArea$" )
+{
+    ScenarioScope<TestCtx> context;
+    bool areaChecked = context->map.CheckArea( context->dungeonCreationStep );
+    context->areaChecked = areaChecked;
+}
+
+WHEN("^I call get room rect$")
+{
+    ScenarioScope<TestCtx> context;
+    JIVector vPos;
+    vPos.Init(3, 3);
+    JRect rcRoom;
+    rcRoom.Init( vPos, 0, 0 );
+    JIVector vSize;
+    vSize.Init(10,10);
+    context->map.GetRoomRect(context->direction, rcRoom, vSize);
+    context->room = rcRoom;
+}
+
+
 /*#######
 ##
 ## THEN
@@ -163,4 +205,26 @@ THEN( "^The JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) is now lit$" )
         }
         // printf("\n");
     }
+}
+
+THEN("^I'll have a CDungeonCreationStep$")
+{
+    ScenarioScope<TestCtx> context;
+    // printf("Step is %d\n", context->dungeonCreationStep->m_dwIndex);
+    EXPECT_EQ( context->dungeonCreationStep->m_dwIndex, DUNG_CREATE_STEP_MAKE_ROOM );
+}
+
+THEN("^I'll have a valid area$")
+{
+    ScenarioScope<TestCtx> context;
+    EXPECT_EQ( context->areaChecked, 1 );
+}
+
+THEN("^I'll have a valid N room rect$")
+{
+    ScenarioScope<TestCtx> context;
+    JRect expected = context->room;
+    printf("JRect is <%d, %d, %d, %d>\n", RECT_EXPAND(expected) );
+    EXPECT_EQ( expected.Width(), 6 );
+    EXPECT_EQ( expected.Height(), 2 );
 }

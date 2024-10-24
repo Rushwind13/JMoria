@@ -538,7 +538,7 @@ CDungeonCreationStep *CDungeonMap::MakeRoomStep( const JIVector &vPos, const int
     JRect rcTry( pStep->m_rcArea );
     while( !dwDone && count < MAX_TRIES )
     {
-        GetRoomRect( pStep->m_rcArea, pStep->m_dwDirection );
+        GetRandomRoomRect( pStep->m_rcArea, pStep->m_dwDirection );
         dwDone = CheckArea( pStep );
         if( !dwDone )
         {
@@ -609,11 +609,16 @@ CDungeonCreationStep *CDungeonMap::MakeHallStep( const JIVector &vPos, const int
     return pStep;
 }
 
-void CDungeonMap::GetRoomRect( JRect &rcRoom, const int direction )
+void CDungeonMap::GetRandomRoomRect( JRect &rcRoom, const int direction )
 {
     JIVector vSize( 0, 0 );
     vSize.Init( Util::GetRandom( DUNG_ROOM_MINWIDTH, DUNG_ROOM_MAXWIDTH ),
                 Util::GetRandom( DUNG_ROOM_MINHEIGHT, DUNG_ROOM_MAXHEIGHT ) );
+    GetRoomRect( direction, rcRoom, vSize );
+}
+
+void CDungeonMap::GetRoomRect( const int direction, JRect &rcRoom, JIVector &vSize )
+{
     // vSize.Init(5,5);
     switch( direction )
     {

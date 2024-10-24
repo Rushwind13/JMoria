@@ -33,6 +33,8 @@ struct TestCtx
     JIVector aspect;
     JIVector vTile;
 
+    JIVector origin;
+
     // TextEntry
     TextEntry pair;
 
@@ -41,6 +43,10 @@ struct TestCtx
 
     // DungeonMap
     CDungeonMap map;
+    CDungeonCreationStep *dungeonCreationStep;
+    bool areaChecked;
+    int direction;
+    JRect room;
 
     // MonsterDef
     CDataFile dfMonsters;

@@ -3,6 +3,7 @@
 ## Setup clang-format as pre-commit
 
 Add the following script to .git/hooks/pre-commit
+https://ortogonal.github.io/cpp/git-clang-format/
 ```bash
 #!/bin/sh  
   

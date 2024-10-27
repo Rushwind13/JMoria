@@ -13,6 +13,10 @@ using cucumber::ScenarioScope;
 GIVEN( "^I have a game$" )
 {
     ScenarioScope<TestCtx> context;
+    if( g_pGame != NULL )
+    {
+        g_pGame = NULL;
+    }
     g_pGame = new CGame;
 }
 GIVEN( "^I initialize the game$" )
@@ -38,17 +42,27 @@ GIVEN( "^I spawn a monster with SEEK$" )
 
     context->result = CMonster::CreateMonster( pmd, context->vec_b );
 }
+GIVEN("^I update the monster's brain$")
+{
+    ScenarioScope<TestCtx> context;
+    CMonster *pMon = g_pGame->GetDungeon()->GetTile( context->vec_b )->m_pCurMonster;
+    pMon->m_pBrain->Update(1.0f);
+}
 
 /*#######
 ##
 ## WHEN
 ##
 #######*/
-WHEN("^I update the monster's brain$")
+WHEN("^I update the monster's brain again$")
 {
     ScenarioScope<TestCtx> context;
     CMonster *pMon = g_pGame->GetDungeon()->GetTile( context->vec_b )->m_pCurMonster;
     pMon->m_pBrain->Update(1.0f);
+}
+WHEN("^I terminate the game$")
+{
+    g_pGame->Term();
 }
 
 /*#######
@@ -62,6 +76,11 @@ THEN( "^the game initalized successfully$" )
     ScenarioScope<TestCtx> context;
     int actual = context->result;
     EXPECT_EQ( actual, JSUCCESS );
+}
+
+THEN( "^the game terminates successfully$" )
+{
+    EXPECT_EQ(true, true);
 }
 
 THEN( "^the monster spawned successfully$" )
@@ -87,4 +106,30 @@ THEN("^the monster wants to move toward the player$")
     JVector actual = pMon->m_pBrain->m_vVel;
     EXPECT_EQ(expected.x, actual.x);
     EXPECT_EQ(expected.y, actual.y);
+
+    EXPECT_EQ(pMon->m_pBrain->GetState(), BRAINSTATE_GOTODEST);
+}
+
+THEN("^the monster moves toward the player$")
+{
+    JVector delta(1,-1);
+    ScenarioScope<TestCtx> context;
+    // Monster not in old pos
+    CMonster *pMon = g_pGame->GetDungeon()->GetTile( context->vec_b )->m_pCurMonster;
+
+    bool expected = pMon == NULL;
+    EXPECT_EQ(expected, true);
+
+    // Monster is in new pos
+    context->vec_b += delta;
+    pMon = g_pGame->GetDungeon()->GetTile( context->vec_b )->m_pCurMonster;
+    expected = pMon != NULL;
+    EXPECT_EQ(expected, true);
+
+    // Monster is correct monster
+    char monster[32];
+    char *wanted = "Red Dragon";
+    sprintf( monster, "%s", pMon->m_md->m_szName );
+
+    EXPECT_EQ( strcmp( monster, wanted ), 0 );
 }

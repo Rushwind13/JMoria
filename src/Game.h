@@ -42,6 +42,7 @@ public:
     CDisplayText *GetUse() { return m_pUseDT; }
     CDisplayText *GetEnd() { return m_pEndGameDT; }
     CAIMgr *GetAIMgr() { return m_pAIMgr; }
+    void Term();
     void Quit( int returncode );
     void SetState( int eNewState );
     CStateBase *GetGameState() { return m_pCurState; }

@@ -96,15 +96,9 @@ JResult CMonster::SpawnMonster( JVector vSpawnPoint )
         vTryPos.Init( (float)( Util::GetRandom( 0, DUNG_WIDTH - 1 ) ),
                       (float)( Util::GetRandom( 0, DUNG_HEIGHT - 1 ) ) );
 
-        // printf("Trying to spawn monster type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x,
-        // vTryPos.y ); g_pGame->GetMsgs()->Printf( "Trying to spawn monster type: %d at <%.2f
-        // %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
-
         if( SpawnAt( vTryPos ) == JSUCCESS )
         {
             bMonsterSpawned = true;
-            printf( "Success!\n" );
-            // g_pGame->GetMsgs()->Printf( "Success!\n" );
         }
     }
 
@@ -117,6 +111,9 @@ JResult CMonster::SpawnAt( JVector vPos )
     {
         SetPos( vPos );
         g_pGame->GetDungeon()->GetTile( vPos )->m_pCurMonster = this;
+        printf( "Success!\n" );
+        // g_pGame->GetMsgs()->Printf( "Success!\n" );
+
         return JSUCCESS;
     }
     return JBOGUSKEY;

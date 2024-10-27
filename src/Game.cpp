@@ -110,10 +110,12 @@ JResult CGame::Init( const char *szBasedir )
     return JSUCCESS;
 }
 
-void CGame::Quit( int returncode )
+void CGame::Term()
 {
+    printf("Terminating the game...");
     if( m_pRender )
     {
+        printf("Renderer...");
         m_pRender->Term();
         delete m_pRender;
         m_pRender = NULL;
@@ -121,6 +123,7 @@ void CGame::Quit( int returncode )
 
     if( m_pDungeon )
     {
+        printf("Dungeon...");
         m_pDungeon->Term();
         delete m_pDungeon;
         m_pDungeon = NULL;
@@ -128,11 +131,13 @@ void CGame::Quit( int returncode )
 
     if( m_pPlayer )
     {
+        printf("Player...");
         m_pPlayer->Term();
         delete m_pPlayer;
         m_pPlayer = NULL;
     }
 
+    printf("States...");
     if( m_pCmdState )
     {
         delete m_pCmdState;
@@ -175,6 +180,7 @@ void CGame::Quit( int returncode )
         m_pRestState = NULL;
     }
 
+    printf("Message boxes...");
     if( m_pMsgsDT )
     {
         delete m_pMsgsDT;
@@ -210,6 +216,12 @@ void CGame::Quit( int returncode )
         delete m_pEndGameDT;
         m_pEndGameDT = NULL;
     }
+    printf("done.\n");
+}
+
+void CGame::Quit( int returncode )
+{
+    Term();
     exit( returncode );
 }
 

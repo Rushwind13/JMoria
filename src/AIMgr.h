@@ -49,8 +49,11 @@ public:
     void SetParent( CMonster *newParent ) { m_pParent = newParent; };
 
     eBrainState GetState() { return m_eBrainState; };
-
+#ifdef UNIT_TEST
+public:
+#else
 protected:
+#endif
     float m_fStateTicks;
     JVector m_vVel;
     eBrainState m_eBrainState;

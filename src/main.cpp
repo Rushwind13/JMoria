@@ -9,6 +9,8 @@
 
 // The global game pointer
 CGame *g_pGame = NULL;
+eLogLevel g_eLogLevel = LOG_LEVEL_WARN;
+
 JIVector g_vDirDelta[] = { JIVector( 0, -1 ), JIVector( 0, 1 ), JIVector( -1, 0 ),
                            JIVector( 1, 0 ) };
 
@@ -29,7 +31,7 @@ int main( int argc, char **argv )
     result = g_pGame->Init( "../JMoria/" );
     if( result != JSUCCESS )
     {
-        printf( "Error in game initialization. Terminating.\n" );
+        JLog( LOG_LEVEL_INFO, true, "Error in game initialization. Terminating.\n" );
         exit( 1 );
     }
 

@@ -31,7 +31,7 @@ int CModState::OnHandleKey( SDL_Keysym *keysym )
 int CModState::OnHandleOpen( SDL_Keysym *keysym )
 {
     int retval;
-    printf( "Handling OPEN modifier\n" );
+    JLog( LOG_LEVEL_INFO, true, "Handling OPEN modifier\n" );
     retval = OnBaseHandleKey( keysym );
 
     if( retval == JRESETSTATE )
@@ -41,13 +41,14 @@ int CModState::OnHandleOpen( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        printf( "Open cmd still waiting for a directional key: Directional key not pressed.\n" );
+        JLog( LOG_LEVEL_INFO, true,
+              "Open cmd still waiting for a directional key: Directional key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
         return 0;
     }
 
     // We got a directional key; do an "open" in that direction
-    printf( "OPEN modifier got a directional\n" );
+    JLog( LOG_LEVEL_INFO, true, "OPEN modifier got a directional\n" );
     if( TestOpen() )
     {
         if( DoOpen() )
@@ -65,7 +66,8 @@ int CModState::OnHandleOpen( SDL_Keysym *keysym )
         g_pGame->GetMsgs()->Printf( "I do not see anything to open there.\n" );
     }
 
-    printf( "OPEN modifier resetting game state to COMMAND, OPEN state to INIT\n" );
+    JLog( LOG_LEVEL_INFO, true,
+          "OPEN modifier resetting game state to COMMAND, OPEN state to INIT\n" );
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
     return 0;
@@ -74,7 +76,7 @@ int CModState::OnHandleOpen( SDL_Keysym *keysym )
 int CModState::OnHandleClose( SDL_Keysym *keysym )
 {
     int retval;
-    printf( "Handling CLOSE modifier\n" );
+    JLog( LOG_LEVEL_INFO, true, "Handling CLOSE modifier\n" );
     retval = OnBaseHandleKey( keysym );
 
     if( retval == JRESETSTATE )
@@ -84,13 +86,14 @@ int CModState::OnHandleClose( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        printf( "close cmd still waiting for a directional key: Directional key not pressed.\n" );
+        JLog( LOG_LEVEL_INFO, true,
+              "close cmd still waiting for a directional key: Directional key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
         return 0;
     }
 
     // We got a directional key; do an "open" in that direction
-    printf( "CLOSE modifier got a directional\n" );
+    JLog( LOG_LEVEL_INFO, true, "CLOSE modifier got a directional\n" );
     if( TestClose() )
     {
         if( DoClose() )
@@ -108,7 +111,8 @@ int CModState::OnHandleClose( SDL_Keysym *keysym )
         g_pGame->GetMsgs()->Printf( "I do not see anything to close there.\n" );
     }
 
-    printf( "CLOSE modifier resetting game state to COMMAND, CLOSE state to INIT\n" );
+    JLog( LOG_LEVEL_INFO, true,
+          "CLOSE modifier resetting game state to COMMAND, CLOSE state to INIT\n" );
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
     return 0;
@@ -117,7 +121,7 @@ int CModState::OnHandleClose( SDL_Keysym *keysym )
 int CModState::OnHandleTunnel( SDL_Keysym *keysym )
 {
     int retval;
-    printf( "Handling TUNNEL modifier\n" );
+    JLog( LOG_LEVEL_INFO, true, "Handling TUNNEL modifier\n" );
     retval = OnBaseHandleKey( keysym );
 
     if( retval == JRESETSTATE )
@@ -127,13 +131,14 @@ int CModState::OnHandleTunnel( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        printf( "Tunnel cmd still waiting for a directional key: Directional key not pressed.\n" );
+        JLog( LOG_LEVEL_INFO, true,
+              "Tunnel cmd still waiting for a directional key: Directional key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
         return 0;
     }
 
     // We got a directional key; do an "open" in that direction
-    printf( "TUNNEL modifier got a directional\n" );
+    JLog( LOG_LEVEL_INFO, true, "TUNNEL modifier got a directional\n" );
     if( TestTunnel() )
     {
         if( DoTunnel() )
@@ -151,7 +156,8 @@ int CModState::OnHandleTunnel( SDL_Keysym *keysym )
         g_pGame->GetMsgs()->Printf( "Tunnel through what? Empty air?.\n" );
     }
 
-    printf( "TUNNEL modifier resetting game state to COMMAND, TUNNEL state to INIT\n" );
+    JLog( LOG_LEVEL_INFO, true,
+          "TUNNEL modifier resetting game state to COMMAND, TUNNEL state to INIT\n" );
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
     return 0;
@@ -159,7 +165,7 @@ int CModState::OnHandleTunnel( SDL_Keysym *keysym )
 
 int CModState::OnHandleInit( SDL_Keysym *keysym )
 {
-    printf( "Initializing modify state...\n" );
+    JLog( LOG_LEVEL_INFO, true, "Initializing modify state...\n" );
     if( !m_cCommand )
     {
         m_cCommand = keysym->sym;
@@ -180,14 +186,14 @@ int CModState::OnHandleInit( SDL_Keysym *keysym )
             }
             else
             {
-                printf( "THROW not implemented yet.\n" );
+                JLog( LOG_LEVEL_INFO, true, "THROW not implemented yet.\n" );
                 ResetToState( STATE_COMMAND );
                 return 0;
             }
             break;
         default:
-            printf( "There seems to be some kind of mistake; I don't handle mod: %d\n",
-                    m_cCommand );
+            JLog( LOG_LEVEL_INFO, true,
+                  "There seems to be some kind of mistake; I don't handle mod: %d\n", m_cCommand );
             ResetToState( STATE_COMMAND );
             return 0;
             break;
@@ -198,7 +204,8 @@ int CModState::OnHandleInit( SDL_Keysym *keysym )
         return 0;
     }
 
-    printf( "Error: tried to init modify state when it was already initted...\n" );
+    JLog( LOG_LEVEL_INFO, true,
+          "Error: tried to init modify state when it was already initted...\n" );
     ResetToState( STATE_COMMAND );
     // shouldn't get here
     return JRESETSTATE;

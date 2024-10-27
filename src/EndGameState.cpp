@@ -57,7 +57,7 @@ int CEndGameState::OnHandleKey( SDL_Keysym *keysym )
 int CEndGameState::OnHandleTomb( SDL_Keysym *keysym )
 {
     int retval;
-    printf( "Handling TOMB modifier\n" );
+    JLog( LOG_LEVEL_INFO, true, "Handling TOMB modifier\n" );
     retval = OnBaseHandleKey( keysym );
 
     if( retval == JRESETSTATE )
@@ -67,7 +67,7 @@ int CEndGameState::OnHandleTomb( SDL_Keysym *keysym )
 
     if( retval == JCOMPLETESTATE )
     {
-        printf( "TOMB modifier complete, ENDGAME state to SCORES\n" );
+        JLog( LOG_LEVEL_INFO, true, "TOMB modifier complete, ENDGAME state to SCORES\n" );
         g_pGame->GetEnd()->Clear();
         InitScores();
         DoScores();
@@ -77,12 +77,12 @@ int CEndGameState::OnHandleTomb( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        printf( "Name cmd still waiting for a valid key.\n" );
+        JLog( LOG_LEVEL_INFO, true, "Name cmd still waiting for a valid key.\n" );
         return 0;
     }
 
     // We got a valid key
-    printf( "TOMB modifier got a valid key\n" );
+    JLog( LOG_LEVEL_INFO, true, "TOMB modifier got a valid key\n" );
     g_pGame->GetEnd()->Clear();
     DoTomb();
 
@@ -92,7 +92,7 @@ int CEndGameState::OnHandleTomb( SDL_Keysym *keysym )
 int CEndGameState::OnHandleScores( SDL_Keysym *keysym )
 {
     int retval;
-    printf( "Handling SCORES modifier\n" );
+    JLog( LOG_LEVEL_INFO, true, "Handling SCORES modifier\n" );
     retval = OnBaseHandleKey( keysym );
 
     if( retval == JRESETSTATE )
@@ -102,18 +102,18 @@ int CEndGameState::OnHandleScores( SDL_Keysym *keysym )
 
     if( retval == JCOMPLETESTATE )
     {
-        printf( "SCORES modifier complete, ENDGAME state to INIT\n" );
+        JLog( LOG_LEVEL_INFO, true, "SCORES modifier complete, ENDGAME state to INIT\n" );
         g_pGame->Quit( 0 );
     }
 
     if( retval != JSUCCESS )
     {
-        printf( "Name cmd still waiting for a valid key.\n" );
+        JLog( LOG_LEVEL_INFO, true, "Name cmd still waiting for a valid key.\n" );
         return 0;
     }
 
     // We got a valid key
-    printf( "SCORES modifier got a valid key\n" );
+    JLog( LOG_LEVEL_INFO, true, "SCORES modifier got a valid key\n" );
     g_pGame->GetEnd()->Clear();
     DoScores();
 
@@ -122,7 +122,7 @@ int CEndGameState::OnHandleScores( SDL_Keysym *keysym )
 
 int CEndGameState::OnHandleInit( SDL_Keysym *keysym )
 {
-    printf( "Initializing endgame state...\n" );
+    JLog( LOG_LEVEL_INFO, true, "Initializing endgame state...\n" );
 
     m_pScore->InitScore();
 

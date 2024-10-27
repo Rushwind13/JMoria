@@ -81,7 +81,7 @@ void CDisplayText::DrawStr( int x, int y, char *szString )
 
 void CDisplayText::DrawStr( int x, int y, bool bBoundsCheck, int dwYMax, char *szString )
 {
-    // printf("Trying to draw string: %s\n", szString);
+    JLog( LOG_LEVEL_DEBUG, true, "Trying to draw string: %s\n", szString );
     JVector vScreen( (float)x, (float)y );
     JVector vSize( (float)FONT_DRAW_W, (float)FONT_DRAW_H );
     char *ptr = szString;
@@ -286,7 +286,7 @@ void CDisplayText::DisplayList( JLinkList<CItem> *pList, const CDisplayMeta *pMe
         }
         else
         {
-            printf( pMeta->footer );
+            JLog( LOG_LEVEL_INFO, true, pMeta->footer );
             break;
         }
         pLink = pList->GetNext( pLink );
@@ -312,7 +312,7 @@ void CDisplayText::DisplayList( JLinkList<CScore> *pList, const CDisplayMeta *pM
         }
         else
         {
-            printf( pMeta->footer );
+            JLog( LOG_LEVEL_INFO, true, pMeta->footer );
             break;
         }
         pLink = pList->GetNext( pLink );

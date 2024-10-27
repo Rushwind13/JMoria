@@ -41,32 +41,33 @@ void CDungeonMap::CreateDungeon( const int depth )
     // Do something with the depth, here...
     if( depth > 100 )
     {
-        printf( "You have a bad feeling about this level...\n" );
+        JLog( LOG_LEVEL_INFO, true, "You have a bad feeling about this level...\n" );
     }
     else if( depth > 75 )
     {
-        printf( "Just another walk in the park.\n" );
+        JLog( LOG_LEVEL_INFO, true, "Just another walk in the park.\n" );
     }
     else if( depth > 50 )
     {
-        printf(
-            "It is my firm belief that this level contains monsters, of one kind or another.\n" );
+        JLog( LOG_LEVEL_INFO, true,
+              "It is my firm belief that this level contains monsters, of one kind or another.\n" );
     }
     else if( depth > 25 )
     {
-        printf( "This level goes together like wham-a-lamma-lamma and bop-she-bop-she-bop.\n" );
+        JLog( LOG_LEVEL_INFO, true,
+              "This level goes together like wham-a-lamma-lamma and bop-she-bop-she-bop.\n" );
     }
     else if( depth > 10 )
     {
-        printf( "What was *that*?!.\n" );
+        JLog( LOG_LEVEL_INFO, true, "What was *that*?!.\n" );
     }
     else if( depth > 5 )
     {
-        printf( "Please keep hands and arms inside the carriage.\n" );
+        JLog( LOG_LEVEL_INFO, true, "Please keep hands and arms inside the carriage.\n" );
     }
     else if( depth <= 0 )
     {
-        printf( "Error, levels don't go below 0.\n" );
+        JLog( LOG_LEVEL_INFO, true, "Error, levels don't go below 0.\n" );
     }
 #ifdef FIXED_DUNGEON
     //    For setpiece rooms, treasure rooms, &c
@@ -120,8 +121,9 @@ bool CDungeonMap::CheckInterior( const JRect area )
             vCheck.x = x;
             if( GetTile( vCheck )->GetType() != DUNG_IDX_WALL )
             {
-                printf( "interior check failed. Wanted <%d %d, %d %d>, but <%d %d> was %d\n",
-                        RECT_EXPAND( area ), x, y, m_dmtTiles[y * DUNG_WIDTH + x].GetType() );
+                JLog( LOG_LEVEL_INFO, true,
+                      "interior check failed. Wanted <%d %d, %d %d>, but <%d %d> was %d\n",
+                      RECT_EXPAND( area ), x, y, m_dmtTiles[y * DUNG_WIDTH + x].GetType() );
                 return false;
             }
         }
@@ -160,29 +162,34 @@ bool CDungeonMap::CheckBorder( const JRect area, int direction )
     // TweakBorders(rcCheck, direction);
     if( rcCheck.top <= 0 )
     {
-        printf( "border failed: <%d %d, %d %d>, top=0\n", RECT_EXPAND( rcCheck ) );
+        JLog( LOG_LEVEL_INFO, true, "border failed: <%d %d, %d %d>, top=0\n",
+              RECT_EXPAND( rcCheck ) );
         return false;
     }
     else if( rcCheck.bottom >= DUNG_HEIGHT - 1 )
     {
-        printf( "border failed: <%d %d, %d %d>, bottom=max\n", RECT_EXPAND( rcCheck ) );
+        JLog( LOG_LEVEL_INFO, true, "border failed: <%d %d, %d %d>, bottom=max\n",
+              RECT_EXPAND( rcCheck ) );
         return false;
     }
     else if( rcCheck.left <= 0 )
     {
-        printf( "border failed: <%d %d, %d %d>, left=0\n", RECT_EXPAND( rcCheck ) );
+        JLog( LOG_LEVEL_INFO, true, "border failed: <%d %d, %d %d>, left=0\n",
+              RECT_EXPAND( rcCheck ) );
         return false;
     }
     else if( rcCheck.right >= DUNG_WIDTH - 1 )
     {
-        printf( "border failed: <%d %d, %d %d>, right=max\n", RECT_EXPAND( rcCheck ) );
+        JLog( LOG_LEVEL_INFO, true, "border failed: <%d %d, %d %d>, right=max\n",
+              RECT_EXPAND( rcCheck ) );
         return false;
     }
 
     JRect rcEdges( rcCheck.left - 1, rcCheck.top - 1, rcCheck.right + 1, rcCheck.bottom + 1 );
     if( !rcEdges.IsInWorld() )
     {
-        printf( "border failed: <%d %d, %d %d>, edges fail.\n", RECT_EXPAND( rcEdges ) );
+        JLog( LOG_LEVEL_INFO, true, "border failed: <%d %d, %d %d>, edges fail.\n",
+              RECT_EXPAND( rcEdges ) );
         return false;
     }
     JIVector vCheck( rcEdges.left, rcEdges.top );
@@ -195,8 +202,9 @@ bool CDungeonMap::CheckBorder( const JRect area, int direction )
             int type = GetTile( vCheck )->GetType();
             if( type != DUNG_IDX_WALL && !IsDoor( type ) )
             {
-                printf( "border check failed. Wanted <%d %d, %d %d>, but <%d %d> was %d\n",
-                        RECT_EXPAND( area ), x, y, m_dmtTiles[y * DUNG_WIDTH + x].GetType() );
+                JLog( LOG_LEVEL_INFO, true,
+                      "border check failed. Wanted <%d %d, %d %d>, but <%d %d> was %d\n",
+                      RECT_EXPAND( area ), x, y, m_dmtTiles[y * DUNG_WIDTH + x].GetType() );
                 return false;
             }
         }
@@ -289,8 +297,8 @@ void CDungeonMap::FillArea( const Uint8 type, JRect *rcFill, const int direction
     // Now light the borders
     if( type != DUNG_IDX_WALL )
     {
-        printf( "filled: <%d %d, %d %d>\nlit <%d %d, %d %d>\n", RECT_EXPAND( rcLocal ),
-                RECT_EXPAND( rcEdges ) );
+        JLog( LOG_LEVEL_INFO, true, "filled: <%d %d, %d %d>\nlit <%d %d, %d %d>\n",
+              RECT_EXPAND( rcLocal ), RECT_EXPAND( rcEdges ) );
 
         // L and R sides, going over-by-one in each direction
         for( y = rcEdges.top; y <= rcEdges.bottom; y++ )
@@ -313,7 +321,7 @@ void CDungeonMap::FillArea( const Uint8 type, JRect *rcFill, const int direction
     }
 
     // you still filled rcFill squares, just that one of them was a door.
-    printf( "filled from <%d %d> to <%d %d>\n", RECT_EXPAND( *rcFill ) );
+    JLog( LOG_LEVEL_INFO, true, "filled from <%d %d> to <%d %d>\n", RECT_EXPAND( *rcFill ) );
 
     if( bIsHallway )
     {
@@ -381,9 +389,9 @@ bool CDungeonMap::CreateOneStep()
     CDungeonCreationStep *pCurStep = pLink->m_lpData;
     CDungeonCreationStep *pNewStep = NULL;
 
-    printf( "creating %d %s at <%d %d, %d %d>\n", pCurStep->m_dwDirection,
-            pCurStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM ? "room" : "hallway",
-            RECT_EXPAND( pCurStep->m_rcArea ) );
+    JLog( LOG_LEVEL_INFO, true, "creating %d %s at <%d %d, %d %d>\n", pCurStep->m_dwDirection,
+          pCurStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM ? "room" : "hallway",
+          RECT_EXPAND( pCurStep->m_rcArea ) );
     // create current entity
     FillArea( pCurStep );
 
@@ -500,15 +508,15 @@ void CDungeonMap::AddDoor( const JIVector vHall, int direction )
     }
     else if( roll <= open )
     {
-        printf( "Added an open door.\n" );
+        JLog( LOG_LEVEL_INFO, true, "Added an open door.\n" );
         door_type = DUNG_IDX_OPEN_DOOR;
     }
     else
     {
-        printf( "Added a secret door.\n" );
+        JLog( LOG_LEVEL_INFO, true, "Added a secret door.\n" );
         door_type = DUNG_IDX_SECRET_DOOR;
     }
-    printf( "Placing a %d door at <%d %d>\n", door_type, VEC_EXPAND( vDoor ) );
+    JLog( LOG_LEVEL_INFO, true, "Placing a %d door at <%d %d>\n", door_type, VEC_EXPAND( vDoor ) );
     GetTile( vDoor )->SetType( door_type );
 }
 
@@ -543,8 +551,8 @@ CDungeonCreationStep *CDungeonMap::MakeRoomStep( const JIVector &vPos, const int
         if( !dwDone )
         {
             // this one didn't work, need to "un-shift" the rect for the next try.
-            printf( "un-shifting <%d %d, %d %d> back to <%d %d, %d %d>\n",
-                    RECT_EXPAND( pStep->m_rcArea ), RECT_EXPAND( rcTry ) );
+            JLog( LOG_LEVEL_INFO, true, "un-shifting <%d %d, %d %d> back to <%d %d, %d %d>\n",
+                  RECT_EXPAND( pStep->m_rcArea ), RECT_EXPAND( rcTry ) );
             pStep->m_rcArea.Init( rcTry );
         }
         count++;
@@ -588,8 +596,8 @@ CDungeonCreationStep *CDungeonMap::MakeHallStep( const JIVector &vPos, const int
         if( !dwDone )
         {
             // this one didn't work, need to "un-shift" the rect for the next try.
-            printf( "un-shifting <%d %d, %d %d> back to <%d %d, %d %d>\n",
-                    RECT_EXPAND( pStep->m_rcArea ), RECT_EXPAND( rcTry ) );
+            JLog( LOG_LEVEL_INFO, true, "un-shifting <%d %d, %d %d> back to <%d %d, %d %d>\n",
+                  RECT_EXPAND( pStep->m_rcArea ), RECT_EXPAND( rcTry ) );
             pStep->m_rcArea.Init( rcTry );
         }
         count++;
@@ -694,37 +702,37 @@ JIVector &CDungeonMap::GetWallOrigin( CDungeonCreationStep *pStep, const int dir
         pStep->m_vPos.Init(
             pStep->m_rcArea.Left() + ( Util::GetRandom( 0, pStep->m_rcArea.Width() ) ),
             pStep->m_rcArea.Top() - 2 ); // -1... does a room's rect include its walls?
-        printf( "[%d>%d]GetWallOrigin creating north %s, starting at <%d %d>\n",
-                pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1,
-                pStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM ? "hall" : "room",
-                VEC_EXPAND( pStep->m_vPos ) );
+        JLog( LOG_LEVEL_INFO, true, "[%d>%d]GetWallOrigin creating north %s, starting at <%d %d>\n",
+              pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1,
+              pStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM ? "hall" : "room",
+              VEC_EXPAND( pStep->m_vPos ) );
         break;
     case DIR_SOUTH:
         pStep->m_vPos.Init( pStep->m_rcArea.Left() +
                                 ( Util::GetRandom( 0, pStep->m_rcArea.Width() ) ),
                             pStep->m_rcArea.Bottom() + 2 );
-        printf( "[%d>%d]GetWallOrigin creating south %s, starting at <%d %d>\n",
-                pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1,
-                pStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM ? "hall" : "room",
-                VEC_EXPAND( pStep->m_vPos ) );
+        JLog( LOG_LEVEL_INFO, true, "[%d>%d]GetWallOrigin creating south %s, starting at <%d %d>\n",
+              pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1,
+              pStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM ? "hall" : "room",
+              VEC_EXPAND( pStep->m_vPos ) );
         break;
     case DIR_WEST:
         pStep->m_vPos.Init( pStep->m_rcArea.Left() - 2,
                             pStep->m_rcArea.Top() +
                                 ( Util::GetRandom( 0, pStep->m_rcArea.Height() ) ) );
-        printf( "[%d>%d]GetWallOrigin creating west %s, starting at <%d %d>\n",
-                pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1,
-                pStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM ? "hall" : "room",
-                VEC_EXPAND( pStep->m_vPos ) );
+        JLog( LOG_LEVEL_INFO, true, "[%d>%d]GetWallOrigin creating west %s, starting at <%d %d>\n",
+              pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1,
+              pStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM ? "hall" : "room",
+              VEC_EXPAND( pStep->m_vPos ) );
         break;
     case DIR_EAST:
         pStep->m_vPos.Init( pStep->m_rcArea.Right() + 2,
                             pStep->m_rcArea.Top() +
                                 ( Util::GetRandom( 0, pStep->m_rcArea.Height() ) ) );
-        printf( "[%d>%d]GetWallOrigin creating east %s, starting at <%d %d>\n",
-                pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1,
-                pStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM ? "hall" : "room",
-                VEC_EXPAND( pStep->m_vPos ) );
+        JLog( LOG_LEVEL_INFO, true, "[%d>%d]GetWallOrigin creating east %s, starting at <%d %d>\n",
+              pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1,
+              pStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM ? "hall" : "room",
+              VEC_EXPAND( pStep->m_vPos ) );
         break;
     }
     return pStep->m_vPos;
@@ -744,23 +752,27 @@ JIVector &CDungeonMap::GetHallOrigin( CDungeonCreationStep *pStep, int step_type
         pStep->m_vPos.Init( pStep->m_rcArea.Left(),
                             pStep->m_rcArea.Top() -
                                 modifier ); // -1... does a room's rect include its walls?
-        printf( "[%d>%d]GetHallOrigin creating north hall, starting at <%d %d>\n",
-                pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1, VEC_EXPAND( pStep->m_vPos ) );
+        JLog( LOG_LEVEL_INFO, true,
+              "[%d>%d]GetHallOrigin creating north hall, starting at <%d %d>\n",
+              pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1, VEC_EXPAND( pStep->m_vPos ) );
         break;
     case DIR_SOUTH:
         pStep->m_vPos.Init( pStep->m_rcArea.Left(), pStep->m_rcArea.Bottom() + modifier );
-        printf( "[%d>%d]GetHallOrigin creating south hall, starting at <%d %d>\n",
-                pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1, VEC_EXPAND( pStep->m_vPos ) );
+        JLog( LOG_LEVEL_INFO, true,
+              "[%d>%d]GetHallOrigin creating south hall, starting at <%d %d>\n",
+              pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1, VEC_EXPAND( pStep->m_vPos ) );
         break;
     case DIR_WEST:
         pStep->m_vPos.Init( pStep->m_rcArea.Left() - modifier, pStep->m_rcArea.Top() );
-        printf( "[%d>%d]GetHallOrigin creating west hall, starting at <%d %d>\n",
-                pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1, VEC_EXPAND( pStep->m_vPos ) );
+        JLog( LOG_LEVEL_INFO, true,
+              "[%d>%d]GetHallOrigin creating west hall, starting at <%d %d>\n",
+              pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1, VEC_EXPAND( pStep->m_vPos ) );
         break;
     case DIR_EAST:
         pStep->m_vPos.Init( pStep->m_rcArea.Right() + modifier, pStep->m_rcArea.Top() );
-        printf( "[%d>%d]GetHallOrigin creating east hall, starting at <%d %d>\n",
-                pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1, VEC_EXPAND( pStep->m_vPos ) );
+        JLog( LOG_LEVEL_INFO, true,
+              "[%d>%d]GetHallOrigin creating east hall, starting at <%d %d>\n",
+              pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1, VEC_EXPAND( pStep->m_vPos ) );
         break;
     }
 

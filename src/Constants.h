@@ -281,7 +281,7 @@ public:
 
     void Init()
     {
-        printf( "expecting %d strings...", NUM_STRINGS );
+        JLog( LOG_LEVEL_INFO, true, "expecting %d strings...", NUM_STRINGS );
         m_StringTable = new TextEntry[NUM_STRINGS];
         int i = 0;
         // Monster flags
@@ -440,11 +440,11 @@ public:
 
         if( i == NUM_STRINGS )
         {
-            printf( "success!\n" );
+            JLog( LOG_LEVEL_INFO, false, "Success!\n" );
         }
         else
         {
-            printf( "got %d strings instead, misconfiguration error!\n", i );
+            JLog( LOG_LEVEL_INFO, true, "got %d strings instead, misconfiguration error!\n", i );
         }
     };
     TextEntry *m_StringTable;
@@ -461,7 +461,7 @@ public:
             }
         }
 
-        printf( "bad string: %s\n", szIn );
+        JLog( LOG_LEVEL_INFO, true, "bad string: %s\n", szIn );
 
         return -1;
     }

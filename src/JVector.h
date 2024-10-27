@@ -165,7 +165,7 @@ public:
             y /= len;
         }
     }
-    void printvec( const char *label ) { printf( "%s: %f %f ", label, x, y ); }
+    void printvec( const char *label ) { JLog( LOG_LEVEL_INFO, true, "%s: %f %f ", label, x, y ); }
 };
 
 typedef TVector2<int> JIVector;

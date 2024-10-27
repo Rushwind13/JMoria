@@ -255,7 +255,7 @@ void CRender::PreDrawObjects( JRect rcBounds, uint32 Texture, bool bTranslate, b
     glBindTexture( GL_TEXTURE_2D, Texture );
     if( !glIsTexture( Texture ) )
     {
-        printf( "Hey! That's not a texture.\n" );
+        JLog( LOG_LEVEL_INFO, true, "Hey! That's not a texture.\n" );
     }
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );

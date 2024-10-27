@@ -175,7 +175,8 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 end = strchr( szLine, '>' );
                 if( begin == NULL || end == NULL )
                 {
-                    printf( "error parsing attack: effect type not found %s\n", cur );
+                    JLog( LOG_LEVEL_INFO, true, "error parsing attack: effect type not found %s\n",
+                          cur );
                     continue;
                 }
                 *end++ = NULL;
@@ -188,7 +189,8 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 end = strchr( cur, '>' );
                 if( begin == NULL || end == NULL )
                 {
-                    printf( "error parsing attack: attack type not found %s\n", cur );
+                    JLog( LOG_LEVEL_INFO, true, "error parsing attack: attack type not found %s\n",
+                          cur );
                     continue;
                 }
                 *end++ = NULL;
@@ -215,7 +217,8 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 begin = strchr( cur, ',' );
                 if( begin == NULL )
                 {
-                    printf( "error parsing attack: damage not found %s\n", cur );
+                    JLog( LOG_LEVEL_INFO, true, "error parsing attack: damage not found %s\n",
+                          cur );
                     continue;
                 }
                 begin++;
@@ -244,7 +247,7 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 {
                     // multi-hued
                     // <<rgb1>,<rgb2>,...,<rgbn>>
-                    printf( "Found multi-hued monster: %s\n", color );
+                    JLog( LOG_LEVEL_INFO, true, "Found multi-hued monster: %s\n", color );
                     mdIn.m_Colors = ParseColors( color );
 
                     mdIn.m_dwFlags |= MON_COLOR_MULTI;
@@ -262,7 +265,7 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
             }
             else
             {
-                printf( "Unparseable line:%s\n", szLine );
+                JLog( LOG_LEVEL_INFO, true, "Unparseable line:%s\n", szLine );
             }
         }
     }
@@ -379,7 +382,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 {
                     // multi-hued
                     // <<rgb1>,<rgb2>,...,<rgbn>>
-                    printf( "Found multi-hued item: %s\n", color );
+                    JLog( LOG_LEVEL_INFO, true, "Found multi-hued item: %s\n", color );
                     idIn.m_Colors = ParseColors( color );
 
                     idIn.m_dwFlags |= ITEM_COLOR_MULTI;
@@ -438,7 +441,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
             }
             else
             {
-                printf( "Unparseable line:%s\n", szLine );
+                JLog( LOG_LEVEL_INFO, true, "Unparseable line:%s\n", szLine );
             }
         }
     }
@@ -525,7 +528,7 @@ CScore *CDataFile::ReadScore( CScore &sIn )
             }
             else
             {
-                printf( "Unparseable line:%s\n", szLine );
+                JLog( LOG_LEVEL_INFO, true, "Unparseable line:%s\n", szLine );
             }
         }
     }

@@ -1,3 +1,5 @@
+#include "JMDefs.h"
+
 #include "Constants.h"
 #include "TextEntry.h"
 // This is the string table holding the

@@ -38,7 +38,7 @@ int CStringInputState::OnHandleKey( SDL_Keysym *keysym )
 int CStringInputState::OnHandleName( SDL_Keysym *keysym )
 {
     int retval;
-    printf( "Handling NAME modifier\n" );
+    JLog( LOG_LEVEL_INFO, true, "Handling NAME modifier\n" );
     retval = OnBaseHandleKey( keysym );
 
     if( retval == JRESETSTATE )
@@ -48,7 +48,8 @@ int CStringInputState::OnHandleName( SDL_Keysym *keysym )
 
     if( retval == JCOMPLETESTATE )
     {
-        printf( "NAME modifier resetting game state to COMMAND, NAME state to INIT\n" );
+        JLog( LOG_LEVEL_INFO, true,
+              "NAME modifier resetting game state to COMMAND, NAME state to INIT\n" );
         // One way or another, we're done with this state now.
         g_pGame->GetPlayer()->SetName( m_szInput );
         memset( m_szInput, 0, MAX_STRING_LENGTH );
@@ -58,13 +59,13 @@ int CStringInputState::OnHandleName( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        printf( "Name cmd still waiting for a Alphanumeric key.\n" );
+        JLog( LOG_LEVEL_INFO, true, "Name cmd still waiting for a Alphanumeric key.\n" );
         //        g_pGame->GetMsgs()->Printf("Direction(1 2 3 4 6 7 8 9):\n");
         return 0;
     }
 
     // We got a alpha key; append it to the name
-    printf( "NAME modifier got a alpha\n" );
+    JLog( LOG_LEVEL_INFO, true, "NAME modifier got a alpha\n" );
     g_pGame->GetMsgs()->Clear();
     g_pGame->GetMsgs()->Printf( "Character Name: %s", m_szInput );
 
@@ -74,7 +75,7 @@ int CStringInputState::OnHandleName( SDL_Keysym *keysym )
 int CStringInputState::OnHandleHaggle( SDL_Keysym *keysym )
 {
     int retval;
-    printf( "Handling HAGGLE modifier\n" );
+    JLog( LOG_LEVEL_INFO, true, "Handling HAGGLE modifier\n" );
     retval = OnBaseHandleKey( keysym );
 
     if( retval == JRESETSTATE )
@@ -84,13 +85,13 @@ int CStringInputState::OnHandleHaggle( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        printf( "HAGGLE cmd still waiting for a Numeric key.\n" );
+        JLog( LOG_LEVEL_INFO, true, "HAGGLE cmd still waiting for a Numeric key.\n" );
         g_pGame->GetMsgs()->Printf( "Enter a number.\n" );
         return 0;
     }
 
     // We got a numeric key; add to haggle number
-    printf( "HAGGLE modifier got a numeric\n" );
+    JLog( LOG_LEVEL_INFO, true, "HAGGLE modifier got a numeric\n" );
     if( TestHaggle() )
     {
         if( DoHaggle() )
@@ -111,7 +112,8 @@ int CStringInputState::OnHandleHaggle( SDL_Keysym *keysym )
 
     if( retval == JRESETSTATE )
     {
-        printf( "HAGGLE modifier resetting game state to COMMAND, HAGGLE state to INIT\n" );
+        JLog( LOG_LEVEL_INFO, true,
+              "HAGGLE modifier resetting game state to COMMAND, HAGGLE state to INIT\n" );
         // One way or another, we're done with this state now.
         ResetToState( STATE_COMMAND );
     }
@@ -120,7 +122,7 @@ int CStringInputState::OnHandleHaggle( SDL_Keysym *keysym )
 
 int CStringInputState::OnHandleInit( SDL_Keysym *keysym )
 {
-    printf( "Initializing modify state...\n" );
+    JLog( LOG_LEVEL_INFO, true, "Initializing modify state...\n" );
     if( !m_cCommand )
     {
         m_cCommand = keysym->sym;
@@ -137,8 +139,8 @@ int CStringInputState::OnHandleInit( SDL_Keysym *keysym )
             mod = SI_HAGGLE;
             break;
         default:
-            printf( "There seems to be some kind of mistake; I don't handle mod: %d\n",
-                    m_cCommand );
+            JLog( LOG_LEVEL_INFO, true,
+                  "There seems to be some kind of mistake; I don't handle mod: %d\n", m_cCommand );
             ResetToState( STATE_COMMAND );
             return 0;
             break;
@@ -149,7 +151,8 @@ int CStringInputState::OnHandleInit( SDL_Keysym *keysym )
         return 0;
     }
 
-    printf( "Error: tried to init stringinput state when it was already initted...\n" );
+    JLog( LOG_LEVEL_INFO, true,
+          "Error: tried to init stringinput state when it was already initted...\n" );
     ResetToState( STATE_COMMAND );
     // shouldn't get here
     return JRESETSTATE;
@@ -174,7 +177,7 @@ int CStringInputState::OnBaseHandleKey( SDL_Keysym *keysym )
     else if( keysym->sym == SDLK_RETURN )
     {
         // actually set the string on the place
-        printf( "you entered: <%s>\n", m_szInput );
+        JLog( LOG_LEVEL_INFO, true, "you entered: <%s>\n", m_szInput );
         return JCOMPLETESTATE;
     }
     else if( keysym->sym == SDLK_ESCAPE )

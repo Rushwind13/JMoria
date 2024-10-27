@@ -41,7 +41,16 @@ WHEN("^I spawn a monster with SEEK$")
     context->vec_b += context->vec;
     printf("monster pos <%.2f %.2f>\n", VEC_EXPAND(context->vec_b));
 
-    context->result_bool = g_pGame->GetDungeon()->SpawnMonster(10, context->vec_b);
+    int seek_monster = 10;
+    CDungeon *pDungeon = g_pGame->GetDungeon();
+    CMonsterDef *pmd = pDungeon->GetMonsterDef(seek_monster);
+
+    context->result = CMonster::CreateMonster(pmd, context->vec_b);
+
+    CDungeonTile *pTile = pDungeon->GetTile( context->vec_b );
+    CMonster *pMon = pTile->m_pCurMonster;
+    printf("monster spawn pos <%.2f %.2f>, result: %d dungeon: %d, tile: %d, monster: %f\n", VEC_EXPAND(context->vec_b), context->result_bool, pDungeon->m_dwWidth, pTile->m_dwFlags, pMon->m_fHP);
+
 }
 
 /*#######
@@ -60,10 +69,15 @@ THEN( "^the game initalized successfully$" )
 THEN("^the monster spawned successfully$")
 {
     ScenarioScope<TestCtx> context;
-    int actual = context->result_bool;
-    EXPECT_EQ( actual, true );
-    CMonster *pMon = g_pGame->GetDungeon()->GetTile( context->vec_b )->m_pCurMonster;
-    printf("monster spawn pos <%.2f %.2f> %s\n", VEC_EXPAND(context->vec_b), pMon->GetName());
+    int actual = context->result;
+    EXPECT_EQ( actual, JSUCCESS );
+    CDungeon *pDungeon = g_pGame->GetDungeon();
+    CDungeonTile *pTile = pDungeon->GetTile( context->vec_b );
+    CMonster *pMon = pTile->m_pCurMonster;
+    char monster[32];
+    char *expected = "Giant Snake";
+    sprintf(monster,"%s", pMon->m_md->m_szName);
+    printf("monster spawn pos <%.2f %.2f>, dungeon: %d, tile: %d, monster: %f name: %s\n", VEC_EXPAND(context->vec_b), pDungeon->m_dwWidth, pTile->m_dwFlags, pMon->m_fHP, monster);
 
-    EXPECT_EQ( pMon->GetName(), "Giant Snake");
+    EXPECT_EQ( strcmp(monster, expected),0);
 }

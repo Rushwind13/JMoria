@@ -10,7 +10,8 @@ ifeq ($(OS),Darwin)
 endif
 
 EXEC = jmoria
-TEST_EXEC = test/bin/AllSteps
+TEST_DIR = test/bin
+TEST_EXEC = AllSteps
 SOURCES = $(wildcard src/*.cpp)
 OBJECTS = $(SOURCES:.cpp=.o)
 TEST_SOURCES = test/features/step_definitions/AllSteps.cpp
@@ -19,8 +20,11 @@ TEST_OBJECTS = $(TEST_SOURCES:.cpp=.o)
 $(EXEC): $(OBJECTS)
 	$(CC) $(OBJECTS) $(LD_FLAGS) -o $(EXEC)
 
-$(TEST_EXEC): $(TEST_OBJECTS) $(filter-out src/main.o, $(OBJECTS))
-	$(CC) $(TEST_OBJECTS) $(filter-out src/main.o, $(OBJECTS)) $(TEST_LD_FLAGS) $(LD_FLAGS) -o $(TEST_EXEC)
+$(TEST_EXEC): $(TEST_DIR) $(TEST_OBJECTS) $(filter-out src/main.o, $(OBJECTS))
+	$(CC) $(TEST_OBJECTS) $(filter-out src/main.o, $(OBJECTS)) $(TEST_LD_FLAGS) $(LD_FLAGS) -o $(TEST_DIR)/$(TEST_EXEC)
+
+$(TEST_DIR):
+	mkdir -p $(TEST_DIR)
 
 test: $(TEST_EXEC)
 
@@ -28,4 +32,5 @@ test: $(TEST_EXEC)
 	$(CC) -c $(CC_FLAGS) $(TEST_CC_FLAGS) $< -o $@
 
 clean:
-	rm -f $(EXEC) $(OBJECTS) $(TEST_EXEC) $(TEST_OBJECTS)
+	rm -f $(EXEC) $(OBJECTS) $(TEST_DIR)/$(TEST_EXEC) $(TEST_OBJECTS)
+	rmdir $(TEST_DIR)

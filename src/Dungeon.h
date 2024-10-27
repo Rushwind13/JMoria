@@ -68,7 +68,7 @@ public:
     void DrawItems();
     void DrawMonsters();
     void PostDraw();
-    void Init(const char *szBasedir);
+    void Init( const char *szBasedir );
     void Term();
     bool Tick( const int dwClock );
     bool Update( float fCurTime );
@@ -117,6 +117,8 @@ public:
     bool IsTunnelable( JVector &vPos );
     bool IsCloseable( JVector &vPos );
     int IsStairs( JVector &vPos );
+    CMonsterDef *GetMonsterDef( int which_monster );
+    bool SpawnMonster( int which_monster, JVector vSpawnPoint = JVector( -1, -1 ) );
     void RemoveMonster( CMonster *pMon );
     JResult Modify( JVector &vPos );
     CItem *PickUp( JVector &vPickupPos );

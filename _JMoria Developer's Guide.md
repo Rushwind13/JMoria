@@ -20,6 +20,7 @@ c) add the new item's emoji to the *ItemIds* list in _Item.cpp_
 
 similar instruction for items
 
+Before you check in, please `lint` your code, with `clang-format -i 
 Create a Pull request on Github when you're satisfied.
 
 ## Monster Types and their tile bindings

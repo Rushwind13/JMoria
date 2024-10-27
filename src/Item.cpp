@@ -59,6 +59,7 @@ JResult CItem::SpawnItem()
     JVector vTryPos;
     while( !bItemSpawned )
     {
+        printf( "." );
         vTryPos.Init( (float)( Util::GetRandom( 0, DUNG_WIDTH - 1 ) ),
                       (float)( Util::GetRandom( 0, DUNG_HEIGHT - 1 ) ) );
 

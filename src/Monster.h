@@ -160,9 +160,11 @@ public:
     CMonster();
     ~CMonster();
 
-    static JResult CreateMonster( CMonsterDef *pmd );
+    static JResult CreateMonster( CMonsterDef *pmd, JVector vSpawnPoint = JVector( -1, -1 ) );
+    JResult InitAndSpawn( CMonsterDef *pmd, JVector vSpawnPoint = JVector( -1, -1 ) );
     void Breed();
-    JResult SpawnMonster();
+    JResult SpawnMonster( JVector vSpawnPoint = JVector( -1, -1 ) );
+    JResult SpawnAt( JVector vSpawnPoint = JVector( -1, -1 ) );
     void PreDraw();
     void Draw();
     void PostDraw();

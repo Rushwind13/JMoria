@@ -51,9 +51,11 @@ bool CAIBrain::Update( float fCurTime )
         return UpdateRest( fCurTime );
         break;
     case BRAINSTATE_GOTODEST:
+        // printf("I'm going, I'm going\n");
         return UpdateGoToDest( fCurTime );
         break;
     case BRAINSTATE_SEEK:
+        // printf("I seek\n");
         return UpdateSeek( fCurTime );
         break;
     case BRAINSTATE_IDLE:
@@ -73,18 +75,39 @@ bool CAIBrain::UpdateSeek( float fCurTime )
     {
     case MON_AI_100RANDOMMOVE:
     {
+        // printf("rng\n");
         SetRandomDest( fCurTime );
     }
     break;
     case MON_AI_75RANDOMMOVE:
     {
+        // printf("chaos monkey\n");
+        if( Util::Roll( "1d100" ) <= 75 )
+        {
+            SetRandomDest( fCurTime );
+        }
+        else
+        {
+            WalkSeek( fCurTime );
+        }
     }
     break;
     case MON_AI_DONTMOVE:
     {
+
+        // printf("i no move\n");
         SetRandomDest( fCurTime );
     }
     break;
+    case MON_AI_SEEKPLAYER:
+    {
+        // printf("seek player\n");
+        WalkSeek( fCurTime );
+    }
+    break;
+    default:
+        // printf("bad seek\n");
+        return false;
     }
 
     SetState( BRAINSTATE_GOTODEST );
@@ -100,6 +123,7 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
 
     while( m_fStateTicks >= 1.0f )
     {
+        // printf("and we're walking\n");
         didWalk = true;
         JVector vTryPos( m_vPos + m_vVel );
         if( Util::IsInWorld( vTryPos ) )
@@ -108,14 +132,17 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
             switch( dwCollideType )
             {
             case DUNG_COLL_NO_COLLISION:
+                // printf("swing and a miss\n");
                 if( m_dwMoveType != MON_AI_DONTMOVE )
                 {
+                    // printf("on the move\n");
                     g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster = NULL;
                     m_vPos += m_vVel;
                     g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster = m_pParent;
                 }
                 break;
             case DUNG_COLL_PLAYER:
+                // printf("ouch! you ran into the player!\n");
                 char szStatus[16];
                 float fDamageMult = 1.0f;
                 // TODO: make this use all the attacks, not just the first one
@@ -159,6 +186,7 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
  }/* */
     if( didWalk )
     {
+        // printf("looking\n");
         SetState( BRAINSTATE_SEEK );
     }
 
@@ -192,4 +220,53 @@ bool CAIBrain::SetRandomDest( float fCurTime )
     return true;
 }
 
-bool CAIBrain::WalkSeek( float fCurTime ) { return true; }
+bool CAIBrain::WalkSeek( float fCurTime )
+{
+    JVector delta( 0, 0 ), dest( 0, 0 );
+    JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
+
+    m_fStateTicks += fCurTime * m_fSpeed;
+
+    float x_delta = vPlayerPos.x - m_vPos.x;
+    float y_delta = vPlayerPos.y - m_vPos.y;
+
+    if( x_delta > 1 )
+        x_delta = 1;
+    if( x_delta < -1 )
+        x_delta = -1;
+    if( y_delta > 1 )
+        y_delta = 1;
+    if( y_delta < -1 )
+        y_delta = -1;
+
+    delta.Init( x_delta, y_delta );
+
+    dest = m_vPos + delta;
+    int dwCollideType = DUNG_COLL_NO_COLLISION;
+    if( dest.IsInWorld() )
+    {
+        dwCollideType = g_pGame->GetDungeon()->IsWalkableFor( dest );
+    }
+    else
+    {
+        delta.Init();
+    }
+
+    return WalkSeek( fCurTime, delta, dwCollideType );
+}
+
+bool CAIBrain::WalkSeek( float fCurTime, JVector &delta, int dwCollideType )
+{
+    switch( dwCollideType )
+    {
+    case DUNG_COLL_NO_COLLISION:
+    case DUNG_COLL_PLAYER:
+        m_vVel = delta;
+        break;
+    default:
+        m_vVel.Init();
+        break;
+    }
+
+    return true;
+}

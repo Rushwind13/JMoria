@@ -27,7 +27,7 @@ public:
     CGame();
     ~CGame() { Quit( 0 ); }
 
-    JResult Init(const char *szBasedir);
+    JResult Init( const char *szBasedir );
     bool Update( float fCurTime ); // someday figure out why this doesn't work...
     void HandleEvents( int &isActive, int &done );
     void Draw();
@@ -42,6 +42,7 @@ public:
     CDisplayText *GetUse() { return m_pUseDT; }
     CDisplayText *GetEnd() { return m_pEndGameDT; }
     CAIMgr *GetAIMgr() { return m_pAIMgr; }
+    void Term();
     void Quit( int returncode );
     void SetState( int eNewState );
     CStateBase *GetGameState() { return m_pCurState; }

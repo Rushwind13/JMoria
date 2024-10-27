@@ -11,7 +11,7 @@ public:
     CTileset( const char *szBasedir, const char *szName, int cellWidth, int cellHeight )
     {
         char szFilename[256];
-        sprintf(szFilename, "%s%s", szBasedir, szName);
+        sprintf( szFilename, "%s%s", szBasedir, szName );
         Load( szFilename, cellWidth, cellHeight );
     }
 

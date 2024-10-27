@@ -4,7 +4,39 @@ Feature: Game
     As a game engine
     I want to make sure my game is working
 
-    Scenario: lookup strings
+    Scenario: Game creation is possible
         Given I have a game
-        When I initialize the game
+        And I initialize the game
         Then the game initalized successfully
+
+    Scenario: Game creation is idempotent
+        Given I have a game
+        And I have a game
+        And I have a game
+        And I initialize the game
+        Then the game initalized successfully
+
+    Scenario: Game termination works
+        Given I have a game
+        And I initialize the game
+        When I terminate the game
+        Then the game terminates successfully
+
+    Scenario: Player Seek works
+        Given I have a game
+        And I initialize the game
+        And the game has a player
+        And I spawn a monster with SEEK
+        And I update the monster's brain
+        Then the game initalized successfully
+        And the monster spawned successfully
+        And the monster wants to move toward the player
+
+    Scenario: AI state changes work
+        Given I have a game
+        And I initialize the game
+        And the game has a player
+        And I spawn a monster with SEEK
+        And I update the monster's brain
+        When I update the monster's brain again
+        And the monster moves toward the player

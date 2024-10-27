@@ -27,22 +27,28 @@ GIVEN( "^the game has a player$" )
     int actual = context->result;
     EXPECT_EQ( actual, JSUCCESS );
 }
+GIVEN( "^I spawn a monster with SEEK$" )
+{
+    ScenarioScope<TestCtx> context;
+    context->vec_b.Init( -2, 2 );
+    context->vec_b += context->vec;
+
+    int seek_monster = 11;
+    CMonsterDef *pmd = g_pGame->GetDungeon()->GetMonsterDef( seek_monster );
+
+    context->result = CMonster::CreateMonster( pmd, context->vec_b );
+}
 
 /*#######
 ##
 ## WHEN
 ##
 #######*/
-WHEN( "^I spawn a monster with SEEK$" )
+WHEN("^I update the monster's brain$")
 {
     ScenarioScope<TestCtx> context;
-    context->vec_b.Init( 2, 0 );
-    context->vec_b += context->vec;
-
-    int seek_monster = 10;
-    CMonsterDef *pmd = g_pGame->GetDungeon()->GetMonsterDef( seek_monster );
-
-    context->result = CMonster::CreateMonster( pmd, context->vec_b );
+    CMonster *pMon = g_pGame->GetDungeon()->GetTile( context->vec_b )->m_pCurMonster;
+    pMon->m_pBrain->Update(1.0f);
 }
 
 /*#######
@@ -67,8 +73,18 @@ THEN( "^the monster spawned successfully$" )
     CDungeonTile *pTile = pDungeon->GetTile( context->vec_b );
     CMonster *pMon = pTile->m_pCurMonster;
     char monster[32];
-    char *expected = "Giant Snake";
+    char *expected = "Red Dragon";
     sprintf( monster, "%s", pMon->m_md->m_szName );
 
     EXPECT_EQ( strcmp( monster, expected ), 0 );
+}
+
+THEN("^the monster wants to move toward the player$")
+{
+    JVector expected(1,-1);
+    ScenarioScope<TestCtx> context;
+    CMonster *pMon = g_pGame->GetDungeon()->GetTile( context->vec_b )->m_pCurMonster;
+    JVector actual = pMon->m_pBrain->m_vVel;
+    EXPECT_EQ(expected.x, actual.x);
+    EXPECT_EQ(expected.y, actual.y);
 }

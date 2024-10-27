@@ -49,7 +49,7 @@ CGame::CGame()
 #endif // TURN_BASED
 };
 
-JResult CGame::Init(const char *szBasedir)
+JResult CGame::Init( const char *szBasedir )
 {
     JResult result;
     // Initialize all the game stuff, baby.
@@ -88,11 +88,11 @@ JResult CGame::Init(const char *szBasedir)
 
     // Init the Dungeon
     m_pDungeon = new CDungeon;
-    m_pDungeon->Init(szBasedir);
+    m_pDungeon->Init( szBasedir );
 
     // Init the Player
     m_pPlayer = new CPlayer;
-    m_pPlayer->Init(szBasedir);
+    m_pPlayer->Init( szBasedir );
 
 #ifdef PROFILE
     ProfileInit();

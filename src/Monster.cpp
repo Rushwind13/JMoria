@@ -53,37 +53,46 @@ JResult CMonster::CreateMonster( CMonsterDef *pmd, JVector vSpawnPoint )
     {
         CMonster *pMon;
         pMon = new CMonster;
-
-        // Initialize the Monster from the MonsterDef
-        pMon->Init( pmd );
-
-        // Initialize the Brain
-        // TODO: move to AIBrain::Init()
-        pMon->InitBrain( pmd );
-
-        // Put the monster in the world
-        pMon->SpawnMonster(vSpawnPoint);
-
-        // Now that the monster is set up, add it to the global lists (monsters, brains)
-        pMon->m_pllLink = g_pGame->GetDungeon()->m_llMonsters->Add( pMon );
-        pMon->m_pBrain->m_pllLink = g_pGame->GetAIMgr()->m_llAIBrains->Add( pMon->m_pBrain );
+        pMon->InitAndSpawn( pmd, vSpawnPoint );
     }
 
     return JSUCCESS;
 }
 
-JResult CMonster::SpawnMonster(JVector vSpawnPoint)
+JResult CMonster::InitAndSpawn( CMonsterDef *pmd, JVector vSpawnPoint )
+{
+    JResult retval = JSUCCESS;
+
+    // Initialize the Monster from the MonsterDef
+    Init( pmd );
+
+    // Initialize the Brain
+    // TODO: move to AIBrain::Init()
+    InitBrain( pmd );
+
+    // Put the monster in the world
+    retval = SpawnMonster( vSpawnPoint );
+
+    // Now that the monster is set up, add it to the global lists (monsters, brains)
+    m_pllLink = g_pGame->GetDungeon()->m_llMonsters->Add( this );
+    m_pBrain->m_pllLink = g_pGame->GetAIMgr()->m_llAIBrains->Add( m_pBrain );
+
+    return retval;
+}
+
+JResult CMonster::SpawnMonster( JVector vSpawnPoint )
 {
     bool bMonsterSpawned = false;
     printf( "Trying to spawn monster type: %s...", m_md->m_szName );
-    if( vSpawnPoint.IsInWorld())
+    if( vSpawnPoint.IsInWorld() )
     {
-        return SpawnAt(vSpawnPoint) ? JSUCCESS : JERROR();
+        return SpawnAt( vSpawnPoint );
     }
 
     JVector vTryPos;
     while( !bMonsterSpawned )
     {
+        printf( "." );
         vTryPos.Init( (float)( Util::GetRandom( 0, DUNG_WIDTH - 1 ) ),
                       (float)( Util::GetRandom( 0, DUNG_HEIGHT - 1 ) ) );
 
@@ -91,7 +100,7 @@ JResult CMonster::SpawnMonster(JVector vSpawnPoint)
         // vTryPos.y ); g_pGame->GetMsgs()->Printf( "Trying to spawn monster type: %d at <%.2f
         // %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
 
-        if( SpawnAt(vTryPos) )
+        if( SpawnAt( vTryPos ) == JSUCCESS )
         {
             bMonsterSpawned = true;
             printf( "Success!\n" );
@@ -102,15 +111,15 @@ JResult CMonster::SpawnMonster(JVector vSpawnPoint)
     return JSUCCESS;
 }
 
-bool CMonster::SpawnAt(JVector vPos)
+JResult CMonster::SpawnAt( JVector vPos )
 {
     if( g_pGame->GetDungeon()->IsWalkableFor( vPos ) == DUNG_COLL_NO_COLLISION )
     {
         SetPos( vPos );
         g_pGame->GetDungeon()->GetTile( vPos )->m_pCurMonster = this;
-        return true;
+        return JSUCCESS;
     }
-    return false;
+    return JBOGUSKEY;
 }
 
 float CMonster::Attack()

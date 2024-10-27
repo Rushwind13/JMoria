@@ -105,7 +105,7 @@ public:
     };
     ~CPlayer() { Term(); }
 
-    void Init(const char *szBasedir);
+    void Init( const char *szBasedir );
     JResult SpawnPlayer();
     void Term()
     {

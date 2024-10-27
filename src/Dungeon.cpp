@@ -22,7 +22,7 @@ int ModifiedTileTypes[DUNG_IDX_MAX + 1] = { DUNG_IDX_INVALID, DUNG_IDX_INVALID, 
 // create all the dungeon tile types,
 // read the monsters config data
 
-void CDungeon::Init(const char *szBasedir)
+void CDungeon::Init( const char *szBasedir )
 {
     int i;
     // Initialize all the Dungeon stuff, baby.
@@ -76,7 +76,7 @@ void CDungeon::Init(const char *szBasedir)
     CMonsterDef *pmd;
     CDataFile dfMonsters;
     char szMonsterFile[256];
-    sprintf(szMonsterFile, "%s%s", szBasedir, "Resources/Monsters.txt");
+    sprintf( szMonsterFile, "%s%s", szBasedir, "Resources/Monsters.txt" );
     dfMonsters.Open( szMonsterFile );
 
     pmd = new CMonsterDef;
@@ -95,7 +95,7 @@ void CDungeon::Init(const char *szBasedir)
     CItemDef *pid;
     CDataFile dfItems;
     char szItemFilename[256];
-    sprintf(szItemFilename, "%s%s", szBasedir, "Resources/Items.txt" );
+    sprintf( szItemFilename, "%s%s", szBasedir, "Resources/Items.txt" );
     dfItems.Open( szItemFilename );
 
     pid = new CItemDef;
@@ -278,7 +278,7 @@ JResult CDungeon::PlaceItems( const int depth )
         }
 
         CItemDef *chosen_item = m_llItemDefs->GetLink( which_item )->m_lpData;
-        printf( "Choosing item %d, called %s\n", which_item, chosen_item->m_szName );
+        printf( "Choosing item %d, called %s", which_item, chosen_item->m_szName );
 
         CItem::CreateItem( chosen_item );
 
@@ -308,8 +308,8 @@ JResult CDungeon::SpawnMonsters( const int depth )
         int which_monster = m_llMonsterDefs->length() - 1;
         // which_monster = 0;
 #endif // RANDOM_MONSTER
-       if( SpawnMonster(which_monster) )
-       {
+        if( SpawnMonster( which_monster ) )
+        {
             desired_monsters--;
         }
     }
@@ -317,15 +317,20 @@ JResult CDungeon::SpawnMonsters( const int depth )
     return JSUCCESS;
 }
 
-bool CDungeon::SpawnMonster( int which_monster, JVector vSpawnPoint )
+CMonsterDef *CDungeon::GetMonsterDef( int which_monster )
 {
     if( which_monster == MON_IDX_INVALID || which_monster >= MON_IDX_MAX )
     {
         printf( "Couldn't find a suitable monster.\n" );
-        return false;
+        return NULL;
     }
-    CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink( which_monster )->m_lpData;
-    printf( "Choosing monster %d, called %s\n", which_monster, chosen_monster->m_szName );
+    return m_llMonsterDefs->GetLink( which_monster )->m_lpData;
+}
+
+bool CDungeon::SpawnMonster( int which_monster, JVector vSpawnPoint )
+{
+    CMonsterDef *chosen_monster = GetMonsterDef( which_monster );
+    printf( "Choosing monster %d, called %s...", which_monster, chosen_monster->m_szName );
 
     CMonster::CreateMonster( chosen_monster, vSpawnPoint );
     return true;

@@ -32,7 +32,7 @@ int CUseState::OnHandleKey( SDL_Keysym *keysym )
 int CUseState::OnHandleWield( SDL_Keysym *keysym )
 {
     int retval;
-    printf( "Handling WIELD \n" );
+    JLog( LOG_LEVEL_INFO, "Handling WIELD \n" );
     retval = OnBaseHandleKey( keysym, USE_WIELD );
 
     if( retval == JRESETSTATE )
@@ -42,13 +42,14 @@ int CUseState::OnHandleWield( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        printf( "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
+        JLog( LOG_LEVEL_INFO,
+              "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
         return 0;
     }
 
     // We got a alpha key; do a "wield" of that item
-    printf( "WIELD got a selection\n" );
+    JLog( LOG_LEVEL_INFO, "WIELD got a selection\n" );
     if( TestWield() )
     {
         if( DoWield() )
@@ -69,7 +70,7 @@ int CUseState::OnHandleWield( SDL_Keysym *keysym )
     }
     m_pSelected = NULL;
 
-    printf( "WIELD resetting game state to COMMAND, WIELD state to INIT\n" );
+    JLog( LOG_LEVEL_INFO, "WIELD resetting game state to COMMAND, WIELD state to INIT\n" );
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
     return 0;
@@ -78,7 +79,7 @@ int CUseState::OnHandleWield( SDL_Keysym *keysym )
 int CUseState::OnHandleRemove( SDL_Keysym *keysym )
 {
     int retval;
-    printf( "Handling REMOVE \n" );
+    JLog( LOG_LEVEL_INFO, "Handling REMOVE \n" );
     retval = OnBaseHandleKey( keysym, USE_REMOVE );
 
     if( retval == JRESETSTATE )
@@ -88,13 +89,14 @@ int CUseState::OnHandleRemove( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        printf( "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
+        JLog( LOG_LEVEL_INFO,
+              "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Choose an item from equipment(a to z):\n" );
         return 0;
     }
 
     // We got a alpha key; do a "remove" of that item
-    printf( "REMOVE  got a selection\n" );
+    JLog( LOG_LEVEL_INFO, "REMOVE  got a selection\n" );
     if( TestRemove() )
     {
         if( DoRemove() )
@@ -114,7 +116,7 @@ int CUseState::OnHandleRemove( SDL_Keysym *keysym )
                                     m_pSelected->m_lpData->GetName() );
     }
 
-    printf( "REMOVE resetting game state to COMMAND, REMOVE state to INIT\n" );
+    JLog( LOG_LEVEL_INFO, "REMOVE resetting game state to COMMAND, REMOVE state to INIT\n" );
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
     return 0;
@@ -123,7 +125,7 @@ int CUseState::OnHandleRemove( SDL_Keysym *keysym )
 int CUseState::OnHandleDrop( SDL_Keysym *keysym )
 {
     int retval;
-    printf( "Handling DROP \n" );
+    JLog( LOG_LEVEL_INFO, "Handling DROP \n" );
     retval = OnBaseHandleKey( keysym, USE_DROP );
 
     if( retval == JRESETSTATE )
@@ -133,13 +135,14 @@ int CUseState::OnHandleDrop( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        printf( "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
+        JLog( LOG_LEVEL_INFO,
+              "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
         return 0;
     }
 
     // We got a alpha key; do a "drop" of that item
-    printf( "DROP  got a selection\n" );
+    JLog( LOG_LEVEL_INFO, "DROP  got a selection\n" );
     if( TestDrop() )
     {
         if( DoDrop() )
@@ -160,7 +163,7 @@ int CUseState::OnHandleDrop( SDL_Keysym *keysym )
     }
     m_pSelected = NULL;
 
-    printf( "DROP resetting game state to COMMAND, USE state to INIT\n" );
+    JLog( LOG_LEVEL_INFO, "DROP resetting game state to COMMAND, USE state to INIT\n" );
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
     return 0;
@@ -169,7 +172,7 @@ int CUseState::OnHandleDrop( SDL_Keysym *keysym )
 int CUseState::OnHandleQuaff( SDL_Keysym *keysym )
 {
     int retval;
-    printf( "Handling QUAFF\n" );
+    JLog( LOG_LEVEL_INFO, "Handling QUAFF\n" );
     retval = OnBaseHandleKey( keysym, USE_QUAFF );
 
     if( retval == JRESETSTATE )
@@ -179,13 +182,14 @@ int CUseState::OnHandleQuaff( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        printf( "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
+        JLog( LOG_LEVEL_INFO,
+              "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
         return 0;
     }
 
     // We got a alpha key; do a "quaff" of that item
-    printf( "QUAFF  got a selection\n" );
+    JLog( LOG_LEVEL_INFO, "QUAFF  got a selection\n" );
     if( TestQuaff() )
     {
         if( DoQuaff() )
@@ -205,7 +209,7 @@ int CUseState::OnHandleQuaff( SDL_Keysym *keysym )
     }
     m_pSelected = NULL;
 
-    printf( "QUAFF resetting game state to COMMAND, USE state to INIT\n" );
+    JLog( LOG_LEVEL_INFO, "QUAFF resetting game state to COMMAND, USE state to INIT\n" );
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
     return 0;
@@ -213,7 +217,7 @@ int CUseState::OnHandleQuaff( SDL_Keysym *keysym )
 
 int CUseState::OnHandleInit( SDL_Keysym *keysym )
 {
-    printf( "Initializing USE state...\n" );
+    JLog( LOG_LEVEL_INFO, "Initializing USE state...\n" );
     if( !m_cCommand )
     {
         m_cCommand = keysym->sym;
@@ -238,8 +242,8 @@ int CUseState::OnHandleInit( SDL_Keysym *keysym )
             g_pGame->GetMsgs()->Printf( "Quaff which item? [a-z]\n" );
             break;
         default:
-            printf( "There seems to be some kind of mistake; I don't handle mod: %d\n",
-                    m_cCommand );
+            JLog( LOG_LEVEL_INFO,
+                  "There seems to be some kind of mistake; I don't handle mod: %d\n", m_cCommand );
             ResetToState( STATE_COMMAND );
             return 0;
             break;
@@ -250,7 +254,7 @@ int CUseState::OnHandleInit( SDL_Keysym *keysym )
         return 0;
     }
 
-    printf( "Error: tried to init USE state when it was already initted...\n" );
+    JLog( LOG_LEVEL_INFO, "Error: tried to init USE state when it was already initted...\n" );
     ResetToState( STATE_COMMAND );
     // shouldn't get here
     return JRESETSTATE;
@@ -309,7 +313,7 @@ CLink<CItem> *CUseState::GetResponse( eUseModifier whichUse )
         pList = g_pGame->GetPlayer()->m_llInventory;
         break;
     default:
-        printf( "Can't get response for : %d\n", whichUse );
+        JLog( LOG_LEVEL_INFO, "Can't get response for : %d\n", whichUse );
         return NULL;
         break;
     }

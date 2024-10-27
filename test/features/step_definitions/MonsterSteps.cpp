@@ -66,7 +66,7 @@ THEN( "^I can see all the monster names$" )
     CLink<CMonster> *pLink = context->m_llMonsters->GetHead();
     while( pLink != NULL )
     {
-        printf( "Monster is %s\n", pLink->m_lpData->GetName() );
+        JLog( LOG_LEVEL_INFO, "Monster is %s\n", pLink->m_lpData->GetName() );
         pLink = context->m_llMonsters->GetNext( pLink );
     }
 }

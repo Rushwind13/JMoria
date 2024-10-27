@@ -9,9 +9,6 @@ typedef int JResult;
 typedef unsigned int uint32;
 typedef unsigned char uint8;
 
-#include "JRect.h"
-#include "JVector.h"
-
 #define nul '\0'
 
 #define JSUCCESS 0
@@ -23,7 +20,23 @@ typedef unsigned char uint8;
 #define INVALID_LENGTH -1
 #define MAX_STRING_LENGTH 32
 
-#define JERROR() printf( "An error occurred: %s %d\n", __FILE__, __LINE__ );
+enum eLogLevel
+{
+    LOG_LEVEL_INVALID = -1,
+    LOG_LEVEL_DEBUG = 0,
+    LOG_LEVEL_INFO = 1,
+    LOG_LEVEL_WARN,
+    LOG_LEVEL_ERROR,
+    LOG_LEVEL_MAX
+};
+extern eLogLevel g_eLogLevel;
+
+#include "JLog.h"
+
+#include "JRect.h"
+#include "JVector.h"
+
+#define JERROR() JLog( LOG_LEVEL_ERROR, "An error occurred: %s %d\n", __FILE__, __LINE__ );
 
 #define TURN_BASED
 // #define CLOCKSTEP

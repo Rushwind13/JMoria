@@ -112,10 +112,10 @@ JResult CGame::Init( const char *szBasedir )
 
 void CGame::Term()
 {
-    printf( "Terminating the game..." );
+    JLog( LOG_LEVEL_INFO, "Terminating the game..." );
     if( m_pRender )
     {
-        printf( "Renderer..." );
+        JLog( LOG_LEVEL_INFO, "Renderer..." );
         m_pRender->Term();
         delete m_pRender;
         m_pRender = NULL;
@@ -123,7 +123,7 @@ void CGame::Term()
 
     if( m_pDungeon )
     {
-        printf( "Dungeon..." );
+        JLog( LOG_LEVEL_INFO, "Dungeon..." );
         m_pDungeon->Term();
         delete m_pDungeon;
         m_pDungeon = NULL;
@@ -131,13 +131,13 @@ void CGame::Term()
 
     if( m_pPlayer )
     {
-        printf( "Player..." );
+        JLog( LOG_LEVEL_INFO, "Player..." );
         m_pPlayer->Term();
         delete m_pPlayer;
         m_pPlayer = NULL;
     }
 
-    printf( "States..." );
+    JLog( LOG_LEVEL_INFO, "States..." );
     if( m_pCmdState )
     {
         delete m_pCmdState;
@@ -180,7 +180,7 @@ void CGame::Term()
         m_pRestState = NULL;
     }
 
-    printf( "Message boxes..." );
+    JLog( LOG_LEVEL_INFO, "Message boxes..." );
     if( m_pMsgsDT )
     {
         delete m_pMsgsDT;
@@ -216,7 +216,7 @@ void CGame::Term()
         delete m_pEndGameDT;
         m_pEndGameDT = NULL;
     }
-    printf( "done.\n" );
+    JLog( LOG_LEVEL_INFO, "done.\n" );
 }
 
 void CGame::Quit( int returncode )
@@ -262,7 +262,7 @@ void CGame::SetState( int eNewState )
         m_pCurState = reinterpret_cast<CStateBase *>( m_pRestState );
         break;
     default:
-        printf( "Tried to change to unknown state.\n" );
+        JLog( LOG_LEVEL_INFO, "Tried to change to unknown state.\n" );
         break;
     }
 }
@@ -408,7 +408,7 @@ bool CGame::Update( float fCurTime )
             GetPlayer()->DisplayEquipment( PLACEMENT_USE );
             break;
         default:
-            printf( "Nothing to display for command\n" );
+            JLog( LOG_LEVEL_INFO, "Nothing to display for command\n" );
             break;
         }
         GetUse()->Update( fCurTime );
@@ -487,7 +487,7 @@ void CGame::HandleEvents( int &isActive, int &done )
             retval = m_pCurState->HandleKey( &event.key.keysym );
             if( retval == JBOGUSKEY )
             {
-                printf( "Bogus command: 0x%x\n", event.key.keysym.sym );
+                JLog( LOG_LEVEL_INFO, "Bogus command: 0x%x\n", event.key.keysym.sym );
                 GetMsgs()->Printf( "Unrecognized command: 0x%x\n", event.key.keysym.sym );
             }
             else if( retval == JQUITREQUEST )
@@ -515,16 +515,13 @@ void CGame::HandleEvents( int &isActive, int &done )
                 g_pGame->GetDungeon()->Zoom( -3 );
                 break;
             }
-            /*printf("Got up event type: %d which: %d button: %d state: %d at <%d %d>\n",
-            event.button.type,
-            event.button.which,
-            event.button.button,
-            event.button.state,
+            /*JLog( LOG_LEVEL_INFO, "Got up event type: %d which: %d button: %d state: %d at <%d
+            %d>\n", event.button.type, event.button.which, event.button.button, event.button.state,
             event.button.x,
             event.button.y );/* */
             break;
         default:
-            // printf("unhandled event type: %d\n", event.type );
+            JLog( LOG_LEVEL_DEBUG, "unhandled event type: %d\n", event.type );
             break;
         }
     }

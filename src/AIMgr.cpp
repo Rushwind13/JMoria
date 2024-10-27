@@ -51,11 +51,11 @@ bool CAIBrain::Update( float fCurTime )
         return UpdateRest( fCurTime );
         break;
     case BRAINSTATE_GOTODEST:
-        // printf("I'm going, I'm going\n");
+        JLog( LOG_LEVEL_DEBUG, "I'm going, I'm going\n" );
         return UpdateGoToDest( fCurTime );
         break;
     case BRAINSTATE_SEEK:
-        // printf("I seek\n");
+        JLog( LOG_LEVEL_DEBUG, "I seek\n" );
         return UpdateSeek( fCurTime );
         break;
     case BRAINSTATE_IDLE:
@@ -75,13 +75,13 @@ bool CAIBrain::UpdateSeek( float fCurTime )
     {
     case MON_AI_100RANDOMMOVE:
     {
-        // printf("rng\n");
+        JLog( LOG_LEVEL_DEBUG, "rng\n" );
         SetRandomDest( fCurTime );
     }
     break;
     case MON_AI_75RANDOMMOVE:
     {
-        // printf("chaos monkey\n");
+        JLog( LOG_LEVEL_DEBUG, "chaos monkey\n" );
         if( Util::Roll( "1d100" ) <= 75 )
         {
             SetRandomDest( fCurTime );
@@ -95,18 +95,18 @@ bool CAIBrain::UpdateSeek( float fCurTime )
     case MON_AI_DONTMOVE:
     {
 
-        // printf("i no move\n");
+        JLog( LOG_LEVEL_DEBUG, "i no move\n" );
         SetRandomDest( fCurTime );
     }
     break;
     case MON_AI_SEEKPLAYER:
     {
-        // printf("seek player\n");
+        JLog( LOG_LEVEL_DEBUG, "seek player\n" );
         WalkSeek( fCurTime );
     }
     break;
     default:
-        // printf("bad seek\n");
+        JLog( LOG_LEVEL_DEBUG, "bad seek\n" );
         return false;
     }
 
@@ -123,7 +123,7 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
 
     while( m_fStateTicks >= 1.0f )
     {
-        // printf("and we're walking\n");
+        JLog( LOG_LEVEL_DEBUG, "and we're walking\n" );
         didWalk = true;
         JVector vTryPos( m_vPos + m_vVel );
         if( Util::IsInWorld( vTryPos ) )
@@ -132,17 +132,17 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
             switch( dwCollideType )
             {
             case DUNG_COLL_NO_COLLISION:
-                // printf("swing and a miss\n");
+                JLog( LOG_LEVEL_DEBUG, "swing and a miss\n" );
                 if( m_dwMoveType != MON_AI_DONTMOVE )
                 {
-                    // printf("on the move\n");
+                    JLog( LOG_LEVEL_DEBUG, "on the move\n" );
                     g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster = NULL;
                     m_vPos += m_vVel;
                     g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster = m_pParent;
                 }
                 break;
             case DUNG_COLL_PLAYER:
-                // printf("ouch! you ran into the player!\n");
+                JLog( LOG_LEVEL_DEBUG, "ouch! you ran into the player!\n" );
                 char szStatus[16];
                 float fDamageMult = 1.0f;
                 // TODO: make this use all the attacks, not just the first one
@@ -181,12 +181,12 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
     JVector junk = m_vPos + delta;
     if( Util::IsInWorld(junk) )
     {
-            printf( "moving from <%f %f> to <%f %f>...\n", VEC_EXPAND(m_vPos),
+            JLog( LOG_LEVEL_INFO,  "moving from <%f %f> to <%f %f>...\n", VEC_EXPAND(m_vPos),
  VEC_EXPAND(m_vPos+delta) ); m_vPos += delta;
  }/* */
     if( didWalk )
     {
-        // printf("looking\n");
+        JLog( LOG_LEVEL_DEBUG, "looking\n" );
         SetState( BRAINSTATE_SEEK );
     }
 

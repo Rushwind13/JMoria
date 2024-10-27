@@ -238,22 +238,23 @@ JResult CDungeon::PlaceStairs( const int desired, const int type )
     while( count < desired )
     {
         bStairsSpawned = false;
-        printf( "Trying to spawn stairs type: %d...", type );
+        JLog( LOG_LEVEL_INFO, "Trying to spawn stairs type: %d...", type );
         JVector vTryPos;
         while( !bStairsSpawned )
         {
             vTryPos.Init( (float)( Util::GetRandom( 0, DUNG_WIDTH - 1 ) ),
                           (float)( Util::GetRandom( 0, DUNG_HEIGHT - 1 ) ) );
 
-            // printf("Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType,
-            // vTryPos.x, vTryPos.y ); g_pGame->GetMsgs()->Printf( "Trying to spawn item type: %d at
+            // JLog( LOG_LEVEL_DEBUG, "Trying to spawn item type: %d at <%.2f %.2f>...\n",
+            // m_md->m_dwType, vTryPos.x, vTryPos.y ); g_pGame->GetMsgs()->Printf( "Trying to spawn
+            // item type: %d at
             // <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
 
             if( CanPlaceStairsAt( vTryPos ) == DUNG_COLL_NO_COLLISION )
             {
                 GetTile( vTryPos )->m_dtd = &m_dtdlist[type];
                 bStairsSpawned = true;
-                printf( "Success!\n" );
+                JLog( LOG_LEVEL_INFO, "Success!\n" );
             }
         }
         count++;
@@ -266,19 +267,20 @@ JResult CDungeon::PlaceItems( const int depth )
     m_llItems = new JLinkList<CItem>;
 
     int desired_items = int( m_fOpenFloorArea * DUNG_CFG_ITEMS_PER_LEVEL );
-    printf( "Possible spawn points: %0.2f  desired items: %d\n", m_fOpenFloorArea, desired_items );
+    JLog( LOG_LEVEL_INFO, "Possible spawn points: %0.2f  desired items: %d\n", m_fOpenFloorArea,
+          desired_items );
 
     while( desired_items > 0 )
     {
         int which_item = ChooseItemForDepth( depth );
         if( which_item == ITEM_IDX_INVALID )
         {
-            printf( "Couldn't find a suitable item.\n" );
+            JLog( LOG_LEVEL_INFO, "Couldn't find a suitable item.\n" );
             continue;
         }
 
         CItemDef *chosen_item = m_llItemDefs->GetLink( which_item )->m_lpData;
-        printf( "Choosing item %d, called %s", which_item, chosen_item->m_szName );
+        JLog( LOG_LEVEL_INFO, "Choosing item %d, called %s", which_item, chosen_item->m_szName );
 
         CItem::CreateItem( chosen_item );
 
@@ -293,8 +295,8 @@ JResult CDungeon::SpawnMonsters( const int depth )
     m_llMonsters = new JLinkList<CMonster>;
 
     int desired_monsters = int( m_fOpenFloorArea * DUNG_CFG_MONSTERS_PER_LEVEL );
-    printf( "Possible spawn points: %0.2f  desired monsters: %d\n", m_fOpenFloorArea,
-            desired_monsters );
+    JLog( LOG_LEVEL_INFO, "Possible spawn points: %0.2f  desired monsters: %d\n", m_fOpenFloorArea,
+          desired_monsters );
 
     while( desired_monsters > 0 )
     {
@@ -321,7 +323,7 @@ CMonsterDef *CDungeon::GetMonsterDef( int which_monster )
 {
     if( which_monster == MON_IDX_INVALID || which_monster >= MON_IDX_MAX )
     {
-        printf( "Couldn't find a suitable monster.\n" );
+        JLog( LOG_LEVEL_INFO, "Couldn't find a suitable monster.\n" );
         return NULL;
     }
     return m_llMonsterDefs->GetLink( which_monster )->m_lpData;
@@ -330,7 +332,8 @@ CMonsterDef *CDungeon::GetMonsterDef( int which_monster )
 bool CDungeon::SpawnMonster( int which_monster, JVector vSpawnPoint )
 {
     CMonsterDef *chosen_monster = GetMonsterDef( which_monster );
-    printf( "Choosing monster %d, called %s...", which_monster, chosen_monster->m_szName );
+    JLog( LOG_LEVEL_INFO, "Choosing monster %d, called %s...", which_monster,
+          chosen_monster->m_szName );
 
     CMonster::CreateMonster( chosen_monster, vSpawnPoint );
     return true;
@@ -376,7 +379,7 @@ int CDungeon::ChooseMonsterForDepth( const int depth )
 
 JResult CDungeon::OnChangeLevel( const int delta )
 {
-    printf( "Changing level..." );
+    JLog( LOG_LEVEL_INFO, "Changing level..." );
     // Clean up old level, then
     TerminateLevel();
 
@@ -384,8 +387,8 @@ JResult CDungeon::OnChangeLevel( const int delta )
     CreateNewLevel( delta );
     g_pGame->GetPlayer()->m_bHasSpawned = false;
     g_pGame->GetPlayer()->SpawnPlayer();
-    printf( "done.\n" );
-    printf( "You pass through a one-way door, to arrive on level %d.\n", depth );
+    JLog( LOG_LEVEL_INFO, "done.\n" );
+    JLog( LOG_LEVEL_INFO, "You pass through a one-way door, to arrive on level %d.\n", depth );
     g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
                                 depth );
 
@@ -625,7 +628,7 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
     CDungeonTile *curTile = GetTile( vPos );
     if( curTile == NULL )
     {
-        printf( "Hey! That's a bad tile.\n" );
+        JLog( LOG_LEVEL_INFO, "Hey! That's a bad tile.\n" );
         return false;
     }
     if( curTile->m_pCurMonster != NULL )
@@ -637,7 +640,7 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
              g_pGame->GetPlayer()->m_vPos == vPos )
     {
         // Monsters colliding with the player can be hazardous to your health.
-        printf( "Monster attacking not implemented yet.\n" );
+        JLog( LOG_LEVEL_INFO, "Monster attacking not implemented yet.\n" );
         return DUNG_COLL_PLAYER;
     }
     else if( isPlayer && curTile->m_pCurItem != NULL )
@@ -666,7 +669,7 @@ int CDungeon::CanPlaceStairsAt( JVector &vPos )
     CDungeonTile *curTile = GetTile( vPos );
     if( curTile == NULL )
     {
-        printf( "Hey! That's a bad tile.\n" );
+        JLog( LOG_LEVEL_INFO, "Hey! That's a bad tile.\n" );
         return false;
     }
 
@@ -695,7 +698,7 @@ int CDungeon::CanPlaceItemAt( JVector &vPos )
     CDungeonTile *curTile = GetTile( vPos );
     if( curTile == NULL )
     {
-        printf( "Hey! That's a bad tile.\n" );
+        JLog( LOG_LEVEL_INFO, "Hey! That's a bad tile.\n" );
         return false;
     }
     if( curTile->m_pCurItem != NULL )

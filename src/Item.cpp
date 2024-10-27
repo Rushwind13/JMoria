@@ -55,15 +55,15 @@ void CItem::ApplyCursedStatus( int likelihood )
 JResult CItem::SpawnItem()
 {
     bool bItemSpawned = false;
-    JLog( LOG_LEVEL_INFO, "Trying to spawn item type: %s...", m_id->m_szName );
+    JLog( LOG_LEVEL_INFO, false, "Trying to spawn item type: %s...", m_id->m_szName );
     JVector vTryPos;
     while( !bItemSpawned )
     {
-        JLog( LOG_LEVEL_INFO, "." );
+        JLog( LOG_LEVEL_INFO, false, "." );
         vTryPos.Init( (float)( Util::GetRandom( 0, DUNG_WIDTH - 1 ) ),
                       (float)( Util::GetRandom( 0, DUNG_HEIGHT - 1 ) ) );
 
-        // JLog( LOG_LEVEL_DEBUG, "Trying to spawn item type: %d at <%.2f %.2f>...\n",
+        // JLog( LOG_LEVEL_DEBUG, false, "Trying to spawn item type: %d at <%.2f %.2f>...\n",
         // m_md->m_dwType, vTryPos.x, vTryPos.y ); g_pGame->GetMsgs()->Printf( "Trying to spawn item
         // type: %d at <%.2f
         // %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
@@ -73,7 +73,7 @@ JResult CItem::SpawnItem()
             m_vPos = vTryPos;
             g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurItem = this;
             bItemSpawned = true;
-            JLog( LOG_LEVEL_INFO, "Success!\n" );
+            JLog( LOG_LEVEL_INFO, false, "Success!\n" );
             // g_pGame->GetMsgs()->Printf( "Success!\n" );
         }
     }

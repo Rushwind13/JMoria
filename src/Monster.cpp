@@ -83,7 +83,7 @@ JResult CMonster::InitAndSpawn( CMonsterDef *pmd, JVector vSpawnPoint )
 JResult CMonster::SpawnMonster( JVector vSpawnPoint )
 {
     bool bMonsterSpawned = false;
-    JLog( LOG_LEVEL_INFO, "Trying to spawn monster type: %s...", m_md->m_szName );
+    JLog( LOG_LEVEL_INFO, true, "Trying to spawn monster type: %s...", m_md->m_szName );
     if( vSpawnPoint.IsInWorld() )
     {
         return SpawnAt( vSpawnPoint );
@@ -92,7 +92,7 @@ JResult CMonster::SpawnMonster( JVector vSpawnPoint )
     JVector vTryPos;
     while( !bMonsterSpawned )
     {
-        JLog( LOG_LEVEL_INFO, "." );
+        JLog( LOG_LEVEL_INFO, false, "." );
         vTryPos.Init( (float)( Util::GetRandom( 0, DUNG_WIDTH - 1 ) ),
                       (float)( Util::GetRandom( 0, DUNG_HEIGHT - 1 ) ) );
 
@@ -111,7 +111,7 @@ JResult CMonster::SpawnAt( JVector vPos )
     {
         SetPos( vPos );
         g_pGame->GetDungeon()->GetTile( vPos )->m_pCurMonster = this;
-        JLog( LOG_LEVEL_INFO, "Success!\n" );
+        JLog( LOG_LEVEL_INFO, false, "Success!\n" );
         // g_pGame->GetMsgs()->Printf( "Success!\n" );
 
         return JSUCCESS;
@@ -123,7 +123,7 @@ float CMonster::Attack()
 {
     float fRoll = Util::Roll( "1d100" );
 
-    JLog( LOG_LEVEL_INFO, "%s rolled: %.2f\n", GetName(), fRoll );
+    JLog( LOG_LEVEL_INFO, true, "%s rolled: %.2f\n", GetName(), fRoll );
 
     return fRoll;
 }
@@ -134,7 +134,7 @@ float CMonster::Damage( float fDamageMult )
     float fDamageModifier = 0.0f;
 
     float fDamage = ( Util::Roll( szDamage ) + fDamageModifier ) * fDamageMult;
-    JLog( LOG_LEVEL_INFO, "%s did %.2f damage (damagemult: %.2f). ", GetName(), fDamage,
+    JLog( LOG_LEVEL_INFO, true, "%s did %.2f damage (damagemult: %.2f). ", GetName(), fDamage,
           fDamageMult );
 
     return fDamage;
@@ -157,7 +157,7 @@ int CMonster::TakeDamage( float fDamage )
         retval = STATUS_DEAD;
     }
 
-    JLog( LOG_LEVEL_INFO, "Remaining HP: %.2f \n", m_fCurHP );
+    JLog( LOG_LEVEL_INFO, true, "Remaining HP: %.2f \n", m_fCurHP );
 
     return retval;
 }

@@ -37,7 +37,7 @@ int CClockStepState::OnHandleKey( SDL_Keysym *keysym )
 int CClockStepState::OnHandleTick( SDL_Keysym *keysym )
 {
     int retval;
-    JLog( LOG_LEVEL_INFO, "Handling TICK modifier\n" );
+    JLog( LOG_LEVEL_INFO, true, "Handling TICK modifier\n" );
     retval = OnBaseHandleKey( keysym );
 
     if( retval == JRESETSTATE )
@@ -47,7 +47,7 @@ int CClockStepState::OnHandleTick( SDL_Keysym *keysym )
 
     if( retval == JCOMPLETESTATE )
     {
-        JLog( LOG_LEVEL_INFO, "TICK modifier complete, CLOCKSTEP state to next TICK\n" );
+        JLog( LOG_LEVEL_INFO, true, "TICK modifier complete, CLOCKSTEP state to next TICK\n" );
         DoTick();
         m_eCurModifier = CLOCKSTEP_TICK;
         m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -55,12 +55,12 @@ int CClockStepState::OnHandleTick( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, "CLOCK still waiting for a valid key.\n" );
+        JLog( LOG_LEVEL_INFO, true, "CLOCK still waiting for a valid key.\n" );
         return 0;
     }
 
     // We got a valid key
-    JLog( LOG_LEVEL_INFO, "TICK modifier got a valid key\n" );
+    JLog( LOG_LEVEL_INFO, true, "TICK modifier got a valid key\n" );
     g_pGame->GetEnd()->Clear();
     DoTick();
 
@@ -69,7 +69,7 @@ int CClockStepState::OnHandleTick( SDL_Keysym *keysym )
 
 int CClockStepState::OnHandleInit( SDL_Keysym *keysym )
 {
-    JLog( LOG_LEVEL_INFO, "Initializing CLOCKSTEP state...\n" );
+    JLog( LOG_LEVEL_INFO, true, "Initializing CLOCKSTEP state...\n" );
 
     g_pGame->GetStats()->Clear();
     DoTick();

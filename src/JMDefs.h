@@ -36,7 +36,7 @@ extern eLogLevel g_eLogLevel;
 #include "JRect.h"
 #include "JVector.h"
 
-#define JERROR() JLog( LOG_LEVEL_ERROR, "An error occurred: %s %d\n", __FILE__, __LINE__ );
+#define JERROR() JLog( LOG_LEVEL_ERROR, true, "An error occurred: %s %d\n", __FILE__, __LINE__ );
 
 #define TURN_BASED
 // #define CLOCKSTEP

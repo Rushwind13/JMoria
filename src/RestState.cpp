@@ -34,7 +34,7 @@ int CRestState::OnHandleKey( SDL_Keysym *keysym )
 int CRestState::OnHandleTick( SDL_Keysym *keysym )
 {
     int retval;
-    JLog( LOG_LEVEL_INFO, "Handling TICK modifier\n" );
+    JLog( LOG_LEVEL_INFO, true, "Handling TICK modifier\n" );
     retval = OnBaseHandleKey( keysym );
 
     if( retval == JRESETSTATE )
@@ -45,7 +45,7 @@ int CRestState::OnHandleTick( SDL_Keysym *keysym )
 
     if( retval == JCOMPLETESTATE )
     {
-        JLog( LOG_LEVEL_INFO, "TICK modifier complete, REST state to next TICK\n" );
+        JLog( LOG_LEVEL_INFO, true, "TICK modifier complete, REST state to next TICK\n" );
         DoTick();
         m_eCurModifier = REST_TICK;
         m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -53,12 +53,12 @@ int CRestState::OnHandleTick( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, "REST state still waiting for a valid key.\n" );
+        JLog( LOG_LEVEL_INFO, true, "REST state still waiting for a valid key.\n" );
         return 0;
     }
 
     // We got a valid key
-    JLog( LOG_LEVEL_INFO, "TICK modifier got a valid key\n" );
+    JLog( LOG_LEVEL_INFO, true, "TICK modifier got a valid key\n" );
     DoTick();
 
     return 0;
@@ -66,7 +66,7 @@ int CRestState::OnHandleTick( SDL_Keysym *keysym )
 
 int CRestState::OnHandleInit( SDL_Keysym *keysym )
 {
-    JLog( LOG_LEVEL_INFO, "Initializing REST state...\n" );
+    JLog( LOG_LEVEL_INFO, true, "Initializing REST state...\n" );
 
     DoTick();
     m_eCurModifier = REST_TICK;
@@ -101,7 +101,7 @@ bool CRestState::DoTick()
     m_dwClock++;
     if( g_pGame->GetPlayer()->m_bIsRested || g_pGame->GetPlayer()->m_bIsDisturbed )
     {
-        JLog( LOG_LEVEL_INFO, "REST state complete, reset to CMD state.\n" );
+        JLog( LOG_LEVEL_INFO, true, "REST state complete, reset to CMD state.\n" );
         ResetToState( STATE_COMMAND );
     }
     g_pGame->SetReadyForUpdate( true );

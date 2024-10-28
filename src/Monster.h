@@ -162,7 +162,8 @@ public:
     CMonster();
     ~CMonster();
 
-    static JResult CreateMonster( CMonsterDef *pmd, JVector vSpawnPoint = JVector( -1, -1 ), bool bNear = false );
+    static JResult CreateMonster( CMonsterDef *pmd, JVector vSpawnPoint = JVector( -1, -1 ),
+                                  bool bNear = false );
     JResult InitAndSpawn( CMonsterDef *pmd, JVector vSpawnPoint = JVector( -1, -1 ) );
     void Breed();
     JResult SpawnMonster( JVector vSpawnPoint = JVector( -1, -1 ) );

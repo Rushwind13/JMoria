@@ -7,7 +7,7 @@ CMonster::CMonster()
       m_fCurHP( 0.0f ),
       m_fCurAC( 0.0f ),
       m_fLastHPTime( 0.0f ),
-      m_dwFecundity(5),
+      m_dwFecundity( 5 ),
       m_md( NULL ),
       m_pBrain( NULL ),
       m_fColorChangeInterval( COLOR_CHANGE_TIMEOUT + 1 ),
@@ -54,7 +54,7 @@ JResult CMonster::CreateMonster( CMonsterDef *pmd, JVector vSpawnPoint, bool bNe
     {
         CMonster *pMon;
         pMon = new CMonster;
-        pMon->InitAndSpawn( pmd, bNear ? Util::Near(vSpawnPoint, 1): vSpawnPoint );
+        pMon->InitAndSpawn( pmd, bNear ? Util::Near( vSpawnPoint ) : vSpawnPoint );
 
         // force additional monsters of the same type to appear near each other
         bNear = true;
@@ -177,19 +177,19 @@ void CMonster::Breed()
     {
         if( m_dwFecundity > 0 )
         {
-            JLog(LOG_LEVEL_DEBUG, true, "still going: %d ", m_dwFecundity);
-            if( Util::GetRandom(0.0f, 1.0f) <= BREED_CHANCE )
+            JLog( LOG_LEVEL_DEBUG, true, "still going: %d ", m_dwFecundity );
+            if( Util::GetRandom( 0.0f, 1.0f ) <= BREED_CHANCE )
             {
-                JLog(LOG_LEVEL_DEBUG, false, "spawnd!");
+                JLog( LOG_LEVEL_DEBUG, false, "spawnd!" );
                 // Spawn a new copy
                 CreateMonster( m_md, GetPos(), true );
             }
-            JLog(LOG_LEVEL_DEBUG, false, "\n");
+            JLog( LOG_LEVEL_DEBUG, false, "\n" );
             m_dwFecundity--;
         }
         else
         {
-            JLog(LOG_LEVEL_WARN, true, "sterilizing\n");
+            JLog( LOG_LEVEL_WARN, true, "sterilizing\n" );
             // sterilize
             m_md->m_dwFlags = m_md->m_dwFlags & ~MON_FLAG_BREED;
         }

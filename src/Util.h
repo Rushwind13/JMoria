@@ -18,6 +18,8 @@ float Roll( const char *szFormat );
 bool IsInWorld( JFVector vIn );
 bool IsInWorld( JRect rcIn );
 
+JVector Near( const JVector vOrig, int distance );
+
 unsigned int GetTickCount();
 }; // namespace Util
 

@@ -6,7 +6,8 @@
 #include "JMDefs.h"
 
 #define COLOR_CHANGE_TIMEOUT 0.266f
-#define BREED_TIMEOUT 0.75f
+#define BREED_INTERVAL 4.0f
+#define BREED_CHANCE 0.33f
 
 class CAttack
 {
@@ -112,7 +113,8 @@ public:
     float m_fCurAC;
     // 	JVector m_vPos;
     float m_fColorChangeInterval;
-    float m_fBreedInterval;
+    float m_fLastBreed;
+    int m_dwFecundity;
     CMonsterDef *m_md;
     CLink<CMonster> *m_pllLink;
     CAIBrain *m_pBrain; // this is the place to get info for the AI.
@@ -160,7 +162,7 @@ public:
     CMonster();
     ~CMonster();
 
-    static JResult CreateMonster( CMonsterDef *pmd, JVector vSpawnPoint = JVector( -1, -1 ) );
+    static JResult CreateMonster( CMonsterDef *pmd, JVector vSpawnPoint = JVector( -1, -1 ), bool bNear = false );
     JResult InitAndSpawn( CMonsterDef *pmd, JVector vSpawnPoint = JVector( -1, -1 ) );
     void Breed();
     JResult SpawnMonster( JVector vSpawnPoint = JVector( -1, -1 ) );

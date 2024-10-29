@@ -3,37 +3,37 @@
 
 using cucumber::ScenarioScope;
 #include "TestContext.hpp"
+#include <StepMacros.hpp>
 
 /*#######
 ##
 ## GIVEN
 ##
 #######*/
-GIVEN( "^I have a DungeonMap$" )
+GIVEN( "^I have a Player$" )
 {
     ScenarioScope<TestCtx> context;
-    context->map.CreateDungeon( 1 );
+    //get a player
+    g_pGame = NULL;
+    g_pGame = new CGame;
+    g_pGame->Init("../../JMoria");
+}
+GIVEN( "^I spawn a dagger$" )
+{
+    ScenarioScope<TestCtx> context;
+
+
+
+    int item = 11;
+    CItemDef *chosen_item = g_pGame->GetDungeon()->m_llItemDefs->GetLink( item )->m_lpData;
+
+
+    context->result = CMonster::CreateMonster( pmd, context->vec_b );
 }
 
-GIVEN( "^There is already a room at ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) in the dungeon$" )
+GIVEN("^the player has a dagger in inventory$")
 {
-    REGEX_PARAM( float, l );
-    REGEX_PARAM( float, t );
-    REGEX_PARAM( float, r );
-    REGEX_PARAM( float, b );
-    JRect rcBlocking( l, t, r, b );
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( rcBlocking ), DIR_NONE, false );
-}
 
-GIVEN( "^I have a JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) to fill$" )
-{
-    REGEX_PARAM( float, l );
-    REGEX_PARAM( float, t );
-    REGEX_PARAM( float, r );
-    REGEX_PARAM( float, b );
-    ScenarioScope<TestCtx> context;
-    context->area = JRect( l, t, r, b );
 }
 
 /*#######
@@ -41,77 +41,9 @@ GIVEN( "^I have a JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) to fill$" )
 ## WHEN
 ##
 #######*/
-WHEN( "^I call GetHallRect for east from ([0-9.-]+),([0-9.-]+)$" )
-{
-    REGEX_PARAM( int, x );
-    REGEX_PARAM( int, y );
-    JRect rcHall( x, y, x, y );
-    ScenarioScope<TestCtx> context;
-    context->map.GetHallRect( rcHall, DIR_EAST );
-}
-WHEN( "^I call GetHallRect for west from ([0-9.-]+),([0-9.-]+)$" )
+WHEN( "^the player equips the item$" )
 {
     ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ), DIR_NONE, false );
-}
-WHEN( "^I call GetHallRect for north from ([0-9.-]+),([0-9.-]+)$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ), DIR_NONE, false );
-}
-WHEN( "^I call GetHallRect for south from ([0-9.-]+),([0-9.-]+)$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ), DIR_NONE, false );
-}
-WHEN( "^I call FillArea for a room$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ), DIR_NONE, false );
-}
-WHEN( "^I call FillArea for a room N$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ), DIR_NORTH, false );
-}
-WHEN( "^I call FillArea for a room S$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ), DIR_SOUTH, false );
-}
-WHEN( "^I call FillArea for a room E$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ), DIR_EAST, false );
-}
-WHEN( "^I call FillArea for a room W$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ), DIR_WEST, false );
-}
-
-WHEN( "^I call FillArea for a hallway north$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ), DIR_NORTH, true );
-}
-
-WHEN( "^I call FillArea for a hallway south$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ), DIR_SOUTH, true );
-}
-
-WHEN( "^I call FillArea for a hallway west$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ), DIR_WEST, true );
-}
-
-WHEN( "^I call FillArea for a hallway east$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ), DIR_EAST, true );
 }
 
 /*#######
@@ -120,48 +52,34 @@ WHEN( "^I call FillArea for a hallway east$" )
 ##
 #######*/
 
-THEN( "^The JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) is now filled with ([0-9]+)$" )
+THEN( "^The ([a-z]+) ([is|is not]) in ([inventory|equipment])$" )
 {
-    REGEX_PARAM( float, l );
-    REGEX_PARAM( float, t );
-    REGEX_PARAM( float, r );
-    REGEX_PARAM( float, b );
-    REGEX_PARAM( int, type );
+    REGEX_PARAM(std::string, object);
+    REGEX_PARAM(std::string, item_state);
+    REGEX_PARAM(std::string, item_location);
     ScenarioScope<TestCtx> context;
 
-    int x, y;
-    for( y = t; y <= b; y++ )
-    {
-        for( x = l; x <= r; x++ )
-        {
-            JIVector vCheck( x, y );
-            int expected = context->map.GetdtdIndex( vCheck );
-            JLog( LOG_LEVEL_DEBUG, true, "<%d %d>: %d/%d ", VEC_EXPAND( vCheck ), expected, type );
-            EXPECT_EQ( expected, type );
-        }
-        JLog( LOG_LEVEL_DEBUG, true, "\n" );
-    }
+    bool state = item_state == "is";
+
+
+
+    JLinkList<CItem> *which_list = item_location == "inventory" ? g_pGame->GetPlayer()->m_llInventory : g_pGame->GetPlayer()->m_llEquipment;
+
+    // which_list->GetLink()
+
 }
 
-THEN( "^The JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) is now lit$" )
+THEN( "^The ring is in inventory$" )
 {
-    REGEX_PARAM( float, l );
-    REGEX_PARAM( float, t );
-    REGEX_PARAM( float, r );
-    REGEX_PARAM( float, b );
-    ScenarioScope<TestCtx> context;
+   
+}
 
-    int x, y;
-    for( y = t; y <= b; y++ )
-    {
-        for( x = l; x <= r; x++ )
-        {
-            JIVector vCheck( x, y );
-            int expected = context->map.GetFlags( vCheck );
-            JLog( LOG_LEVEL_DEBUG, true, "<%d %d>: %d/%d ", VEC_EXPAND( vCheck ), expected,
-                  DUNG_FLAG_LIT );
-            EXPECT_EQ( expected, DUNG_FLAG_LIT );
-        }
-        JLog( LOG_LEVEL_DEBUG, true, "\n" );
-    }
+THEN( "^The ring is not in equipment$" )
+{
+   
+}
+
+THEN( "^The ring is in equipment$" )
+{
+   
 }

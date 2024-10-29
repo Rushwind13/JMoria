@@ -20,7 +20,6 @@ Feature: Equipment
         And The shield is in equipment
         And A shield is in the shield equipment slot
 
-
     Scenario: Some Equipment has two proper slots
         Given I have a Player
         Given the player has a ring in inventory
@@ -44,6 +43,7 @@ Feature: Equipment
         When the player takes off the dagger
         Then The dagger is in inventory
         And The dagger is not in equipment
+
     Scenario: Cursed Equipment can be wielded
         Given I have a Player
         Given the player has a dagger in inventory
@@ -59,6 +59,7 @@ Feature: Equipment
         When the player takes off the dagger
         Then The dagger is not in inventory
         And The dagger is in equipment
+
     Scenario: New Equipment replaces old equipment
         Given I have a Player
         Given A dagger is in the primary weapon equipment slot

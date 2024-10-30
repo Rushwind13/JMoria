@@ -43,7 +43,6 @@ bool CAIBrain::Update( float fCurTime )
         m_pParent->m_fLastHPTime = g_pGame->GetTime();
     }
     m_pParent->m_fColorChangeInterval += fCurTime;
-    m_pParent->m_fBreedInterval += fCurTime;
     m_pParent->Breed();
     switch( m_eBrainState )
     {

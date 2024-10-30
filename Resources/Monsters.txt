@@ -326,7 +326,7 @@ Monster <Blue Worm Mass>
 Monster <Yellow Worm Mass>
 {
     Plural		<Yellow Worm Masses>
-    Appear      <1d8>
+    Appear      <1d3>
     Speed		0.5
     MoveType	<MON_AI_100RANDOMMOVE>
     HD          <1d8>

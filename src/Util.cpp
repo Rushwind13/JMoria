@@ -102,6 +102,12 @@ bool IsInWorld( JFVector vIn ) { return vIn.IsInWorld(); }
 
 bool IsInWorld( JRect rcIn ) { return rcIn.IsInWorld(); }
 
+JVector Near( const JVector vOrig, int distance )
+{
+    JVector vDelta( GetRandom( -distance, distance ), GetRandom( -distance, distance ) );
+    return JVector( vOrig + vDelta );
+}
+
 unsigned int GetTickCount()
 {
     struct timeval tv;

@@ -75,11 +75,11 @@ WHEN( "^I update the monster's brain again$" )
 
     CMonster *pMon = pTile->m_pCurMonster;
 
-    printf("mon %f ", pMon->m_fHP);
+    printf("mon %f\n", pMon->m_fHP);
     pMon->m_pBrain->Update( 1.0f );
-    pMon = pTile->m_pCurMonster;
+    // pMon = pTile->m_pCurMonster;
 
-    printf("mon_after %f\n", pMon->m_fHP);
+    // printf("mon_after %f\n", pMon->m_fHP);
 }
 WHEN( "^I terminate the game$" ) { g_pGame->Term(); }
 

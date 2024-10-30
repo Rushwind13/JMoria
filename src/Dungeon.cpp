@@ -340,6 +340,11 @@ bool CDungeon::SpawnMonster( int which_monster, JVector vSpawnPoint )
     return true;
 }
 
+CItemDef *CDungeon::GetItemDef( int which_item )
+{
+    return m_llItemDefs->GetLink( which_item )->m_lpData;
+}
+
 int CDungeon::ChooseItemForDepth( const int depth )
 {
     int which_item = ITEM_IDX_INVALID;
@@ -347,7 +352,7 @@ int CDungeon::ChooseItemForDepth( const int depth )
     while( count < DUNG_CFG_MAX_SPAWN_TRIES )
     {
         int try_item = Util::GetRandom( 0, m_llItemDefs->length() - 1 );
-        CItemDef *chosen_item = m_llItemDefs->GetLink( try_item )->m_lpData;
+        CItemDef *chosen_item = GetItemDef( try_item );
         if( abs( depth - chosen_item->m_dwLevel ) < 5 )
         {
             which_item = try_item;

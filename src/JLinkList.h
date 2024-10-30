@@ -222,16 +222,9 @@ public:
         // empty list; no entry for you
         if( curr_link == NULL )
             return NULL;
-
-        // You can't iterate more than N times to find Nth entry
-        while( count <= which_link )
+        while( count < which_link )
         {
-            // Found the desired entry
-            if( curr_link->m_dwIndex == which_link )
-                return curr_link;
-
-            // You've passed the target index, or hit end of list
-            if( curr_link->m_dwIndex > which_link || curr_link->next == NULL )
+            if( curr_link->next == NULL )
             {
                 if( bForceValid )
                 {
@@ -242,12 +235,9 @@ public:
                     return NULL;
                 }
             }
-
-            // try again
             curr_link = GetNext( curr_link );
             count++;
         }
-        // iterated N times and couldn't find it.
         return curr_link;
     }
     int length() { return m_iNumElements; }

@@ -10,7 +10,7 @@
 #include "Dungeon.h"
 #include "Player.h"
 
-JResult CItem::CreateItem( CItemDef *pid )
+JResult CItem::CreateItem( CItemDef *pid, JVector vSpawnPoint, bool bNear )
 {
     //    int desired = Util::Roll(pid->m_szAppear);
     //    for( int count=0; count < desired; count++ )
@@ -27,7 +27,7 @@ JResult CItem::CreateItem( CItemDef *pid )
         if( g_pGame )
         {
             // Put the item in the world
-            pItem->SpawnItem();
+            pItem->SpawnItem( /*bNear? Util::Near(vSpawnPoint): /**/ vSpawnPoint );
 
             // Now that the item is set up, add it to the global list of items
             pItem->m_pllLink = g_pGame->GetDungeon()->m_llItems->Add( pItem );
@@ -52,10 +52,16 @@ void CItem::ApplyCursedStatus( int likelihood )
     }
 }
 
-JResult CItem::SpawnItem()
+JResult CItem::SpawnItem( JVector vSpawnPoint )
 {
     bool bItemSpawned = false;
     JLog( LOG_LEVEL_INFO, false, "Trying to spawn item type: %s...", m_id->m_szName );
+
+    if( vSpawnPoint.IsInWorld() )
+    {
+        return SpawnAt( vSpawnPoint );
+    }
+
     JVector vTryPos;
     while( !bItemSpawned )
     {
@@ -68,17 +74,27 @@ JResult CItem::SpawnItem()
         // type: %d at <%.2f
         // %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
 
-        if( g_pGame && g_pGame->GetDungeon()->CanPlaceItemAt( vTryPos ) == DUNG_COLL_NO_COLLISION )
+        if( SpawnAt( vTryPos ) == JSUCCESS )
         {
-            m_vPos = vTryPos;
-            g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurItem = this;
             bItemSpawned = true;
-            JLog( LOG_LEVEL_INFO, false, "Success!\n" );
-            // g_pGame->GetMsgs()->Printf( "Success!\n" );
         }
     }
-
     return JSUCCESS;
+}
+
+JResult CItem::SpawnAt( JVector vSpawnPoint )
+{
+    if( g_pGame && g_pGame->GetDungeon()->CanPlaceItemAt( vSpawnPoint ) == DUNG_COLL_NO_COLLISION )
+    {
+        m_vPos = vSpawnPoint;
+        g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurItem = this;
+
+        JLog( LOG_LEVEL_INFO, false, "Success!\n" );
+        // g_pGame->GetMsgs()->Printf( "Success!\n" );
+
+        return JSUCCESS;
+    }
+    return JBOGUSKEY;
 }
 
 bool CItem::Update( float fCurTime )

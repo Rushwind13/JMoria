@@ -115,8 +115,10 @@ public:
     bool IsCloseable() { return false; }  // closeable pickup?
     bool IsTunnelable() { return false; } // Tunnelable pickup? unlikely.
 
-    static JResult CreateItem( CItemDef *pid );
-    JResult SpawnItem();
+    static JResult CreateItem( CItemDef *pid, JVector vSpawnPoint = JVector( -1, -1 ),
+                               bool bNear = false );
+    JResult SpawnItem( JVector vSpawnPoint = JVector( -1, -1 ) );
+    JResult SpawnAt( JVector vSpawnPoint );
 
     bool Update( float fCurTime );
     void PreDraw();

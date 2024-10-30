@@ -6,19 +6,25 @@ Feature: Equipment
 
     Scenario: I can equip things
         Given I have a Player
-        Given I spawn a dagger
-        Given the player has a dagger in inventory
-        When the player equips the item
-        Then The dagger is in equipment
-        Then The dagger is not in inventory
+        Given I spawn a Dagger:27
+        Given the player has a Dagger:27 in inventory
+        Given the player equips the item
+        Then Also The Dagger:27 is in equipment at 0
+        Then The Dagger:27 is not in inventory
         # And A dagger is in the primary weapon equipment slot
 
-    # Scenario: Equipment goes to the proper slot
-    #     Given I have a Player
-    #     Given the player has a shield in inventory
-    #     When the player equips the item
-    #     Then The shield is not in inventory
-    #     And The shield is in equipment
+    Scenario: Equipment goes to the proper slot
+        Given I have a Player
+        Given I spawn a Dagger:27
+        Given the player has a Dagger:27 in inventory
+        Given the player equips the item
+        Given I spawn a Small Wooden Shield:26
+        # Given I spawn a Battle Axe:42
+        Given the player has a Small Wooden Shield:26 in inventory
+        Given the player equips the item
+        Then The Small Wooden Shield:26 is not in inventory
+        And Also The Dagger:27 is in equipment at 0
+        And Also The Small Wooden Shield:26 is in equipment at 1
     #     And A shield is in the shield equipment slot
 
     # Scenario: Some Equipment has two proper slots
@@ -38,12 +44,16 @@ Feature: Equipment
     #     Given A pickaxe is in the primary weapon equipment slot
     #     Given A dagger is in the secondary weapon equipment slot
 
-    # Scenario: Equipment can be taken off
-    #     Given I have a Player
-    #     Given A dagger is in the primary weapon equipment slot
-    #     When the player takes off the dagger
-    #     Then The dagger is in inventory
-    #     And The dagger is not in equipment
+    Scenario: Equipment can be taken off
+        Given I have a Player
+        Given I spawn a Dagger:27
+        Given the player has a Dagger:27 in inventory
+        Given the player equips the item
+        # Given A dagger is in the primary weapon equipment slot
+        Given The Dagger:27 is in equipment at 0
+        When the player takes off the item
+        # Then The Dagger:27 is not in equipment at 0
+        # Then But The Dagger:27 is in inventory at 1
 
     # Scenario: Cursed Equipment can be wielded
     #     Given I have a Player

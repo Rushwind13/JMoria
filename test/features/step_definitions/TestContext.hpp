@@ -72,6 +72,8 @@ struct TestCtx
     int hi;
     int lo_f;
     int hi_f;
+
+    char szBuffer[1024];
 };
 
 #endif // __TEST_CONTEXT__

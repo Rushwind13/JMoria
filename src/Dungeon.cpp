@@ -330,13 +330,13 @@ CMonsterDef *CDungeon::GetMonsterDef( int which_monster )
     return m_llMonsterDefs->GetLink( which_monster )->m_lpData;
 }
 
-bool CDungeon::SpawnMonster( int which_monster, JVector vSpawnPoint )
+bool CDungeon::SpawnMonster( int which_monster )
 {
     CMonsterDef *chosen_monster = GetMonsterDef( which_monster );
     JLog( LOG_LEVEL_INFO, true, "Choosing monster %d, called %s...", which_monster,
           chosen_monster->m_szName );
 
-    CMonster::CreateMonster( chosen_monster, vSpawnPoint );
+    CMonster::CreateMonster( chosen_monster );
     return true;
 }
 

@@ -7,10 +7,11 @@ CMonster::CMonster()
       m_fCurHP( 0.0f ),
       m_fCurAC( 0.0f ),
       m_fLastHPTime( 0.0f ),
+      m_dwFecundity( 5 ),
       m_md( NULL ),
       m_pBrain( NULL ),
       m_fColorChangeInterval( COLOR_CHANGE_TIMEOUT + 1 ),
-      m_fBreedInterval( BREED_TIMEOUT + 1 )
+      m_fLastBreed( BREED_INTERVAL )
 {
     m_pBrain = new CAIBrain;
 }
@@ -46,14 +47,18 @@ void CMonster::InitBrain( CMonsterDef *pmd )
     m_pBrain->SetParent( this );
 }
 
-JResult CMonster::CreateMonster( CMonsterDef *pmd, JVector vSpawnPoint )
+JResult CMonster::CreateMonster( CMonsterDef *pmd, JVector vSpawnPoint, bool bNear )
 {
     int desired = Util::Roll( pmd->m_szAppear );
     for( int count = 0; count < desired; count++ )
     {
         CMonster *pMon;
         pMon = new CMonster;
-        pMon->InitAndSpawn( pmd, vSpawnPoint );
+        pMon->InitAndSpawn( pmd, bNear ? Util::Near( vSpawnPoint ) : vSpawnPoint );
+
+        // force additional monsters of the same type to appear near each other
+        bNear = true;
+        vSpawnPoint = pMon->GetPos();
     }
 
     return JSUCCESS;
@@ -165,14 +170,31 @@ int CMonster::TakeDamage( float fDamage )
 // draw routines
 void CMonster::Breed()
 {
-    if( m_fBreedInterval < BREED_TIMEOUT )
+    if( g_pGame->GetTime() < m_fLastBreed + BREED_INTERVAL )
         return;
 
     if( ( m_md->m_dwFlags & MON_FLAG_BREED ) == MON_FLAG_BREED )
     {
-        // Spawn a new copy
+        if( m_dwFecundity > 0 )
+        {
+            JLog( LOG_LEVEL_DEBUG, true, "still going: %d ", m_dwFecundity );
+            if( Util::GetRandom( 0.0f, 1.0f ) <= BREED_CHANCE )
+            {
+                JLog( LOG_LEVEL_DEBUG, false, "spawnd!" );
+                // Spawn a new copy
+                CreateMonster( m_md, GetPos(), true );
+            }
+            JLog( LOG_LEVEL_DEBUG, false, "\n" );
+            m_dwFecundity--;
+        }
+        else
+        {
+            JLog( LOG_LEVEL_WARN, true, "sterilizing\n" );
+            // sterilize
+            m_md->m_dwFlags = m_md->m_dwFlags & ~MON_FLAG_BREED;
+        }
     }
-    m_fBreedInterval = 0.0f;
+    m_fLastBreed = g_pGame->GetTime();
 }
 
 // draw routines

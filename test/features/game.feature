@@ -4,23 +4,23 @@ Feature: Game
     As a game engine
     I want to make sure my game is working
 
-    # Scenario: Game creation is possible
-    #     Given I have a game
-    #     And I initialize the game
-    #     Then the game initalized successfully
+    Scenario: Game creation is possible
+        Given I have a game
+        And I initialize the game
+        Then the game initalized successfully
 
-    # Scenario: Game creation is idempotent
-    #     Given I have a game
-    #     And I have a game
-    #     And I have a game
-    #     And I initialize the game
-    #     Then the game initalized successfully
+    Scenario: Game creation is idempotent
+        Given I have a game
+        And I have a game
+        And I have a game
+        And I initialize the game
+        Then the game initalized successfully
 
-    # Scenario: Game termination works
-    #     Given I have a game
-    #     And I initialize the game
-    #     When I terminate the game
-    #     Then the game terminates successfully
+    Scenario: Game termination works
+        Given I have a game
+        And I initialize the game
+        When I terminate the game
+        Then the game terminates successfully
     @skip
     Scenario: Player Seek works
         Given I have a game

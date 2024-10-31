@@ -35,12 +35,13 @@ int GetRandom( int lo, int hi )
         return ( ( rand() & 1 ) ? hi : lo );
     }
 
-    int num;
-    num = rand();
-    num %= ( hi - lo + 1 );
-    num += lo;
+    // int num;
+    // num = rand();
+    // num %= ( hi - lo + 1 );
+    // num += lo;
 
-    return ( num );
+    // return ( num );
+    return (int)GetRandom( (float)lo, (float)hi );
 }
 
 // Roll some dice

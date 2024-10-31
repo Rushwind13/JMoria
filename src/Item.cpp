@@ -22,7 +22,7 @@ JResult CItem::CreateItem( CItemDef *pid, JVector vSpawnPoint, bool bNear )
         pItem->Init( pid );
 
         // Apply cursed flag
-        pItem->ApplyCursedStatus( 5 );
+        // pItem->ApplyCursedStatus( 5 );
 
         if( g_pGame )
         {
@@ -45,8 +45,10 @@ void CItem::Init( CItemDef *pid )
 
 void CItem::ApplyCursedStatus( int likelihood )
 {
-    if( Util::GetRandom( 1, 100 ) < likelihood )
+    int rolled = (int)Util::GetRandom( 1.0f, 100.0f );
+    if( rolled < likelihood )
     {
+        JLog( LOG_LEVEL_DEBUG, true, "Cursed! %d\n", rolled );
         m_dwFlags |= ITEM_FLAG_CURSED;
         m_Color.SetColor( 255, 0, 0, 255 );
     }
@@ -120,7 +122,7 @@ void CItem::SetColor()
     m_fColorChangeInterval = 0.0f;
 }
 
-unsigned char ItemIDs[ITEM_IDX_MAX + 1] = "|)[](]]\"=~{}{}&?!-_?$~/\\/";
+unsigned char ItemIDs[ITEM_IDX_MAX + 1] = "|)[](]]\"=~{}{}&?!-_?$~|/\\/|/|";
 void CItem::Draw()
 {
     // Don't draw if something else is there.

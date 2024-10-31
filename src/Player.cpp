@@ -181,7 +181,7 @@ bool CPlayer::IsWieldable( CLink<CItem> *pItem )
     bool retval = false;
     switch( pItem->m_lpData->m_id->m_dwIndex )
     {
-    case ITEM_IDX_SWORD:
+    case ITEM_IDX_WEAPON:
     case ITEM_IDX_SHIELD:
     case ITEM_IDX_ARMOR:
     case ITEM_IDX_HELMET:

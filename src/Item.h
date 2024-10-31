@@ -107,6 +107,7 @@ protected:
 private:
     // Member Functions
 public:
+    CItem() : m_vPos( 0, 0 ), m_dwFlags( 0 ), m_pllLink( NULL ), m_id( NULL ) {};
     void Init( CItemDef *pid );
     void ApplyCursedStatus( int likelihood );
     bool PercentChance( int chance );

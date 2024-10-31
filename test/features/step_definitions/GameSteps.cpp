@@ -42,20 +42,20 @@ GIVEN( "^I spawn a monster with SEEK$" )
 
     context->result = CMonster::CreateMonster( pmd, context->vec_b );
 
-    printf("<%f %f> %s %d\n", VEC_EXPAND(context->vec_b), pmd->m_szName, context->result);
+    printf( "<%f %f> %s %d\n", VEC_EXPAND( context->vec_b ), pmd->m_szName, context->result );
 }
 GIVEN( "^I update the monster's brain pizza$" )
 {
     ScenarioScope<TestCtx> context;
     CDungeon *pDungeon = g_pGame->GetDungeon();
-        printf("dung %d ", pDungeon->m_dwHeight);
+    printf( "dung %d ", pDungeon->m_dwHeight );
 
     CDungeonTile *pTile = pDungeon->GetTile( context->vec_b );
-        printf("tile %d ", pTile->m_dwFlags);
+    printf( "tile %d ", pTile->m_dwFlags );
 
     CMonster *pMon = pTile->m_pCurMonster;
 
-    printf("mon %f\n", pMon->m_fHP);
+    printf( "mon %f\n", pMon->m_fHP );
     pMon->m_pBrain->Update( 1.0f );
 }
 
@@ -68,14 +68,14 @@ WHEN( "^I update the monster's brain again$" )
 {
     ScenarioScope<TestCtx> context;
     CDungeon *pDungeon = g_pGame->GetDungeon();
-        printf("dung %d ", pDungeon->m_dwHeight);
+    printf( "dung %d ", pDungeon->m_dwHeight );
 
     CDungeonTile *pTile = pDungeon->GetTile( context->vec_b );
-        printf("tile %d ", pTile->m_dwFlags);
+    printf( "tile %d ", pTile->m_dwFlags );
 
     CMonster *pMon = pTile->m_pCurMonster;
 
-    printf("mon %f\n", pMon->m_fHP);
+    printf( "mon %f\n", pMon->m_fHP );
     pMon->m_pBrain->Update( 1.0f );
     // pMon = pTile->m_pCurMonster;
 

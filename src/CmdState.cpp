@@ -280,6 +280,11 @@ bool CCmdState::IsStringInputCommand( SDL_Keysym *keysym )
     switch( keysym->sym )
     {
     case SDLK_n: // name your character
+        if( keysym->mod & KMOD_SHIFT )
+        {
+            return true;
+        }
+        break;
     case SDLK_p: // purchase something in a store
         return true;
         break;

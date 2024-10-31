@@ -120,6 +120,12 @@ protected:
             return true;
         }
 
+        // Use "roguelike" directional keybinds
+        if( strchr("hjklyubn", GetAlpha(keysym)) != NULL )
+        {
+            return true;
+        }
+
         return false;
     }
 
@@ -129,40 +135,48 @@ protected:
         {
         case SDLK_UP:
         case SDLK_KP_8:
+        case SDLK_k:
             // up
             vDir.y = -1;
             break;
         case SDLK_DOWN:
         case SDLK_KP_2:
+        case SDLK_j:
             // down
             vDir.y = 1;
             break;
         case SDLK_LEFT:
         case SDLK_KP_4:
+        case SDLK_h:
             // left
             vDir.x = -1;
             break;
         case SDLK_RIGHT:
         case SDLK_KP_6:
+        case SDLK_l:
             vDir.x = 1;
             // right
             break;
         case SDLK_KP_7:
+        case SDLK_y:
             // up + left
             vDir.x = -1;
             vDir.y = -1;
             break;
         case SDLK_KP_9:
+        case SDLK_u:
             // up + right
             vDir.x = 1;
             vDir.y = -1;
             break;
         case SDLK_KP_1:
+        case SDLK_b:
             // down + left
             vDir.x = -1;
             vDir.y = 1;
             break;
         case SDLK_KP_3:
+        case SDLK_n:
             // down + right
             vDir.x = 1;
             vDir.y = 1;

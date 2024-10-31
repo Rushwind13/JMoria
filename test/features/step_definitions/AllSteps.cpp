@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 
 #define UNIT_TEST
+#include "FirstSteps.cpp"
 
 #include "BrainSteps.cpp"
 #include "DungeonMapSteps.cpp"
 #include "EquipmentSteps.cpp"
-#include "FirstSteps.cpp"
 #include "GameSteps.cpp"
 #include "ItemSteps.cpp"
 #include "MonsterSteps.cpp"

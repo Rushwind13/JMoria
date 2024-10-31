@@ -48,7 +48,25 @@ GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in inventory$" )
     EXPECT_EQ( inv_index, item_index );
 }
 
-GIVEN( "^The ([A-Za-z ]+):([0-9]+) is in equipment$" )
+GIVEN( "^the ([A-Za-z ]+):([0-9]+) (is|is not) cursed$" )
+{
+    ScenarioScope<TestCtx> context;
+    REGEX_PARAM( std::string, item );
+    REGEX_PARAM( int, item_id );
+    REGEX_PARAM( std::string, choice);
+    int chance = (choice == "is")? 100 : 0;
+    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile(context->vec_b);
+    CItem *pItem = pTile->m_pCurItem;
+    pItem->SetCursed(chance);
+
+    int actual = g_pGame->GetDungeon()->GetTile(context->vec_b)->m_pCurItem->m_dwFlags & ITEM_FLAG_CURSED;
+    int expected = (choice == "is") ? ITEM_FLAG_CURSED : 0;
+
+    EXPECT_EQ( actual, expected );
+}
+
+GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in equipment$" )
 {
     ScenarioScope<TestCtx> context;
     REGEX_PARAM( std::string, item );
@@ -71,8 +89,6 @@ GIVEN( "^the player equips the item ([0-9]+)$" )
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
     context->result_bool = g_pGame->GetPlayer()->Wield(
         g_pGame->GetPlayer()->m_llInventory->GetLink( pid->m_dwIndex ) );
-
-    EXPECT_EQ(context->result_bool, true);
 }
 
 /*#######
@@ -96,7 +112,7 @@ WHEN( "^the player takes off the item ([0-9]+)$" )
 ##
 #######*/
 
-THEN( "^Also The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment)$" )
+THEN( "^The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment)$" )
 {
     REGEX_PARAM( std::string, item );
     REGEX_PARAM( int, item_id );

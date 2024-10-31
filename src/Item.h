@@ -109,7 +109,7 @@ private:
 public:
     CItem() : m_vPos( 0, 0 ), m_dwFlags( 0 ), m_pllLink( NULL ), m_id( NULL ) {};
     void Init( CItemDef *pid );
-    void ApplyCursedStatus( int likelihood );
+    void SetCursed( int likelihood );
     bool PercentChance( int chance );
     char *GetName() { return m_id->m_szName; }
     bool IsOpenable() { return false; }   // for chests, etc.

@@ -3,6 +3,7 @@
 I'm making this game that I've loved for years, I'll get around to putting in all the features.
 
 *Commands*
+hjklyubn - movement
 o - open
 c - close
 T - tunnel
@@ -15,7 +16,7 @@ d - drop
 . - rest one turn
 R - rest until at full health, or until disturbed
 q - quaff a potion
-n - set character name
+N - set character name
 ^c - exit game
 
 *Items*

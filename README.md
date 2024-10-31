@@ -10,6 +10,7 @@ To run it, run _"jmoria"_
 Keyboard commands recognized:
 * *Ctrl-C* - Exit
 * *Arrow keys (or numberpad)* - movement
+* *hjklyubn* - movement
 * *o* - open a door
 * *c* - close a door
 * *T* - tunnel through rubble
@@ -22,7 +23,7 @@ Keyboard commands recognized:
 * *.* - rest one turn
 * *R* - rest until at full health, or until disturbed
 * *q* - quaff a potion
-* *n* - set character name
+* *N* - set character name
 
 Monster definitions are in _Resources/Monsters.txt_
 Item definitions are in _Resources/Items.txt_

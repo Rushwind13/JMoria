@@ -4,6 +4,7 @@
 
 #include "BrainSteps.cpp"
 #include "DungeonMapSteps.cpp"
+#include "EquipmentSteps.cpp"
 #include "FirstSteps.cpp"
 #include "GameSteps.cpp"
 #include "ItemSteps.cpp"

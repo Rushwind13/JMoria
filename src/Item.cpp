@@ -10,7 +10,7 @@
 #include "Dungeon.h"
 #include "Player.h"
 
-JResult CItem::CreateItem( CItemDef *pid )
+JResult CItem::CreateItem( CItemDef *pid, JVector vSpawnPoint, bool bNear )
 {
     //    int desired = Util::Roll(pid->m_szAppear);
     //    for( int count=0; count < desired; count++ )
@@ -22,12 +22,12 @@ JResult CItem::CreateItem( CItemDef *pid )
         pItem->Init( pid );
 
         // Apply cursed flag
-        pItem->ApplyCursedStatus( 5 );
+        pItem->SetCursed( 5 );
 
         if( g_pGame )
         {
             // Put the item in the world
-            pItem->SpawnItem();
+            pItem->SpawnItem( /*bNear? Util::Near(vSpawnPoint): /**/ vSpawnPoint );
 
             // Now that the item is set up, add it to the global list of items
             pItem->m_pllLink = g_pGame->GetDungeon()->m_llItems->Add( pItem );
@@ -43,19 +43,32 @@ void CItem::Init( CItemDef *pid )
     m_Color.SetColor( m_id->m_Color );
 }
 
-void CItem::ApplyCursedStatus( int likelihood )
+void CItem::SetCursed( int likelihood )
 {
-    if( Util::GetRandom( 1, 100 ) < likelihood )
+    int rolled = (int)Util::GetRandom( 1.0f, 100.0f );
+    if( rolled < likelihood )
     {
+        JLog( LOG_LEVEL_DEBUG, true, "Cursed! %d\n", rolled );
         m_dwFlags |= ITEM_FLAG_CURSED;
         m_Color.SetColor( 255, 0, 0, 255 );
     }
+    else
+    {
+        m_dwFlags &= ~ITEM_FLAG_CURSED;
+        m_Color.SetColor(m_id->m_Color);
+    }
 }
 
-JResult CItem::SpawnItem()
+JResult CItem::SpawnItem( JVector vSpawnPoint )
 {
     bool bItemSpawned = false;
     JLog( LOG_LEVEL_INFO, false, "Trying to spawn item type: %s...", m_id->m_szName );
+
+    if( vSpawnPoint.IsInWorld() )
+    {
+        return SpawnAt( vSpawnPoint );
+    }
+
     JVector vTryPos;
     while( !bItemSpawned )
     {
@@ -68,17 +81,27 @@ JResult CItem::SpawnItem()
         // type: %d at <%.2f
         // %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
 
-        if( g_pGame && g_pGame->GetDungeon()->CanPlaceItemAt( vTryPos ) == DUNG_COLL_NO_COLLISION )
+        if( SpawnAt( vTryPos ) == JSUCCESS )
         {
-            m_vPos = vTryPos;
-            g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurItem = this;
             bItemSpawned = true;
-            JLog( LOG_LEVEL_INFO, false, "Success!\n" );
-            // g_pGame->GetMsgs()->Printf( "Success!\n" );
         }
     }
-
     return JSUCCESS;
+}
+
+JResult CItem::SpawnAt( JVector vSpawnPoint )
+{
+    if( g_pGame && g_pGame->GetDungeon()->CanPlaceItemAt( vSpawnPoint ) == DUNG_COLL_NO_COLLISION )
+    {
+        m_vPos = vSpawnPoint;
+        g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurItem = this;
+
+        JLog( LOG_LEVEL_INFO, false, "Success!\n" );
+        // g_pGame->GetMsgs()->Printf( "Success!\n" );
+
+        return JSUCCESS;
+    }
+    return JBOGUSKEY;
 }
 
 bool CItem::Update( float fCurTime )
@@ -104,7 +127,7 @@ void CItem::SetColor()
     m_fColorChangeInterval = 0.0f;
 }
 
-unsigned char ItemIDs[ITEM_IDX_MAX + 1] = "|)[](]]\"=~{}{}&?!-_?$~/\\/";
+unsigned char ItemIDs[ITEM_IDX_MAX + 1] = "|)[](]]\"=~{}{}&?!-_?$~|/\\/|/|";
 void CItem::Draw()
 {
     // Don't draw if something else is there.

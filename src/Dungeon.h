@@ -118,6 +118,7 @@ public:
     bool IsCloseable( JVector &vPos );
     int IsStairs( JVector &vPos );
     CMonsterDef *GetMonsterDef( int which_monster );
+    CItemDef *GetItemDef( int which_item );
     bool SpawnMonster( int which_monster );
     void RemoveMonster( CMonster *pMon );
     JResult Modify( JVector &vPos );

@@ -17,7 +17,7 @@
 
 // main game pointer
 CGame *g_pGame = NULL;
-eLogLevel g_eLogLevel = LOG_LEVEL_DEBUG;
+eLogLevel g_eLogLevel = LOG_LEVEL_WARN;
 
 /*#######
 ##
@@ -72,6 +72,8 @@ struct TestCtx
     int hi;
     int lo_f;
     int hi_f;
+
+    char szBuffer[1024];
 };
 
 #endif // __TEST_CONTEXT__

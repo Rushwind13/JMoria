@@ -107,16 +107,19 @@ protected:
 private:
     // Member Functions
 public:
+    CItem() : m_vPos( 0, 0 ), m_dwFlags( 0 ), m_pllLink( NULL ), m_id( NULL ) {};
     void Init( CItemDef *pid );
-    void ApplyCursedStatus( int likelihood );
+    void SetCursed( int likelihood );
     bool PercentChance( int chance );
     char *GetName() { return m_id->m_szName; }
     bool IsOpenable() { return false; }   // for chests, etc.
     bool IsCloseable() { return false; }  // closeable pickup?
     bool IsTunnelable() { return false; } // Tunnelable pickup? unlikely.
 
-    static JResult CreateItem( CItemDef *pid );
-    JResult SpawnItem();
+    static JResult CreateItem( CItemDef *pid, JVector vSpawnPoint = JVector( -1, -1 ),
+                               bool bNear = false );
+    JResult SpawnItem( JVector vSpawnPoint = JVector( -1, -1 ) );
+    JResult SpawnAt( JVector vSpawnPoint );
 
     bool Update( float fCurTime );
     void PreDraw();

@@ -224,10 +224,10 @@ Speed         7.0
 Color        <200,200,200,255>
 }
 
-Item <Long sword>
+Item <Long Sword>
 {
     Plural        <Long swords>
-    Type        <ITEM_IDX_SWORD>
+    Type        <ITEM_IDX_WEAPON>
     Value       150.0
     Level       1
     Damage      <1d10>
@@ -239,7 +239,7 @@ Item <Long sword>
 Item <Dagger>
 {
     Plural        <Daggers>
-    Type        <ITEM_IDX_SWORD>
+    Type        <ITEM_IDX_WEAPON>
     Value       20.0
     Level       1
     Damage      <1d4>

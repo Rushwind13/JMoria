@@ -224,7 +224,7 @@
 
 // Types of items
 #define ITEM_IDX_INVALID -1
-#define ITEM_IDX_SWORD 0
+#define ITEM_IDX_WEAPON 0
 #define ITEM_IDX_SHIELD 1
 #define ITEM_IDX_ARMOR 2
 #define ITEM_IDX_HELMET 3
@@ -246,10 +246,14 @@
 #define ITEM_IDX_BOOK 19
 #define ITEM_IDX_MONEY 20
 #define ITEM_IDX_FOOD 21
-#define ITEM_IDX_AXE 22
-#define ITEM_IDX_POLEARM 23
-#define ITEM_IDX_SHOVEL 24
-#define ITEM_IDX_MAX 25
+#define ITEM_IDX_SWORD 22
+#define ITEM_IDX_AXE 23
+#define ITEM_IDX_POLEARM 24
+#define ITEM_IDX_SHOVEL 25
+#define ITEM_IDX_DAGGER 26
+#define ITEM_IDX_MACE 27
+#define ITEM_IDX_2H_SWORD 28
+#define ITEM_IDX_MAX 29
 
 // TODO: Might need to switch from "ITEM/MONSTER"
 //       to "types of harm" / "types of aid"
@@ -258,6 +262,14 @@
 // Item flags
 
 #define ITEM_FLAG_CURSED 0x00000001
+// #define ITEM_FLAG_x 0x00000002
+// #define ITEM_FLAG_x 0x00000004
+// #define ITEM_FLAG_x 0x00000008
+
+// #define ITEM_FLAG_x 0x00000010
+// #define ITEM_FLAG_x 0x00000020
+// #define ITEM_FLAG_x 0x00000040
+// #define ITEM_FLAG_x 0x00000080
 
 #define ITEM_COLOR_MULTI 0x10000000
 
@@ -408,7 +420,7 @@ public:
         m_StringTable[i++].Init( "EFFECT_TYPE_LOSE", EFFECT_TYPE_LOSE );
 
         // Item Types
-        m_StringTable[i++].Init( "ITEM_IDX_SWORD", ITEM_IDX_SWORD );
+        m_StringTable[i++].Init( "ITEM_IDX_WEAPON", ITEM_IDX_WEAPON );
         m_StringTable[i++].Init( "ITEM_IDX_SHIELD", ITEM_IDX_SHIELD );
         m_StringTable[i++].Init( "ITEM_IDX_ARMOR", ITEM_IDX_ARMOR );
         m_StringTable[i++].Init( "ITEM_IDX_HELMET", ITEM_IDX_HELMET );
@@ -430,9 +442,13 @@ public:
         m_StringTable[i++].Init( "ITEM_IDX_BOOK", ITEM_IDX_BOOK );
         m_StringTable[i++].Init( "ITEM_IDX_MONEY", ITEM_IDX_MONEY );
         m_StringTable[i++].Init( "ITEM_IDX_FOOD", ITEM_IDX_FOOD );
+        m_StringTable[i++].Init( "ITEM_IDX_DAGGER", ITEM_IDX_DAGGER );
+        m_StringTable[i++].Init( "ITEM_IDX_MACE", ITEM_IDX_MACE );
+        m_StringTable[i++].Init( "ITEM_IDX_2H_SWORD", ITEM_IDX_2H_SWORD );
+        m_StringTable[i++].Init( "ITEM_IDX_SWORD", ITEM_IDX_SWORD );
         m_StringTable[i++].Init( "ITEM_IDX_AXE", ITEM_IDX_AXE );
-        m_StringTable[i++].Init( "ITEM_IDX_SHOVEL", ITEM_IDX_SHOVEL );
         m_StringTable[i++].Init( "ITEM_IDX_POLEARM", ITEM_IDX_POLEARM );
+        m_StringTable[i++].Init( "ITEM_IDX_SHOVEL", ITEM_IDX_SHOVEL );
 
         // Item flags
         m_StringTable[i++].Init( "ITEM_FLAG_CURSED", ITEM_FLAG_CURSED );

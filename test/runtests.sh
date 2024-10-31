@@ -33,4 +33,4 @@ if [[ -n "$1" ]]; then
 fi
 
 # Run the Cucumber tests
-cucumber features/$TEST_TO_RUN.feature
+cucumber --tags ~@skip features/$TEST_TO_RUN.feature

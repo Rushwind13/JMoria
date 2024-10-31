@@ -53,15 +53,16 @@ GIVEN( "^the ([A-Za-z ]+):([0-9]+) (is|is not) cursed$" )
     ScenarioScope<TestCtx> context;
     REGEX_PARAM( std::string, item );
     REGEX_PARAM( int, item_id );
-    REGEX_PARAM( std::string, choice);
-    int chance = (choice == "is")? 100 : 0;
+    REGEX_PARAM( std::string, choice );
+    int chance = ( choice == "is" ) ? 100 : 0;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
-    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile(context->vec_b);
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
     CItem *pItem = pTile->m_pCurItem;
-    pItem->SetCursed(chance);
+    pItem->SetCursed( chance );
 
-    int actual = g_pGame->GetDungeon()->GetTile(context->vec_b)->m_pCurItem->m_dwFlags & ITEM_FLAG_CURSED;
-    int expected = (choice == "is") ? ITEM_FLAG_CURSED : 0;
+    int actual =
+        g_pGame->GetDungeon()->GetTile( context->vec_b )->m_pCurItem->m_dwFlags & ITEM_FLAG_CURSED;
+    int expected = ( choice == "is" ) ? ITEM_FLAG_CURSED : 0;
 
     EXPECT_EQ( actual, expected );
 }
@@ -116,9 +117,10 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment)$" )
 {
     REGEX_PARAM( std::string, item );
     REGEX_PARAM( int, item_id );
-    REGEX_PARAM( std::string, list);
+    REGEX_PARAM( std::string, list );
     ScenarioScope<TestCtx> context;
-    JLinkList<CItem> *pList = (list == "inventory") ? g_pGame->GetPlayer()->m_llInventory : g_pGame->GetPlayer()->m_llEquipment;
+    JLinkList<CItem> *pList = ( list == "inventory" ) ? g_pGame->GetPlayer()->m_llInventory
+                                                      : g_pGame->GetPlayer()->m_llEquipment;
     CItem *expected = NULL;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
     CLink<CItem> *pLink = pList->GetLink( pid->m_dwIndex );
@@ -130,7 +132,7 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment)$" )
 
     int result = strcmp( want, have );
     if( result != 0 )
-        JLog(LOG_LEVEL_WARN, true, "want %s have %s\n", want, have );
+        JLog( LOG_LEVEL_WARN, true, "want %s have %s\n", want, have );
 
     EXPECT_EQ( result, 0 );
 }
@@ -139,9 +141,10 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment)$" )
 {
     REGEX_PARAM( std::string, item );
     REGEX_PARAM( int, item_id );
-    REGEX_PARAM( std::string, list);
+    REGEX_PARAM( std::string, list );
     ScenarioScope<TestCtx> context;
-    JLinkList<CItem> *pList = (list == "inventory") ? g_pGame->GetPlayer()->m_llInventory : g_pGame->GetPlayer()->m_llEquipment;
+    JLinkList<CItem> *pList = ( list == "inventory" ) ? g_pGame->GetPlayer()->m_llInventory
+                                                      : g_pGame->GetPlayer()->m_llEquipment;
     CItem *expected = NULL;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
     CLink<CItem> *pLink = pList->GetLink( pid->m_dwIndex );
@@ -151,7 +154,7 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment)$" )
     {
         // found an item of the same type, make sure it's a different one
         actual = pLink->m_lpData;
-        EXPECT_NE(actual->m_id->m_szName, item);
+        EXPECT_NE( actual->m_id->m_szName, item );
     }
     else
     {

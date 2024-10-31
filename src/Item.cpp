@@ -55,7 +55,7 @@ void CItem::SetCursed( int likelihood )
     else
     {
         m_dwFlags &= ~ITEM_FLAG_CURSED;
-        m_Color.SetColor(m_id->m_Color);
+        m_Color.SetColor( m_id->m_Color );
     }
 }
 

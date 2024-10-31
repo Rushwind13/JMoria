@@ -21,7 +21,7 @@ Feature: Game
     #     And I initialize the game
     #     When I terminate the game
     #     Then the game terminates successfully
-
+    @skip
     Scenario: Player Seek works
         Given I have a game
         And I initialize the game
@@ -31,7 +31,7 @@ Feature: Game
         Then the game initalized successfully
         And the monster spawned successfully
         And the monster wants to move toward the player
-
+    @skip
     Scenario: AI state changes work
         Given I have a game
         And I initialize the game

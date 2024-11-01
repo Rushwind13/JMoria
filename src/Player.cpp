@@ -176,30 +176,9 @@ void CPlayer::PickUp( JVector &vPickupPos )
     g_pGame->GetMsgs()->Printf( "You have a %s.\n", pItem->GetName() );
 }
 
-bool CPlayer::IsWieldable( CLink<CItem> *pItem )
+bool CPlayer::IsWieldable( CLink<CItem> *pLink )
 {
-    bool retval = false;
-    switch( pItem->m_lpData->m_id->m_dwIndex )
-    {
-    case ITEM_IDX_WEAPON:
-    case ITEM_IDX_SHIELD:
-    case ITEM_IDX_ARMOR:
-    case ITEM_IDX_HELMET:
-    case ITEM_IDX_BOW:
-    case ITEM_IDX_XBOW:
-    case ITEM_IDX_CLOAK:
-    case ITEM_IDX_GLOVES:
-    case ITEM_IDX_RING:
-    case ITEM_IDX_BOOTS:
-    case ITEM_IDX_TORCH:
-    case ITEM_IDX_AMULET:
-        retval = true;
-        break;
-    default:
-        retval = false;
-        break;
-    }
-    return retval;
+   return( pLink->m_lpData->EquipType() != EQUIP_IDX_INVALID );
 }
 
 bool CPlayer::Wield( CLink<CItem> *pLink )
@@ -207,7 +186,7 @@ bool CPlayer::Wield( CLink<CItem> *pLink )
     CItem *pItem = pLink->m_lpData;
 
     // You can only wield one thing of a given type at a time
-    CLink<CItem> *pCurrEquip = m_llEquipment->GetLink( pItem->m_id->m_dwIndex, true );
+    CLink<CItem> *pCurrEquip = m_llEquipment->GetLink( pItem->EquipType(), true );
     if( pCurrEquip != NULL && pCurrEquip->m_dwIndex == pLink->m_dwIndex )
     {
         // So if you're already wearing something of this type, remove it and put it back in
@@ -224,7 +203,7 @@ bool CPlayer::Wield( CLink<CItem> *pLink )
     }
     // Now put on the new item.
     m_llInventory->Remove( pLink, false );
-    pItem->m_pllLink = m_llEquipment->Add( pItem, pItem->m_id->m_dwIndex );
+    pItem->m_pllLink = m_llEquipment->Add( pItem, pItem->EquipType() );
     m_fArmorClass += pItem->m_id->m_fBaseAC + pItem->m_id->m_fACBonus;
     if( pItem->m_id->m_szBaseDamage != NULL )
         strcpy( m_szDamage, pItem->m_id->m_szBaseDamage );

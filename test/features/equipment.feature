@@ -10,8 +10,8 @@ Feature: Equipment
         Given the Dagger:27 is not cursed
         Given the player has a Dagger:27 in inventory
         Given the player equips the item 27
-        Then The Dagger:27 is in equipment
-        Then The Dagger:27 is not in inventory
+        Then The Dagger:27 is in equipment at 0
+        Then The Dagger:27 is not in inventory at -1
         # And A dagger is in the primary weapon equipment slot
 
     Scenario: Equipment goes to the proper slot
@@ -25,9 +25,9 @@ Feature: Equipment
         # Given I spawn a Battle Axe:42
         Given the player has a Small Wooden Shield:26 in inventory
         Given the player equips the item 26
-        Then The Small Wooden Shield:26 is not in inventory
-        And The Dagger:27 is in equipment
-        And The Small Wooden Shield:26 is in equipment
+        Then The Small Wooden Shield:26 is not in inventory at -1
+        And The Dagger:27 is in equipment at 0
+        And The Small Wooden Shield:26 is in equipment at 5
     #     And A shield is in the shield equipment slot
 
     # Scenario: Some Equipment has two proper slots
@@ -54,10 +54,10 @@ Feature: Equipment
         Given the player has a Dagger:27 in inventory
         Given the player equips the item 27
         # Given A dagger is in the primary weapon equipment slot
-        Given the player has a Dagger:27 in equipment
-        When the player takes off the item 27
-        Then The Dagger:27 is not in equipment
-        Then The Dagger:27 is in inventory
+        Given the player has a Dagger:27 in equipment at 0
+        When the player takes off the item 27 at 0
+        Then The Dagger:27 is not in equipment at 0
+        Then The Dagger:27 is in inventory at -1
 
     Scenario: Cursed Equipment can be wielded
         Given I have a Player
@@ -65,8 +65,8 @@ Feature: Equipment
         Given the Dagger:27 is cursed
         Given the player has a Dagger:27 in inventory
         Given the player equips the item 27
-        Then The Dagger:27 is in equipment
-        Then The Dagger:27 is not in inventory
+        Then The Dagger:27 is in equipment at 0
+        Then The Dagger:27 is not in inventory at -1
         # And A dagger is in the primary weapon equipment slot
 
     Scenario: Cursed Equipment cannot be taken off
@@ -76,10 +76,10 @@ Feature: Equipment
         Given the player has a Dagger:27 in inventory
         Given the player equips the item 27
         # Given A dagger is in the primary weapon equipment slot
-        Given the player has a Dagger:27 in equipment
-        When the player takes off the item 27
-        Then The Dagger:27 is in equipment
-        Then The Dagger:27 is not in inventory
+        Given the player has a Dagger:27 in equipment at 0
+        When the player takes off the item 27 at 0
+        Then The Dagger:27 is in equipment at 0
+        Then The Dagger:27 is not in inventory at -1
 
     Scenario: New Equipment replaces old equipment
         Given I have a Player
@@ -90,9 +90,9 @@ Feature: Equipment
         Given I spawn a Long Sword:28
         Given the player has a Long Sword:28 in inventory
         Given the player equips the item 28
-        Then The Long Sword:28 is not in inventory
-        Then The Dagger:27 is in inventory
-        And The Long Sword:28 is in equipment
+        Then The Long Sword:28 is not in inventory at -1
+        Then The Dagger:27 is in inventory at -1
+        And The Long Sword:28 is in equipment at 0
 
     Scenario: New Equipment does not replace cursed equipment
         Given I have a Player
@@ -103,5 +103,5 @@ Feature: Equipment
         Given I spawn a Long Sword:28
         Given the player has a Long Sword:28 in inventory
         Given the player equips the item 28
-        Then The Long Sword:28 is in inventory
-        And The Dagger:27 is in equipment
+        Then The Long Sword:28 is in inventory at -1
+        And The Dagger:27 is in equipment at 0

@@ -127,7 +127,24 @@ void CItem::SetColor()
     m_fColorChangeInterval = 0.0f;
 }
 
-unsigned char ItemIDs[ITEM_IDX_MAX + 1] = "|)[](]]\"=~{}{}&?!-_?$~|/\\/|/|";
+unsigned char ItemIDs[ITEM_IDX_MAX + 1] = "|)[](]]\"=~{}{}&?!-_?$~//\\/|/|]";
+int EquipTypes[ITEM_IDX_MAX + 1] = { EQUIP_IDX_MAIN_HAND, EQUIP_IDX_OFF_HAND, EQUIP_IDX_ARMOR,
+                                     EQUIP_IDX_HELMET,    EQUIP_IDX_CLOAK, EQUIP_IDX_GLOVES,
+                                     EQUIP_IDX_BOOTS,   EQUIP_IDX_AMULET,  EQUIP_IDX_RING,
+                                     EQUIP_IDX_TORCH, EQUIP_IDX_MAIN_HAND, EQUIP_IDX_AMMO,
+                                     EQUIP_IDX_MAIN_HAND,    EQUIP_IDX_AMMO, EQUIP_IDX_INVALID,
+                                     EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,  EQUIP_IDX_INVALID,
+                                     EQUIP_IDX_INVALID, EQUIP_IDX_INVALID, EQUIP_IDX_INVALID,
+                                     EQUIP_IDX_INVALID,    EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND,
+                                     EQUIP_IDX_MAIN_HAND,   EQUIP_IDX_MAIN_HAND,  EQUIP_IDX_MAIN_HAND,
+                                     EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND, EQUIP_IDX_BELT };
+
+int CItem::EquipType()
+{
+    int item_type = m_id->m_dwIndex;
+    if( item_type <= ITEM_IDX_INVALID || item_type >= ITEM_IDX_MAX ) return EQUIP_IDX_INVALID;
+    return EquipTypes[item_type];
+}
 void CItem::Draw()
 {
     // Don't draw if something else is there.

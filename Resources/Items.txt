@@ -56,11 +56,24 @@ Item <Bastard sword>
     Color        <200,200,200,255>
 }
 
+Item <Hand Axe>
+{
+    Plural        <Battle  Axes>
+    Type        <ITEM_IDX_AXE>
+    Value        150.0
+    Level        7
+    Damage       <2d4>
+    Weight       3.5
+    Speed        7.0
+    Color        <200,200,200,255>
+}
+
 Item <Battle Axe>
 {
     Plural        <Battle  Axes>
     Type        <ITEM_IDX_AXE>
     Value        600.0
+    Flags       <ITEM_FLAG_2HANDED>
     Level        10
     Damage       <2d4>
     Weight       7.5
@@ -73,6 +86,7 @@ Item <Long Bow>
     Plural        <Long Bows>
     Type        <ITEM_IDX_BOW>
     Value        250.0
+    Flags       <ITEM_FLAG_NEEDSAMMO>
     Level        5
     Damage       <1d8>
     Weight       10.0
@@ -82,20 +96,21 @@ Item <Long Bow>
 
 Item <Quarter Staff>
 {
-Plural        <Quarter Staves>
-Type        <ITEM_IDX_AXE>
-Value     15.0
-Level        10
-Damage       1d6
-Weight        5.0
-Speed        4.0
-Color        <89,90,91,255>
+    Plural        <Quarter Staves>
+    Type        <ITEM_IDX_STAFF>
+    Value       15.0
+    Flags       <ITEM_FLAG_2HANDED>
+    Level        10
+    Damage       1d6
+    Weight        5.0
+    Speed        4.0
+    Color        <89,90,91,255>
 }
 
 Item <Club>
 {
     Plural        <Clubs>
-    Type        <ITEM_IDX_AXE>
+    Type        <ITEM_IDX_MACE>
     Value        600.0
     Level        10
     Damage       <2d3>
@@ -104,11 +119,12 @@ Item <Club>
     Color        <200,200,200,255>
 }
 
-Item <Mace>
+Item <Battle Mace>
 {
-    Plural        <Maces>
-    Type        <ITEM_IDX_AXE>
+    Plural        <Battle Maces>
+    Type        <ITEM_IDX_MACE>
     Value        80.0
+    Flags       <ITEM_FLAG_2HANDED>
     Level        110
     Damage       <2d3>
     Weight       10.0
@@ -119,7 +135,7 @@ Item <Mace>
 Item <Lance>
 {
     Plural        <Lances>
-    Type        <ITEM_IDX_AXE>
+    Type        <ITEM_IDX_SPEAR>
     Value        60.0
     Level        10
     Damage       <3d6>
@@ -131,7 +147,7 @@ Item <Lance>
 Item <Morning Star>
 {
     Plural        <Morning Stars>
-    Type        <ITEM_IDX_AXE>
+    Type        <ITEM_IDX_MACE>
     Value        50.0
     Level        10
     Damage       <2d4>
@@ -143,8 +159,9 @@ Item <Morning Star>
 Item <Glaive>
 {
     Plural        <Glaives>
-    Type        <ITEM_IDX_AXE>
+    Type        <ITEM_IDX_POLEARM>
     Value        60.0
+    Flags       <ITEM_FLAG_2HANDED>
     Level        10
     Damage       <2d5>
     Weight       7.5
@@ -155,8 +172,9 @@ Item <Glaive>
 Item <Halberd>
 {
     Plural        <Halberds>
-    Type        <ITEM_IDX_AXE>
+    Type        <ITEM_IDX_POLEARM>
     Value        90.0
+    Flags       <ITEM_FLAG_2HANDED>
     Level        10
     Damage       <2d5>
     Weight       17.5
@@ -167,8 +185,9 @@ Item <Halberd>
 Item <War Hammer>
 {
     Plural        <War hammers>
-    Type        <ITEM_IDX_AXE>
+    Type        <ITEM_IDX_MACE>
     Value        10.0
+    Flags       <ITEM_FLAG_2HANDED>
     Level        10
     Damage       <1d5>
     Weight       5.0
@@ -179,7 +198,7 @@ Item <War Hammer>
 Item <Spear>
 {
     Plural        <Spears>
-    Type        <ITEM_IDX_AXE>
+    Type        <ITEM_IDX_SPEAR>
     Value        10.0
     Level        10
     Damage       <2d4>
@@ -191,7 +210,7 @@ Item <Spear>
 Item <Mace>
 {
     Plural        <Maces>
-    Type        <ITEM_IDX_AXE>
+    Type        <ITEM_IDX_MACE>
     Value        80.0
     Level        10
     Damage       <1d8>
@@ -217,6 +236,7 @@ Item <Trident>
 Plural        <Tridents>
 Type        <ITEM_IDX_POLEARM>
 Value     40.0
+Flags       <ITEM_FLAG_2HANDED>
 Level        10
 Damage       3d4
 Weight        4.0
@@ -227,7 +247,7 @@ Color        <200,200,200,255>
 Item <Long Sword>
 {
     Plural        <Long swords>
-    Type        <ITEM_IDX_WEAPON>
+    Type        <ITEM_IDX_SWORD>
     Value       150.0
     Level       1
     Damage      <1d10>
@@ -239,7 +259,7 @@ Item <Long Sword>
 Item <Dagger>
 {
     Plural        <Daggers>
-    Type        <ITEM_IDX_WEAPON>
+    Type        <ITEM_IDX_SWORD>
     Value       20.0
     Level       1
     Damage      <1d4>
@@ -253,6 +273,7 @@ Item <Small Wooden Shield>
     Plural        <Small Wooden Shields>
     Type        <ITEM_IDX_SHIELD>
     Value       10.0
+    Flags       <ITEM_FLAG_OFFHAND>
     Level       1
     AC          2.0
     Weight      10.0
@@ -305,6 +326,7 @@ Plural        <Brass Lanterns>
 Type        <ITEM_IDX_TORCH>
 Effect       <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LIGHT>,5,7500,15000
 Value       10.0
+Flags       <ITEM_FLAG_NEEDSAMMO>
 Level       5
 Weight      2.0
 Color        <225,225,50,255>
@@ -507,6 +529,7 @@ Item <Small Steel Shield>
     Plural        <Small Steel Shields>
     Type        <ITEM_IDX_SHIELD>
     Value        100.0
+    Flags       <ITEM_FLAG_OFFHAND>
     Level        2
     AC           4.0
     Weight       10.0
@@ -518,6 +541,7 @@ Item <Large Steel Shield>
     Plural        <Large Steel Shields>
     Type        <ITEM_IDX_SHIELD>
     Value        150.0
+    Flags       <ITEM_FLAG_OFFHAND>
     Level        2
     AC           6.0
     Weight       10.0
@@ -527,6 +551,7 @@ Item <Steel Shield>
     Plural      <Steel Shields>
     Type        <ITEM_IDX_SHIELD>
     Value        125.0
+    Flags       <ITEM_FLAG_OFFHAND>
     Level        2
     AC           5.0
     Weight       10.0

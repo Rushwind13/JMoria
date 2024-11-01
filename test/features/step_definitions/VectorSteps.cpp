@@ -101,11 +101,29 @@ THEN( "^The vector is in world$" )
     EXPECT_EQ( expected, actual );
 }
 
+THEN( "^The vector is within world$" )
+{
+    bool expected = true;
+    ScenarioScope<TestCtx> context;
+    bool actual = context->vec.IsWithinWorld();
+
+    EXPECT_EQ( expected, actual );
+}
+
 THEN( "^The vector is not in world$" )
 {
     bool expected = false;
     ScenarioScope<TestCtx> context;
     bool actual = context->vec.IsInWorld();
+
+    EXPECT_EQ( expected, actual );
+}
+
+THEN( "^The vector is not within world$" )
+{
+    bool expected = false;
+    ScenarioScope<TestCtx> context;
+    bool actual = context->vec.IsWithinWorld();
 
     EXPECT_EQ( expected, actual );
 }

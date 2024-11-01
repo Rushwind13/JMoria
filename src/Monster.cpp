@@ -49,19 +49,29 @@ void CMonster::InitBrain( CMonsterDef *pmd )
 
 JResult CMonster::CreateMonster( CMonsterDef *pmd, JVector vSpawnPoint, bool bNear )
 {
+    JResult retval = JSUCCESS;
     int desired = Util::Roll( pmd->m_szAppear );
     for( int count = 0; count < desired; count++ )
     {
         CMonster *pMon;
         pMon = new CMonster;
-        pMon->InitAndSpawn( pmd, bNear ? Util::Near( vSpawnPoint ) : vSpawnPoint );
-
-        // force additional monsters of the same type to appear near each other
-        bNear = true;
-        vSpawnPoint = pMon->GetPos();
+        retval = pMon->InitAndSpawn( pmd, bNear ? Util::Near( vSpawnPoint ) : vSpawnPoint );
+        if( retval == JSUCCESS )
+        {
+            // force additional monsters of the same type to appear near each other
+            bNear = true;
+            vSpawnPoint = pMon->GetPos();
+        }
+        else
+        {
+            JLog(LOG_LEVEL_WARN, true, "spawn failed.\n");
+            // That spawn failed; clean up
+            // delete pMon;
+            // pMon = NULL;
+        }
     }
 
-    return JSUCCESS;
+    return retval;
 }
 
 JResult CMonster::InitAndSpawn( CMonsterDef *pmd, JVector vSpawnPoint )
@@ -89,8 +99,9 @@ JResult CMonster::SpawnMonster( JVector vSpawnPoint )
 {
     bool bMonsterSpawned = false;
     JLog( LOG_LEVEL_WARN, false, "Trying to spawn monster type: %s...", m_md->m_szName );
-    if( vSpawnPoint.IsInWorld() )
+    if( vSpawnPoint.IsWithinWorld() )
     {
+        JLog(LOG_LEVEL_WARN, true, "given <%.2f %.2f>...", VEC_EXPAND(vSpawnPoint));
         return SpawnAt( vSpawnPoint );
     }
 
@@ -98,8 +109,8 @@ JResult CMonster::SpawnMonster( JVector vSpawnPoint )
     while( !bMonsterSpawned )
     {
         JLog( LOG_LEVEL_WARN, false, "." );
-        vTryPos.Init( (float)( Util::GetRandom( 0, DUNG_WIDTH - 1 ) ),
-                      (float)( Util::GetRandom( 0, DUNG_HEIGHT - 1 ) ) );
+        vTryPos.Init( (float)( Util::GetRandom( 1, DUNG_WIDTH - 2 ) ),
+                      (float)( Util::GetRandom( 1, DUNG_HEIGHT - 2 ) ) );
 
         if( SpawnAt( vTryPos ) == JSUCCESS )
         {
@@ -112,6 +123,7 @@ JResult CMonster::SpawnMonster( JVector vSpawnPoint )
 
 JResult CMonster::SpawnAt( JVector vPos )
 {
+    // JLog(LOG_LEVEL_WARN, true, "trying <%.2f %.2f>...", VEC_EXPAND(vPos));
     if( g_pGame->GetDungeon()->IsWalkableFor( vPos ) == DUNG_COLL_NO_COLLISION )
     {
         SetPos( vPos );
@@ -170,29 +182,29 @@ int CMonster::TakeDamage( float fDamage )
 // draw routines
 void CMonster::Breed()
 {
+    if( ( m_md->m_dwFlags & MON_FLAG_BREED ) != MON_FLAG_BREED ) 
+        return;
+
     if( g_pGame->GetTime() < m_fLastBreed + BREED_INTERVAL )
         return;
 
-    if( ( m_md->m_dwFlags & MON_FLAG_BREED ) == MON_FLAG_BREED )
+    if( m_dwFecundity > 0 )
     {
-        if( m_dwFecundity > 0 )
+        JLog( LOG_LEVEL_DEBUG, true, "still going: %d ", m_dwFecundity );
+        if( Util::GetRandom( 0.0f, 1.0f ) <= BREED_CHANCE )
         {
-            JLog( LOG_LEVEL_DEBUG, true, "still going: %d ", m_dwFecundity );
-            if( Util::GetRandom( 0.0f, 1.0f ) <= BREED_CHANCE )
-            {
-                JLog( LOG_LEVEL_DEBUG, false, "spawnd!" );
-                // Spawn a new copy
-                CreateMonster( m_md, GetPos(), true );
-            }
-            JLog( LOG_LEVEL_DEBUG, false, "\n" );
-            m_dwFecundity--;
+            JLog( LOG_LEVEL_WARN, false, "spawnd!" );
+            // Spawn a new copy
+            CreateMonster( m_md, GetPos(), true );
         }
-        else
-        {
-            JLog( LOG_LEVEL_WARN, true, "sterilizing\n" );
-            // sterilize
-            m_md->m_dwFlags = m_md->m_dwFlags & ~MON_FLAG_BREED;
-        }
+        JLog( LOG_LEVEL_DEBUG, false, "\n" );
+        m_dwFecundity--;
+    }
+    else
+    {
+        JLog( LOG_LEVEL_WARN, true, "sterilizing\n" );
+        // sterilize
+        m_md->m_dwFlags = m_md->m_dwFlags & ~MON_FLAG_BREED;
     }
     m_fLastBreed = g_pGame->GetTime();
 }

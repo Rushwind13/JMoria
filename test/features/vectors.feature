@@ -49,6 +49,22 @@ Feature: Vectors
         Given I have a JVector 99,99 in the data
         Then The vector is in world
 
+    Scenario: Vector is within world
+        Given I have a JVector 0,0 in the data
+        Then The vector is not within world
+
+    Scenario: Vector is within world
+        Given I have a JVector 99,99 in the data
+        Then The vector is not within world
+
+    Scenario: Vector is within world
+        Given I have a JVector 1,1 in the data
+        Then The vector is within world
+
+    Scenario: Vector is within world
+        Given I have a JVector 98,98 in the data
+        Then The vector is within world
+
     Scenario: Vector is not in world horz
         Given I have a JVector 100,50 in the data
         Then The vector is not in world

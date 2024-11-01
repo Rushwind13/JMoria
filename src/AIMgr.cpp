@@ -27,12 +27,23 @@ bool CAIMgr::Update( float fCurTime )
     return true;
 }
 
-void CAIMgr::DestroyBrain( CAIBrain *delete_me ) { m_llAIBrains->Remove( delete_me->m_pllLink ); }
+void CAIMgr::DestroyBrain( CAIBrain *delete_me )
+ { 
+    m_llAIBrains->Remove( delete_me->m_pllLink );
+ }
 
 CAIBrain::CAIBrain() : m_dwMoveType( 0 ), m_fSpeed( 0.0f ), m_eBrainState( BRAINSTATE_INVALID ) {}
 
 bool CAIBrain::Update( float fCurTime )
 {
+    if( m_vPos.IsZero() )
+    {
+        JLog(LOG_LEVEL_INFO, true, "%s has a bad position...\n", m_pParent->m_md->m_szName);
+        // g_pGame->GetDungeon()->RemoveMonster( m_pParent);
+
+        return false;
+    }
+
     if( g_pGame->GetTime() > m_pParent->m_fLastHPTime + AI_TURNS_PER_HP )
     {
         m_pParent->m_fCurHP++;
@@ -122,67 +133,34 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
 
     while( m_fStateTicks >= 1.0f )
     {
-        JLog( LOG_LEVEL_DEBUG, true, "and we're walking\n" );
-        didWalk = true;
-        JVector vTryPos( m_vPos + m_vVel );
-        if( Util::IsInWorld( vTryPos ) )
-        {
-            int dwCollideType = g_pGame->GetDungeon()->IsWalkableFor( vTryPos );
-            switch( dwCollideType )
-            {
-            case DUNG_COLL_NO_COLLISION:
-                JLog( LOG_LEVEL_DEBUG, true, "swing and a miss\n" );
-                if( m_dwMoveType != MON_AI_DONTMOVE )
-                {
-                    JLog( LOG_LEVEL_DEBUG, true, "on the move\n" );
-                    g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster = NULL;
-                    m_vPos += m_vVel;
-                    g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster = m_pParent;
-                }
-                break;
-            case DUNG_COLL_PLAYER:
-                JLog( LOG_LEVEL_DEBUG, true, "ouch! you ran into the player!\n" );
-                char szStatus[16];
-                float fDamageMult = 1.0f;
-                // TODO: make this use all the attacks, not just the first one
-                float fRoll = m_pParent->Attack();
-                bool bHit = g_pGame->GetPlayer()->Hit( fRoll );
-                if( bHit )
-                {
-                    // TODO: make this differ based on attack effect type
-                    sprintf( szStatus, "hits" );
-                }
-                else
-                {
-                    sprintf( szStatus, "misses" );
-                }
-                g_pGame->GetMsgs()->Printf( "The %s %s you.\n", m_pParent->GetName(), szStatus );
-
-                if( bHit )
-                {
-                    if( fRoll > 80.0f )
-                    {
-                        g_pGame->GetMsgs()->Printf( "(It was an excellent hit! (x2 damage)\n" );
-                        fDamageMult = 2.0f;
-                    }
-
-                    float fDamage = m_pParent->Damage( fDamageMult );
-                    g_pGame->GetPlayer()->TakeDamage( fDamage, m_pParent->GetName() );
-                }
-                break;
-            }
-        }
         m_fStateTicks -= 1.0f;
-    }
-    /*JVector delta;
-    delta *= (m_fSpeed * fCurTime);
+        didWalk = true;
+        if( m_vVel.IsZero() ) continue;
+        JVector vTryPos( m_vPos + m_vVel );
+        JLog( LOG_LEVEL_DEBUG, true, "and we're walking... <%.2f %.2f> + <%.2f %.2f> = <%.2f %.2f> ",
+        VEC_EXPAND(m_vPos), VEC_EXPAND(m_vVel), VEC_EXPAND(vTryPos) );
+        if( !Util::IsInWorld( vTryPos ) )
+        {
+            continue;
+        }
 
-    JVector junk = m_vPos + delta;
-    if( Util::IsInWorld(junk) )
-    {
-            JLog( LOG_LEVEL_INFO, true,  "moving from <%f %f> to <%f %f>...\n", VEC_EXPAND(m_vPos),
- VEC_EXPAND(m_vPos+delta) ); m_vPos += delta;
- }/* */
+        JLog( LOG_LEVEL_DEBUG, true, "and we're in the world... " );
+        int dwCollideType = g_pGame->GetDungeon()->IsWalkableFor( vTryPos );
+        switch( dwCollideType )
+        {
+        case DUNG_COLL_NO_COLLISION:
+            Move();
+            break;
+        case DUNG_COLL_PLAYER:
+            CollideWithPlayer();
+            break;
+        default:
+            JLog(LOG_LEVEL_DEBUG, true, "you hit %d ", dwCollideType);
+            break;
+        }
+    }
+
+    JLog(LOG_LEVEL_DEBUG, false, "\n");
     if( didWalk )
     {
         JLog( LOG_LEVEL_DEBUG, true, "looking\n" );
@@ -192,14 +170,60 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
     return true;
 }
 
+void CAIBrain::Move()
+{
+    JLog( LOG_LEVEL_DEBUG, true, "swing and a miss " );
+    if( m_dwMoveType != MON_AI_DONTMOVE )
+    {
+        JLog( LOG_LEVEL_DEBUG, true, "on the move " );
+        g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster = NULL;
+        m_vPos += m_vVel;
+        g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster = m_pParent;
+    }
+}
+
+void CAIBrain::CollideWithPlayer()
+{
+    JLog( LOG_LEVEL_DEBUG, true, "ouch! you ran into the player! " );
+    char szStatus[16];
+    float fDamageMult = 1.0f;
+    // TODO: make this use all the attacks, not just the first one
+    float fRoll = m_pParent->Attack();
+    bool bHit = g_pGame->GetPlayer()->Hit( fRoll );
+    if( bHit )
+    {
+        // TODO: make this differ based on attack effect type
+        sprintf( szStatus, "hits" );
+    }
+    else
+    {
+        sprintf( szStatus, "misses" );
+    }
+    g_pGame->GetMsgs()->Printf( "The %s %s you.\n", m_pParent->GetName(), szStatus );
+
+    if( bHit )
+    {
+        if( fRoll > 80.0f )
+        {
+            g_pGame->GetMsgs()->Printf( "(It was an excellent hit! (x2 damage)\n" );
+            fDamageMult = 2.0f;
+        }
+
+        float fDamage = m_pParent->Damage( fDamageMult );
+        g_pGame->GetPlayer()->TakeDamage( fDamage, m_pParent->GetName() );
+    }
+}
+
 bool CAIBrain::UpdateIdle( float fCurTime ) { return true; }
 
 bool CAIBrain::SetRandomDest( float fCurTime )
 {
     JFVector delta, dest;
-    delta.Init( (float)( Util::GetRandom( -1, 1 ) ), (float)( Util::GetRandom( -1, 1 ) ) );
-
+    delta.Init( (int)( Util::GetRandom( -2.0f, 2.0f ) ), (int)( Util::GetRandom( -2.0f, 2.0f ) ) );
     dest = m_vPos + delta;
+    
+    JLog( LOG_LEVEL_DEBUG, true, "and we're rnging... <%.2f %.2f> + <%.2f %.2f> = <%.2f %.2f> ",
+        VEC_EXPAND(m_vPos), VEC_EXPAND(delta), VEC_EXPAND(dest) );
 
     if( Util::IsInWorld( dest ) )
     {
@@ -209,9 +233,11 @@ bool CAIBrain::SetRandomDest( float fCurTime )
         case DUNG_COLL_NO_COLLISION:
         case DUNG_COLL_PLAYER:
             m_vVel = delta;
+            JLog( LOG_LEVEL_DEBUG, true, "hit %d change course <%.2f %.2f>\n", dwCollideType, VEC_EXPAND(m_vVel));
             break;
         default:
-            m_vVel.Init();
+            JLog( LOG_LEVEL_DEBUG, true, "hit %d steady course <%.2f %.2f>\n",dwCollideType, VEC_EXPAND(m_vVel));
+            // m_vVel.Init();
             break;
         }
     }
@@ -223,8 +249,6 @@ bool CAIBrain::WalkSeek( float fCurTime )
 {
     JVector delta( 0, 0 ), dest( 0, 0 );
     JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
-
-    m_fStateTicks += fCurTime * m_fSpeed;
 
     float x_delta = vPlayerPos.x - m_vPos.x;
     float y_delta = vPlayerPos.y - m_vPos.y;
@@ -241,6 +265,9 @@ bool CAIBrain::WalkSeek( float fCurTime )
     delta.Init( x_delta, y_delta );
 
     dest = m_vPos + delta;
+
+        JLog( LOG_LEVEL_DEBUG, true, "and we're seeking... <%.2f %.2f> + <%.2f %.2f> = <%.2f %.2f> ",
+        VEC_EXPAND(m_vPos), VEC_EXPAND(delta), VEC_EXPAND(dest) );
     int dwCollideType = DUNG_COLL_NO_COLLISION;
     if( dest.IsInWorld() )
     {
@@ -248,7 +275,7 @@ bool CAIBrain::WalkSeek( float fCurTime )
     }
     else
     {
-        delta.Init();
+        // delta.Init();
     }
 
     return WalkSeek( fCurTime, delta, dwCollideType );
@@ -261,9 +288,11 @@ bool CAIBrain::WalkSeek( float fCurTime, JVector &delta, int dwCollideType )
     case DUNG_COLL_NO_COLLISION:
     case DUNG_COLL_PLAYER:
         m_vVel = delta;
+        JLog( LOG_LEVEL_DEBUG, true, "hit %d change course <%.2f %.2f>\n", dwCollideType, VEC_EXPAND(m_vVel));
         break;
     default:
-        m_vVel.Init();
+        JLog( LOG_LEVEL_DEBUG, true, "hit %d steady course <%.2f %.2f>\n",dwCollideType, VEC_EXPAND(m_vVel));
+        // m_vVel.Init();
         break;
     }
 

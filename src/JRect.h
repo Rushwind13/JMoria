@@ -80,6 +80,17 @@ public:
         else
             top = bottom - dwHeight;
     };
+    
+    bool IsValidRect()
+    {
+        if( left > right || top > bottom )
+        {
+            JLog( LOG_LEVEL_ERROR, true, "JRect has bad memory allocation: <%d %d, %d %d>\n", left,
+                  top, right, bottom );
+            return false;
+        }
+        return true;
+    }
 
     bool IsInWorld()
     {
@@ -87,14 +98,17 @@ public:
         {
             return false;
         }
-        if( left > right || top > bottom )
+
+        return IsValidRect();
+    }
+
+    bool IsWithinWorld()
+    {
+        if( left < 1 || right >= DUNG_WIDTH-1 || top < 1 || bottom >= DUNG_HEIGHT-1 )
         {
-            JLog( LOG_LEVEL_ERROR, true, "JRect has bad memory allocation: <%d %d, %d %d>\n", left,
-                  top, right, bottom );
             return false;
         }
-
-        return true;
+        return IsValidRect();
     }
 };
 

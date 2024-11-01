@@ -64,7 +64,7 @@ JResult CItem::SpawnItem( JVector vSpawnPoint )
     bool bItemSpawned = false;
     JLog( LOG_LEVEL_WARN, false, "Trying to spawn item type: %s...", m_id->m_szName );
 
-    if( vSpawnPoint.IsInWorld() )
+    if( vSpawnPoint.IsWithinWorld() )
     {
         return SpawnAt( vSpawnPoint );
     }
@@ -73,8 +73,8 @@ JResult CItem::SpawnItem( JVector vSpawnPoint )
     while( !bItemSpawned )
     {
         JLog( LOG_LEVEL_WARN, false, "." );
-        vTryPos.Init( (float)( Util::GetRandom( 0, DUNG_WIDTH - 1 ) ),
-                      (float)( Util::GetRandom( 0, DUNG_HEIGHT - 1 ) ) );
+        vTryPos.Init( (float)( Util::GetRandom( 1, DUNG_WIDTH - 2 ) ),
+                      (float)( Util::GetRandom( 1, DUNG_HEIGHT - 2 ) ) );
 
         // JLog( LOG_LEVEL_DEBUG, false, "Trying to spawn item type: %d at <%.2f %.2f>...\n",
         // m_md->m_dwType, vTryPos.x, vTryPos.y ); g_pGame->GetMsgs()->Printf( "Trying to spawn item

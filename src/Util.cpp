@@ -100,12 +100,31 @@ float Roll( const char *szFormat )
 }
 
 bool IsInWorld( JFVector vIn ) { return vIn.IsInWorld(); }
+bool IsWithinWorld( JFVector vIn ) { return vIn.IsWithinWorld(); }
 
 bool IsInWorld( JRect rcIn ) { return rcIn.IsInWorld(); }
+bool IsWithinWorld( JRect rcIn ) { return rcIn.IsWithinWorld(); }
 
 JVector Near( const JVector vOrig, int distance )
 {
-    JVector vDelta( GetRandom( -distance, distance ), GetRandom( -distance, distance ) );
+    // want an integer position within a certain distance
+    // but never the same as the original position
+    int direction = GetRandom(0,7);
+    int x = 0;
+    int y = 0;
+
+    switch(direction)
+    {
+        case DIR_NORTH: x = 0; y = 1; break;
+        case DIR_NE:    x = 1; y = 1; break;
+        case DIR_EAST:  x = 1; y = 0; break;
+        case DIR_SE:    x = 1; y = -1; break;
+        case DIR_SOUTH: x = 0; y = -1; break;
+        case DIR_SW:    x = -1; y = -1; break;
+        case DIR_WEST:  x = -1; y = 0; break;
+        case DIR_NW:    x = -1; y = 1; break;
+    }
+    JVector vDelta( x*GetRandom(1,distance),y*GetRandom(1,distance) );
     return JVector( vOrig + vDelta );
 }
 

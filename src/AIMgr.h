@@ -54,6 +54,8 @@ public:
 #else
 protected:
 #endif
+    void Move();
+    void CollideWithPlayer();
     float m_fStateTicks;
     JVector m_vVel;
     eBrainState m_eBrainState;

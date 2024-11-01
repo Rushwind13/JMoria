@@ -633,6 +633,7 @@ void CDungeon::RemoveMonster( CMonster *pMon )
 
 int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
 {
+    if( !vPos.IsWithinWorld() ) return false;
     // Check for someone else standing there first (handles things that can walk thru walls)
     CDungeonTile *curTile = GetTile( vPos );
     if( curTile == NULL )
@@ -643,13 +644,13 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
     if( curTile->m_pCurMonster != NULL )
     {
         // Monsters can collide with other monsters
+        JLog( LOG_LEVEL_INFO, true, "Monster attacking other monsters is not implemented yet.\n" );
         return DUNG_COLL_MONSTER;
     }
     else if( !isPlayer && g_pGame->GetPlayer() && g_pGame->GetPlayer()->m_bHasSpawned &&
              g_pGame->GetPlayer()->m_vPos == vPos )
     {
         // Monsters colliding with the player can be hazardous to your health.
-        JLog( LOG_LEVEL_WARN, true, "Monster attacking not implemented yet.\n" );
         return DUNG_COLL_PLAYER;
     }
     else if( isPlayer && curTile->m_pCurItem != NULL )

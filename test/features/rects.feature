@@ -16,6 +16,22 @@ Feature: Rects
         Given I have a JRect 99,99,99,99 in the data
         Then The rect is in world
 
+    Scenario: Rect is not within world
+        Given I have a JRect 0,0,0,0 in the data
+        Then The rect is not within world
+
+    Scenario: Rect is not within world
+        Given I have a JRect 99,99,99,99 in the data
+        Then The rect is not within world
+
+    Scenario: Rect is within world
+        Given I have a JRect 1,1,1,1 in the data
+        Then The rect is within world
+
+    Scenario: Rect is within world
+        Given I have a JRect 98,98,98,98 in the data
+        Then The rect is within world
+
     Scenario: Rect is not in world horz
         Given I have a JRect 50,50,100,50 in the data
         Then The rect is not in world

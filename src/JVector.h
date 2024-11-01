@@ -145,6 +145,7 @@ public:
     }
 
     bool IsInWorld() { return ( x >= 0 && x < ( DUNG_WIDTH ) && y >= 0 && y < ( DUNG_HEIGHT ) ); }
+    bool IsWithinWorld() { return ( x >= 1 && x < ( DUNG_WIDTH -1 ) && y >= 1 && y < ( DUNG_HEIGHT -1 ) ); }
 
     void Init( T inx = 0, T iny = 0 )
     {

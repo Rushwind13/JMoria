@@ -38,6 +38,17 @@
 #define STATUS_SLEEPING 9
 #define STATUS_MAX 10
 
+#define DIR_INVALID -1
+#define DIR_NORTH 0
+#define DIR_NE 1
+#define DIR_EAST 2
+#define DIR_SE 3
+#define DIR_SOUTH 4
+#define DIR_SW 5
+#define DIR_WEST 6
+#define DIR_NW 7
+#define DIR_MAX 8
+
 // Types of Dungeon Tiles
 #define DUNG_IDX_INVALID -1
 #define DUNG_IDX_FLOOR 0

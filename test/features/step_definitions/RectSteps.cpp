@@ -85,3 +85,21 @@ THEN( "^The rect is not in world$" )
 
     EXPECT_EQ( expected, actual );
 }
+
+THEN( "^The rect is within world$" )
+{
+    bool expected = true;
+    ScenarioScope<TestCtx> context;
+    bool actual = context->area.IsWithinWorld();
+
+    EXPECT_EQ( expected, actual );
+}
+
+THEN( "^The rect is not within world$" )
+{
+    bool expected = false;
+    ScenarioScope<TestCtx> context;
+    bool actual = context->area.IsWithinWorld();
+
+    EXPECT_EQ( expected, actual );
+}

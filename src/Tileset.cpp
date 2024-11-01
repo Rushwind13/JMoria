@@ -38,7 +38,7 @@ JResult CTileset::Load( const char *szName, int dwCellWidth, int dwCellHeight )
     }
     else
     {
-        JLog( LOG_LEVEL_INFO, true,
+        JLog( LOG_LEVEL_WARN, true,
               "g_pGame not initialized yet, when loading %s -- m_Texture not created.\n", szName );
     }
 #endif

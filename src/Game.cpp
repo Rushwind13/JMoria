@@ -86,13 +86,13 @@ JResult CGame::Init( const char *szBasedir )
     m_pAIMgr = new CAIMgr;
     m_pAIMgr->Init();
 
-    // Init the Dungeon
-    m_pDungeon = new CDungeon;
-    m_pDungeon->Init( szBasedir );
-
     // Init the Player
     m_pPlayer = new CPlayer;
     m_pPlayer->Init( szBasedir );
+
+    // Init the Dungeon
+    m_pDungeon = new CDungeon;
+    m_pDungeon->Init( szBasedir );
 
 #ifdef PROFILE
     ProfileInit();
@@ -112,7 +112,7 @@ JResult CGame::Init( const char *szBasedir )
 
 void CGame::Term()
 {
-    JLog( LOG_LEVEL_INFO, true, "Terminating the game..." );
+    JLog( LOG_LEVEL_WARN, true, "Terminating the game..." );
     if( m_pRender )
     {
         JLog( LOG_LEVEL_INFO, true, "Renderer..." );
@@ -262,7 +262,7 @@ void CGame::SetState( int eNewState )
         m_pCurState = reinterpret_cast<CStateBase *>( m_pRestState );
         break;
     default:
-        JLog( LOG_LEVEL_INFO, true, "Tried to change to unknown state.\n" );
+        JLog( LOG_LEVEL_ERROR, true, "Tried to change to unknown state.\n" );
         break;
     }
 }
@@ -408,7 +408,7 @@ bool CGame::Update( float fCurTime )
             GetPlayer()->DisplayEquipment( PLACEMENT_USE );
             break;
         default:
-            JLog( LOG_LEVEL_INFO, true, "Nothing to display for command\n" );
+            JLog( LOG_LEVEL_WARN, true, "Nothing to display for command\n" );
             break;
         }
         GetUse()->Update( fCurTime );
@@ -487,7 +487,7 @@ void CGame::HandleEvents( int &isActive, int &done )
             retval = m_pCurState->HandleKey( &event.key.keysym );
             if( retval == JBOGUSKEY )
             {
-                JLog( LOG_LEVEL_INFO, true, "Bogus command: 0x%x\n", event.key.keysym.sym );
+                JLog( LOG_LEVEL_ERROR, true, "Bogus command: 0x%x\n", event.key.keysym.sym );
                 GetMsgs()->Printf( "Unrecognized command: 0x%x\n", event.key.keysym.sym );
             }
             else if( retval == JQUITREQUEST )
@@ -515,7 +515,7 @@ void CGame::HandleEvents( int &isActive, int &done )
                 g_pGame->GetDungeon()->Zoom( -3 );
                 break;
             }
-            /*JLog( LOG_LEVEL_INFO, true, "Got up event type: %d which: %d button: %d state: %d at
+            /*JLog( LOG_LEVEL_DEBUG, true, "Got up event type: %d which: %d button: %d state: %d at
             <%d %d>\n", event.button.type, event.button.which, event.button.button,
             event.button.state, event.button.x, event.button.y );/* */
             break;

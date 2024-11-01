@@ -41,14 +41,14 @@ int CModState::OnHandleOpen( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true,
+        JLog( LOG_LEVEL_WARN, true,
               "Open cmd still waiting for a directional key: Directional key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
         return 0;
     }
 
     // We got a directional key; do an "open" in that direction
-    JLog( LOG_LEVEL_INFO, true, "OPEN modifier got a directional\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "OPEN modifier got a directional\n" );
     if( TestOpen() )
     {
         if( DoOpen() )
@@ -86,14 +86,14 @@ int CModState::OnHandleClose( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true,
+        JLog( LOG_LEVEL_WARN, true,
               "close cmd still waiting for a directional key: Directional key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
         return 0;
     }
 
     // We got a directional key; do an "open" in that direction
-    JLog( LOG_LEVEL_INFO, true, "CLOSE modifier got a directional\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "CLOSE modifier got a directional\n" );
     if( TestClose() )
     {
         if( DoClose() )
@@ -131,14 +131,14 @@ int CModState::OnHandleTunnel( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true,
+        JLog( LOG_LEVEL_WARN, true,
               "Tunnel cmd still waiting for a directional key: Directional key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
         return 0;
     }
 
     // We got a directional key; do an "open" in that direction
-    JLog( LOG_LEVEL_INFO, true, "TUNNEL modifier got a directional\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "TUNNEL modifier got a directional\n" );
     if( TestTunnel() )
     {
         if( DoTunnel() )
@@ -186,13 +186,13 @@ int CModState::OnHandleInit( SDL_Keysym *keysym )
             }
             else
             {
-                JLog( LOG_LEVEL_INFO, true, "THROW not implemented yet.\n" );
+                JLog( LOG_LEVEL_WARN, true, "THROW not implemented yet.\n" );
                 ResetToState( STATE_COMMAND );
                 return 0;
             }
             break;
         default:
-            JLog( LOG_LEVEL_INFO, true,
+            JLog( LOG_LEVEL_ERROR, true,
                   "There seems to be some kind of mistake; I don't handle mod: %d\n", m_cCommand );
             ResetToState( STATE_COMMAND );
             return 0;
@@ -204,7 +204,7 @@ int CModState::OnHandleInit( SDL_Keysym *keysym )
         return 0;
     }
 
-    JLog( LOG_LEVEL_INFO, true,
+    JLog( LOG_LEVEL_ERROR, true,
           "Error: tried to init modify state when it was already initted...\n" );
     ResetToState( STATE_COMMAND );
     // shouldn't get here

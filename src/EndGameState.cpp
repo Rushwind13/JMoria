@@ -77,12 +77,12 @@ int CEndGameState::OnHandleTomb( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true, "Name cmd still waiting for a valid key.\n" );
+        JLog( LOG_LEVEL_WARN, true, "Name cmd still waiting for a valid key.\n" );
         return 0;
     }
 
     // We got a valid key
-    JLog( LOG_LEVEL_INFO, true, "TOMB modifier got a valid key\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "TOMB modifier got a valid key\n" );
     g_pGame->GetEnd()->Clear();
     DoTomb();
 
@@ -108,12 +108,12 @@ int CEndGameState::OnHandleScores( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true, "Name cmd still waiting for a valid key.\n" );
+        JLog( LOG_LEVEL_WARN, true, "Name cmd still waiting for a valid key.\n" );
         return 0;
     }
 
     // We got a valid key
-    JLog( LOG_LEVEL_INFO, true, "SCORES modifier got a valid key\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "SCORES modifier got a valid key\n" );
     g_pGame->GetEnd()->Clear();
     DoScores();
 
@@ -122,7 +122,7 @@ int CEndGameState::OnHandleScores( SDL_Keysym *keysym )
 
 int CEndGameState::OnHandleInit( SDL_Keysym *keysym )
 {
-    JLog( LOG_LEVEL_INFO, true, "Initializing endgame state...\n" );
+    JLog( LOG_LEVEL_WARN, true, "Initializing endgame state...\n" );
 
     m_pScore->InitScore();
 

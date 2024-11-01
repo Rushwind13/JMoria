@@ -114,7 +114,7 @@ void CDungeon::Init( const char *szBasedir )
 
     m_bDraw = true;
 
-    CreateNewLevel( DUNG_CFG_START_LEVEL );
+    OnChangeLevel( DUNG_CFG_START_LEVEL );
 }
 
 JResult CDungeon::TerminateLevel()
@@ -238,10 +238,11 @@ JResult CDungeon::PlaceStairs( const int desired, const int type )
     while( count < desired )
     {
         bStairsSpawned = false;
-        JLog( LOG_LEVEL_INFO, true, "Trying to spawn stairs type: %d...", type );
+        JLog( LOG_LEVEL_WARN, false, "Trying to spawn stairs type: %d...", type );
         JVector vTryPos;
         while( !bStairsSpawned )
         {
+            JLog( LOG_LEVEL_WARN, false, "." );
             vTryPos.Init( (float)( Util::GetRandom( 0, DUNG_WIDTH - 1 ) ),
                           (float)( Util::GetRandom( 0, DUNG_HEIGHT - 1 ) ) );
 
@@ -254,7 +255,8 @@ JResult CDungeon::PlaceStairs( const int desired, const int type )
             {
                 GetTile( vTryPos )->m_dtd = &m_dtdlist[type];
                 bStairsSpawned = true;
-                JLog( LOG_LEVEL_INFO, false, "Success!\n" );
+                JLog( LOG_LEVEL_WARN, false, "Success! Spawned at <%.2f %.2f>\n",
+                      VEC_EXPAND( vTryPos ) );
             }
         }
         count++;
@@ -267,7 +269,7 @@ JResult CDungeon::PlaceItems( const int depth )
     m_llItems = new JLinkList<CItem>;
 
     int desired_items = int( m_fOpenFloorArea * DUNG_CFG_ITEMS_PER_LEVEL );
-    JLog( LOG_LEVEL_INFO, true, "Possible spawn points: %0.2f  desired items: %d\n",
+    JLog( LOG_LEVEL_WARN, false, "\nPossible spawn points: %0.2f  desired items: %d\n",
           m_fOpenFloorArea, desired_items );
 
     while( desired_items > 0 )
@@ -280,7 +282,7 @@ JResult CDungeon::PlaceItems( const int depth )
         }
 
         CItemDef *chosen_item = m_llItemDefs->GetLink( which_item )->m_lpData;
-        JLog( LOG_LEVEL_INFO, true, "Choosing item %d, called %s", which_item,
+        JLog( LOG_LEVEL_DEBUG, true, "Choosing item %d, called %s", which_item,
               chosen_item->m_szName );
 
         CItem::CreateItem( chosen_item );
@@ -296,7 +298,7 @@ JResult CDungeon::SpawnMonsters( const int depth )
     m_llMonsters = new JLinkList<CMonster>;
 
     int desired_monsters = int( m_fOpenFloorArea * DUNG_CFG_MONSTERS_PER_LEVEL );
-    JLog( LOG_LEVEL_INFO, true, "Possible spawn points: %0.2f  desired monsters: %d\n",
+    JLog( LOG_LEVEL_WARN, false, "\nPossible spawn points: %0.2f  desired monsters: %d\n",
           m_fOpenFloorArea, desired_monsters );
 
     while( desired_monsters > 0 )
@@ -333,7 +335,7 @@ CMonsterDef *CDungeon::GetMonsterDef( int which_monster )
 bool CDungeon::SpawnMonster( int which_monster )
 {
     CMonsterDef *chosen_monster = GetMonsterDef( which_monster );
-    JLog( LOG_LEVEL_INFO, true, "Choosing monster %d, called %s...", which_monster,
+    JLog( LOG_LEVEL_DEBUG, true, "Choosing monster %d, called %s...", which_monster,
           chosen_monster->m_szName );
 
     CMonster::CreateMonster( chosen_monster );
@@ -385,7 +387,7 @@ int CDungeon::ChooseMonsterForDepth( const int depth )
 
 JResult CDungeon::OnChangeLevel( const int delta )
 {
-    JLog( LOG_LEVEL_INFO, true, "Changing level..." );
+    JLog( LOG_LEVEL_WARN, false, "Changing level...\n" );
     // Clean up old level, then
     TerminateLevel();
 
@@ -393,8 +395,8 @@ JResult CDungeon::OnChangeLevel( const int delta )
     CreateNewLevel( delta );
     g_pGame->GetPlayer()->m_bHasSpawned = false;
     g_pGame->GetPlayer()->SpawnPlayer();
-    JLog( LOG_LEVEL_INFO, true, "done.\n" );
-    JLog( LOG_LEVEL_INFO, true, "You pass through a one-way door, to arrive on level %d.\n",
+    JLog( LOG_LEVEL_WARN, false, "done.\n" );
+    JLog( LOG_LEVEL_WARN, false, "You pass through a one-way door, to arrive on level %d.\n",
           depth );
     g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
                                 depth );
@@ -635,7 +637,7 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
     CDungeonTile *curTile = GetTile( vPos );
     if( curTile == NULL )
     {
-        JLog( LOG_LEVEL_INFO, true, "Hey! That's a bad tile.\n" );
+        JLog( LOG_LEVEL_ERROR, true, "Hey! That's a bad tile.\n" );
         return false;
     }
     if( curTile->m_pCurMonster != NULL )
@@ -647,7 +649,7 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
              g_pGame->GetPlayer()->m_vPos == vPos )
     {
         // Monsters colliding with the player can be hazardous to your health.
-        JLog( LOG_LEVEL_INFO, true, "Monster attacking not implemented yet.\n" );
+        JLog( LOG_LEVEL_WARN, true, "Monster attacking not implemented yet.\n" );
         return DUNG_COLL_PLAYER;
     }
     else if( isPlayer && curTile->m_pCurItem != NULL )
@@ -676,7 +678,7 @@ int CDungeon::CanPlaceStairsAt( JVector &vPos )
     CDungeonTile *curTile = GetTile( vPos );
     if( curTile == NULL )
     {
-        JLog( LOG_LEVEL_INFO, true, "Hey! That's a bad tile.\n" );
+        JLog( LOG_LEVEL_ERROR, true, "Hey! That's a bad tile.\n" );
         return false;
     }
 

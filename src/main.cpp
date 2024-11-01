@@ -31,7 +31,7 @@ int main( int argc, char **argv )
     result = g_pGame->Init( "../JMoria/" );
     if( result != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true, "Error in game initialization. Terminating.\n" );
+        JLog( LOG_LEVEL_ERROR, true, "Error in game initialization. Terminating.\n" );
         exit( 1 );
     }
 

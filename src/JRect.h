@@ -89,7 +89,7 @@ public:
         }
         if( left > right || top > bottom )
         {
-            JLog( LOG_LEVEL_INFO, true, "JRect has bad memory allocation: <%d %d, %d %d>\n", left,
+            JLog( LOG_LEVEL_ERROR, true, "JRect has bad memory allocation: <%d %d, %d %d>\n", left,
                   top, right, bottom );
             return false;
         }

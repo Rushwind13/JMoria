@@ -19,7 +19,7 @@ void CPlayer::Init( const char *szBasedir )
     m_TileSet = new DUNG_TILESET;
 
     // This will likely get moved somewhere else. --Jimbo
-    SpawnPlayer();
+    // SpawnPlayer();
 }
 
 bool CPlayer::Update( float fCurTime )
@@ -74,15 +74,16 @@ void CPlayer::PostDraw() { g_pGame->GetDungeon()->PostDraw(); }
 
 JResult CPlayer::SpawnPlayer()
 {
-    JLog( LOG_LEVEL_INFO, true, "Trying to spawn player..." );
+    JLog( LOG_LEVEL_WARN, false, "\nTrying to spawn player..." );
     JVector vTryPos;
     while( !m_bHasSpawned )
     {
+        JLog( LOG_LEVEL_WARN, false, "." );
         vTryPos.Init( (float)Util::GetRandom( 0, DUNG_WIDTH - 1 ),
                       (float)Util::GetRandom( 0, DUNG_HEIGHT - 1 ) );
 
-        JLog( LOG_LEVEL_DEBUG, true, "Trying to spawn player at <%.2f %.2f>...\n", vTryPos.x,
-              vTryPos.y );
+        // JLog( LOG_LEVEL_DEBUG, true, "Trying to spawn player at <%.2f %.2f>...\n", vTryPos.x,
+        //       vTryPos.y );
         // g_pGame->GetMsgs()->Printf( "Trying to spawn player at <%.2f %.2f>...\n", vTryPos.x,
         // vTryPos.y );
 
@@ -91,7 +92,8 @@ JResult CPlayer::SpawnPlayer()
         {
             m_vPos = vTryPos;
             m_bHasSpawned = true;
-            JLog( LOG_LEVEL_INFO, false, "Success!\n" );
+            JLog( LOG_LEVEL_WARN, false, "Success! Spawned at <%.2f %.2f>\n",
+                  VEC_EXPAND( m_vPos ) );
             // g_pGame->GetMsgs()->Printf( "Success!\n" );
         }
     }
@@ -136,7 +138,7 @@ void CPlayer::DisplayInventory( uint8 dwPlacement )
         pDT = g_pGame->GetUse();
         break;
     default:
-        JLog( LOG_LEVEL_INFO, true, "DisplayInventory got bad placement: %d\n", dwPlacement );
+        JLog( LOG_LEVEL_ERROR, true, "DisplayInventory got bad placement: %d\n", dwPlacement );
         return;
         break;
     }
@@ -160,7 +162,7 @@ void CPlayer::DisplayEquipment( uint8 dwPlacement )
         pDT = g_pGame->GetUse();
         break;
     default:
-        JLog( LOG_LEVEL_INFO, true, "DisplayEquipment got bad placement: %d\n", dwPlacement );
+        JLog( LOG_LEVEL_ERROR, true, "DisplayEquipment got bad placement: %d\n", dwPlacement );
         return;
         break;
     }
@@ -248,7 +250,7 @@ float CPlayer::Attack()
     float fRoll = Util::Roll( "1d100" );
     float fHitMod = g_pGame->GetPlayer()->m_fToHitModifier;
 
-    JLog( LOG_LEVEL_INFO, true, "You rolled: %.2f, +to-hit Bonus: %.2f = Total: %.2f\n", fRoll,
+    JLog( LOG_LEVEL_WARN, true, "You rolled: %.2f, +to-hit Bonus: %.2f = Total: %.2f\n", fRoll,
           fHitMod, fRoll + fHitMod );
 
     fRoll += fHitMod;
@@ -259,7 +261,7 @@ float CPlayer::Attack()
 float CPlayer::Damage( float fDamageMult )
 {
     float fDamage = ( Util::Roll( m_szDamage ) + m_fDamageModifier ) * fDamageMult;
-    JLog( LOG_LEVEL_INFO, true, "You did %.2f damage (damagemult: %.2f). ", fDamage, fDamageMult );
+    JLog( LOG_LEVEL_WARN, true, "You did %.2f damage (damagemult: %.2f). ", fDamage, fDamageMult );
 
     return fDamage;
 }
@@ -306,13 +308,13 @@ int CPlayer::TakeDamage( float fDamage, char *szMon )
         memset( m_szKilledBy, 0, strlen( szMon ) + 1 );
         strcpy( m_szKilledBy, szMon );
         // This is the end of the game; make the game end on next update.
-        JLog( LOG_LEVEL_INFO, true,
+        JLog( LOG_LEVEL_WARN, true,
               "%s died on dungeon level %d, while level %d, killed by a %s.\n", m_szName,
               g_pGame->GetDungeon()->depth, (int)m_fLevel, m_szKilledBy );
         g_pGame->SetState( STATE_ENDGAME );
     }
 
-    JLog( LOG_LEVEL_INFO, true, "Remaining HP: %.2f \n", m_fCurHitPoints );
+    JLog( LOG_LEVEL_WARN, true, "Remaining HP: %.2f \n", m_fCurHitPoints );
 
     return retval;
 }

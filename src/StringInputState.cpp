@@ -59,13 +59,13 @@ int CStringInputState::OnHandleName( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true, "Name cmd still waiting for a Alphanumeric key.\n" );
+        JLog( LOG_LEVEL_WARN, true, "Name cmd still waiting for a Alphanumeric key.\n" );
         //        g_pGame->GetMsgs()->Printf("Direction(1 2 3 4 6 7 8 9):\n");
         return 0;
     }
 
     // We got a alpha key; append it to the name
-    JLog( LOG_LEVEL_INFO, true, "NAME modifier got a alpha\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "NAME modifier got a alpha\n" );
     g_pGame->GetMsgs()->Clear();
     g_pGame->GetMsgs()->Printf( "Character Name: %s", m_szInput );
 
@@ -85,13 +85,13 @@ int CStringInputState::OnHandleHaggle( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true, "HAGGLE cmd still waiting for a Numeric key.\n" );
+        JLog( LOG_LEVEL_WARN, true, "HAGGLE cmd still waiting for a Numeric key.\n" );
         g_pGame->GetMsgs()->Printf( "Enter a number.\n" );
         return 0;
     }
 
     // We got a numeric key; add to haggle number
-    JLog( LOG_LEVEL_INFO, true, "HAGGLE modifier got a numeric\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "HAGGLE modifier got a numeric\n" );
     if( TestHaggle() )
     {
         if( DoHaggle() )
@@ -139,7 +139,7 @@ int CStringInputState::OnHandleInit( SDL_Keysym *keysym )
             mod = SI_HAGGLE;
             break;
         default:
-            JLog( LOG_LEVEL_INFO, true,
+            JLog( LOG_LEVEL_ERROR, true,
                   "There seems to be some kind of mistake; I don't handle mod: %d\n", m_cCommand );
             ResetToState( STATE_COMMAND );
             return 0;
@@ -151,7 +151,7 @@ int CStringInputState::OnHandleInit( SDL_Keysym *keysym )
         return 0;
     }
 
-    JLog( LOG_LEVEL_INFO, true,
+    JLog( LOG_LEVEL_ERROR, true,
           "Error: tried to init stringinput state when it was already initted...\n" );
     ResetToState( STATE_COMMAND );
     // shouldn't get here

@@ -121,9 +121,10 @@ protected:
         }
 
         // Use "roguelike" directional keybinds
-        char sym = GetAlpha(keysym);
-        if( sym == NULL ) return false;
-        const char *c = strchr("hjklyubn", sym);
+        char sym = GetAlpha( keysym );
+        if( sym == NULL )
+            return false;
+        const char *c = strchr( "hjklyubn", sym );
         if( c != NULL )
         {
             return true;

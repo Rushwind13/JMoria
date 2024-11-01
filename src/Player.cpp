@@ -178,7 +178,7 @@ void CPlayer::PickUp( JVector &vPickupPos )
 
 bool CPlayer::IsWieldable( CLink<CItem> *pLink )
 {
-   return( pLink->m_lpData->EquipType() != EQUIP_IDX_INVALID );
+    return ( pLink->m_lpData->EquipType() != EQUIP_IDX_INVALID );
 }
 
 bool CPlayer::Wield( CLink<CItem> *pLink )

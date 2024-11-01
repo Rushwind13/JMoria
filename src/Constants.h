@@ -308,8 +308,8 @@
 
 // Make sure you change below here if you added any flags.
 #define NUM_STRINGS                                                                                \
-    MON_IDX_MAX + NUM_MON_FLAGS + EQUIP_IDX_MAX + ITEM_IDX_MAX + NUM_ITEM_FLAGS + NUM_EFFECT_FLAGS +               \
-        NUM_EFFECT_MODIFIERS + NUM_EFFECT_TYPES
+    MON_IDX_MAX + NUM_MON_FLAGS + EQUIP_IDX_MAX + ITEM_IDX_MAX + NUM_ITEM_FLAGS +                  \
+        NUM_EFFECT_FLAGS + NUM_EFFECT_MODIFIERS + NUM_EFFECT_TYPES
 #include "TextEntry.h"
 class Constants
 {

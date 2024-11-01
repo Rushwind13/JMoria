@@ -827,6 +827,8 @@ JResult CDungeon::Modify( JVector &vPos )
     if( GetTile( vPos )->m_dtd->m_dwModifiedType == DUNG_IDX_INVALID )
     {
         // hey! you can't modify that tile! How did you get here?!
+        JLog( LOG_LEVEL_ERROR, true, "Modify error: Can't modify type %d at <%f %f> with type %s\n",
+              GetTile( vPos )->m_dtd->m_dwType, VEC_EXPAND( vPos ) );
         return JERROR();
     }
 

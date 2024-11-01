@@ -42,14 +42,14 @@ int CUseState::OnHandleWield( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true,
+        JLog( LOG_LEVEL_WARN, true,
               "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
         return 0;
     }
 
     // We got a alpha key; do a "wield" of that item
-    JLog( LOG_LEVEL_INFO, true, "WIELD got a selection\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "WIELD got a selection\n" );
     if( TestWield() )
     {
         if( DoWield() )
@@ -89,14 +89,14 @@ int CUseState::OnHandleRemove( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true,
+        JLog( LOG_LEVEL_WARN, true,
               "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Choose an item from equipment(a to z):\n" );
         return 0;
     }
 
     // We got a alpha key; do a "remove" of that item
-    JLog( LOG_LEVEL_INFO, true, "REMOVE  got a selection\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "REMOVE  got a selection\n" );
     if( TestRemove() )
     {
         if( DoRemove() )
@@ -135,14 +135,14 @@ int CUseState::OnHandleDrop( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true,
+        JLog( LOG_LEVEL_WARN, true,
               "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
         return 0;
     }
 
     // We got a alpha key; do a "drop" of that item
-    JLog( LOG_LEVEL_INFO, true, "DROP  got a selection\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "DROP  got a selection\n" );
     if( TestDrop() )
     {
         if( DoDrop() )
@@ -182,14 +182,14 @@ int CUseState::OnHandleQuaff( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true,
+        JLog( LOG_LEVEL_WARN, true,
               "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
         return 0;
     }
 
     // We got a alpha key; do a "quaff" of that item
-    JLog( LOG_LEVEL_INFO, true, "QUAFF  got a selection\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "QUAFF  got a selection\n" );
     if( TestQuaff() )
     {
         if( DoQuaff() )
@@ -242,7 +242,7 @@ int CUseState::OnHandleInit( SDL_Keysym *keysym )
             g_pGame->GetMsgs()->Printf( "Quaff which item? [a-z]\n" );
             break;
         default:
-            JLog( LOG_LEVEL_INFO, true,
+            JLog( LOG_LEVEL_ERROR, true,
                   "There seems to be some kind of mistake; I don't handle mod: %d\n", m_cCommand );
             ResetToState( STATE_COMMAND );
             return 0;
@@ -254,7 +254,8 @@ int CUseState::OnHandleInit( SDL_Keysym *keysym )
         return 0;
     }
 
-    JLog( LOG_LEVEL_INFO, true, "Error: tried to init USE state when it was already initted...\n" );
+    JLog( LOG_LEVEL_ERROR, true,
+          "Error: tried to init USE state when it was already initted...\n" );
     ResetToState( STATE_COMMAND );
     // shouldn't get here
     return JRESETSTATE;
@@ -313,7 +314,7 @@ CLink<CItem> *CUseState::GetResponse( eUseModifier whichUse )
         pList = g_pGame->GetPlayer()->m_llInventory;
         break;
     default:
-        JLog( LOG_LEVEL_INFO, true, "Can't get response for : %d\n", whichUse );
+        JLog( LOG_LEVEL_ERROR, true, "Can't get response for : %d\n", whichUse );
         return NULL;
         break;
     }

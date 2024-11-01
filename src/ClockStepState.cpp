@@ -55,12 +55,12 @@ int CClockStepState::OnHandleTick( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true, "CLOCK still waiting for a valid key.\n" );
+        JLog( LOG_LEVEL_WARN, true, "CLOCK still waiting for a valid key.\n" );
         return 0;
     }
 
     // We got a valid key
-    JLog( LOG_LEVEL_INFO, true, "TICK modifier got a valid key\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "TICK modifier got a valid key\n" );
     g_pGame->GetEnd()->Clear();
     DoTick();
 

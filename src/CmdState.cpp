@@ -82,7 +82,7 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
         switch( keysym->sym )
         {
         case SDLK_r:
-            JLog( LOG_LEVEL_DEBUG, true, "R)est not implemented yet.\n" );
+            JLog( LOG_LEVEL_WARN, true, "R)est not implemented yet.\n" );
             g_pGame->SetState( STATE_REST );
             g_pGame->GetGameState()->HandleKey( keysym );
             break;
@@ -136,7 +136,7 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
             g_Searching = true;
     break;
     default:
-            JLog( LOG_LEVEL_INFO, true,  "Press ? for help.\n" );
+            JLog( LOG_LEVEL_WARN, true,  "Press ? for help.\n" );
     break;
     }/**/
 

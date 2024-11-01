@@ -175,7 +175,7 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 end = strchr( szLine, '>' );
                 if( begin == NULL || end == NULL )
                 {
-                    JLog( LOG_LEVEL_INFO, true, "error parsing attack: effect type not found %s\n",
+                    JLog( LOG_LEVEL_ERROR, true, "error parsing attack: effect type not found %s\n",
                           cur );
                     continue;
                 }
@@ -189,7 +189,7 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 end = strchr( cur, '>' );
                 if( begin == NULL || end == NULL )
                 {
-                    JLog( LOG_LEVEL_INFO, true, "error parsing attack: attack type not found %s\n",
+                    JLog( LOG_LEVEL_ERROR, true, "error parsing attack: attack type not found %s\n",
                           cur );
                     continue;
                 }
@@ -217,7 +217,7 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 begin = strchr( cur, ',' );
                 if( begin == NULL )
                 {
-                    JLog( LOG_LEVEL_INFO, true, "error parsing attack: damage not found %s\n",
+                    JLog( LOG_LEVEL_ERROR, true, "error parsing attack: damage not found %s\n",
                           cur );
                     continue;
                 }
@@ -265,7 +265,7 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
             }
             else
             {
-                JLog( LOG_LEVEL_INFO, true, "Unparseable line:%s\n", szLine );
+                JLog( LOG_LEVEL_WARN, true, "Unparseable line:%s\n", szLine );
             }
         }
     }
@@ -441,7 +441,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
             }
             else
             {
-                JLog( LOG_LEVEL_INFO, true, "Unparseable line:%s\n", szLine );
+                JLog( LOG_LEVEL_WARN, true, "Unparseable line:%s\n", szLine );
             }
         }
     }
@@ -528,7 +528,7 @@ CScore *CDataFile::ReadScore( CScore &sIn )
             }
             else
             {
-                JLog( LOG_LEVEL_INFO, true, "Unparseable line:%s\n", szLine );
+                JLog( LOG_LEVEL_WARN, true, "Unparseable line:%s\n", szLine );
             }
         }
     }

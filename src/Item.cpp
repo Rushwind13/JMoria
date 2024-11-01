@@ -62,7 +62,7 @@ void CItem::SetCursed( int likelihood )
 JResult CItem::SpawnItem( JVector vSpawnPoint )
 {
     bool bItemSpawned = false;
-    JLog( LOG_LEVEL_INFO, false, "Trying to spawn item type: %s...", m_id->m_szName );
+    JLog( LOG_LEVEL_WARN, false, "Trying to spawn item type: %s...", m_id->m_szName );
 
     if( vSpawnPoint.IsInWorld() )
     {
@@ -72,7 +72,7 @@ JResult CItem::SpawnItem( JVector vSpawnPoint )
     JVector vTryPos;
     while( !bItemSpawned )
     {
-        JLog( LOG_LEVEL_INFO, false, "." );
+        JLog( LOG_LEVEL_WARN, false, "." );
         vTryPos.Init( (float)( Util::GetRandom( 0, DUNG_WIDTH - 1 ) ),
                       (float)( Util::GetRandom( 0, DUNG_HEIGHT - 1 ) ) );
 
@@ -96,7 +96,7 @@ JResult CItem::SpawnAt( JVector vSpawnPoint )
         m_vPos = vSpawnPoint;
         g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurItem = this;
 
-        JLog( LOG_LEVEL_INFO, false, "Success!\n" );
+        JLog( LOG_LEVEL_WARN, false, "Success! Spawned at <%.2f %.2f>\n", VEC_EXPAND( m_vPos ) );
         // g_pGame->GetMsgs()->Printf( "Success!\n" );
 
         return JSUCCESS;

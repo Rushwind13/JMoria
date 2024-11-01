@@ -222,9 +222,29 @@
 
 #define NUM_EFFECT_TYPES 8
 
+// Character equipment slots
+// index for m_llEquipment
+#define EQUIP_IDX_INVALID -1
+#define EQUIP_IDX_MAIN_HAND 0
+#define EQUIP_IDX_OFF_HAND 1
+#define EQUIP_IDX_HELMET 2
+#define EQUIP_IDX_AMULET 3
+#define EQUIP_IDX_ARMOR 4
+#define EQUIP_IDX_CLOAK 5
+#define EQUIP_IDX_GLOVES 6
+#define EQUIP_IDX_BELT 7
+#define EQUIP_IDX_BOOTS 8
+#define EQUIP_IDX_RING 9 // duplicate on purpose: readability
+#define EQUIP_IDX_LRING 9
+#define EQUIP_IDX_RRING 10
+#define EQUIP_IDX_TORCH 11
+#define EQUIP_IDX_AMMO 12
+#define EQUIP_IDX_MAX 13 // adding a new type to equipment could be tricky; avoid
+
 // Types of items
+// see ItemIDs
 #define ITEM_IDX_INVALID -1
-#define ITEM_IDX_WEAPON 0
+#define ITEM_IDX_SWORD 0
 #define ITEM_IDX_SHIELD 1
 #define ITEM_IDX_ARMOR 2
 #define ITEM_IDX_HELMET 3
@@ -246,14 +266,15 @@
 #define ITEM_IDX_BOOK 19
 #define ITEM_IDX_MONEY 20
 #define ITEM_IDX_FOOD 21
-#define ITEM_IDX_SWORD 22
+#define ITEM_IDX_SPEAR 22
 #define ITEM_IDX_AXE 23
 #define ITEM_IDX_POLEARM 24
 #define ITEM_IDX_SHOVEL 25
 #define ITEM_IDX_DAGGER 26
 #define ITEM_IDX_MACE 27
 #define ITEM_IDX_2H_SWORD 28
-#define ITEM_IDX_MAX 29
+#define ITEM_IDX_BELT 29
+#define ITEM_IDX_MAX 30
 
 // TODO: Might need to switch from "ITEM/MONSTER"
 //       to "types of harm" / "types of aid"
@@ -266,18 +287,28 @@
 // #define ITEM_FLAG_x 0x00000004
 // #define ITEM_FLAG_x 0x00000008
 
-// #define ITEM_FLAG_x 0x00000010
-// #define ITEM_FLAG_x 0x00000020
-// #define ITEM_FLAG_x 0x00000040
-// #define ITEM_FLAG_x 0x00000080
+#define ITEM_FLAG_2HANDED 0x00000010
+#define ITEM_FLAG_OFFHAND 0x00000020
+#define ITEM_FLAG_MAINHAND 0x00000040
+#define ITEM_FLAG_NEEDSAMMO 0x00000080
+
+// #define ITEM_FLAG_x 0x00000100
+// #define ITEM_FLAG_x 0x00000200
+// #define ITEM_FLAG_x 0x00000400
+// #define ITEM_FLAG_x 0x00000800
+
+// #define ITEM_FLAG_x 0x00001000
+// #define ITEM_FLAG_x 0x00002000
+// #define ITEM_FLAG_x 0x00004000
+// #define ITEM_FLAG_x 0x00008000
 
 #define ITEM_COLOR_MULTI 0x10000000
 
-#define NUM_ITEM_FLAGS 2
+#define NUM_ITEM_FLAGS 6
 
 // Make sure you change below here if you added any flags.
 #define NUM_STRINGS                                                                                \
-    MON_IDX_MAX + NUM_MON_FLAGS + ITEM_IDX_MAX + NUM_ITEM_FLAGS + NUM_EFFECT_FLAGS +               \
+    MON_IDX_MAX + NUM_MON_FLAGS + EQUIP_IDX_MAX + ITEM_IDX_MAX + NUM_ITEM_FLAGS + NUM_EFFECT_FLAGS +               \
         NUM_EFFECT_MODIFIERS + NUM_EFFECT_TYPES
 #include "TextEntry.h"
 class Constants
@@ -293,7 +324,7 @@ public:
 
     void Init()
     {
-        JLog( LOG_LEVEL_INFO, true, "expecting %d strings...", NUM_STRINGS );
+        JLog( LOG_LEVEL_WARN, true, "expecting %d strings...", NUM_STRINGS );
         m_StringTable = new TextEntry[NUM_STRINGS];
         int i = 0;
         // Monster flags
@@ -419,8 +450,23 @@ public:
         m_StringTable[i++].Init( "EFFECT_TYPE_GAIN", EFFECT_TYPE_GAIN );
         m_StringTable[i++].Init( "EFFECT_TYPE_LOSE", EFFECT_TYPE_LOSE );
 
+        // Equipment slots
+        m_StringTable[i++].Init( "EQUIP_IDX_MAIN_HAND", EQUIP_IDX_MAIN_HAND );
+        m_StringTable[i++].Init( "EQUIP_IDX_OFF_HAND", EQUIP_IDX_OFF_HAND );
+        m_StringTable[i++].Init( "EQUIP_IDX_HELMET", EQUIP_IDX_HELMET );
+        m_StringTable[i++].Init( "EQUIP_IDX_AMULET", EQUIP_IDX_AMULET );
+        m_StringTable[i++].Init( "EQUIP_IDX_ARMOR", EQUIP_IDX_ARMOR );
+        m_StringTable[i++].Init( "EQUIP_IDX_CLOAK", EQUIP_IDX_CLOAK );
+        m_StringTable[i++].Init( "EQUIP_IDX_GLOVES", EQUIP_IDX_GLOVES );
+        m_StringTable[i++].Init( "EQUIP_IDX_BELT", EQUIP_IDX_BELT );
+        m_StringTable[i++].Init( "EQUIP_IDX_BOOTS", EQUIP_IDX_BOOTS );
+        m_StringTable[i++].Init( "EQUIP_IDX_LRING", EQUIP_IDX_LRING );
+        m_StringTable[i++].Init( "EQUIP_IDX_RRING", EQUIP_IDX_RRING );
+        m_StringTable[i++].Init( "EQUIP_IDX_TORCH", EQUIP_IDX_TORCH );
+        m_StringTable[i++].Init( "EQUIP_IDX_AMMO", EQUIP_IDX_AMMO );
+
         // Item Types
-        m_StringTable[i++].Init( "ITEM_IDX_WEAPON", ITEM_IDX_WEAPON );
+        m_StringTable[i++].Init( "ITEM_IDX_SWORD", ITEM_IDX_SWORD );
         m_StringTable[i++].Init( "ITEM_IDX_SHIELD", ITEM_IDX_SHIELD );
         m_StringTable[i++].Init( "ITEM_IDX_ARMOR", ITEM_IDX_ARMOR );
         m_StringTable[i++].Init( "ITEM_IDX_HELMET", ITEM_IDX_HELMET );
@@ -445,22 +491,27 @@ public:
         m_StringTable[i++].Init( "ITEM_IDX_DAGGER", ITEM_IDX_DAGGER );
         m_StringTable[i++].Init( "ITEM_IDX_MACE", ITEM_IDX_MACE );
         m_StringTable[i++].Init( "ITEM_IDX_2H_SWORD", ITEM_IDX_2H_SWORD );
-        m_StringTable[i++].Init( "ITEM_IDX_SWORD", ITEM_IDX_SWORD );
+        m_StringTable[i++].Init( "ITEM_IDX_SPEAR", ITEM_IDX_SPEAR );
         m_StringTable[i++].Init( "ITEM_IDX_AXE", ITEM_IDX_AXE );
         m_StringTable[i++].Init( "ITEM_IDX_POLEARM", ITEM_IDX_POLEARM );
         m_StringTable[i++].Init( "ITEM_IDX_SHOVEL", ITEM_IDX_SHOVEL );
+        m_StringTable[i++].Init( "ITEM_IDX_BELT", ITEM_IDX_BELT );
 
         // Item flags
         m_StringTable[i++].Init( "ITEM_FLAG_CURSED", ITEM_FLAG_CURSED );
+        m_StringTable[i++].Init( "ITEM_FLAG_2HANDED", ITEM_FLAG_2HANDED );
+        m_StringTable[i++].Init( "ITEM_FLAG_OFFHAND", ITEM_FLAG_OFFHAND );
+        m_StringTable[i++].Init( "ITEM_FLAG_MAINHAND", ITEM_FLAG_MAINHAND );
+        m_StringTable[i++].Init( "ITEM_FLAG_NEEDSAMMO", ITEM_FLAG_NEEDSAMMO );
         m_StringTable[i++].Init( "ITEM_COLOR_MULTI", ITEM_COLOR_MULTI );
 
         if( i == NUM_STRINGS )
         {
-            JLog( LOG_LEVEL_INFO, false, "Success!\n" );
+            JLog( LOG_LEVEL_WARN, false, "Success!\n" );
         }
         else
         {
-            JLog( LOG_LEVEL_INFO, true, "got %d strings instead, misconfiguration error!\n", i );
+            JLog( LOG_LEVEL_ERROR, true, "got %d strings instead, misconfiguration error!\n", i );
         }
     };
     TextEntry *m_StringTable;
@@ -477,7 +528,7 @@ public:
             }
         }
 
-        JLog( LOG_LEVEL_INFO, true, "bad string: %s\n", szIn );
+        JLog( LOG_LEVEL_WARN, true, "bad string: %s\n", szIn );
 
         return -1;
     }

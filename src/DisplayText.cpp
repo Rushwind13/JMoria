@@ -286,7 +286,7 @@ void CDisplayText::DisplayList( JLinkList<CItem> *pList, const CDisplayMeta *pMe
         }
         else
         {
-            JLog( LOG_LEVEL_INFO, true, pMeta->footer );
+            Printf( pMeta->footer );
             break;
         }
         pLink = pList->GetNext( pLink );
@@ -312,7 +312,7 @@ void CDisplayText::DisplayList( JLinkList<CScore> *pList, const CDisplayMeta *pM
         }
         else
         {
-            JLog( LOG_LEVEL_INFO, true, pMeta->footer );
+            Printf( pMeta->footer );
             break;
         }
         pLink = pList->GetNext( pLink );

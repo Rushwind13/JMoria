@@ -67,14 +67,15 @@ GIVEN( "^the ([A-Za-z ]+):([0-9]+) (is|is not) cursed$" )
     EXPECT_EQ( actual, expected );
 }
 
-GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in equipment$" )
+GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in equipment at ([-0-9]+)$" )
 {
     ScenarioScope<TestCtx> context;
     REGEX_PARAM( std::string, item );
     REGEX_PARAM( int, item_id );
+    REGEX_PARAM( int, equip_id );
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
     CItem *expected = NULL;
-    CItem *actual = g_pGame->GetPlayer()->m_llEquipment->GetLink( pid->m_dwIndex )->m_lpData;
+    CItem *actual = g_pGame->GetPlayer()->m_llEquipment->GetLink( equip_id )->m_lpData;
     EXPECT_NE( expected, actual );
 
     const char *want = item.c_str();
@@ -98,12 +99,13 @@ GIVEN( "^the player equips the item ([0-9]+)$" )
 ##
 #######*/
 
-WHEN( "^the player takes off the item ([0-9]+)$" )
+WHEN( "^the player takes off the item ([0-9]+) at ([-0-9]+)$" )
 {
     REGEX_PARAM( int, item_id );
+    REGEX_PARAM( int, equip_id );
     ScenarioScope<TestCtx> context;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
-    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llEquipment->GetLink( pid->m_dwIndex );
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llEquipment->GetLink( equip_id );
     context->result_bool = g_pGame->GetPlayer()->Remove( pLink );
 }
 
@@ -113,17 +115,19 @@ WHEN( "^the player takes off the item ([0-9]+)$" )
 ##
 #######*/
 
-THEN( "^The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment)$" )
+THEN( "^The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment) at ([-0-9]+)$" )
 {
     REGEX_PARAM( std::string, item );
     REGEX_PARAM( int, item_id );
     REGEX_PARAM( std::string, list );
+    REGEX_PARAM( int, equip_id );
     ScenarioScope<TestCtx> context;
     JLinkList<CItem> *pList = ( list == "inventory" ) ? g_pGame->GetPlayer()->m_llInventory
                                                       : g_pGame->GetPlayer()->m_llEquipment;
     CItem *expected = NULL;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
-    CLink<CItem> *pLink = pList->GetLink( pid->m_dwIndex );
+    int index = ( list == "inventory" ) ? pid->m_dwIndex : equip_id;
+    CLink<CItem> *pLink = pList->GetLink( index );
     CItem *actual = pLink->m_lpData;
     EXPECT_NE( expected, actual );
 
@@ -137,17 +141,19 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment)$" )
     EXPECT_EQ( result, 0 );
 }
 
-THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment)$" )
+THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment) at ([-0-9]+)$" )
 {
     REGEX_PARAM( std::string, item );
     REGEX_PARAM( int, item_id );
     REGEX_PARAM( std::string, list );
+    REGEX_PARAM( int, equip_id );
     ScenarioScope<TestCtx> context;
     JLinkList<CItem> *pList = ( list == "inventory" ) ? g_pGame->GetPlayer()->m_llInventory
                                                       : g_pGame->GetPlayer()->m_llEquipment;
     CItem *expected = NULL;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
-    CLink<CItem> *pLink = pList->GetLink( pid->m_dwIndex );
+    int index = ( list == "inventory" ) ? pid->m_dwIndex : equip_id;
+    CLink<CItem> *pLink = pList->GetLink( index );
     CItem *actual = NULL;
 
     if( pLink )

@@ -148,7 +148,7 @@ void CPlayer::DisplayEquipment( uint8 dwPlacement )
 {
     CDisplayMeta meta;
     sprintf( meta.header, "You are wearing:\n" );
-    meta.limit = 'j';
+    meta.limit = 'm';
     sprintf( meta.footer, "Equipment is limited to 10 items, one each for specific body parts.\n" );
     CDisplayText *pDT = NULL;
     switch( dwPlacement )
@@ -165,7 +165,7 @@ void CPlayer::DisplayEquipment( uint8 dwPlacement )
         break;
     }
 
-    pDT->DisplayList( m_llEquipment, &meta );
+    pDT->DisplayFixedList( m_llEquipment, &meta );
 }
 
 void CPlayer::PickUp( JVector &vPickupPos )

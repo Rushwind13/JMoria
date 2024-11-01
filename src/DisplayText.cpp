@@ -266,6 +266,34 @@ void CDisplayText::DrawFormattedStr( const char *szString )
     strcat( m_szText, szBuffer );
 }
 
+#define SHOW_EMPTY
+void CDisplayText::DisplayFixedList( JLinkList<CItem> *pList, const CDisplayMeta *pMeta,
+                                const uint8 dwIndex )
+{
+    // TODO: Use dwIndex to filter the
+    CLink<CItem> *pLink = pList->GetHead();
+    Clear();
+    Printf( pMeta->header );
+    char cListId = 'a';
+
+    while( cListId <= pMeta->limit )
+    {
+        if( pLink != NULL && pLink->m_dwIndex == cListId - 'a' )
+        {
+            Printf( "%c - %s\n", cListId, pLink->m_lpData->GetName() );
+            pLink = pList->GetNext(pLink);
+        }
+#ifdef SHOW_EMPTY
+        else
+        {
+
+            Printf( "%c - (None)\n", cListId);
+        }
+#endif // SHOW_EMPTY
+        cListId++;
+    }
+}
+
 void CDisplayText::DisplayList( JLinkList<CItem> *pList, const CDisplayMeta *pMeta,
                                 const uint8 dwIndex )
 {

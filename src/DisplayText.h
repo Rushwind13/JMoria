@@ -47,6 +47,8 @@ public:
     void Draw();
     void DrawStr( int x, int y, char *szString );
     void Printf( const char *fmt, ... );
+    void DisplayFixedList( JLinkList<CItem> *pList, const CDisplayMeta *pMeta,
+                      const uint8 dwIndex = DUNG_IDX_INVALID );
     void DisplayList( JLinkList<CItem> *pList, const CDisplayMeta *pMeta,
                       const uint8 dwIndex = DUNG_IDX_INVALID );
     void DisplayList( JLinkList<CScore> *pList, const CDisplayMeta *pMeta,

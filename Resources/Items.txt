@@ -243,7 +243,29 @@ Weight        4.0
 Speed         7.0
 Color        <200,200,200,255>
 }
+Item <Scroll of Remove Curse>
+{
+Plural      <Scrolls of Remove Curse>
+Type        <ITEM_IDX_SCROLL>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_TYPE_LOSE>
+Value       10.0
+Level       1
+Weight      2.0
+Color       <225,225,50,255>
+}
 
+Item <Potion of Minor Healing>
+{
+    Plural        <Potions of Minor Healing>
+    Type        <ITEM_IDX_POTION>
+    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>,<1d20>
+    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
+    Value       1000.0
+    Level       2
+    Weight      0.2
+    Color        <225,50,225,255>
+}
 Item <Long Sword>
 {
     Plural        <Long swords>
@@ -310,6 +332,26 @@ Level       20
 Weight      0.2
 Color        <225,225,50,255>
 }
+Item <Ring of Fire Resistance>
+{
+Plural        <Rings of Fire Resistance>
+Type        <ITEM_IDX_RING>
+Value       300.0
+Level       10
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FIRE>,<EFFECT_MOD_RESIST>
+Weight      0.2
+Color        <225,225,50,255>
+}
+Item <Ring of Protection>
+{
+    Plural        <Rings of Protection>
+    Type        <ITEM_IDX_RING>
+    ACBonus     <1d20>
+    Value       1000.0
+    Level       20
+    Weight      0.2
+    Color        <225,50,225,255>
+}
 Item <Torch>
 {
 Plural        <Torches>
@@ -330,16 +372,6 @@ Flags       <ITEM_FLAG_NEEDSAMMO>
 Level       5
 Weight      2.0
 Color        <225,225,50,255>
-}
-Item <Scroll of Remove Curse>
-{
-Plural      <Scrolls of Remove Curse>
-Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_TYPE_LOSE>
-Value       10.0
-Level       1
-Weight      2.0
-Color       <225,225,50,255>
 }
 Item <Flask of Oil>
 {
@@ -461,16 +493,6 @@ AC          4.0
 Weight      2.0
 Color        <225,225,50,255>
 }
-Item <Ring of Fire Resistance>
-{
-Plural        <Rings of Fire Resistance>
-Type        <ITEM_IDX_RING>
-Value       300.0
-Level       10
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FIRE>,<EFFECT_MOD_RESIST>
-Weight      0.2
-Color        <225,225,50,255>
-}
 Item <Cloak>
 {
 Plural        <Cloaks>
@@ -509,31 +531,6 @@ Level       1
 Weight      2.0
 Color        <225,225,50,255>
 }
-
-Item <Ring of Protection>
-{
-    Plural        <Rings of Protection>
-    Type        <ITEM_IDX_RING>
-    ACBonus     <1d20>
-    Value       1000.0
-    Level       20
-    Weight      0.2
-    Color        <225,50,225,255>
-}
-
-Item <Potion of Minor Healing>
-{
-    Plural        <Potions of Minor Healing>
-    Type        <ITEM_IDX_POTION>
-    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>,<1d20>
-    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
-    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
-    Value       1000.0
-    Level       2
-    Weight      0.2
-    Color        <225,50,225,255>
-}
-
 Item <Small Steel Shield>
 {
     Plural        <Small Steel Shields>
@@ -545,7 +542,6 @@ Item <Small Steel Shield>
     Weight       10.0
     Color        <115,112,121,255>
 }
-
 Item <Large Steel Shield>
 {
     Plural        <Large Steel Shields>
@@ -558,6 +554,7 @@ Item <Large Steel Shield>
     Color        <115,112,121,255>
 }
 Item <Steel Shield>
+{
     Plural      <Steel Shields>
     Type        <ITEM_IDX_SHIELD>
     Value        125.0

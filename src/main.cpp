@@ -9,7 +9,7 @@
 
 // The global game pointer
 CGame *g_pGame = NULL;
-eLogLevel g_eLogLevel = LOG_LEVEL_WARN;
+eLogLevel g_eLogLevel = LOG_LEVEL_INFO;
 
 JIVector g_vDirDelta[] = { JIVector( 0, -1 ), JIVector( 0, 1 ), JIVector( -1, 0 ),
                            JIVector( 1, 0 ) };

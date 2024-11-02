@@ -64,7 +64,7 @@ JResult CMonster::CreateMonster( CMonsterDef *pmd, JVector vSpawnPoint, bool bNe
         }
         else
         {
-            JLog(LOG_LEVEL_WARN, true, "spawn failed.\n");
+            JLog( LOG_LEVEL_WARN, true, "spawn failed.\n" );
             // That spawn failed; clean up
             // delete pMon;
             // pMon = NULL;
@@ -99,17 +99,17 @@ JResult CMonster::InitAndSpawn( CMonsterDef *pmd, JVector vSpawnPoint )
 JResult CMonster::SpawnMonster( JVector vSpawnPoint )
 {
     bool bMonsterSpawned = false;
-    JLog( LOG_LEVEL_WARN, false, "Trying to spawn monster type: %s...", m_md->m_szName );
+    JLog( LOG_LEVEL_INFO, false, "Trying to spawn monster type: %s...", m_md->m_szName );
     if( vSpawnPoint.IsWithinWorld() )
     {
-        JLog(LOG_LEVEL_WARN, true, "given <%.2f %.2f>...", VEC_EXPAND(vSpawnPoint));
+        JLog( LOG_LEVEL_INFO, true, "given <%.2f %.2f>...", VEC_EXPAND( vSpawnPoint ) );
         return SpawnAt( vSpawnPoint );
     }
 
     JVector vTryPos;
     while( !bMonsterSpawned )
     {
-        JLog( LOG_LEVEL_WARN, false, "." );
+        JLog( LOG_LEVEL_INFO, false, "." );
         vTryPos.Init( (float)( Util::GetRandom( 1, DUNG_WIDTH - 2 ) ),
                       (float)( Util::GetRandom( 1, DUNG_HEIGHT - 2 ) ) );
 
@@ -124,12 +124,12 @@ JResult CMonster::SpawnMonster( JVector vSpawnPoint )
 
 JResult CMonster::SpawnAt( JVector vPos )
 {
-    // JLog(LOG_LEVEL_WARN, true, "trying <%.2f %.2f>...", VEC_EXPAND(vPos));
+    // JLog(LOG_LEVEL_INFO, true, "trying <%.2f %.2f>...", VEC_EXPAND(vPos));
     if( g_pGame->GetDungeon()->IsWalkableFor( vPos ) == DUNG_COLL_NO_COLLISION )
     {
         SetPos( vPos );
         g_pGame->GetDungeon()->GetTile( vPos )->m_pCurMonster = this;
-        JLog( LOG_LEVEL_WARN, false, "Success! Spawned at <%.2f %.2f>\n", VEC_EXPAND( vPos ) );
+        JLog( LOG_LEVEL_INFO, false, "Success! Spawned at <%.2f %.2f>\n", VEC_EXPAND( vPos ) );
         // g_pGame->GetMsgs()->Printf( "Success!\n" );
 
         return JSUCCESS;
@@ -141,7 +141,7 @@ float CMonster::Attack()
 {
     float fRoll = Util::Roll( "1d100" );
 
-    JLog( LOG_LEVEL_WARN, true, "%s rolled: %.2f\n", GetName(), fRoll );
+    JLog( LOG_LEVEL_INFO, true, "%s rolled: %.2f\n", GetName(), fRoll );
 
     return fRoll;
 }
@@ -152,7 +152,7 @@ float CMonster::Damage( float fDamageMult )
     float fDamageModifier = 0.0f;
 
     float fDamage = ( Util::Roll( szDamage ) + fDamageModifier ) * fDamageMult;
-    JLog( LOG_LEVEL_WARN, true, "%s did %.2f damage (damagemult: %.2f). ", GetName(), fDamage,
+    JLog( LOG_LEVEL_INFO, true, "%s did %.2f damage (damagemult: %.2f). ", GetName(), fDamage,
           fDamageMult );
 
     return fDamage;
@@ -175,7 +175,7 @@ int CMonster::TakeDamage( float fDamage )
         retval = STATUS_DEAD;
     }
 
-    JLog( LOG_LEVEL_WARN, true, "Remaining HP: %.2f \n", m_fCurHP );
+    JLog( LOG_LEVEL_INFO, true, "Remaining HP: %.2f \n", m_fCurHP );
 
     return retval;
 }
@@ -183,7 +183,7 @@ int CMonster::TakeDamage( float fDamage )
 // draw routines
 void CMonster::Breed()
 {
-    if( ( m_md->m_dwFlags & MON_FLAG_BREED ) != MON_FLAG_BREED ) 
+    if( ( m_md->m_dwFlags & MON_FLAG_BREED ) != MON_FLAG_BREED )
         return;
 
     if( g_pGame->GetTime() < m_fLastBreed + BREED_INTERVAL )
@@ -191,19 +191,19 @@ void CMonster::Breed()
 
     if( m_dwFecundity > 0 )
     {
-        JLog( LOG_LEVEL_DEBUG, true, "still going: %d ", m_dwFecundity );
+        JLog( LOG_LEVEL_NOISE, true, "still going: %d ", m_dwFecundity );
         if( Util::GetRandom( 0.0f, 1.0f ) <= BREED_CHANCE )
         {
-            JLog( LOG_LEVEL_WARN, false, "spawnd!" );
+            JLog( LOG_LEVEL_INFO, false, "spawnd!" );
             // Spawn a new copy
             CreateMonster( m_md, GetPos(), true );
         }
-        JLog( LOG_LEVEL_DEBUG, false, "\n" );
+        JLog( LOG_LEVEL_NOISE, false, "\n" );
         m_dwFecundity--;
     }
     else
     {
-        JLog( LOG_LEVEL_WARN, true, "sterilizing\n" );
+        JLog( LOG_LEVEL_INFO, true, "sterilizing\n" );
         // sterilize
         m_md->m_dwFlags = m_md->m_dwFlags & ~MON_FLAG_BREED;
     }

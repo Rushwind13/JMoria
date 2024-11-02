@@ -335,7 +335,7 @@ public:
 
     void Init()
     {
-        JLog( LOG_LEVEL_WARN, true, "expecting %d strings...", NUM_STRINGS );
+        JLog( LOG_LEVEL_INFO, true, "expecting %d strings...", NUM_STRINGS );
         m_StringTable = new TextEntry[NUM_STRINGS];
         int i = 0;
         // Monster flags
@@ -518,7 +518,7 @@ public:
 
         if( i == NUM_STRINGS )
         {
-            JLog( LOG_LEVEL_WARN, false, "Success!\n" );
+            JLog( LOG_LEVEL_INFO, false, "Success!\n" );
         }
         else
         {

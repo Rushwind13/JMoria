@@ -33,7 +33,7 @@ int CUseState::OnHandleKey( SDL_Keysym *keysym )
 int CUseState::OnHandleWield( SDL_Keysym *keysym )
 {
     int retval;
-    JLog( LOG_LEVEL_INFO, true, "Handling WIELD \n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Handling WIELD \n" );
     retval = OnBaseHandleKey( keysym, USE_WIELD );
 
     if( retval == JRESETSTATE )
@@ -50,7 +50,7 @@ int CUseState::OnHandleWield( SDL_Keysym *keysym )
     }
 
     // We got a alpha key; do a "wield" of that item
-    JLog( LOG_LEVEL_DEBUG, true, "WIELD got a selection\n" );
+    JLog( LOG_LEVEL_NOISE, true, "WIELD got a selection\n" );
     if( TestWield() )
     {
         if( DoWield() )
@@ -71,7 +71,7 @@ int CUseState::OnHandleWield( SDL_Keysym *keysym )
     }
     m_pSelected = NULL;
 
-    JLog( LOG_LEVEL_INFO, true, "WIELD resetting game state to COMMAND, WIELD state to INIT\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "WIELD resetting game state to COMMAND, WIELD state to INIT\n" );
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
     return 0;
@@ -80,7 +80,7 @@ int CUseState::OnHandleWield( SDL_Keysym *keysym )
 int CUseState::OnHandleRemove( SDL_Keysym *keysym )
 {
     int retval;
-    JLog( LOG_LEVEL_INFO, true, "Handling REMOVE \n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Handling REMOVE \n" );
     retval = OnBaseHandleKey( keysym, USE_REMOVE );
 
     if( retval == JRESETSTATE )
@@ -97,7 +97,7 @@ int CUseState::OnHandleRemove( SDL_Keysym *keysym )
     }
 
     // We got a alpha key; do a "remove" of that item
-    JLog( LOG_LEVEL_DEBUG, true, "REMOVE  got a selection\n" );
+    JLog( LOG_LEVEL_NOISE, true, "REMOVE  got a selection\n" );
     if( TestRemove() )
     {
         if( DoRemove() )
@@ -117,7 +117,7 @@ int CUseState::OnHandleRemove( SDL_Keysym *keysym )
                                     m_pSelected->m_lpData->GetName() );
     }
 
-    JLog( LOG_LEVEL_INFO, true, "REMOVE resetting game state to COMMAND, REMOVE state to INIT\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "REMOVE resetting game state to COMMAND, REMOVE state to INIT\n" );
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
     return 0;
@@ -126,7 +126,7 @@ int CUseState::OnHandleRemove( SDL_Keysym *keysym )
 int CUseState::OnHandleDrop( SDL_Keysym *keysym )
 {
     int retval;
-    JLog( LOG_LEVEL_INFO, true, "Handling DROP \n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Handling DROP \n" );
     retval = OnBaseHandleKey( keysym, USE_DROP );
 
     if( retval == JRESETSTATE )
@@ -143,7 +143,7 @@ int CUseState::OnHandleDrop( SDL_Keysym *keysym )
     }
 
     // We got a alpha key; do a "drop" of that item
-    JLog( LOG_LEVEL_DEBUG, true, "DROP  got a selection\n" );
+    JLog( LOG_LEVEL_NOISE, true, "DROP  got a selection\n" );
     if( TestDrop() )
     {
         if( DoDrop() )
@@ -164,7 +164,7 @@ int CUseState::OnHandleDrop( SDL_Keysym *keysym )
     }
     m_pSelected = NULL;
 
-    JLog( LOG_LEVEL_INFO, true, "DROP resetting game state to COMMAND, USE state to INIT\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "DROP resetting game state to COMMAND, USE state to INIT\n" );
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
     return 0;
@@ -173,7 +173,7 @@ int CUseState::OnHandleDrop( SDL_Keysym *keysym )
 int CUseState::OnHandleRead( SDL_Keysym *keysym )
 {
     int retval;
-    JLog( LOG_LEVEL_INFO, true, "Handling READ\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Handling READ\n" );
     retval = OnBaseHandleKey( keysym, USE_READ );
 
     if( retval == JRESETSTATE )
@@ -188,7 +188,7 @@ int CUseState::OnHandleRead( SDL_Keysym *keysym )
         g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
         return 0;
     }
-    JLog( LOG_LEVEL_DEBUG, true, "READ got a selection\n" );
+    JLog( LOG_LEVEL_NOISE, true, "READ got a selection\n" );
     if( TestRead() )
     {
         if( DoRead() )
@@ -203,7 +203,7 @@ int CUseState::OnHandleRead( SDL_Keysym *keysym )
         }
     }
 
-    JLog( LOG_LEVEL_INFO, true, "READ resetting game state to COMMAND, USE state to INIT\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "READ resetting game state to COMMAND, USE state to INIT\n" );
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
     return 0;
@@ -212,7 +212,7 @@ int CUseState::OnHandleRead( SDL_Keysym *keysym )
 int CUseState::OnHandleQuaff( SDL_Keysym *keysym )
 {
     int retval;
-    JLog( LOG_LEVEL_INFO, true, "Handling QUAFF\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Handling QUAFF\n" );
     retval = OnBaseHandleKey( keysym, USE_QUAFF );
 
     if( retval == JRESETSTATE )
@@ -229,7 +229,7 @@ int CUseState::OnHandleQuaff( SDL_Keysym *keysym )
     }
 
     // We got a alpha key; do a "quaff" of that item
-    JLog( LOG_LEVEL_DEBUG, true, "QUAFF  got a selection\n" );
+    JLog( LOG_LEVEL_NOISE, true, "QUAFF  got a selection\n" );
     if( TestQuaff() )
     {
         if( DoQuaff() )
@@ -249,7 +249,7 @@ int CUseState::OnHandleQuaff( SDL_Keysym *keysym )
     }
     m_pSelected = NULL;
 
-    JLog( LOG_LEVEL_INFO, true, "QUAFF resetting game state to COMMAND, USE state to INIT\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "QUAFF resetting game state to COMMAND, USE state to INIT\n" );
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
     return 0;
@@ -257,7 +257,7 @@ int CUseState::OnHandleQuaff( SDL_Keysym *keysym )
 
 int CUseState::OnHandleInit( SDL_Keysym *keysym )
 {
-    JLog( LOG_LEVEL_INFO, true, "Initializing USE state...\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Initializing USE state...\n" );
     if( !m_cCommand )
     {
         m_cCommand = keysym->sym;

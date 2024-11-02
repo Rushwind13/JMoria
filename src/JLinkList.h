@@ -224,6 +224,11 @@ public:
             return NULL;
         while( count < which_link )
         {
+            if( curr_link->m_dwIndex == which_link )
+            {
+                return curr_link;
+            }
+
             if( curr_link->next == NULL )
             {
                 if( bForceValid )

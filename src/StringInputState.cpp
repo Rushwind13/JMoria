@@ -38,7 +38,7 @@ int CStringInputState::OnHandleKey( SDL_Keysym *keysym )
 int CStringInputState::OnHandleName( SDL_Keysym *keysym )
 {
     int retval;
-    JLog( LOG_LEVEL_INFO, true, "Handling NAME modifier\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Handling NAME modifier\n" );
     retval = OnBaseHandleKey( keysym );
 
     if( retval == JRESETSTATE )
@@ -48,7 +48,7 @@ int CStringInputState::OnHandleName( SDL_Keysym *keysym )
 
     if( retval == JCOMPLETESTATE )
     {
-        JLog( LOG_LEVEL_INFO, true,
+        JLog( LOG_LEVEL_DEBUG, true,
               "NAME modifier resetting game state to COMMAND, NAME state to INIT\n" );
         // One way or another, we're done with this state now.
         g_pGame->GetPlayer()->SetName( m_szInput );
@@ -65,7 +65,7 @@ int CStringInputState::OnHandleName( SDL_Keysym *keysym )
     }
 
     // We got a alpha key; append it to the name
-    JLog( LOG_LEVEL_DEBUG, true, "NAME modifier got a alpha\n" );
+    JLog( LOG_LEVEL_NOISE, true, "NAME modifier got a alpha\n" );
     g_pGame->GetMsgs()->Clear();
     g_pGame->GetMsgs()->Printf( "Character Name: %s", m_szInput );
 
@@ -75,7 +75,7 @@ int CStringInputState::OnHandleName( SDL_Keysym *keysym )
 int CStringInputState::OnHandleHaggle( SDL_Keysym *keysym )
 {
     int retval;
-    JLog( LOG_LEVEL_INFO, true, "Handling HAGGLE modifier\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Handling HAGGLE modifier\n" );
     retval = OnBaseHandleKey( keysym );
 
     if( retval == JRESETSTATE )
@@ -91,7 +91,7 @@ int CStringInputState::OnHandleHaggle( SDL_Keysym *keysym )
     }
 
     // We got a numeric key; add to haggle number
-    JLog( LOG_LEVEL_DEBUG, true, "HAGGLE modifier got a numeric\n" );
+    JLog( LOG_LEVEL_NOISE, true, "HAGGLE modifier got a numeric\n" );
     if( TestHaggle() )
     {
         if( DoHaggle() )
@@ -112,7 +112,7 @@ int CStringInputState::OnHandleHaggle( SDL_Keysym *keysym )
 
     if( retval == JRESETSTATE )
     {
-        JLog( LOG_LEVEL_INFO, true,
+        JLog( LOG_LEVEL_DEBUG, true,
               "HAGGLE modifier resetting game state to COMMAND, HAGGLE state to INIT\n" );
         // One way or another, we're done with this state now.
         ResetToState( STATE_COMMAND );
@@ -122,7 +122,7 @@ int CStringInputState::OnHandleHaggle( SDL_Keysym *keysym )
 
 int CStringInputState::OnHandleInit( SDL_Keysym *keysym )
 {
-    JLog( LOG_LEVEL_INFO, true, "Initializing modify state...\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Initializing modify state...\n" );
     if( !m_cCommand )
     {
         m_cCommand = keysym->sym;
@@ -177,7 +177,7 @@ int CStringInputState::OnBaseHandleKey( SDL_Keysym *keysym )
     else if( keysym->sym == SDLK_RETURN )
     {
         // actually set the string on the place
-        JLog( LOG_LEVEL_INFO, true, "you entered: <%s>\n", m_szInput );
+        JLog( LOG_LEVEL_DEBUG, true, "you entered: <%s>\n", m_szInput );
         return JCOMPLETESTATE;
     }
     else if( keysym->sym == SDLK_ESCAPE )

@@ -23,8 +23,9 @@ typedef unsigned char uint8;
 enum eLogLevel
 {
     LOG_LEVEL_INVALID = -1,
-    LOG_LEVEL_DEBUG = 0,
-    LOG_LEVEL_INFO = 1,
+    LOG_LEVEL_NOISE = 0,
+    LOG_LEVEL_DEBUG = 1,
+    LOG_LEVEL_INFO,
     LOG_LEVEL_WARN,
     LOG_LEVEL_ERROR,
     LOG_LEVEL_MAX

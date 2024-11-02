@@ -23,6 +23,7 @@ Keyboard commands recognized:
 * *.* - rest one turn
 * *R* - rest until at full health, or until disturbed
 * *q* - quaff a potion
+* *r* - read a scroll
 * *N* - set character name
 
 Monster definitions are in _Resources/Monsters.txt_

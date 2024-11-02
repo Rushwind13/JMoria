@@ -264,6 +264,14 @@ bool CCmdState::IsUseCommand( SDL_Keysym *keysym )
         // t (but not T)
     case SDLK_t:
     case SDLK_d:
+    case SDLK_r:
+    {
+        if( !( keysym->mod & KMOD_SHIFT ) )
+        {
+            return true;
+        }
+        break;
+    }
     case SDLK_q:
         return true;
         break;

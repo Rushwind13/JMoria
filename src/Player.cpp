@@ -355,12 +355,41 @@ bool CPlayer::Quaff( CLink<CItem> *pLink )
     return true;
 }
 
+bool CPlayer::Read( CLink<CItem> *pLink )
+{
+    CItem *pItem = pLink->m_lpData;
+    m_llInventory->Remove( pItem->m_pllLink, false );
+    CEffect *pEffect = pItem->m_id->m_llEffects->GetHead()->m_lpData;
+    if( pEffect->m_dwEffect == EFFECT_TYPE_LOSE ) // TODO: add this
+    {
+        g_pGame->GetMsgs()->Printf( "It is no longer cursed.\n" );
+    }
+
+    return true;
+}
+
 bool CPlayer::IsDrinkable( CLink<CItem> *pLink )
 {
     bool retval = false;
     switch( pLink->m_lpData->m_id->m_dwIndex )
     {
     case ITEM_IDX_POTION:
+        retval = true;
+        break;
+    default:
+        retval = false;
+        break;
+    }
+    return retval;
+}
+
+bool CPlayer::IsReadable( CLink<CItem> *pLink )
+{
+    bool retval = false;
+    switch( pLink->m_lpData->m_id->m_dwIndex )
+    {
+    case ITEM_IDX_BOOK:
+    case ITEM_IDX_SCROLL:
         retval = true;
         break;
     default:

@@ -15,6 +15,7 @@ enum eUseModifier
     USE_INIT,
     USE_DROP,
     USE_QUAFF,
+    USE_READ,
     USE_MAX
 };
 
@@ -53,6 +54,7 @@ private:
     int OnHandleInit( SDL_Keysym *keysym );
     int OnHandleDrop( SDL_Keysym *keysym );
     int OnHandleQuaff( SDL_Keysym *keysym );
+    int OnHandleRead( SDL_Keysym *keysym );
 
     bool TestWield();
     bool DoWield();
@@ -65,6 +67,9 @@ private:
 
     bool TestQuaff();
     bool DoQuaff();
+
+    bool TestRead();
+    bool DoRead();
 
     void ResetToState( int newstate );
 };

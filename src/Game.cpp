@@ -401,6 +401,7 @@ bool CGame::Update( float fCurTime )
         {
         case USE_WIELD:
         case USE_DROP:
+        case USE_READ:
         case USE_QUAFF:
             GetPlayer()->DisplayInventory( PLACEMENT_USE );
             break;

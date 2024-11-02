@@ -331,6 +331,16 @@ Level       5
 Weight      2.0
 Color        <225,225,50,255>
 }
+Item <Scroll of Remove Curse>
+{
+Plural      <Scrolls of Remove Curse>
+Type        <ITEM_IDX_SCROLL>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_TYPE_LOSE>
+Value       10.0
+Level       1
+Weight      2.0
+Color       <225,225,50,255>
+}
 Item <Flask of Oil>
 {
 Plural        <Flasks of Oil>

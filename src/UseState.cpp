@@ -17,6 +17,7 @@ CUseState::CUseState() : m_cCommand( 0 )
     m_pKeyHandlers[USE_REMOVE] = &CUseState::OnHandleRemove;
     m_pKeyHandlers[USE_DROP] = &CUseState::OnHandleDrop;
     m_pKeyHandlers[USE_QUAFF] = &CUseState::OnHandleQuaff;
+    m_pKeyHandlers[USE_READ] = &CUseState::OnHandleRead;
 
     m_eCurModifier = USE_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -169,6 +170,45 @@ int CUseState::OnHandleDrop( SDL_Keysym *keysym )
     return 0;
 }
 
+int CUseState::OnHandleRead( SDL_Keysym *keysym )
+{
+    int retval;
+    JLog( LOG_LEVEL_INFO, true, "Handling READ\n" );
+    retval = OnBaseHandleKey( keysym, USE_READ );
+
+    if( retval == JRESETSTATE )
+    {
+        return 0;
+    }
+
+    if( retval != JSUCCESS )
+    {
+        JLog( LOG_LEVEL_WARN, true,
+              "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
+        g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
+        return 0;
+    }
+    JLog( LOG_LEVEL_DEBUG, true, "READ got a selection\n" );
+    if( TestRead() )
+    {
+        if( DoRead() )
+        {
+            g_pGame->GetMsgs()->Printf( "You read the %s.\n", m_pSelected->m_lpData->GetName() );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf(
+                "The %s slips from your fingers and returns to your pack!\n",
+                m_pSelected->m_lpData->GetName() );
+        }
+    }
+
+    JLog( LOG_LEVEL_INFO, true, "READ resetting game state to COMMAND, USE state to INIT\n" );
+    // One way or another, we're done with this state now.
+    ResetToState( STATE_COMMAND );
+    return 0;
+}
+
 int CUseState::OnHandleQuaff( SDL_Keysym *keysym )
 {
     int retval;
@@ -236,6 +276,10 @@ int CUseState::OnHandleInit( SDL_Keysym *keysym )
         case SDLK_d:
             mod = USE_DROP;
             g_pGame->GetMsgs()->Printf( "Drop which item? [a-z]\n" );
+            break;
+        case SDLK_r:
+            mod = USE_READ;
+            g_pGame->GetMsgs()->Printf( "Read which item? [a-z]\n" );
             break;
         case SDLK_q:
             mod = USE_QUAFF;
@@ -310,6 +354,9 @@ CLink<CItem> *CUseState::GetResponse( eUseModifier whichUse )
     case USE_DROP:
         pList = g_pGame->GetPlayer()->m_llInventory;
         break;
+    case USE_READ:
+        pList = g_pGame->GetPlayer()->m_llInventory;
+        break;
     case USE_QUAFF:
         pList = g_pGame->GetPlayer()->m_llInventory;
         break;
@@ -344,3 +391,8 @@ bool CUseState::DoDrop() { return g_pGame->GetPlayer()->Drop( m_pSelected->m_lpD
 bool CUseState::TestQuaff() { return g_pGame->GetPlayer()->IsDrinkable( m_pSelected ); }
 
 bool CUseState::DoQuaff() { return g_pGame->GetPlayer()->Quaff( m_pSelected ); }
+
+//// Read commands
+bool CUseState::TestRead() { return g_pGame->GetPlayer()->IsReadable( m_pSelected ); }
+
+bool CUseState::DoRead() { return g_pGame->GetPlayer()->Read( m_pSelected ); }

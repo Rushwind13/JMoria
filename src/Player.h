@@ -156,6 +156,9 @@ public:
     bool IsDrinkable( CLink<CItem> *pLink );
     bool Quaff( CLink<CItem> *pLink );
 
+    bool IsReadable( CLink<CItem> *pLink );
+    bool Read( CLink<CItem> *pLink );
+
     bool SetName( const char *szName );
 
     float Attack();

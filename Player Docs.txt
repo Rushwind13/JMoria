@@ -16,6 +16,7 @@ d - drop
 . - rest one turn
 R - rest until at full health, or until disturbed
 q - quaff a potion
+r - read a scroll
 N - set character name
 ^c - exit game
 

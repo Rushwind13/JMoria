@@ -21,22 +21,22 @@ Feature: Game
         And I initialize the game
         When I terminate the game
         Then the game terminates successfully
-    @skip
+    # @skip
     Scenario: Player Seek works
         Given I have a game
         And I initialize the game
         And the game has a player
-        And I spawn a monster with SEEK
-        And I update the monster's brain pizza
+        And I spawn a Red Dragon:12, a monster with SEEK
+        And I update the monster's brain
         Then the game initalized successfully
-        And the monster spawned successfully
-        And the monster wants to move toward the player
-    @skip
+        And the Red Dragon spawned successfully
+        And the Red Dragon wants to move toward the player
+    # @skip
     Scenario: AI state changes work
         Given I have a game
         And I initialize the game
         And the game has a player
-        And I spawn a monster with SEEK
-        And I update the monster's brain pizza
+        And I spawn a Red Dragon:12, a monster with SEEK
+        And I update the monster's brain
         When I update the monster's brain again
-        And the monster moves toward the player
+        And the Red Dragon moves toward the player

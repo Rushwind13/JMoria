@@ -68,6 +68,7 @@ JResult CMonster::CreateMonster( CMonsterDef *pmd, JVector vSpawnPoint, bool bNe
             // That spawn failed; clean up
             // delete pMon;
             // pMon = NULL;
+            return retval;
         }
     }
 

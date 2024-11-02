@@ -41,7 +41,7 @@ static JResult JLog( eLogLevel eLogLevel, bool verbose, const char *format, ... 
         vprintf( mod_format, args );
         va_end( args );
     }
-    if( eLogLevel >= LOG_LEVEL_INFO )
+    if( eLogLevel >= LOG_LEVEL_WARN )
     {
         return JBOGUSKEY;
     }

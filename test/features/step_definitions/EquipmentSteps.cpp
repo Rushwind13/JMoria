@@ -31,6 +31,13 @@ GIVEN( "^I spawn a ([A-Za-z ]+):([0-9]+)$" )
     context->index = index;
 
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( context->index );
+
+    int compare = strcmp( context->szBuffer, pid->m_szName);
+    if( compare != 0 )
+    {
+        JLog(LOG_LEVEL_ERROR, true, "want %s have %s\n",item.c_str(), pid->m_szName);
+    }
+    EXPECT_EQ(compare, 0);
     context->result = CItem::CreateItem( pid, context->vec_b );
 }
 
@@ -40,6 +47,13 @@ GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in inventory$" )
     REGEX_PARAM( std::string, item );
     REGEX_PARAM( int, item_id );
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
+    int compare = strcmp( item.c_str(), pid->m_szName);
+    if( compare != 0 )
+    {
+        JLog(LOG_LEVEL_ERROR, true, "want %s have %s\n",item.c_str(), pid->m_szName);
+    }
+    EXPECT_EQ(compare, 0);
+
     g_pGame->GetPlayer()->PickUp( context->vec_b );
     int inv_index =
         g_pGame->GetPlayer()->m_llInventory->GetLink( pid->m_dwIndex )->m_lpData->m_id->m_dwIndex;
@@ -56,6 +70,12 @@ GIVEN( "^the ([A-Za-z ]+):([0-9]+) (is|is not) cursed$" )
     REGEX_PARAM( std::string, choice );
     int chance = ( choice == "is" ) ? 100 : 0;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
+    int compare = strcmp( item.c_str(), pid->m_szName);
+    if( compare != 0 )
+    {
+        JLog(LOG_LEVEL_ERROR, true, "want %s have %s\n",item.c_str(), pid->m_szName);
+    }
+    EXPECT_EQ(compare, 0);
     CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
     CItem *pItem = pTile->m_pCurItem;
     pItem->SetCursed( chance );
@@ -74,6 +94,12 @@ GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in equipment at ([-0-9]+)$" )
     REGEX_PARAM( int, item_id );
     REGEX_PARAM( int, equip_id );
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
+    int compare = strcmp( item.c_str(), pid->m_szName);
+    if( compare != 0 )
+    {
+        JLog(LOG_LEVEL_ERROR, true, "want %s have %s\n",item.c_str(), pid->m_szName);
+    }
+    EXPECT_EQ(compare, 0);
     CItem *expected = NULL;
     CItem *actual = g_pGame->GetPlayer()->m_llEquipment->GetLink( equip_id )->m_lpData;
     EXPECT_NE( expected, actual );
@@ -126,7 +152,15 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment) at ([-0-9]+)$" )
                                                       : g_pGame->GetPlayer()->m_llEquipment;
     CItem *expected = NULL;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
-    int index = ( list == "inventory" ) ? pid->m_dwIndex : equip_id;
+    int compare = strcmp( item.c_str(), pid->m_szName);
+    if( compare != 0 )
+    {
+        JLog(LOG_LEVEL_ERROR, true, "want %s have %s\n",item.c_str(), pid->m_szName);
+    }
+    EXPECT_EQ(compare, 0);
+    int item_type = pid->m_dwIndex;
+    int equip_slot = EQUIP_IDX_MAIN_HAND + equip_id;
+    int index = ( list == "inventory" ) ? item_type : equip_slot;
     CLink<CItem> *pLink = pList->GetLink( index );
     CItem *actual = pLink->m_lpData;
     EXPECT_NE( expected, actual );
@@ -136,7 +170,7 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment) at ([-0-9]+)$" )
 
     int result = strcmp( want, have );
     if( result != 0 )
-        JLog( LOG_LEVEL_WARN, true, "want %s have %s\n", want, have );
+        JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", want, have );
 
     EXPECT_EQ( result, 0 );
 }
@@ -152,6 +186,12 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment) at ([-0-9]+)$"
                                                       : g_pGame->GetPlayer()->m_llEquipment;
     CItem *expected = NULL;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
+    int compare = strcmp( item.c_str(), pid->m_szName);
+    if( compare != 0 )
+    {
+        JLog(LOG_LEVEL_ERROR, true, "want %s have %s\n",item.c_str(), pid->m_szName);
+    }
+    EXPECT_EQ(compare, 0);
     int index = ( list == "inventory" ) ? pid->m_dwIndex : equip_id;
     CLink<CItem> *pLink = pList->GetLink( index );
     CItem *actual = NULL;

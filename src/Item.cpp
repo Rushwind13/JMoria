@@ -48,7 +48,7 @@ void CItem::SetCursed( int likelihood )
     int rolled = (int)Util::GetRandom( 1.0f, 100.0f );
     if( rolled < likelihood )
     {
-        JLog( LOG_LEVEL_DEBUG, true, "Cursed! %d\n", rolled );
+        JLog( LOG_LEVEL_NOISE, true, "Cursed! %d\n", rolled );
         m_dwFlags |= ITEM_FLAG_CURSED;
         m_Color.SetColor( 255, 0, 0, 255 );
     }
@@ -62,7 +62,7 @@ void CItem::SetCursed( int likelihood )
 JResult CItem::SpawnItem( JVector vSpawnPoint )
 {
     bool bItemSpawned = false;
-    JLog( LOG_LEVEL_WARN, false, "Trying to spawn item type: %s...", m_id->m_szName );
+    JLog( LOG_LEVEL_INFO, false, "Trying to spawn item type: %s...", m_id->m_szName );
 
     if( vSpawnPoint.IsWithinWorld() )
     {
@@ -72,11 +72,11 @@ JResult CItem::SpawnItem( JVector vSpawnPoint )
     JVector vTryPos;
     while( !bItemSpawned )
     {
-        JLog( LOG_LEVEL_WARN, false, "." );
+        JLog( LOG_LEVEL_INFO, false, "." );
         vTryPos.Init( (float)( Util::GetRandom( 1, DUNG_WIDTH - 2 ) ),
                       (float)( Util::GetRandom( 1, DUNG_HEIGHT - 2 ) ) );
 
-        // JLog( LOG_LEVEL_DEBUG, false, "Trying to spawn item type: %d at <%.2f %.2f>...\n",
+        // JLog( LOG_LEVEL_NOISE, false, "Trying to spawn item type: %d at <%.2f %.2f>...\n",
         // m_md->m_dwType, vTryPos.x, vTryPos.y ); g_pGame->GetMsgs()->Printf( "Trying to spawn item
         // type: %d at <%.2f
         // %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
@@ -96,7 +96,7 @@ JResult CItem::SpawnAt( JVector vSpawnPoint )
         m_vPos = vSpawnPoint;
         g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurItem = this;
 
-        JLog( LOG_LEVEL_WARN, false, "Success! Spawned at <%.2f %.2f>\n", VEC_EXPAND( m_vPos ) );
+        JLog( LOG_LEVEL_INFO, false, "Success! Spawned at <%.2f %.2f>\n", VEC_EXPAND( m_vPos ) );
         // g_pGame->GetMsgs()->Printf( "Success!\n" );
 
         return JSUCCESS;

@@ -247,7 +247,7 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 {
                     // multi-hued
                     // <<rgb1>,<rgb2>,...,<rgbn>>
-                    JLog( LOG_LEVEL_INFO, true, "Found multi-hued monster: %s\n", color );
+                    JLog( LOG_LEVEL_DEBUG, true, "Found multi-hued monster: %s\n", color );
                     mdIn.m_Colors = ParseColors( color );
 
                     mdIn.m_dwFlags |= MON_COLOR_MULTI;
@@ -382,7 +382,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 {
                     // multi-hued
                     // <<rgb1>,<rgb2>,...,<rgbn>>
-                    JLog( LOG_LEVEL_INFO, true, "Found multi-hued item: %s\n", color );
+                    JLog( LOG_LEVEL_DEBUG, true, "Found multi-hued item: %s\n", color );
                     idIn.m_Colors = ParseColors( color );
 
                     idIn.m_dwFlags |= ITEM_COLOR_MULTI;

@@ -112,10 +112,10 @@ JResult CGame::Init( const char *szBasedir )
 
 void CGame::Term()
 {
-    JLog( LOG_LEVEL_WARN, true, "Terminating the game..." );
+    JLog( LOG_LEVEL_INFO, true, "Terminating the game..." );
     if( m_pRender )
     {
-        JLog( LOG_LEVEL_INFO, true, "Renderer..." );
+        JLog( LOG_LEVEL_DEBUG, true, "Renderer..." );
         m_pRender->Term();
         delete m_pRender;
         m_pRender = NULL;
@@ -123,7 +123,7 @@ void CGame::Term()
 
     if( m_pDungeon )
     {
-        JLog( LOG_LEVEL_INFO, true, "Dungeon..." );
+        JLog( LOG_LEVEL_DEBUG, true, "Dungeon..." );
         m_pDungeon->Term();
         delete m_pDungeon;
         m_pDungeon = NULL;
@@ -131,13 +131,13 @@ void CGame::Term()
 
     if( m_pPlayer )
     {
-        JLog( LOG_LEVEL_INFO, true, "Player..." );
+        JLog( LOG_LEVEL_DEBUG, true, "Player..." );
         m_pPlayer->Term();
         delete m_pPlayer;
         m_pPlayer = NULL;
     }
 
-    JLog( LOG_LEVEL_INFO, true, "States..." );
+    JLog( LOG_LEVEL_DEBUG, true, "States..." );
     if( m_pCmdState )
     {
         delete m_pCmdState;
@@ -180,7 +180,7 @@ void CGame::Term()
         m_pRestState = NULL;
     }
 
-    JLog( LOG_LEVEL_INFO, true, "Message boxes..." );
+    JLog( LOG_LEVEL_DEBUG, true, "Message boxes..." );
     if( m_pMsgsDT )
     {
         delete m_pMsgsDT;
@@ -216,7 +216,7 @@ void CGame::Term()
         delete m_pEndGameDT;
         m_pEndGameDT = NULL;
     }
-    JLog( LOG_LEVEL_INFO, true, "done.\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "done.\n" );
 }
 
 void CGame::Quit( int returncode )
@@ -516,12 +516,12 @@ void CGame::HandleEvents( int &isActive, int &done )
                 g_pGame->GetDungeon()->Zoom( -3 );
                 break;
             }
-            /*JLog( LOG_LEVEL_DEBUG, true, "Got up event type: %d which: %d button: %d state: %d at
+            /*JLog( LOG_LEVEL_NOISE, true, "Got up event type: %d which: %d button: %d state: %d at
             <%d %d>\n", event.button.type, event.button.which, event.button.button,
             event.button.state, event.button.x, event.button.y );/* */
             break;
         default:
-            JLog( LOG_LEVEL_DEBUG, true, "unhandled event type: %d\n", event.type );
+            JLog( LOG_LEVEL_NOISE, true, "unhandled event type: %d\n", event.type );
             break;
         }
     }

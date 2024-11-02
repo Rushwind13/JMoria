@@ -81,7 +81,7 @@ void CDisplayText::DrawStr( int x, int y, char *szString )
 
 void CDisplayText::DrawStr( int x, int y, bool bBoundsCheck, int dwYMax, char *szString )
 {
-    JLog( LOG_LEVEL_DEBUG, true, "Trying to draw string: %s\n", szString );
+    JLog( LOG_LEVEL_NOISE, true, "Trying to draw string: %s\n", szString );
     JVector vScreen( (float)x, (float)y );
     JVector vSize( (float)FONT_DRAW_W, (float)FONT_DRAW_H );
     char *ptr = szString;

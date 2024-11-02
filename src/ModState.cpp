@@ -31,7 +31,7 @@ int CModState::OnHandleKey( SDL_Keysym *keysym )
 int CModState::OnHandleOpen( SDL_Keysym *keysym )
 {
     int retval;
-    JLog( LOG_LEVEL_INFO, true, "Handling OPEN modifier\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Handling OPEN modifier\n" );
     retval = OnBaseHandleKey( keysym );
 
     if( retval == JRESETSTATE )
@@ -48,7 +48,7 @@ int CModState::OnHandleOpen( SDL_Keysym *keysym )
     }
 
     // We got a directional key; do an "open" in that direction
-    JLog( LOG_LEVEL_DEBUG, true, "OPEN modifier got a directional\n" );
+    JLog( LOG_LEVEL_NOISE, true, "OPEN modifier got a directional\n" );
     if( TestOpen() )
     {
         if( DoOpen() )
@@ -66,7 +66,7 @@ int CModState::OnHandleOpen( SDL_Keysym *keysym )
         g_pGame->GetMsgs()->Printf( "I do not see anything to open there.\n" );
     }
 
-    JLog( LOG_LEVEL_INFO, true,
+    JLog( LOG_LEVEL_DEBUG, true,
           "OPEN modifier resetting game state to COMMAND, OPEN state to INIT\n" );
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
@@ -76,7 +76,7 @@ int CModState::OnHandleOpen( SDL_Keysym *keysym )
 int CModState::OnHandleClose( SDL_Keysym *keysym )
 {
     int retval;
-    JLog( LOG_LEVEL_INFO, true, "Handling CLOSE modifier\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Handling CLOSE modifier\n" );
     retval = OnBaseHandleKey( keysym );
 
     if( retval == JRESETSTATE )
@@ -93,7 +93,7 @@ int CModState::OnHandleClose( SDL_Keysym *keysym )
     }
 
     // We got a directional key; do an "open" in that direction
-    JLog( LOG_LEVEL_DEBUG, true, "CLOSE modifier got a directional\n" );
+    JLog( LOG_LEVEL_NOISE, true, "CLOSE modifier got a directional\n" );
     if( TestClose() )
     {
         if( DoClose() )
@@ -111,7 +111,7 @@ int CModState::OnHandleClose( SDL_Keysym *keysym )
         g_pGame->GetMsgs()->Printf( "I do not see anything to close there.\n" );
     }
 
-    JLog( LOG_LEVEL_INFO, true,
+    JLog( LOG_LEVEL_DEBUG, true,
           "CLOSE modifier resetting game state to COMMAND, CLOSE state to INIT\n" );
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
@@ -121,7 +121,7 @@ int CModState::OnHandleClose( SDL_Keysym *keysym )
 int CModState::OnHandleTunnel( SDL_Keysym *keysym )
 {
     int retval;
-    JLog( LOG_LEVEL_INFO, true, "Handling TUNNEL modifier\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Handling TUNNEL modifier\n" );
     retval = OnBaseHandleKey( keysym );
 
     if( retval == JRESETSTATE )
@@ -138,7 +138,7 @@ int CModState::OnHandleTunnel( SDL_Keysym *keysym )
     }
 
     // We got a directional key; do an "open" in that direction
-    JLog( LOG_LEVEL_DEBUG, true, "TUNNEL modifier got a directional\n" );
+    JLog( LOG_LEVEL_NOISE, true, "TUNNEL modifier got a directional\n" );
     if( TestTunnel() )
     {
         if( DoTunnel() )
@@ -156,7 +156,7 @@ int CModState::OnHandleTunnel( SDL_Keysym *keysym )
         g_pGame->GetMsgs()->Printf( "Tunnel through what? Empty air?.\n" );
     }
 
-    JLog( LOG_LEVEL_INFO, true,
+    JLog( LOG_LEVEL_DEBUG, true,
           "TUNNEL modifier resetting game state to COMMAND, TUNNEL state to INIT\n" );
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
@@ -165,7 +165,7 @@ int CModState::OnHandleTunnel( SDL_Keysym *keysym )
 
 int CModState::OnHandleInit( SDL_Keysym *keysym )
 {
-    JLog( LOG_LEVEL_INFO, true, "Initializing modify state...\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Initializing modify state...\n" );
     if( !m_cCommand )
     {
         m_cCommand = keysym->sym;

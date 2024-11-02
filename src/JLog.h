@@ -7,6 +7,8 @@ static const char *Level( eLogLevel log_level )
 {
     switch( log_level )
     {
+    case LOG_LEVEL_NOISE:
+        return "NOISE";
     case LOG_LEVEL_DEBUG:
         return "DEBUG";
     case LOG_LEVEL_INFO:

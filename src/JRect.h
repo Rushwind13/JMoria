@@ -80,7 +80,7 @@ public:
         else
             top = bottom - dwHeight;
     };
-    
+
     bool IsValidRect()
     {
         if( left > right || top > bottom )
@@ -104,7 +104,7 @@ public:
 
     bool IsWithinWorld()
     {
-        if( left < 1 || right >= DUNG_WIDTH-1 || top < 1 || bottom >= DUNG_HEIGHT-1 )
+        if( left < 1 || right >= DUNG_WIDTH - 1 || top < 1 || bottom >= DUNG_HEIGHT - 1 )
         {
             return false;
         }

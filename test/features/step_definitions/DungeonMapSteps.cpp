@@ -136,10 +136,10 @@ THEN( "^The JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) is now filled with
         {
             JIVector vCheck( x, y );
             int expected = context->map.GetdtdIndex( vCheck );
-            JLog( LOG_LEVEL_DEBUG, true, "<%d %d>: %d/%d ", VEC_EXPAND( vCheck ), expected, type );
+            JLog( LOG_LEVEL_NOISE, true, "<%d %d>: %d/%d ", VEC_EXPAND( vCheck ), expected, type );
             EXPECT_EQ( expected, type );
         }
-        JLog( LOG_LEVEL_DEBUG, true, "\n" );
+        JLog( LOG_LEVEL_NOISE, true, "\n" );
     }
 }
 
@@ -158,10 +158,10 @@ THEN( "^The JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) is now lit$" )
         {
             JIVector vCheck( x, y );
             int expected = context->map.GetFlags( vCheck );
-            JLog( LOG_LEVEL_DEBUG, true, "<%d %d>: %d/%d ", VEC_EXPAND( vCheck ), expected,
+            JLog( LOG_LEVEL_NOISE, true, "<%d %d>: %d/%d ", VEC_EXPAND( vCheck ), expected,
                   DUNG_FLAG_LIT );
             EXPECT_EQ( expected, DUNG_FLAG_LIT );
         }
-        JLog( LOG_LEVEL_DEBUG, true, "\n" );
+        JLog( LOG_LEVEL_NOISE, true, "\n" );
     }
 }

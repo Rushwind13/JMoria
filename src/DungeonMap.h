@@ -149,7 +149,9 @@ protected:
     bool CheckInterior( const JRect rcCheck );
     bool CheckBorder( const JRect rcCheck, int direction );
 
-    void FillArea( const Uint8 type, JRect *rcFill, const int direction, bool bIsHallway );
+    JResult LightArea( JRect rcLight );
+    JResult FillDungeonArea( Uint8 type, JRect *rcFill, bool bBoundsCheck = true );
+    void FillArea( const Uint8 type, JRect *rcFill );
     void FillArea( const CDungeonCreationStep *pStep );
     void AddDoor( JIVector vHall, int direction );
     bool IsDoor( const int type );

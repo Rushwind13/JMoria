@@ -94,17 +94,26 @@ public:
 
     bool IsInWorld()
     {
-        if( left < 0 || right >= DUNG_WIDTH || top < 0 || bottom >= DUNG_HEIGHT )
-        {
-            return false;
-        }
-
-        return IsValidRect();
+        return IsInRect(JRect(0,0,DUNG_WIDTH,DUNG_HEIGHT));
     }
 
     bool IsWithinWorld()
     {
-        if( left < 1 || right >= DUNG_WIDTH - 1 || top < 1 || bottom >= DUNG_HEIGHT - 1 )
+        return IsWithinRect(JRect(0,0,DUNG_WIDTH,DUNG_HEIGHT));
+    }
+
+    bool IsInRect( const JRect &rcIn )
+    {
+        if( left < rcIn.left || right >= rcIn.right || top < rcIn.top || bottom >= rcIn.bottom )
+        {
+            return false;
+        }
+        return IsValidRect();
+    }
+
+    bool IsWithinRect( const JRect &rcIn )
+    {
+        if( left < rcIn.left + 1 || right >= rcIn.right - 1 || top < rcIn.top + 1 || bottom >= rcIn.bottom - 1 )
         {
             return false;
         }

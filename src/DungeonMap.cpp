@@ -36,7 +36,7 @@ void CDungeonMap::CreateDungeon( const int depth )
     JRect rcWorld( 0, 0, DUNG_WIDTH - 1, DUNG_HEIGHT - 1 );
 
     // First, fill the whole dungeon with rock
-    FillArea( DUNG_IDX_WALL, &rcWorld, DIR_NONE, false );
+    FillDungeonArea( DUNG_IDX_WALL, &rcWorld, false );
 
     // Do something with the depth, here...
     if( depth > 100 )
@@ -113,17 +113,15 @@ bool CDungeonMap::CheckInterior( const JRect area )
 {
     JIVector vCheck;
 
-    for( int y = area.top; y <= area.bottom; y++ )
+    for( vCheck.y = area.top; vCheck.y <= area.bottom; vCheck.y++ )
     {
-        vCheck.y = y;
-        for( int x = area.left; x <= area.right; x++ )
+        for( vCheck.x = area.left; vCheck.x <= area.right; vCheck.x++ )
         {
-            vCheck.x = x;
             if( GetTile( vCheck )->GetType() != DUNG_IDX_WALL )
             {
                 JLog( LOG_LEVEL_NOISE, true,
                       "interior check failed. Wanted <%d %d, %d %d>, but <%d %d> was %d\n",
-                      RECT_EXPAND( area ), x, y, m_dmtTiles[y * DUNG_WIDTH + x].GetType() );
+                      RECT_EXPAND( area ), VEC_EXPAND(vCheck), GetTile(vCheck)->GetType() );
                 return false;
             }
         }
@@ -226,114 +224,94 @@ bool CDungeonMap::IsDoor( int type )
     }
 }
 
+JResult CDungeonMap::LightArea( JRect rcLight )
+{
+    if( !Util::IsInWorld( rcLight ) )
+    {
+        return JBOGUSKEY;
+    }
+
+    JIVector vCurPos(rcLight.left, rcLight.top);
+    for(vCurPos.y = rcLight.top; vCurPos.y <= rcLight.bottom; vCurPos.y++ )
+    {
+        for(vCurPos.x = rcLight.left; vCurPos.x <= rcLight.right; vCurPos.x++ )
+        {
+            GetTile( vCurPos )->SetFlags( DUNG_FLAG_LIT );
+        }
+    }
+    return JSUCCESS;
+}
+
+JResult CDungeonMap::FillDungeonArea( Uint8 type, JRect *rcFill, bool bBoundsCheck )
+{
+    JRect rcLocal( *rcFill );
+    if( bBoundsCheck && !Util::IsWithinWorld( rcLocal ) )
+    {
+        return JBOGUSKEY;
+    }
+
+    JIVector vCurPos;
+    for(vCurPos.y = rcLocal.top; vCurPos.y <= rcLocal.bottom; vCurPos.y++ )
+    {
+        for(vCurPos.x = rcLocal.left; vCurPos.x <= rcLocal.right; vCurPos.x++ )
+        {
+            GetTile( vCurPos )->SetType( type );
+        }
+    }
+    return JSUCCESS;
+}
 void CDungeonMap::FillArea( const CDungeonCreationStep *pStep )
 {
     JRect rcFill( pStep->m_rcArea );
-    FillArea( DUNG_IDX_FLOOR, &rcFill, pStep->m_dwDirection,
-              pStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_HALLWAY );
+    FillArea( DUNG_IDX_FLOOR, &rcFill );
 }
-void CDungeonMap::FillArea( const Uint8 type, JRect *rcFill, const int direction, bool bIsHallway )
+void CDungeonMap::FillArea( const Uint8 type, JRect *rcFill )
 {
-    JRect rcLocal( *rcFill );
+    JRect rcLocal(*rcFill);
     JRect rcEdges( rcLocal.left - 1, rcLocal.top - 1, rcLocal.right + 1, rcLocal.bottom + 1 );
-    JIVector vOrigin( rcLocal.left, rcLocal.top );
 
-    if( bIsHallway )
-    {
-        switch( direction )
-        {
-        case DIR_NORTH:
-            // rcLocal.bottom--;
-            break;
-        case DIR_SOUTH:
-            vOrigin.Init( rcLocal.left, rcLocal.bottom );
-            // rcLocal.top++;
-            break;
-        case DIR_EAST:
-            vOrigin.Init( rcLocal.right, rcLocal.top );
-            // rcLocal.left++;
-            break;
-        case DIR_WEST:
-            // rcLocal.right--;
-            break;
-        case DIR_NONE:
-            // this doesn't make sense, but whatever.
-            break;
-        }
-    }
-
-    // Do not fill if requested rect is outside the world
-    if( !Util::IsInWorld( rcLocal ) )
-    {
-        return;
-    }
-
-    // Do not fill if requested rect would light areas outside the world
+    FillDungeonArea(type, &rcLocal);
+    
     if( type != DUNG_IDX_WALL )
     {
-        JRect rcEdges( rcLocal.left - 1, rcLocal.top - 1, rcLocal.right + 1, rcLocal.bottom + 1 );
-        if( !Util::IsInWorld( rcEdges ) )
-        {
-            return;
-        }
-    }
-
-    int x, y;
-    JIVector vCurPos( vOrigin );
-    for( y = rcLocal.top; y <= rcLocal.bottom; y++ )
-    {
-        vCurPos.y = y;
-        for( x = rcLocal.left; x <= rcLocal.right; x++ )
-        {
-            vCurPos.x = x;
-            GetTile( vCurPos )->SetType( type );
-            if( type != DUNG_IDX_WALL )
-            {
-                GetTile( vCurPos )->SetFlags( DUNG_FLAG_LIT );
-            }
-        }
-    }
-
-    // Now light the borders
-    if( type != DUNG_IDX_WALL )
-    {
-        JLog( LOG_LEVEL_DEBUG, true, "filled: <%d %d, %d %d>\nlit <%d %d, %d %d>\n",
-              RECT_EXPAND( rcLocal ), RECT_EXPAND( rcEdges ) );
-
-        // L and R sides, going over-by-one in each direction
-        for( y = rcEdges.top; y <= rcEdges.bottom; y++ )
-        {
-            vCurPos.Init( rcEdges.left, y );
-            GetTile( vCurPos )->SetFlags( DUNG_FLAG_LIT );
-
-            vCurPos.Init( rcEdges.right, y );
-            GetTile( vCurPos )->SetFlags( DUNG_FLAG_LIT );
-        }
-        // T and B sides, staying between the already-lit corners
-        for( x = rcLocal.left; x <= rcLocal.right; x++ )
-        {
-            vCurPos.Init( x, rcEdges.top );
-            GetTile( vCurPos )->SetFlags( DUNG_FLAG_LIT );
-
-            vCurPos.Init( x, rcEdges.bottom );
-            GetTile( vCurPos )->SetFlags( DUNG_FLAG_LIT );
-        }
+        LightArea(rcEdges);
     }
 
     // you still filled rcFill squares, just that one of them was a door.
-    JLog( LOG_LEVEL_DEBUG, true, "filled from <%d %d> to <%d %d>\n", RECT_EXPAND( *rcFill ) );
+    JLog( LOG_LEVEL_DEBUG, true, "filled from <%d %d> to <%d %d>\n", RECT_EXPAND( rcLocal ) );
 
-    if( bIsHallway )
-    {
-        // GetTile(*vOrigin)->SetType(DUNG_IDX_OPEN_DOOR);
-        GetTile( vOrigin )->SetType( DUNG_IDX_FLOOR );
-        // GetTile(*vOrigin)->SetFlags(~DUNG_FLAG_LIT);
-    }
-    else if( type != DUNG_IDX_WALL )
-    {
-        // GetTile(*vOrigin)->SetType(DUNG_IDX_RUBBLE);
-        GetTile( vOrigin )->SetType( DUNG_IDX_FLOOR );
-    }
+    // JIVector vOrigin( rcLocal.left, rcLocal.top );
+    //
+    // if( bIsHallway )
+    // {
+    //     switch( direction )
+    //     {
+    //     case DIR_NORTH:
+    //         break;
+    //     case DIR_SOUTH:
+    //         vOrigin.Init( rcLocal.left, rcLocal.bottom );
+    //         break;
+    //     case DIR_EAST:
+    //         vOrigin.Init( rcLocal.right, rcLocal.top );
+    //         break;
+    //     case DIR_WEST:
+    //         break;
+    //     case DIR_NONE:
+    //         // this doesn't make sense, but whatever.
+    //         break;
+    //     }
+    // }
+    // if( bIsHallway )
+    // {
+    //     // GetTile(*vOrigin)->SetType(DUNG_IDX_OPEN_DOOR);
+    //     GetTile( vOrigin )->SetType( DUNG_IDX_FLOOR );
+    //     // GetTile(*vOrigin)->SetFlags(~DUNG_FLAG_LIT);
+    // }
+    // else if( type != DUNG_IDX_WALL )
+    // {
+    //     // GetTile(*vOrigin)->SetType(DUNG_IDX_RUBBLE);
+    //     GetTile( vOrigin )->SetType( DUNG_IDX_FLOOR );
+    // }
 }
 
 int CDungeonMap::Opposite( int direction )
@@ -653,8 +631,7 @@ void CDungeonMap::GetRoomRect( JRect &rcRoom, const int direction )
         rcRoom.SetHeight( vSize.y );
         break;
     }
-    JRect rcEdges( rcRoom.left - 1, rcRoom.top - 1, rcRoom.right + 1, rcRoom.bottom + 1 );
-    if( !rcEdges.IsInWorld() )
+    if( !rcRoom.IsWithinWorld() )
     {
         rcRoom.top = CLAMP( rcRoom.top, 1, DUNG_HEIGHT - 2 );
         rcRoom.bottom = CLAMP( rcRoom.bottom, 1, DUNG_HEIGHT - 2 );
@@ -686,7 +663,7 @@ void CDungeonMap::GetHallRect( JRect &rcHall, const int direction )
         rcHall.SetHeight( 0 );
         break;
     }
-    if( !rcHall.IsInWorld() )
+    if( !rcHall.IsWithinWorld() )
     {
         rcHall.top = CLAMP( rcHall.top, 1, DUNG_HEIGHT - 2 );
         rcHall.bottom = CLAMP( rcHall.bottom, 1, DUNG_HEIGHT - 2 );
@@ -702,7 +679,7 @@ JIVector &CDungeonMap::GetWallOrigin( CDungeonCreationStep *pStep, const int dir
     case DIR_NORTH:
         // note: someday, this should be a random spot on the wall, rather than width/2
         pStep->m_vPos.Init(
-            pStep->m_rcArea.Left() + ( Util::GetRandom( 0, pStep->m_rcArea.Width() ) ),
+            pStep->m_rcArea.Left() + ( Util::GetRandom( 1, pStep->m_rcArea.Width() - 1 ) ),
             pStep->m_rcArea.Top() - 2 ); // -1... does a room's rect include its walls?
         JLog( LOG_LEVEL_NOISE, true,
               "[%d>%d]GetWallOrigin creating north %s, starting at <%d %d>\n",
@@ -712,7 +689,7 @@ JIVector &CDungeonMap::GetWallOrigin( CDungeonCreationStep *pStep, const int dir
         break;
     case DIR_SOUTH:
         pStep->m_vPos.Init( pStep->m_rcArea.Left() +
-                                ( Util::GetRandom( 0, pStep->m_rcArea.Width() ) ),
+                                ( Util::GetRandom( 1, pStep->m_rcArea.Width() - 1 ) ),
                             pStep->m_rcArea.Bottom() + 2 );
         JLog( LOG_LEVEL_NOISE, true,
               "[%d>%d]GetWallOrigin creating south %s, starting at <%d %d>\n",
@@ -723,7 +700,7 @@ JIVector &CDungeonMap::GetWallOrigin( CDungeonCreationStep *pStep, const int dir
     case DIR_WEST:
         pStep->m_vPos.Init( pStep->m_rcArea.Left() - 2,
                             pStep->m_rcArea.Top() +
-                                ( Util::GetRandom( 0, pStep->m_rcArea.Height() ) ) );
+                                ( Util::GetRandom( 1, pStep->m_rcArea.Height() - 1 ) ) );
         JLog( LOG_LEVEL_NOISE, true, "[%d>%d]GetWallOrigin creating west %s, starting at <%d %d>\n",
               pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1,
               pStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM ? "hall" : "room",
@@ -732,7 +709,7 @@ JIVector &CDungeonMap::GetWallOrigin( CDungeonCreationStep *pStep, const int dir
     case DIR_EAST:
         pStep->m_vPos.Init( pStep->m_rcArea.Right() + 2,
                             pStep->m_rcArea.Top() +
-                                ( Util::GetRandom( 0, pStep->m_rcArea.Height() ) ) );
+                                ( Util::GetRandom( 1, pStep->m_rcArea.Height() -1 ) ) );
         JLog( LOG_LEVEL_NOISE, true, "[%d>%d]GetWallOrigin creating east %s, starting at <%d %d>\n",
               pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1,
               pStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM ? "hall" : "room",

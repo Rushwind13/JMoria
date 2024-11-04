@@ -18,6 +18,9 @@ float Roll( const char *szFormat );
 bool IsInWorld( JFVector vIn );
 bool IsInWorld( JRect rcIn );
 
+bool IsWithinWorld( JFVector vIn );
+bool IsWithinWorld( JRect rcIn );
+
 JVector Near( const JVector vOrig, int distance = 1 );
 
 unsigned int GetTickCount();

@@ -10,12 +10,6 @@
 
 #define MAX_RECURDEPTH 10
 
-#define DIR_NONE -1
-#define DIR_NORTH 0
-#define DIR_SOUTH 1
-#define DIR_WEST 2
-#define DIR_EAST 3
-
 #define DUNG_HALL_MINLENGTH 2
 #define DUNG_HALL_MAXLENGTH 8
 class CDungeonCreationStep

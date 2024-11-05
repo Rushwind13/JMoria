@@ -39,6 +39,7 @@
 #define STATUS_MAX 10
 
 #define DIR_INVALID -1
+#define DIR_NONE -1
 #define DIR_NORTH 0
 #define DIR_NE 1
 #define DIR_EAST 2

@@ -10,12 +10,6 @@
 
 #define MAX_RECURDEPTH 10
 
-#define DIR_NONE -1
-#define DIR_NORTH 0
-#define DIR_SOUTH 1
-#define DIR_WEST 2
-#define DIR_EAST 3
-
 #define DUNG_HALL_MINLENGTH 2
 #define DUNG_HALL_MAXLENGTH 8
 class CDungeonCreationStep
@@ -149,7 +143,9 @@ protected:
     bool CheckInterior( const JRect rcCheck );
     bool CheckBorder( const JRect rcCheck, int direction );
 
-    void FillArea( const Uint8 type, JRect *rcFill, const int direction, bool bIsHallway );
+    JResult LightArea( JRect rcLight );
+    JResult FillDungeonArea( Uint8 type, JRect *rcFill, bool bBoundsCheck = true );
+    void FillArea( const Uint8 type, JRect *rcFill );
     void FillArea( const CDungeonCreationStep *pStep );
     void AddDoor( JIVector vHall, int direction );
     bool IsDoor( const int type );

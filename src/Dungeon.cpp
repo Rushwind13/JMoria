@@ -275,13 +275,9 @@ JResult CDungeon::PlaceItems( const int depth )
     while( desired_items > 0 )
     {
         int which_item = ChooseItemForDepth( depth );
-        if( which_item == ITEM_IDX_INVALID )
-        {
-            JLog( LOG_LEVEL_DEBUG, true, "Couldn't find a suitable item.\n" );
+        CItemDef *chosen_item = GetItemDef( which_item );
+        if( chosen_item == NULL )
             continue;
-        }
-
-        CItemDef *chosen_item = m_llItemDefs->GetLink( which_item )->m_lpData;
         JLog( LOG_LEVEL_NOISE, true, "Choosing item %d, called %s", which_item,
               chosen_item->m_szName );
 
@@ -324,9 +320,9 @@ JResult CDungeon::SpawnMonsters( const int depth )
 
 CMonsterDef *CDungeon::GetMonsterDef( int which_monster )
 {
-    if( which_monster == MON_IDX_INVALID || which_monster >= MON_IDX_MAX )
+    if( which_monster <= MON_IDX_INVALID || which_monster >= m_llMonsterDefs->length() - 1 )
     {
-        JLog( LOG_LEVEL_DEBUG, true, "Couldn't find a suitable monster.\n" );
+        JLog( LOG_LEVEL_WARN, true, "got an invalid monster: %d\n", which_monster );
         return NULL;
     }
     return m_llMonsterDefs->GetLink( which_monster )->m_lpData;
@@ -335,6 +331,10 @@ CMonsterDef *CDungeon::GetMonsterDef( int which_monster )
 bool CDungeon::SpawnMonster( int which_monster )
 {
     CMonsterDef *chosen_monster = GetMonsterDef( which_monster );
+    if( chosen_monster == NULL )
+    {
+        return false;
+    }
     JLog( LOG_LEVEL_NOISE, true, "Choosing monster %d, called %s...", which_monster,
           chosen_monster->m_szName );
 
@@ -344,6 +344,11 @@ bool CDungeon::SpawnMonster( int which_monster )
 
 CItemDef *CDungeon::GetItemDef( int which_item )
 {
+    if( which_item <= ITEM_IDX_INVALID || which_item >= m_llItemDefs->length() - 1 )
+    {
+        JLog( LOG_LEVEL_WARN, true, "got an invalid item: %d\n", which_item );
+        return NULL;
+    }
     return m_llItemDefs->GetLink( which_item )->m_lpData;
 }
 
@@ -363,6 +368,11 @@ int CDungeon::ChooseItemForDepth( const int depth )
         count++;
     }
 
+    if( which_item == ITEM_IDX_INVALID )
+    {
+        JLog( LOG_LEVEL_WARN, true, "Couldn't find a suitable item for this depth.\n" );
+    }
+
     return which_item;
 }
 
@@ -373,13 +383,18 @@ int CDungeon::ChooseMonsterForDepth( const int depth )
     while( count < DUNG_CFG_MAX_SPAWN_TRIES )
     {
         int try_monster = Util::GetRandom( 0, m_llMonsterDefs->length() - 1 );
-        CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink( try_monster )->m_lpData;
+        CMonsterDef *chosen_monster = GetMonsterDef( try_monster );
         if( abs( depth - chosen_monster->m_dwLevel ) < 5 )
         {
             which_monster = try_monster;
             break;
         }
         count++;
+    }
+
+    if( which_monster == MON_IDX_INVALID )
+    {
+        JLog( LOG_LEVEL_WARN, true, "Couldn't find a suitable monster for this depth.\n" );
     }
 
     return which_monster;

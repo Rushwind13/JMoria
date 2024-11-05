@@ -92,15 +92,9 @@ public:
         return true;
     }
 
-    bool IsInWorld()
-    {
-        return IsInRect(JRect(0,0,DUNG_WIDTH,DUNG_HEIGHT));
-    }
+    bool IsInWorld() { return IsInRect( JRect( 0, 0, DUNG_WIDTH, DUNG_HEIGHT ) ); }
 
-    bool IsWithinWorld()
-    {
-        return IsWithinRect(JRect(0,0,DUNG_WIDTH,DUNG_HEIGHT));
-    }
+    bool IsWithinWorld() { return IsWithinRect( JRect( 0, 0, DUNG_WIDTH, DUNG_HEIGHT ) ); }
 
     bool IsInRect( const JRect &rcIn )
     {
@@ -113,7 +107,8 @@ public:
 
     bool IsWithinRect( const JRect &rcIn )
     {
-        if( left < rcIn.left + 1 || right >= rcIn.right - 1 || top < rcIn.top + 1 || bottom >= rcIn.bottom - 1 )
+        if( left < rcIn.left + 1 || right >= rcIn.right - 1 || top < rcIn.top + 1 ||
+            bottom >= rcIn.bottom - 1 )
         {
             return false;
         }

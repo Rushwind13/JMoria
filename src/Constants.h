@@ -8,6 +8,7 @@
 #ifndef __CONSTANTS_H__
 #define __CONSTANTS_H__
 #include <stdio.h>
+#include <cmath>
 
 #define VERSION "0.20"
 
@@ -210,6 +211,10 @@
 #define EFFECT_FLAG_SPEED 0x80000000
 
 #define NUM_EFFECT_FLAGS 32
+// probably need a second set of effects
+// cursed
+// trap
+// holding might be an item thing
 
 // Effect Modifiers
 #define EFFECT_MOD_RESIST 0x000000001
@@ -217,7 +222,9 @@
 #define EFFECT_MOD_IMMUNE 0x000000004
 #define EFFECT_MOD_WEAK 0x000000008
 
-#define EFFECT_MOD_ENCHANT 0x000000010
+#define EFFECT_MOD_ENCHANT 0x000000010 // targets an item?
+// ball vs line spells
+// target vs aoe
 
 #define NUM_EFFECT_MODIFIERS 5
 
@@ -322,6 +329,16 @@
 #define NUM_STRINGS                                                                                \
     MON_IDX_MAX + NUM_MON_FLAGS + EQUIP_IDX_MAX + ITEM_IDX_MAX + NUM_ITEM_FLAGS +                  \
         NUM_EFFECT_FLAGS + NUM_EFFECT_MODIFIERS + NUM_EFFECT_TYPES
+
+#define MON_IDX 0
+#define MON_FLAG 1
+#define EQUIP_IDX 2
+#define ITEM_IDX 3
+#define ITEM_FLAG 4
+#define EFFECT_FLAG 5
+#define EFFECT_MOD 6
+#define EFFECT_TYPE 7
+
 #include "TextEntry.h"
 class Constants
 {
@@ -543,6 +560,45 @@ public:
         JLog( LOG_LEVEL_WARN, true, "bad string: %s\n", szIn );
 
         return -1;
+    }
+
+    char *IndexToString( const int flag_set, const int dwIndex )
+    {
+        if( dwIndex < 0 || dwIndex >= NUM_STRINGS ) return "";
+        int offset = 0;
+        int index = dwIndex;
+        
+        switch(flag_set)
+        {
+            case EFFECT_TYPE:
+            offset += NUM_EFFECT_MODIFIERS;
+            case EFFECT_MOD:
+            offset += NUM_EFFECT_FLAGS;
+            case EFFECT_FLAG:
+            offset += NUM_ITEM_FLAGS;;
+            case ITEM_FLAG:
+            offset += ITEM_IDX_MAX;
+            case ITEM_IDX:
+            offset += EQUIP_IDX_MAX;
+            case EQUIP_IDX:
+            offset += NUM_MON_FLAGS;
+            case MON_FLAG:
+            offset += MON_IDX_MAX;
+            case MON_IDX:
+            break;
+            default: 
+            break;
+        }
+        switch(flag_set)
+        {
+            case ITEM_IDX:
+            case EQUIP_IDX:
+            case MON_IDX:
+            break;
+            default:
+            index = (int)log2(dwIndex);
+        }
+        return m_StringTable[offset + index].m_szString;
     }
 };
 #endif // __CONSTANTS_H__

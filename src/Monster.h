@@ -12,10 +12,11 @@
 class CAttack
 {
 public:
-    CAttack() : m_dwType( -1 ), m_dwEffect( -1 ), m_szDamage( NULL ) {}
+    CAttack() : m_dwType( -1 ), m_dwEffect( -1 ), m_dwEffectFlags( -1 ), m_szDamage( NULL ) {}
     ~CAttack() {}
     int m_dwType;
     int m_dwEffect;
+    int m_dwEffectFlags;
     char *m_szDamage;
 };
 
@@ -115,6 +116,7 @@ public:
     float m_fColorChangeInterval;
     float m_fLastBreed;
     int m_dwFecundity;
+    CAttack *m_pCurrentAttack;
     CMonsterDef *m_md;
     CLink<CMonster> *m_pllLink;
     CAIBrain *m_pBrain; // this is the place to get info for the AI.
@@ -130,6 +132,10 @@ public:
     };
 
     float Attack();
+    void ChooseAttack();
+    char *AttackFlavorText();
+    char *AttackEffect();
+    void AttackDone();
     float Damage( float fDamageMult );
 
     bool Hit( float &fRoll );

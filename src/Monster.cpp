@@ -37,6 +37,7 @@ void CMonster::Init( CMonsterDef *pmd )
     }
     m_fCurHP = m_fHP;
     m_fCurAC = pmd->m_fBaseAC;
+    m_pCurrentAttack = NULL;
 }
 
 void CMonster::InitBrain( CMonsterDef *pmd )
@@ -137,8 +138,18 @@ JResult CMonster::SpawnAt( JVector vPos )
     return JBOGUSKEY;
 }
 
+void CMonster::ChooseAttack()
+{
+    float which_attack = Util::Roll( 0, m_md->m_llAttacks->length() - 1 );
+
+    m_pCurrentAttack = m_md->m_llAttacks->GetLink(which_attack)->m_lpData;
+
+    JLog( LOG_LEVEL_INFO, true, "%s choosing attack: %s\n", GetName(), g_Constants.IndexToString( MON_FLAG, m_pCurrentAttack->m_dwType ) );
+}
+
 float CMonster::Attack()
 {
+    // TODO: this should be modified by resistances, immunities, and other intrinsics.
     float fRoll = Util::Roll( "1d100" );
 
     JLog( LOG_LEVEL_INFO, true, "%s rolled: %.2f\n", GetName(), fRoll );
@@ -146,9 +157,57 @@ float CMonster::Attack()
     return fRoll;
 }
 
+char *CMonster::AttackEffect()
+{
+    if( m_pCurrentAttack == NULL )
+        return "thoughts and prayers";
+    switch( m_pCurrentAttack->m_dwEffectFlags)
+    {
+        case EFFECT_FLAG_ACID:
+        return "acid";
+        case EFFECT_FLAG_COLD:
+        return "cold";
+        case EFFECT_FLAG_ELECTRICITY:
+        return "lightning";
+        case EFFECT_FLAG_FIRE:
+        return "fire";
+        case EFFECT_FLAG_POISON:
+        return "poison gas";
+    }
+    return "hot air";
+}
+
+char *CMonster::AttackFlavorText()
+{
+    if( m_pCurrentAttack == NULL )
+        return "misses";
+    switch( m_pCurrentAttack->m_dwType )
+    {
+        case MON_FLAG_BITE:
+        return "bites";
+        case MON_FLAG_CRAWL:
+        return "crawls on";
+        case MON_FLAG_CLAW:
+        return "claws";
+        case MON_FLAG_TRAMPLE:
+        return "tramples";
+        case MON_FLAG_SPORE:
+        return "releases a cloud of spores at";
+        case MON_FLAG_TOUCH:
+        return "touches";
+        case MON_FLAG_DROOL:
+        return "drools on";
+        case MON_FLAG_BREATHE:
+        char retval[32];
+        sprintf(retval, "breathes %s on", AttackEffect());
+        return retval;
+    }
+    return "hits";
+}
+
 float CMonster::Damage( float fDamageMult )
 {
-    char *szDamage = m_md->m_llAttacks->GetHead()->m_lpData->m_szDamage;
+    char *szDamage = m_pCurrentAttack->m_szDamage;
     float fDamageModifier = 0.0f;
 
     float fDamage = ( Util::Roll( szDamage ) + fDamageModifier ) * fDamageMult;
@@ -157,6 +216,8 @@ float CMonster::Damage( float fDamageMult )
 
     return fDamage;
 }
+
+void CMonster::AttackDone() { m_pCurrentAttack = NULL; }
 
 bool CMonster::Hit( float &fRoll ) { return ( fRoll >= m_fCurAC ); }
 

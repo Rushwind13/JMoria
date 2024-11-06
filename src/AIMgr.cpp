@@ -187,12 +187,13 @@ void CAIBrain::CollideWithPlayer()
     char szStatus[16];
     float fDamageMult = 1.0f;
     // TODO: make this use all the attacks, not just the first one
+    m_pParent->ChooseAttack();
     float fRoll = m_pParent->Attack();
     bool bHit = g_pGame->GetPlayer()->Hit( fRoll );
     if( bHit )
     {
         // TODO: make this differ based on attack effect type
-        sprintf( szStatus, "hits" );
+        sprintf( szStatus, m_pParent->AttackFlavorText() );
     }
     else
     {
@@ -210,6 +211,7 @@ void CAIBrain::CollideWithPlayer()
 
         float fDamage = m_pParent->Damage( fDamageMult );
         g_pGame->GetPlayer()->TakeDamage( fDamage, m_pParent->GetName() );
+        m_pParent->AttackDone();
     }
 }
 

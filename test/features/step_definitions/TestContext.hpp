@@ -28,6 +28,7 @@ struct TestCtx
 {
     JVector vec;
     JVector vec_b;
+    JIVector vec_i;
 
     JRect area;
 
@@ -45,6 +46,7 @@ struct TestCtx
 
     // DungeonMap
     CDungeonMap map;
+    CDungeonCreationStep *pStep;
 
     // AI Brain
     CAIBrain *brain;

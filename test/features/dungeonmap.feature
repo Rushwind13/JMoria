@@ -137,3 +137,10 @@ Feature: Dungeon Creation
         Then The JRect 1,1,5,1 is now filled with 0
         Then The JRect 0,0,6,2 is now lit
         And The rect is in world
+
+    Scenario: I can create rooms and hallways using steps
+        Given I have a DungeonMap
+        Given I have a room create step
+        Given I have a E hallway create step
+        When I create a S hallway create step
+        Then the S hallway meets the E hallway

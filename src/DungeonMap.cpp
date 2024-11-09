@@ -156,34 +156,7 @@ void TweakBorders( JRect &rcIn, int direction )
 
 bool CDungeonMap::CheckBorder( const JRect area, int direction )
 {
-    JRect rcCheck( area );
-    // TweakBorders(rcCheck, direction);
-    if( rcCheck.top <= 0 )
-    {
-        JLog( LOG_LEVEL_NOISE, true, "border failed: <%d %d, %d %d>, top=0\n",
-              RECT_EXPAND( rcCheck ) );
-        return false;
-    }
-    else if( rcCheck.bottom >= DUNG_HEIGHT - 1 )
-    {
-        JLog( LOG_LEVEL_NOISE, true, "border failed: <%d %d, %d %d>, bottom=max\n",
-              RECT_EXPAND( rcCheck ) );
-        return false;
-    }
-    else if( rcCheck.left <= 0 )
-    {
-        JLog( LOG_LEVEL_NOISE, true, "border failed: <%d %d, %d %d>, left=0\n",
-              RECT_EXPAND( rcCheck ) );
-        return false;
-    }
-    else if( rcCheck.right >= DUNG_WIDTH - 1 )
-    {
-        JLog( LOG_LEVEL_NOISE, true, "border failed: <%d %d, %d %d>, right=max\n",
-              RECT_EXPAND( rcCheck ) );
-        return false;
-    }
-
-    JRect rcEdges( rcCheck.left - 1, rcCheck.top - 1, rcCheck.right + 1, rcCheck.bottom + 1 );
+    JRect rcEdges( area.left - 1, area.top - 1, area.right + 1, area.bottom + 1 );
     if( !rcEdges.IsInWorld() )
     {
         JLog( LOG_LEVEL_NOISE, true, "border failed: <%d %d, %d %d>, edges fail.\n",
@@ -202,7 +175,8 @@ bool CDungeonMap::CheckBorder( const JRect area, int direction )
             {
                 JLog( LOG_LEVEL_NOISE, true,
                       "border check failed. Wanted <%d %d, %d %d>, but <%d %d> was %d\n",
-                      RECT_EXPAND( area ), x, y, m_dmtTiles[y * DUNG_WIDTH + x].GetType() );
+                      RECT_EXPAND( area ), VEC_EXPAND( vCheck ), GetTile( vCheck )->GetType() );
+                // TODO: ... what if we allow overlaps? This is just a border check... the interior is OK.
                 return false;
             }
         }
@@ -397,7 +371,10 @@ bool CDungeonMap::CreateOneStep()
                 continue;
             pNewStep = MakeHallStep( vHall, dir, pCurStep->m_dwRecurDepth + 1 );
             if( pNewStep != NULL )
+            {
+                AddDoor(vHall, dir);
                 m_stkDungeonMapCreation->Push( pNewStep );
+            }
         }
     }
     break;
@@ -409,12 +386,14 @@ bool CDungeonMap::CreateOneStep()
             // Make a (single) room, in the direction of this hallway
             int dir = pCurStep->m_dwDirection;
             JIVector vRoom = GetHallOrigin( pCurStep, DUNG_CREATE_STEP_MAKE_ROOM );
-            AddDoor( vRoom, dir );
             if( !vRoom.IsWithinWorld() )
                 break;
             pNewStep = MakeRoomStep( vRoom, dir, pCurStep->m_dwRecurDepth + 1 );
             if( pNewStep != NULL )
+            {
+                AddDoor(vRoom, dir);
                 m_stkDungeonMapCreation->Push( pNewStep );
+            }
         }
         else if( pick_next <= 100 )
         {
@@ -441,7 +420,10 @@ bool CDungeonMap::CreateOneStep()
                     break;
                 pNewStep = MakeHallStep( vHall, dir, pCurStep->m_dwRecurDepth + 1 );
                 if( pNewStep != NULL )
+                {
+                    AddDoor(vHall, pCurStep->m_dwDirection);
                     m_stkDungeonMapCreation->Push( pNewStep );
+                }
             }
         }
     }
@@ -519,7 +501,7 @@ CDungeonCreationStep *CDungeonMap::MakeRoomStep( const JIVector &vPos, const int
 {
     if( recurdepth > MAX_RECURDEPTH )
         return NULL;
-    JLog( LOG_LEVEL_WARN, true, "Creating a room step\n" );
+    JLog( LOG_LEVEL_INFO, true, "Creating a room step\n" );
     CDungeonCreationStep *pStep = new CDungeonCreationStep();
     pStep->m_dwIndex = DUNG_CREATE_STEP_MAKE_ROOM;
     pStep->m_dwDirection = direction;
@@ -558,10 +540,10 @@ CDungeonCreationStep *CDungeonMap::MakeRoomStep( const JIVector &vPos, const int
         return NULL;
     }
     // put a door where the room and hallway meet
-    if( recurdepth > 0 )
-        AddDoor( pStep->m_vPos, pStep->m_dwDirection );
+    // if( recurdepth > 0 )
+    //     AddDoor( pStep->m_vPos, pStep->m_dwDirection );
 
-    JLog( LOG_LEVEL_WARN, true, "success!\n" );
+    JLog( LOG_LEVEL_INFO, true, "success!\n" );
     return pStep;
 }
 
@@ -570,6 +552,7 @@ CDungeonCreationStep *CDungeonMap::MakeHallStep( const JIVector &vPos, const int
 {
     if( recurdepth > MAX_RECURDEPTH )
         return NULL;
+    JLog( LOG_LEVEL_INFO, true, "Creating a hall step\n" );
     CDungeonCreationStep *pStep = new CDungeonCreationStep();
     pStep->m_dwIndex = DUNG_CREATE_STEP_MAKE_HALLWAY;
     pStep->m_dwRecurDepth = recurdepth;
@@ -606,8 +589,9 @@ CDungeonCreationStep *CDungeonMap::MakeHallStep( const JIVector &vPos, const int
         return NULL;
     }
     // put a door where the room and hallway meet
-    AddDoor( pStep->m_vPos, pStep->m_dwDirection );
+    // AddDoor( pStep->m_vPos, pStep->m_dwDirection );
 
+    JLog( LOG_LEVEL_INFO, true, "success!\n" );
     return pStep;
 }
 

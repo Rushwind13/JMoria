@@ -142,6 +142,12 @@ JResult CDungeon::TerminateLevel()
         delete m_llItems;
         m_llItems = NULL;
     }
+    if( m_llOpenArea )
+    {
+        m_llOpenArea->Terminate();
+        delete m_llOpenArea;
+        m_llOpenArea = NULL;
+    }
 
     return JSUCCESS;
 }
@@ -188,9 +194,15 @@ JResult CDungeon::CreateMap()
 
 JResult CDungeon::InitDungeonTiles()
 {
-    JIVector vDungeon( DUNG_HEIGHT, DUNG_WIDTH );
+    JIVector vDungeon;
+    JIVector *vOpen = new JIVector( -1, -1 );
     Uint8 dung_tile_type = DUNG_IDX_INVALID;
-    float open_area = 0.0f;
+    int open_area = 0;
+
+    if( m_llOpenArea == NULL )
+    {
+        m_llOpenArea = new JLinkList<JIVector>;
+    }
     // Create the dungeon array (at the moment, there are 16*16 entries in this list)
     // Set position, Tile type, and Flags for entire dungeon
     for( vDungeon.y = 0; vDungeon.y < DUNG_HEIGHT; vDungeon.y++ )
@@ -201,13 +213,19 @@ JResult CDungeon::InitDungeonTiles()
             GetITile( vDungeon )->m_vPos.y = (float)vDungeon.y;
             dung_tile_type = m_dmCurLevel->GetdtdIndex( vDungeon );
             if( dung_tile_type == DUNG_IDX_FLOOR )
+            {
+                vOpen = new JIVector( VEC_EXPAND( vDungeon ) );
+                m_llOpenArea->Add( vOpen );
                 open_area++;
+            }
             GetITile( vDungeon )->m_dtd = &m_dtdlist[dung_tile_type];
             GetITile( vDungeon )->m_dwFlags = m_dmCurLevel->GetFlags( vDungeon );
         }
     }
 
-    m_fOpenFloorArea = open_area;
+    // delete vOpen;
+
+    m_fOpenFloorArea = (float)open_area;
     return JSUCCESS;
 }
 
@@ -235,6 +253,7 @@ JResult CDungeon::PlaceStairs( const int desired, const int type )
 {
     int count = 0;
     bool bStairsSpawned = false;
+    JIVector *vOpen;
     while( count < desired )
     {
         bStairsSpawned = false;
@@ -243,13 +262,8 @@ JResult CDungeon::PlaceStairs( const int desired, const int type )
         while( !bStairsSpawned )
         {
             JLog( LOG_LEVEL_INFO, false, "." );
-            vTryPos.Init( (float)( Util::GetRandom( 0, DUNG_WIDTH - 1 ) ),
-                          (float)( Util::GetRandom( 0, DUNG_HEIGHT - 1 ) ) );
-
-            // JLog( LOG_LEVEL_NOISE, false, "Trying to spawn item type: %d at <%.2f %.2f>...\n",
-            // m_md->m_dwType, vTryPos.x, vTryPos.y ); g_pGame->GetMsgs()->Printf( "Trying to spawn
-            // item type: %d at
-            // <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
+            vOpen = g_pGame->GetDungeon()->AnyOpenTile();
+            vTryPos.Init( VEC_EXPAND( *vOpen ) );
 
             if( CanPlaceStairsAt( vTryPos ) == DUNG_COLL_NO_COLLISION )
             {
@@ -847,7 +861,7 @@ JResult CDungeon::Modify( JVector &vPos )
     {
         // hey! you can't modify that tile! How did you get here?!
         JLog( LOG_LEVEL_ERROR, true, "Modify error: Can't modify type %d at <%f %f>\n",
-              GetTile( vPos )->m_dtd->m_dwType, VEC_EXPAND( vPos ));
+              GetTile( vPos )->m_dtd->m_dwType, VEC_EXPAND( vPos ) );
         return JERROR();
     }
 

@@ -7,8 +7,8 @@
 // how to make them work with CL /EP for monsters.dat
 #ifndef __CONSTANTS_H__
 #define __CONSTANTS_H__
-#include <stdio.h>
 #include <cmath>
+#include <stdio.h>
 
 #define VERSION "0.20"
 
@@ -564,39 +564,40 @@ public:
 
     char *IndexToString( const int flag_set, const int dwIndex )
     {
-        if( dwIndex < 0 || dwIndex >= NUM_STRINGS ) return "";
+        if( dwIndex < 0 || dwIndex >= NUM_STRINGS )
+            return "";
         int offset = 0;
         int index = dwIndex;
-        
-        switch(flag_set)
+
+        switch( flag_set )
         {
-            case EFFECT_TYPE:
+        case EFFECT_TYPE:
             offset += NUM_EFFECT_MODIFIERS;
-            case EFFECT_MOD:
+        case EFFECT_MOD:
             offset += NUM_EFFECT_FLAGS;
-            case EFFECT_FLAG:
-            offset += NUM_ITEM_FLAGS;;
-            case ITEM_FLAG:
+        case EFFECT_FLAG:
+            offset += NUM_ITEM_FLAGS;
+        case ITEM_FLAG:
             offset += ITEM_IDX_MAX;
-            case ITEM_IDX:
+        case ITEM_IDX:
             offset += EQUIP_IDX_MAX;
-            case EQUIP_IDX:
+        case EQUIP_IDX:
             offset += NUM_MON_FLAGS;
-            case MON_FLAG:
+        case MON_FLAG:
             offset += MON_IDX_MAX;
-            case MON_IDX:
+        case MON_IDX:
             break;
-            default: 
+        default:
             break;
         }
-        switch(flag_set)
+        switch( flag_set )
         {
-            case ITEM_IDX:
-            case EQUIP_IDX:
-            case MON_IDX:
+        case ITEM_IDX:
+        case EQUIP_IDX:
+        case MON_IDX:
             break;
-            default:
-            index = (int)log2(dwIndex);
+        default:
+            index = (int)log2( dwIndex );
         }
         return m_StringTable[offset + index].m_szString;
     }

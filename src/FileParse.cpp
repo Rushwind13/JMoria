@@ -210,7 +210,7 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                         *end = NULL;
                         begin++;
                         curAttack->m_dwEffectFlags = g_Constants.LookupString( begin );
-                        JLog(LOG_LEVEL_NOISE, true, "Found an Effect Flag: %s\n", begin);
+                        JLog( LOG_LEVEL_NOISE, true, "Found an Effect Flag: %s\n", begin );
                     }
                 }
 

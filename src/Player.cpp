@@ -76,11 +76,12 @@ JResult CPlayer::SpawnPlayer()
 {
     JLog( LOG_LEVEL_INFO, false, "\nTrying to spawn player..." );
     JVector vTryPos;
+    JIVector *vOpen;
     while( !m_bHasSpawned )
     {
         JLog( LOG_LEVEL_INFO, false, "." );
-        vTryPos.Init( (float)Util::GetRandom( 0, DUNG_WIDTH - 1 ),
-                      (float)Util::GetRandom( 0, DUNG_HEIGHT - 1 ) );
+        vOpen = g_pGame->GetDungeon()->AnyOpenTile();
+        vTryPos.Init( VEC_EXPAND( *vOpen ) );
 
         // JLog( LOG_LEVEL_NOISE, true, "Trying to spawn player at <%.2f %.2f>...\n", vTryPos.x,
         //       vTryPos.y );

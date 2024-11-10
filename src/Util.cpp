@@ -44,6 +44,12 @@ int GetRandom( int lo, int hi )
     return (int)GetRandom( (float)lo, (float)hi );
 }
 
+JIVector GetRandomPoint( const JRect rcIn )
+{
+    JIVector vPoint( GetRandom( rcIn.left, rcIn.right ), GetRandom( rcIn.top, rcIn.bottom ) );
+    return vPoint;
+}
+
 // Roll some dice
 float Roll( int dice, int sides )
 {
@@ -99,8 +105,19 @@ float Roll( const char *szFormat )
     return Roll( dice, sides );
 }
 
-bool IsInWorld( JFVector vIn ) { return vIn.IsInWorld(); }
-bool IsWithinWorld( JFVector vIn ) { return vIn.IsWithinWorld(); }
+bool IsInWorld( JIVector vIn ) { return vIn.IsInWorld(); }
+bool IsWithinWorld( JIVector vIn ) { return vIn.IsWithinWorld(); }
+
+bool IsInWorld( JVector vIn )
+{
+    JIVector vReturn( VEC_EXPAND( vIn ) );
+    return vReturn.IsInWorld();
+}
+bool IsWithinWorld( JVector vIn )
+{
+    JIVector vReturn( VEC_EXPAND( vIn ) );
+    return vReturn.IsWithinWorld();
+}
 
 bool IsInWorld( JRect rcIn ) { return rcIn.IsInWorld(); }
 bool IsWithinWorld( JRect rcIn ) { return rcIn.IsWithinWorld(); }
@@ -150,6 +167,13 @@ JVector Near( const JVector vOrig, int distance )
     }
     JVector vDelta( x * GetRandom( 1, distance ), y * GetRandom( 1, distance ) );
     return JVector( vOrig + vDelta );
+}
+
+JRect Nearby( const JIVector vTarget, const int radius )
+{
+    JIVector delta( -radius, -radius );
+    JIVector size( radius * 2, radius * 2 );
+    return JRect( vTarget + delta, VEC_EXPAND( size ) );
 }
 
 unsigned int GetTickCount()

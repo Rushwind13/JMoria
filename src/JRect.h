@@ -114,6 +114,15 @@ public:
         }
         return IsValidRect();
     }
+
+    bool Contains( const JIVector vTarget )
+    {
+        if( vTarget.x < left || vTarget.x >= right || vTarget.y < top || vTarget.y >= bottom )
+        {
+            return false;
+        }
+        return IsValidRect();
+    }
 };
 
 #endif // __JRECT_H__

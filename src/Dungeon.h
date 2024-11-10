@@ -37,6 +37,7 @@ public:
     CTileset *m_TileSet;
     JLinkList<CMonster> *m_llMonsters;
     JLinkList<CItem> *m_llItems;
+    JLinkList<JIVector> *m_llOpenArea;
 
 protected:
     CDungeonTileDef *m_dtdlist;
@@ -60,6 +61,11 @@ public:
           m_vfTranslate( (int)( -DUNG_WIDTH * 0.5f ), (int)( -DUNG_HEIGHT * 0.5f ) ),
           m_dwZoom( DUNG_ZOOM_NORMAL ),
           // m_dmTownLevel(NULL),
+          m_llItems( NULL ),
+          m_llMonsters( NULL ),
+          m_llOpenArea( NULL ),
+          m_llItemDefs( NULL ),
+          m_llMonsterDefs( NULL ),
           m_dmCurLevel( NULL ) {};
     ~CDungeon() { Term(); }
     void PreDraw();
@@ -109,6 +115,10 @@ public:
         return ( m_Tiles + ( (int)vPos.y * DUNG_WIDTH ) +
                  (int)vPos.x ); // going to have to work in offsets, too, if the dungeon's bigger
                                 // than the screen. --Jimbo
+    };
+    JIVector *AnyOpenTile()
+    {
+        return m_llOpenArea->GetLink( Util::GetRandom( 0, m_llOpenArea->length() - 1 ) )->m_lpData;
     };
     int IsWalkableFor( JVector &vPos, bool isPlayer = false );
     int CanPlaceItemAt( JVector &vPos );

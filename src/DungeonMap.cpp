@@ -176,7 +176,8 @@ bool CDungeonMap::CheckBorder( const JRect area, int direction )
                 JLog( LOG_LEVEL_NOISE, true,
                       "border check failed. Wanted <%d %d, %d %d>, but <%d %d> was %d\n",
                       RECT_EXPAND( area ), VEC_EXPAND( vCheck ), GetTile( vCheck )->GetType() );
-                // TODO: ... what if we allow overlaps? This is just a border check... the interior is OK.
+                // TODO: ... what if we allow overlaps? This is just a border check... the interior
+                // is OK.
                 return false;
             }
         }
@@ -372,7 +373,7 @@ bool CDungeonMap::CreateOneStep()
             pNewStep = MakeHallStep( vHall, dir, pCurStep->m_dwRecurDepth + 1 );
             if( pNewStep != NULL )
             {
-                AddDoor(vHall, dir);
+                AddDoor( vHall, dir );
                 m_stkDungeonMapCreation->Push( pNewStep );
             }
         }
@@ -391,7 +392,7 @@ bool CDungeonMap::CreateOneStep()
             pNewStep = MakeRoomStep( vRoom, dir, pCurStep->m_dwRecurDepth + 1 );
             if( pNewStep != NULL )
             {
-                AddDoor(vRoom, dir);
+                AddDoor( vRoom, dir );
                 m_stkDungeonMapCreation->Push( pNewStep );
             }
         }
@@ -421,7 +422,7 @@ bool CDungeonMap::CreateOneStep()
                 pNewStep = MakeHallStep( vHall, dir, pCurStep->m_dwRecurDepth + 1 );
                 if( pNewStep != NULL )
                 {
-                    AddDoor(vHall, pCurStep->m_dwDirection);
+                    AddDoor( vHall, pCurStep->m_dwDirection );
                     m_stkDungeonMapCreation->Push( pNewStep );
                 }
             }
@@ -534,7 +535,7 @@ CDungeonCreationStep *CDungeonMap::MakeRoomStep( const JIVector &vPos, const int
         // can't find a good match for this room.
         g_pGame->GetStats()->Printf( "...room <%d %d> conflicts. terminated.\n",
                                      VEC_EXPAND( vPos ) );
-        JLog( LOG_LEVEL_ERROR, true, "...room <%d %d> conflicts. terminated.\n",
+        JLog( LOG_LEVEL_DEBUG, true, "...room <%d %d> conflicts. terminated.\n",
               VEC_EXPAND( vPos ) );
         delete pStep;
         return NULL;

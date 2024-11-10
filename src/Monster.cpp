@@ -48,20 +48,22 @@ void CMonster::InitBrain( CMonsterDef *pmd )
     m_pBrain->SetParent( this );
 }
 
-JResult CMonster::CreateMonster( CMonsterDef *pmd, JVector vSpawnPoint, bool bNear )
+JResult CMonster::CreateMonster( CMonsterDef *pmd, JIVector vSpawnPoint, bool bNear )
 {
     JResult retval = JSUCCESS;
     int desired = Util::Roll( pmd->m_szAppear );
+    JRect rcNearby = Util::Nearby( vSpawnPoint );
     for( int count = 0; count < desired; count++ )
     {
         CMonster *pMon;
         pMon = new CMonster;
-        retval = pMon->InitAndSpawn( pmd, bNear ? Util::Near( vSpawnPoint ) : vSpawnPoint );
+        retval = pMon->InitAndSpawn( pmd, bNear ? Util::GetRandomPoint( rcNearby ) : vSpawnPoint );
         if( retval == JSUCCESS )
         {
             // force additional monsters of the same type to appear near each other
             bNear = true;
-            vSpawnPoint = pMon->GetPos();
+            JIVector vMon( VEC_EXPAND( pMon->GetPos() ) );
+            rcNearby = Util::Nearby( vMon );
         }
         else
         {
@@ -69,68 +71,97 @@ JResult CMonster::CreateMonster( CMonsterDef *pmd, JVector vSpawnPoint, bool bNe
             // That spawn failed; clean up
             // delete pMon;
             // pMon = NULL;
-            return retval;
+            // return retval;
         }
     }
 
     return retval;
 }
 
-JResult CMonster::InitAndSpawn( CMonsterDef *pmd, JVector vSpawnPoint )
+JResult CMonster::InitAndSpawn( CMonsterDef *pmd, JIVector vRequestedSpawnPoint )
 {
     JResult retval = JSUCCESS;
 
-    // Initialize the Monster from the MonsterDef
-    Init( pmd );
+    JLog( LOG_LEVEL_INFO, false, "Trying to spawn monster type: %s...", pmd->m_szName );
 
-    // Initialize the Brain
-    // TODO: move to AIBrain::Init()
-    InitBrain( pmd );
+    // Find a good spawn point
+    JIVector vSpawnPoint = GetSpawnPoint( vRequestedSpawnPoint );
 
-    // Put the monster in the world
-    retval = SpawnMonster( vSpawnPoint );
+    if( vSpawnPoint.IsWithinWorld() )
+    {
+        // Initialize the Monster from the MonsterDef
+        Init( pmd );
 
-    // Now that the monster is set up, add it to the global lists (monsters, brains)
-    m_pllLink = g_pGame->GetDungeon()->m_llMonsters->Add( this );
-    m_pBrain->m_pllLink = g_pGame->GetAIMgr()->m_llAIBrains->Add( m_pBrain );
+        // Initialize the Brain
+        // TODO: move to AIBrain::Init()
+        InitBrain( pmd );
+
+        // Put the monster in the world
+        SpawnAt( vSpawnPoint );
+
+        // Now that the monster is set up, add it to the global lists (monsters, brains)
+        m_pllLink = g_pGame->GetDungeon()->m_llMonsters->Add( this );
+        m_pBrain->m_pllLink = g_pGame->GetAIMgr()->m_llAIBrains->Add( m_pBrain );
+    }
+    else
+    {
+        retval = JBOGUSKEY;
+    }
 
     return retval;
 }
 
-JResult CMonster::SpawnMonster( JVector vSpawnPoint )
+JIVector CMonster::GetSpawnPoint( JIVector vRequestedSpawnPoint )
 {
-    bool bMonsterSpawned = false;
-    JLog( LOG_LEVEL_INFO, false, "Trying to spawn monster type: %s...", m_md->m_szName );
-    if( vSpawnPoint.IsWithinWorld() )
+    JIVector vTryPos;
+    JIVector *vOpen;
+    bool bNear = vRequestedSpawnPoint.IsWithinWorld();
+    if( bNear )
     {
-        JLog( LOG_LEVEL_INFO, true, "given <%.2f %.2f>...", VEC_EXPAND( vSpawnPoint ) );
-        return SpawnAt( vSpawnPoint );
+        JLog( LOG_LEVEL_INFO, true, "given <%d %d>...", VEC_EXPAND( vRequestedSpawnPoint ) );
+        // return SpawnAt( vSpawnPoint );
+        vTryPos.Init( VEC_EXPAND( vRequestedSpawnPoint ) );
+    }
+    else
+    {
+        vOpen = g_pGame->GetDungeon()->AnyOpenTile();
+        vTryPos.Init( VEC_EXPAND( *vOpen ) );
     }
 
-    JVector vTryPos;
-    while( !bMonsterSpawned )
+    int dwTries = 0;
+    while( dwTries < DUNG_CFG_MAX_SPAWN_TRIES )
     {
         JLog( LOG_LEVEL_INFO, false, "." );
-        vTryPos.Init( (float)( Util::GetRandom( 1, DUNG_WIDTH - 2 ) ),
-                      (float)( Util::GetRandom( 1, DUNG_HEIGHT - 2 ) ) );
 
-        if( SpawnAt( vTryPos ) == JSUCCESS )
+        JVector vTryIt( VEC_EXPAND( vTryPos ) );
+        if( g_pGame->GetDungeon()->IsWalkableFor( vTryIt ) == DUNG_COLL_NO_COLLISION )
         {
-            bMonsterSpawned = true;
+            return vTryPos;
         }
+        if( bNear )
+        {
+            JRect rcNearby = Util::Nearby( vRequestedSpawnPoint );
+            vTryPos = Util::GetRandomPoint( rcNearby );
+        }
+        else
+        {
+            vOpen = g_pGame->GetDungeon()->AnyOpenTile();
+            vTryPos.Init( VEC_EXPAND( *vOpen ) );
+        }
+        dwTries++;
     }
 
-    return JSUCCESS;
+    return JIVector( -1, -1 );
 }
 
-JResult CMonster::SpawnAt( JVector vPos )
+JResult CMonster::SpawnAt( JIVector vPos )
 {
-    // JLog(LOG_LEVEL_INFO, true, "trying <%.2f %.2f>...", VEC_EXPAND(vPos));
-    if( g_pGame->GetDungeon()->IsWalkableFor( vPos ) == DUNG_COLL_NO_COLLISION )
+    JVector vSpawn( VEC_EXPAND( vPos ) );
+    if( vSpawn.IsInWorld() )
     {
-        SetPos( vPos );
-        g_pGame->GetDungeon()->GetTile( vPos )->m_pCurMonster = this;
-        JLog( LOG_LEVEL_INFO, false, "Success! Spawned at <%.2f %.2f>\n", VEC_EXPAND( vPos ) );
+        SetPos( vSpawn );
+        g_pGame->GetDungeon()->GetTile( vSpawn )->m_pCurMonster = this;
+        JLog( LOG_LEVEL_INFO, false, "Success! Spawned at <%d %d>\n", VEC_EXPAND( vPos ) );
         // g_pGame->GetMsgs()->Printf( "Success!\n" );
 
         return JSUCCESS;
@@ -142,9 +173,10 @@ void CMonster::ChooseAttack()
 {
     float which_attack = Util::Roll( 0, m_md->m_llAttacks->length() - 1 );
 
-    m_pCurrentAttack = m_md->m_llAttacks->GetLink(which_attack)->m_lpData;
+    m_pCurrentAttack = m_md->m_llAttacks->GetLink( which_attack )->m_lpData;
 
-    JLog( LOG_LEVEL_INFO, true, "%s choosing attack: %s\n", GetName(), g_Constants.IndexToString( MON_FLAG, m_pCurrentAttack->m_dwType ) );
+    JLog( LOG_LEVEL_INFO, true, "%s choosing attack: %s\n", GetName(),
+          g_Constants.IndexToString( MON_FLAG, m_pCurrentAttack->m_dwType ) );
 }
 
 float CMonster::Attack()
@@ -161,17 +193,17 @@ char *CMonster::AttackEffect()
 {
     if( m_pCurrentAttack == NULL )
         return "thoughts and prayers";
-    switch( m_pCurrentAttack->m_dwEffectFlags)
+    switch( m_pCurrentAttack->m_dwEffectFlags )
     {
-        case EFFECT_FLAG_ACID:
+    case EFFECT_FLAG_ACID:
         return "acid";
-        case EFFECT_FLAG_COLD:
+    case EFFECT_FLAG_COLD:
         return "cold";
-        case EFFECT_FLAG_ELECTRICITY:
+    case EFFECT_FLAG_ELECTRICITY:
         return "lightning";
-        case EFFECT_FLAG_FIRE:
+    case EFFECT_FLAG_FIRE:
         return "fire";
-        case EFFECT_FLAG_POISON:
+    case EFFECT_FLAG_POISON:
         return "poison gas";
     }
     return "hot air";
@@ -183,23 +215,23 @@ char *CMonster::AttackFlavorText()
         return "misses";
     switch( m_pCurrentAttack->m_dwType )
     {
-        case MON_FLAG_BITE:
+    case MON_FLAG_BITE:
         return "bites";
-        case MON_FLAG_CRAWL:
+    case MON_FLAG_CRAWL:
         return "crawls on";
-        case MON_FLAG_CLAW:
+    case MON_FLAG_CLAW:
         return "claws";
-        case MON_FLAG_TRAMPLE:
+    case MON_FLAG_TRAMPLE:
         return "tramples";
-        case MON_FLAG_SPORE:
+    case MON_FLAG_SPORE:
         return "releases a cloud of spores at";
-        case MON_FLAG_TOUCH:
+    case MON_FLAG_TOUCH:
         return "touches";
-        case MON_FLAG_DROOL:
+    case MON_FLAG_DROOL:
         return "drools on";
-        case MON_FLAG_BREATHE:
+    case MON_FLAG_BREATHE:
         char retval[32];
-        sprintf(retval, "breathes %s on", AttackEffect());
+        sprintf( retval, "breathes %s on", AttackEffect() );
         return retval;
     }
     return "hits";
@@ -257,7 +289,8 @@ void CMonster::Breed()
         {
             JLog( LOG_LEVEL_INFO, false, "spawnd!" );
             // Spawn a new copy
-            CreateMonster( m_md, GetPos(), true );
+            JIVector vSpawn( VEC_EXPAND( GetPos() ) );
+            CreateMonster( m_md, vSpawn, true );
         }
         JLog( LOG_LEVEL_NOISE, false, "\n" );
         m_dwFecundity--;

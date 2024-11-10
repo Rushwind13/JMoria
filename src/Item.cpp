@@ -70,11 +70,12 @@ JResult CItem::SpawnItem( JVector vSpawnPoint )
     }
 
     JVector vTryPos;
+    JIVector *vOpen;
     while( !bItemSpawned )
     {
         JLog( LOG_LEVEL_INFO, false, "." );
-        vTryPos.Init( (float)( Util::GetRandom( 1, DUNG_WIDTH - 2 ) ),
-                      (float)( Util::GetRandom( 1, DUNG_HEIGHT - 2 ) ) );
+        vOpen = g_pGame->GetDungeon()->AnyOpenTile();
+        vTryPos.Init( VEC_EXPAND( *vOpen ) );
 
         // JLog( LOG_LEVEL_NOISE, false, "Trying to spawn item type: %d at <%.2f %.2f>...\n",
         // m_md->m_dwType, vTryPos.x, vTryPos.y ); g_pGame->GetMsgs()->Printf( "Trying to spawn item

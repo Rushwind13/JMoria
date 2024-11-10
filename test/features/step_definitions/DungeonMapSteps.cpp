@@ -36,22 +36,23 @@ GIVEN( "^I have a JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) to fill$" )
     context->area = JRect( l, t, r, b );
 }
 
-GIVEN("^I have a room create step$")
+GIVEN( "^I have a room create step$" )
 {
     ScenarioScope<TestCtx> context;
-    JIVector vRoom(50,50);
-    context->pStep = context->map.MakeRoomStep(vRoom,DIR_NONE,0);
+    JIVector vRoom( 50, 50 );
+    context->pStep = context->map.MakeRoomStep( vRoom, DIR_NONE, 0 );
 
-    JLog(LOG_LEVEL_ERROR, false, "room: <%d %d %d %d>\n", RECT_EXPAND(context->pStep->m_rcArea));
+    JLog( LOG_LEVEL_ERROR, false, "room: <%d %d %d %d>\n",
+          RECT_EXPAND( context->pStep->m_rcArea ) );
 }
 
-GIVEN("^I have a E hallway create step$")
+GIVEN( "^I have a E hallway create step$" )
 {
     ScenarioScope<TestCtx> context;
-    JIVector vHallway = context->map.GetWallOrigin(context->pStep, DIR_EAST);
-    context->pStep = context->map.MakeHallStep(vHallway,DIR_EAST,1);
-    context->area.Init(context->pStep->m_rcArea);
-    JLog(LOG_LEVEL_ERROR, false, "E hallway: <%d %d %d %d>\n", RECT_EXPAND(context->area));
+    JIVector vHallway = context->map.GetWallOrigin( context->pStep, DIR_EAST );
+    context->pStep = context->map.MakeHallStep( vHallway, DIR_EAST, 1 );
+    context->area.Init( context->pStep->m_rcArea );
+    JLog( LOG_LEVEL_ERROR, false, "E hallway: <%d %d %d %d>\n", RECT_EXPAND( context->area ) );
 }
 
 /*#######
@@ -59,13 +60,13 @@ GIVEN("^I have a E hallway create step$")
 ## WHEN
 ##
 #######*/
-WHEN("^I create a S hallway create step$")
+WHEN( "^I create a S hallway create step$" )
 {
     ScenarioScope<TestCtx> context;
-    context->vec_i = context->map.GetHallOrigin(context->pStep, DUNG_CREATE_STEP_MAKE_HALLWAY);
-    context->pStep = context->map.MakeHallStep(context->vec_i,DIR_SOUTH,2);
+    context->vec_i = context->map.GetHallOrigin( context->pStep, DUNG_CREATE_STEP_MAKE_HALLWAY );
+    context->pStep = context->map.MakeHallStep( context->vec_i, DIR_SOUTH, 2 );
 
-    JLog(LOG_LEVEL_ERROR, false, "S origin: <%d %d>\n", VEC_EXPAND(context->vec_i));
+    JLog( LOG_LEVEL_ERROR, false, "S origin: <%d %d>\n", VEC_EXPAND( context->vec_i ) );
 }
 
 WHEN( "^I call GetHallRect for east from ([0-9.-]+),([0-9.-]+)$" )
@@ -147,17 +148,17 @@ WHEN( "^I call FillArea for a hallway east$" )
 ##
 #######*/
 
-THEN("^the S hallway meets the E hallway$")
+THEN( "^the S hallway meets the E hallway$" )
 {
     ScenarioScope<TestCtx> context;
-    JRect s(context->vec_i,0,0);
-    JRect e(context->area);
+    JRect s( context->vec_i, 0, 0 );
+    JRect e( context->area );
 
     // New Hallway should start +1 in the direction of the last hallway
-    JIVector vEast(e.right+1, e.top);
+    JIVector vEast( e.right + 1, e.top );
 
-    EXPECT_EQ(context->vec_i.x, vEast.x);
-    EXPECT_EQ(context->vec_i.y, vEast.y);
+    EXPECT_EQ( context->vec_i.x, vEast.x );
+    EXPECT_EQ( context->vec_i.y, vEast.y );
 }
 
 THEN( "^The JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) is now filled with ([0-9]+)$" )

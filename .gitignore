@@ -8,6 +8,9 @@ Scores.txt
 *.xcodeproj
 DerivedData
 
+# VSCode
+.vscode/
+
 # G++
 *.o
 jmoria

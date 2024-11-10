@@ -12,6 +12,7 @@ namespace Util
 {
 float GetRandom( float lo, float hi );
 int GetRandom( int lo, int hi );
+JIVector GetRandomPoint( const JRect rcIn );
 float Roll( int dice, int sides );
 float Roll( const char *szFormat );
 
@@ -22,6 +23,7 @@ bool IsWithinWorld( JFVector vIn );
 bool IsWithinWorld( JRect rcIn );
 
 JVector Near( const JVector vOrig, int distance = 1 );
+JRect Nearby( const JIVector vTarget, const int radius = 3 );
 
 unsigned int GetTickCount();
 }; // namespace Util

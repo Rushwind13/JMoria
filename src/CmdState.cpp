@@ -96,6 +96,14 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
         retval = 0;
     }
 
+    else if( IsTeleportCommand( keysym ) )
+    {
+        g_pGame->GetPlayer()->SetWizard();
+        g_pGame->GetPlayer()->m_bHasSpawned = false;
+        g_pGame->GetPlayer()->SpawnPlayer();
+        retval = 0;
+    }
+
     /*
     // These commands will bring up a ""
     // Inventory, Equipment
@@ -243,7 +251,7 @@ bool CCmdState::IsModifierNeeded( SDL_Keysym *keysym )
         break;
         // T ( but not t )
     case SDLK_t:
-        if( keysym->mod & KMOD_SHIFT )
+        if( keysym->mod & KMOD_SHIFT && !( keysym->mod & KMOD_CTRL ) )
         {
             return true;
         }
@@ -266,7 +274,7 @@ bool CCmdState::IsUseCommand( SDL_Keysym *keysym )
     case SDLK_d:
     case SDLK_r:
     {
-        if( !( keysym->mod & KMOD_SHIFT ) )
+        if( !( keysym->mod & KMOD_SHIFT ) && !( keysym->mod & KMOD_CTRL ) )
         {
             return true;
         }
@@ -332,6 +340,22 @@ bool CCmdState::IsRestCommand( SDL_Keysym *keysym )
     case SDLK_r:
         // want R not r
         return ( keysym->mod & KMOD_SHIFT ) ? true : false;
+        break;
+    default:
+        return false;
+        break;
+    }
+
+    return false;
+}
+
+bool CCmdState::IsTeleportCommand( SDL_Keysym *keysym )
+{
+    switch( keysym->sym )
+    {
+    case SDLK_t:
+        // want ^t not t
+        return ( keysym->mod & KMOD_CTRL ) ? true : false;
         break;
     default:
         return false;

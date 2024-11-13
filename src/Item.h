@@ -29,6 +29,7 @@ public:
           m_dwLevel( 0 ),
           m_fValue( 0.0f ),
           m_fWeight( 0.0f ),
+          m_fDuration( 0.0f ),
           m_dwFlags( 0 ),
           m_dwIndex( ITEM_IDX_INVALID ),
           m_dwBaseHP( 0.0f )
@@ -76,8 +77,9 @@ public:
     float m_fValue;
     float m_fWeight;
     int m_dwFlags;
-    int m_dwIndex;  // ITEM_IDX_SWORD, ITEM_IDX_WAND, etc.
-    int m_dwBaseHP; // for busting down walls, disarming traps, etc.
+    int m_dwIndex;     // ITEM_IDX_SWORD, ITEM_IDX_WAND, etc.
+    int m_dwBaseHP;    // for busting down walls, disarming traps, etc.
+    float m_fDuration; // for potions, scrolls, torches -- "How long will this last?"
     JLinkList<JColor> *m_Colors;
     JLinkList<CEffect> *m_llEffects;
     JColor m_Color;
@@ -104,10 +106,17 @@ protected:
     float m_fColorChangeInterval;
     JColor m_Color;
 
+    float m_fRemainingDuration; // for potions, scrolls, torches -- "How long will this last?"
+
 private:
     // Member Functions
 public:
-    CItem() : m_vPos( 0, 0 ), m_dwFlags( 0 ), m_pllLink( NULL ), m_id( NULL ) {};
+    CItem()
+        : m_vPos( 0, 0 ),
+          m_dwFlags( 0 ),
+          m_pllLink( NULL ),
+          m_id( NULL ),
+          m_fRemainingDuration( 0.0f ) {};
     void Init( CItemDef *pid );
     void SetCursed( int likelihood );
     char *GetName() { return m_id->m_szName; }
@@ -115,6 +124,19 @@ public:
     bool IsCloseable() { return false; }  // closeable pickup?
     bool IsTunnelable() { return false; } // Tunnelable pickup? unlikely.
     int EquipType();
+
+    float GetDuration() { return m_fRemainingDuration; };
+    void ChangeDuration( float fValue, bool bReset = false )
+    {
+        if( bReset )
+        {
+            m_fRemainingDuration = fValue;
+        }
+        else
+        {
+            m_fRemainingDuration += fValue;
+        }
+    };
 
     static JResult CreateItem( CItemDef *pid, JVector vSpawnPoint = JVector( -1, -1 ),
                                bool bNear = false );

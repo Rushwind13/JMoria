@@ -29,6 +29,7 @@ private:
     bool IsMenuCommand( SDL_Keysym *keysym ) { return false; }
     bool IsHelpCommand( SDL_Keysym *keysym ) { return false; }
     bool IsRestCommand( SDL_Keysym *keysym );
+    bool IsTeleportCommand( SDL_Keysym *keysym );
     bool IsStringInputCommand( SDL_Keysym *keysym );
     bool IsMonster( int collide_type ) { return ( collide_type == DUNG_COLL_MONSTER ); }
     void ResetToState( int newstate ) {}

@@ -25,6 +25,8 @@ Keyboard commands recognized:
 * *q* - quaff a potion
 * *r* - read a scroll
 * *N* - set character name
+* *Ctrl-T* - ^t - teleport (Note: will turn on Wizard Mode)
+
 
 Monster definitions are in _Resources/Monsters.txt_
 Item definitions are in _Resources/Items.txt_

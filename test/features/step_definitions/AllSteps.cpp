@@ -8,6 +8,7 @@
 #include "EquipmentSteps.cpp"
 #include "GameSteps.cpp"
 #include "ItemSteps.cpp"
+#include "LightSteps.cpp"
 #include "MonsterSteps.cpp"
 #include "RectSteps.cpp"
 #include "StringTableSteps.cpp"

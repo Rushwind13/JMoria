@@ -355,9 +355,13 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
             {
                 GetValue( szLine, idIn.m_fValue );
             }
-            else if( strncasecmp( szLine, "weight", 5 ) == 0 )
+            else if( strncasecmp( szLine, "weight", 6 ) == 0 )
             {
                 GetValue( szLine, idIn.m_fWeight );
+            }
+            else if( strncasecmp( szLine, "duration", 8 ) == 0 )
+            {
+                idIn.m_fDuration = GetValue( szLine, idIn.m_fDuration );
             }
             else if( strncasecmp( szLine, "type", 4 ) == 0 )
             {

@@ -86,9 +86,11 @@ public:
           m_fHitPoints( 0.0f ),
           m_fLastHPTime( 0.0f ),
           m_fLastMPTime( 0.0f ),
+          m_fLastLightTime( 0.0f ),
           m_fCurHitPoints( 0.0f ),
           m_fExperience( 0.0f ),
           m_fLevel( 1.0f ),
+          m_bWizardMode( false ),
           m_pClass( NULL )
     {
         memset( m_szName, 0, MAX_STRING_LENGTH );
@@ -159,6 +161,9 @@ public:
     bool IsReadable( CLink<CItem> *pLink );
     bool Read( CLink<CItem> *pLink );
 
+    float LightSource();
+    void UpdateLight( float fValue, bool bReset = false );
+
     bool SetName( const char *szName );
 
     float Attack();
@@ -168,6 +173,9 @@ public:
     int TakeDamage( float fDamage, char *szMon );
 
     void OnKillMonster( CMonster *pMon );
+
+    void SetWizard();
+    bool IsWizard() { return m_bWizardMode; };
 
     JVector m_vPos;
     CTileset *m_TileSet;
@@ -195,6 +203,7 @@ protected:
     float m_fCurHitPoints;
     float m_fLastHPTime;
     float m_fLastMPTime;
+    float m_fLastLightTime;
 
     float m_fExperience;
     float m_fLevel;
@@ -202,5 +211,6 @@ protected:
     CClass *m_pClass;
     CRace *m_pRace;
     char m_szName[MAX_STRING_LENGTH];
+    bool m_bWizardMode;
 };
 #endif // __PLAYER_H__

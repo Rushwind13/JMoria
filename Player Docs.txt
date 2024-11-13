@@ -19,6 +19,7 @@ q - quaff a potion
 r - read a scroll
 N - set character name
 ^c - exit game
+^t - teleport (Note: will turn on Wizard Mode, which prevents score being saved)
 
 *Items*
 Players will automatically pick up items they walk over. Inventory is sorted by item type.

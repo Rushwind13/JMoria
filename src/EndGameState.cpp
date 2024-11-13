@@ -69,6 +69,11 @@ int CEndGameState::OnHandleTomb( SDL_Keysym *keysym )
     {
         JLog( LOG_LEVEL_DEBUG, true, "TOMB modifier complete, ENDGAME state to SCORES\n" );
         g_pGame->GetEnd()->Clear();
+        if( g_pGame->GetPlayer()->IsWizard() )
+        {
+            JLog(LOG_LEVEL_WARN, true, "*** Wizard Mode: On *** Score not recorded.\n");
+            g_pGame->Quit(0);
+        }
         InitScores();
         DoScores();
         m_eCurModifier = ENDGAME_SCORES;

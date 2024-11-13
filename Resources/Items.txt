@@ -360,6 +360,7 @@ Effect       <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LIGHT>,3,5000,5000
 Value       10.0
 Level       1
 Weight     1.0
+Duration    3000.0
 Color        <225,225,50,255>
 }
 Item <Brass Lantern>
@@ -371,6 +372,7 @@ Value       10.0
 Flags       <ITEM_FLAG_NEEDSAMMO>
 Level       5
 Weight      2.0
+Duration    7500.0
 Color        <225,225,50,255>
 }
 Item <Flask of Oil>
@@ -381,6 +383,7 @@ Effect       <EFFECT_FLAG_FUEL>,7500
 Value       10.0
 Level       4
 Weight     0.5
+Duration    5000.0
 Color        <225,225,50,255>
 }
 Item <Steel Helm>

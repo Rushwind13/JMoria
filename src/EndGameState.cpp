@@ -71,8 +71,8 @@ int CEndGameState::OnHandleTomb( SDL_Keysym *keysym )
         g_pGame->GetEnd()->Clear();
         if( g_pGame->GetPlayer()->IsWizard() )
         {
-            JLog(LOG_LEVEL_WARN, true, "*** Wizard Mode: On *** Score not recorded.\n");
-            g_pGame->Quit(0);
+            JLog( LOG_LEVEL_WARN, true, "*** Wizard Mode: On *** Score not recorded.\n" );
+            g_pGame->Quit( 0 );
         }
         InitScores();
         DoScores();

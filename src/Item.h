@@ -77,8 +77,8 @@ public:
     float m_fValue;
     float m_fWeight;
     int m_dwFlags;
-    int m_dwIndex;  // ITEM_IDX_SWORD, ITEM_IDX_WAND, etc.
-    int m_dwBaseHP; // for busting down walls, disarming traps, etc.
+    int m_dwIndex;     // ITEM_IDX_SWORD, ITEM_IDX_WAND, etc.
+    int m_dwBaseHP;    // for busting down walls, disarming traps, etc.
     float m_fDuration; // for potions, scrolls, torches -- "How long will this last?"
     JLinkList<JColor> *m_Colors;
     JLinkList<CEffect> *m_llEffects;
@@ -111,7 +111,12 @@ protected:
 private:
     // Member Functions
 public:
-    CItem() : m_vPos( 0, 0 ), m_dwFlags( 0 ), m_pllLink( NULL ), m_id( NULL ), m_fRemainingDuration(0.0f) {};
+    CItem()
+        : m_vPos( 0, 0 ),
+          m_dwFlags( 0 ),
+          m_pllLink( NULL ),
+          m_id( NULL ),
+          m_fRemainingDuration( 0.0f ) {};
     void Init( CItemDef *pid );
     void SetCursed( int likelihood );
     char *GetName() { return m_id->m_szName; }
@@ -121,7 +126,17 @@ public:
     int EquipType();
 
     float GetDuration() { return m_fRemainingDuration; };
-    void ChangeDuration(float fValue, bool bReset = false) { if(bReset){m_fRemainingDuration = fValue;} else {m_fRemainingDuration += fValue;} };
+    void ChangeDuration( float fValue, bool bReset = false )
+    {
+        if( bReset )
+        {
+            m_fRemainingDuration = fValue;
+        }
+        else
+        {
+            m_fRemainingDuration += fValue;
+        }
+    };
 
     static JResult CreateItem( CItemDef *pid, JVector vSpawnPoint = JVector( -1, -1 ),
                                bool bNear = false );

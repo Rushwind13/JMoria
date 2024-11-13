@@ -90,7 +90,7 @@ public:
           m_fCurHitPoints( 0.0f ),
           m_fExperience( 0.0f ),
           m_fLevel( 1.0f ),
-          m_bWizardMode(false),
+          m_bWizardMode( false ),
           m_pClass( NULL )
     {
         memset( m_szName, 0, MAX_STRING_LENGTH );
@@ -162,7 +162,7 @@ public:
     bool Read( CLink<CItem> *pLink );
 
     float LightSource();
-    void UpdateLight(float fValue, bool bReset = false);
+    void UpdateLight( float fValue, bool bReset = false );
 
     bool SetName( const char *szName );
 
@@ -175,7 +175,7 @@ public:
     void OnKillMonster( CMonster *pMon );
 
     void SetWizard();
-    bool IsWizard(){ return m_bWizardMode;};
+    bool IsWizard() { return m_bWizardMode; };
 
     JVector m_vPos;
     CTileset *m_TileSet;

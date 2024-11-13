@@ -41,7 +41,7 @@ void CItem::Init( CItemDef *pid )
 {
     m_id = pid;
     m_Color.SetColor( m_id->m_Color );
-    m_fRemainingDuration = Util::GetRandom(0.0f, m_id->m_fDuration);
+    m_fRemainingDuration = Util::GetRandom( 0.0f, m_id->m_fDuration );
 }
 
 void CItem::SetCursed( int likelihood )

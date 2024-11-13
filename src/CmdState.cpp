@@ -251,7 +251,7 @@ bool CCmdState::IsModifierNeeded( SDL_Keysym *keysym )
         break;
         // T ( but not t )
     case SDLK_t:
-        if( keysym->mod & KMOD_SHIFT && !( keysym->mod & KMOD_CTRL )  )
+        if( keysym->mod & KMOD_SHIFT && !( keysym->mod & KMOD_CTRL ) )
         {
             return true;
         }

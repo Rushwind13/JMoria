@@ -50,11 +50,11 @@ bool CPlayer::Update( float fCurTime )
         // m_fLastMPTime = g_pGame->GetTime();
     }
 
-    if( g_pGame->GetTime() >= (int)(m_fLastLightTime + 1.0f) )
+    if( g_pGame->GetTime() >= (int)( m_fLastLightTime + 1.0f ) )
     {
         if( LightSource() > 0.0f )
         {
-            UpdateLight(-1.0f);
+            UpdateLight( -1.0f );
         }
         m_fLastLightTime = (float)g_pGame->GetTime();
     }
@@ -202,9 +202,8 @@ bool CPlayer::Wield( CLink<CItem> *pLink )
 
     // You can only wield one thing of a given type at a time
     CLink<CItem> *pCurrEquip = m_llEquipment->GetLink( pItem->EquipType(), true );
-    if( pCurrEquip != NULL && 
-    pCurrEquip->m_lpData != NULL && 
-    pCurrEquip->m_lpData->EquipType() == pItem->EquipType() )
+    if( pCurrEquip != NULL && pCurrEquip->m_lpData != NULL &&
+        pCurrEquip->m_lpData->EquipType() == pItem->EquipType() )
     {
         // So if you're already wearing something of this type, remove it and put it back in
         // inventory
@@ -262,47 +261,50 @@ bool CPlayer::Remove( CLink<CItem> *pLink )
 
 float CPlayer::LightSource()
 {
-    if( m_llEquipment == NULL ) return 0.0f;
+    if( m_llEquipment == NULL )
+        return 0.0f;
 
-    CLink<CItem> *pLink = m_llEquipment->GetLink(EQUIP_IDX_TORCH);
-    if( pLink == NULL || pLink->m_lpData == NULL ) return 0.0f;
+    CLink<CItem> *pLink = m_llEquipment->GetLink( EQUIP_IDX_TORCH );
+    if( pLink == NULL || pLink->m_lpData == NULL )
+        return 0.0f;
 
-    CItem * pTorch = pLink->m_lpData;
+    CItem *pTorch = pLink->m_lpData;
 
     return pTorch->GetDuration();
 }
 
-void CPlayer::UpdateLight(float fValue, bool bReset)
+void CPlayer::UpdateLight( float fValue, bool bReset )
 {
-    if( m_llEquipment == NULL ) return;
+    if( m_llEquipment == NULL )
+        return;
 
-    CLink<CItem> *pLink = m_llEquipment->GetLink(EQUIP_IDX_TORCH);
-    if( pLink == NULL || pLink->m_lpData == NULL ) return;
+    CLink<CItem> *pLink = m_llEquipment->GetLink( EQUIP_IDX_TORCH );
+    if( pLink == NULL || pLink->m_lpData == NULL )
+        return;
 
-    CItem * pTorch = pLink->m_lpData;
+    CItem *pTorch = pLink->m_lpData;
 
     if( !bReset && fValue >= pTorch->GetDuration() )
     {
         fValue = 0.0f;
         bReset = true;
     }
-    pTorch->ChangeDuration(fValue, bReset);
+    pTorch->ChangeDuration( fValue, bReset );
 
-    int duration = (int) pTorch->GetDuration();
+    int duration = (int)pTorch->GetDuration();
     if( duration == 0 )
     {
-        g_pGame->GetMsgs()->Printf("Your light has gone out!\n");
+        g_pGame->GetMsgs()->Printf( "Your light has gone out!\n" );
     }
     else if( duration <= 100 && duration % 25 == 0 )
     {
-        g_pGame->GetMsgs()->Printf("Your light is growing very faint.\n");
+        g_pGame->GetMsgs()->Printf( "Your light is growing very faint.\n" );
     }
     else if( duration <= 500 && duration % 100 == 0 )
     {
-        g_pGame->GetMsgs()->Printf("Your light is growing faint.\n");
+        g_pGame->GetMsgs()->Printf( "Your light is growing faint.\n" );
     }
 }
-
 
 float CPlayer::Attack()
 {
@@ -474,8 +476,8 @@ void CPlayer::SetWizard()
 {
     if( !m_bWizardMode )
     {
-        g_pGame->GetMsgs()->Printf("*** Wizard Mode: On *** your score will not be saved.\n");
-        JLog(LOG_LEVEL_WARN, true, "*** Wizard Mode: On *** your score will not be saved.\n");
+        g_pGame->GetMsgs()->Printf( "*** Wizard Mode: On *** your score will not be saved.\n" );
+        JLog( LOG_LEVEL_WARN, true, "*** Wizard Mode: On *** your score will not be saved.\n" );
     }
     m_bWizardMode = true;
 }

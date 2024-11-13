@@ -23,7 +23,8 @@ GIVEN( "^There is already a room at ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) 
     REGEX_PARAM( float, b );
     JRect rcBlocking( l, t, r, b );
     ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( rcBlocking ) );
+    CRoom *pBlocking = new CRoom( rcBlocking );
+    context->map.FillArea( DUNG_IDX_FLOOR, pBlocking );
 }
 
 GIVEN( "^I have a JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) to fill$" )
@@ -33,7 +34,9 @@ GIVEN( "^I have a JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) to fill$" )
     REGEX_PARAM( float, r );
     REGEX_PARAM( float, b );
     ScenarioScope<TestCtx> context;
+
     context->area = JRect( l, t, r, b );
+    context->pRoom = new CRoom( context->area );
 }
 
 GIVEN( "^I have a room create step$" )
@@ -80,66 +83,66 @@ WHEN( "^I call GetHallRect for east from ([0-9.-]+),([0-9.-]+)$" )
 WHEN( "^I call GetHallRect for west from ([0-9.-]+),([0-9.-]+)$" )
 {
     ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ) );
+    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
 }
 WHEN( "^I call GetHallRect for north from ([0-9.-]+),([0-9.-]+)$" )
 {
     ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ) );
+    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
 }
 WHEN( "^I call GetHallRect for south from ([0-9.-]+),([0-9.-]+)$" )
 {
     ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ) );
+    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
 }
 WHEN( "^I call FillArea for a room$" )
 {
     ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ) );
+    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
 }
 WHEN( "^I call FillArea for a room N$" )
 {
     ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ) );
+    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
 }
 WHEN( "^I call FillArea for a room S$" )
 {
     ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ) );
+    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
 }
 WHEN( "^I call FillArea for a room E$" )
 {
     ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ) );
+    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
 }
 WHEN( "^I call FillArea for a room W$" )
 {
     ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ) );
+    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
 }
 
 WHEN( "^I call FillArea for a hallway north$" )
 {
     ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ) );
+    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
 }
 
 WHEN( "^I call FillArea for a hallway south$" )
 {
     ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ) );
+    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
 }
 
 WHEN( "^I call FillArea for a hallway west$" )
 {
     ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ) );
+    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
 }
 
 WHEN( "^I call FillArea for a hallway east$" )
 {
     ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, &( context->area ) );
+    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
 }
 
 /*#######

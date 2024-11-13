@@ -187,6 +187,10 @@ JResult CDungeon::CreateMap()
         ;
 #endif
 
+    JLog( LOG_LEVEL_INFO, true, "Rooms in current level: %d\n", m_dmCurLevel->HowManyRooms() );
+    JLog( LOG_LEVEL_INFO, true, "Hallways in current level: %d\n",
+          m_dmCurLevel->HowManyHallways() );
+
     InitDungeonTiles();
 
     return JSUCCESS;
@@ -521,10 +525,11 @@ void CDungeon::Draw()
 
 bool CDungeon::IsLit( JVector vPos )
 {
-    if( !g_pGame->GetPlayer()->LightSource() ) return false;
-    JIVector vPlayer(VEC_EXPAND(g_pGame->GetPlayer()->m_vPos));
-    JIVector vTarget(VEC_EXPAND(vPos));
-    return Util::WithinRadius(vPlayer, vTarget);
+    if( !g_pGame->GetPlayer()->LightSource() )
+        return false;
+    JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+    JIVector vTarget( VEC_EXPAND( vPos ) );
+    return Util::WithinRadius( vPlayer, vTarget );
 }
 
 void CDungeon::DrawDungeon()
@@ -555,7 +560,7 @@ void CDungeon::DrawDungeon()
             {
                 continue;
             }
-            JColor color = IsLit(vScreen) ? JColor(200,200,0,255) : curTile->m_dtd->m_Color;
+            JColor color = IsLit( vScreen ) ? JColor( 200, 200, 0, 255 ) : curTile->m_dtd->m_Color;
             m_TileSet->SetTileColor( color );
             m_TileSet->DrawTile( curTile->m_dtd->m_dwIndex, vScreen, vSize, true );
         }

@@ -33,10 +33,12 @@ void CDungeonMap::CreateDungeon( const int depth )
 {
     Term();
     m_dmtTiles = new CDungeonMapTile[DUNG_WIDTH * DUNG_HEIGHT];
+    m_llRooms = new JLinkList<CRoom>;
+    m_llHallways = new JLinkList<CRoom>;
     JRect rcWorld( 0, 0, DUNG_WIDTH - 1, DUNG_HEIGHT - 1 );
 
     // First, fill the whole dungeon with rock
-    FillDungeonArea( DUNG_IDX_WALL, &rcWorld, false );
+    FillDungeonArea( DUNG_IDX_WALL, rcWorld, false );
 
     // Do something with the depth, here...
     if( depth > 100 )
@@ -217,18 +219,17 @@ JResult CDungeonMap::LightArea( JRect rcLight )
     return JSUCCESS;
 }
 
-JResult CDungeonMap::FillDungeonArea( Uint8 type, JRect *rcFill, bool bBoundsCheck )
+JResult CDungeonMap::FillDungeonArea( Uint8 type, JRect rcFill, bool bBoundsCheck )
 {
-    JRect rcLocal( *rcFill );
-    if( bBoundsCheck && !Util::IsWithinWorld( rcLocal ) )
+    if( bBoundsCheck && !Util::IsWithinWorld( rcFill ) )
     {
         return JBOGUSKEY;
     }
 
     JIVector vCurPos;
-    for( vCurPos.y = rcLocal.top; vCurPos.y <= rcLocal.bottom; vCurPos.y++ )
+    for( vCurPos.y = rcFill.top; vCurPos.y <= rcFill.bottom; vCurPos.y++ )
     {
-        for( vCurPos.x = rcLocal.left; vCurPos.x <= rcLocal.right; vCurPos.x++ )
+        for( vCurPos.x = rcFill.left; vCurPos.x <= rcFill.right; vCurPos.x++ )
         {
             GetTile( vCurPos )->SetType( type );
         }
@@ -237,23 +238,32 @@ JResult CDungeonMap::FillDungeonArea( Uint8 type, JRect *rcFill, bool bBoundsChe
 }
 void CDungeonMap::FillArea( const CDungeonCreationStep *pStep )
 {
-    JRect rcFill( pStep->m_rcArea );
-    FillArea( DUNG_IDX_FLOOR, &rcFill );
-}
-void CDungeonMap::FillArea( const Uint8 type, JRect *rcFill )
-{
-    JRect rcLocal( *rcFill );
-    JRect rcEdges( rcLocal.left - 1, rcLocal.top - 1, rcLocal.right + 1, rcLocal.bottom + 1 );
+    CRoom *pRoom = new CRoom( pStep->m_rcArea );
 
-    FillDungeonArea( type, &rcLocal );
+    if( pStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM )
+    {
+        m_llRooms->Add( pRoom );
+    }
+    else
+    {
+        m_llHallways->Add( pRoom );
+    }
+
+    FillArea( DUNG_IDX_FLOOR, pRoom );
+}
+void CDungeonMap::FillArea( const Uint8 type, CRoom *pRoom )
+{
+    FillDungeonArea( type, pRoom->GetArea() );
 
     if( type != DUNG_IDX_WALL )
     {
-        LightArea( rcEdges );
+        LightArea( pRoom->GetEdges() );
+        pRoom->SetFlags( DUNG_FLAG_LIT );
     }
 
     // you still filled rcFill squares, just that one of them was a door.
-    JLog( LOG_LEVEL_DEBUG, true, "filled from <%d %d> to <%d %d>\n", RECT_EXPAND( rcLocal ) );
+    JLog( LOG_LEVEL_DEBUG, true, "filled from <%d %d> to <%d %d>\n",
+          RECT_EXPAND( pRoom->GetArea() ) );
 
     // JIVector vOrigin( rcLocal.left, rcLocal.top );
     //

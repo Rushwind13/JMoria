@@ -70,6 +70,40 @@ private:
     CLink<CDungeonMapTile> *m_pllLink; // My link into the Used Space list (or another list)
 };
 
+class CRoom
+{
+    // Methods
+public:
+    CRoom( const JRect rcIn ) : m_dwFlags( 0 ), m_rcRoom( rcIn ) { Init(); };
+    CRoom() : m_dwFlags( 0 ), m_rcRoom( 0, 0, 0, 0 ), m_rcEdges( 0, 0, 0, 0 ) {};
+    ~CRoom() {};
+
+    JResult Init()
+    {
+        m_rcEdges = Util::Edges( m_rcRoom );
+        return JSUCCESS;
+    };
+    JRect GetArea() { return m_rcRoom; };
+    JRect GetEdges() { return m_rcEdges; };
+    uint32 GetFlags() { return m_dwFlags; };
+    void SetFlags( const uint32 dwIn ) { m_dwFlags = dwIn; };
+
+protected:
+    JRect m_rcRoom;
+    JRect m_rcEdges;
+    uint32 m_dwFlags;
+    // does the room know it has monsters?
+    // does the room know it has items?
+    // does the room know it is a treasure room?
+    // does the room know if it has stairs?
+    // can a room have a max number of staris/items/monsters/traps/doors/...
+private:
+    // Member variables
+public:
+protected:
+private:
+};
+
 // CDungeonMap:
 // holder class for dungeon generation
 // algorithm.
@@ -77,7 +111,11 @@ class CDungeonMap
 {
     // Member variables
 public:
-    CDungeonMap() : m_dmtTiles( NULL ), m_llUsedSpace( NULL ), m_stkDungeonMapCreation( NULL )
+    CDungeonMap()
+        : m_dmtTiles( NULL ),
+          m_stkDungeonMapCreation( NULL ),
+          m_llRooms( NULL ),
+          m_llHallways( NULL )
     {
         m_stkDungeonMapCreation = new JStack<CDungeonCreationStep>;
     };
@@ -91,13 +129,27 @@ protected:
             delete[] m_dmtTiles;
             m_dmtTiles = NULL;
         }
+        if( m_llRooms )
+        {
+            m_llRooms->Terminate();
+            delete m_llRooms;
+            m_llRooms = NULL;
+        }
+        if( m_llHallways )
+        {
+            m_llHallways->Terminate();
+            delete m_llHallways;
+            m_llHallways = NULL;
+        }
     };
 
 private:
     CDungeonMapTile
         *m_dmtTiles; // 1 DungeonMapTile per tile, has "graphical" info (size, location, type, ...)
-    JLinkList<CDungeonMapTile> *m_llUsedSpace;
+    // JLinkList<CDungeonMapTile> *m_llUsedSpace;
     JStack<CDungeonCreationStep> *m_stkDungeonMapCreation;
+    JLinkList<CRoom> *m_llRooms;
+    JLinkList<CRoom> *m_llHallways;
 
     // Member functions
 public:
@@ -133,6 +185,22 @@ public:
         return -1;
     };
 
+    int HowManyRooms()
+    {
+        if( m_llRooms )
+            return m_llRooms->length();
+        else
+            return 0;
+    };
+
+    int HowManyHallways()
+    {
+        if( m_llHallways )
+            return m_llHallways->length();
+        else
+            return 0;
+    };
+
 #ifdef UNIT_TEST
 public:
 #else
@@ -144,8 +212,8 @@ protected:
     bool CheckBorder( const JRect rcCheck, int direction );
 
     JResult LightArea( JRect rcLight );
-    JResult FillDungeonArea( Uint8 type, JRect *rcFill, bool bBoundsCheck = true );
-    void FillArea( const Uint8 type, JRect *rcFill );
+    JResult FillDungeonArea( Uint8 type, JRect rcFill, bool bBoundsCheck = true );
+    void FillArea( const Uint8 type, CRoom *pRoom );
     void FillArea( const CDungeonCreationStep *pStep );
     void AddDoor( JIVector vHall, int direction );
     bool IsDoor( const int type );

@@ -243,6 +243,7 @@ Weight        4.0
 Speed         7.0
 Color        <200,200,200,255>
 }
+
 Item <Scroll of Remove Curse>
 {
 Plural      <Scrolls of Remove Curse>

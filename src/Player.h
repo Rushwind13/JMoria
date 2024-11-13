@@ -165,6 +165,8 @@ public:
     float LightSource();
     void UpdateLight( float fValue, bool bReset = false );
 
+    void DoReadScroll( CItem *pItem );
+
     bool SetName( const char *szName );
 
     int Move( JVector vDir );

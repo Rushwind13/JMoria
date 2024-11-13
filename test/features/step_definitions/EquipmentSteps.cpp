@@ -65,11 +65,13 @@ GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in inventory$" )
     REGEX_PARAM( std::string, item );
     REGEX_PARAM( int, item_id );
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
+    JLog( LOG_LEVEL_INFO, true, "Item is %s\n", pid->m_szName );
     int compare = strcmp( item.c_str(), pid->m_szName );
     if( compare != 0 )
     {
         JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", item.c_str(), pid->m_szName );
     }
+    JLog( LOG_LEVEL_INFO, true, "Compare is %d\n", compare );
     EXPECT_EQ( compare, 0 );
 
     g_pGame->GetPlayer()->PickUp( context->vec_b );
@@ -77,6 +79,8 @@ GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in inventory$" )
         g_pGame->GetPlayer()->m_llInventory->GetLink( pid->m_dwIndex )->m_lpData->m_id->m_dwIndex;
     int item_index = pid->m_dwIndex;
 
+    JLog( LOG_LEVEL_INFO, true, "Inventory index is %d and item index is %d\n", inv_index,
+          item_index );
     EXPECT_EQ( inv_index, item_index );
 }
 
@@ -164,6 +168,15 @@ WHEN( "^the player takes off the item ([0-9]+) at ([-0-9]+)$" )
     context->result_bool = g_pGame->GetPlayer()->Remove( pLink );
 }
 
+WHEN( "^the player reads the scroll in inventory at ([-0-9]+)$" )
+{
+    REGEX_PARAM( int, inv_id );
+    ScenarioScope<TestCtx> context;
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetLink( inv_id );
+    JLog( LOG_LEVEL_DEBUG, true, "Found item to read is %s\n", pLink->m_lpData->GetName() );
+    g_pGame->GetPlayer()->Read( pLink );
+}
+
 /*#######
 ##
 ## THEN
@@ -236,4 +249,19 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment) at ([-0-9]+)$"
         // nothing of this type; win
         EXPECT_EQ( expected, actual );
     }
+}
+
+THEN( "^The ([A-Za-z ]+):([0-9]+) is not cursed$" )
+{
+    REGEX_PARAM( std::string, item );
+    REGEX_PARAM( int, item_id );
+    ScenarioScope<TestCtx> context;
+    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
+    int index = pid->m_dwIndex;
+    JLinkList<CItem> *pList = g_pGame->GetPlayer()->m_llEquipment;
+
+    CLink<CItem> *pLink = pList->GetLink( index );
+    bool b_isCursed = pLink->m_lpData->m_dwFlags & ITEM_FLAG_CURSED;
+    EXPECT_FALSE( b_isCursed );
+    JLog( LOG_LEVEL_DEBUG, true, "Cursed state is %d\n", b_isCursed );
 }

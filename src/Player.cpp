@@ -517,15 +517,53 @@ bool CPlayer::Quaff( CLink<CItem> *pLink )
 
 bool CPlayer::Read( CLink<CItem> *pLink )
 {
+    bool retval = true;
     CItem *pItem = pLink->m_lpData;
-    m_llInventory->Remove( pItem->m_pllLink, false );
-    CEffect *pEffect = pItem->m_id->m_llEffects->GetHead()->m_lpData;
-    if( pEffect->m_dwEffect == EFFECT_TYPE_LOSE ) // TODO: add this
+    switch( pLink->m_dwIndex )
     {
-        g_pGame->GetMsgs()->Printf( "It is no longer cursed.\n" );
+    case ITEM_IDX_SCROLL:
+    {
+        JLog( LOG_LEVEL_INFO, true, "Reading the %s\n", pItem->GetName() );
+        DoReadScroll( pItem );
+        break;
+    }
+    case ITEM_IDX_BOOK:
+    default:
+    {
+        retval = false;
+    }
     }
 
-    return true;
+    return retval;
+}
+
+void CPlayer::DoReadScroll( CItem *pItem )
+{
+    m_llInventory->Remove( pItem->m_pllLink, false );
+    CEffect *pEffect = pItem->m_id->m_llEffects->GetHead()->m_lpData;
+    JLog( LOG_LEVEL_INFO, true, "Item to read is %s\n", pItem->GetName() );
+    JLog( LOG_LEVEL_INFO, true, "Effect on the item is %d\n", pEffect->m_dwEffect );
+    // if( pEffect->m_dwEffect == EFFECT_TYPE_LOSE )
+    // {
+    JLog( LOG_LEVEL_INFO, true, "Looking for a cursed item\n" );
+    CItem *cursed;
+    CLink<CItem> *pLink = m_llEquipment->GetHead();
+    while( pLink != NULL )
+    {
+        if( pLink->m_lpData->m_dwFlags & ITEM_FLAG_CURSED )
+        {
+            JLog( LOG_LEVEL_INFO, true, "Item is cursed %s\n", pLink->m_lpData->GetName() );
+            pLink->m_lpData->m_dwFlags &= ~ITEM_FLAG_CURSED;
+            break;
+        }
+        else
+        {
+            JLog( LOG_LEVEL_INFO, true, "Item is not cursed %s\n", pLink->m_lpData->GetName() );
+        }
+        pLink = pLink->next;
+    }
+    g_pGame->GetMsgs()->Printf( "It is no longer cursed.\n" );
+    // }
 }
 
 bool CPlayer::IsDrinkable( CLink<CItem> *pLink )

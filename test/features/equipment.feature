@@ -81,6 +81,19 @@ Feature: Equipment
         Then The Dagger:27 is in equipment at 0
         Then The Dagger:27 is not in inventory at -1
 
+    Scenario: Cursed Equipment can be uncursed with scroll of remove cruse
+        Given I have a Player
+        Given I spawn a Dagger:27
+        Given the Dagger:27 is cursed
+        Given the player has a Dagger:27 in inventory
+        Given the player equips the item 27
+        Given I spawn a Scroll of Remove Curse:30
+        Given the player has a Scroll of Remove Curse:30 in inventory
+        # Given A dagger is in the primary weapon equipment slot
+        Given the player has a Dagger:27 in equipment at 0
+        When the player reads the scroll in inventory at 1
+        Then The Dagger:27 is not cursed
+
     Scenario: New Equipment replaces old equipment
         Given I have a Player
         Given I spawn a Dagger:27

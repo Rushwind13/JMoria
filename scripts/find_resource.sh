@@ -5,8 +5,9 @@ else
 	TYPE="$1"
 fi
 if [[ -z "$2" ]]; then
-	read -p "Find which item? " ITEM
+	read -p "Find which object? " OBJECT
 else
-	ITEM="$2"
+	OBJECT="$2"
 fi
-grep ^$TYPE Resources/${TYPE}s.txt | tac | nl -v $ITEM
+
+grep ^$TYPE Resources/${TYPE}s.txt | tail -r | awk -v obj="$OBJECT" 'tolower($0) ~ tolower("\\<"obj"\\>") {print NR-1, $0}'

@@ -44,12 +44,11 @@ void CItem::Init( CItemDef *pid )
     m_fRemainingDuration = Util::GetRandom( 0.0f, m_id->m_fDuration );
 }
 
-void CItem::SetCursed( int likelihood )
+void CItem::SetCursed( bool bCursed )
 {
-    int rolled = (int)Util::GetRandom( 1.0f, 100.0f );
-    if( rolled < likelihood )
+    if( bCursed )
     {
-        JLog( LOG_LEVEL_NOISE, true, "Cursed! %d\n", rolled );
+        m_dwFlags &= ~ITEM_FLAG_CURSED;
         m_dwFlags |= ITEM_FLAG_CURSED;
         m_Color.SetColor( 255, 0, 0, 255 );
     }
@@ -58,6 +57,12 @@ void CItem::SetCursed( int likelihood )
         m_dwFlags &= ~ITEM_FLAG_CURSED;
         m_Color.SetColor( m_id->m_Color );
     }
+}
+
+void CItem::SetCursed( int likelihood )
+{
+    int rolled = (int)Util::GetRandom( 1.0f, 100.0f );
+    SetCursed( rolled < likelihood );
 }
 
 JResult CItem::SpawnItem( JVector vSpawnPoint )

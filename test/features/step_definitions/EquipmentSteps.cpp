@@ -30,6 +30,9 @@ GIVEN( "^I spawn a ([A-Za-z ]+):([0-9]+)$" )
     context->vec_b = g_pGame->GetPlayer()->m_vPos;
     context->index = index;
 
+    JLog( LOG_LEVEL_ERROR, true, "<%.2f %.2f>\n", VEC_EXPAND( context->vec_b ) );
+    g_pGame->GetPlayer()->PickUp( context->vec_b );
+
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( context->index );
 
     int compare = strcmp( context->szBuffer, pid->m_szName );
@@ -39,6 +42,8 @@ GIVEN( "^I spawn a ([A-Za-z ]+):([0-9]+)$" )
     }
     EXPECT_EQ( compare, 0 );
     context->result = CItem::CreateItem( pid, context->vec_b );
+
+    EXPECT_EQ( context->result, JSUCCESS );
 }
 
 GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in inventory$" )
@@ -68,7 +73,7 @@ GIVEN( "^the ([A-Za-z ]+):([0-9]+) (is|is not) cursed$" )
     REGEX_PARAM( std::string, item );
     REGEX_PARAM( int, item_id );
     REGEX_PARAM( std::string, choice );
-    int chance = ( choice == "is" ) ? 100 : 0;
+    bool cursed = ( choice == "is" ) ? true : false;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
     int compare = strcmp( item.c_str(), pid->m_szName );
     if( compare != 0 )
@@ -76,9 +81,20 @@ GIVEN( "^the ([A-Za-z ]+):([0-9]+) (is|is not) cursed$" )
         JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", item.c_str(), pid->m_szName );
     }
     EXPECT_EQ( compare, 0 );
+
+    JLog( LOG_LEVEL_ERROR, true, "<%.2f %.2f>\n", VEC_EXPAND( context->vec_b ) );
+
     CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
     CItem *pItem = pTile->m_pCurItem;
-    pItem->SetCursed( chance );
+    if( pItem )
+    {
+        JLog( LOG_LEVEL_ERROR, true, "item %d\n", pItem->m_dwFlags );
+        pItem->SetCursed( cursed );
+    }
+    else
+    {
+        JLog( LOG_LEVEL_ERROR, true, "item not found\n" );
+    }
 
     int actual =
         g_pGame->GetDungeon()->GetTile( context->vec_b )->m_pCurItem->m_dwFlags & ITEM_FLAG_CURSED;

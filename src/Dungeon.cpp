@@ -519,6 +519,14 @@ void CDungeon::Draw()
     PostDraw();
 }
 
+bool CDungeon::IsLit( JVector vPos )
+{
+    if( !g_pGame->GetPlayer()->LightSource() ) return false;
+    JIVector vPlayer(VEC_EXPAND(g_pGame->GetPlayer()->m_vPos));
+    JIVector vTarget(VEC_EXPAND(vPos));
+    return Util::WithinRadius(vPlayer, vTarget);
+}
+
 void CDungeon::DrawDungeon()
 {
     // Brute force method; optimize this later
@@ -547,7 +555,8 @@ void CDungeon::DrawDungeon()
             {
                 continue;
             }
-            m_TileSet->SetTileColor( curTile->m_dtd->m_Color );
+            JColor color = IsLit(vScreen) ? JColor(200,200,0,255) : curTile->m_dtd->m_Color;
+            m_TileSet->SetTileColor( color );
             m_TileSet->DrawTile( curTile->m_dtd->m_dwIndex, vScreen, vSize, true );
         }
     }

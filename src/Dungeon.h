@@ -158,5 +158,6 @@ protected:
 
 private:
     bool IsOnScreen( JVector vPos );
+    bool IsLit( JVector vPos );
 };
 #endif // __DUNGEON_H__

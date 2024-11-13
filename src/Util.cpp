@@ -169,11 +169,31 @@ JVector Near( const JVector vOrig, int distance )
     return JVector( vOrig + vDelta );
 }
 
+// Returns square area
 JRect Nearby( const JIVector vTarget, const int radius )
 {
     JIVector delta( -radius, -radius );
-    JIVector size( radius * 2, radius * 2 );
+    JIVector size( (radius * 2)+1, (radius * 2)+1 );
     return JRect( vTarget + delta, VEC_EXPAND( size ) );
+}
+
+// returns diamond-shaped area
+bool Taxicab( const JIVector vOrigin, const JIVector vTarget, const uint8 distance )
+{
+    JIVector vDelta = vOrigin - vTarget;
+    return abs(vDelta.x) + abs(vDelta.y) <= distance;
+}
+
+// returns circular area
+bool WithinRadius( const JIVector vOrigin, const JIVector vTarget, const uint8 distance )
+{
+    // Euclidean offset between the points
+    JIVector vDelta = vOrigin - vTarget;
+    // to avoid a sqrt(), square everything
+    vDelta.x *= vDelta.x;
+    vDelta.y *= vDelta.y;
+    uint8 dsquared = distance * distance;
+    return vDelta.x + vDelta.y <= dsquared;
 }
 
 unsigned int GetTickCount()

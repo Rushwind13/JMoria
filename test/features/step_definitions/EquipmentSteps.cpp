@@ -31,7 +31,7 @@ GIVEN( "^I spawn a ([A-Za-z ]+):([0-9]+)$" )
     context->vec_b = g_pGame->GetPlayer()->m_vPos;
     context->index = index;
 
-    JLog( LOG_LEVEL_ERROR, true, "<%.2f %.2f>\n", VEC_EXPAND( context->vec_b ) );
+    JLog( LOG_LEVEL_INFO, true, "<%.2f %.2f>\n", VEC_EXPAND( context->vec_b ) );
     g_pGame->GetPlayer()->PickUp( context->vec_b );
 
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( context->index );
@@ -55,7 +55,7 @@ GIVEN( "^I spawn a ([A-Za-z ]+):([0-9]+)$" )
     }
     else
     {
-        JLog( LOG_LEVEL_WARN, true, "Item spawned: %s\n", pItem->GetName() );
+        JLog( LOG_LEVEL_INFO, true, "Item spawned: %s\n", pItem->GetName() );
     }
 }
 
@@ -95,13 +95,13 @@ GIVEN( "^the ([A-Za-z ]+):([0-9]+) (is|is not) cursed$" )
     }
     EXPECT_EQ( compare, 0 );
 
-    JLog( LOG_LEVEL_ERROR, true, "<%.2f %.2f>\n", VEC_EXPAND( context->vec_b ) );
+    JLog( LOG_LEVEL_INFO, true, "<%.2f %.2f>\n", VEC_EXPAND( context->vec_b ) );
 
     CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
     CItem *pItem = pTile->m_pCurItem;
     if( pItem )
     {
-        JLog( LOG_LEVEL_ERROR, true, "item %d\n", pItem->m_dwFlags );
+        JLog( LOG_LEVEL_INFO, true, "item %d\n", pItem->m_dwFlags );
         pItem->SetCursed( cursed );
     }
     else

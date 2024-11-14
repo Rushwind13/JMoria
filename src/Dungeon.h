@@ -78,6 +78,9 @@ public:
     void Term();
     bool Tick( const int dwClock );
     bool Update( float fCurTime );
+    JResult UpdateSeen();
+    bool WithinSight( JVector vCheck );
+
     JResult OnChangeLevel( const int delta );
 
     void Zoom( Uint16 dwDelta )

@@ -69,6 +69,14 @@
 
 // Dungeon Tile flags
 #define DUNG_FLAG_LIT 0x00000001
+#define DUNG_FLAG_SEEN 0x00000002
+#define DUNG_FLAG_ROOM 0x00000004
+#define DUNG_FLAG_HALL 0x00000008
+
+#define DUNG_FLAG_TRAP 0x00000010
+#define DUNG_FLAG_LOCKED  0x00000020
+// #define DUNG_FLAG_x  0x00000040
+// #define DUNG_FLAG_x  0x00000080
 
 // Dungeon Flags
 #ifdef FIXED_DUNGEON

@@ -154,12 +154,13 @@ int CItem::EquipType()
 }
 void CItem::Draw()
 {
-    // Don't draw if something else is there.
+    // Don't draw if something else is there, or if it's out of sight.
     if( g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster != NULL ||
-        g_pGame->GetPlayer()->m_vPos == m_vPos )
+        g_pGame->GetPlayer()->m_vPos == m_vPos || !g_pGame->GetDungeon()->WithinSight( m_vPos ) )
     {
         return;
     }
+
     Uint8 item_tile = ItemIDs[m_id->m_dwIndex] - ' ' - 1;
     JVector DUNG_ASPECT;
 

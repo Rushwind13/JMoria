@@ -155,8 +155,11 @@ protected:
     int ChooseItemForDepth( const int depth );
 
     JResult TerminateLevel();
-
+#ifdef UNIT_TEST
+public:
+#else
 private:
+#endif // UNIT_TEST
     bool IsOnScreen( JVector vPos );
     bool IsLit( JVector vPos );
 };

@@ -119,6 +119,7 @@ public:
           m_fRemainingDuration( 0.0f ) {};
     void Init( CItemDef *pid );
     void SetCursed( int likelihood );
+    void SetCursed( bool bCursed );
     char *GetName() { return m_id->m_szName; }
     bool IsOpenable() { return false; }   // for chests, etc.
     bool IsCloseable() { return false; }  // closeable pickup?

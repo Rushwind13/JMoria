@@ -187,6 +187,10 @@ JResult CDungeon::CreateMap()
         ;
 #endif
 
+    JLog( LOG_LEVEL_INFO, true, "Rooms in current level: %d\n", m_dmCurLevel->HowManyRooms() );
+    JLog( LOG_LEVEL_INFO, true, "Hallways in current level: %d\n",
+          m_dmCurLevel->HowManyHallways() );
+
     InitDungeonTiles();
 
     return JSUCCESS;
@@ -521,10 +525,11 @@ void CDungeon::Draw()
 
 bool CDungeon::IsLit( JVector vPos )
 {
-    if( !g_pGame->GetPlayer()->LightSource() ) return false;
-    JIVector vPlayer(VEC_EXPAND(g_pGame->GetPlayer()->m_vPos));
-    JIVector vTarget(VEC_EXPAND(vPos));
-    return Util::WithinRadius(vPlayer, vTarget);
+    if( !g_pGame->GetPlayer()->LightSource() )
+        return false;
+    JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+    JIVector vTarget( VEC_EXPAND( vPos ) );
+    return Util::WithinRadius( vPlayer, vTarget );
 }
 
 void CDungeon::DrawDungeon()
@@ -555,7 +560,7 @@ void CDungeon::DrawDungeon()
             {
                 continue;
             }
-            JColor color = IsLit(vScreen) ? JColor(200,200,0,255) : curTile->m_dtd->m_Color;
+            JColor color = IsLit( vScreen ) ? JColor( 200, 200, 0, 255 ) : curTile->m_dtd->m_Color;
             m_TileSet->SetTileColor( color );
             m_TileSet->DrawTile( curTile->m_dtd->m_dwIndex, vScreen, vSize, true );
         }
@@ -705,6 +710,17 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
     case DUNG_IDX_DOOR:
     case DUNG_IDX_SECRET_DOOR:
     case DUNG_IDX_RUBBLE:
+        return type;
+        break;
+    case DUNG_IDX_UPSTAIRS:
+    case DUNG_IDX_LONG_UPSTAIRS:
+    case DUNG_IDX_DOWNSTAIRS:
+    case DUNG_IDX_LONG_DOWNSTAIRS:
+        if( g_pGame->GetPlayer()->m_bHasSpawned )
+        {
+            return DUNG_COLL_NO_COLLISION;
+        }
+        JLog( LOG_LEVEL_WARN, true, "Player can't spawn on stairs\n" );
         return type;
         break;
     default:
@@ -882,7 +898,8 @@ JResult CDungeon::Modify( JVector &vPos )
 CItem *CDungeon::PickUp( JVector &vPickupPos )
 {
     CItem *pItem = GetTile( vPickupPos )->m_pCurItem;
-    m_llItems->Remove( pItem->m_pllLink, false );
+    if( pItem )
+        m_llItems->Remove( pItem->m_pllLink, false );
     return pItem;
 }
 

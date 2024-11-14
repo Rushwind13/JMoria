@@ -81,6 +81,12 @@ public:
             top = bottom - dwHeight;
     };
 
+    const JRect Edges()
+    {
+        JRect edges( left - 1, top - 1, right + 1, bottom + 1 );
+        return edges;
+    };
+
     bool IsValidRect()
     {
         if( left > right || top > bottom )

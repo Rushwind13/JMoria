@@ -186,9 +186,12 @@ void CPlayer::DisplayEquipment( uint8 dwPlacement )
 void CPlayer::PickUp( JVector &vPickupPos )
 {
     CItem *pItem = g_pGame->GetDungeon()->PickUp( vPickupPos );
-    pItem->m_pllLink = m_llInventory->Add( pItem, pItem->m_id->m_dwIndex );
-    g_pGame->GetDungeon()->GetTile( vPickupPos )->m_pCurItem = NULL;
-    g_pGame->GetMsgs()->Printf( "You have a %s.\n", pItem->GetName() );
+    if( pItem )
+    {
+        pItem->m_pllLink = m_llInventory->Add( pItem, pItem->m_id->m_dwIndex );
+        g_pGame->GetDungeon()->GetTile( vPickupPos )->m_pCurItem = NULL;
+        g_pGame->GetMsgs()->Printf( "You have a %s.\n", pItem->GetName() );
+    }
 }
 
 bool CPlayer::IsWieldable( CLink<CItem> *pLink )

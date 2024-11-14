@@ -122,6 +122,7 @@ bool IsWithinWorld( JVector vIn )
 bool IsInWorld( JRect rcIn ) { return rcIn.IsInWorld(); }
 bool IsWithinWorld( JRect rcIn ) { return rcIn.IsWithinWorld(); }
 
+JRect Edges( JRect rcIn ) { return rcIn.Edges(); }
 JVector Near( const JVector vOrig, int distance )
 {
     // want an integer position within a certain distance
@@ -173,7 +174,7 @@ JVector Near( const JVector vOrig, int distance )
 JRect Nearby( const JIVector vTarget, const int radius )
 {
     JIVector delta( -radius, -radius );
-    JIVector size( (radius * 2)+1, (radius * 2)+1 );
+    JIVector size( ( radius * 2 ) + 1, ( radius * 2 ) + 1 );
     return JRect( vTarget + delta, VEC_EXPAND( size ) );
 }
 
@@ -181,7 +182,7 @@ JRect Nearby( const JIVector vTarget, const int radius )
 bool Taxicab( const JIVector vOrigin, const JIVector vTarget, const uint8 distance )
 {
     JIVector vDelta = vOrigin - vTarget;
-    return abs(vDelta.x) + abs(vDelta.y) <= distance;
+    return abs( vDelta.x ) + abs( vDelta.y ) <= distance;
 }
 
 // returns circular area

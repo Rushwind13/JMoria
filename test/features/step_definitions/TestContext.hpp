@@ -47,6 +47,7 @@ struct TestCtx
     // DungeonMap
     CDungeonMap map;
     CDungeonCreationStep *pStep;
+    CRoom *pRoom;
 
     // AI Brain
     CAIBrain *brain;

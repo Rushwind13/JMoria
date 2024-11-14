@@ -1,5 +1,5 @@
-#!/bin/bash
-if [[ -z "$1" ]]; then
+#!/bin/sh
+if [ -z "$1" ]; then
 	read -p "Find which monster? " MONSTER
 else
 	MONSTER="$1"

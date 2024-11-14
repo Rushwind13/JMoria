@@ -11,6 +11,7 @@ class CMonster;
 #define PLAYER_BASE_DAMAGE "1d2"
 #define CLASS_HD_WARRIOR "1d10"
 #define PLAYER_MAX_LEVEL 11
+#define PLAYER_SIGHT_DISTANCE 5
 
 class CClass
 {

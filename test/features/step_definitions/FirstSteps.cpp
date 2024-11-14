@@ -3,11 +3,11 @@
 
 using cucumber::ScenarioScope;
 #include "TestContext.hpp"
-AFTER_ALL() { JLog( LOG_LEVEL_ERROR, true, "-------------------- (After all scenarios)\n" ); }
+AFTER_ALL() { JLog( LOG_LEVEL_ERROR, false, "-------------------- (After all scenarios)\n" ); }
 AFTER()
 {
     g_pGame = NULL;
-    JLog( LOG_LEVEL_ERROR, true, "-------------------- (After each scenario)\n" );
+    JLog( LOG_LEVEL_ERROR, false, "-------------------- (After each scenario)\n" );
 }
 /*#######
 ##

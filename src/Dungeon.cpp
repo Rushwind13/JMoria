@@ -476,6 +476,74 @@ bool CDungeon::Update( float fCurTime )
         pItem->Update( fCurTime );
         pLink = m_llItems->GetNext( pLink );
     }
+
+    UpdateSeen();
+    return true;
+}
+
+JResult CDungeon::UpdateSeen()
+{
+    JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+    JRect rcSeen = Util::Nearby( vPlayer, 1 );
+
+    JLog( LOG_LEVEL_NOISE, false, "player: <%d %d> seen: <%d %d %d %d>\n", VEC_EXPAND( vPlayer ),
+          RECT_EXPAND( rcSeen ) );
+
+    JIVector vTile;
+    for( vTile.y = rcSeen.top; vTile.y <= rcSeen.bottom; vTile.y++ )
+    {
+        for( vTile.x = rcSeen.left; vTile.x <= rcSeen.right; vTile.x++ )
+        {
+            GetITile( vTile )->m_dwFlags |= DUNG_FLAG_SEEN;
+        }
+    }
+
+    return JSUCCESS;
+}
+
+bool CDungeon::WithinSight( JVector vCheck )
+{
+    // Check for sight distance first
+    JIVector vPos( VEC_EXPAND( vCheck ) );
+    JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+    JRect rcVisible = Util::Nearby( vPlayer, PLAYER_SIGHT_DISTANCE );
+
+    if( !rcVisible.Contains( vPos ) )
+        return false;
+
+    // Check along the line between the player and the position
+    // for obstacles
+    // Bresenham Line Algorithm
+    // TODO: move this somewhere to be used for ranged and magic targeting
+    JLinkList<JIVector> *pLine = new JLinkList<JIVector>;
+    JIVector vDelta( abs( vPos.x - vPlayer.x ), abs( vPos.y - vPlayer.y ) );
+    JIVector vStep( vPos.x < vPlayer.x ? 1 : -1, vPos.y < vPlayer.y ? 1 : -1 );
+    int error = vDelta.x - vDelta.y;
+    int errorx2;
+
+    while( vPos.x != vPlayer.x || vPos.y != vPlayer.y )
+    {
+        JVector vCurrent( VEC_EXPAND( vPos ) );
+        if( vCurrent != vCheck )
+        {
+            int collide_type = g_pGame->GetDungeon()->IsWalkableFor( vCurrent );
+            if( collide_type != DUNG_COLL_NO_COLLISION )
+            {
+                return false;
+            }
+        }
+        errorx2 = error * 2;
+        if( errorx2 > -vDelta.y )
+        {
+            error -= vDelta.y;
+            vPos.x += vStep.x;
+        }
+        if( errorx2 < vDelta.x )
+        {
+            error += vDelta.x;
+            vPos.y += vStep.y;
+        }
+    }
     return true;
 }
 
@@ -552,9 +620,9 @@ void CDungeon::DrawDungeon()
              {/* */
             CDungeonTile *curTile = GetTile( vScreen );
 
-            // this tile doesn't exist, or it's not lit
+            // this tile doesn't exist, or it's not been seen
             // or something else is standing there
-            if( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_LIT ) == 0 ) ||
+            if( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_SEEN ) == 0 ) ||
                 vScreen == vPlayer || curTile->m_pCurItem != NULL ||
                 curTile->m_pCurMonster != NULL )
             {

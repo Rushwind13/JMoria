@@ -78,6 +78,9 @@ public:
     void Term();
     bool Tick( const int dwClock );
     bool Update( float fCurTime );
+    JResult UpdateSeen();
+    bool WithinSight( JVector vCheck );
+
     JResult OnChangeLevel( const int delta );
 
     void Zoom( Uint16 dwDelta )
@@ -155,8 +158,11 @@ protected:
     int ChooseItemForDepth( const int depth );
 
     JResult TerminateLevel();
-
+#ifdef UNIT_TEST
+public:
+#else
 private:
+#endif // UNIT_TEST
     bool IsOnScreen( JVector vPos );
     bool IsLit( JVector vPos );
 };

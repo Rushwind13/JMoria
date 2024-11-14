@@ -173,9 +173,8 @@ JVector Near( const JVector vOrig, int distance )
 // Returns square area
 JRect Nearby( const JIVector vTarget, const int radius )
 {
-    JIVector delta( -radius, -radius );
-    JIVector size( ( radius * 2 ) + 1, ( radius * 2 ) + 1 );
-    return JRect( vTarget + delta, VEC_EXPAND( size ) );
+    JIVector delta( radius, radius );
+    return JRect( VEC_EXPAND( vTarget - delta ), VEC_EXPAND( vTarget + delta ) );
 }
 
 // returns diamond-shaped area

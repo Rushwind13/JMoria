@@ -21,6 +21,7 @@ GIVEN( "^I have a Player$" )
     g_pGame = new CGame;
     context->result = g_pGame->Init( "../../JMoria/" );
 }
+
 GIVEN( "^I spawn a ([A-Za-z ]+):([0-9]+)$" )
 {
     ScenarioScope<TestCtx> context;
@@ -44,6 +45,18 @@ GIVEN( "^I spawn a ([A-Za-z ]+):([0-9]+)$" )
     context->result = CItem::CreateItem( pid, context->vec_b );
 
     EXPECT_EQ( context->result, JSUCCESS );
+
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    CItem *pItem = pTile->m_pCurItem;
+    if( !pItem )
+    {
+        JLog( LOG_LEVEL_WARN, true, "Item spawn failed\n" );
+        EXPECT_EQ( false, true );
+    }
+    else
+    {
+        JLog( LOG_LEVEL_WARN, true, "Item spawned: %s\n", pItem->GetName() );
+    }
 }
 
 GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in inventory$" )

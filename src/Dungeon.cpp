@@ -712,6 +712,17 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
     case DUNG_IDX_RUBBLE:
         return type;
         break;
+    case DUNG_IDX_UPSTAIRS:
+    case DUNG_IDX_LONG_UPSTAIRS:
+    case DUNG_IDX_DOWNSTAIRS:
+    case DUNG_IDX_LONG_DOWNSTAIRS:
+        if( g_pGame->GetPlayer()->m_bHasSpawned )
+        {
+            return DUNG_COLL_NO_COLLISION;
+        }
+        JLog( LOG_LEVEL_WARN, true, "Player can't spawn on stairs\n" );
+        return type;
+        break;
     default:
         return DUNG_COLL_NO_COLLISION;
         break;

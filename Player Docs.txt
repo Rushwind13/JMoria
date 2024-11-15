@@ -4,6 +4,7 @@ I'm making this game that I've loved for years, I'll get around to putting in al
 
 *Commands*
 hjklyubn - movement
+HJKLYUBN - run until disturbed
 o - open
 c - close
 T - tunnel

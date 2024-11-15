@@ -309,6 +309,102 @@ void CPlayer::UpdateLight( float fValue, bool bReset )
     }
 }
 
+int CPlayer::Move( JVector vDir )
+{
+    JVector vPos = m_vPos + vDir;
+
+    int dwCollideType = g_pGame->GetDungeon()->IsWalkableFor( vPos, true );
+    switch( dwCollideType )
+    {
+    case DUNG_COLL_NO_COLLISION:
+        m_vPos = vPos;
+        break;
+    case DUNG_COLL_ITEM:
+        m_vPos = vPos;
+        HandleCollision( vPos, dwCollideType );
+        break;
+    default:
+        HandleCollision( vPos, dwCollideType );
+        break;
+    }
+    return dwCollideType;
+}
+
+void CPlayer::HandleCollision( JVector vPos, int dwCollideType )
+{
+    // There are only 2 things to collide with;
+    // Monsters and Walls.
+    if( dwCollideType == DUNG_COLL_MONSTER )
+    {
+        char szStatus[16];
+        char *szMonster;
+        float fRoll = 0.0f;
+        float fDamageMult = 1.0f;
+        bool bHit;
+        // When Players Attack
+        CMonster *pMon = g_pGame->GetDungeon()->GetTile( vPos )->m_pCurMonster;
+        szMonster = pMon->GetName();
+
+        fRoll = Attack();
+        bHit = pMon->Hit( fRoll );
+        if( bHit )
+        {
+            sprintf( szStatus, "hit" );
+        }
+        else
+        {
+            sprintf( szStatus, "miss" );
+        }
+
+        g_pGame->GetMsgs()->Printf( "You %s the %s.\n", szStatus, szMonster );
+
+        if( bHit )
+        {
+            if( fRoll > 80.0f )
+            {
+                g_pGame->GetMsgs()->Printf( "(It was an excellent hit! (x2 damage)\n" );
+                fDamageMult = 2.0f;
+            }
+
+            float fDamage = Damage( fDamageMult );
+
+            if( pMon->TakeDamage( fDamage ) == STATUS_DEAD )
+            {
+                sprintf( szStatus, "have slain" );
+                g_pGame->GetMsgs()->Printf( "You %s the %s.\n", szStatus, szMonster );
+                OnKillMonster( pMon );
+                g_pGame->GetDungeon()->RemoveMonster( pMon );
+            }
+        }
+    }
+    else if( dwCollideType == DUNG_COLL_ITEM )
+    {
+        PickUp( vPos );
+    }
+    else
+    {
+        // Ouch, you bumped into a %s.
+        char what[16];
+        switch( dwCollideType )
+        {
+        case DUNG_IDX_WALL:
+        case DUNG_IDX_SECRET_DOOR:
+            sprintf( what, "a wall" );
+            break;
+        case DUNG_IDX_DOOR:
+            sprintf( what, "a door" );
+            break;
+        case DUNG_IDX_RUBBLE:
+            sprintf( what, "some rubble" );
+            break;
+        default:
+            sprintf( what, "um, something?" );
+            break;
+        }
+        g_pGame->GetMsgs()->Printf( "Ouch! You bumped into %s!\n", what );
+    }
+}
+
 float CPlayer::Attack()
 {
     float fRoll = Util::Roll( "1d100" );

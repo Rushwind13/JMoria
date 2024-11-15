@@ -124,7 +124,7 @@ protected:
         char sym = GetAlpha( keysym );
         if( sym == NULL )
             return false;
-        const char *c = strchr( "hjklyubn", sym );
+        const char *c = strchr( "HJKLYUBNhjklyubn", sym );
         if( c != NULL )
         {
             return true;

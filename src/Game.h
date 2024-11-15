@@ -19,6 +19,7 @@ class CStringInputState;
 class CEndGameState;
 class CClockStepState;
 class CRestState;
+class CRunState;
 class CAIMgr;
 
 class CGame
@@ -79,6 +80,7 @@ protected:
     CEndGameState *m_pEndGameState;
     CClockStepState *m_pClockStepState;
     CRestState *m_pRestState;
+    CRunState *m_pRunState;
 
 private:
     CRender *m_pRender;

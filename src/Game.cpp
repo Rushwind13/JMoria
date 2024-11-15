@@ -12,6 +12,7 @@
 #include "EndGameState.h"
 #include "ModState.h"
 #include "RestState.h"
+#include "RunState.h"
 #include "StringInputState.h"
 #include "UseState.h"
 
@@ -44,6 +45,7 @@ CGame::CGame()
     m_pEndGameState = new CEndGameState;
     m_pClockStepState = new CClockStepState;
     m_pRestState = new CRestState;
+    m_pRunState = new CRunState;
 #ifdef TURN_BASED
     m_bReadyForUpdate = false;
 #endif // TURN_BASED
@@ -260,6 +262,9 @@ void CGame::SetState( int eNewState )
     break;
     case STATE_REST:
         m_pCurState = reinterpret_cast<CStateBase *>( m_pRestState );
+        break;
+    case STATE_RUN:
+        m_pCurState = reinterpret_cast<CStateBase *>( m_pRunState );
         break;
     default:
         JLog( LOG_LEVEL_ERROR, true, "Tried to change to unknown state.\n" );

@@ -36,6 +36,7 @@ void CDungeonMap::CreateDungeon( const int depth )
     m_llRooms = new JLinkList<CRoom>;
     m_llHallways = new JLinkList<CRoom>;
     JRect rcWorld( 0, 0, DUNG_WIDTH - 1, DUNG_HEIGHT - 1 );
+    m_dwDepth = depth;
 
     // First, fill the whole dungeon with rock
     FillDungeonArea( DUNG_IDX_WALL, rcWorld, false );
@@ -242,10 +243,12 @@ void CDungeonMap::FillArea( const CDungeonCreationStep *pStep )
 
     if( pStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM )
     {
+        pRoom->SetFlags( DUNG_FLAG_ROOM );
         m_llRooms->Add( pRoom );
     }
     else
     {
+        pRoom->SetFlags( DUNG_FLAG_HALL );
         m_llHallways->Add( pRoom );
     }
 
@@ -255,48 +258,33 @@ void CDungeonMap::FillArea( const Uint8 type, CRoom *pRoom )
 {
     FillDungeonArea( type, pRoom->GetArea() );
 
-    if( type != DUNG_IDX_WALL )
+    if( type != DUNG_IDX_WALL && pRoom->HasFlags( DUNG_FLAG_ROOM ) != 0 )
     {
-        LightArea( pRoom->GetEdges() );
-        pRoom->SetFlags( DUNG_FLAG_LIT );
+        if( Util::GetRandom( 1, 100 ) < LitChance() )
+        {
+            LightArea( pRoom->GetEdges() );
+            pRoom->SetFlags( DUNG_FLAG_LIT );
+        }
+        else
+        {
+            JLog( LOG_LEVEL_WARN, true, "Created unlit room\n" );
+        }
     }
 
     // you still filled rcFill squares, just that one of them was a door.
     JLog( LOG_LEVEL_DEBUG, true, "filled from <%d %d> to <%d %d>\n",
           RECT_EXPAND( pRoom->GetArea() ) );
+}
 
-    // JIVector vOrigin( rcLocal.left, rcLocal.top );
-    //
-    // if( bIsHallway )
-    // {
-    //     switch( direction )
-    //     {
-    //     case DIR_NORTH:
-    //         break;
-    //     case DIR_SOUTH:
-    //         vOrigin.Init( rcLocal.left, rcLocal.bottom );
-    //         break;
-    //     case DIR_EAST:
-    //         vOrigin.Init( rcLocal.right, rcLocal.top );
-    //         break;
-    //     case DIR_WEST:
-    //         break;
-    //     case DIR_NONE:
-    //         // this doesn't make sense, but whatever.
-    //         break;
-    //     }
-    // }
-    // if( bIsHallway )
-    // {
-    //     // GetTile(*vOrigin)->SetType(DUNG_IDX_OPEN_DOOR);
-    //     GetTile( vOrigin )->SetType( DUNG_IDX_FLOOR );
-    //     // GetTile(*vOrigin)->SetFlags(~DUNG_FLAG_LIT);
-    // }
-    // else if( type != DUNG_IDX_WALL )
-    // {
-    //     // GetTile(*vOrigin)->SetType(DUNG_IDX_RUBBLE);
-    //     GetTile( vOrigin )->SetType( DUNG_IDX_FLOOR );
-    // }
+int CDungeonMap::LitChance()
+{
+    const float maxChance = 0.75f;
+    const int deepestLit = 20;
+    if( m_dwDepth > deepestLit )
+        return 0;
+    float chance =
+        maxChance - ( ( (float)( m_dwDepth - 1 ) * maxChance ) / (float)( deepestLit - 1 ) );
+    return (int)( chance * 100.0f );
 }
 
 int CDungeonMap::Opposite( int direction )

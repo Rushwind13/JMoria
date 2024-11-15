@@ -204,7 +204,7 @@ THEN( "^The JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) is now lit$" )
             int expected = context->map.GetFlags( vCheck );
             JLog( LOG_LEVEL_NOISE, true, "<%d %d>: %d/%d ", VEC_EXPAND( vCheck ), expected,
                   DUNG_FLAG_LIT );
-            EXPECT_EQ( expected, DUNG_FLAG_LIT );
+            EXPECT_EQ( expected & DUNG_FLAG_LIT, DUNG_FLAG_LIT );
         }
         JLog( LOG_LEVEL_NOISE, true, "\n" );
     }

@@ -81,6 +81,7 @@ public:
     JResult UpdateSeen();
     void LightRoom( CRoom *pRoom );
     bool WithinSight( JVector vCheck );
+    void DisturbPlayer();
 
     JResult OnChangeLevel( const int delta );
 

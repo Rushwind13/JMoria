@@ -327,6 +327,8 @@ void CMonster::Draw()
         return;
     }
 
+    g_pGame->GetDungeon()->DisturbPlayer();
+
     Uint8 monster_tile = MonIDs[m_md->m_dwIndex] - ' ' - 1;
     JVector DUNG_ASPECT;
 

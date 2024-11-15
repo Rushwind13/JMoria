@@ -572,7 +572,6 @@ bool CDungeon::WithinSight( JVector vCheck )
             vPos.y += vStep.y;
         }
     }
-    g_pGame->GetPlayer()->m_bIsDisturbed = true;
     return true;
 }
 
@@ -664,6 +663,8 @@ void CDungeon::DrawDungeon()
         }
     }
 }
+
+void CDungeon::DisturbPlayer() { g_pGame->GetPlayer()->m_bIsDisturbed = true; }
 
 void CDungeon::DrawItems()
 {

@@ -206,8 +206,8 @@ public:
         {
             if( pLink->m_lpData->GetArea().Contains( vCheck ) )
             {
-                JLog( LOG_LEVEL_DEBUG, true, "Inside room: <%d %d %d %d>\n",
-                      RECT_EXPAND( pLink->m_lpData->GetEdges() ) );
+                JLog( LOG_LEVEL_DEBUG, true, "<%d %d> Inside room: <%d %d %d %d>\n",
+                      VEC_EXPAND( vCheck ), RECT_EXPAND( pLink->m_lpData->GetArea() ) );
                 return pLink->m_lpData;
             }
             pLink = m_llRooms->GetNext( pLink );

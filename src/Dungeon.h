@@ -79,6 +79,7 @@ public:
     bool Tick( const int dwClock );
     bool Update( float fCurTime );
     JResult UpdateSeen();
+    void LightRoom( CRoom *pRoom );
     bool WithinSight( JVector vCheck );
 
     JResult OnChangeLevel( const int delta );

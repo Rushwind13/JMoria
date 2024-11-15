@@ -243,8 +243,8 @@ float CMonster::Damage( float fDamageMult )
     float fDamageModifier = 0.0f;
 
     float fDamage = ( Util::Roll( szDamage ) + fDamageModifier ) * fDamageMult;
-    JLog( LOG_LEVEL_INFO, true, "%s did %.2f damage (damagemult: %.2f). ", GetName(), fDamage,
-          fDamageMult );
+    JLog( LOG_LEVEL_INFO, true, "%s did %.2f damage (rolled %s)(damagemult: %.2f). ", GetName(),
+          fDamage, szDamage, fDamageMult );
 
     return fDamage;
 }

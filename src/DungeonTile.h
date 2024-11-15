@@ -36,11 +36,16 @@ public:
     CDungeonTileDef *m_dtd;
     CMonster *m_pCurMonster;
     CItem *m_pCurItem;
-    int m_dwFlags; // 32 bits to do whatever you like with.
+    uint32 m_dwFlags; // 32 bits to do whatever you like with.
 protected:
 private:
     // Member Functions
 public:
+    uint32 GetFlags() const { return m_dwFlags; }
+    uint32 HasFlags( const uint32 type ) { return m_dwFlags & type; }
+    void SetFlags( const uint32 type ) { m_dwFlags |= type; }
+    void UnsetFlags( const uint32 type ) { m_dwFlags &= ~type; }
+
 protected:
 private:
 };

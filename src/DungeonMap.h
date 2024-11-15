@@ -50,15 +50,17 @@ public:
     Uint8 GetType() const { return m_uiType; }
     void SetType( Uint8 type ) { m_uiType = type; }
 
-    int GetFlags() const { return m_dwFlags; }
-    void SetFlags( int type ) { m_dwFlags = type; }
+    uint32 GetFlags() const { return m_dwFlags; }
+    uint32 HasFlags( const uint32 type ) { return m_dwFlags & type; }
+    void SetFlags( const uint32 type ) { m_dwFlags |= type; }
+    void UnsetFlags( const uint32 type ) { m_dwFlags &= ~type; }
 
 protected:
 private:
-    Uint8 m_uiType; // what kind of tile is this? (floor, wall, door, etc)
-    JRect m_Rect;   // What are this tiles coordinates in world space? (ltrb)
-    int m_dwFlags;  // 32 bits to use as you please. Please reference here what's using them (or the
-                    // .h)
+    Uint8 m_uiType;   // what kind of tile is this? (floor, wall, door, etc)
+    JRect m_Rect;     // What are this tiles coordinates in world space? (ltrb)
+    uint32 m_dwFlags; // 32 bits to use as you please. Please reference here what's using them (or
+                      // the .h)
 
     // Member functions
 
@@ -86,7 +88,9 @@ public:
     JRect GetArea() { return m_rcRoom; };
     JRect GetEdges() { return m_rcEdges; };
     uint32 GetFlags() { return m_dwFlags; };
-    void SetFlags( const uint32 dwIn ) { m_dwFlags = dwIn; };
+    uint32 HasFlags( const uint32 dwIn ) { return m_dwFlags & dwIn; };
+    void SetFlags( const uint32 dwIn ) { m_dwFlags |= dwIn; };
+    void UnsetFlags( const uint32 dwIn ) { m_dwFlags &= ~dwIn; };
 
 protected:
     JRect m_rcRoom;
@@ -115,7 +119,8 @@ public:
         : m_dmtTiles( NULL ),
           m_stkDungeonMapCreation( NULL ),
           m_llRooms( NULL ),
-          m_llHallways( NULL )
+          m_llHallways( NULL ),
+          m_dwDepth( 0 )
     {
         m_stkDungeonMapCreation = new JStack<CDungeonCreationStep>;
     };
@@ -150,6 +155,7 @@ private:
     JStack<CDungeonCreationStep> *m_stkDungeonMapCreation;
     JLinkList<CRoom> *m_llRooms;
     JLinkList<CRoom> *m_llHallways;
+    uint32 m_dwDepth;
 
     // Member functions
 public:
@@ -185,6 +191,30 @@ public:
         return -1;
     };
 
+    CRoom *InRoom( JIVector vCheck )
+    {
+        if( !m_llRooms )
+            return NULL;
+        CLink<CRoom> *pLink = m_llRooms->GetHead();
+
+        if( pLink == NULL )
+        {
+            return NULL;
+        }
+
+        while( pLink != NULL )
+        {
+            if( pLink->m_lpData->GetArea().Contains( vCheck ) )
+            {
+                JLog( LOG_LEVEL_DEBUG, true, "Inside room: <%d %d %d %d>\n",
+                      RECT_EXPAND( pLink->m_lpData->GetEdges() ) );
+                return pLink->m_lpData;
+            }
+            pLink = m_llRooms->GetNext( pLink );
+        }
+        return NULL;
+    }
+
     int HowManyRooms()
     {
         if( m_llRooms )
@@ -211,6 +241,7 @@ protected:
     bool CheckInterior( const JRect rcCheck );
     bool CheckBorder( const JRect rcCheck, int direction );
 
+    int LitChance();
     JResult LightArea( JRect rcLight );
     JResult FillDungeonArea( Uint8 type, JRect rcFill, bool bBoundsCheck = true );
     void FillArea( const Uint8 type, CRoom *pRoom );

@@ -490,15 +490,36 @@ JResult CDungeon::UpdateSeen()
           RECT_EXPAND( rcSeen ) );
 
     JIVector vTile;
+    CRoom *pRoom;
     for( vTile.y = rcSeen.top; vTile.y <= rcSeen.bottom; vTile.y++ )
     {
         for( vTile.x = rcSeen.left; vTile.x <= rcSeen.right; vTile.x++ )
         {
-            GetITile( vTile )->m_dwFlags |= DUNG_FLAG_SEEN;
+            GetITile( vTile )->SetFlags( DUNG_FLAG_SEEN );
+            pRoom = m_dmCurLevel->InRoom( vTile );
+            if( pRoom != NULL && pRoom->HasFlags( DUNG_FLAG_LIT ) &&
+                !pRoom->HasFlags( DUNG_FLAG_SEEN ) )
+            {
+                LightRoom( pRoom );
+            }
         }
     }
 
     return JSUCCESS;
+}
+
+void CDungeon::LightRoom( CRoom *pRoom )
+{
+    JVector vCurPos;
+    JRect rcRoom = pRoom->GetEdges();
+    for( vCurPos.y = rcRoom.top; vCurPos.y <= rcRoom.bottom; vCurPos.y++ )
+    {
+        for( vCurPos.x = rcRoom.left; vCurPos.x <= rcRoom.right; vCurPos.x++ )
+        {
+            GetTile( vCurPos )->SetFlags( DUNG_FLAG_SEEN );
+        }
+    }
+    pRoom->SetFlags( DUNG_FLAG_SEEN );
 }
 
 bool CDungeon::WithinSight( JVector vCheck )
@@ -506,6 +527,13 @@ bool CDungeon::WithinSight( JVector vCheck )
     // Check for sight distance first
     JIVector vPos( VEC_EXPAND( vCheck ) );
     JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+
+    // can see things in the same room, if the room is LIT
+    CRoom *prCheck = m_dmCurLevel->InRoom( vPos );
+    CRoom *prPlayer = m_dmCurLevel->InRoom( vPlayer );
+    if( prCheck && prCheck->HasFlags( DUNG_FLAG_SEEN ) && prCheck == prPlayer )
+        return true;
+
     JRect rcVisible = Util::Nearby( vPlayer, PLAYER_SIGHT_DISTANCE );
 
     if( !rcVisible.Contains( vPos ) )

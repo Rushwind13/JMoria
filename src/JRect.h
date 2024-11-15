@@ -123,7 +123,7 @@ public:
 
     bool Contains( const JIVector vTarget )
     {
-        if( vTarget.x < left || vTarget.x >= right || vTarget.y < top || vTarget.y >= bottom )
+        if( vTarget.x < left || vTarget.x > right || vTarget.y < top || vTarget.y > bottom )
         {
             return false;
         }

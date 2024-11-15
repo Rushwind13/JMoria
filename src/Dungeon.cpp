@@ -572,7 +572,6 @@ bool CDungeon::WithinSight( JVector vCheck )
             vPos.y += vStep.y;
         }
     }
-    g_pGame->GetPlayer()->m_bIsDisturbed = true;
     return true;
 }
 
@@ -652,8 +651,9 @@ void CDungeon::DrawDungeon()
             // this tile doesn't exist, or it's not been seen
             // or something else is standing there
             if( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_SEEN ) == 0 ) ||
-                vScreen == vPlayer || curTile->m_pCurItem != NULL ||
-                curTile->m_pCurMonster != NULL )
+                vScreen == vPlayer ||
+                ( WithinSight( vScreen ) &&
+                  ( curTile->m_pCurItem != NULL || curTile->m_pCurMonster != NULL ) ) )
             {
                 continue;
             }
@@ -663,6 +663,8 @@ void CDungeon::DrawDungeon()
         }
     }
 }
+
+void CDungeon::DisturbPlayer() { g_pGame->GetPlayer()->m_bIsDisturbed = true; }
 
 void CDungeon::DrawItems()
 {

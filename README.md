@@ -11,6 +11,7 @@ Keyboard commands recognized:
 * *Ctrl-C* - Exit
 * *Arrow keys (or numberpad)* - movement
 * *hjklyubn* - movement
+* *HJKLYUBN* - run until disturbed
 * *o* - open a door
 * *c* - close a door
 * *T* - tunnel through rubble

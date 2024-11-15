@@ -23,7 +23,8 @@
 #define STATE_ENDGAME 5
 #define STATE_CLOCKSTEP 6
 #define STATE_REST 7
-#define STATE_MAX 8
+#define STATE_RUN 8
+#define STATE_MAX 9
 
 // Various statuses that someone could have
 #define STATUS_INVALID -1
@@ -74,7 +75,7 @@
 #define DUNG_FLAG_HALL 0x00000008
 
 #define DUNG_FLAG_TRAP 0x00000010
-#define DUNG_FLAG_LOCKED  0x00000020
+#define DUNG_FLAG_LOCKED 0x00000020
 // #define DUNG_FLAG_x  0x00000040
 // #define DUNG_FLAG_x  0x00000080
 

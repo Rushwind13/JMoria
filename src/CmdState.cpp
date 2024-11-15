@@ -20,23 +20,21 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
         int dwCollideType;
 
         GetDir( keysym, vTestDir );
-        m_vNewPos = g_pGame->GetPlayer()->m_vPos + vTestDir;
 
-        dwCollideType = TestCollision( m_vNewPos );
-        if( dwCollideType == DUNG_COLL_NO_COLLISION )
+        // handle "run" movement
+        if( keysym->mod & KMOD_SHIFT )
         {
-            UpdatePlayerPos( m_vNewPos );
+            g_pGame->GetPlayer()->m_vVel = vTestDir;
+            // Add "modify" to the top of the state stack
+            g_pGame->SetState( STATE_RUN );
+            g_pGame->GetGameState()->HandleKey( keysym );
+            retval = 0;
         }
-        else if( dwCollideType == DUNG_COLL_ITEM )
+        else // single step movement
         {
-            UpdatePlayerPos( m_vNewPos );
-            HandleCollision( dwCollideType );
+            g_pGame->GetPlayer()->Move( vTestDir );
+            retval = 0;
         }
-        else
-        {
-            HandleCollision( dwCollideType );
-        }
-        retval = 0;
     }
     // Not a directional key; check for other commands
     // (many will induce state changes)
@@ -156,90 +154,6 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 #endif // TURN_BASED
     return retval;
 }
-
-void CCmdState::HandleCollision( int dwCollideType )
-{
-    // There are only 2 things to collide with;
-    // Monsters and Walls.
-    if( IsMonster( dwCollideType ) )
-    {
-        char szStatus[16];
-        char *szMonster;
-        float fRoll = 0.0f;
-        float fDamageMult = 1.0f;
-        bool bHit;
-        // When Players Attack
-        CMonster *pMon = g_pGame->GetDungeon()->GetTile( m_vNewPos )->m_pCurMonster;
-        szMonster = pMon->GetName();
-
-        fRoll = g_pGame->GetPlayer()->Attack();
-        bHit = pMon->Hit( fRoll );
-        if( bHit )
-        {
-            sprintf( szStatus, "hit" );
-        }
-        else
-        {
-            sprintf( szStatus, "miss" );
-        }
-
-        g_pGame->GetMsgs()->Printf( "You %s the %s.\n", szStatus, szMonster );
-
-        if( bHit )
-        {
-            if( fRoll > 80.0f )
-            {
-                g_pGame->GetMsgs()->Printf( "(It was an excellent hit! (x2 damage)\n" );
-                fDamageMult = 2.0f;
-            }
-
-            float fDamage = g_pGame->GetPlayer()->Damage( fDamageMult );
-
-            if( pMon->TakeDamage( fDamage ) == STATUS_DEAD )
-            {
-                sprintf( szStatus, "have slain" );
-                g_pGame->GetMsgs()->Printf( "You %s the %s.\n", szStatus, szMonster );
-                g_pGame->GetPlayer()->OnKillMonster( pMon );
-                g_pGame->GetDungeon()->RemoveMonster( pMon );
-            }
-        }
-    }
-    else if( dwCollideType == DUNG_COLL_ITEM )
-    {
-        PickUpItem( m_vNewPos );
-    }
-    else
-    {
-        // Ouch, you bumped into a %s.
-        char what[16];
-        switch( dwCollideType )
-        {
-        case DUNG_IDX_WALL:
-        case DUNG_IDX_SECRET_DOOR:
-            sprintf( what, "a wall" );
-            break;
-        case DUNG_IDX_DOOR:
-            sprintf( what, "a door" );
-            break;
-        case DUNG_IDX_RUBBLE:
-            sprintf( what, "some rubble" );
-            break;
-        default:
-            sprintf( what, "um, something?" );
-            break;
-        }
-        g_pGame->GetMsgs()->Printf( "Ouch! You bumped into %s!\n", what );
-    }
-}
-
-int CCmdState::TestCollision( JVector &vTest )
-{
-    return ( g_pGame->GetDungeon()->IsWalkableFor( vTest, true ) );
-}
-
-void CCmdState::UpdatePlayerPos( JVector &vNewPos ) { g_pGame->GetPlayer()->m_vPos = vNewPos; }
-
-void CCmdState::PickUpItem( JVector &vNewPos ) { g_pGame->GetPlayer()->PickUp( vNewPos ); }
 
 bool CCmdState::IsModifierNeeded( SDL_Keysym *keysym )
 {

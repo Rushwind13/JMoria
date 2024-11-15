@@ -167,6 +167,9 @@ public:
 
     bool SetName( const char *szName );
 
+    int Move( JVector vDir );
+    void HandleCollision( JVector vPos, int dwCollideType );
+
     float Attack();
     float Damage( float fDamageMult );
 
@@ -179,6 +182,7 @@ public:
     bool IsWizard() { return m_bWizardMode; };
 
     JVector m_vPos;
+    JVector m_vVel;
     CTileset *m_TileSet;
     bool m_bHasSpawned;
 

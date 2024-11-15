@@ -31,15 +31,7 @@ private:
     bool IsRestCommand( SDL_Keysym *keysym );
     bool IsTeleportCommand( SDL_Keysym *keysym );
     bool IsStringInputCommand( SDL_Keysym *keysym );
-    bool IsMonster( int collide_type ) { return ( collide_type == DUNG_COLL_MONSTER ); }
     void ResetToState( int newstate ) {}
-
-    int TestCollision( JVector &vTestDir );
-
-    void UpdatePlayerPos( JVector &vDir );
-
-    void PickUpItem( JVector &vDir );
-    void HandleCollision( int dwCollideType );
 
     int OnHandleStairs( SDL_Keysym *keysym );
     int TestStairs();

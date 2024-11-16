@@ -199,19 +199,15 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 cur = end;
 
                 // effect flag (optional)
-                if( !bDone )
+                begin = strchr( cur, '<' );
+                end = strchr( cur, '>' );
+                if( begin != NULL && end != NULL )
                 {
+                    *end++ = NULL;
+                    begin++;
+                    curAttack->m_dwEffectFlags = g_Constants.LookupString( begin );
+                    JLog( LOG_LEVEL_NOISE, true, "Found an Effect Flag: %s\n", begin );
                     cur = end;
-                    // effect
-                    begin = strchr( cur, '<' );
-                    end = strchr( cur, '>' );
-                    if( begin != NULL && end != NULL )
-                    {
-                        *end = NULL;
-                        begin++;
-                        curAttack->m_dwEffectFlags = g_Constants.LookupString( begin );
-                        JLog( LOG_LEVEL_NOISE, true, "Found an Effect Flag: %s\n", begin );
-                    }
                 }
 
                 // damage
@@ -224,16 +220,6 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 }
                 begin++;
                 // from here on out, you've got enough info to do this.
-                end = strchr( begin, ',' );
-                if( end != NULL )
-                {
-                    *end++ = NULL;
-                }
-                else
-                {
-                    bDone = true;
-                }
-
                 cur = Strip( begin );
                 curAttack->m_szDamage = new char[strlen( cur ) + 1];
                 strcpy( curAttack->m_szDamage, cur );
@@ -359,6 +345,10 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
             {
                 GetValue( szLine, idIn.m_fWeight );
             }
+            else if( strncasecmp( szLine, "radius", 6 ) == 0 )
+            {
+                idIn.m_fRadius = GetValue( szLine, idIn.m_fRadius );
+            }
             else if( strncasecmp( szLine, "duration", 8 ) == 0 )
             {
                 idIn.m_fDuration = GetValue( szLine, idIn.m_fDuration );
@@ -406,13 +396,21 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 char *begin;
                 char *end;
                 char *cur;
-                // Effect    <ITEM_FLAG_HEAL>, 1d20
-                // Effect    <ITEM_FLAG_CURE_BLINDNESS>
+
+                // Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>
+                // Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+                // Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_INVISIBLE>
+                // Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FIRE>,<EFFECT_MOD_RESIST>
+                // Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FIRE>,<EFFECT_MOD_RESIST>
+                // Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LIGHT>
+                // Effect      <EFFECT_TYPE_GAIN>,<EFFECT_FLAG_FUEL>
+                // Effect      <EFFECT_TYPE_HEAL>,<ITEM_FLAG_CURSED>
                 // type
                 begin = strchr( szLine, '<' );
                 end = strchr( szLine, '>' );
                 if( begin == NULL || end == NULL )
                 {
+                    JLog( LOG_LEVEL_ERROR, true, "Error parsing effect: type not found\n" );
                     continue;
                 }
                 *end++ = NULL;
@@ -420,22 +418,47 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 curEffect->m_dwEffect = g_Constants.LookupString( begin );
                 cur = end;
 
-                // amount
-                begin = strchr( cur, ',' );
-                if( begin == NULL )
-                    continue;
-                begin++;
-                cur = Strip( begin );
+                // flag
                 begin = strchr( cur, '<' );
                 end = strchr( cur, '>' );
                 if( begin == NULL || end == NULL )
                 {
+                    JLog( LOG_LEVEL_ERROR, true, "Error parsing effect: flag not found\n" );
                     continue;
                 }
-                *end = NULL;
+                *end++ = NULL;
                 begin++;
-                curEffect->m_szAmount = new char[strlen( begin ) + 1];
-                strcpy( curEffect->m_szAmount, begin );
+                curEffect->m_dwEffect = g_Constants.LookupString( begin );
+                cur = end;
+
+                // modifier (optional)
+                begin = strchr( cur, '<' );
+                end = strchr( cur, '>' );
+                if( begin != NULL && end != NULL )
+                {
+                    JLog( LOG_LEVEL_INFO, true, "Found effect modifier\n" );
+                    *end++ = NULL;
+                    begin++;
+                    curEffect->m_dwEffect = g_Constants.LookupString( begin );
+                    cur = end;
+                }
+
+                // // amount
+                // begin = strchr( cur, ',' );
+                // if( begin == NULL )
+                //     continue;
+                // begin++;
+                // cur = Strip( begin );
+                // begin = strchr( cur, '<' );
+                // end = strchr( cur, '>' );
+                // if( begin == NULL || end == NULL )
+                // {
+                //     continue;
+                // }
+                // *end = NULL;
+                // begin++;
+                // curEffect->m_szAmount = new char[strlen( begin ) + 1];
+                // strcpy( curEffect->m_szAmount, begin );
 
                 // store it
                 idIn.m_llEffects->Add( curEffect );

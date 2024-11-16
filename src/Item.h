@@ -29,6 +29,7 @@ public:
           m_dwLevel( 0 ),
           m_fValue( 0.0f ),
           m_fWeight( 0.0f ),
+          m_fRadius( 0.0f ),
           m_fDuration( 0.0f ),
           m_dwFlags( 0 ),
           m_dwIndex( ITEM_IDX_INVALID ),
@@ -80,6 +81,7 @@ public:
     int m_dwIndex;     // ITEM_IDX_SWORD, ITEM_IDX_WAND, etc.
     int m_dwBaseHP;    // for busting down walls, disarming traps, etc.
     float m_fDuration; // for potions, scrolls, torches -- "How long will this last?"
+    float m_fRadius;   // for AoE effects -- "How big is the badaboom?"
     JLinkList<JColor> *m_Colors;
     JLinkList<CEffect> *m_llEffects;
     JColor m_Color;

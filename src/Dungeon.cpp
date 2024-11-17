@@ -497,8 +497,9 @@ JResult CDungeon::UpdateSeen()
         {
             GetITile( vTile )->SetFlags( DUNG_FLAG_SEEN );
             pRoom = m_dmCurLevel->InRoom( vTile );
-            if( pRoom != NULL && pRoom->HasFlags( DUNG_FLAG_LIT ) &&
-                !pRoom->HasFlags( DUNG_FLAG_SEEN ) )
+            if( pRoom != NULL &&
+                ( g_pGame->GetPlayer()->IsWizard() ||
+                  ( pRoom->HasFlags( DUNG_FLAG_LIT ) && !pRoom->HasFlags( DUNG_FLAG_SEEN ) ) ) )
             {
                 LightRoom( pRoom );
             }
@@ -573,13 +574,16 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget )
     return true;
 }
 
-bool CDungeon::WithinSight( JVector vCheck )
+bool CDungeon::CanSeePlayer( JVector vCheck )
 {
-    // Check for sight distance first
-    JIVector vPos( VEC_EXPAND( vCheck ) );
-    JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+    if( g_pGame->GetPlayer()->IsWizard() )
+        return true;
 
-    return CanSeeEachOther( vPlayer, vPos );
+    // Check for sight distance first
+    JIVector viCheck( VEC_EXPAND( vCheck ) );
+    JIVector viPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+
+    return CanSeeEachOther( viCheck, viPlayer );
 }
 
 bool CDungeon::IsOnScreen( JVector vPos )
@@ -658,8 +662,10 @@ void CDungeon::DrawDungeon()
             // this tile doesn't exist, or it's not been seen
             // or something else is standing there
             if( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_SEEN ) == 0 ) ||
+                ( g_pGame->GetPlayer()->IsWizard() &&
+                  ( curTile->m_dwFlags & ( DUNG_FLAG_SEEN | DUNG_FLAG_LIT ) ) == 0 ) ||
                 vScreen == vPlayer ||
-                ( WithinSight( vScreen ) &&
+                ( CanSeePlayer( vScreen ) &&
                   ( curTile->m_pCurItem != NULL || curTile->m_pCurMonster != NULL ) ) )
             {
                 continue;
@@ -681,7 +687,7 @@ void CDungeon::DrawItems()
     while( pLink != NULL )
     {
         pItem = pLink->m_lpData;
-        if( pItem && IsOnScreen( pItem->m_vPos ) )
+        if( pItem && IsOnScreen( pItem->m_vPos ) && CanSeePlayer( pItem->m_vPos ) )
         {
             pItem->Draw();
         }
@@ -697,7 +703,7 @@ void CDungeon::DrawMonsters()
     while( pLink != NULL )
     {
         pMon = pLink->m_lpData;
-        if( pMon && IsOnScreen( pMon->GetPos() ) )
+        if( pMon && IsOnScreen( pMon->GetPos() ) && CanSeePlayer( pMon->GetPos() ) )
         {
             pMon->Draw();
         }

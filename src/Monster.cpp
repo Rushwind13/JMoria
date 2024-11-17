@@ -134,7 +134,10 @@ JIVector CMonster::GetSpawnPoint( JIVector vRequestedSpawnPoint )
         JLog( LOG_LEVEL_INFO, false, "." );
 
         JVector vTryIt( VEC_EXPAND( vTryPos ) );
-        if( g_pGame->GetDungeon()->IsWalkableFor( vTryIt ) == DUNG_COLL_NO_COLLISION )
+        // target spawn point must be walkable and also within sight of the parent (no spawning past
+        // walls or doors!)
+        if( g_pGame->GetDungeon()->IsWalkableFor( vTryIt ) == DUNG_COLL_NO_COLLISION &&
+            ( !bNear || g_pGame->GetDungeon()->CanSeeEachOther( vRequestedSpawnPoint, vTryPos ) ) )
         {
             return vTryPos;
         }

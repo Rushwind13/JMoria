@@ -80,6 +80,7 @@ public:
     bool Update( float fCurTime );
     JResult UpdateSeen();
     void LightRoom( CRoom *pRoom );
+    bool CanSeeEachOther( JIVector vSource, JIVector vTarget );
     bool WithinSight( JVector vCheck );
     void DisturbPlayer();
 

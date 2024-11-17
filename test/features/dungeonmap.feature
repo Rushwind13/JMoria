@@ -14,6 +14,7 @@ Feature: Dungeon Creation
         Given I have a DungeonMap
         Given I have a JRect 5,5,10,10 to fill
         When I call FillArea for a room
+        When I call LightArea for the room
         Then The JRect 5,5,10,10 is now filled with 0
         Then The JRect 4,4,11,11 is now lit
         And The rect is in world
@@ -22,6 +23,7 @@ Feature: Dungeon Creation
         Given I have a DungeonMap
         Given I have a JRect 1,1,5,5 to fill
         When I call FillArea for a room
+        When I call LightArea for the room
         Then The JRect 1,1,5,5 is now filled with 0
         Then The JRect 0,0,6,6 is now lit
         And The rect is in world
@@ -30,6 +32,7 @@ Feature: Dungeon Creation
         Given I have a DungeonMap
         Given I have a JRect 0,0,5,5 to fill
         When I call FillArea for a room
+        When I call LightArea for the room
         Then The JRect 0,0,5,5 is now filled with 1
         And The rect is in world
 
@@ -46,7 +49,7 @@ Feature: Dungeon Creation
         Given I have a JRect 6,3,10,3 to fill
         When I call FillArea for a hallway east
         Then The JRect 6,3,10,3 is now filled with 0
-        Then The JRect 5,2,11,4 is now lit
+        Then The JRect 7,2,11,4 is not lit
         Then The JRect 1,1,5,5 is now filled with 0
         Then The JRect 0,0,6,6 is now lit
         And The rect is in world
@@ -57,7 +60,7 @@ Feature: Dungeon Creation
         Given I have a JRect 3,3,10,3 to fill
         When I call FillArea for a hallway east
         Then The JRect 6,3,10,3 is now filled with 0
-        Then The JRect 5,2,11,4 is now lit
+        Then The JRect 7,2,11,4 is not lit
         Then The JRect 1,1,5,5 is now filled with 0
         Then The JRect 0,0,6,6 is now lit
         And The rect is in world
@@ -67,7 +70,7 @@ Feature: Dungeon Creation
         Given I have a JRect 1,1,5,1 to fill
         When I call FillArea for a hallway east
         Then The JRect 1,1,5,1 is now filled with 0
-        Then The JRect 0,0,6,2 is now lit
+        Then The JRect 0,0,6,2 is not lit
         And The rect is in world
 
     Scenario: Hallways that are not in-world remain filled with walls
@@ -81,6 +84,7 @@ Feature: Dungeon Creation
         Given I have a DungeonMap
         Given I have a JRect 1,1,5,5 to fill
         When I call FillArea for a room N
+        When I call LightArea for the room
         Then The JRect 1,1,5,5 is now filled with 0
         Then The JRect 0,0,6,6 is now lit
         And The rect is in world
@@ -88,6 +92,7 @@ Feature: Dungeon Creation
         Given I have a DungeonMap
         Given I have a JRect 1,1,5,5 to fill
         When I call FillArea for a room S
+        When I call LightArea for the room
         Then The JRect 1,1,5,5 is now filled with 0
         Then The JRect 0,0,6,6 is now lit
         And The rect is in world
@@ -95,6 +100,7 @@ Feature: Dungeon Creation
         Given I have a DungeonMap
         Given I have a JRect 1,1,5,5 to fill
         When I call FillArea for a room E
+        When I call LightArea for the room
         Then The JRect 1,1,5,5 is now filled with 0
         Then The JRect 0,0,6,6 is now lit
         And The rect is in world
@@ -102,6 +108,7 @@ Feature: Dungeon Creation
         Given I have a DungeonMap
         Given I have a JRect 1,1,5,5 to fill
         When I call FillArea for a room W
+        When I call LightArea for the room
         Then The JRect 1,1,5,5 is now filled with 0
         Then The JRect 0,0,6,6 is now lit
         And The rect is in world
@@ -111,7 +118,7 @@ Feature: Dungeon Creation
         Given I have a JRect 1,1,1,5 to fill
         When I call FillArea for a hallway north
         Then The JRect 1,1,1,5 is now filled with 0
-        Then The JRect 0,0,2,6 is now lit
+        Then The JRect 0,0,2,6 is not lit
         And The rect is in world
 
     Scenario: I can create S hallway
@@ -119,7 +126,7 @@ Feature: Dungeon Creation
         Given I have a JRect 1,1,5,1 to fill
         When I call FillArea for a hallway south
         Then The JRect 1,1,5,1 is now filled with 0
-        Then The JRect 0,0,6,2 is now lit
+        Then The JRect 0,0,6,2 is not lit
         And The rect is in world
 
     Scenario: I can create W hallway
@@ -127,7 +134,7 @@ Feature: Dungeon Creation
         Given I have a JRect 1,1,5,1 to fill
         When I call FillArea for a hallway west
         Then The JRect 1,1,5,1 is now filled with 0
-        Then The JRect 0,0,6,2 is now lit
+        Then The JRect 0,0,6,2 is not lit
         And The rect is in world
 
     Scenario: I can create E hallway
@@ -135,7 +142,7 @@ Feature: Dungeon Creation
         Given I have a JRect 1,1,5,1 to fill
         When I call FillArea for a hallway east
         Then The JRect 1,1,5,1 is now filled with 0
-        Then The JRect 0,0,6,2 is now lit
+        Then The JRect 0,0,6,2 is not lit
         And The rect is in world
 
     Scenario: I can create rooms and hallways using steps

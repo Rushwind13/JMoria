@@ -117,6 +117,16 @@ bool CItem::Update( float fCurTime )
     {
         m_fColorChangeInterval += fCurTime;
     }
+
+    if( !g_pGame->GetPlayer()->m_bIsDisturbed )
+    {
+        JIVector vItem( VEC_EXPAND( m_vPos ) );
+        JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+        if( Util::Nearby( vItem, 1 ).Contains( vPlayer ) )
+        {
+            g_pGame->GetDungeon()->DisturbPlayer();
+        }
+    }
     return true;
 }
 
@@ -154,9 +164,9 @@ int CItem::EquipType()
 }
 void CItem::Draw()
 {
-    // Don't draw if something else is there, or if it's out of sight.
+    // Don't draw if something else is there.
     if( g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster != NULL ||
-        g_pGame->GetPlayer()->m_vPos == m_vPos || !g_pGame->GetDungeon()->WithinSight( m_vPos ) )
+        g_pGame->GetPlayer()->m_vPos == m_vPos )
     {
         return;
     }

@@ -184,9 +184,12 @@ bool CEndGameState::InitScores()
 {
     // call FileParse::Append to add new score (to end of file)
     CDataFile dfScores;
-    dfScores.Append( "Resources/Scores.txt" );
-    dfScores.WriteScore( m_pScore );
-    dfScores.Close();
+    if( m_pScore->m_dwScore > 0 )
+    {
+        dfScores.Append( "Resources/Scores.txt" );
+        dfScores.WriteScore( m_pScore );
+        dfScores.Close();
+    }
 
     // Score entry should have:
     // Player name

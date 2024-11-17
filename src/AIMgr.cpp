@@ -73,6 +73,14 @@ bool CAIBrain::Update( float fCurTime )
         break;
     }
 
+    if( !g_pGame->GetPlayer()->m_bIsDisturbed )
+    {
+        if( g_pGame->GetDungeon()->CanSeePlayer( m_vPos ) )
+        {
+            g_pGame->GetDungeon()->DisturbPlayer();
+        }
+    }
+
     return false;
 }
 

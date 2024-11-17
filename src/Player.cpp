@@ -58,11 +58,42 @@ bool CPlayer::Update( float fCurTime )
         }
         m_fLastLightTime = (float)g_pGame->GetTime();
     }
-    m_bIsDisturbed = false;
+    CheckDisturbance();
     DisplayStats();
     DisplayInventory( PLACEMENT_INV );
     DisplayEquipment( PLACEMENT_EQUIP );
     return true;
+}
+
+void CPlayer::CheckDisturbance()
+{
+    JIVector vPlayer( VEC_EXPAND( m_vPos ) );
+    JRect rcCheck = Util::Nearby( vPlayer, 1 );
+
+    JIVector vCheck;
+    CDungeonTile *pTile;
+    for( vCheck.y = rcCheck.top; vCheck.y <= rcCheck.bottom; vCheck.y++ )
+    {
+        for( vCheck.x = rcCheck.left; vCheck.x <= rcCheck.right; vCheck.x++ )
+        {
+            pTile = g_pGame->GetDungeon()->GetITile( vCheck );
+            // check for interesting dungeon types
+            switch( pTile->m_dtd->m_dwType )
+            {
+            case DUNG_IDX_DOOR:
+            case DUNG_IDX_OPEN_DOOR:
+            case DUNG_IDX_DOWNSTAIRS:
+            case DUNG_IDX_LONG_DOWNSTAIRS:
+            case DUNG_IDX_UPSTAIRS:
+            case DUNG_IDX_LONG_UPSTAIRS:
+            case DUNG_IDX_RUBBLE:
+                m_bIsDisturbed = true;
+                return;
+            }
+            // items and monsters already tag themselves as disturbing
+            // TODO: traps, altars, water,...
+        }
+    }
 }
 
 void CPlayer::Draw()
@@ -459,6 +490,8 @@ int CPlayer::TakeDamage( float fDamage, char *szMon )
         m_fCurHitPoints -= fDamage;
         m_bIsDisturbed = true;
         retval = STATUS_ALIVE;
+
+        JLog( LOG_LEVEL_INFO, true, "Remaining HP: %.2f \n", m_fCurHitPoints );
     }
     else
     {
@@ -469,13 +502,10 @@ int CPlayer::TakeDamage( float fDamage, char *szMon )
         strcpy( m_szKilledBy, szMon );
         // This is the end of the game; make the game end on next update.
         JLog( LOG_LEVEL_INFO, true,
-              "%s died on dungeon level %d, while level %d, killed by a %s.\n", m_szName,
+              "\n\n%s died on dungeon level %d, while level %d, killed by a %s.\n\n", m_szName,
               g_pGame->GetDungeon()->depth, (int)m_fLevel, m_szKilledBy );
         g_pGame->SetState( STATE_ENDGAME );
     }
-
-    JLog( LOG_LEVEL_INFO, true, "Remaining HP: %.2f \n", m_fCurHitPoints );
-
     return retval;
 }
 

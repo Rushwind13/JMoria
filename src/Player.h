@@ -139,6 +139,7 @@ public:
     CRace *GetRace() { return m_pRace; }
     float GetExperience() { return m_fExperience; }
     bool Update( float fCurTime );
+    void CheckDisturbance();
     void PreDraw();
     void Draw();
     void PostDraw();

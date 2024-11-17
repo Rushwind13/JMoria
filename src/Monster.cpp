@@ -134,7 +134,10 @@ JIVector CMonster::GetSpawnPoint( JIVector vRequestedSpawnPoint )
         JLog( LOG_LEVEL_INFO, false, "." );
 
         JVector vTryIt( VEC_EXPAND( vTryPos ) );
-        if( g_pGame->GetDungeon()->IsWalkableFor( vTryIt ) == DUNG_COLL_NO_COLLISION )
+        // target spawn point must be walkable and also within sight of the parent (no spawning past
+        // walls or doors!)
+        if( g_pGame->GetDungeon()->IsWalkableFor( vTryIt ) == DUNG_COLL_NO_COLLISION &&
+            ( !bNear || g_pGame->GetDungeon()->CanSeeEachOther( vRequestedSpawnPoint, vTryPos ) ) )
         {
             return vTryPos;
         }
@@ -321,14 +324,6 @@ void CMonster::SetColor()
 unsigned char MonIDs[MON_IDX_MAX + 1] = "abcddefghhikllmnoprsuwxyzABCDFFFGGHIJKLOPRSTUVWWXY&.,$t";
 void CMonster::Draw()
 {
-    // Don't draw if out of sight.
-    if( !g_pGame->GetDungeon()->WithinSight( GetPos() ) )
-    {
-        return;
-    }
-
-    g_pGame->GetDungeon()->DisturbPlayer();
-
     Uint8 monster_tile = MonIDs[m_md->m_dwIndex] - ' ' - 1;
     JVector DUNG_ASPECT;
 

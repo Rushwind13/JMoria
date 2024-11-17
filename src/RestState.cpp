@@ -68,6 +68,8 @@ int CRestState::OnHandleInit( SDL_Keysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing REST state...\n" );
 
+    g_pGame->GetPlayer()->m_bIsDisturbed = false;
+
     DoTick();
     m_eCurModifier = REST_TICK;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -102,6 +104,7 @@ bool CRestState::DoTick()
     if( g_pGame->GetPlayer()->m_bIsRested || g_pGame->GetPlayer()->m_bIsDisturbed )
     {
         JLog( LOG_LEVEL_DEBUG, true, "REST state complete, reset to CMD state.\n" );
+        g_pGame->GetDungeon()->DisturbPlayer();
         ResetToState( STATE_COMMAND );
     }
     g_pGame->SetReadyForUpdate( true );

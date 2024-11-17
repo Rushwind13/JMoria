@@ -497,8 +497,9 @@ JResult CDungeon::UpdateSeen()
         {
             GetITile( vTile )->SetFlags( DUNG_FLAG_SEEN );
             pRoom = m_dmCurLevel->InRoom( vTile );
-            if( pRoom != NULL && pRoom->HasFlags( DUNG_FLAG_LIT ) &&
-                !pRoom->HasFlags( DUNG_FLAG_SEEN ) )
+            if( pRoom != NULL &&
+                ( g_pGame->GetPlayer()->IsWizard() ||
+                  ( pRoom->HasFlags( DUNG_FLAG_LIT ) && !pRoom->HasFlags( DUNG_FLAG_SEEN ) ) ) )
             {
                 LightRoom( pRoom );
             }
@@ -522,21 +523,17 @@ void CDungeon::LightRoom( CRoom *pRoom )
     pRoom->SetFlags( DUNG_FLAG_SEEN );
 }
 
-bool CDungeon::WithinSight( JVector vCheck )
+bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget )
 {
-    // Check for sight distance first
-    JIVector vPos( VEC_EXPAND( vCheck ) );
-    JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
-
     // can see things in the same room, if the room is LIT
-    CRoom *prCheck = m_dmCurLevel->InRoom( vPos );
-    CRoom *prPlayer = m_dmCurLevel->InRoom( vPlayer );
-    if( prCheck && prCheck->HasFlags( DUNG_FLAG_SEEN ) && prCheck == prPlayer )
+    CRoom *prTarget = m_dmCurLevel->InRoom( vTarget );
+    CRoom *prSource = m_dmCurLevel->InRoom( vSource );
+    if( prTarget && prTarget->HasFlags( DUNG_FLAG_SEEN ) && prTarget == prSource )
         return true;
 
-    JRect rcVisible = Util::Nearby( vPlayer, PLAYER_SIGHT_DISTANCE );
+    JRect rcVisible = Util::Nearby( vSource, PLAYER_SIGHT_DISTANCE );
 
-    if( !rcVisible.Contains( vPos ) )
+    if( !rcVisible.Contains( vTarget ) )
         return false;
 
     // Check along the line between the player and the position
@@ -544,17 +541,19 @@ bool CDungeon::WithinSight( JVector vCheck )
     // Bresenham Line Algorithm
     // TODO: move this somewhere to be used for ranged and magic targeting
     JLinkList<JIVector> *pLine = new JLinkList<JIVector>;
-    JIVector vDelta( abs( vPos.x - vPlayer.x ), abs( vPos.y - vPlayer.y ) );
-    JIVector vStep( vPos.x < vPlayer.x ? 1 : -1, vPos.y < vPlayer.y ? 1 : -1 );
+    JIVector vDelta( abs( vTarget.x - vSource.x ), abs( vTarget.y - vSource.y ) );
+    JIVector vStep( vSource.x < vTarget.x ? 1 : -1, vSource.y < vTarget.y ? 1 : -1 );
     int error = vDelta.x - vDelta.y;
     int errorx2;
 
-    while( vPos.x != vPlayer.x || vPos.y != vPlayer.y )
+    JVector vTest;
+    JIVector vCurrent = vSource;
+    while( vCurrent.x != vTarget.x || vCurrent.y != vTarget.y )
     {
-        JVector vCurrent( VEC_EXPAND( vPos ) );
-        if( vCurrent != vCheck )
+        if( vCurrent != vSource )
         {
-            int collide_type = g_pGame->GetDungeon()->IsWalkableFor( vCurrent );
+            vTest.Init( VEC_EXPAND( vTarget ) );
+            int collide_type = g_pGame->GetDungeon()->IsWalkableFor( vTest );
             if( collide_type != DUNG_COLL_NO_COLLISION )
             {
                 return false;
@@ -564,15 +563,27 @@ bool CDungeon::WithinSight( JVector vCheck )
         if( errorx2 > -vDelta.y )
         {
             error -= vDelta.y;
-            vPos.x += vStep.x;
+            vCurrent.x += vStep.x;
         }
         if( errorx2 < vDelta.x )
         {
             error += vDelta.x;
-            vPos.y += vStep.y;
+            vCurrent.y += vStep.y;
         }
     }
     return true;
+}
+
+bool CDungeon::CanSeePlayer( JVector vCheck )
+{
+    if( g_pGame->GetPlayer()->IsWizard() )
+        return true;
+
+    // Check for sight distance first
+    JIVector viCheck( VEC_EXPAND( vCheck ) );
+    JIVector viPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+
+    return CanSeeEachOther( viCheck, viPlayer );
 }
 
 bool CDungeon::IsOnScreen( JVector vPos )
@@ -651,8 +662,10 @@ void CDungeon::DrawDungeon()
             // this tile doesn't exist, or it's not been seen
             // or something else is standing there
             if( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_SEEN ) == 0 ) ||
+                ( g_pGame->GetPlayer()->IsWizard() &&
+                  ( curTile->m_dwFlags & ( DUNG_FLAG_SEEN | DUNG_FLAG_LIT ) ) == 0 ) ||
                 vScreen == vPlayer ||
-                ( WithinSight( vScreen ) &&
+                ( CanSeePlayer( vScreen ) &&
                   ( curTile->m_pCurItem != NULL || curTile->m_pCurMonster != NULL ) ) )
             {
                 continue;
@@ -674,7 +687,7 @@ void CDungeon::DrawItems()
     while( pLink != NULL )
     {
         pItem = pLink->m_lpData;
-        if( pItem && IsOnScreen( pItem->m_vPos ) )
+        if( pItem && IsOnScreen( pItem->m_vPos ) && CanSeePlayer( pItem->m_vPos ) )
         {
             pItem->Draw();
         }
@@ -690,7 +703,7 @@ void CDungeon::DrawMonsters()
     while( pLink != NULL )
     {
         pMon = pLink->m_lpData;
-        if( pMon && IsOnScreen( pMon->GetPos() ) )
+        if( pMon && IsOnScreen( pMon->GetPos() ) && CanSeePlayer( pMon->GetPos() ) )
         {
             pMon->Draw();
         }

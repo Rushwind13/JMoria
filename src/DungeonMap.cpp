@@ -202,21 +202,22 @@ bool CDungeonMap::IsDoor( int type )
     }
 }
 
-JResult CDungeonMap::LightArea( JRect rcLight )
+JResult CDungeonMap::LightArea( CRoom *pRoom )
 {
-    if( !Util::IsInWorld( rcLight ) )
+    if( !Util::IsInWorld( pRoom->GetEdges() ) )
     {
         return JBOGUSKEY;
     }
 
-    JIVector vCurPos( rcLight.left, rcLight.top );
-    for( vCurPos.y = rcLight.top; vCurPos.y <= rcLight.bottom; vCurPos.y++ )
+    JIVector vCurPos;
+    for( vCurPos.y = pRoom->GetEdges().top; vCurPos.y <= pRoom->GetEdges().bottom; vCurPos.y++ )
     {
-        for( vCurPos.x = rcLight.left; vCurPos.x <= rcLight.right; vCurPos.x++ )
+        for( vCurPos.x = pRoom->GetEdges().left; vCurPos.x <= pRoom->GetEdges().right; vCurPos.x++ )
         {
             GetTile( vCurPos )->SetFlags( DUNG_FLAG_LIT );
         }
     }
+    pRoom->SetFlags( DUNG_FLAG_LIT );
     return JSUCCESS;
 }
 
@@ -262,8 +263,7 @@ void CDungeonMap::FillArea( const Uint8 type, CRoom *pRoom )
     {
         if( Util::GetRandom( 1, 100 ) < LitChance() )
         {
-            LightArea( pRoom->GetEdges() );
-            pRoom->SetFlags( DUNG_FLAG_LIT );
+            LightArea( pRoom );
         }
         else
         {

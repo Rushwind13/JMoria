@@ -242,7 +242,7 @@ protected:
     bool CheckBorder( const JRect rcCheck, int direction );
 
     int LitChance();
-    JResult LightArea( JRect rcLight );
+    JResult LightArea( CRoom *pRoom );
     JResult FillDungeonArea( Uint8 type, JRect rcFill, bool bBoundsCheck = true );
     void FillArea( const Uint8 type, CRoom *pRoom );
     void FillArea( const CDungeonCreationStep *pStep );

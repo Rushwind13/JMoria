@@ -23,8 +23,9 @@ GIVEN( "^There is already a room at ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) 
     REGEX_PARAM( float, b );
     JRect rcBlocking( l, t, r, b );
     ScenarioScope<TestCtx> context;
-    CRoom *pBlocking = new CRoom( rcBlocking );
-    context->map.FillArea( DUNG_IDX_FLOOR, pBlocking );
+    context->pRoom = new CRoom( rcBlocking );
+    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
+    context->map.LightArea( context->pRoom );
 }
 
 GIVEN( "^I have a JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) to fill$" )
@@ -72,77 +73,54 @@ WHEN( "^I create a S hallway create step$" )
     JLog( LOG_LEVEL_ERROR, false, "S origin: <%d %d>\n", VEC_EXPAND( context->vec_i ) );
 }
 
-WHEN( "^I call GetHallRect for east from ([0-9.-]+),([0-9.-]+)$" )
+WHEN( "^I call GetHallRect for (east|west|north|south) from ([0-9.-]+),([0-9.-]+)$" )
 {
+    REGEX_PARAM( std::string, direction );
+    int dir = ( direction == "east" )    ? DIR_EAST
+              : ( direction == "west" )  ? DIR_WEST
+              : ( direction == "north" ) ? DIR_NORTH
+              : ( direction == "south" ) ? DIR_SOUTH
+                                         : DIR_NONE;
     REGEX_PARAM( int, x );
     REGEX_PARAM( int, y );
     JRect rcHall( x, y, x, y );
     ScenarioScope<TestCtx> context;
-    context->map.GetHallRect( rcHall, DIR_EAST );
+    context->map.GetHallRect( rcHall, dir );
 }
-WHEN( "^I call GetHallRect for west from ([0-9.-]+),([0-9.-]+)$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
-}
-WHEN( "^I call GetHallRect for north from ([0-9.-]+),([0-9.-]+)$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
-}
-WHEN( "^I call GetHallRect for south from ([0-9.-]+),([0-9.-]+)$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
-}
+
 WHEN( "^I call FillArea for a room$" )
 {
     ScenarioScope<TestCtx> context;
     context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
 }
-WHEN( "^I call FillArea for a room N$" )
+WHEN( "^I call FillArea for a room (N|S|E|W)$" )
 {
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
-}
-WHEN( "^I call FillArea for a room S$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
-}
-WHEN( "^I call FillArea for a room E$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
-}
-WHEN( "^I call FillArea for a room W$" )
-{
+    REGEX_PARAM( std::string, direction );
+    int dir = ( direction == "E" )   ? DIR_EAST
+              : ( direction == "W" ) ? DIR_WEST
+              : ( direction == "N" ) ? DIR_NORTH
+              : ( direction == "S" ) ? DIR_SOUTH
+                                     : DIR_NONE;
     ScenarioScope<TestCtx> context;
     context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
 }
 
-WHEN( "^I call FillArea for a hallway north$" )
+WHEN( "^I call FillArea for a hallway (east|west|north|south)$" )
 {
+    REGEX_PARAM( std::string, direction );
+    int dir = ( direction == "east" )    ? DIR_EAST
+              : ( direction == "west" )  ? DIR_WEST
+              : ( direction == "north" ) ? DIR_NORTH
+              : ( direction == "south" ) ? DIR_SOUTH
+                                         : DIR_NONE;
     ScenarioScope<TestCtx> context;
     context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
 }
 
-WHEN( "^I call FillArea for a hallway south$" )
+WHEN( "^I call LightArea for the room$" )
 {
     ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
-}
-
-WHEN( "^I call FillArea for a hallway west$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
-}
-
-WHEN( "^I call FillArea for a hallway east$" )
-{
-    ScenarioScope<TestCtx> context;
-    context->map.FillArea( DUNG_IDX_FLOOR, context->pRoom );
+    context->map.LightArea( context->pRoom );
 }
 
 /*#######
@@ -187,12 +165,13 @@ THEN( "^The JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) is now filled with
     }
 }
 
-THEN( "^The JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) is now lit$" )
+THEN( "^The JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) is (now|not) lit$" )
 {
     REGEX_PARAM( float, l );
     REGEX_PARAM( float, t );
     REGEX_PARAM( float, r );
     REGEX_PARAM( float, b );
+    REGEX_PARAM( std::string, desired );
     ScenarioScope<TestCtx> context;
 
     int x, y;
@@ -201,10 +180,11 @@ THEN( "^The JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) is now lit$" )
         for( x = l; x <= r; x++ )
         {
             JIVector vCheck( x, y );
-            int expected = context->map.GetFlags( vCheck );
-            JLog( LOG_LEVEL_NOISE, true, "<%d %d>: %d/%d ", VEC_EXPAND( vCheck ), expected,
+            int actual = context->map.GetFlags( vCheck );
+            JLog( LOG_LEVEL_NOISE, true, "<%d %d>: %d/%d ", VEC_EXPAND( vCheck ), actual,
                   DUNG_FLAG_LIT );
-            EXPECT_EQ( expected & DUNG_FLAG_LIT, DUNG_FLAG_LIT );
+            int expected = ( desired == "not" ) ? 0 : DUNG_FLAG_LIT;
+            EXPECT_EQ( actual & DUNG_FLAG_LIT, expected );
         }
         JLog( LOG_LEVEL_NOISE, true, "\n" );
     }

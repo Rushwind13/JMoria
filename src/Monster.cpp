@@ -324,14 +324,6 @@ void CMonster::SetColor()
 unsigned char MonIDs[MON_IDX_MAX + 1] = "abcddefghhikllmnoprsuwxyzABCDFFFGGHIJKLOPRSTUVWWXY&.,$t";
 void CMonster::Draw()
 {
-    // Don't draw if out of sight.
-    if( !g_pGame->GetDungeon()->WithinSight( GetPos() ) )
-    {
-        return;
-    }
-
-    g_pGame->GetDungeon()->DisturbPlayer();
-
     Uint8 monster_tile = MonIDs[m_md->m_dwIndex] - ' ' - 1;
     JVector DUNG_ASPECT;
 

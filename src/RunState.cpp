@@ -68,6 +68,7 @@ int CRunState::OnHandleInit( SDL_Keysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing RUN state...\n" );
 
+    g_pGame->GetPlayer()->m_bIsDisturbed = false;
     DoTick();
     m_eCurModifier = RUN_TICK;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -92,22 +93,17 @@ bool CRunState::DoTick()
 {
     m_dwClock++;
 
-    if( g_pGame->GetPlayer()->Move( g_pGame->GetPlayer()->m_vVel ) == DUNG_COLL_NO_COLLISION )
-    {
-        JLog( LOG_LEVEL_NOISE, true, "RUN state continuing.\n" );
-    }
-    else
+    if( g_pGame->GetPlayer()->m_bIsDisturbed ||
+        g_pGame->GetPlayer()->Move( g_pGame->GetPlayer()->m_vVel ) != DUNG_COLL_NO_COLLISION )
     {
         JLog( LOG_LEVEL_DEBUG, true, "RUN state collided, reset to CMD state.\n" );
-        g_pGame->GetPlayer()->m_bIsDisturbed = true;
+        g_pGame->GetDungeon()->DisturbPlayer();
         g_pGame->GetPlayer()->m_vVel.Init( 0, 0 );
         ResetToState( STATE_COMMAND );
     }
-
-    if( g_pGame->GetPlayer()->m_bIsDisturbed )
+    else
     {
-        JLog( LOG_LEVEL_DEBUG, true, "RUN state complete, reset to CMD state.\n" );
-        ResetToState( STATE_COMMAND );
+        JLog( LOG_LEVEL_NOISE, true, "RUN state continuing.\n" );
     }
 
     g_pGame->SetReadyForUpdate( true );

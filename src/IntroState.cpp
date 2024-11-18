@@ -7,6 +7,7 @@
 //
 
 #include "IntroState.h"
+#include "Constants.h"
 
 #include "DisplayText.h"
 #include "DungeonTile.h"
@@ -25,24 +26,26 @@ CIntroState::CIntroState() : m_szSplash( NULL ), m_cCommand( 0 )
     m_eCurModifier = INTRO_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
     char splash[] = "\n\n\n\n\n"
-                    "             (**********)    \n"
-                    "            (            )   \n"
-                    "           (              )  \n"
-                    "          (                ) \n"
-                    "         [                  ]\n"
-                    "         [                  ]\n"
-                    "         [                  ]\n"
-                    "         [                  ]\n"
-                    "         [                  ]\n"
-                    "         [                  ]\n"
-                    "         [                  ]\n"
-                    "         [                  ]\n"
-                    "         [                  ]\n"
-                    "         [                  ]\n"
-                    "         [                  ]\n"
-                    "         [                  ]\n"
-                    "         [__________________]\n"
-                    "         [__________________]\n";
+                    "             .-----------------.     \n"
+                    "            (    Ennyn Durin    )    \n"
+                    "           (      Aran Moria     )   \n"
+                    "          (   ._______________.   )  \n"
+                    "         [    )       *       (    ] \n"
+                    "         [    ]    * wWw  *   [    ] \n"
+                    "         /\\   /|  *        * |\\   /\\ \n"
+                    "        //\\ \\//  * WELCOME  * \\\\/ /\\\\ \n"
+                    "       |/[ \\  \\ /|   to    |\\ /  / ]\\| \n"
+                    "        \\[  \\  \\|| JMoria  ||/  /  ]/\n"
+                    "         [    \\ \\/ /|   /| \\/ /    ] \n"
+                    "         [    ]\\ \\/ /   \\ \\/ /[    ] \n"
+                    "         [    ]|   /  |  \\   |[    ] \n"
+                    "         [    ]|  | - * - |  |[    ] \n"
+                    "         [    ]|  |   |   |  |[    ] \n"
+                    "         [    ]|  | v%s |  |[    ] \n"
+                    "        /______\\__\\\\_____//__/______\\ \n"
+                    "       [________]__\\\\___//__[________]\n"
+                    "       [________]__|/___\\|__[________] \n"
+                    "       [copy%s %s]\n";
     m_szSplash = new char[Util::jstrlen( splash ) + 1];
     memset( m_szSplash, 0, Util::jstrlen( splash ) + 1 );
     Util::jstrcpy( m_szSplash, splash );
@@ -164,12 +167,14 @@ void CIntroState::ResetToState( int newstate )
 //// Splash commands
 bool CIntroState::DoSplash()
 {
-    g_pGame->GetEnd()->Printf( m_szSplash );
+    g_pGame->GetEnd()->Printf( m_szSplash, VERSION, COPYRIGHT, AUTHOR );
     return true;
 }
 //// Create commands
 bool CIntroState::DoCharacterCreation()
 {
-    g_pGame->GetEnd()->Printf( "Character Creation Screen goes here...\n" );
+    g_pGame->GetEnd()->Printf(
+        "Character Creation Screen goes here...\n\n\nYou are the eldest son of a human merchant. "
+        "You have dark hair and a charming smile.\n\nForward to Battle! Onward for Glory!\n" );
     return true;
 }

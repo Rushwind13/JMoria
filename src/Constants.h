@@ -10,6 +10,8 @@
 #include "Util.h"
 
 #define VERSION "0.20"
+#define COPYRIGHT "2002-2024"
+#define AUTHOR "Jimbo S. Harris"
 
 // all the states which the game can run in
 // this modifies the event handling

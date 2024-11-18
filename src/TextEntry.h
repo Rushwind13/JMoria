@@ -19,8 +19,8 @@ public:
 
     void Init( const char *szIn, int dwIn )
     {
-        m_szString = new char[strlen( szIn ) + 1];
-        strcpy( m_szString, szIn );
+        m_szString = new char[Util::jstrlen( szIn ) + 1];
+        Util::jstrcpy( m_szString, szIn );
         m_dwValue = dwIn;
     };
 

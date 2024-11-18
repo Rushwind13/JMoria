@@ -3,7 +3,6 @@
 #include "JColor.h"
 #include "JLinkList.h"
 #include "TextEntry.h"
-#include <stdio.h>
 
 class CMonsterDef;
 class CItemDef;

@@ -8,7 +8,9 @@
 #endif // __WIN32__
 #include <stdio.h>
 #include <string.h>
+#ifndef TURN_BASED
 #include <sys/time.h>
+#endif
 
 #include "JMDefs.h"
 #include "Util.h"
@@ -82,9 +84,9 @@ float Roll( const char *szFormat )
     int dice;
     int sides;
     char *c;
-    szToken = new char[strlen( szFormat ) + 1];
+    szToken = new char[Util::jstrlen( szFormat ) + 1];
 
-    strcpy( szToken, szFormat );
+    Util::jstrcpy( szToken, szFormat );
 
     c = strtok( szToken, "d" );
     if( c == NULL )
@@ -196,6 +198,7 @@ bool WithinRadius( const JIVector vOrigin, const JIVector vTarget, const uint8 d
     return vDelta.x + vDelta.y <= dsquared;
 }
 
+#ifndef TURN_BASED
 unsigned int GetTickCount()
 {
     struct timeval tv;
@@ -203,6 +206,97 @@ unsigned int GetTickCount()
         return 0;
 
     return (unsigned int)( ( tv.tv_sec * 1000 ) + ( tv.tv_usec / 1000 ) );
+}
+#endif
+
+uint32 jlog2( uint32 dwBitmask )
+{
+    int exp = 0;
+    while( dwBitmask >> 1 )
+        exp++;
+    return exp;
+}
+
+void jstrcat( char *dest, const char *src )
+{
+    int i, j;
+
+    char *d = dest;
+    const char *s = src;
+
+    // Find the end of the destination string
+    while( *d != NULL )
+        d++;
+
+    // Copy the source string to the end of the destination string
+    while( *s != NULL )
+    {
+        *d = *s;
+        d++;
+        s++;
+    }
+
+    // Null-terminate the concatenated string
+    *d = NULL;
+}
+
+void jstrcpy( char *dest, const char *src )
+{
+    const char *p = src;
+    while( *p != NULL )
+    {
+        *dest = *p;
+        dest++;
+        p++;
+    }
+    *dest = NULL; // Null-terminate the destination string
+}
+
+int jstrlen( const char *s1 )
+{
+    const char *p1 = s1;
+    int count = 0;
+    while( *p1 != NULL )
+    {
+        count++;
+        p1++;
+    }
+    return count;
+}
+
+int jstrcmp( const char *s1, const char *s2 )
+{
+    const char *p1 = s1;
+    const char *p2 = s2;
+    while( *p1 != NULL && *p2 != NULL )
+    {
+        if( *p1 != *p2 )
+        {
+            return *p1 - *p2;
+        }
+        p1++;
+        p2++;
+    }
+    return *p1 - *p2;
+}
+
+int jstrncmp( const char *s1, const char *s2, const uint32 count )
+{
+    int i = 0;
+    const char *p1 = s1;
+    const char *p2 = s2;
+    while( i < count )
+    {
+        if( *p1 == NULL || *p2 == NULL || *p1 != *p2 )
+        {
+            return *p1 - *p2;
+        }
+
+        i++;
+        p1++;
+        p2++;
+    }
+    return 0;
 }
 
 } // namespace Util

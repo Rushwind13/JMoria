@@ -1,5 +1,9 @@
 #ifndef __TEST_CONTEXT__
 #define __TEST_CONTEXT__
+#include <gtest/gtest.h>
+
+#include <cucumber-cpp/autodetect.hpp>
+
 #include <JMDefs.h>
 
 #include "FileParse.h"

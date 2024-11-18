@@ -261,7 +261,7 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
     pItem->m_pllLink = m_llEquipment->Add( pItem, pItem->EquipType() );
     m_fArmorClass += pItem->m_id->m_fBaseAC + pItem->m_id->m_fACBonus;
     if( pItem->m_id->m_szBaseDamage != NULL )
-        strcpy( m_szDamage, pItem->m_id->m_szBaseDamage );
+        Util::jstrcpy( m_szDamage, pItem->m_id->m_szBaseDamage );
     m_fDamageModifier += pItem->m_id->m_fBonusToDamage;
     m_fToHitModifier += pItem->m_id->m_fBonusToHit;
 
@@ -298,7 +298,7 @@ bool CPlayer::RemoveEquipment( CLink<CItem> *pLink )
     pItem->m_pllLink = m_llInventory->Add( pItem, pItem->m_id->m_dwIndex );
     m_fArmorClass -= pItem->m_id->m_fBaseAC + pItem->m_id->m_fACBonus;
     if( pItem->m_id->m_szBaseDamage != NULL )
-        strcpy( m_szDamage, PLAYER_BASE_DAMAGE );
+        Util::jstrcpy( m_szDamage, PLAYER_BASE_DAMAGE );
     m_fDamageModifier -= pItem->m_id->m_fBonusToDamage;
     m_fToHitModifier -= pItem->m_id->m_fBonusToHit;
 
@@ -509,9 +509,9 @@ int CPlayer::TakeDamage( float fDamage, char *szMon )
     {
         m_fCurHitPoints = 0;
         retval = STATUS_DEAD;
-        m_szKilledBy = new char[strlen( szMon ) + 1];
-        memset( m_szKilledBy, 0, strlen( szMon ) + 1 );
-        strcpy( m_szKilledBy, szMon );
+        m_szKilledBy = new char[Util::jstrlen( szMon ) + 1];
+        memset( m_szKilledBy, 0, Util::jstrlen( szMon ) + 1 );
+        Util::jstrcpy( m_szKilledBy, szMon );
         // This is the end of the game; make the game end on next update.
         JLog( LOG_LEVEL_INFO, true,
               "\n\n%s died on dungeon level %d, while level %d, killed by a %s.\n\n", m_szName,
@@ -544,17 +544,23 @@ JResult CPlayer::Quaff( CLink<CItem> *pLink )
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect );
-    m_llInventory->Remove( pItem->m_pllLink, true ); // Potions are single-use
+    m_llInventory->Remove( pItem->m_pllLink, false ); // Potions are single-use
     return retval;
 }
 
 JResult CPlayer::Read( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
+    if( !pItem )
+        JLog( LOG_LEVEL_ERROR, true, "no item found\n" );
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
+    if( !plEffect )
+        JLog( LOG_LEVEL_ERROR, true, "no effects on this item\n" );
+    // JLog( LOG_LEVEL_ERROR, true, "Reading %s\n", plEffect->m_dwIndex );
     JResult retval = DoEffects( plEffect );
-    m_llInventory->Remove( pItem->m_pllLink, true ); // Potions are single-use
+    // m_llInventory->Remove( pItem->m_pllLink, false ); // Scrolls are single-use
     return retval;
+    // return JBOGUSKEY;
 }
 
 JResult CPlayer::Magic( CLink<CItem> *pLink )
@@ -570,6 +576,12 @@ JResult CPlayer::Magic( CLink<CItem> *pLink )
 
 JResult CPlayer::DoEffects( CLink<CEffect> *plEffect )
 {
+    printf( "doing effects\n" );
+    if( plEffect == NULL )
+    {
+        JLog( LOG_LEVEL_WARN, true, "No effects\n" );
+        return JBOGUSKEY;
+    }
     CEffect *pEffect;
     while( plEffect != NULL )
     {
@@ -590,6 +602,8 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect )
             DoCreateEffects( pEffect );
             break;
         case EFFECT_TYPE_DESTROY:
+            JLog( LOG_LEVEL_ERROR, true, "Destroying\n" );
+
             DoDestroyEffects( pEffect );
             break;
         case EFFECT_TYPE_INTRINSIC:
@@ -610,6 +624,8 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect )
         }
         plEffect = plEffect->next;
     }
+
+    printf( "did effects\n" );
     return JSUCCESS;
 }
 
@@ -715,6 +731,8 @@ JResult CPlayer::DoDestroyEffects( CEffect *pEffect )
     switch( pEffect->m_dwFlags )
     {
     case ITEM_FLAG_CURSED:
+        JLog( LOG_LEVEL_ERROR, true, "Uncursing\n" );
+
         return DoRemoveCurse();
         break;
     }
@@ -728,7 +746,7 @@ JResult CPlayer::DoRemoveCurse()
     {
         if( pLink->m_lpData->m_dwFlags & ITEM_FLAG_CURSED )
         {
-            JLog( LOG_LEVEL_DEBUG, true, "Item is cursed %s\n", pLink->m_lpData->GetName() );
+            JLog( LOG_LEVEL_ERROR, true, "Item is cursed %s\n", pLink->m_lpData->GetName() );
             pLink->m_lpData->m_dwFlags &= ~ITEM_FLAG_CURSED;
             break;
         }
@@ -812,12 +830,12 @@ bool CPlayer::IsReadable( CLink<CItem> *pLink )
 
 bool CPlayer::SetName( const char *szName )
 {
-    if( strlen( szName ) > MAX_STRING_LENGTH - 1 )
+    if( Util::jstrlen( szName ) > MAX_STRING_LENGTH - 1 )
     {
         return false;
     }
 
-    strcpy( m_szName, szName );
+    Util::jstrcpy( m_szName, szName );
 
     return true;
 }

@@ -36,7 +36,7 @@ public:
         sprintf( m_szHD, CLASS_HD_WARRIOR );
 
         memset( m_szName, 0, MAX_STRING_LENGTH );
-        strcpy( m_szName, "Warrior" );
+        Util::jstrcpy( m_szName, "Warrior" );
     };
     ~CClass()
     {
@@ -66,7 +66,7 @@ public:
     {
         m_szName = new char[MAX_STRING_LENGTH];
         memset( m_szName, 0, MAX_STRING_LENGTH );
-        strcpy( m_szName, "Human" );
+        Util::jstrcpy( m_szName, "Human" );
     }
 
 public:
@@ -97,7 +97,7 @@ public:
           m_pClass( NULL )
     {
         memset( m_szName, 0, MAX_STRING_LENGTH );
-        strcpy( m_szName, "Anonymous" );
+        Util::jstrcpy( m_szName, "Anonymous" );
         m_pClass = new CClass;
         m_pRace = new CRace;
         m_llInventory = new JLinkList<CItem>;

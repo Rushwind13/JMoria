@@ -31,9 +31,9 @@ CEndGameState::CEndGameState() : m_cCommand( 0 ), m_szTombstone( NULL )
         "         | \n          |                 | \n          |died on level %3d| \n          |  "
         "               | \n          |   killed by a   | \n          |                 | \n       "
         "   |%*s%*s| \n          |                 | \n          |_________________| \n";
-    m_szTombstone = new char[strlen( tombstone ) + 1];
-    memset( m_szTombstone, 0, strlen( tombstone ) + 1 );
-    strcpy( m_szTombstone, tombstone );
+    m_szTombstone = new char[Util::jstrlen( tombstone ) + 1];
+    memset( m_szTombstone, 0, Util::jstrlen( tombstone ) + 1 );
+    Util::jstrcpy( m_szTombstone, tombstone );
 
     m_pScore = new CScore;
 }
@@ -162,20 +162,20 @@ void CEndGameState::ResetToState( int newstate )
 //// Tomb commands
 bool CEndGameState::DoTomb()
 {
-    int dwNamePadding = ( 17 - strlen( m_pScore->m_szName ) ) / 2;
+    int dwNamePadding = ( 17 - Util::jstrlen( m_pScore->m_szName ) ) / 2;
     int dwNameExtraPad = 0;
-    if( strlen( m_pScore->m_szName ) % 2 == 0 )
+    if( Util::jstrlen( m_pScore->m_szName ) % 2 == 0 )
         dwNameExtraPad = 1;
 
-    int dwKillerPadding = ( 17 - strlen( m_pScore->m_szKilledBy ) ) / 2;
+    int dwKillerPadding = ( 17 - Util::jstrlen( m_pScore->m_szKilledBy ) ) / 2;
     int dwKillerExtraPad = 0;
-    if( strlen( m_pScore->m_szKilledBy ) % 2 == 0 )
+    if( Util::jstrlen( m_pScore->m_szKilledBy ) % 2 == 0 )
         dwKillerExtraPad = 1;
 
-    g_pGame->GetEnd()->Printf( m_szTombstone, dwNamePadding + strlen( m_pScore->m_szName ),
+    g_pGame->GetEnd()->Printf( m_szTombstone, dwNamePadding + Util::jstrlen( m_pScore->m_szName ),
                                m_pScore->m_szName, dwNamePadding + dwNameExtraPad, "",
                                m_pScore->m_dwLevel, m_pScore->m_szClass, m_pScore->m_dwDepth,
-                               dwKillerPadding + strlen( m_pScore->m_szKilledBy ),
+                               dwKillerPadding + Util::jstrlen( m_pScore->m_szKilledBy ),
                                m_pScore->m_szKilledBy, dwKillerPadding + dwKillerExtraPad, "" );
     return true;
 }

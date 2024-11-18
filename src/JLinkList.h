@@ -6,7 +6,6 @@
 #ifndef __JLINKLIST_H__
 #define __JLINKLIST_H__
 #include <stdio.h>
-
 template <class T> class CLink
 {
 public:
@@ -226,8 +225,8 @@ public:
         {
             if( curr_link->next == NULL )
             {
-                printf( "Asked for link %d, but there were only %d in the list.\n", which_link,
-                        count );
+                // printf( "Asked for link %d, but there were only %d in the list.\n", which_link,
+                //         count );
                 return NULL;
             }
             curr_link = GetNext( curr_link );

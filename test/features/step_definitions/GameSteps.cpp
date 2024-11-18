@@ -1,8 +1,5 @@
-#include <cucumber-cpp/autodetect.hpp>
-#include <gtest/gtest.h>
-
-using cucumber::ScenarioScope;
 #include "TestContext.hpp"
+using cucumber::ScenarioScope;
 
 /*#######
 ##
@@ -61,7 +58,7 @@ GIVEN( "^I spawn a ([-A-Za-z ]+):([0-9]+), a monster with SEEK, near the player$
     CMonsterDef *pmd = g_pGame->GetDungeon()->GetMonsterDef( monster_id );
 
     // Monster is correct monster
-    int compare = strcmp( monster.c_str(), pmd->m_szName );
+    int compare = Util::jstrcmp( monster.c_str(), pmd->m_szName );
     if( compare != 0 )
     {
         JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", monster.c_str(), pmd->m_szName );
@@ -104,7 +101,7 @@ GIVEN( "^I spawn a ([-A-Za-z ]+):([0-9]+), a monster with SEEK$" )
     CMonsterDef *pmd = g_pGame->GetDungeon()->GetMonsterDef( monster_id );
 
     // Monster is correct monster
-    int compare = strcmp( monster.c_str(), pmd->m_szName );
+    int compare = Util::jstrcmp( monster.c_str(), pmd->m_szName );
     if( compare != 0 )
     {
         JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", monster.c_str(), pmd->m_szName );
@@ -161,7 +158,7 @@ THEN( "^the ([-A-Za-z ]+) spawned successfully$" )
     CMonster *pMon = g_pGame->GetDungeon()->GetTile( context->vec_b )->m_pCurMonster;
 
     // Monster is correct monster
-    int compare = strcmp( monster.c_str(), pMon->m_md->m_szName );
+    int compare = Util::jstrcmp( monster.c_str(), pMon->m_md->m_szName );
     if( compare != 0 )
     {
         JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", monster.c_str(), pMon->m_md->m_szName );
@@ -176,7 +173,7 @@ THEN( "^the ([-A-Za-z ]+) wants to move toward the player$" )
     CMonster *pMon = g_pGame->GetDungeon()->GetTile( context->vec_b )->m_pCurMonster;
 
     // Monster is correct monster
-    int compare = strcmp( monster.c_str(), pMon->m_md->m_szName );
+    int compare = Util::jstrcmp( monster.c_str(), pMon->m_md->m_szName );
     if( compare != 0 )
     {
         JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", monster.c_str(), pMon->m_md->m_szName );
@@ -211,7 +208,7 @@ THEN( "^the ([-A-Za-z ]+) moves toward the player$" )
     EXPECT_EQ( expected, true );
 
     // Monster is correct monster
-    int compare = strcmp( monster.c_str(), pMon->m_md->m_szName );
+    int compare = Util::jstrcmp( monster.c_str(), pMon->m_md->m_szName );
     if( compare != 0 )
     {
         JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", monster.c_str(), pMon->m_md->m_szName );

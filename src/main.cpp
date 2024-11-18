@@ -1,11 +1,4 @@
-#include "Game.h"
 #include "JMDefs.h"
-#include <time.h>
-
-#include "DisplayText.h"
-// #include "Render.h"
-
-#include "Player.h"
 
 // The global game pointer
 CGame *g_pGame = NULL;
@@ -38,7 +31,9 @@ int main( int argc, char **argv )
     atexit( Term );
 
     unsigned int curTime = 0;
+#ifndef TURN_BASED
     unsigned int lastTick = Util::GetTickCount();
+#endif // TURN_BASED
     unsigned int nextTime = 0;
 
     bool bRetVal;
@@ -46,6 +41,15 @@ int main( int argc, char **argv )
     {
         // Main Game Loop
         while( !done )
+#ifdef TURN_BASED
+        {
+            // handle the events in the queue
+            g_pGame->HandleEvents( isActive, done );
+            bRetVal = g_pGame->Update();
+            // Draw the dungeon, player, text
+            g_pGame->Draw();
+        }
+#else
         {
             curTime = Util::GetTickCount();
             if( curTime > nextTime )
@@ -74,6 +78,7 @@ int main( int argc, char **argv )
             }
             lastTick = curTime;
         }
+#endif // TURN_BASED
     }
     catch( ... )
     {

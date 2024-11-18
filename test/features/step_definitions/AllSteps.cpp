@@ -1,6 +1,6 @@
-#include <gtest/gtest.h>
-
 #define UNIT_TEST
+#include "TestContext.hpp"
+
 #include "FirstSteps.cpp"
 
 #include "BrainSteps.cpp"

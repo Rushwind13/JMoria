@@ -1,8 +1,6 @@
-#include <cucumber-cpp/autodetect.hpp>
-#include <gtest/gtest.h>
-
-using cucumber::ScenarioScope;
 #include "TestContext.hpp"
+using cucumber::ScenarioScope;
+
 AFTER_ALL() { JLog( LOG_LEVEL_ERROR, false, "-------------------- (After all scenarios)\n" ); }
 AFTER()
 {

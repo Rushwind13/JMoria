@@ -1,8 +1,5 @@
-#include <cucumber-cpp/autodetect.hpp>
-#include <gtest/gtest.h>
-
-using cucumber::ScenarioScope;
 #include "TestContext.hpp"
+using cucumber::ScenarioScope;
 
 /*#######
 ##
@@ -28,7 +25,7 @@ GIVEN( "^I spawn a ([A-Za-z ]+):([0-9]+)$" )
     ScenarioScope<TestCtx> context;
     REGEX_PARAM( std::string, item );
     REGEX_PARAM( int, index );
-    strcpy( context->szBuffer, item.c_str() );
+    Util::jstrcpy( context->szBuffer, item.c_str() );
     context->vec_b = g_pGame->GetPlayer()->m_vPos;
     context->index = index;
 
@@ -37,7 +34,7 @@ GIVEN( "^I spawn a ([A-Za-z ]+):([0-9]+)$" )
 
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( context->index );
 
-    int compare = strcmp( context->szBuffer, pid->m_szName );
+    int compare = Util::jstrcmp( context->szBuffer, pid->m_szName );
     if( compare != 0 )
     {
         JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", item.c_str(), pid->m_szName );
@@ -67,7 +64,7 @@ GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in inventory$" )
     REGEX_PARAM( int, item_id );
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
     JLog( LOG_LEVEL_INFO, true, "Item is %s\n", pid->m_szName );
-    int compare = strcmp( item.c_str(), pid->m_szName );
+    int compare = Util::jstrcmp( item.c_str(), pid->m_szName );
     if( compare != 0 )
     {
         JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", item.c_str(), pid->m_szName );
@@ -93,7 +90,7 @@ GIVEN( "^the ([A-Za-z ]+):([0-9]+) (is|is not) cursed$" )
     REGEX_PARAM( std::string, choice );
     bool cursed = ( choice == "is" ) ? true : false;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
-    int compare = strcmp( item.c_str(), pid->m_szName );
+    int compare = Util::jstrcmp( item.c_str(), pid->m_szName );
     if( compare != 0 )
     {
         JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", item.c_str(), pid->m_szName );
@@ -128,7 +125,7 @@ GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in equipment at ([-0-9]+)$" )
     REGEX_PARAM( int, item_id );
     REGEX_PARAM( int, equip_id );
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
-    int compare = strcmp( item.c_str(), pid->m_szName );
+    int compare = Util::jstrcmp( item.c_str(), pid->m_szName );
     if( compare != 0 )
     {
         JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", item.c_str(), pid->m_szName );
@@ -141,7 +138,7 @@ GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in equipment at ([-0-9]+)$" )
     const char *want = item.c_str();
     char *have = actual->GetName();
 
-    EXPECT_EQ( strcmp( want, have ), 0 );
+    EXPECT_EQ( Util::jstrcmp( want, have ), 0 );
 }
 
 GIVEN( "^the player equips the item ([0-9]+)$" )
@@ -196,7 +193,7 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment) at ([-0-9]+)$" )
                                                       : g_pGame->GetPlayer()->m_llEquipment;
     CItem *expected = NULL;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
-    int compare = strcmp( item.c_str(), pid->m_szName );
+    int compare = Util::jstrcmp( item.c_str(), pid->m_szName );
     if( compare != 0 )
     {
         JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", item.c_str(), pid->m_szName );
@@ -212,7 +209,7 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment) at ([-0-9]+)$" )
     const char *want = item.c_str();
     char *have = actual->GetName();
 
-    int result = strcmp( want, have );
+    int result = Util::jstrcmp( want, have );
     if( result != 0 )
         JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", want, have );
 
@@ -230,7 +227,7 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment) at ([-0-9]+)$"
                                                       : g_pGame->GetPlayer()->m_llEquipment;
     CItem *expected = NULL;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
-    int compare = strcmp( item.c_str(), pid->m_szName );
+    int compare = Util::jstrcmp( item.c_str(), pid->m_szName );
     if( compare != 0 )
     {
         JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", item.c_str(), pid->m_szName );

@@ -544,7 +544,7 @@ JResult CPlayer::Quaff( CLink<CItem> *pLink )
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect );
-    m_llInventory->Remove( pItem->m_pllLink, true ); // Potions are single-use
+    m_llInventory->Remove( pItem->m_pllLink, false ); // Potions are single-use
     return retval;
 }
 
@@ -553,7 +553,7 @@ JResult CPlayer::Read( CLink<CItem> *pLink )
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect );
-    m_llInventory->Remove( pItem->m_pllLink, true ); // Scrolls are single-use
+    m_llInventory->Remove( pItem->m_pllLink, false ); // Scrolls are single-use
     return retval;
 }
 

@@ -544,23 +544,17 @@ JResult CPlayer::Quaff( CLink<CItem> *pLink )
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect );
-    m_llInventory->Remove( pItem->m_pllLink, false ); // Potions are single-use
+    m_llInventory->Remove( pItem->m_pllLink, true ); // Potions are single-use
     return retval;
 }
 
 JResult CPlayer::Read( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
-    if( !pItem )
-        JLog( LOG_LEVEL_ERROR, true, "no item found\n" );
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    if( !plEffect )
-        JLog( LOG_LEVEL_ERROR, true, "no effects on this item\n" );
-    // JLog( LOG_LEVEL_ERROR, true, "Reading %s\n", plEffect->m_dwIndex );
     JResult retval = DoEffects( plEffect );
-    // m_llInventory->Remove( pItem->m_pllLink, false ); // Scrolls are single-use
+    m_llInventory->Remove( pItem->m_pllLink, true ); // Scrolls are single-use
     return retval;
-    // return JBOGUSKEY;
 }
 
 JResult CPlayer::Magic( CLink<CItem> *pLink )
@@ -576,20 +570,10 @@ JResult CPlayer::Magic( CLink<CItem> *pLink )
 
 JResult CPlayer::DoEffects( CLink<CEffect> *plEffect )
 {
-    printf( "doing effects\n" );
-    if( plEffect == NULL )
-    {
-        JLog( LOG_LEVEL_WARN, true, "No effects\n" );
-        return JBOGUSKEY;
-    }
     CEffect *pEffect;
     while( plEffect != NULL )
     {
         pEffect = plEffect->m_lpData;
-        JLog( LOG_LEVEL_WARN, true, "Effect: %s Flag: %s Mod: %s\n",
-              g_Constants.IndexToString( EFFECT_TYPE, pEffect->m_dwEffect ),
-              g_Constants.IndexToString( EFFECT_FLAG, pEffect->m_dwFlags ),
-              g_Constants.IndexToString( EFFECT_MOD, pEffect->m_dwModifier ) );
         switch( pEffect->m_dwEffect )
         {
         case EFFECT_TYPE_HEAL:
@@ -603,7 +587,6 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect )
             break;
         case EFFECT_TYPE_DESTROY:
             JLog( LOG_LEVEL_ERROR, true, "Destroying\n" );
-
             DoDestroyEffects( pEffect );
             break;
         case EFFECT_TYPE_INTRINSIC:
@@ -624,8 +607,6 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect )
         }
         plEffect = plEffect->next;
     }
-
-    printf( "did effects\n" );
     return JSUCCESS;
 }
 

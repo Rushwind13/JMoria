@@ -5,6 +5,7 @@
 
 class CTileset;
 class CItem;
+class CEffect;
 class CMonster;
 #define PLAYER_TURNS_PER_HP 4
 #define PLAYER_TURNS_PER_MP 16
@@ -91,6 +92,7 @@ public:
           m_fCurHitPoints( 0.0f ),
           m_fExperience( 0.0f ),
           m_fLevel( 1.0f ),
+          m_dwIntrinsics( 0 ),
           m_bWizardMode( false ),
           m_pClass( NULL )
     {
@@ -151,22 +153,40 @@ public:
 
     bool CanDropHere();
 
+    void SetIntrinsic( const uint32 dwIntrinsic ) { m_dwIntrinsics != dwIntrinsic; };
+    void UnsetIntrinsic( const uint32 dwIntrinsic ) { m_dwIntrinsics &= ~dwIntrinsic; };
+    uint32 GetIntrinsic( const uint32 dwIntrinsic ) { return m_dwIntrinsics & dwIntrinsic != 0; };
+
     bool IsWieldable( CLink<CItem> *pLink );
-    bool Wield( CLink<CItem> *pItem );
+    JResult Wield( CLink<CItem> *pItem );
 
     bool IsRemovable( CLink<CItem> *pLink );
-    bool Remove( CLink<CItem> *pLink );
+    JResult RemoveEquipment( CLink<CItem> *pLink );
 
     bool IsDrinkable( CLink<CItem> *pLink );
-    bool Quaff( CLink<CItem> *pLink );
+    JResult Quaff( CLink<CItem> *pLink );
 
     bool IsReadable( CLink<CItem> *pLink );
-    bool Read( CLink<CItem> *pLink );
+    JResult Read( CLink<CItem> *pLink );
+
+    bool IsCastable( CLink<CItem> *pLink );
+    JResult Magic( CLink<CItem> *pLink );
 
     float LightSource();
     void UpdateLight( float fValue, bool bReset = false );
 
-    void DoReadScroll( CItem *pItem );
+    JResult DoEffects( CLink<CEffect> *plEffect );
+    JResult DoHealEffects( CEffect *pEffect );
+    JResult DoHealHP( CEffect *pEffect );
+    JResult DoHitEffects( CEffect *pEffect );
+    JResult DoCreateEffects( CEffect *pEffect );
+    JResult DoLightArea();
+    JResult DoDestroyEffects( CEffect *pEffect );
+    JResult DoRemoveCurse();
+    JResult DoIntrinsicEffects( CEffect *pEffect );
+    JResult DoRestoreEffects( CEffect *pEffect );
+    JResult DoGainEffects( CEffect *pEffect );
+    JResult DoLoseEffects( CEffect *pEffect );
 
     bool SetName( const char *szName );
 
@@ -215,6 +235,8 @@ protected:
 
     float m_fExperience;
     float m_fLevel;
+
+    uint32 m_dwIntrinsics;
 
     CClass *m_pClass;
     CRace *m_pRace;

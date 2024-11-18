@@ -992,6 +992,12 @@ int CDungeon::IsStairs( JVector &vPos )
     return DUNG_IDX_INVALID;
 }
 
+CRoom *CDungeon::InRoom( JVector &vPos )
+{
+    JIVector viPos( VEC_EXPAND( vPos ) );
+    return m_dmCurLevel->InRoom( viPos );
+}
+
 JResult CDungeon::Modify( JVector &vPos )
 {
     if( GetTile( vPos )->m_dtd->m_dwModifiedType == DUNG_IDX_INVALID )

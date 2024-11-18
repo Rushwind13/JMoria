@@ -10,6 +10,8 @@ public:
     CEffect() : m_dwEffect( -1 ), m_szAmount( NULL ) {}
     ~CEffect() {}
     int m_dwEffect;
+    int m_dwFlags;
+    int m_dwModifier;
     char *m_szAmount;
 };
 

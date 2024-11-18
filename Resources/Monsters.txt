@@ -101,7 +101,7 @@ Monster <Flaming Bat>
      Level       1
      ExpValue	100.0
      Type		<MON_IDX_EYE>
-     Attack     <EFFECT_TYPE_TIMED>,<EFFECT_FLAG_PARALYZE>,1d20
+     Attack     <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d20
      Color		<255,100,0,255  >
 }
 #
@@ -284,7 +284,7 @@ Monster <White Worm Mass>
     Level       1
     ExpValue	5.0
     Type		<MON_IDX_WORM>
-    Attack		<EFFECT_TYPE_TIMED>,<EFFECT_FLAG_POISON>,1d5
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d5
     Color		<255,255,255,255>
     Flags       <MON_FLAG_BREED>
 }
@@ -544,7 +544,7 @@ Monster <Yellow Mushroom Patch>
 	ExpValue	2.0
 	Type		<MON_IDX_SHROOM>
 	Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,1d1
-    Attack      <EFFECT_TYPE_TIMED>,<EFFECT_FLAG_POISON>,1d5
+    Attack      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d5
 	Color		<255,255,0,255>
 }
 

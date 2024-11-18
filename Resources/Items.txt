@@ -233,7 +233,7 @@ Color        <200,200,200,255>
 
 Item <Potion of Minor Healing>
 {
-    Plural        <Potions of Minor Healing>
+    Plural      <Potions of Minor Healing>
     Type        <ITEM_IDX_POTION>
     Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>
     Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
@@ -242,7 +242,7 @@ Item <Potion of Minor Healing>
     Value       100.0
     Level       2
     Weight      0.2
-    Color        <225,50,225,255>
+    Color       <225,50,225,255>
 }
 Item <Potion of Resist Fire>
 {
@@ -256,11 +256,22 @@ Duration    150.0
 Color       <225,50,50,255>
 }
 
+Item <Scroll of Light>
+{
+Plural      <Scrolls of Light>
+Type        <ITEM_IDX_SCROLL>
+Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_LIGHT>
+Value       20.0
+Level       1
+Weight      2.0
+Color       <225,225,50,255>
+}
+
 Item <Scroll of Remove Curse>
 {
 Plural      <Scrolls of Remove Curse>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_HEAL>,<ITEM_FLAG_CURSED>
+Effect      <EFFECT_TYPE_DESTROY>,<ITEM_FLAG_CURSED>
 Value       100.0
 Level       1
 Weight      2.0
@@ -295,7 +306,7 @@ Item <Long Sword>
 Item <Dagger>
 {
     Plural        <Daggers>
-    Type        <ITEM_IDX_SWORD>
+    Type        <ITEM_IDX_DAGGER>
     Value       20.0
     Level       1
     Damage      <1d4>

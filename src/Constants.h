@@ -23,7 +23,8 @@
 #define STATE_CLOCKSTEP 6
 #define STATE_REST 7
 #define STATE_RUN 8
-#define STATE_MAX 9
+#define STATE_INTRO 9
+#define STATE_MAX 10
 
 // Various statuses that someone could have
 #define STATUS_INVALID -1

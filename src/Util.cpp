@@ -212,8 +212,11 @@ unsigned int GetTickCount()
 uint32 jlog2( uint32 dwBitmask )
 {
     int exp = 0;
-    while( dwBitmask >> 1 )
+    while( dwBitmask > 1 )
+    {
+        dwBitmask >>= 1;
         exp++;
+    }
     return exp;
 }
 

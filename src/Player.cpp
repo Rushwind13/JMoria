@@ -574,6 +574,10 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect )
     while( plEffect != NULL )
     {
         pEffect = plEffect->m_lpData;
+        JLog( LOG_LEVEL_WARN, true, "Effect: %s Flag: %s Mod: %s\n",
+              g_Constants.IndexToString( EFFECT_TYPE, pEffect->m_dwEffect ),
+              g_Constants.IndexToString( EFFECT_FLAG, pEffect->m_dwFlags ),
+              g_Constants.IndexToString( EFFECT_MOD, pEffect->m_dwModifier ) );
         switch( pEffect->m_dwEffect )
         {
         case EFFECT_TYPE_HEAL:

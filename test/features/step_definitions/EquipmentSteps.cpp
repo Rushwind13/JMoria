@@ -174,7 +174,7 @@ WHEN( "^the player reads the scroll in inventory at ([-0-9]+)$" )
 {
     REGEX_PARAM( int, inv_id );
     ScenarioScope<TestCtx> context;
-    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetLink( inv_id );
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetNthLink( inv_id );
     JLog( LOG_LEVEL_ERROR, true, "Found item to read is %s\n", pLink->m_lpData->GetName() );
     g_pGame->GetPlayer()->Read( pLink );
 }
@@ -241,7 +241,8 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment) at ([-0-9]+)$"
     }
     EXPECT_EQ( compare, 0 );
     int index = ( list == "inventory" ) ? pid->m_dwIndex : equip_id;
-    CLink<CItem> *pLink = pList->GetLink( index );
+    CLink<CItem> *pLink =
+        ( list == "inventory" ) ? pList->GetNthLink( index ) : pList->GetLink( index );
     CItem *actual = NULL;
 
     if( pLink )

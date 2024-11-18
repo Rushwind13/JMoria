@@ -235,7 +235,7 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
     CItem *pItem = pLink->m_lpData;
 
     // You can only wield one thing of a given type at a time
-    CLink<CItem> *pCurrEquip = m_llEquipment->GetLink( pItem->EquipType() );
+    CLink<CItem> *pCurrEquip = m_llEquipment->GetLink( pItem->EquipType(), true );
     if( pCurrEquip != NULL && pCurrEquip->m_lpData != NULL &&
         pCurrEquip->m_lpData->EquipType() == pItem->EquipType() )
     {
@@ -542,17 +542,19 @@ bool CPlayer::CanDropHere()
 JResult CPlayer::Quaff( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
-    m_llInventory->Remove( pItem->m_pllLink, false ); // Potions are single-use
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    return DoEffects( plEffect );
+    JResult retval = DoEffects( plEffect );
+    m_llInventory->Remove( pItem->m_pllLink, true ); // Potions are single-use
+    return retval;
 }
 
 JResult CPlayer::Read( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
-    m_llInventory->Remove( pItem->m_pllLink, false ); // Scrolls are single-use
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    return DoEffects( plEffect );
+    JResult retval = DoEffects( plEffect );
+    m_llInventory->Remove( pItem->m_pllLink, true ); // Potions are single-use
+    return retval;
 }
 
 JResult CPlayer::Magic( CLink<CItem> *pLink )
@@ -562,7 +564,8 @@ JResult CPlayer::Magic( CLink<CItem> *pLink )
     // Quaff and Magic are similar but magic is multi-use
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    return DoEffects( plEffect );
+    JResult retval = DoEffects( plEffect );
+    return retval;
 }
 
 JResult CPlayer::DoEffects( CLink<CEffect> *plEffect )

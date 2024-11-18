@@ -27,7 +27,7 @@ Feature: Equipment
         Given the player equips the item 26
         Then The Small Wooden Shield:26 is not in inventory at -1
         And The Dagger:27 is in equipment at 0
-        And The Small Wooden Shield:26 is in equipment at 5
+        And The Small Wooden Shield:26 is in equipment at 1
     #     And A shield is in the shield equipment slot
 
     # Scenario: Some Equipment has two proper slots
@@ -91,7 +91,7 @@ Feature: Equipment
         Given the player has a Scroll of Remove Curse:30 in inventory
         # Given A dagger is in the primary weapon equipment slot
         Given the player has a Dagger:27 in equipment at 0
-        When the player reads the scroll in inventory at 1
+        When the player reads the scroll in inventory at 0
         Then The Dagger:27 is not cursed
 
     # @skip

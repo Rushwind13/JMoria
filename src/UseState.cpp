@@ -315,6 +315,7 @@ int CUseState::OnBaseHandleKey( SDL_Keysym *keysym, eUseModifier whichUse )
     {
         // convert selected item to list offset
         m_dwSelected -= 'a';
+        JLog( LOG_LEVEL_DEBUG, true, "Use State got key: %c\n", m_dwSelected + 'a' );
         m_pSelected = GetResponse( whichUse );
         if( m_pSelected == NULL )
         {
@@ -346,29 +347,25 @@ void CUseState::ResetToState( int newstate )
 CLink<CItem> *CUseState::GetResponse( eUseModifier whichUse )
 {
     JLinkList<CItem> *pList = NULL;
+    CLink<CItem> *pLink = NULL;
     switch( whichUse )
     {
+    case USE_DROP:
+    case USE_READ:
+    case USE_QUAFF:
     case USE_WIELD:
         pList = g_pGame->GetPlayer()->m_llInventory;
+        pLink = pList->GetNthLink( m_dwSelected );
         break;
     case USE_REMOVE:
         pList = g_pGame->GetPlayer()->m_llEquipment;
-        break;
-    case USE_DROP:
-        pList = g_pGame->GetPlayer()->m_llInventory;
-        break;
-    case USE_READ:
-        pList = g_pGame->GetPlayer()->m_llInventory;
-        break;
-    case USE_QUAFF:
-        pList = g_pGame->GetPlayer()->m_llInventory;
+        pLink = pList->GetLink( m_dwSelected );
         break;
     default:
         JLog( LOG_LEVEL_ERROR, true, "Can't get response for : %d\n", whichUse );
         return NULL;
         break;
     }
-    CLink<CItem> *pLink = pList->GetLink( m_dwSelected, false );
 
     return pLink;
 }

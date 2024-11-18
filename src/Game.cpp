@@ -375,7 +375,7 @@ bool CGame::Update( float fCurTime )
         m_bReadyForUpdate = false;
         // TODO: Why does the AI require 2 ticks to move the monster?
         GetAIMgr()->Update( fCurTime );
-        GetAIMgr()->Update( fCurTime );
+        // GetAIMgr()->Update( fCurTime );
     }
 //    else
 //    {

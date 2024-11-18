@@ -1,9 +1,5 @@
-#include <cucumber-cpp/autodetect.hpp>
-#include <gtest/gtest.h>
-
-#include "Util.h"
-using cucumber::ScenarioScope;
 #include "TestContext.hpp"
+using cucumber::ScenarioScope;
 
 /*#######
 ##

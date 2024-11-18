@@ -365,9 +365,10 @@ int CGame::Update()
         return done;
 }/**/
 
-bool CGame::Update( float fCurTime )
-{
 #ifdef TURN_BASED
+bool CGame::Update()
+{
+    float fCurTime = 0.0f;
     if( m_bReadyForUpdate )
     {
         m_fGameTime++;
@@ -382,6 +383,8 @@ bool CGame::Update( float fCurTime )
 //        return false;
 //    }
 #else
+bool CGame::Update( float fCurTime )
+{
     m_fGameTime += fCurTime;
     // Update the AI
     GetAIMgr()->Update( fCurTime );

@@ -191,7 +191,7 @@ void CDisplayText::DrawFormattedStr( const char *szString )
     char *ptr2;
     JIVector vPos( m_Rect.Left(), m_Rect.Top() );
 
-    strcpy( szBuffer, szString );
+    Util::jstrcpy( szBuffer, szString );
     ptr = szBuffer;
 
     while( *ptr )
@@ -218,7 +218,7 @@ void CDisplayText::DrawFormattedStr( const char *szString )
                 }
             }
 
-            strcpy( szBuffer2, ptr );
+            Util::jstrcpy( szBuffer2, ptr );
             *ptr++ = '\n';
             *ptr = nul;
 
@@ -232,7 +232,7 @@ void CDisplayText::DrawFormattedStr( const char *szString )
                 ptr2 = szBuffer2;
             }
 
-            strcat( ptr, ptr2 );
+            Util::jstrcat( ptr, ptr2 );
             vPos.x = m_Rect.Left();
         }
         else
@@ -244,7 +244,7 @@ void CDisplayText::DrawFormattedStr( const char *szString )
     // Make sure it's going to fit in the bounding box by removing
     // strings at the top of the bounding box
     ptr = m_szText;
-    while( strlen( ptr ) + strlen( szBuffer ) > TEXT_MAXCHARS )
+    while( Util::jstrlen( ptr ) + Util::jstrlen( szBuffer ) > TEXT_MAXCHARS )
     {
         ptr = strchr( ptr, '\n' );
         if( !ptr )
@@ -258,12 +258,12 @@ void CDisplayText::DrawFormattedStr( const char *szString )
     // If there are strings that need to be removed, do that now.
     if( ptr != m_szText )
     {
-        strcpy( szBuffer2, ptr );
-        strcpy( m_szText, szBuffer2 );
+        Util::jstrcpy( szBuffer2, ptr );
+        Util::jstrcpy( m_szText, szBuffer2 );
     }
 
     // Now that we have the space, concatenate the new string.
-    strcat( m_szText, szBuffer );
+    Util::jstrcat( m_szText, szBuffer );
 }
 
 #define SHOW_EMPTY

@@ -163,15 +163,15 @@ int CStringInputState::OnBaseHandleKey( SDL_Keysym *keysym )
     char bInput = GetAlphaNumeric( keysym );
     if( bInput != nul )
     {
-        if( strlen( m_szInput ) < MAX_STRING_LENGTH - 1 )
+        if( Util::jstrlen( m_szInput ) < MAX_STRING_LENGTH - 1 )
         {
-            m_szInput[strlen( m_szInput )] = bInput;
+            m_szInput[Util::jstrlen( m_szInput )] = bInput;
         }
         return JSUCCESS;
     }
     else if( keysym->sym == SDLK_DELETE || keysym->sym == SDLK_BACKSPACE )
     {
-        m_szInput[strlen( m_szInput ) - 1] = nul;
+        m_szInput[Util::jstrlen( m_szInput ) - 1] = nul;
         return JSUCCESS;
     }
     else if( keysym->sym == SDLK_RETURN )

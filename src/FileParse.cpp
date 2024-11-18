@@ -2,7 +2,6 @@
 #include "EndGameState.h"
 #include "Item.h"
 #include "Monster.h"
-#include <string.h>
 
 bool CDataFile::Open( const char *szFilename )
 {
@@ -44,9 +43,9 @@ char *CDataFile::Strip( char *szLine )
         return NULL;
     }
 
-    if( szLine[strlen( szLine ) - 1] == '\n' )
+    if( szLine[Util::jstrlen( szLine ) - 1] == '\n' )
     {
-        szLine[strlen( szLine ) - 1] = NULL;
+        szLine[Util::jstrlen( szLine ) - 1] = NULL;
     }
 
     if( *szLine == nul )
@@ -240,8 +239,8 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 begin++;
                 // from here on out, you've got enough info to do this.
                 cur = Strip( begin );
-                curAttack->m_szDamage = new char[strlen( cur ) + 1];
-                strcpy( curAttack->m_szDamage, cur );
+                curAttack->m_szDamage = new char[Util::jstrlen( cur ) + 1];
+                Util::jstrcpy( curAttack->m_szDamage, cur );
 
                 // store it
                 mdIn.m_llAttacks->Add( curAttack );
@@ -442,6 +441,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 begin++;
                 if( g_Constants.CompareType( "EFFECT_TYPE", begin ) )
                 {
+                    printf( "%s ", begin );
                     curEffect->m_dwEffect = g_Constants.LookupString( begin );
                 }
                 cur = end;
@@ -456,11 +456,13 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 }
                 *end++ = NULL;
                 begin++;
-                if( g_Constants.CompareType( "EFFECT_FLAG", begin ) ||
-                    g_Constants.CompareType( "ITEM_FLAG", begin ) )
-                {
-                    curEffect->m_dwFlags = g_Constants.LookupString( begin );
-                }
+                // if( g_Constants.CompareType( "EFFECT_FLAG", begin ) ||
+                //     g_Constants.CompareType( "ITEM_FLAG", begin ) )
+                // {
+
+                printf( "%s ", begin );
+                curEffect->m_dwFlags = g_Constants.LookupString( begin );
+                // }
                 cur = end;
 
                 // modifier (optional)
@@ -473,6 +475,8 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                     begin++;
                     if( g_Constants.CompareType( "EFFECT_MOD", begin ) )
                     {
+
+                        printf( "%s ", begin );
                         curEffect->m_dwModifier = g_Constants.LookupString( begin );
                     }
                     cur = end;
@@ -492,9 +496,10 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 // }
                 // *end = NULL;
                 // begin++;
-                // curEffect->m_szAmount = new char[strlen( begin ) + 1];
-                // strcpy( curEffect->m_szAmount, begin );
+                // curEffect->m_szAmount = new char[Util::jstrlen( begin ) + 1];
+                // Util::jstrcpy( curEffect->m_szAmount, begin );
 
+                printf( "\n" );
                 // store it
                 idIn.m_llEffects->Add( curEffect );
             }
@@ -626,8 +631,8 @@ char *CDataFile::chomp( const char *szLine, char *szIn )
 
     char *copy;
 
-    copy = new char[strlen( szLine ) + 1];
-    strcpy( copy, szLine );
+    copy = new char[Util::jstrlen( szLine ) + 1];
+    Util::jstrcpy( copy, szLine );
     char *begin;
     char *end;
     begin = strchr( copy, '<' );
@@ -640,8 +645,8 @@ char *CDataFile::chomp( const char *szLine, char *szIn )
     *end = NULL;
     begin++;
 
-    szIn = new char[strlen( begin ) + 1];
-    strcpy( szIn, begin );
+    szIn = new char[Util::jstrlen( begin ) + 1];
+    Util::jstrcpy( szIn, begin );
 
     delete[] copy;
     return szIn;
@@ -658,7 +663,7 @@ JLinkList<JColor> *CDataFile::ParseColors( char *szLine )
     while( c != NULL )
     {
         memset( szToken[count], 0, 32 );
-        strcpy( szToken[count++], c );
+        Util::jstrcpy( szToken[count++], c );
         c = strtok( NULL, ";" );
     }
 

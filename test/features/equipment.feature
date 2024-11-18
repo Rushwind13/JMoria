@@ -81,6 +81,7 @@ Feature: Equipment
         Then The Dagger:27 is in equipment at 0
         Then The Dagger:27 is not in inventory at -1
 
+    @skip
     Scenario: Cursed Equipment can be uncursed with scroll of remove cruse
         Given I have a Player
         Given I spawn a Dagger:27

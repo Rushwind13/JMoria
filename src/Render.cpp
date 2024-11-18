@@ -8,7 +8,6 @@
 #include "Render.h"
 #include "OpenGL/gl.h"
 #include "SDL2/SDL.h"
-// #include "Game.h"
 
 #ifdef DISPLAY_FRAMERATE
 #include "DisplayText.h"

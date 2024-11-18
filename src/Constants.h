@@ -7,8 +7,7 @@
 // how to make them work with CL /EP for monsters.dat
 #ifndef __CONSTANTS_H__
 #define __CONSTANTS_H__
-#include <cmath>
-#include <stdio.h>
+#include "Util.h"
 
 #define VERSION "0.20"
 
@@ -567,7 +566,7 @@ public:
 
     bool CompareType( const char *type, const char *szIn )
     {
-        if( strncmp( szIn, type, strlen( type ) ) )
+        if( Util::jstrncmp( szIn, type, Util::jstrlen( type ) ) )
         {
             JLog( LOG_LEVEL_WARN, true, "wanted type %s but got %s\n", type, szIn );
             return false;
@@ -582,7 +581,7 @@ public:
         for( i = 0; i < NUM_STRINGS; i++ )
         {
             char *curr = m_StringTable[i].m_szString;
-            if( strcmp( curr, szIn ) == 0 )
+            if( Util::jstrcmp( curr, szIn ) == 0 )
             {
                 return m_StringTable[i].m_dwValue;
             }
@@ -628,7 +627,7 @@ public:
         case MON_IDX:
             break;
         default:
-            index = (int)log2( dwIndex );
+            index = Util::jlog2( dwIndex );
         }
         return m_StringTable[offset + index].m_szString;
     }

@@ -59,17 +59,17 @@ public:
 
     void InitScore()
     {
-        m_szName = new char[strlen( g_pGame->GetPlayer()->GetName() ) + 1];
-        strcpy( m_szName, g_pGame->GetPlayer()->GetName() );
+        m_szName = new char[Util::jstrlen( g_pGame->GetPlayer()->GetName() ) + 1];
+        Util::jstrcpy( m_szName, g_pGame->GetPlayer()->GetName() );
 
-        m_szClass = new char[strlen( g_pGame->GetPlayer()->GetClass()->m_szName ) + 1];
-        strcpy( m_szClass, g_pGame->GetPlayer()->GetClass()->m_szName );
+        m_szClass = new char[Util::jstrlen( g_pGame->GetPlayer()->GetClass()->m_szName ) + 1];
+        Util::jstrcpy( m_szClass, g_pGame->GetPlayer()->GetClass()->m_szName );
 
-        m_szRace = new char[strlen( g_pGame->GetPlayer()->GetRace()->m_szName ) + 1];
-        strcpy( m_szRace, g_pGame->GetPlayer()->GetRace()->m_szName );
+        m_szRace = new char[Util::jstrlen( g_pGame->GetPlayer()->GetRace()->m_szName ) + 1];
+        Util::jstrcpy( m_szRace, g_pGame->GetPlayer()->GetRace()->m_szName );
 
-        m_szKilledBy = new char[strlen( g_pGame->GetPlayer()->m_szKilledBy ) + 1];
-        strcpy( m_szKilledBy, g_pGame->GetPlayer()->m_szKilledBy );
+        m_szKilledBy = new char[Util::jstrlen( g_pGame->GetPlayer()->m_szKilledBy ) + 1];
+        Util::jstrcpy( m_szKilledBy, g_pGame->GetPlayer()->m_szKilledBy );
 
         m_dwLevel = g_pGame->GetPlayer()->GetLevel();
         m_dwDepth = g_pGame->GetDungeon()->depth;

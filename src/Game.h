@@ -1,11 +1,6 @@
 #ifndef __GAME_H__
 #define __GAME_H__
 #include "JMDefs.h"
-// #include "Render.h"
-// #include "Player.h"
-// #include "Dungeon.h"
-// #include "DisplayText.h"
-// #include "States.h"
 
 class CRender;
 class CDungeon;
@@ -29,7 +24,11 @@ public:
     ~CGame() { Quit( 0 ); }
 
     JResult Init( const char *szBasedir );
+#ifdef TURN_BASED
+    bool Update(); // someday figure out why this doesn't work...
+#else
     bool Update( float fCurTime ); // someday figure out why this doesn't work...
+#endif // TURN_BASED
     void HandleEvents( int &isActive, int &done );
     void Draw();
 

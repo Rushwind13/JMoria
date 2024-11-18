@@ -4,7 +4,6 @@
 // declaration of class JVector, a 2D vector class
 #ifndef __JVECTOR_H__
 #define __JVECTOR_H__
-// #include "JMDefs.h"
 #include "assert.h"
 
 #include "DungeonConstants.h"

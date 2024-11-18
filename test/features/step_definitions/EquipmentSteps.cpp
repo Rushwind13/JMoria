@@ -135,7 +135,7 @@ GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in equipment at ([-0-9]+)$" )
     }
     EXPECT_EQ( compare, 0 );
     CItem *expected = NULL;
-    CItem *actual = g_pGame->GetPlayer()->m_llEquipment->GetNthLink( equip_id )->m_lpData;
+    CItem *actual = g_pGame->GetPlayer()->m_llEquipment->GetLink( equip_id )->m_lpData;
     EXPECT_NE( expected, actual );
 
     const char *want = item.c_str();
@@ -166,7 +166,7 @@ WHEN( "^the player takes off the item ([0-9]+) at ([-0-9]+)$" )
     REGEX_PARAM( int, equip_id );
     ScenarioScope<TestCtx> context;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
-    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llEquipment->GetNthLink( equip_id );
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llEquipment->GetLink( equip_id );
     context->result = g_pGame->GetPlayer()->RemoveEquipment( pLink );
 }
 
@@ -205,7 +205,7 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment) at ([-0-9]+)$" )
     int item_type = pid->m_dwIndex;
     int equip_slot = EQUIP_IDX_MAIN_HAND + equip_id;
     int index = ( list == "inventory" ) ? item_type : equip_slot;
-    CLink<CItem> *pLink = pList->GetNthLink( index );
+    CLink<CItem> *pLink = pList->GetLink( index );
     CItem *actual = pLink->m_lpData;
     EXPECT_NE( expected, actual );
 
@@ -241,7 +241,8 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment) at ([-0-9]+)$"
     }
     EXPECT_EQ( compare, 0 );
     int index = ( list == "inventory" ) ? pid->m_dwIndex : equip_id;
-    CLink<CItem> *pLink = pList->GetNthLink( index );
+    CLink<CItem> *pLink =
+        ( list == "inventory" ) ? pList->GetNthLink( index ) : pList->GetLink( index );
     CItem *actual = NULL;
 
     if( pLink )

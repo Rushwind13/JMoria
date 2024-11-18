@@ -213,6 +213,29 @@ public:
         return pLink->prev;
     };
 
+    // Retrieve the (0-based) Nth entry in the list
+    CLink<T> *GetNthLink( int which_link )
+    {
+        int count = 0;
+        CLink<T> *curr_link = GetHead();
+
+        // empty list; no entry for you
+        if( curr_link == NULL )
+            return NULL;
+        while( count < which_link )
+        {
+            if( curr_link->next == NULL )
+            {
+                printf( "Asked for link %d, but there were only %d in the list.\n", which_link,
+                        count );
+                return NULL;
+            }
+            curr_link = GetNext( curr_link );
+            count++;
+        }
+        return curr_link;
+    }
+
     // Retrieve the Nth entry in the list, or correct position to insert
     CLink<T> *GetLink( int which_link, bool bForceValid = true )
     {

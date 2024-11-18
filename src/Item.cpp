@@ -139,7 +139,7 @@ void CItem::SetColor()
     if( ( m_id->m_dwFlags & ITEM_COLOR_MULTI ) == ITEM_COLOR_MULTI )
     {
         int which_color = Util::GetRandom( 0, m_id->m_Colors->length() - 1 );
-        m_Color.SetColor( *( m_id->m_Colors->GetLink( which_color )->m_lpData ) );
+        m_Color.SetColor( *( m_id->m_Colors->GetNthLink( which_color )->m_lpData ) );
     }
     m_fColorChangeInterval = 0.0f;
 }

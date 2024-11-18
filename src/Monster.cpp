@@ -176,7 +176,7 @@ void CMonster::ChooseAttack()
 {
     float which_attack = Util::Roll( 0, m_md->m_llAttacks->length() - 1 );
 
-    m_pCurrentAttack = m_md->m_llAttacks->GetLink( which_attack )->m_lpData;
+    m_pCurrentAttack = m_md->m_llAttacks->GetNthLink( which_attack )->m_lpData;
 
     JLog( LOG_LEVEL_INFO, true, "%s choosing attack: %s\n", GetName(),
           g_Constants.IndexToString( MON_FLAG, m_pCurrentAttack->m_dwType ) );
@@ -316,7 +316,7 @@ void CMonster::SetColor()
     if( ( m_md->m_dwFlags & MON_COLOR_MULTI ) == MON_COLOR_MULTI )
     {
         int which_color = Util::GetRandom( 0, m_md->m_Colors->length() - 1 );
-        ( m_md->m_Color ).SetColor( *( m_md->m_Colors->GetLink( which_color )->m_lpData ) );
+        ( m_md->m_Color ).SetColor( *( m_md->m_Colors->GetNthLink( which_color )->m_lpData ) );
     }
     m_fColorChangeInterval = 0.0f;
 }

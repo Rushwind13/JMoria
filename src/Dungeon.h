@@ -124,7 +124,8 @@ public:
     };
     JIVector *AnyOpenTile()
     {
-        return m_llOpenArea->GetLink( Util::GetRandom( 0, m_llOpenArea->length() - 1 ) )->m_lpData;
+        return m_llOpenArea->GetNthLink( Util::GetRandom( 0, m_llOpenArea->length() - 1 ) )
+            ->m_lpData;
     };
     int IsWalkableFor( JVector &vPos, bool isPlayer = false );
     int CanPlaceItemAt( JVector &vPos );

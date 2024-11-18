@@ -10,6 +10,7 @@
 #include "ClockStepState.h"
 #include "CmdState.h"
 #include "EndGameState.h"
+#include "IntroState.h"
 #include "ModState.h"
 #include "RestState.h"
 #include "RunState.h"
@@ -32,6 +33,7 @@ CGame::CGame()
       m_pCurState( NULL ),
       m_pCmdState( NULL ),
       m_pStringInputState( NULL ),
+      m_pIntroState( NULL ),
       m_pEndGameState( NULL ),
       m_pClockStepState( NULL ),
       m_pRestState( NULL ),
@@ -42,6 +44,7 @@ CGame::CGame()
     m_pModState = new CModState;
     m_pUseState = new CUseState;
     m_pStringInputState = new CStringInputState;
+    m_pIntroState = new CIntroState;
     m_pEndGameState = new CEndGameState;
     m_pClockStepState = new CClockStepState;
     m_pRestState = new CRestState;
@@ -105,7 +108,8 @@ JResult CGame::Init( const char *szBasedir )
     SetState( STATE_CLOCKSTEP );
 #else
     // Set up the initial game state
-    SetState( STATE_COMMAND );
+    // SetState( STATE_COMMAND );
+    SetState( STATE_INTRO );
 #endif // CLOCKSTEP
        // we're up.
 
@@ -162,6 +166,12 @@ void CGame::Term()
     {
         delete m_pStringInputState;
         m_pStringInputState = NULL;
+    }
+
+    if( m_pIntroState )
+    {
+        delete m_pIntroState;
+        m_pIntroState = NULL;
     }
 
     if( m_pEndGameState )
@@ -247,6 +257,14 @@ void CGame::SetState( int eNewState )
     case STATE_ENDGAME:
     {
         m_pCurState = reinterpret_cast<CStateBase *>( m_pEndGameState );
+        SDL_Keysym *keysym = new SDL_Keysym();
+        keysym->sym = SDLK_SPACE;
+        m_pCurState->HandleKey( keysym );
+    }
+    break;
+    case STATE_INTRO:
+    {
+        m_pCurState = reinterpret_cast<CStateBase *>( m_pIntroState );
         SDL_Keysym *keysym = new SDL_Keysym();
         keysym->sym = SDLK_SPACE;
         m_pCurState->HandleKey( keysym );
@@ -426,6 +444,10 @@ bool CGame::Update( float fCurTime )
     {
         GetEnd()->Update( fCurTime );
     }
+    else if( m_eCurState == STATE_INTRO )
+    {
+        GetEnd()->Update( fCurTime );
+    }
     m_pCurState->Update( fCurTime );
 #endif // CLOCKSTEP
     return true;
@@ -450,6 +472,10 @@ void CGame::Draw()
         GetUse()->Draw();
     }
     else if( m_eCurState == STATE_ENDGAME )
+    {
+        GetEnd()->Draw();
+    }
+    else if( m_eCurState == STATE_INTRO )
     {
         GetEnd()->Draw();
     }

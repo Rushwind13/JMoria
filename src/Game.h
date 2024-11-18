@@ -11,6 +11,7 @@ class CCmdState;
 class CModState;
 class CUseState;
 class CStringInputState;
+class CIntroState;
 class CEndGameState;
 class CClockStepState;
 class CRestState;
@@ -76,6 +77,7 @@ protected:
     CModState *m_pModState;
     CUseState *m_pUseState;
     CStringInputState *m_pStringInputState;
+    CIntroState *m_pIntroState;
     CEndGameState *m_pEndGameState;
     CClockStepState *m_pClockStepState;
     CRestState *m_pRestState;

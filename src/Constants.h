@@ -10,6 +10,8 @@
 #include "Util.h"
 
 #define VERSION "0.20"
+#define COPYRIGHT "2002-2024"
+#define AUTHOR "Jimbo S. Harris"
 
 // all the states which the game can run in
 // this modifies the event handling
@@ -23,7 +25,8 @@
 #define STATE_CLOCKSTEP 6
 #define STATE_REST 7
 #define STATE_RUN 8
-#define STATE_MAX 9
+#define STATE_INTRO 9
+#define STATE_MAX 10
 
 // Various statuses that someone could have
 #define STATUS_INVALID -1

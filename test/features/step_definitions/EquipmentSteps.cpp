@@ -20,6 +20,7 @@ GIVEN( "^I have a Player$" )
     g_pGame = NULL;
     g_pGame = new CGame;
     context->result = g_pGame->Init( "../../JMoria/" );
+    EXPECT_EQ( context->result, JSUCCESS );
 }
 
 GIVEN( "^I spawn a ([A-Za-z ]+):([0-9]+)$" )
@@ -148,8 +149,9 @@ GIVEN( "^the player equips the item ([0-9]+)$" )
     REGEX_PARAM( int, item_id );
     ScenarioScope<TestCtx> context;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
-    context->result_bool = g_pGame->GetPlayer()->Wield(
+    context->result = g_pGame->GetPlayer()->Wield(
         g_pGame->GetPlayer()->m_llInventory->GetLink( pid->m_dwIndex ) );
+    EXPECT_EQ( context->result, JSUCCESS );
 }
 
 /*#######
@@ -165,7 +167,7 @@ WHEN( "^the player takes off the item ([0-9]+) at ([-0-9]+)$" )
     ScenarioScope<TestCtx> context;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
     CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llEquipment->GetLink( equip_id );
-    context->result_bool = g_pGame->GetPlayer()->Remove( pLink );
+    context->result = g_pGame->GetPlayer()->RemoveEquipment( pLink );
 }
 
 WHEN( "^the player reads the scroll in inventory at ([-0-9]+)$" )
@@ -173,7 +175,7 @@ WHEN( "^the player reads the scroll in inventory at ([-0-9]+)$" )
     REGEX_PARAM( int, inv_id );
     ScenarioScope<TestCtx> context;
     CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetLink( inv_id );
-    JLog( LOG_LEVEL_DEBUG, true, "Found item to read is %s\n", pLink->m_lpData->GetName() );
+    JLog( LOG_LEVEL_ERROR, true, "Found item to read is %s\n", pLink->m_lpData->GetName() );
     g_pGame->GetPlayer()->Read( pLink );
 }
 
@@ -233,6 +235,10 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment) at ([-0-9]+)$"
     {
         JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", item.c_str(), pid->m_szName );
     }
+    else
+    {
+        JLog( LOG_LEVEL_ERROR, true, "have %s as expected\n", pid->m_szName );
+    }
     EXPECT_EQ( compare, 0 );
     int index = ( list == "inventory" ) ? pid->m_dwIndex : equip_id;
     CLink<CItem> *pLink = pList->GetLink( index );
@@ -240,12 +246,14 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment) at ([-0-9]+)$"
 
     if( pLink )
     {
+        JLog( LOG_LEVEL_ERROR, true, "Found item in that position\n" );
         // found an item of the same type, make sure it's a different one
         actual = pLink->m_lpData;
         EXPECT_NE( actual->m_id->m_szName, item );
     }
     else
     {
+        JLog( LOG_LEVEL_ERROR, true, "No item in that position\n" );
         // nothing of this type; win
         EXPECT_EQ( expected, actual );
     }
@@ -262,6 +270,7 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is not cursed$" )
 
     CLink<CItem> *pLink = pList->GetLink( index );
     bool b_isCursed = pLink->m_lpData->m_dwFlags & ITEM_FLAG_CURSED;
+    JLog( LOG_LEVEL_ERROR, true, "Cursed state is %d\n", b_isCursed );
+
     EXPECT_FALSE( b_isCursed );
-    JLog( LOG_LEVEL_DEBUG, true, "Cursed state is %d\n", b_isCursed );
 }

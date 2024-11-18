@@ -126,7 +126,10 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
             else if( strncasecmp( szLine, "movetype", 8 ) == 0 )
             {
                 szValue = GetValue( szLine, szValue );
-                mdIn.m_dwMoveType = g_Constants.LookupString( szValue );
+                if( g_Constants.CompareType( "MON_AI", szValue ) )
+                {
+                    mdIn.m_dwMoveType = g_Constants.LookupString( szValue );
+                }
             }
             else if( strncasecmp( szLine, "hd", 2 ) == 0 )
             {
@@ -147,7 +150,10 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
             else if( strncasecmp( szLine, "type", 4 ) == 0 )
             {
                 szValue = GetValue( szLine, szValue );
-                mdIn.m_dwIndex = g_Constants.LookupString( szValue );
+                if( g_Constants.CompareType( "MON_IDX", szValue ) )
+                {
+                    mdIn.m_dwIndex = g_Constants.LookupString( szValue );
+                }
             }
             else if( strncasecmp( szLine, "flags", 5 ) == 0 )
             {
@@ -156,7 +162,10 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 char *c = strtok( szValue, "," );
                 while( c != NULL )
                 {
-                    mdIn.m_dwFlags |= g_Constants.LookupString( c );
+                    if( g_Constants.CompareType( "MON_FLAG", c ) )
+                    {
+                        mdIn.m_dwFlags |= g_Constants.LookupString( c );
+                    }
                     c = strtok( NULL, "," );
                 }
             }
@@ -181,7 +190,10 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 }
                 *end++ = NULL;
                 begin++;
-                curAttack->m_dwEffect = g_Constants.LookupString( begin );
+                if( g_Constants.CompareType( "EFFECT_TYPE", begin ) )
+                {
+                    curAttack->m_dwEffect = g_Constants.LookupString( begin );
+                }
                 cur = end;
 
                 // attack type
@@ -195,7 +207,11 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 }
                 *end++ = NULL;
                 begin++;
-                curAttack->m_dwType = g_Constants.LookupString( begin );
+                if( g_Constants.CompareType( "MON_FLAG", begin ) ||
+                    g_Constants.CompareType( "EFFECT_FLAG", begin ) )
+                {
+                    curAttack->m_dwType = g_Constants.LookupString( begin );
+                }
                 cur = end;
 
                 // effect flag (optional)
@@ -205,8 +221,11 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 {
                     *end++ = NULL;
                     begin++;
-                    curAttack->m_dwEffectFlags = g_Constants.LookupString( begin );
-                    JLog( LOG_LEVEL_NOISE, true, "Found an Effect Flag: %s\n", begin );
+                    if( g_Constants.CompareType( "EFFECT_FLAG", begin ) )
+                    {
+                        curAttack->m_dwEffectFlags = g_Constants.LookupString( begin );
+                        JLog( LOG_LEVEL_NOISE, true, "Found an Effect Flag: %s\n", begin );
+                    }
                     cur = end;
                 }
 
@@ -357,7 +376,10 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
             {
                 // TODO: Add validation that this is ITEM_IDX_ and not...
                 szValue = GetValue( szLine, szValue );
-                idIn.m_dwIndex = g_Constants.LookupString( szValue );
+                if( g_Constants.CompareType( "ITEM_IDX", szValue ) )
+                {
+                    idIn.m_dwIndex = g_Constants.LookupString( szValue );
+                }
             }
             else if( strncasecmp( szLine, "flags", 5 ) == 0 )
             {
@@ -366,7 +388,10 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 char *c = strtok( szValue, "," );
                 while( c != NULL )
                 {
-                    idIn.m_dwFlags |= g_Constants.LookupString( c );
+                    if( g_Constants.CompareType( "ITEM_FLAG", c ) )
+                    {
+                        idIn.m_dwFlags |= g_Constants.LookupString( c );
+                    }
                     c = strtok( NULL, "," );
                 }
             }
@@ -415,7 +440,10 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 }
                 *end++ = NULL;
                 begin++;
-                curEffect->m_dwEffect = g_Constants.LookupString( begin );
+                if( g_Constants.CompareType( "EFFECT_TYPE", begin ) )
+                {
+                    curEffect->m_dwEffect = g_Constants.LookupString( begin );
+                }
                 cur = end;
 
                 // flag
@@ -428,7 +456,11 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 }
                 *end++ = NULL;
                 begin++;
-                curEffect->m_dwEffect = g_Constants.LookupString( begin );
+                if( g_Constants.CompareType( "EFFECT_FLAG", begin ) ||
+                    g_Constants.CompareType( "ITEM_FLAG", begin ) )
+                {
+                    curEffect->m_dwFlags = g_Constants.LookupString( begin );
+                }
                 cur = end;
 
                 // modifier (optional)
@@ -439,7 +471,10 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                     JLog( LOG_LEVEL_INFO, true, "Found effect modifier\n" );
                     *end++ = NULL;
                     begin++;
-                    curEffect->m_dwEffect = g_Constants.LookupString( begin );
+                    if( g_Constants.CompareType( "EFFECT_MOD", begin ) )
+                    {
+                        curEffect->m_dwModifier = g_Constants.LookupString( begin );
+                    }
                     cur = end;
                 }
 

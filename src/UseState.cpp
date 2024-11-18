@@ -57,17 +57,20 @@ int CUseState::OnHandleWield( SDL_Keysym *keysym )
         {
             g_pGame->GetMsgs()->Printf( "You are now wielding the %s.\n",
                                         m_pSelected->m_lpData->GetName() );
+            JLog( LOG_LEVEL_WARN, true, "Now wielding %s\n", m_pSelected->m_lpData->GetName() );
         }
         else
         {
             g_pGame->GetMsgs()->Printf(
                 "The %s slips from your fingers and returns to your pack!\n",
                 m_pSelected->m_lpData->GetName() );
+            JLog( LOG_LEVEL_WARN, true, "failed to wield %s\n", m_pSelected->m_lpData->GetName() );
         }
     }
     else
     {
         g_pGame->GetMsgs()->Printf( "You can't wield a %s!\n", m_pSelected->m_lpData->GetName() );
+        JLog( LOG_LEVEL_WARN, true, "can't wield %s\n", m_pSelected->m_lpData->GetName() );
     }
     m_pSelected = NULL;
 
@@ -376,12 +379,15 @@ CLink<CItem> *CUseState::GetResponse( eUseModifier whichUse )
 //// Open commands
 bool CUseState::TestWield() { return g_pGame->GetPlayer()->IsWieldable( m_pSelected ); }
 
-bool CUseState::DoWield() { return g_pGame->GetPlayer()->Wield( m_pSelected ); }
+bool CUseState::DoWield() { return g_pGame->GetPlayer()->Wield( m_pSelected ) == JSUCCESS; }
 
 //// Close commands
 bool CUseState::TestRemove() { return g_pGame->GetPlayer()->IsRemovable( m_pSelected ); }
 
-bool CUseState::DoRemove() { return g_pGame->GetPlayer()->Remove( m_pSelected ); }
+bool CUseState::DoRemove()
+{
+    return g_pGame->GetPlayer()->RemoveEquipment( m_pSelected ) == JSUCCESS;
+}
 
 //// Drop commands
 bool CUseState::TestDrop() { return g_pGame->GetPlayer()->CanDropHere(); }
@@ -390,9 +396,9 @@ bool CUseState::DoDrop() { return g_pGame->GetPlayer()->Drop( m_pSelected->m_lpD
 //// Quaff commands
 bool CUseState::TestQuaff() { return g_pGame->GetPlayer()->IsDrinkable( m_pSelected ); }
 
-bool CUseState::DoQuaff() { return g_pGame->GetPlayer()->Quaff( m_pSelected ); }
+bool CUseState::DoQuaff() { return g_pGame->GetPlayer()->Quaff( m_pSelected ) == JSUCCESS; }
 
 //// Read commands
 bool CUseState::TestRead() { return g_pGame->GetPlayer()->IsReadable( m_pSelected ); }
 
-bool CUseState::DoRead() { return g_pGame->GetPlayer()->Read( m_pSelected ); }
+bool CUseState::DoRead() { return g_pGame->GetPlayer()->Read( m_pSelected ) == JSUCCESS; }

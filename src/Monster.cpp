@@ -67,7 +67,7 @@ JResult CMonster::CreateMonster( CMonsterDef *pmd, JIVector vSpawnPoint, bool bN
         }
         else
         {
-            JLog( LOG_LEVEL_WARN, true, "spawn failed.\n" );
+            JLog( LOG_LEVEL_WARN, true, "monster spawn failed.\n" );
             // That spawn failed; clean up
             // delete pMon;
             // pMon = NULL;

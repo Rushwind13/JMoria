@@ -133,6 +133,7 @@ public:
     bool IsTunnelable( JVector &vPos );
     bool IsCloseable( JVector &vPos );
     int IsStairs( JVector &vPos );
+    CRoom *InRoom( JVector &vPos );
     CMonsterDef *GetMonsterDef( int which_monster );
     CItemDef *GetItemDef( int which_item );
     bool SpawnMonster( int which_monster );

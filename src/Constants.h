@@ -185,7 +185,7 @@
 #define EFFECT_FLAG_ACID 0x00000008
 
 #define EFFECT_FLAG_POISON 0x00000010
-#define EFFECT_FLAG_SPELL 0x00000020
+#define EFFECT_FLAG_ENCHANT 0x00000020
 #define EFFECT_FLAG_HP 0x00000040
 #define EFFECT_FLAG_XP 0x00000080
 
@@ -231,22 +231,28 @@
 #define EFFECT_MOD_IMMUNE 0x000000004
 #define EFFECT_MOD_WEAK 0x000000008
 
-#define EFFECT_MOD_ENCHANT 0x000000010 // targets an item?
-// ball vs line spells
-// target vs aoe
+#define EFFECT_MOD_TIMED 0x000000010
+#define EFFECT_MOD_AREA 0x000000020
+#define EFFECT_MOD_LINE 0x000000040
+#define EFFECT_MOD_BALL 0x000000080
 
-#define NUM_EFFECT_MODIFIERS 5
+#define NUM_EFFECT_MODIFIERS 8
 
 // Effect Types
 #define EFFECT_TYPE_HEAL 0x00000001
 #define EFFECT_TYPE_HIT 0x00000002
-#define EFFECT_TYPE_TIMED 0x00000004
-#define EFFECT_TYPE_CAUSE 0x00000008
+#define EFFECT_TYPE_CREATE 0x00000004
+#define EFFECT_TYPE_DESTROY 0x00000008
 
 #define EFFECT_TYPE_INTRINSIC 0x00000010
 #define EFFECT_TYPE_RESTORE 0x00000020
 #define EFFECT_TYPE_GAIN 0x00000040
 #define EFFECT_TYPE_LOSE 0x00000080
+
+// #define EFFECT_TYPE_x 0x00000100
+// #define EFFECT_TYPE_x 0x00000200
+// #define EFFECT_TYPE_x 0x00000400
+// #define EFFECT_TYPE_x 0x00000800
 
 #define NUM_EFFECT_TYPES 8
 
@@ -346,7 +352,8 @@
 #define ITEM_FLAG 4
 #define EFFECT_FLAG 5
 #define EFFECT_MOD 6
-#define EFFECT_TYPE 7
+#define MON_AI 7
+#define EFFECT_TYPE 8
 
 #include "TextEntry.h"
 class Constants
@@ -445,7 +452,7 @@ public:
         m_StringTable[i++].Init( "EFFECT_FLAG_ELECTRICITY", EFFECT_FLAG_ELECTRICITY );
         m_StringTable[i++].Init( "EFFECT_FLAG_ACID", EFFECT_FLAG_ACID );
         m_StringTable[i++].Init( "EFFECT_FLAG_POISON", EFFECT_FLAG_POISON );
-        m_StringTable[i++].Init( "EFFECT_FLAG_SPELL", EFFECT_FLAG_SPELL );
+        m_StringTable[i++].Init( "EFFECT_FLAG_ENCHANT", EFFECT_FLAG_ENCHANT );
         m_StringTable[i++].Init( "EFFECT_FLAG_HP", EFFECT_FLAG_HP );
         m_StringTable[i++].Init( "EFFECT_FLAG_XP", EFFECT_FLAG_XP );
         m_StringTable[i++].Init( "EFFECT_FLAG_AFRAID", EFFECT_FLAG_AFRAID );
@@ -477,12 +484,16 @@ public:
         m_StringTable[i++].Init( "EFFECT_MOD_SEE", EFFECT_MOD_SEE );
         m_StringTable[i++].Init( "EFFECT_MOD_IMMUNE", EFFECT_MOD_IMMUNE );
         m_StringTable[i++].Init( "EFFECT_MOD_WEAK", EFFECT_MOD_WEAK );
-        m_StringTable[i++].Init( "EFFECT_MOD_ENCHANT", EFFECT_MOD_ENCHANT );
+
+        m_StringTable[i++].Init( "EFFECT_MOD_TIMED", EFFECT_MOD_TIMED );
+        m_StringTable[i++].Init( "EFFECT_MOD_AREA", EFFECT_MOD_AREA );
+        m_StringTable[i++].Init( "EFFECT_MOD_LINE", EFFECT_MOD_LINE );
+        m_StringTable[i++].Init( "EFFECT_MOD_BALL", EFFECT_MOD_BALL );
 
         m_StringTable[i++].Init( "EFFECT_TYPE_HEAL", EFFECT_TYPE_HEAL );
         m_StringTable[i++].Init( "EFFECT_TYPE_HIT", EFFECT_TYPE_HIT );
-        m_StringTable[i++].Init( "EFFECT_TYPE_TIMED", EFFECT_TYPE_TIMED );
-        m_StringTable[i++].Init( "EFFECT_TYPE_CAUSE", EFFECT_TYPE_CAUSE );
+        m_StringTable[i++].Init( "EFFECT_TYPE_CREATE", EFFECT_TYPE_CREATE );
+        m_StringTable[i++].Init( "EFFECT_TYPE_DESTROY", EFFECT_TYPE_DESTROY );
         m_StringTable[i++].Init( "EFFECT_TYPE_INTRINSIC", EFFECT_TYPE_INTRINSIC );
         m_StringTable[i++].Init( "EFFECT_TYPE_RESTORE", EFFECT_TYPE_RESTORE );
         m_StringTable[i++].Init( "EFFECT_TYPE_GAIN", EFFECT_TYPE_GAIN );
@@ -554,6 +565,17 @@ public:
     };
     TextEntry *m_StringTable;
 
+    bool CompareType( const char *type, const char *szIn )
+    {
+        if( strncmp( szIn, type, strlen( type ) ) )
+        {
+            JLog( LOG_LEVEL_WARN, true, "wanted type %s but got %s\n", type, szIn );
+            return false;
+        }
+
+        return true;
+    }
+
     int LookupString( const char *szIn )
     {
         int i;
@@ -580,17 +602,17 @@ public:
 
         switch( flag_set )
         {
-        case EFFECT_TYPE:
-            offset += NUM_EFFECT_MODIFIERS;
-        case EFFECT_MOD:
-            offset += NUM_EFFECT_FLAGS;
-        case EFFECT_FLAG:
-            offset += NUM_ITEM_FLAGS;
         case ITEM_FLAG:
             offset += ITEM_IDX_MAX;
         case ITEM_IDX:
             offset += EQUIP_IDX_MAX;
         case EQUIP_IDX:
+            offset += NUM_EFFECT_TYPES;
+        case EFFECT_TYPE:
+            offset += NUM_EFFECT_MODIFIERS;
+        case EFFECT_MOD:
+            offset += NUM_EFFECT_FLAGS;
+        case EFFECT_FLAG:
             offset += NUM_MON_FLAGS;
         case MON_FLAG:
             offset += MON_IDX_MAX;

@@ -230,7 +230,7 @@ bool CPlayer::IsWieldable( CLink<CItem> *pLink )
     return ( pLink->m_lpData->EquipType() != EQUIP_IDX_INVALID );
 }
 
-bool CPlayer::Wield( CLink<CItem> *pLink )
+JResult CPlayer::Wield( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
 
@@ -241,14 +241,19 @@ bool CPlayer::Wield( CLink<CItem> *pLink )
     {
         // So if you're already wearing something of this type, remove it and put it back in
         // inventory
-        if( Remove( pCurrEquip ) )
+        JResult removed = RemoveEquipment( pCurrEquip );
+        if( removed != JSUCCESS )
         {
             g_pGame->GetMsgs()->Printf( "You were wielding the %s...",
                                         pCurrEquip->m_lpData->GetName() );
+            JLog( LOG_LEVEL_INFO, true, "You were wielding the %s\n",
+                  pCurrEquip->m_lpData->GetName() );
         }
         else
         {
-            return false;
+            JLog( LOG_LEVEL_WARN, true, "could not remove the %s, got %d\n",
+                  pCurrEquip->m_lpData->GetName(), removed );
+            return JBOGUSKEY;
         }
     }
     // Now put on the new item.
@@ -260,7 +265,7 @@ bool CPlayer::Wield( CLink<CItem> *pLink )
     m_fDamageModifier += pItem->m_id->m_fBonusToDamage;
     m_fToHitModifier += pItem->m_id->m_fBonusToHit;
 
-    return true;
+    return JSUCCESS;
 }
 
 bool CPlayer::IsRemovable( CLink<CItem> *pLink )
@@ -273,15 +278,22 @@ bool CPlayer::IsRemovable( CLink<CItem> *pLink )
     return true;
 }
 
-bool CPlayer::Remove( CLink<CItem> *pLink )
+JResult CPlayer::RemoveEquipment( CLink<CItem> *pLink )
 {
+    if( !pLink )
+        return JBOGUSKEY;
+
     CItem *pItem = pLink->m_lpData;
-    if( pItem->m_dwFlags & ITEM_FLAG_CURSED )
+    if( pItem && pItem->m_dwFlags & ITEM_FLAG_CURSED )
     {
         g_pGame->GetMsgs()->Printf( "You can't remove the %s... it seems to be cursed.\n",
                                     pItem->GetName() );
-        return false;
+
+        JLog( LOG_LEVEL_WARN, true, "You can't remove the %s... it seems to be cursed.\n",
+              pItem->GetName() );
+        return JBOGUSKEY;
     }
+
     m_llEquipment->Remove( pLink, false );
     pItem->m_pllLink = m_llInventory->Add( pItem, pItem->m_id->m_dwIndex );
     m_fArmorClass -= pItem->m_id->m_fBaseAC + pItem->m_id->m_fACBonus;
@@ -290,7 +302,7 @@ bool CPlayer::Remove( CLink<CItem> *pLink )
     m_fDamageModifier -= pItem->m_id->m_fBonusToDamage;
     m_fToHitModifier -= pItem->m_id->m_fBonusToHit;
 
-    return true;
+    return JSUCCESS;
 }
 
 float CPlayer::LightSource()
@@ -527,54 +539,186 @@ bool CPlayer::CanDropHere()
     return true;
 }
 
-bool CPlayer::Quaff( CLink<CItem> *pLink )
+JResult CPlayer::Quaff( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
-    m_llInventory->Remove( pItem->m_pllLink, false );
-    CEffect *pEffect = pItem->m_id->m_llEffects->GetHead()->m_lpData;
-    if( pEffect->m_dwEffect == EFFECT_TYPE_HEAL )
-    {
-        m_fCurHitPoints += Util::Roll( pEffect->m_szAmount );
-        if( m_fCurHitPoints > m_fHitPoints )
-        {
-            m_fCurHitPoints = m_fHitPoints;
-        }
-        g_pGame->GetMsgs()->Printf( "You feel a bit better.\n" );
-    }
-
-    return true;
+    m_llInventory->Remove( pItem->m_pllLink, false ); // Potions are single-use
+    CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
+    return DoEffects( plEffect );
 }
 
-bool CPlayer::Read( CLink<CItem> *pLink )
+JResult CPlayer::Read( CLink<CItem> *pLink )
 {
-    bool retval = true;
     CItem *pItem = pLink->m_lpData;
-    switch( pLink->m_dwIndex )
+    m_llInventory->Remove( pItem->m_pllLink, false ); // Scrolls are single-use
+    CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
+    return DoEffects( plEffect );
+}
+
+JResult CPlayer::Magic( CLink<CItem> *pLink )
+{
+    // TODO: Make magic actually work -- probably should not be item-based (it's a choose-from-menu
+    // type) and will probably pass a CSpell rather than a CItem This was to demonstrate that Read
+    // Quaff and Magic are similar but magic is multi-use
+    CItem *pItem = pLink->m_lpData;
+    CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
+    return DoEffects( plEffect );
+}
+
+JResult CPlayer::DoEffects( CLink<CEffect> *plEffect )
+{
+    CEffect *pEffect;
+    while( plEffect != NULL )
     {
-    case ITEM_IDX_SCROLL:
+        pEffect = plEffect->m_lpData;
+        JLog( LOG_LEVEL_WARN, true, "Effect: %s Flag: %s Mod: %s\n",
+              g_Constants.IndexToString( EFFECT_TYPE, pEffect->m_dwEffect ),
+              g_Constants.IndexToString( EFFECT_FLAG, pEffect->m_dwFlags ),
+              g_Constants.IndexToString( EFFECT_MOD, pEffect->m_dwModifier ) );
+        switch( pEffect->m_dwEffect )
+        {
+        case EFFECT_TYPE_HEAL:
+            DoHealEffects( pEffect );
+            break;
+        case EFFECT_TYPE_HIT:
+            DoHitEffects( pEffect );
+            break;
+        case EFFECT_TYPE_CREATE:
+            DoCreateEffects( pEffect );
+            break;
+        case EFFECT_TYPE_DESTROY:
+            DoDestroyEffects( pEffect );
+            break;
+        case EFFECT_TYPE_INTRINSIC:
+            DoIntrinsicEffects( pEffect );
+            break;
+        case EFFECT_TYPE_RESTORE:
+            DoRestoreEffects( pEffect );
+            break;
+        case EFFECT_TYPE_GAIN:
+            DoGainEffects( pEffect );
+            break;
+        case EFFECT_TYPE_LOSE:
+            DoLoseEffects( pEffect );
+            break;
+        default:
+            JLog( LOG_LEVEL_ERROR, true, "bad effect type: %d\n", pEffect->m_dwEffect );
+            break;
+        }
+        plEffect = plEffect->next;
+    }
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoHealEffects( CEffect *pEffect )
+{
+    char effect[32];
+    switch( pEffect->m_dwFlags )
     {
-        JLog( LOG_LEVEL_DEBUG, true, "Reading the %s\n", pItem->GetName() );
-        DoReadScroll( pItem );
+    case EFFECT_FLAG_HP:
+        DoHealHP( pEffect );
+        break;
+    case EFFECT_FLAG_AFRAID:
+        UnsetIntrinsic( pEffect->m_dwFlags );
+        g_pGame->GetMsgs()->Printf( "You are no longer afraid.\n" );
+        break;
+    case EFFECT_FLAG_BLIND:
+        UnsetIntrinsic( pEffect->m_dwFlags );
+        g_pGame->GetMsgs()->Printf( "You can see again.\n" );
+        break;
+    case EFFECT_FLAG_CONFUSE:
+        UnsetIntrinsic( pEffect->m_dwFlags );
+        g_pGame->GetMsgs()->Printf( "You can think clearly again.\n" );
+        break;
+    case EFFECT_FLAG_POISON:
+        UnsetIntrinsic( pEffect->m_dwFlags );
+        g_pGame->GetMsgs()->Printf( "You are no longer poisoned.\n" );
+        break;
+    case EFFECT_FLAG_PARALYZE:
+        UnsetIntrinsic( pEffect->m_dwFlags );
+        g_pGame->GetMsgs()->Printf( "You can move again.\n" );
+        break;
+    case EFFECT_FLAG_SLEEP:
+        g_pGame->GetMsgs()->Printf( "You wake up.\n" );
+        UnsetIntrinsic( pEffect->m_dwFlags );
+        break;
+    default:
         break;
     }
-    case ITEM_IDX_BOOK:
-    default:
-    {
-        retval = false;
-    }
-    }
-
-    return retval;
+    return JSUCCESS;
 }
 
-void CPlayer::DoReadScroll( CItem *pItem )
+JResult CPlayer::DoHealHP( CEffect *pEffect )
 {
-    m_llInventory->Remove( pItem->m_pllLink, false );
-    CEffect *pEffect = pItem->m_id->m_llEffects->GetHead()->m_lpData;
-    // TODO: Fix the effect flag
-    // JLog( LOG_LEVEL_DEBUG, true, "Effect on the item is %d\n", pEffect->m_dwEffect );
-    // if( pEffect->m_dwEffect == EFFECT_TYPE_RESTORE )
-    // {
+    float fHeal = Util::Roll( pEffect->m_szAmount );
+    m_fCurHitPoints += fHeal;
+    if( m_fCurHitPoints > m_fHitPoints )
+    {
+        m_fCurHitPoints = m_fHitPoints;
+    }
+    if( fHeal > 100.0f )
+    {
+        g_pGame->GetMsgs()->Printf( "You feel amazing!\n" );
+    }
+    else if( fHeal > 50.0f )
+    {
+        g_pGame->GetMsgs()->Printf( "You feel a lot better.\n" );
+    }
+    else if( fHeal > 25.0f )
+    {
+        g_pGame->GetMsgs()->Printf( "You feel better.\n" );
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "You feel a bit better.\n" );
+    }
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoHitEffects( CEffect *pEffect )
+{
+    switch( pEffect->m_dwFlags )
+    {
+    default:
+        break;
+    }
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoCreateEffects( CEffect *pEffect )
+{
+    switch( pEffect->m_dwFlags )
+    {
+    case EFFECT_FLAG_LIGHT:
+        return DoLightArea();
+        break;
+    }
+}
+
+JResult CPlayer::DoLightArea()
+{
+    CRoom *pRoom = g_pGame->GetDungeon()->InRoom( m_vPos );
+    if( pRoom )
+    {
+        pRoom->SetFlags( DUNG_FLAG_LIT );
+        g_pGame->GetDungeon()->LightRoom( pRoom );
+        return JSUCCESS;
+    }
+    return JBOGUSKEY;
+}
+
+JResult CPlayer::DoDestroyEffects( CEffect *pEffect )
+{
+    switch( pEffect->m_dwFlags )
+    {
+    case ITEM_FLAG_CURSED:
+        return DoRemoveCurse();
+        break;
+    }
+}
+
+JResult CPlayer::DoRemoveCurse()
+{
     CItem *cursed;
     CLink<CItem> *pLink = m_llEquipment->GetHead();
     while( pLink != NULL )
@@ -588,7 +732,48 @@ void CPlayer::DoReadScroll( CItem *pItem )
         pLink = pLink->next;
     }
     g_pGame->GetMsgs()->Printf( "It is no longer cursed.\n" );
-    // }
+
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoIntrinsicEffects( CEffect *pEffect )
+{
+    switch( pEffect->m_dwFlags )
+    {
+    default:
+        break;
+    }
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoRestoreEffects( CEffect *pEffect )
+{
+    switch( pEffect->m_dwFlags )
+    {
+    default:
+        break;
+    }
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoGainEffects( CEffect *pEffect )
+{
+    switch( pEffect->m_dwFlags )
+    {
+    default:
+        break;
+    }
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoLoseEffects( CEffect *pEffect )
+{
+    switch( pEffect->m_dwFlags )
+    {
+    default:
+        break;
+    }
+    return JSUCCESS;
 }
 
 bool CPlayer::IsDrinkable( CLink<CItem> *pLink )

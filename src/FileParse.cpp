@@ -206,11 +206,11 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 }
                 *end++ = NULL;
                 begin++;
-                if( g_Constants.CompareType( "MON_FLAG", begin ) ||
-                    g_Constants.CompareType( "EFFECT_FLAG", begin ) )
-                {
-                    curAttack->m_dwType = g_Constants.LookupString( begin );
-                }
+                // if( g_Constants.CompareType( "MON_FLAG", begin ) ||
+                //     g_Constants.CompareType( "EFFECT_FLAG", begin ) )
+                // {
+                curAttack->m_dwType = g_Constants.LookupString( begin );
+                // }
                 cur = end;
 
                 // effect flag (optional)

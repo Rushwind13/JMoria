@@ -12,16 +12,20 @@ endif
 EXEC = jmoria
 TEST_DIR = test/bin
 TEST_EXEC = AllSteps
+SCORE_FILE = Resources/Scores.txt
 SOURCES = $(wildcard src/*.cpp)
 OBJECTS = $(SOURCES:.cpp=.o)
 TEST_SOURCES = test/features/step_definitions/AllSteps.cpp
 TEST_OBJECTS = $(TEST_SOURCES:.cpp=.o)
 
-$(EXEC): $(OBJECTS)
+$(EXEC): $(OBJECTS) $(SCORE_FILE)
 	$(CC) $(OBJECTS) $(LD_FLAGS) -o $(EXEC)
 
 $(TEST_EXEC): $(TEST_DIR) $(TEST_OBJECTS) $(filter-out src/main.o, $(OBJECTS))
 	$(CC) $(TEST_OBJECTS) $(filter-out src/main.o, $(OBJECTS)) $(TEST_LD_FLAGS) $(LD_FLAGS) -o $(TEST_DIR)/$(TEST_EXEC)
+
+$(SCORE_FILE):
+	touch $(SCORE_FILE)
 
 $(TEST_DIR):
 	mkdir -p $(TEST_DIR)

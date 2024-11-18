@@ -94,7 +94,7 @@ Feature: Equipment
         When the player reads the scroll in inventory at 1
         Then The Dagger:27 is not cursed
 
-    @skip
+    # @skip
     Scenario: New Equipment replaces old equipment
         Given I have a Player
         Given I spawn a Dagger:27
@@ -108,7 +108,7 @@ Feature: Equipment
         Then The Dagger:27 is in inventory at -1
         And The Long Sword:28 is in equipment at 0
 
-    @skip
+    # @skip
     Scenario: New Equipment does not replace cursed equipment
         Given I have a Player
         Given I spawn a Dagger:27

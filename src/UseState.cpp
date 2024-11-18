@@ -384,10 +384,7 @@ bool CUseState::DoWield() { return g_pGame->GetPlayer()->Wield( m_pSelected ) ==
 //// Close commands
 bool CUseState::TestRemove() { return g_pGame->GetPlayer()->IsRemovable( m_pSelected ); }
 
-bool CUseState::DoRemove()
-{
-    return g_pGame->GetPlayer()->RemoveEquipment( m_pSelected ) == JSUCCESS;
-}
+bool CUseState::DoRemove() { return g_pGame->GetPlayer()->RemoveEquipment( m_pSelected ); }
 
 //// Drop commands
 bool CUseState::TestDrop() { return g_pGame->GetPlayer()->CanDropHere(); }

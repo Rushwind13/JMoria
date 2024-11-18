@@ -161,7 +161,7 @@ public:
     JResult Wield( CLink<CItem> *pItem );
 
     bool IsRemovable( CLink<CItem> *pLink );
-    JResult RemoveEquipment( CLink<CItem> *pLink );
+    bool RemoveEquipment( CLink<CItem> *pLink );
 
     bool IsDrinkable( CLink<CItem> *pLink );
     JResult Quaff( CLink<CItem> *pLink );

@@ -235,14 +235,14 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
     CItem *pItem = pLink->m_lpData;
 
     // You can only wield one thing of a given type at a time
-    CLink<CItem> *pCurrEquip = m_llEquipment->GetLink( pItem->EquipType(), true );
+    CLink<CItem> *pCurrEquip = m_llEquipment->GetLink( pItem->EquipType() );
     if( pCurrEquip != NULL && pCurrEquip->m_lpData != NULL &&
         pCurrEquip->m_lpData->EquipType() == pItem->EquipType() )
     {
         // So if you're already wearing something of this type, remove it and put it back in
         // inventory
-        JResult removed = RemoveEquipment( pCurrEquip );
-        if( removed != JSUCCESS )
+        bool removed = RemoveEquipment( pCurrEquip );
+        if( removed )
         {
             g_pGame->GetMsgs()->Printf( "You were wielding the %s...",
                                         pCurrEquip->m_lpData->GetName() );
@@ -278,10 +278,10 @@ bool CPlayer::IsRemovable( CLink<CItem> *pLink )
     return true;
 }
 
-JResult CPlayer::RemoveEquipment( CLink<CItem> *pLink )
+bool CPlayer::RemoveEquipment( CLink<CItem> *pLink )
 {
     if( !pLink )
-        return JBOGUSKEY;
+        return false;
 
     CItem *pItem = pLink->m_lpData;
     if( pItem && pItem->m_dwFlags & ITEM_FLAG_CURSED )
@@ -291,7 +291,7 @@ JResult CPlayer::RemoveEquipment( CLink<CItem> *pLink )
 
         JLog( LOG_LEVEL_WARN, true, "You can't remove the %s... it seems to be cursed.\n",
               pItem->GetName() );
-        return JBOGUSKEY;
+        return false;
     }
 
     m_llEquipment->Remove( pLink, false );
@@ -302,7 +302,7 @@ JResult CPlayer::RemoveEquipment( CLink<CItem> *pLink )
     m_fDamageModifier -= pItem->m_id->m_fBonusToDamage;
     m_fToHitModifier -= pItem->m_id->m_fBonusToHit;
 
-    return JSUCCESS;
+    return true;
 }
 
 float CPlayer::LightSource()

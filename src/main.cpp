@@ -1,4 +1,5 @@
 #include "JMDefs.h"
+#include <time.h>
 
 // The global game pointer
 CGame *g_pGame = NULL;

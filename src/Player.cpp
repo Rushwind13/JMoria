@@ -185,6 +185,24 @@ void CPlayer::DisplayStats()
         "Exp to Next: %d\n", (int)( m_pClass->m_fExpNeeded[(int)m_fLevel - 1] - m_fExperience ) );
     g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "\n" );
+    if( HasIntrinsic( EFFECT_FLAG_INFRA ) )
+        g_pGame->GetStats()->Printf( "Infravision\n" );
+    if( HasIntrinsic( EFFECT_FLAG_ESP ) )
+        g_pGame->GetStats()->Printf( "Telepathy\n" );
+    if( HasIntrinsic( EFFECT_FLAG_POISON ) )
+        g_pGame->GetStats()->Printf( "Poisoned\n" );
+    if( HasIntrinsic( EFFECT_FLAG_PARALYZE ) )
+        g_pGame->GetStats()->Printf( "Paralyzed\n" );
+    if( HasIntrinsic( EFFECT_FLAG_AFRAID ) )
+        g_pGame->GetStats()->Printf( "Afraid\n" );
+    if( HasIntrinsic( EFFECT_FLAG_BLIND ) )
+        g_pGame->GetStats()->Printf( "Blind\n" );
+    if( HasIntrinsic( EFFECT_FLAG_SLEEP ) )
+        g_pGame->GetStats()->Printf( "Asleep\n" );
+    if( HasIntrinsic( EFFECT_FLAG_CONFUSE ) )
+        g_pGame->GetStats()->Printf( "Confused\n" );
+    g_pGame->GetStats()->Printf( "\n" );
+    g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "Light: %d turns\n", (int)LightSource() );
 }
 
@@ -798,7 +816,9 @@ JResult CPlayer::DoIntrinsicEffects( CEffect *pEffect, float fDuration )
         return JBOGUSKEY;
     }
     CEffect *pActive = new CEffect( *pEffect );
+    JLog( LOG_LEVEL_WARN, true, "Intrinsics before setting flag: %d", m_dwIntrinsics );
     SetIntrinsic( pActive->m_dwFlags );
+    JLog( LOG_LEVEL_WARN, true, " after: %d\n", m_dwIntrinsics );
     if( pActive->m_dwModifier & EFFECT_MOD_TIMED != 0 )
     {
         pActive->m_fDuration = (int)fDuration;

@@ -160,9 +160,9 @@ public:
 
     bool CanDropHere();
 
-    void SetIntrinsic( const uint32 dwIntrinsic ) { m_dwIntrinsics != dwIntrinsic; };
+    void SetIntrinsic( const uint32 dwIntrinsic ) { m_dwIntrinsics |= dwIntrinsic; };
     void UnsetIntrinsic( const uint32 dwIntrinsic ) { m_dwIntrinsics &= ~dwIntrinsic; };
-    uint32 GetIntrinsic( const uint32 dwIntrinsic ) { return m_dwIntrinsics & dwIntrinsic != 0; };
+    bool HasIntrinsic( const uint32 dwIntrinsic ) { return ( m_dwIntrinsics & dwIntrinsic ) != 0; }
 
     bool IsWieldable( CLink<CItem> *pLink );
     JResult Wield( CLink<CItem> *pItem );

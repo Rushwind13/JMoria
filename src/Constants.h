@@ -163,7 +163,7 @@
 #define MON_FLAG_CRAWL 0x00000080
 
 #define MON_FLAG_WARM 0x00000100
-#define MON_FLAG_HAS_MIND 0x00000200
+#define MON_FLAG_EMPTY_MIND 0x00000200
 // #define MON_FLAG_x          0x00000400
 // #define MON_FLAG_x          0x00000800
 
@@ -452,7 +452,7 @@ public:
         m_StringTable[i++].Init( "MON_FLAG_BREATHE", MON_FLAG_BREATHE );
         m_StringTable[i++].Init( "MON_FLAG_CRAWL", MON_FLAG_CRAWL );
         m_StringTable[i++].Init( "MON_FLAG_WARM", MON_FLAG_WARM );
-        m_StringTable[i++].Init( "MON_FLAG_HAS_MIND", MON_FLAG_HAS_MIND );
+        m_StringTable[i++].Init( "MON_FLAG_EMPTY_MIND", MON_FLAG_EMPTY_MIND );
         m_StringTable[i++].Init( "MON_FLAG_BREED", MON_FLAG_BREED );
         m_StringTable[i++].Init( "MON_AI_DONTMOVE", MON_AI_DONTMOVE );
         m_StringTable[i++].Init( "MON_AI_100RANDOMMOVE", MON_AI_100RANDOMMOVE );

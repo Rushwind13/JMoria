@@ -816,7 +816,7 @@ JResult CPlayer::DoDestroyEffects( CEffect *pEffect, int dwFlags )
         if( dwFlags & ITEM_FLAG_CURSED )
         {
             JLog( LOG_LEVEL_DEBUG, true, "Cursing\n" );
-            return DoApplyCurse(); // TODO
+            return DoApplyCurse();
         }
         else
         {

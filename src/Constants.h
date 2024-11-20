@@ -478,7 +478,7 @@ public:
 
         m_StringTable[i++].Init( "EFFECT_FLAG_STONE_TO_MUD", EFFECT_FLAG_STONE_TO_MUD );
         m_StringTable[i++].Init( "EFFECT_FLAG_FUEL", EFFECT_FLAG_FUEL );
-        m_StringTable[i++].Init( "EFFECT_FLAG_FUEL", EFFECT_FLAG_INFRA );
+        m_StringTable[i++].Init( "EFFECT_FLAG_INFRA", EFFECT_FLAG_INFRA );
         m_StringTable[i++].Init( "EFFECT_FLAG_ESP", EFFECT_FLAG_ESP );
 
         m_StringTable[i++].Init( "EFFECT_FLAG_IDENTIFY", EFFECT_FLAG_IDENTIFY );

@@ -58,11 +58,33 @@ bool CPlayer::Update( float fCurTime )
         }
         m_fLastLightTime = (float)g_pGame->GetTime();
     }
+    UpdateActiveEffects( fCurTime );
     CheckDisturbance();
     DisplayStats();
     DisplayInventory( PLACEMENT_INV );
     DisplayEquipment( PLACEMENT_EQUIP );
     return true;
+}
+
+void CPlayer::UpdateActiveEffects( float fCurTime )
+{
+    CLink<CEffect> *pActive = m_llActiveEffects->GetHead();
+    CLink<CEffect> *pDelete = NULL;
+    CEffect *pEffect = NULL;
+    while( pActive != NULL )
+    {
+        pEffect = pActive->m_lpData;
+        pEffect->m_fDuration -= fCurTime;
+        if( pEffect->m_fDuration <= 0.0f )
+        {
+            UndoIntrinsicEffects( pEffect );
+            pDelete = pActive;
+            pActive = pActive->next;
+            m_llActiveEffects->Remove( pDelete, true );
+            continue;
+        }
+        pActive = pActive->next;
+    }
 }
 
 void CPlayer::CheckDisturbance()
@@ -543,7 +565,7 @@ JResult CPlayer::Quaff( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    JResult retval = DoEffects( plEffect );
+    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration );
     m_llInventory->Remove( pItem->m_pllLink, false ); // Potions are single-use
     return retval;
 }
@@ -552,7 +574,7 @@ JResult CPlayer::Read( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    JResult retval = DoEffects( plEffect );
+    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration );
     m_llInventory->Remove( pItem->m_pllLink, false ); // Scrolls are single-use
     return retval;
 }
@@ -564,11 +586,11 @@ JResult CPlayer::Magic( CLink<CItem> *pLink )
     // Quaff and Magic are similar but magic is multi-use
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    JResult retval = DoEffects( plEffect );
+    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration );
     return retval;
 }
 
-JResult CPlayer::DoEffects( CLink<CEffect> *plEffect )
+JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration )
 {
     CEffect *pEffect;
     while( plEffect != NULL )
@@ -594,7 +616,8 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect )
             DoDestroyEffects( pEffect );
             break;
         case EFFECT_TYPE_INTRINSIC:
-            DoIntrinsicEffects( pEffect );
+            JLog( LOG_LEVEL_ERROR, true, "Setting intrinsic\n" );
+            DoIntrinsicEffects( pEffect, fDuration );
             break;
         case EFFECT_TYPE_RESTORE:
             DoRestoreEffects( pEffect );
@@ -742,13 +765,71 @@ JResult CPlayer::DoRemoveCurse()
     return JSUCCESS;
 }
 
-JResult CPlayer::DoIntrinsicEffects( CEffect *pEffect )
+JResult CPlayer::DoIntrinsicEffects( CEffect *pEffect, float fDuration )
 {
     switch( pEffect->m_dwFlags )
     {
-    default:
+    case EFFECT_FLAG_AFRAID:
+        g_pGame->GetMsgs()->Printf( "You are afraid!\n" );
         break;
+    case EFFECT_FLAG_BLIND:
+        g_pGame->GetMsgs()->Printf( "You are blind.\n" );
+        break;
+    case EFFECT_FLAG_CONFUSE:
+        g_pGame->GetMsgs()->Printf( "You are confused.\n" );
+        break;
+    case EFFECT_FLAG_POISON:
+        g_pGame->GetMsgs()->Printf( "You are poisoned.\n" );
+        break;
+    case EFFECT_FLAG_PARALYZE:
+        g_pGame->GetMsgs()->Printf( "You can't move!\n" );
+        break;
+    case EFFECT_FLAG_SLEEP:
+        g_pGame->GetMsgs()->Printf( "You fall asleep.\n" );
+        break;
+    case EFFECT_FLAG_INFRA:
+        g_pGame->GetMsgs()->Printf( "Your eyes feel tingly.\n" );
+        break;
+    case EFFECT_FLAG_ESP:
+        g_pGame->GetMsgs()->Printf( "You sense stray thoughts around you.\n" );
+        break;
+    default:
+        JLog( LOG_LEVEL_ERROR, true, "unknown intrinsic type: %d\n", pEffect->m_dwFlags );
+        return JBOGUSKEY;
     }
+    CEffect *pActive = new CEffect( *pEffect );
+    SetIntrinsic( pActive->m_dwFlags );
+    if( pActive->m_dwModifier & EFFECT_MOD_TIMED != 0 )
+    {
+        pActive->m_fDuration = (int)fDuration;
+        m_llActiveEffects->Add( pActive, pActive->m_dwFlags );
+    }
+    return JSUCCESS;
+}
+
+JResult CPlayer::UndoIntrinsicEffects( CEffect *pEffect )
+{
+    switch( pEffect->m_dwFlags )
+    {
+    case EFFECT_FLAG_AFRAID:
+    case EFFECT_FLAG_BLIND:
+    case EFFECT_FLAG_CONFUSE:
+    case EFFECT_FLAG_POISON:
+    case EFFECT_FLAG_PARALYZE:
+    case EFFECT_FLAG_SLEEP:
+        return DoHealEffects( pEffect );
+        break;
+    case EFFECT_FLAG_INFRA:
+        g_pGame->GetMsgs()->Printf( "Your eyes stop tinging.\n" );
+        break;
+    case EFFECT_FLAG_ESP:
+        g_pGame->GetMsgs()->Printf( "You no longer sense stray thoughts.\n" );
+        break;
+    default:
+        JLog( LOG_LEVEL_ERROR, true, "unknown intrinsic type: %d\n", pEffect->m_dwFlags );
+        return JBOGUSKEY;
+    }
+    UnsetIntrinsic( pEffect->m_dwFlags );
     return JSUCCESS;
 }
 

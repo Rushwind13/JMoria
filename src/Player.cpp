@@ -606,7 +606,7 @@ JResult CPlayer::Quaff( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration );
+    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
     if( pItem->IsStackable() && pItem->m_dwCount > 1 )
     {
         pItem->m_dwCount--;
@@ -622,7 +622,7 @@ JResult CPlayer::Read( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration );
+    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
     if( pItem->IsStackable() && pItem->m_dwCount > 1 )
     {
         pItem->m_dwCount--;
@@ -641,11 +641,11 @@ JResult CPlayer::Magic( CLink<CItem> *pLink )
     // Quaff and Magic are similar but magic is multi-use
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration );
+    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
     return retval;
 }
 
-JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration )
+JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwFlags )
 {
     CEffect *pEffect;
     while( plEffect != NULL )
@@ -668,7 +668,7 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration )
             break;
         case EFFECT_TYPE_DESTROY:
             JLog( LOG_LEVEL_ERROR, true, "Destroying\n" );
-            DoDestroyEffects( pEffect );
+            DoDestroyEffects( pEffect, dwFlags );
             break;
         case EFFECT_TYPE_INTRINSIC:
             JLog( LOG_LEVEL_ERROR, true, "Setting intrinsic\n" );
@@ -706,7 +706,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
         {
             g_pGame->GetMsgs()->Printf( "You are no longer afraid.\n" );
             UnsetIntrinsic( pEffect->m_dwFlags );
-\        }
+        }
         break;
     case EFFECT_FLAG_BLIND:
         if( needsHeal )
@@ -808,14 +808,21 @@ JResult CPlayer::DoLightArea()
     return JBOGUSKEY;
 }
 
-JResult CPlayer::DoDestroyEffects( CEffect *pEffect )
+JResult CPlayer::DoDestroyEffects( CEffect *pEffect, int dwFlags )
 {
     switch( pEffect->m_dwFlags )
     {
     case ITEM_FLAG_CURSED:
-        JLog( LOG_LEVEL_ERROR, true, "Uncursing\n" );
-
-        return DoRemoveCurse();
+        if( dwFlags & ITEM_FLAG_CURSED )
+        {
+            JLog( LOG_LEVEL_DEBUG, true, "Cursing\n" );
+            return DoApplyCurse(); // TODO
+        }
+        else
+        {
+            JLog( LOG_LEVEL_ERROR, true, "Uncursing\n" );
+            return DoRemoveCurse();
+        }
         break;
     }
 }
@@ -828,13 +835,34 @@ JResult CPlayer::DoRemoveCurse()
     {
         if( pLink->m_lpData->m_dwFlags & ITEM_FLAG_CURSED )
         {
-            JLog( LOG_LEVEL_ERROR, true, "Item is cursed %s\n", pLink->m_lpData->GetName() );
+            JLog( LOG_LEVEL_ERROR, true, "Item is cursed %s, uncursing it.\n",
+                  pLink->m_lpData->GetName() );
             pLink->m_lpData->m_dwFlags &= ~ITEM_FLAG_CURSED;
             break;
         }
         pLink = pLink->next;
     }
     g_pGame->GetMsgs()->Printf( "It is no longer cursed.\n" );
+
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoApplyCurse()
+{
+    CItem *cursed;
+    CLink<CItem> *pLink = m_llEquipment->GetHead();
+    while( pLink != NULL )
+    {
+        if( pLink->m_lpData->m_dwFlags | ITEM_FLAG_CURSED )
+        {
+            JLog( LOG_LEVEL_ERROR, true, "Item is not cursed %s, cursing it.\n",
+                  pLink->m_lpData->GetName() );
+            pLink->m_lpData->m_dwFlags |= ITEM_FLAG_CURSED;
+            break;
+        }
+        pLink = pLink->next;
+    }
+    g_pGame->GetMsgs()->Printf( "It is now cursed.\n" );
 
     return JSUCCESS;
 }

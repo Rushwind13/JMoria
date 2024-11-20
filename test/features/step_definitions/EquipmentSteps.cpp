@@ -257,18 +257,20 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment) at ([-0-9]+)$"
     }
 }
 
-THEN( "^The ([A-Za-z ]+):([0-9]+) is not cursed$" )
+THEN( "^the equipped ([A-Za-z ]+):([0-9]+) at ([-0-9]+) (is|is not) cursed$" )
 {
     REGEX_PARAM( std::string, item );
     REGEX_PARAM( int, item_id );
+    REGEX_PARAM( int, equip_id );
+    REGEX_PARAM( std::string, choice );
+
     ScenarioScope<TestCtx> context;
-    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
-    int index = pid->m_dwIndex;
     JLinkList<CItem> *pList = g_pGame->GetPlayer()->m_llEquipment;
 
-    CLink<CItem> *pLink = pList->GetLink( index );
-    bool b_isCursed = pLink->m_lpData->m_dwFlags & ITEM_FLAG_CURSED;
-    JLog( LOG_LEVEL_ERROR, true, "Cursed state is %d\n", b_isCursed );
+    CLink<CItem> *pLink = pList->GetLink( equip_id );
+    int actual = pLink->m_lpData->m_dwFlags & ITEM_FLAG_CURSED;
+    int expected = ( choice == "is" ) ? ITEM_FLAG_CURSED : 0;
 
-    EXPECT_FALSE( b_isCursed );
+    JLog( LOG_LEVEL_DEBUG, true, "Cursed state is %d\n", actual );
+    EXPECT_EQ( actual, expected );
 }

@@ -21,6 +21,9 @@ CStringInputState::CStringInputState() : m_cCommand( 0 )
 {
     memset( m_szInput, 0, MAX_STRING_LENGTH );
     m_pKeyHandlers[SI_INIT] = &CStringInputState::OnHandleInit;
+    m_pKeyHandlers[SI_FLAG] = &CStringInputState::OnHandleFlag;
+    m_pKeyHandlers[SI_ITEM] = &CStringInputState::OnHandleItem;
+    m_pKeyHandlers[SI_MONSTER] = &CStringInputState::OnHandleMonster;
     m_pKeyHandlers[SI_NAME] = &CStringInputState::OnHandleName;
     m_pKeyHandlers[SI_HAGGLE] = &CStringInputState::OnHandleHaggle;
 
@@ -68,6 +71,129 @@ int CStringInputState::OnHandleName( SDL_Keysym *keysym )
     JLog( LOG_LEVEL_NOISE, true, "NAME modifier got a alpha\n" );
     g_pGame->GetMsgs()->Clear();
     g_pGame->GetMsgs()->Printf( "Character Name: %s", m_szInput );
+
+    return 0;
+}
+
+int CStringInputState::OnHandleItem( SDL_Keysym *keysym )
+{
+    int retval;
+    JLog( LOG_LEVEL_DEBUG, true, "Handling ITEM modifier\n" );
+    retval = OnBaseHandleKey( keysym );
+
+    if( retval == JRESETSTATE )
+    {
+        return 0;
+    }
+
+    if( retval == JCOMPLETESTATE )
+    {
+        JLog( LOG_LEVEL_DEBUG, true,
+              "ITEM modifier resetting game state to COMMAND, ITEM state to INIT\n" );
+        // One way or another, we're done with this state now.
+
+        CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( m_szInput );
+        JVector vPos = g_pGame->GetPlayer()->m_vPos;
+        CItem::CreateItem( pid, vPos );
+
+        memset( m_szInput, 0, MAX_STRING_LENGTH );
+        g_pGame->GetMsgs()->Clear();
+        ResetToState( STATE_COMMAND );
+    }
+
+    if( retval != JSUCCESS )
+    {
+        JLog( LOG_LEVEL_WARN, true, "ITEM cmd still waiting for a Alphanumeric key.\n" );
+        return 0;
+    }
+
+    // We got a alpha key; append it to the name
+    JLog( LOG_LEVEL_NOISE, true, "ITEM modifier got a alpha\n" );
+    g_pGame->GetMsgs()->Clear();
+    g_pGame->GetMsgs()->Printf( "Item Name: %s", m_szInput );
+
+    return 0;
+}
+
+int CStringInputState::OnHandleFlag( SDL_Keysym *keysym )
+{
+    int retval;
+    JLog( LOG_LEVEL_DEBUG, true, "Handling FLAG modifier\n" );
+    retval = OnBaseHandleKey( keysym );
+
+    if( retval == JRESETSTATE )
+    {
+        return 0;
+    }
+
+    if( retval == JCOMPLETESTATE )
+    {
+        JLog( LOG_LEVEL_DEBUG, true,
+              "FLAG modifier resetting game state to COMMAND, FLAG state to INIT\n" );
+        // One way or another, we're done with this state now.
+
+        int dwFlag = g_Constants.LookupString( m_szInput );
+        if( dwFlag != -1 )
+        {
+            JLog( LOG_LEVEL_INFO, true, "Setting flag %s = %d\n", m_szInput, dwFlag );
+            g_pGame->GetPlayer()->SetIntrinsic( dwFlag );
+        }
+
+        memset( m_szInput, 0, MAX_STRING_LENGTH );
+        g_pGame->GetMsgs()->Clear();
+        ResetToState( STATE_COMMAND );
+    }
+
+    if( retval != JSUCCESS )
+    {
+        JLog( LOG_LEVEL_WARN, true, "FLAG cmd still waiting for a Alphanumeric key.\n" );
+        return 0;
+    }
+
+    // We got a alpha key; append it to the name
+    JLog( LOG_LEVEL_NOISE, true, "FLAG modifier got a alpha\n" );
+    g_pGame->GetMsgs()->Clear();
+    g_pGame->GetMsgs()->Printf( "Flag Name: %s", m_szInput );
+
+    return 0;
+}
+
+int CStringInputState::OnHandleMonster( SDL_Keysym *keysym )
+{
+    int retval;
+    JLog( LOG_LEVEL_DEBUG, true, "Handling MONSTER modifier\n" );
+    retval = OnBaseHandleKey( keysym );
+
+    if( retval == JRESETSTATE )
+    {
+        return 0;
+    }
+
+    if( retval == JCOMPLETESTATE )
+    {
+        JLog( LOG_LEVEL_DEBUG, true,
+              "MONSTER modifier resetting game state to COMMAND, MONSTER state to INIT\n" );
+        // One way or another, we're done with this state now.
+
+        CMonsterDef *pmd = g_pGame->GetDungeon()->GetMonsterDef( m_szInput );
+        JIVector vPos( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+        CMonster::CreateMonster( pmd, vPos, true );
+
+        memset( m_szInput, 0, MAX_STRING_LENGTH );
+        g_pGame->GetMsgs()->Clear();
+        ResetToState( STATE_COMMAND );
+    }
+
+    if( retval != JSUCCESS )
+    {
+        JLog( LOG_LEVEL_WARN, true, "MONSTER cmd still waiting for a Alphanumeric key.\n" );
+        return 0;
+    }
+
+    // We got a alpha key; append it to the name
+    JLog( LOG_LEVEL_NOISE, true, "MONSTER modifier got a alpha\n" );
+    g_pGame->GetMsgs()->Clear();
+    g_pGame->GetMsgs()->Printf( "Monster Name: %s", m_szInput );
 
     return 0;
 }
@@ -137,6 +263,15 @@ int CStringInputState::OnHandleInit( SDL_Keysym *keysym )
             break;
         case SDLK_p:
             mod = SI_HAGGLE;
+            break;
+        case SDLK_f:
+            mod = SI_FLAG;
+            break;
+        case SDLK_i:
+            mod = SI_ITEM;
+            break;
+        case SDLK_s:
+            mod = SI_MONSTER;
             break;
         default:
             JLog( LOG_LEVEL_ERROR, true,
@@ -222,6 +357,45 @@ bool CStringInputState::TestHaggle()
 }
 
 bool CStringInputState::DoHaggle()
+{
+    // append this numeral to the running string (only send it back when complete)
+    return false;
+}
+
+//// Haggle commands
+bool CStringInputState::TestFlag()
+{
+    // Make sure that it's a numeric input
+    return false;
+}
+
+bool CStringInputState::DoFlag()
+{
+    // append this numeral to the running string (only send it back when complete)
+    return false;
+}
+
+//// Haggle commands
+bool CStringInputState::TestItem()
+{
+    // Make sure that it's a numeric input
+    return false;
+}
+
+bool CStringInputState::DoItem()
+{
+    // append this numeral to the running string (only send it back when complete)
+    return false;
+}
+
+//// Haggle commands
+bool CStringInputState::TestMonster()
+{
+    // Make sure that it's a numeric input
+    return false;
+}
+
+bool CStringInputState::DoMonster()
 {
     // append this numeral to the running string (only send it back when complete)
     return false;

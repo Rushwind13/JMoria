@@ -30,6 +30,9 @@ private:
     bool IsHelpCommand( SDL_Keysym *keysym ) { return false; }
     bool IsRestCommand( SDL_Keysym *keysym );
     bool IsTeleportCommand( SDL_Keysym *keysym );
+    bool IsSetIntrinsicCommand( SDL_Keysym *keysym );
+    bool IsCreateItemCommand( SDL_Keysym *keysym );
+    bool IsSummonMonsterCommand( SDL_Keysym *keysym );
     bool IsStringInputCommand( SDL_Keysym *keysym );
     void ResetToState( int newstate ) {}
 

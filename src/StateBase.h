@@ -99,6 +99,9 @@ protected:
         if( keysym->sym == SDLK_SPACE )
             return ' ';
 
+        if( keysym->sym == SDLK_MINUS && keysym->mod & KMOD_SHIFT )
+            return '_';
+
         char retval = GetAlpha( keysym );
         if( retval == nul )
         {

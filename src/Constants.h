@@ -619,7 +619,7 @@ public:
         return -1;
     }
 
-    char *IndexToString( const int flag_set, const int dwIndex )
+    const char *IndexToString( const int flag_set, const int dwIndex )
     {
         if( dwIndex < 0 || dwIndex >= NUM_STRINGS )
             return "";

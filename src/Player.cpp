@@ -185,25 +185,29 @@ void CPlayer::DisplayStats()
         "Exp to Next: %d\n", (int)( m_pClass->m_fExpNeeded[(int)m_fLevel - 1] - m_fExperience ) );
     g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "\n" );
-    if( HasIntrinsic( EFFECT_FLAG_INFRA ) )
+    if( GetIntrinsic( EFFECT_FLAG_INFRA ) != 0 )
         g_pGame->GetStats()->Printf( "Infravision\n" );
-    if( HasIntrinsic( EFFECT_FLAG_ESP ) )
+    if( GetIntrinsic( EFFECT_FLAG_ESP ) != 0 )
         g_pGame->GetStats()->Printf( "Telepathy\n" );
-    if( HasIntrinsic( EFFECT_FLAG_POISON ) )
+    if( GetIntrinsic( EFFECT_FLAG_POISON ) != 0 )
         g_pGame->GetStats()->Printf( "Poisoned\n" );
-    if( HasIntrinsic( EFFECT_FLAG_PARALYZE ) )
+    if( GetIntrinsic( EFFECT_FLAG_PARALYZE ) != 0 )
         g_pGame->GetStats()->Printf( "Paralyzed\n" );
-    if( HasIntrinsic( EFFECT_FLAG_AFRAID ) )
+    if( GetIntrinsic( EFFECT_FLAG_AFRAID ) != 0 )
         g_pGame->GetStats()->Printf( "Afraid\n" );
-    if( HasIntrinsic( EFFECT_FLAG_BLIND ) )
+    if( GetIntrinsic( EFFECT_FLAG_BLIND ) != 0 )
         g_pGame->GetStats()->Printf( "Blind\n" );
-    if( HasIntrinsic( EFFECT_FLAG_SLEEP ) )
+    if( GetIntrinsic( EFFECT_FLAG_SLEEP ) != 0 )
         g_pGame->GetStats()->Printf( "Asleep\n" );
-    if( HasIntrinsic( EFFECT_FLAG_CONFUSE ) )
+    if( GetIntrinsic( EFFECT_FLAG_CONFUSE ) != 0 )
         g_pGame->GetStats()->Printf( "Confused\n" );
     g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "Light: %d turns\n", (int)LightSource() );
+    g_pGame->GetStats()->Printf( "\n" );
+    g_pGame->GetStats()->Printf( "\n" );
+    if( IsWizard() )
+        g_pGame->GetStats()->Printf( "** WIZARD MODE **\n" );
 }
 
 void CPlayer::DisplayInventory( uint8 dwPlacement )
@@ -816,10 +820,8 @@ JResult CPlayer::DoIntrinsicEffects( CEffect *pEffect, float fDuration )
         return JBOGUSKEY;
     }
     CEffect *pActive = new CEffect( *pEffect );
-    JLog( LOG_LEVEL_WARN, true, "Intrinsics before setting flag: %d", m_dwIntrinsics );
     SetIntrinsic( pActive->m_dwFlags );
-    JLog( LOG_LEVEL_WARN, true, " after: %d\n", m_dwIntrinsics );
-    if( pActive->m_dwModifier & EFFECT_MOD_TIMED != 0 )
+    if( ( pActive->m_dwModifier & EFFECT_MOD_TIMED ) != 0 )
     {
         pActive->m_fDuration = (int)fDuration;
         m_llActiveEffects->Add( pActive, pActive->m_dwFlags );
@@ -930,6 +932,7 @@ void CPlayer::SetWizard()
 {
     if( !m_bWizardMode )
     {
+        SetName( "** Wizard Mode **" );
         g_pGame->GetMsgs()->Printf( "*** Wizard Mode: On *** your score will not be saved.\n" );
         JLog( LOG_LEVEL_WARN, true, "*** Wizard Mode: On *** your score will not be saved.\n" );
     }

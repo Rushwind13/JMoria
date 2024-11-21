@@ -192,7 +192,7 @@ float CMonster::Attack()
     return fRoll;
 }
 
-char *CMonster::AttackEffect()
+const char *CMonster::AttackEffect()
 {
     if( m_pCurrentAttack == NULL )
         return "thoughts and prayers";
@@ -212,7 +212,7 @@ char *CMonster::AttackEffect()
     return "hot air";
 }
 
-char *CMonster::AttackFlavorText()
+const char *CMonster::AttackFlavorText()
 {
     if( m_pCurrentAttack == NULL )
         return "misses";

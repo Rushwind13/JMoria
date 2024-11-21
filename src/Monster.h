@@ -134,8 +134,8 @@ public:
 
     float Attack();
     void ChooseAttack();
-    char *AttackFlavorText();
-    char *AttackEffect();
+    const char *AttackFlavorText();
+    const char *AttackEffect();
     void AttackDone();
     float Damage( float fDamageMult );
 

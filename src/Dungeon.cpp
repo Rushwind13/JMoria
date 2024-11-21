@@ -573,22 +573,24 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
     uint32 esp = EFFECT_FLAG_ESP;
     uint32 empty_mind = MON_FLAG_EMPTY_MIND;
     if( dwFlags >= esp )
-        JLog( LOG_LEVEL_INFO, true, "performing esp check\n" );
+        JLog( LOG_LEVEL_NOISE, true, "performing esp check\n" );
     if( ( ( dwFlags & esp ) == esp ) && ( ( dwFlags & empty_mind ) == 0 ) )
     {
-        JLog( LOG_LEVEL_INFO, true, "detected a thinking mind at <%d %d>\n",
+        JLog( LOG_LEVEL_DEBUG, true, "detected a thinking mind at <%d %d>\n",
               VEC_EXPAND( vTarget ) );
-        return Util::Nearby( vSource, SIGHT_DISTANCE_ESP ).Contains( vTarget );
+        if( Util::Nearby( vSource, SIGHT_DISTANCE_ESP ).Contains( vTarget ) )
+            return true;
     }
 
     // check for both infravision and warm body
     uint32 heat_sense = ( EFFECT_FLAG_INFRA | MON_FLAG_WARM );
     if( dwFlags >= heat_sense )
-        JLog( LOG_LEVEL_INFO, true, "performing infra check\n" );
+        JLog( LOG_LEVEL_NOISE, true, "performing infra check\n" );
     if( ( dwFlags & heat_sense ) == heat_sense )
     {
-        JLog( LOG_LEVEL_INFO, true, "sensed a heat source at <%d %d>\n", VEC_EXPAND( vTarget ) );
-        return Util::Nearby( vSource, SIGHT_DISTANCE_INFRA ).Contains( vTarget );
+        JLog( LOG_LEVEL_DEBUG, true, "sensed a heat source at <%d %d>\n", VEC_EXPAND( vTarget ) );
+        if( Util::Nearby( vSource, SIGHT_DISTANCE_INFRA ).Contains( vTarget ) )
+            return true;
     }
 
     // check for "in visible range" before doing the

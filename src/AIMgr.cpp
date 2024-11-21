@@ -75,7 +75,8 @@ bool CAIBrain::Update( float fCurTime )
 
     if( !g_pGame->GetPlayer()->m_bIsDisturbed )
     {
-        if( g_pGame->GetDungeon()->CanSeePlayer( m_vPos ) )
+        uint32 dwFlags = m_pParent->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND );
+        if( g_pGame->GetDungeon()->PlayerCanSee( m_vPos, dwFlags ) )
         {
             g_pGame->GetDungeon()->DisturbPlayer();
         }
@@ -201,11 +202,11 @@ void CAIBrain::CollideWithPlayer()
     if( bHit )
     {
         // TODO: make this differ based on attack effect type
-        sprintf( szStatus, m_pParent->AttackFlavorText() );
+        Util::jstrcpy( szStatus, m_pParent->AttackFlavorText() );
     }
     else
     {
-        sprintf( szStatus, "misses" );
+        Util::jstrcpy( szStatus, "misses" );
     }
     g_pGame->GetMsgs()->Printf( "The %s %s you.\n", m_pParent->GetName(), szStatus );
 

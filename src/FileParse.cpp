@@ -161,8 +161,9 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 char *c = strtok( szValue, "," );
                 while( c != NULL )
                 {
-                    if( g_Constants.CompareType( "MON_FLAG", c ) )
+                    // if( g_Constants.CompareType( "MON_FLAG", c ) )
                     {
+                        JLog( LOG_LEVEL_NOISE, true, "found flag: %s\n", c );
                         mdIn.m_dwFlags |= g_Constants.LookupString( c );
                     }
                     c = strtok( NULL, "," );
@@ -189,7 +190,7 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 }
                 *end++ = NULL;
                 begin++;
-                if( g_Constants.CompareType( "EFFECT_TYPE", begin ) )
+                // if( g_Constants.CompareType( "EFFECT_TYPE", begin ) )
                 {
                     curAttack->m_dwEffect = g_Constants.LookupString( begin );
                 }
@@ -220,7 +221,7 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 {
                     *end++ = NULL;
                     begin++;
-                    if( g_Constants.CompareType( "EFFECT_FLAG", begin ) )
+                    // if( g_Constants.CompareType( "EFFECT_FLAG", begin ) )
                     {
                         curAttack->m_dwEffectFlags = g_Constants.LookupString( begin );
                         JLog( LOG_LEVEL_NOISE, true, "Found an Effect Flag: %s\n", begin );
@@ -387,7 +388,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 char *c = strtok( szValue, "," );
                 while( c != NULL )
                 {
-                    if( g_Constants.CompareType( "ITEM_FLAG", c ) )
+                    // if( g_Constants.CompareType( "ITEM_FLAG", c ) )
                     {
                         idIn.m_dwFlags |= g_Constants.LookupString( c );
                     }
@@ -439,9 +440,9 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 }
                 *end++ = NULL;
                 begin++;
-                if( g_Constants.CompareType( "EFFECT_TYPE", begin ) )
+                // if( g_Constants.CompareType( "EFFECT_TYPE", begin ) )
                 {
-                    printf( "%s ", begin );
+                    JLog( LOG_LEVEL_NOISE, true, "%s ", begin );
                     curEffect->m_dwEffect = g_Constants.LookupString( begin );
                 }
                 cur = end;
@@ -460,7 +461,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 //     g_Constants.CompareType( "ITEM_FLAG", begin ) )
                 // {
 
-                printf( "%s ", begin );
+                JLog( LOG_LEVEL_NOISE, false, "%s ", begin );
                 curEffect->m_dwFlags = g_Constants.LookupString( begin );
                 // }
                 cur = end;
@@ -470,13 +471,13 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 end = strchr( cur, '>' );
                 if( begin != NULL && end != NULL )
                 {
-                    JLog( LOG_LEVEL_INFO, true, "Found effect modifier\n" );
+                    JLog( LOG_LEVEL_NOISE, true, "Found effect modifier\n" );
                     *end++ = NULL;
                     begin++;
-                    if( g_Constants.CompareType( "EFFECT_MOD", begin ) )
+                    // if( g_Constants.CompareType( "EFFECT_MOD", begin ) )
                     {
 
-                        printf( "%s ", begin );
+                        JLog( LOG_LEVEL_NOISE, false, "%s ", begin );
                         curEffect->m_dwModifier = g_Constants.LookupString( begin );
                     }
                     cur = end;
@@ -499,7 +500,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 // curEffect->m_szAmount = new char[Util::jstrlen( begin ) + 1];
                 // Util::jstrcpy( curEffect->m_szAmount, begin );
 
-                printf( "\n" );
+                JLog( LOG_LEVEL_NOISE, false, "\n" );
                 // store it
                 idIn.m_llEffects->Add( curEffect );
             }

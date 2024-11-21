@@ -119,7 +119,8 @@ public:
     CAttack *m_pCurrentAttack;
     CMonsterDef *m_md;
     CLink<CMonster> *m_pllLink;
-    CAIBrain *m_pBrain; // this is the place to get info for the AI.
+    CAIBrain *m_pBrain;       // this is the place to get info for the AI.
+    uint32 m_dwActiveEffects; // this monster is confused, blind, ...
 
     char *GetName()
     {
@@ -133,8 +134,8 @@ public:
 
     float Attack();
     void ChooseAttack();
-    char *AttackFlavorText();
-    char *AttackEffect();
+    const char *AttackFlavorText();
+    const char *AttackEffect();
     void AttackDone();
     float Damage( float fDamageMult );
 

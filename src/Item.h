@@ -7,12 +7,13 @@
 class CEffect
 {
 public:
-    CEffect() : m_dwEffect( -1 ), m_szAmount( NULL ) {}
+    CEffect() : m_dwEffect( -1 ), m_szAmount( NULL ), m_fDuration( 0 ) {}
     ~CEffect() {}
     int m_dwEffect;
     int m_dwFlags;
     int m_dwModifier;
     char *m_szAmount;
+    float m_fDuration;
 };
 
 class CItemDef

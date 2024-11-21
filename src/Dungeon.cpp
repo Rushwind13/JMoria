@@ -559,7 +559,7 @@ void CDungeon::LightRoom( CRoom *pRoom )
     pRoom->SetFlags( DUNG_FLAG_SEEN );
 }
 
-bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget )
+bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFlags )
 {
     // can see things in the same room, if the room is LIT
     CRoom *prTarget = m_dmCurLevel->InRoom( vTarget );
@@ -567,13 +567,41 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget )
     if( prTarget && prTarget->HasFlags( DUNG_FLAG_SEEN ) && prTarget == prSource )
         return true;
 
-    JRect rcVisible = Util::Nearby( vSource, PLAYER_SIGHT_DISTANCE );
+    // check for "see through walls" effects
 
-    if( !rcVisible.Contains( vTarget ) )
+    // check for ESP and not EMPTY_MIND
+    uint32 esp = EFFECT_FLAG_ESP;
+    uint32 empty_mind = MON_FLAG_EMPTY_MIND;
+    if( dwFlags >= esp )
+        JLog( LOG_LEVEL_NOISE, true, "performing esp check\n" );
+    if( ( ( dwFlags & esp ) == esp ) && ( ( dwFlags & empty_mind ) == 0 ) )
+    {
+        JLog( LOG_LEVEL_DEBUG, true, "detected a thinking mind at <%d %d>\n",
+              VEC_EXPAND( vTarget ) );
+        if( Util::Nearby( vSource, SIGHT_DISTANCE_ESP ).Contains( vTarget ) )
+            return true;
+    }
+
+    // check for both infravision and warm body
+    uint32 heat_sense = ( EFFECT_FLAG_INFRA | MON_FLAG_WARM );
+    if( dwFlags >= heat_sense )
+        JLog( LOG_LEVEL_NOISE, true, "performing infra check\n" );
+    if( ( dwFlags & heat_sense ) == heat_sense )
+    {
+        JLog( LOG_LEVEL_DEBUG, true, "sensed a heat source at <%d %d>\n", VEC_EXPAND( vTarget ) );
+        if( Util::Nearby( vSource, SIGHT_DISTANCE_INFRA ).Contains( vTarget ) )
+            return true;
+    }
+
+    // check for "in visible range" before doing the
+    // more expensive line-of-sight test
+    if( !Util::Nearby( vSource, SIGHT_DISTANCE_PLAYER ).Contains( vTarget ) )
         return false;
 
-    // Check along the line between the player and the position
-    // for obstacles
+    // No "see through walls" effects are active
+    // Check for obstacles along the line between
+    // the player and the position
+    //
     // Bresenham Line Algorithm
     // TODO: move this somewhere to be used for ranged and magic targeting
     JLinkList<JIVector> *pLine = new JLinkList<JIVector>;
@@ -588,7 +616,7 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget )
     {
         if( vCurrent != vSource )
         {
-            vTest.Init( VEC_EXPAND( vTarget ) );
+            vTest.Init( VEC_EXPAND( vCurrent ) );
             int collide_type = g_pGame->GetDungeon()->IsWalkableFor( vTest );
             if( collide_type != DUNG_COLL_NO_COLLISION )
             {
@@ -610,7 +638,7 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget )
     return true;
 }
 
-bool CDungeon::CanSeePlayer( JVector vCheck )
+bool CDungeon::PlayerCanSee( JVector vCheck, uint32 dwFlags )
 {
     if( g_pGame->GetPlayer()->IsWizard() )
         return true;
@@ -619,7 +647,9 @@ bool CDungeon::CanSeePlayer( JVector vCheck )
     JIVector viCheck( VEC_EXPAND( vCheck ) );
     JIVector viPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
 
-    return CanSeeEachOther( viCheck, viPlayer );
+    dwFlags |= g_pGame->GetPlayer()->GetIntrinsic( EFFECT_FLAG_ESP | EFFECT_FLAG_INFRA );
+
+    return CanSeeEachOther( viPlayer, viCheck, dwFlags );
 }
 
 bool CDungeon::IsOnScreen( JVector vPos )
@@ -701,8 +731,10 @@ void CDungeon::DrawDungeon()
                 ( g_pGame->GetPlayer()->IsWizard() &&
                   ( curTile->m_dwFlags & ( DUNG_FLAG_SEEN | DUNG_FLAG_LIT ) ) == 0 ) ||
                 vScreen == vPlayer ||
-                ( CanSeePlayer( vScreen ) &&
-                  ( curTile->m_pCurItem != NULL || curTile->m_pCurMonster != NULL ) ) )
+                ( curTile->m_pCurMonster != NULL &&
+                  PlayerCanSee( vScreen, curTile->m_pCurMonster->m_md->m_dwFlags &
+                                             ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) ) ||
+                ( curTile->m_pCurItem != NULL && PlayerCanSee( vScreen, MON_FLAG_EMPTY_MIND ) ) )
             {
                 continue;
             }
@@ -723,7 +755,8 @@ void CDungeon::DrawItems()
     while( pLink != NULL )
     {
         pItem = pLink->m_lpData;
-        if( pItem && IsOnScreen( pItem->m_vPos ) && CanSeePlayer( pItem->m_vPos ) )
+        if( pItem && IsOnScreen( pItem->m_vPos ) &&
+            PlayerCanSee( pItem->m_vPos, MON_FLAG_EMPTY_MIND ) )
         {
             pItem->Draw();
         }
@@ -739,7 +772,8 @@ void CDungeon::DrawMonsters()
     while( pLink != NULL )
     {
         pMon = pLink->m_lpData;
-        if( pMon && IsOnScreen( pMon->GetPos() ) && CanSeePlayer( pMon->GetPos() ) )
+        uint32 dwFlags = pMon->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND );
+        if( pMon && IsOnScreen( pMon->GetPos() ) && PlayerCanSee( pMon->GetPos(), dwFlags ) )
         {
             pMon->Draw();
         }

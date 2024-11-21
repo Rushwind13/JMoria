@@ -80,8 +80,8 @@ public:
     bool Update( float fCurTime );
     JResult UpdateSeen();
     void LightRoom( CRoom *pRoom );
-    bool CanSeeEachOther( JIVector vSource, JIVector vTarget );
-    bool CanSeePlayer( JVector vCheck );
+    bool CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFlags = 0 );
+    bool PlayerCanSee( JVector vCheck, uint32 dwFlags = 0 );
     void DisturbPlayer();
 
     JResult OnChangeLevel( const int delta );

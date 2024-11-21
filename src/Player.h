@@ -12,7 +12,9 @@ class CMonster;
 #define PLAYER_BASE_DAMAGE "1d2"
 #define CLASS_HD_WARRIOR "1d10"
 #define PLAYER_MAX_LEVEL 11
-#define PLAYER_SIGHT_DISTANCE 5
+#define SIGHT_DISTANCE_PLAYER 5
+#define SIGHT_DISTANCE_INFRA 10
+#define SIGHT_DISTANCE_ESP 15
 
 class CClass
 {
@@ -102,6 +104,7 @@ public:
         m_pRace = new CRace;
         m_llInventory = new JLinkList<CItem>;
         m_llEquipment = new JLinkList<CItem>;
+        m_llActiveEffects = new JLinkList<CEffect>;
         m_szDamage = new char[10];
         sprintf( m_szDamage, PLAYER_BASE_DAMAGE );
 
@@ -129,6 +132,11 @@ public:
             m_llEquipment->Terminate();
             m_llEquipment = NULL;
         }
+        if( m_llActiveEffects )
+        {
+            m_llActiveEffects->Terminate();
+            m_llActiveEffects = NULL;
+        }
         if( m_szDamage )
         {
             delete[] m_szDamage;
@@ -141,6 +149,7 @@ public:
     CRace *GetRace() { return m_pRace; }
     float GetExperience() { return m_fExperience; }
     bool Update( float fCurTime );
+    void UpdateActiveEffects( float fCurTime );
     void CheckDisturbance();
     void PreDraw();
     void Draw();
@@ -153,9 +162,9 @@ public:
 
     bool CanDropHere();
 
-    void SetIntrinsic( const uint32 dwIntrinsic ) { m_dwIntrinsics != dwIntrinsic; };
+    void SetIntrinsic( const uint32 dwIntrinsic ) { m_dwIntrinsics |= dwIntrinsic; };
     void UnsetIntrinsic( const uint32 dwIntrinsic ) { m_dwIntrinsics &= ~dwIntrinsic; };
-    uint32 GetIntrinsic( const uint32 dwIntrinsic ) { return m_dwIntrinsics & dwIntrinsic != 0; };
+    int GetIntrinsic( const uint32 dwIntrinsic ) { return m_dwIntrinsics & dwIntrinsic; }
 
     bool IsWieldable( CLink<CItem> *pLink );
     JResult Wield( CLink<CItem> *pItem );
@@ -175,7 +184,7 @@ public:
     float LightSource();
     void UpdateLight( float fValue, bool bReset = false );
 
-    JResult DoEffects( CLink<CEffect> *plEffect );
+    JResult DoEffects( CLink<CEffect> *plEffect, float fDuration );
     JResult DoHealEffects( CEffect *pEffect );
     JResult DoHealHP( CEffect *pEffect );
     JResult DoHitEffects( CEffect *pEffect );
@@ -183,7 +192,8 @@ public:
     JResult DoLightArea();
     JResult DoDestroyEffects( CEffect *pEffect );
     JResult DoRemoveCurse();
-    JResult DoIntrinsicEffects( CEffect *pEffect );
+    JResult DoIntrinsicEffects( CEffect *pEffect, float fDuration );
+    JResult UndoIntrinsicEffects( CEffect *pEffect );
     JResult DoRestoreEffects( CEffect *pEffect );
     JResult DoGainEffects( CEffect *pEffect );
     JResult DoLoseEffects( CEffect *pEffect );
@@ -237,6 +247,7 @@ protected:
     float m_fLevel;
 
     uint32 m_dwIntrinsics;
+    JLinkList<CEffect> *m_llActiveEffects;
 
     CClass *m_pClass;
     CRace *m_pRace;

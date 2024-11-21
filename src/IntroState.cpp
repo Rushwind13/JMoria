@@ -90,7 +90,7 @@ int CIntroState::OnHandleSplash( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true, "INTRO still waiting for a valid key.\n" );
+        JLog( LOG_LEVEL_DEBUG, true, "INTRO still waiting for a valid key.\n" );
         return 0;
     }
 
@@ -121,7 +121,7 @@ int CIntroState::OnHandleCharacterCreate( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true, "CREATE still waiting for a valid key.\n" );
+        JLog( LOG_LEVEL_DEBUG, true, "CREATE still waiting for a valid key.\n" );
         return 0;
     }
 

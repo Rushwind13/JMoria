@@ -20,7 +20,10 @@ q - quaff a potion
 r - read a scroll
 N - set character name
 ^c - exit game
-^t - teleport (Note: will turn on Wizard Mode, which prevents score being saved)
+^t - wizard teleport (Note: will turn on Wizard Mode, which prevents score being saved)
+^f - wizard set flag (Note: needs Wizard Mode)
+^i - wizard item (Note: needs Wizard Mode)
+^s - wizard summon (Note: needs Wizard Mode)
 
 *Items*
 Players will automatically pick up items they walk over. Inventory is sorted by item type.

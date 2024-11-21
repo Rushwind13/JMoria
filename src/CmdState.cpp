@@ -102,6 +102,27 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
         retval = 0;
     }
 
+    else if( IsSetIntrinsicCommand( keysym ) )
+    {
+        g_pGame->SetState( STATE_STRINGINPUT );
+        g_pGame->GetGameState()->HandleKey( keysym );
+        retval = 0;
+    }
+
+    else if( IsCreateItemCommand( keysym ) )
+    {
+        g_pGame->SetState( STATE_STRINGINPUT );
+        g_pGame->GetGameState()->HandleKey( keysym );
+        retval = 0;
+    }
+
+    else if( IsSummonMonsterCommand( keysym ) )
+    {
+        g_pGame->SetState( STATE_STRINGINPUT );
+        g_pGame->GetGameState()->HandleKey( keysym );
+        retval = 0;
+    }
+
     /*
     // These commands will bring up a ""
     // Inventory, Equipment
@@ -270,6 +291,54 @@ bool CCmdState::IsTeleportCommand( SDL_Keysym *keysym )
     case SDLK_t:
         // want ^t not t
         return ( keysym->mod & KMOD_CTRL ) ? true : false;
+        break;
+    default:
+        return false;
+        break;
+    }
+
+    return false;
+}
+
+bool CCmdState::IsSetIntrinsicCommand( SDL_Keysym *keysym )
+{
+    switch( keysym->sym )
+    {
+    case SDLK_f:
+        // want ^f not f
+        return ( keysym->mod & KMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
+        break;
+    default:
+        return false;
+        break;
+    }
+
+    return false;
+}
+
+bool CCmdState::IsCreateItemCommand( SDL_Keysym *keysym )
+{
+    switch( keysym->sym )
+    {
+    case SDLK_i:
+        // want ^t not t
+        return ( keysym->mod & KMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
+        break;
+    default:
+        return false;
+        break;
+    }
+
+    return false;
+}
+
+bool CCmdState::IsSummonMonsterCommand( SDL_Keysym *keysym )
+{
+    switch( keysym->sym )
+    {
+    case SDLK_s:
+        // want ^t not t
+        return ( keysym->mod & KMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
         break;
     default:
         return false;

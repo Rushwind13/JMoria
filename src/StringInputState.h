@@ -19,6 +19,9 @@ enum eStringInputModifier
     SI_INIT = 0,
     SI_NAME = 1,
     SI_HAGGLE,
+    SI_FLAG,
+    SI_ITEM,
+    SI_MONSTER,
     SI_MAX
 };
 class CStringInputState : public CStateBase
@@ -46,6 +49,9 @@ public:
 protected:
 private:
     int OnHandleName( SDL_Keysym *keysym );
+    int OnHandleFlag( SDL_Keysym *keysym );
+    int OnHandleItem( SDL_Keysym *keysym );
+    int OnHandleMonster( SDL_Keysym *keysym );
     int OnHandleHaggle( SDL_Keysym *keysym );
     int OnHandleInit( SDL_Keysym *keysym );
 
@@ -54,6 +60,15 @@ private:
 
     bool TestHaggle();
     bool DoHaggle();
+
+    bool TestFlag();
+    bool DoFlag();
+
+    bool TestItem();
+    bool DoItem();
+
+    bool TestMonster();
+    bool DoMonster();
 
     void ResetToState( int newstate );
 };

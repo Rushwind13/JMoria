@@ -27,6 +27,9 @@ Keyboard commands recognized:
 * *r* - read a scroll
 * *N* - set character name
 * *Ctrl-T* - ^t - teleport (Note: will turn on Wizard Mode)
+* *Ctrl-F* - ^f - set player intrinsic flag (Note: needs Wizard Mode)
+* *Ctrl-I* - ^i - create item (Note: needs Wizard Mode)
+* *Ctrl-S* - ^s - summon monster (Note: needs Wizard Mode)
 
 
 Monster definitions are in _Resources/Monsters.txt_

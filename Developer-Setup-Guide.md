@@ -1,4 +1,13 @@
-
+## MacOS Getting Started
+* you will need XCode to be installed from App Store
+* you will need `xcode-select --install` done (this is done by XCode install)
+* SDL2, SDL2_image required `brew install sdl2 sdl2_image`
+* OpenGL will be on your machine already
+* If you get this far, then `make` should work to create the game executable.
+* to set up cucumber tests, `brew install googletest cucumber-cpp`
+* needed to `git clone` the cucumber-cpp repo and
+* do the cmake stuff in the readme
+* 
 
 ## Setup clang-format as pre-commit
 

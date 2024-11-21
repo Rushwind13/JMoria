@@ -336,6 +336,24 @@ JResult CDungeon::SpawnMonsters( const int depth )
     return JSUCCESS;
 }
 
+CMonsterDef *CDungeon::GetMonsterDef( char *szMonsterName )
+{
+    CLink<CMonsterDef> *pLink = m_llMonsterDefs->GetHead();
+    CMonsterDef *pid;
+    if( pLink == NULL )
+        return NULL;
+    while( pLink != NULL )
+    {
+        pid = pLink->m_lpData;
+        if( Util::jstrcmp( pid->m_szName, szMonsterName ) == 0 )
+        {
+            return pid;
+        }
+        pLink = pLink->next;
+    }
+    return NULL;
+}
+
 CMonsterDef *CDungeon::GetMonsterDef( int which_monster )
 {
     if( which_monster <= MON_IDX_INVALID || which_monster >= m_llMonsterDefs->length() - 1 )
@@ -358,6 +376,24 @@ bool CDungeon::SpawnMonster( int which_monster )
 
     CMonster::CreateMonster( chosen_monster );
     return true;
+}
+
+CItemDef *CDungeon::GetItemDef( char *szItemName )
+{
+    CLink<CItemDef> *pLink = m_llItemDefs->GetHead();
+    CItemDef *pid;
+    if( pLink == NULL )
+        return NULL;
+    while( pLink != NULL )
+    {
+        pid = pLink->m_lpData;
+        if( Util::jstrcmp( pid->m_szName, szItemName ) == 0 )
+        {
+            return pid;
+        }
+        pLink = pLink->next;
+    }
+    return NULL;
 }
 
 CItemDef *CDungeon::GetItemDef( int which_item )

@@ -238,6 +238,7 @@ Item <Potion of Minor Healing>
     Level       2
     Weight      0.2
     Color       <225,50,225,255>
+    Flags       <ITEM_FLAG_STACKS>
 }
 
 Item <Potion of Resist Fire>
@@ -250,6 +251,7 @@ Level       4
 Weight      0.2
 Duration    150.0
 Color       <225,50,50,255>
+Flags       <ITEM_FLAG_STACKS>
 }
 
 Item <Potion of Infravision>
@@ -262,6 +264,7 @@ Level       4
 Weight      0.2
 Duration    100.0
 Color       <225,50,225,255>
+Flags       <ITEM_FLAG_STACKS>
 }
 
 # Scrolls
@@ -274,6 +277,7 @@ Value       20.0
 Level       1
 Weight      2.0
 Color       <255,255,255,255>
+Flags       <ITEM_FLAG_STACKS>
 }
 
 Item <Scroll of Telepathy>
@@ -286,6 +290,7 @@ Level       4
 Weight      0.2
 Duration    100.0
 Color       <215,215,80,255>
+Flags       <ITEM_FLAG_STACKS>
 }
 
 Item <Scroll of Remove Curse>
@@ -297,6 +302,7 @@ Value       100.0
 Level       1
 Weight      2.0
 Color       <225,225,50,255>
+Flags       <ITEM_FLAG_STACKS>
 }
 
 # Weapons
@@ -448,6 +454,7 @@ Level       4
 Weight      0.5
 Duration    5000.0
 Color       <225,225,50,255>
+Flags       <ITEM_FLAG_STACKS>
 }
 
 # Armor

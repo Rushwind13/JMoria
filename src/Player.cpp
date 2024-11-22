@@ -263,9 +263,28 @@ void CPlayer::PickUp( JVector &vPickupPos )
     CItem *pItem = g_pGame->GetDungeon()->PickUp( vPickupPos );
     if( pItem )
     {
+        if( pItem->IsStackable() )
+        {
+            CLink<CItem> *pExists = m_llInventory->GetLink( pItem->m_id->m_dwIndex, false );
+            while( pExists != NULL )
+            {
+                // we have an item of that type in inventory -- is it the correct item?
+                if( Util::jstrcmp( pExists->m_lpData->GetName(), pItem->GetName() ) == 0 )
+                {
+                    pExists->m_lpData->m_dwCount++;
+                    g_pGame->GetMsgs()->Printf( "You have %d %s.\n", pExists->m_lpData->m_dwCount,
+                                                pExists->m_lpData->GetPlural() );
+
+                    g_pGame->GetDungeon()->GetTile( vPickupPos )->m_pCurItem = NULL;
+                    return;
+                }
+                pExists = pExists->next;
+            }
+        }
         pItem->m_pllLink = m_llInventory->Add( pItem, pItem->m_id->m_dwIndex );
-        g_pGame->GetDungeon()->GetTile( vPickupPos )->m_pCurItem = NULL;
         g_pGame->GetMsgs()->Printf( "You have a %s.\n", pItem->GetName() );
+
+        g_pGame->GetDungeon()->GetTile( vPickupPos )->m_pCurItem = NULL;
     }
 }
 
@@ -588,7 +607,14 @@ JResult CPlayer::Quaff( CLink<CItem> *pLink )
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration );
-    m_llInventory->Remove( pItem->m_pllLink, false ); // Potions are single-use
+    if( pItem->IsStackable() && pItem->m_dwCount > 1 )
+    {
+        pItem->m_dwCount--;
+    }
+    else
+    {
+        m_llInventory->Remove( pItem->m_pllLink, false ); // Potions are single-use
+    }
     return retval;
 }
 
@@ -597,7 +623,14 @@ JResult CPlayer::Read( CLink<CItem> *pLink )
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration );
-    m_llInventory->Remove( pItem->m_pllLink, false ); // Scrolls are single-use
+    if( pItem->IsStackable() && pItem->m_dwCount > 1 )
+    {
+        pItem->m_dwCount--;
+    }
+    else
+    {
+        m_llInventory->Remove( pItem->m_pllLink, false ); // Scrolls are single-use
+    }
     return retval;
 }
 
@@ -662,34 +695,53 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration )
 JResult CPlayer::DoHealEffects( CEffect *pEffect )
 {
     char effect[32];
+    bool needsHeal = GetIntrinsic( pEffect->m_dwFlags ) != 0;
     switch( pEffect->m_dwFlags )
     {
     case EFFECT_FLAG_HP:
         DoHealHP( pEffect );
         break;
     case EFFECT_FLAG_AFRAID:
-        UnsetIntrinsic( pEffect->m_dwFlags );
-        g_pGame->GetMsgs()->Printf( "You are no longer afraid.\n" );
+        if( needsHeal )
+        {
+            g_pGame->GetMsgs()->Printf( "You are no longer afraid.\n" );
+            UnsetIntrinsic( pEffect->m_dwFlags );
+\        }
         break;
     case EFFECT_FLAG_BLIND:
-        UnsetIntrinsic( pEffect->m_dwFlags );
-        g_pGame->GetMsgs()->Printf( "You can see again.\n" );
+        if( needsHeal )
+        {
+            g_pGame->GetMsgs()->Printf( "You can see again.\n" );
+            UnsetIntrinsic( pEffect->m_dwFlags );
+        }
         break;
     case EFFECT_FLAG_CONFUSE:
-        UnsetIntrinsic( pEffect->m_dwFlags );
-        g_pGame->GetMsgs()->Printf( "You can think clearly again.\n" );
+        if( needsHeal )
+        {
+            g_pGame->GetMsgs()->Printf( "You can think clearly again.\n" );
+            UnsetIntrinsic( pEffect->m_dwFlags );
+        }
         break;
     case EFFECT_FLAG_POISON:
-        UnsetIntrinsic( pEffect->m_dwFlags );
-        g_pGame->GetMsgs()->Printf( "You are no longer poisoned.\n" );
+        if( needsHeal )
+        {
+            g_pGame->GetMsgs()->Printf( "You are no longer poisoned.\n" );
+            UnsetIntrinsic( pEffect->m_dwFlags );
+        }
         break;
     case EFFECT_FLAG_PARALYZE:
-        UnsetIntrinsic( pEffect->m_dwFlags );
-        g_pGame->GetMsgs()->Printf( "You can move again.\n" );
+        if( needsHeal )
+        {
+            g_pGame->GetMsgs()->Printf( "You can move again.\n" );
+            UnsetIntrinsic( pEffect->m_dwFlags );
+        }
         break;
     case EFFECT_FLAG_SLEEP:
-        g_pGame->GetMsgs()->Printf( "You wake up.\n" );
-        UnsetIntrinsic( pEffect->m_dwFlags );
+        if( needsHeal )
+        {
+            g_pGame->GetMsgs()->Printf( "You wake up.\n" );
+            UnsetIntrinsic( pEffect->m_dwFlags );
+        }
         break;
     default:
         break;

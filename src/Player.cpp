@@ -645,7 +645,7 @@ JResult CPlayer::Magic( CLink<CItem> *pLink )
     return retval;
 }
 
-JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwFlags )
+JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwItemFlags )
 {
     CEffect *pEffect;
     while( plEffect != NULL )
@@ -668,7 +668,7 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwFla
             break;
         case EFFECT_TYPE_DESTROY:
             JLog( LOG_LEVEL_ERROR, true, "Destroying\n" );
-            DoDestroyEffects( pEffect, dwFlags );
+            DoDestroyEffects( pEffect, dwItemFlags );
             break;
         case EFFECT_TYPE_INTRINSIC:
             JLog( LOG_LEVEL_ERROR, true, "Setting intrinsic\n" );
@@ -808,12 +808,12 @@ JResult CPlayer::DoLightArea()
     return JBOGUSKEY;
 }
 
-JResult CPlayer::DoDestroyEffects( CEffect *pEffect, int dwFlags )
+JResult CPlayer::DoDestroyEffects( CEffect *pEffect, int dwItemFlags )
 {
     switch( pEffect->m_dwFlags )
     {
     case ITEM_FLAG_CURSED:
-        if( dwFlags & ITEM_FLAG_CURSED )
+        if( dwItemFlags & ITEM_FLAG_CURSED )
         {
             JLog( LOG_LEVEL_DEBUG, true, "Cursing\n" );
             return DoApplyCurse();
@@ -853,7 +853,7 @@ JResult CPlayer::DoApplyCurse()
     CLink<CItem> *pLink = m_llEquipment->GetHead();
     while( pLink != NULL )
     {
-        if( pLink->m_lpData->m_dwFlags | ITEM_FLAG_CURSED )
+        if( pLink->m_lpData->m_dwFlags & ITEM_FLAG_CURSED == ITEM_FLAG_CURSED )
         {
             JLog( LOG_LEVEL_ERROR, true, "Item is not cursed %s, cursing it.\n",
                   pLink->m_lpData->GetName() );

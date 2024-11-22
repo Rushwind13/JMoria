@@ -853,16 +853,16 @@ JResult CPlayer::DoApplyCurse()
     CLink<CItem> *pLink = m_llEquipment->GetHead();
     while( pLink != NULL )
     {
-        if( pLink->m_lpData->m_dwFlags & ITEM_FLAG_CURSED == ITEM_FLAG_CURSED )
+        if( ( pLink->m_lpData->m_dwFlags & ITEM_FLAG_CURSED ) == 0 )
         {
-            JLog( LOG_LEVEL_ERROR, true, "Item is not cursed %s, cursing it.\n",
+            JLog( LOG_LEVEL_NOISE, true, "Item is not cursed %s, cursing it.\n",
                   pLink->m_lpData->GetName() );
             pLink->m_lpData->m_dwFlags |= ITEM_FLAG_CURSED;
+            g_pGame->GetMsgs()->Printf( "It is now cursed.\n" );
             break;
         }
         pLink = pLink->next;
     }
-    g_pGame->GetMsgs()->Printf( "It is now cursed.\n" );
 
     return JSUCCESS;
 }

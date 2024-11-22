@@ -706,7 +706,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
         {
             g_pGame->GetMsgs()->Printf( "You are no longer afraid.\n" );
             UnsetIntrinsic( pEffect->m_dwFlags );
-\        }
+        }
         break;
     case EFFECT_FLAG_BLIND:
         if( needsHeal )

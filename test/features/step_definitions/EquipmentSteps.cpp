@@ -118,6 +118,17 @@ GIVEN( "^the ([A-Za-z ]+):([0-9]+) (is|is not) cursed$" )
     EXPECT_EQ( actual, expected );
 }
 
+GIVEN( "^the ([A-Za-z ]+):([0-9]+) (is|is not) identified$" )
+{
+    ScenarioScope<TestCtx> context;
+    REGEX_PARAM( std::string, item );
+    REGEX_PARAM( int, item_id );
+    REGEX_PARAM( std::string, choice );
+    bool cursed = ( choice == "is" ) ? true : false;
+
+    JLog( LOG_LEVEL_DEBUG, true, "Checking identified\n" );
+}
+
 GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in equipment at ([-0-9]+)$" )
 {
     ScenarioScope<TestCtx> context;
@@ -175,6 +186,8 @@ WHEN( "^the player reads the scroll in inventory at ([-0-9]+)$" )
     JLog( LOG_LEVEL_ERROR, true, "Found item to read is %s\n", pLink->m_lpData->GetName() );
     g_pGame->GetPlayer()->Read( pLink );
 }
+
+WHEN( "^I display equipment$" ) { JLog( LOG_LEVEL_DEBUG, true, "Display the equipment\n" ); }
 
 /*#######
 ##
@@ -273,4 +286,9 @@ THEN( "^the equipped ([A-Za-z ]+):([0-9]+) at ([-0-9]+) (is|is not) cursed$" )
 
     JLog( LOG_LEVEL_DEBUG, true, "Cursed state is %d\n", actual );
     EXPECT_EQ( actual, expected );
+}
+
+THEN( "^the ([A-Za-z ]+):([0-9]+) is not labeled as cursed$" )
+{
+    JLog( LOG_LEVEL_DEBUG, true, "Showing label on equipment\n" );
 }

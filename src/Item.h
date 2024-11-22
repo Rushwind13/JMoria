@@ -105,6 +105,7 @@ public:
     JVector m_vPos;
     CItemDef *m_id;
     CLink<CItem> *m_pllLink;
+    int m_dwCount; // how many of this item are being carried?
     int m_dwFlags; // item cursed, or other specific to this instance, rather than in the general
                    // CItemDef
 protected:
@@ -119,6 +120,7 @@ public:
     CItem()
         : m_vPos( 0, 0 ),
           m_dwFlags( 0 ),
+          m_dwCount( 1 ),
           m_pllLink( NULL ),
           m_id( NULL ),
           m_fRemainingDuration( 0.0f ) {};
@@ -126,6 +128,8 @@ public:
     void SetCursed( int likelihood );
     void SetCursed( bool bCursed );
     char *GetName() { return m_id->m_szName; }
+    char *GetPlural() { return m_id->m_szPlural; }
+    bool IsStackable() { return ( m_id->m_dwFlags & ITEM_FLAG_STACKS ) == ITEM_FLAG_STACKS; }
     bool IsOpenable() { return false; }   // for chests, etc.
     bool IsCloseable() { return false; }  // closeable pickup?
     bool IsTunnelable() { return false; } // Tunnelable pickup? unlikely.

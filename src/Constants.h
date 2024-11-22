@@ -329,7 +329,7 @@
 // Item flags
 
 #define ITEM_FLAG_CURSED 0x00000001
-// #define ITEM_FLAG_x 0x00000002
+#define ITEM_FLAG_STACKS 0x00000002
 // #define ITEM_FLAG_x 0x00000004
 // #define ITEM_FLAG_x 0x00000008
 
@@ -350,7 +350,7 @@
 
 #define ITEM_COLOR_MULTI 0x10000000
 
-#define NUM_ITEM_FLAGS 7
+#define NUM_ITEM_FLAGS 8
 
 // Make sure you change below here if you added any flags.
 #define NUM_STRINGS                                                                                \
@@ -573,6 +573,7 @@ public:
 
         // Item flags
         m_StringTable[i++].Init( "ITEM_FLAG_CURSED", ITEM_FLAG_CURSED );
+        m_StringTable[i++].Init( "ITEM_FLAG_STACKS", ITEM_FLAG_STACKS );
         m_StringTable[i++].Init( "ITEM_FLAG_2HANDED", ITEM_FLAG_2HANDED );
         m_StringTable[i++].Init( "ITEM_FLAG_OFFHAND", ITEM_FLAG_OFFHAND );
         m_StringTable[i++].Init( "ITEM_FLAG_MAINHAND", ITEM_FLAG_MAINHAND );

@@ -306,7 +306,14 @@ void CDisplayText::DisplayList( JLinkList<CItem> *pList, const CDisplayMeta *pMe
     while( pLink != NULL )
     {
         pItem = pLink->m_lpData;
-        Printf( "%c - %s\n", cListId, pItem->GetName() );
+        if( pItem->IsStackable() && pItem->m_dwCount > 1 )
+        {
+            Printf( "%c - %d %s\n", cListId, pItem->m_dwCount, pItem->GetPlural() );
+        }
+        else
+        {
+            Printf( "%c - %s\n", cListId, pItem->GetName() );
+        }
 
         if( cListId < pMeta->limit )
         {

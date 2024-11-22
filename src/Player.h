@@ -184,16 +184,17 @@ public:
     float LightSource();
     void UpdateLight( float fValue, bool bReset = false );
 
-    JResult DoEffects( CLink<CEffect> *plEffect, float fDuration );
+    JResult DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwFlags );
     JResult DoHealEffects( CEffect *pEffect );
     JResult DoHealHP( CEffect *pEffect );
     JResult DoHitEffects( CEffect *pEffect );
     JResult DoCreateEffects( CEffect *pEffect );
     JResult DoLightArea();
-    JResult DoDestroyEffects( CEffect *pEffect );
+    JResult DoDestroyEffects( CEffect *pEffect, int dwFlags );
     JResult DoRemoveCurse();
     JResult DoIntrinsicEffects( CEffect *pEffect, float fDuration );
     JResult UndoIntrinsicEffects( CEffect *pEffect );
+    JResult DoApplyCurse();
     JResult DoRestoreEffects( CEffect *pEffect );
     JResult DoGainEffects( CEffect *pEffect );
     JResult DoLoseEffects( CEffect *pEffect );

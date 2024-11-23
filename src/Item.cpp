@@ -145,7 +145,7 @@ void CItem::SetColor()
 }
 
 unsigned char ItemIDs[ITEM_IDX_MAX + 1] = "|)[](]]\"=~{}{}&?!-_?$~//\\/|/|]";
-int EquipTypes[ITEM_IDX_MAX + 1] = {
+const int EquipTypes[ITEM_IDX_MAX + 1] = {
     EQUIP_IDX_MAIN_HAND, EQUIP_IDX_OFF_HAND,  EQUIP_IDX_ARMOR,     EQUIP_IDX_HELMET,
     EQUIP_IDX_CLOAK,     EQUIP_IDX_GLOVES,    EQUIP_IDX_BOOTS,     EQUIP_IDX_AMULET,
     EQUIP_IDX_RING,      EQUIP_IDX_TORCH,     EQUIP_IDX_MAIN_HAND, EQUIP_IDX_AMMO,
@@ -162,6 +162,31 @@ int CItem::EquipType()
         return EQUIP_IDX_INVALID;
     return EquipTypes[item_type];
 }
+
+char *CItem::GetName()
+{
+    if( false ) // IsIdentified() ) // TODO: MIKE: ID goes here
+    {
+        return m_id->m_szName;
+    }
+    else
+    {
+        return m_id->m_szUnidentifiedName;
+    }
+}
+
+char *CItem::GetPlural()
+{
+    if( false ) // IsIdentified() )// TODO: MIKE: ID goes here
+    {
+        return m_id->m_szPlural;
+    }
+    else
+    {
+        return m_id->m_szUnidentifiedPlural;
+    }
+}
+
 void CItem::Draw()
 {
     // Don't draw if something else is there.

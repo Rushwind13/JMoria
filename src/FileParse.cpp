@@ -292,6 +292,14 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
     bool bStartItem = false;
     bool bEndItem = false;
 
+    int PotionIndex[NUM_POTION_NAMES];
+    Util::Shuffle( PotionIndex, NUM_POTION_NAMES );
+    int ScrollIndex[NUM_SCROLL_NAMES];
+    Util::Shuffle( ScrollIndex, NUM_SCROLL_NAMES );
+
+    uint32 potion_count = 0;
+    uint32 scroll_count = 0;
+
     while( !bEndItem && fgets( szRaw, 1024, m_fp ) != NULL )
     {
         szLine = Strip( szRaw );
@@ -379,6 +387,42 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 if( g_Constants.CompareType( "ITEM_IDX", szValue ) )
                 {
                     idIn.m_dwIndex = g_Constants.LookupString( szValue );
+                    if( idIn.m_dwIndex == ITEM_IDX_POTION )
+                    {
+                        int potion_index = PotionIndex[potion_count];
+                        idIn.m_szFlavor =
+                            new char[Util::jstrlen( g_Constants.PotionColor( potion_index ) ) + 1];
+                        Util::jstrcpy( idIn.m_szFlavor, g_Constants.PotionColor( potion_index ) );
+                        char szUnID[100];
+                        sprintf( szUnID, "%s Potion", idIn.m_szFlavor );
+                        idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
+                        sprintf( szUnID, "%s Potions", idIn.m_szFlavor );
+
+                        idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
+                        potion_count++;
+                    }
+                    else if( idIn.m_dwIndex == ITEM_IDX_SCROLL )
+                    {
+                        int scroll_index = ScrollIndex[scroll_count];
+                        idIn.m_szFlavor =
+                            new char[Util::jstrlen( g_Constants.ScrollName( scroll_index ) ) + 1];
+                        Util::jstrcpy( idIn.m_szFlavor, g_Constants.ScrollName( scroll_index ) );
+                        char szUnID[100];
+                        sprintf( szUnID, "Scroll labeled %s", idIn.m_szFlavor );
+                        idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
+                        sprintf( szUnID, "Scrolls labeled %s", idIn.m_szFlavor );
+                        idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
+                        scroll_count++;
+                    }
+                    else
+                    {
+                        idIn.m_szUnidentifiedName = idIn.m_szName;
+                        idIn.m_szUnidentifiedPlural = idIn.m_szPlural;
+                    }
                 }
             }
             else if( strncasecmp( szLine, "flags", 5 ) == 0 )

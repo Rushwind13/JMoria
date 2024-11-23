@@ -23,6 +23,7 @@ public:
     CItemDef()
         : m_szName( NULL ),
           m_szPlural( NULL ),
+          m_szFlavor( NULL ),
           m_fSpeed( 0.0f ),
           m_fACBonus( 0.0f ),
           m_fBaseAC( 0.0f ),
@@ -71,6 +72,9 @@ public:
     }
     char *m_szName; // what item is this?
     char *m_szPlural;
+    char *m_szUnidentifiedName;
+    char *m_szUnidentifiedPlural;
+    char *m_szFlavor; // "Green" Potion
     float m_fSpeed;
     float m_fACBonus;
     float m_fBaseAC;
@@ -127,8 +131,8 @@ public:
     void Init( CItemDef *pid );
     void SetCursed( int likelihood );
     void SetCursed( bool bCursed );
-    char *GetName() { return m_id->m_szName; }
-    char *GetPlural() { return m_id->m_szPlural; }
+    char *GetName();
+    char *GetPlural();
     bool IsStackable() { return ( m_id->m_dwFlags & ITEM_FLAG_STACKS ) == ITEM_FLAG_STACKS; }
     bool IsOpenable() { return false; }   // for chests, etc.
     bool IsCloseable() { return false; }  // closeable pickup?

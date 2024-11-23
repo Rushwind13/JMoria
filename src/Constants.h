@@ -367,6 +367,9 @@
 #define MON_AI 7
 #define EFFECT_TYPE 8
 
+#define NUM_POTION_NAMES 32
+#define NUM_SCROLL_NAMES 32
+
 #include "TextEntry.h"
 class Constants
 {
@@ -590,7 +593,6 @@ public:
             JLog( LOG_LEVEL_ERROR, true, "got %d strings instead, misconfiguration error!\n", i );
         }
     };
-    TextEntry *m_StringTable;
 
     bool CompareType( const char *type, const char *szIn )
     {
@@ -659,5 +661,40 @@ public:
         }
         return m_StringTable[offset + index].m_szString;
     }
+
+    const char *PotionColor( const uint32 dwIndex )
+    {
+        if( dwIndex >= NUM_POTION_NAMES )
+            return "";
+        const char *PotionColors[] = {
+            "Clear",      "White",   "Black",    "Red",    "Pink",    "Orange",  "Yellow",
+            "Green",      "Blue",    "Purple",   "Brown",  "Gray",    "Golden",  "Silver",
+            "Ruby",       "Emerald", "Sapphire", "Amber",  "Rose",    "Lilac",   "Teal",
+            "Turquoise",  "Navy",    "Olive",    "Maroon", "Crimson", "Fuchsia", "Lavender",
+            "Chartreuse", "Gloopy",  "Bubbling", "Glowing" };
+        JLog( LOG_LEVEL_NOISE, true, "index %d value %s\n", dwIndex, PotionColors[dwIndex] );
+        return PotionColors[dwIndex];
+    }
+    const char *ScrollName( const uint32 dwIndex )
+    {
+        if( dwIndex >= NUM_SCROLL_NAMES )
+            return "";
+
+        const char *ScrollNames[] = {
+            "pizza",          "dolphin",       "coffee",       "doggos",       "dolor sit",
+            "amet consect",   "etur adipis",   "elit sed",     "do eius",      "mod tempor",
+            "didunt utbore",  "et aliqua",     "ut enim ad",   "veniam quis",  "nostrud exer",
+            "ullamco labo",   "ris nisi ut",   "aliquip ex",   "comm sequat",  "duis aute ir",
+            "uredo lorin",    "epre deriti",   "volute velit", "esse cillum",  "eu fugiat",
+            "nulla pariatur", "excesint occa", "ecat pidatat", "proident sun", "incul pafic",
+            "des erumol",     "id est laborum" };
+
+        return ScrollNames[dwIndex];
+    }
+
+public:
+    TextEntry *m_StringTable;
+
+protected:
 };
 #endif // __CONSTANTS_H__

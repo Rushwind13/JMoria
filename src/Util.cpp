@@ -107,6 +107,22 @@ float Roll( const char *szFormat )
     return Roll( dice, sides );
 }
 
+void Shuffle( int *array, const uint32 size )
+{
+    for( int i = 0; i < size; i++ )
+    {
+        array[i] = i;
+    }
+
+    for( int i = size - 1; i > 0; i-- )
+    {
+        int j = rand() % ( i + 1 );
+        int temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
 bool IsInWorld( JIVector vIn ) { return vIn.IsInWorld(); }
 bool IsWithinWorld( JIVector vIn ) { return vIn.IsWithinWorld(); }
 

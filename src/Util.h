@@ -16,6 +16,8 @@ JIVector GetRandomPoint( const JRect rcIn );
 float Roll( int dice, int sides );
 float Roll( const char *szFormat );
 
+void Shuffle( int *array, const uint32 size );
+
 JRect Edges( const JRect rcIn );
 
 bool IsInWorld( JFVector vIn );

@@ -11,6 +11,7 @@
 #include "CmdState.h"
 #include "EndGameState.h"
 #include "IntroState.h"
+#include "LookState.h"
 #include "ModState.h"
 #include "RestState.h"
 #include "RunState.h"
@@ -31,24 +32,29 @@ CGame::CGame()
       m_pPlayer( NULL ),
       m_pRender( NULL ),
       m_pCurState( NULL ),
-      m_pCmdState( NULL ),
-      m_pStringInputState( NULL ),
-      m_pIntroState( NULL ),
-      m_pEndGameState( NULL ),
       m_pClockStepState( NULL ),
+      m_pCmdState( NULL ),
+      m_pEndGameState( NULL ),
+      m_pIntroState( NULL ),
+      m_pLookState( NULL ),
+      m_pModState( NULL ),
       m_pRestState( NULL ),
+      m_pRunState( NULL ),
+      m_pStringInputState( NULL ),
+      m_pUseState( NULL ),
       m_eCurState( STATE_INVALID ),
       m_fGameTime( 0.0f )
 {
-    m_pCmdState = new CCmdState;
-    m_pModState = new CModState;
-    m_pUseState = new CUseState;
-    m_pStringInputState = new CStringInputState;
-    m_pIntroState = new CIntroState;
-    m_pEndGameState = new CEndGameState;
     m_pClockStepState = new CClockStepState;
+    m_pCmdState = new CCmdState;
+    m_pEndGameState = new CEndGameState;
+    m_pIntroState = new CIntroState;
+    m_pLookState = new CLookState;
+    m_pModState = new CModState;
     m_pRestState = new CRestState;
     m_pRunState = new CRunState;
+    m_pStringInputState = new CStringInputState;
+    m_pUseState = new CUseState;
 #ifdef TURN_BASED
     m_bReadyForUpdate = false;
 #endif // TURN_BASED
@@ -144,34 +150,16 @@ void CGame::Term()
     }
 
     JLog( LOG_LEVEL_DEBUG, true, "States..." );
+    if( m_pClockStepState )
+    {
+        delete m_pClockStepState;
+        m_pClockStepState = NULL;
+    }
+
     if( m_pCmdState )
     {
         delete m_pCmdState;
         m_pCmdState = NULL;
-    }
-
-    if( m_pModState )
-    {
-        delete m_pModState;
-        m_pModState = NULL;
-    }
-
-    if( m_pUseState )
-    {
-        delete m_pUseState;
-        m_pUseState = NULL;
-    }
-
-    if( m_pStringInputState )
-    {
-        delete m_pStringInputState;
-        m_pStringInputState = NULL;
-    }
-
-    if( m_pIntroState )
-    {
-        delete m_pIntroState;
-        m_pIntroState = NULL;
     }
 
     if( m_pEndGameState )
@@ -180,16 +168,46 @@ void CGame::Term()
         m_pEndGameState = NULL;
     }
 
-    if( m_pClockStepState )
+    if( m_pIntroState )
     {
-        delete m_pClockStepState;
-        m_pClockStepState = NULL;
+        delete m_pIntroState;
+        m_pIntroState = NULL;
+    }
+
+    if( m_pLookState )
+    {
+        delete m_pLookState;
+        m_pLookState = NULL;
+    }
+
+    if( m_pModState )
+    {
+        delete m_pModState;
+        m_pModState = NULL;
     }
 
     if( m_pRestState )
     {
         delete m_pRestState;
         m_pRestState = NULL;
+    }
+
+    if( m_pRunState )
+    {
+        delete m_pRunState;
+        m_pRunState = NULL;
+    }
+
+    if( m_pStringInputState )
+    {
+        delete m_pStringInputState;
+        m_pStringInputState = NULL;
+    }
+
+    if( m_pUseState )
+    {
+        delete m_pUseState;
+        m_pUseState = NULL;
     }
 
     JLog( LOG_LEVEL_DEBUG, true, "Message boxes..." );
@@ -245,14 +263,23 @@ void CGame::SetState( int eNewState )
     case STATE_COMMAND:
         m_pCurState = reinterpret_cast<CStateBase *>( m_pCmdState );
         break;
+    case STATE_LOOK:
+        m_pCurState = reinterpret_cast<CStateBase *>( m_pLookState );
+        break;
     case STATE_MODIFY:
         m_pCurState = reinterpret_cast<CStateBase *>( m_pModState );
         break;
-    case STATE_USE:
-        m_pCurState = reinterpret_cast<CStateBase *>( m_pUseState );
-        break;
     case STATE_STRINGINPUT:
         m_pCurState = reinterpret_cast<CStateBase *>( m_pStringInputState );
+        break;
+    case STATE_REST:
+        m_pCurState = reinterpret_cast<CStateBase *>( m_pRestState );
+        break;
+    case STATE_RUN:
+        m_pCurState = reinterpret_cast<CStateBase *>( m_pRunState );
+        break;
+    case STATE_USE:
+        m_pCurState = reinterpret_cast<CStateBase *>( m_pUseState );
         break;
     case STATE_ENDGAME:
     {
@@ -278,12 +305,6 @@ void CGame::SetState( int eNewState )
         m_pCurState->HandleKey( keysym );
     }
     break;
-    case STATE_REST:
-        m_pCurState = reinterpret_cast<CStateBase *>( m_pRestState );
-        break;
-    case STATE_RUN:
-        m_pCurState = reinterpret_cast<CStateBase *>( m_pRunState );
-        break;
     default:
         JLog( LOG_LEVEL_ERROR, true, "Tried to change to unknown state.\n" );
         break;

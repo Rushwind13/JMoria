@@ -25,6 +25,7 @@ private:
     bool IsModifierNeeded( SDL_Keysym *keysym );
     bool IsUseCommand( SDL_Keysym *keysym );
     bool IsStairsCommand( SDL_Keysym *keysym );
+    bool IsLookCommand( SDL_Keysym *keysym );
     bool IsMagicCommand( SDL_Keysym *keysym ) { return false; }
     bool IsMenuCommand( SDL_Keysym *keysym ) { return false; }
     bool IsHelpCommand( SDL_Keysym *keysym ) { return false; }

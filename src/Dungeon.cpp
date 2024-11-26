@@ -710,7 +710,8 @@ void CDungeon::DrawDungeon()
     // Brute force method; optimize this later
     JVector vScreen;
     JVector DUNG_ASPECT;
-    JVector vPlayer = g_pGame->GetPlayer()->m_vPos;
+    JVector vLook =
+        ( g_pGame->GetGameStateIndex() == STATE_LOOK ) ? m_vLookPos : g_pGame->GetPlayer()->m_vPos;
 
     for( vScreen.x = 0; vScreen.x < DUNG_WIDTH; vScreen.x++ )
     {
@@ -730,7 +731,7 @@ void CDungeon::DrawDungeon()
             if( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_SEEN ) == 0 ) ||
                 ( g_pGame->GetPlayer()->IsWizard() &&
                   ( curTile->m_dwFlags & ( DUNG_FLAG_SEEN | DUNG_FLAG_LIT ) ) == 0 ) ||
-                vScreen == vPlayer ||
+                vScreen == vLook ||
                 ( curTile->m_pCurMonster != NULL &&
                   PlayerCanSee( vScreen, curTile->m_pCurMonster->m_md->m_dwFlags &
                                              ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) ) ||

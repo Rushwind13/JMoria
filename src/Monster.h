@@ -160,8 +160,12 @@ public:
         }
     }
 
+    void SetAsTarget() { m_bIsPlayerTarget = true; }
+    void UnsetAsTarget() { m_bIsPlayerTarget = false; }
+
 protected:
     void SetColor();
+    bool m_bIsPlayerTarget;
 
 private:
     // Member Functions

@@ -14,6 +14,7 @@ t - remove (take off) a piece of equipment
 < - go upstairs
 > - go downstairs
 d - drop
+: - look (look around with movement keys, choose target with .)
 . - rest one turn
 R - rest until at full health, or until disturbed
 q - quaff a potion

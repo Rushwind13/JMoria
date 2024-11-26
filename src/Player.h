@@ -2,6 +2,7 @@
 #define __PLAYER_H__
 #include "JLinkList.h"
 #include "JMDefs.h"
+#include "Monster.h"
 
 class CTileset;
 class CItem;
@@ -96,7 +97,8 @@ public:
           m_fLevel( 1.0f ),
           m_dwIntrinsics( 0 ),
           m_bWizardMode( false ),
-          m_pClass( NULL )
+          m_pClass( NULL ),
+          m_pTarget( NULL )
     {
         memset( m_szName, 0, MAX_STRING_LENGTH );
         Util::jstrcpy( m_szName, "Anonymous" );
@@ -204,6 +206,17 @@ public:
     int Move( JVector vDir );
     void HandleCollision( JVector vPos, int dwCollideType );
 
+    void SetTarget( CMonster *pMon )
+    {
+        if( m_pTarget )
+        {
+            m_pTarget->UnsetAsTarget();
+        }
+        m_pTarget = pMon;
+        if( pMon )
+            pMon->SetAsTarget();
+    }
+
     float Attack();
     float Damage( float fDamageMult );
 
@@ -254,5 +267,7 @@ protected:
     CRace *m_pRace;
     char m_szName[MAX_STRING_LENGTH];
     bool m_bWizardMode;
+
+    CMonster *m_pTarget;
 };
 #endif // __PLAYER_H__

@@ -19,7 +19,7 @@ class CLookState : public CStateBase
 public:
 protected:
     char m_cCommand;
-    JVector m_vLookPos;
+    JVector m_vDelta;
 
 private:
     // Member Functions

@@ -712,6 +712,7 @@ void CDungeon::DrawDungeon()
     JVector DUNG_ASPECT;
     JVector vLook =
         ( g_pGame->GetGameStateIndex() == STATE_LOOK ) ? m_vLookPos : g_pGame->GetPlayer()->m_vPos;
+    JColor color;
 
     for( vScreen.x = 0; vScreen.x < DUNG_WIDTH; vScreen.x++ )
     {
@@ -726,20 +727,39 @@ void CDungeon::DrawDungeon()
              {/* */
             CDungeonTile *curTile = GetTile( vScreen );
 
+            if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
+            {
+                ; // need to display this tile
+                // color = JColor( 100, 0, 100, 255 );
+            }
+
             // this tile doesn't exist, or it's not been seen
             // or something else is standing there
-            if( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_SEEN ) == 0 ) ||
-                ( g_pGame->GetPlayer()->IsWizard() &&
-                  ( curTile->m_dwFlags & ( DUNG_FLAG_SEEN | DUNG_FLAG_LIT ) ) == 0 ) ||
-                vScreen == vLook ||
-                ( curTile->m_pCurMonster != NULL &&
-                  PlayerCanSee( vScreen, curTile->m_pCurMonster->m_md->m_dwFlags &
-                                             ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) ) ||
-                ( curTile->m_pCurItem != NULL && PlayerCanSee( vScreen, MON_FLAG_EMPTY_MIND ) ) )
+            else if( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_SEEN ) == 0 ) ||
+                     ( g_pGame->GetPlayer()->IsWizard() &&
+                       ( curTile->m_dwFlags & ( DUNG_FLAG_SEEN | DUNG_FLAG_LIT ) ) == 0 ) ||
+                     vScreen == g_pGame->GetPlayer()->m_vPos ||
+                     ( curTile->m_pCurMonster != NULL &&
+                       PlayerCanSee( vScreen, curTile->m_pCurMonster->m_md->m_dwFlags &
+                                                  ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) ) ||
+                     ( curTile->m_pCurItem != NULL &&
+                       PlayerCanSee( vScreen, MON_FLAG_EMPTY_MIND ) ) )
             {
                 continue;
             }
-            JColor color = IsLit( vScreen ) ? JColor( 200, 200, 0, 255 ) : curTile->m_dtd->m_Color;
+
+            if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
+            {
+                color = JColor( 100, 0, 100, 255 );
+            }
+            else if( IsLit( vScreen ) )
+            {
+                color = JColor( 200, 200, 0, 255 );
+            }
+            else
+            {
+                color = curTile->m_dtd->m_Color;
+            }
             m_TileSet->SetTileColor( color );
             m_TileSet->DrawTile( curTile->m_dtd->m_dwIndex, vScreen, vSize, true );
         }

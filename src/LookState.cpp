@@ -10,7 +10,7 @@
 
 extern CGame *g_pGame;
 
-CLookState::CLookState() : m_cCommand( 0 ), m_vLookPos( 0, 0 )
+CLookState::CLookState() : m_cCommand( 0 ), m_vDelta( 0, 0 )
 {
     m_pKeyHandlers[LOOK_INIT] = &CLookState::OnHandleInit;
     m_pKeyHandlers[LOOK_LOOK] = &CLookState::OnHandleLook;
@@ -84,8 +84,8 @@ int CLookState::OnHandleInit( SDL_Keysym *keysym )
             if( keysym->mod & KMOD_SHIFT )
             {
                 mod = LOOK_LOOK;
-                m_vLookPos = g_pGame->GetPlayer()->m_vPos;
-                g_pGame->GetDungeon()->SetLookPosition( m_vLookPos );
+                m_vDelta.Init();
+                g_pGame->GetDungeon()->SetLookPosition( g_pGame->GetPlayer()->m_vPos );
             }
             break;
         default:
@@ -112,44 +112,74 @@ int CLookState::OnBaseHandleKey( SDL_Keysym *keysym )
 {
     if( IsDirectional( keysym ) )
     {
-        JVector vDelta;
-        GetDir( keysym, vDelta );
-        m_vLookPos += vDelta; // the previous position // g_pGame->GetPlayer()->m_vPos;
-        g_pGame->GetDungeon()->SetLookPosition( m_vLookPos );
+        m_vDelta.Init();
+        GetDir( keysym, m_vDelta );
 
         return JSUCCESS;
     }
-    else if( keysym->sym == SDLK_8 )
+    else if( keysym->sym == SDLK_PERIOD )
     {
-        if( keysym->mod & KMOD_SHIFT )
-        {
-            // * key chooses look target, then gets us out of look mode
-            CDungeonTile *pTile =
-                g_pGame->GetDungeon()->GetTile( g_pGame->GetDungeon()->GetLookPosition() );
+        // * key chooses look target, then gets us out of look mode
+        CDungeonTile *pTile =
+            g_pGame->GetDungeon()->GetTile( g_pGame->GetDungeon()->GetLookPosition() );
 
-            // monster
-            if( pTile->m_pCurMonster )
-            {
-                printf( "monster\n" );
-                // you see here a %s
-                // target selected.
-            }
-            // item
-            if( pTile->m_pCurItem )
-            {
-                printf( "item\n" );
-                // you see here a %s
-            }
-            // tile
-            if( pTile->m_dtd->m_dwType != DUNG_IDX_WALL )
-            {
-                printf( "dungeon\n" );
-                // you see here a %s
-            }
-            // now reset
-            ResetToState( STATE_COMMAND );
-            return JRESETSTATE;
+        // monster
+        if( pTile->m_pCurMonster )
+        {
+            JLog( LOG_LEVEL_DEBUG, true, "LOOK command sees a monster\n" );
+            g_pGame->GetMsgs()->Printf( "You see here a %s.\nTarget selected.\n",
+                                        pTile->m_pCurMonster->GetName() );
+            g_pGame->GetPlayer()->SetTarget( pTile->m_pCurMonster );
         }
+        // item
+        if( pTile->m_pCurItem )
+        {
+            JLog( LOG_LEVEL_DEBUG, true, "LOOK command sees an item\n" );
+            g_pGame->GetMsgs()->Printf( "You see here a %s\n", pTile->m_pCurItem->GetName() );
+        }
+        // tile
+        if( pTile->m_dtd->m_dwType != DUNG_IDX_WALL )
+        {
+            JLog( LOG_LEVEL_DEBUG, true, "LOOK command sees an item\n" );
+            char dungeon[32];
+            switch( pTile->m_dtd->m_dwType )
+            {
+            case DUNG_IDX_DOOR:
+                Util::jstrcpy( dungeon, "a door. It is closed" );
+                break;
+            case DUNG_IDX_OPEN_DOOR:
+                Util::jstrcpy( dungeon, "an open door" );
+                break;
+            case DUNG_IDX_SECRET_DOOR:
+                Util::jstrcpy( dungeon, "You can't see that from here" );
+                break;
+            case DUNG_IDX_DOWNSTAIRS:
+                Util::jstrcpy( dungeon, "a set of stairs, going down" );
+                break;
+            case DUNG_IDX_LONG_DOWNSTAIRS:
+                Util::jstrcpy( dungeon, "a long set of stairs, going down" );
+                break;
+            case DUNG_IDX_UPSTAIRS:
+                Util::jstrcpy( dungeon, "a staircase, going up" );
+                break;
+            case DUNG_IDX_LONG_UPSTAIRS:
+                Util::jstrcpy( dungeon, "a long staircase, going up" );
+                break;
+            case DUNG_IDX_FLOOR:
+                Util::jstrcpy( dungeon, "open floor" );
+                break;
+            case DUNG_IDX_RUBBLE:
+                Util::jstrcpy( dungeon, "some rubble" );
+                break;
+            default:
+                Util::jstrcpy( dungeon, "... what is *that*?! .." );
+                break;
+            }
+            g_pGame->GetMsgs()->Printf( "You see %s.\n", dungeon );
+        }
+        // now reset
+        ResetToState( STATE_COMMAND );
+        return JRESETSTATE;
     }
     else if( keysym->sym == SDLK_ESCAPE )
     {
@@ -173,10 +203,14 @@ void CLookState::ResetToState( int newstate )
 /// command-specific fcns go below
 
 //// Look commands
-bool CLookState::TestLook() { return g_pGame->GetDungeon()->PlayerCanSee( m_vLookPos ); }
+bool CLookState::TestLook()
+{
+    return g_pGame->GetDungeon()->PlayerCanSee( g_pGame->GetDungeon()->GetLookPosition() +
+                                                m_vDelta );
+}
 
 bool CLookState::DoLook()
 {
-    // save off ( m_vLookPos );
+    g_pGame->GetDungeon()->SetLookPosition( g_pGame->GetDungeon()->GetLookPosition() + m_vDelta );
     return true;
 }

@@ -43,6 +43,7 @@ protected:
     CDungeonTileDef *m_dtdlist;
     JLinkList<CMonsterDef> *m_llMonsterDefs;
     JLinkList<CItemDef> *m_llItemDefs;
+    JVector m_vLookPos;
 
 private:
     Uint16 m_dwZoom;
@@ -60,6 +61,7 @@ public:
           m_Rect( -DUNG_WIDTH, DUNG_HEIGHT, DUNG_WIDTH, -DUNG_HEIGHT ),
           m_vfTranslate( (int)( -DUNG_WIDTH * 0.5f ), (int)( -DUNG_HEIGHT * 0.5f ) ),
           m_dwZoom( DUNG_ZOOM_NORMAL ),
+          m_vLookPos( (int)( -DUNG_WIDTH * 0.5f ), (int)( -DUNG_HEIGHT * 0.5f ) ),
           // m_dmTownLevel(NULL),
           m_llItems( NULL ),
           m_llMonsters( NULL ),
@@ -83,6 +85,9 @@ public:
     bool CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFlags = 0 );
     bool PlayerCanSee( JVector vCheck, uint32 dwFlags = 0 );
     void DisturbPlayer();
+
+    void SetLookPosition( JVector vNewPos ) { m_vLookPos.Init( VEC_EXPAND( vNewPos ) ); }
+    JVector GetLookPosition() { return m_vLookPos; }
 
     JResult OnChangeLevel( const int delta );
 

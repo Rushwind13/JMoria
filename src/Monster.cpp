@@ -38,6 +38,7 @@ void CMonster::Init( CMonsterDef *pmd )
     m_fCurHP = m_fHP;
     m_fCurAC = pmd->m_fBaseAC;
     m_pCurrentAttack = NULL;
+    m_bIsPlayerTarget = false;
 }
 
 void CMonster::InitBrain( CMonsterDef *pmd )
@@ -329,8 +330,15 @@ void CMonster::Draw()
 
     SetColor();
 
+    JColor color = m_md->m_Color;
+
+    if( m_bIsPlayerTarget )
+    {
+        color = JColor( 100, 0, 0, 255 );
+    }
+
     // PreDraw();
-    g_pGame->GetDungeon()->m_TileSet->SetTileColor( m_md->m_Color );
+    g_pGame->GetDungeon()->m_TileSet->SetTileColor( color );
     g_pGame->GetDungeon()->m_TileSet->DrawTile( monster_tile, GetPos(), vSize, false );
     // PostDraw();
 }

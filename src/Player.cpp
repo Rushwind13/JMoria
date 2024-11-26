@@ -536,6 +536,7 @@ void CPlayer::OnKillMonster( CMonster *pMon )
 {
     m_fExperience += pMon->m_md->m_fExpValue / m_fLevel;
     GainLevel();
+    m_pTarget = NULL;
 }
 
 void CPlayer::GainLevel()

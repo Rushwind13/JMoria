@@ -8,6 +8,7 @@ class CPlayer;
 class CDisplayText;
 class CStateBase;
 class CCmdState;
+class CLookState;
 class CModState;
 class CUseState;
 class CStringInputState;
@@ -46,6 +47,7 @@ public:
     void Term();
     void Quit( int returncode );
     void SetState( int eNewState );
+    int GetGameStateIndex() { return m_eCurState; }
     CStateBase *GetGameState() { return m_pCurState; }
     float GetFTime() { return m_fGameTime; }
     int GetITime() { return (int)m_fGameTime; }
@@ -74,6 +76,7 @@ protected:
     int m_eCurState;
 
     CCmdState *m_pCmdState;
+    CLookState *m_pLookState;
     CModState *m_pModState;
     CUseState *m_pUseState;
     CStringInputState *m_pStringInputState;

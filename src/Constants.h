@@ -26,7 +26,8 @@
 #define STATE_REST 7
 #define STATE_RUN 8
 #define STATE_INTRO 9
-#define STATE_MAX 10
+#define STATE_LOOK 10
+#define STATE_MAX 11
 
 // Various statuses that someone could have
 #define STATUS_INVALID -1
@@ -36,11 +37,11 @@
 #define STATUS_FULL 3
 #define STATUS_HUNGRY 4
 #define STATUS_STARVING 5
-#define STATUS_CONFUSED 6
-#define STATUS_STUNNED 7
-#define STATUS_AFRAID 8
-#define STATUS_SLEEPING 9
-#define STATUS_MAX 10
+// #define STATUS_CONFUSED 6
+// #define STATUS_STUNNED 7
+// #define STATUS_AFRAID 8
+// #define STATUS_SLEEPING 9
+#define STATUS_MAX 6
 
 #define DIR_INVALID -1
 #define DIR_NONE -1

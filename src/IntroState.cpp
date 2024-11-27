@@ -134,7 +134,7 @@ int CIntroState::OnHandleCharacterCreate( SDL_Keysym *keysym )
 
 int CIntroState::OnHandleInit( SDL_Keysym *keysym )
 {
-    JLog( LOG_LEVEL_INFO, true, "Initializing intro state...\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Initializing intro state...\n" );
 
     g_pGame->GetEnd()->Clear();
     DoSplash();

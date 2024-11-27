@@ -237,7 +237,6 @@ Item <Potion of Minor Healing>
     Value       100.0
     Level       2
     Weight      0.2
-    Color       <225,50,225,255>
     Flags       <ITEM_FLAG_STACKS>
 }
 
@@ -250,7 +249,6 @@ Value       200.0
 Level       4
 Weight      0.2
 Duration    150.0
-Color       <225,50,50,255>
 Flags       <ITEM_FLAG_STACKS>
 }
 
@@ -263,7 +261,6 @@ Value       80.0
 Level       4
 Weight      0.2
 Duration    100.0
-Color       <225,50,225,255>
 Flags       <ITEM_FLAG_STACKS>
 }
 
@@ -447,7 +444,7 @@ Color        <225,225,50,255>
 Item <Flask of Oil>
 {
 Plural      <Flasks of Oil>
-Type        <ITEM_IDX_POTION>
+Type        <ITEM_IDX_FUEL>
 Effect      <EFFECT_TYPE_GAIN>,<EFFECT_FLAG_FUEL>
 Value       10.0
 Level       4

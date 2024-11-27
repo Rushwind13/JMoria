@@ -12,6 +12,9 @@ bool CDataFile::Open( const char *szFilename )
         return false;
     }
 
+    Util::Shuffle( PotionIndex, NUM_POTION_NAMES );
+    Util::Shuffle( ScrollIndex, NUM_SCROLL_NAMES );
+
     return true;
 }
 
@@ -292,14 +295,6 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
     bool bStartItem = false;
     bool bEndItem = false;
 
-    int PotionIndex[NUM_POTION_NAMES];
-    Util::Shuffle( PotionIndex, NUM_POTION_NAMES );
-    int ScrollIndex[NUM_SCROLL_NAMES];
-    Util::Shuffle( ScrollIndex, NUM_SCROLL_NAMES );
-
-    uint32 potion_count = 0;
-    uint32 scroll_count = 0;
-
     while( !bEndItem && fgets( szRaw, 1024, m_fp ) != NULL )
     {
         szLine = Strip( szRaw );
@@ -389,23 +384,28 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                     idIn.m_dwIndex = g_Constants.LookupString( szValue );
                     if( idIn.m_dwIndex == ITEM_IDX_POTION )
                     {
-                        int potion_index = PotionIndex[potion_count];
+                        int potion_index = PotionIndex[m_dwPotionCount];
                         idIn.m_szFlavor =
                             new char[Util::jstrlen( g_Constants.PotionColor( potion_index ) ) + 1];
                         Util::jstrcpy( idIn.m_szFlavor, g_Constants.PotionColor( potion_index ) );
                         char szUnID[100];
                         sprintf( szUnID, "%s Potion", idIn.m_szFlavor );
+                        JLog( LOG_LEVEL_DEBUG, true, "Potion #%d - index %d color %s\n",
+                              m_dwPotionCount, potion_index, szUnID );
                         idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
-                        sprintf( szUnID, "%s Potions", idIn.m_szFlavor );
 
+                        sprintf( szUnID, "%s Potions", idIn.m_szFlavor );
                         idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
-                        potion_count++;
+
+                        sprintf( szUnID, "%s", g_Constants.PotionRGBA( potion_index ) );
+                        idIn.m_Color.SetColor( szUnID );
+                        m_dwPotionCount++;
                     }
                     else if( idIn.m_dwIndex == ITEM_IDX_SCROLL )
                     {
-                        int scroll_index = ScrollIndex[scroll_count];
+                        int scroll_index = ScrollIndex[m_dwScrollCount];
                         idIn.m_szFlavor =
                             new char[Util::jstrlen( g_Constants.ScrollName( scroll_index ) ) + 1];
                         Util::jstrcpy( idIn.m_szFlavor, g_Constants.ScrollName( scroll_index ) );
@@ -416,7 +416,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                         sprintf( szUnID, "Scrolls labeled %s", idIn.m_szFlavor );
                         idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
-                        scroll_count++;
+                        m_dwScrollCount++;
                     }
                     else
                     {

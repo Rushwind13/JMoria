@@ -321,7 +321,8 @@
 #define ITEM_IDX_MACE 27
 #define ITEM_IDX_2H_SWORD 28
 #define ITEM_IDX_BELT 29
-#define ITEM_IDX_MAX 30
+#define ITEM_IDX_FUEL 30
+#define ITEM_IDX_MAX 31
 
 // TODO: Might need to switch from "ITEM/MONSTER"
 //       to "types of harm" / "types of aid"
@@ -574,6 +575,7 @@ public:
         m_StringTable[i++].Init( "ITEM_IDX_POLEARM", ITEM_IDX_POLEARM );
         m_StringTable[i++].Init( "ITEM_IDX_SHOVEL", ITEM_IDX_SHOVEL );
         m_StringTable[i++].Init( "ITEM_IDX_BELT", ITEM_IDX_BELT );
+        m_StringTable[i++].Init( "ITEM_IDX_FUEL", ITEM_IDX_FUEL );
 
         // Item flags
         m_StringTable[i++].Init( "ITEM_FLAG_CURSED", ITEM_FLAG_CURSED );
@@ -676,6 +678,51 @@ public:
         JLog( LOG_LEVEL_NOISE, true, "index %d value %s\n", dwIndex, PotionColors[dwIndex] );
         return PotionColors[dwIndex];
     }
+
+    char *PotionRGBA( const uint32 dwIndex )
+    {
+        if( dwIndex >= NUM_POTION_NAMES )
+            return "0,0,0,0";
+
+        char *PotionRGBAs[] = {
+            "255,255,255,10",  // Clear
+            "255,255,255,255", // White
+            "0,0,0,255",       // Black
+            "255,0,0,255",     // Red
+            "255,192,203,255", // Pink
+            "255,165,0,255",   // Orange
+            "255,255,0,255",   // Yellow
+            "0,128,0,255",     // Green
+            "0,0,255,255",     // Blue
+            "128,0,128,255",   // Purple
+            "165,42,42,255",   // Brown
+            "128,128,128,255", // Gray
+            "255,215,0,255",   // Golden
+            "192,192,192,255", // Silver
+            "220,20,60,255",   // Ruby
+            "0,128,0,255",     // Emerald
+            "0,0,255,255",     // Sapphire
+            "255,191,0,255",   // Amber
+            "255,228,225,255", // Rose
+            "221,160,221,255", // Lilac
+            "0,128,128,255",   // Teal
+            "64,224,208,255",  // Turquoise
+            "0,0,128,255",     // Navy
+            "128,128,0,255",   // Olive
+            "128,0,0,255",     // Maroon
+            "220,20,60,255",   // Crimson
+            "255,0,255,255",   // Fuchsia
+            "230,230,250,255", // Lavender
+            "127,255,0,255",   // Chartreuse
+            "127,127,127,255", //  "Gloopy"
+            "225,225,255,255", // "Bubbling"
+            "127,255,0,255"    // "Glowing"
+        };
+
+        JLog( LOG_LEVEL_NOISE, true, "index %d value %s\n", dwIndex, PotionRGBAs[dwIndex] );
+        return PotionRGBAs[dwIndex];
+    }
+
     const char *ScrollName( const uint32 dwIndex )
     {
         if( dwIndex >= NUM_SCROLL_NAMES )

@@ -70,7 +70,7 @@ void CDungeonMap::CreateDungeon( const int depth )
     }
     else if( depth <= 0 )
     {
-        JLog( LOG_LEVEL_INFO, false, "Error, levels don't go below 0.\n" );
+        JLog( LOG_LEVEL_ERROR, false, "Error, levels don't go below 0.\n" );
     }
 #ifdef FIXED_DUNGEON
     //    For setpiece rooms, treasure rooms, &c
@@ -485,7 +485,7 @@ void CDungeonMap::AddDoor( const JIVector vHall, int direction )
         sprintf( flavor, "secret " );
         door_type = DUNG_IDX_SECRET_DOOR;
     }
-    JLog( LOG_LEVEL_INFO, false, "Placing a %sdoor at <%d %d>\n", flavor, VEC_EXPAND( vDoor ) );
+    JLog( LOG_LEVEL_DEBUG, false, "Placing a %sdoor at <%d %d>\n", flavor, VEC_EXPAND( vDoor ) );
     GetTile( vDoor )->SetType( door_type );
 }
 
@@ -500,7 +500,7 @@ CDungeonCreationStep *CDungeonMap::MakeRoomStep( const JIVector &vPos, const int
 {
     if( recurdepth > MAX_RECURDEPTH )
         return NULL;
-    JLog( LOG_LEVEL_INFO, true, "Creating a room step\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Creating a room step\n" );
     CDungeonCreationStep *pStep = new CDungeonCreationStep();
     pStep->m_dwIndex = DUNG_CREATE_STEP_MAKE_ROOM;
     pStep->m_dwDirection = direction;
@@ -542,7 +542,7 @@ CDungeonCreationStep *CDungeonMap::MakeRoomStep( const JIVector &vPos, const int
     // if( recurdepth > 0 )
     //     AddDoor( pStep->m_vPos, pStep->m_dwDirection );
 
-    JLog( LOG_LEVEL_INFO, true, "success!\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "success!\n" );
     return pStep;
 }
 
@@ -551,7 +551,7 @@ CDungeonCreationStep *CDungeonMap::MakeHallStep( const JIVector &vPos, const int
 {
     if( recurdepth > MAX_RECURDEPTH )
         return NULL;
-    JLog( LOG_LEVEL_INFO, true, "Creating a hall step\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Creating a hall step\n" );
     CDungeonCreationStep *pStep = new CDungeonCreationStep();
     pStep->m_dwIndex = DUNG_CREATE_STEP_MAKE_HALLWAY;
     pStep->m_dwRecurDepth = recurdepth;
@@ -590,7 +590,7 @@ CDungeonCreationStep *CDungeonMap::MakeHallStep( const JIVector &vPos, const int
     // put a door where the room and hallway meet
     // AddDoor( pStep->m_vPos, pStep->m_dwDirection );
 
-    JLog( LOG_LEVEL_INFO, true, "success!\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "success!\n" );
     return pStep;
 }
 

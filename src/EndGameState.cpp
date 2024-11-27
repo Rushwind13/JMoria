@@ -82,7 +82,7 @@ int CEndGameState::OnHandleTomb( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true, "Name cmd still waiting for a valid key.\n" );
+        JLog( LOG_LEVEL_DEBUG, true, "Name cmd still waiting for a valid key.\n" );
         return 0;
     }
 
@@ -113,7 +113,7 @@ int CEndGameState::OnHandleScores( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_INFO, true, "Name cmd still waiting for a valid key.\n" );
+        JLog( LOG_LEVEL_DEBUG, true, "Name cmd still waiting for a valid key.\n" );
         return 0;
     }
 
@@ -127,7 +127,7 @@ int CEndGameState::OnHandleScores( SDL_Keysym *keysym )
 
 int CEndGameState::OnHandleInit( SDL_Keysym *keysym )
 {
-    JLog( LOG_LEVEL_INFO, true, "Initializing endgame state...\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Initializing endgame state...\n" );
 
     m_pScore->InitScore();
 

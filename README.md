@@ -21,6 +21,7 @@ Keyboard commands recognized:
 * *w* - wield an item
 * *t* - remove (take off) a piece of equipment
 * *d* - drop
+* *** - choose target monster (choose target with *.*)
 * *:* - look (choose target with *.*)
 * *.* - rest one turn
 * *R* - rest until at full health, or until disturbed

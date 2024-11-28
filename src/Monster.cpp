@@ -119,7 +119,7 @@ JIVector CMonster::GetSpawnPoint( JIVector vRequestedSpawnPoint )
     bool bNear = vRequestedSpawnPoint.IsWithinWorld();
     if( bNear )
     {
-        JLog( LOG_LEVEL_INFO, true, "given <%d %d>...", VEC_EXPAND( vRequestedSpawnPoint ) );
+        JLog( LOG_LEVEL_INFO, false, "given <%d %d>...", VEC_EXPAND( vRequestedSpawnPoint ) );
         // return SpawnAt( vSpawnPoint );
         vTryPos.Init( VEC_EXPAND( vRequestedSpawnPoint ) );
     }
@@ -334,6 +334,7 @@ void CMonster::Draw()
 
     if( m_bIsPlayerTarget )
     {
+        JLog( LOG_LEVEL_NOISE, false, "drawing the target monster: %s\n", GetName() );
         color = JColor( 100, 0, 0, 255 );
     }
 

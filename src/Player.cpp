@@ -206,6 +206,12 @@ void CPlayer::DisplayStats()
     g_pGame->GetStats()->Printf( "Light: %d turns\n", (int)LightSource() );
     g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "\n" );
+    if( m_pTarget )
+    {
+        g_pGame->GetStats()->Printf( "Target: %s\n", m_pTarget->GetName() );
+        g_pGame->GetStats()->Printf( "\n" );
+        g_pGame->GetStats()->Printf( "\n" );
+    }
     if( IsWizard() )
         g_pGame->GetStats()->Printf( "** WIZARD MODE **\n" );
 }

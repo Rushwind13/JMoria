@@ -7,16 +7,17 @@ class CDungeon;
 class CPlayer;
 class CDisplayText;
 class CStateBase;
+class CClockStepState;
 class CCmdState;
+class CEndGameState;
+class CIntroState;
 class CLookState;
 class CModState;
-class CUseState;
-class CStringInputState;
-class CIntroState;
-class CEndGameState;
-class CClockStepState;
 class CRestState;
 class CRunState;
+class CStringInputState;
+class CTargetState;
+class CUseState;
 class CAIMgr;
 
 class CGame
@@ -75,16 +76,17 @@ protected:
     CStateBase *m_pCurState;
     int m_eCurState;
 
+    CClockStepState *m_pClockStepState;
     CCmdState *m_pCmdState;
+    CEndGameState *m_pEndGameState;
+    CIntroState *m_pIntroState;
     CLookState *m_pLookState;
     CModState *m_pModState;
-    CUseState *m_pUseState;
-    CStringInputState *m_pStringInputState;
-    CIntroState *m_pIntroState;
-    CEndGameState *m_pEndGameState;
-    CClockStepState *m_pClockStepState;
     CRestState *m_pRestState;
     CRunState *m_pRunState;
+    CStringInputState *m_pStringInputState;
+    CTargetState *m_pTargetState;
+    CUseState *m_pUseState;
 
 private:
     CRender *m_pRender;

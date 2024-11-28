@@ -27,7 +27,8 @@
 #define STATE_RUN 8
 #define STATE_INTRO 9
 #define STATE_LOOK 10
-#define STATE_MAX 11
+#define STATE_TARGET 11
+#define STATE_MAX 12
 
 // Various statuses that someone could have
 #define STATUS_INVALID -1

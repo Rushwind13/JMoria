@@ -16,6 +16,7 @@
 #include "RestState.h"
 #include "RunState.h"
 #include "StringInputState.h"
+#include "TargetState.h"
 #include "UseState.h"
 
 #include "DisplayText.h"
@@ -41,6 +42,7 @@ CGame::CGame()
       m_pRestState( NULL ),
       m_pRunState( NULL ),
       m_pStringInputState( NULL ),
+      m_pTargetState( NULL ),
       m_pUseState( NULL ),
       m_eCurState( STATE_INVALID ),
       m_fGameTime( 0.0f )
@@ -54,6 +56,7 @@ CGame::CGame()
     m_pRestState = new CRestState;
     m_pRunState = new CRunState;
     m_pStringInputState = new CStringInputState;
+    m_pTargetState = new CTargetState;
     m_pUseState = new CUseState;
 #ifdef TURN_BASED
     m_bReadyForUpdate = false;
@@ -204,6 +207,12 @@ void CGame::Term()
         m_pStringInputState = NULL;
     }
 
+    if( m_pTargetState )
+    {
+        delete m_pTargetState;
+        m_pTargetState = NULL;
+    }
+
     if( m_pUseState )
     {
         delete m_pUseState;
@@ -277,6 +286,9 @@ void CGame::SetState( int eNewState )
         break;
     case STATE_RUN:
         m_pCurState = reinterpret_cast<CStateBase *>( m_pRunState );
+        break;
+    case STATE_TARGET:
+        m_pCurState = reinterpret_cast<CStateBase *>( m_pTargetState );
         break;
     case STATE_USE:
         m_pCurState = reinterpret_cast<CStateBase *>( m_pUseState );

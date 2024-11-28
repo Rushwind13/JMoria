@@ -155,6 +155,7 @@ public:
             }
 
             m_lpHead = pLink;
+            pLink->m_dwIndex = m_iNumElements;
         }
 
         m_iNumElements++;

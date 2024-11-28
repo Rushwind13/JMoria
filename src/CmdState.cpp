@@ -76,6 +76,14 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
         retval = 0;
     }
 
+    else if( IsTargetCommand( keysym ) )
+    {
+        // Add "target" to the top of the state stack
+        g_pGame->SetState( STATE_TARGET );
+        g_pGame->GetGameState()->HandleKey( keysym );
+        retval = 0;
+    }
+
     else if( IsStairsCommand( keysym ) )
     {
         m_vNewPos = g_pGame->GetPlayer()->m_vPos;
@@ -260,6 +268,19 @@ bool CCmdState::IsLookCommand( SDL_Keysym *keysym )
     switch( keysym->sym )
     {
     case SDLK_SEMICOLON:
+        if( keysym->mod & KMOD_SHIFT )
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool CCmdState::IsTargetCommand( SDL_Keysym *keysym )
+{
+    switch( keysym->sym )
+    {
+    case SDLK_8:
         if( keysym->mod & KMOD_SHIFT )
         {
             return true;

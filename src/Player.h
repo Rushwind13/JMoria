@@ -206,6 +206,7 @@ public:
     int Move( JVector vDir );
     void HandleCollision( JVector vPos, int dwCollideType );
 
+    CMonster *GetTarget() { return m_pTarget; }
     void SetTarget( CMonster *pMon )
     {
         if( m_pTarget )

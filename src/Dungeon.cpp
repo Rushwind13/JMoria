@@ -336,7 +336,7 @@ JResult CDungeon::SpawnMonsters( const int depth )
     return JSUCCESS;
 }
 
-CMonsterDef *CDungeon::GetMonsterDef( char *szMonsterName )
+CMonsterDef *CDungeon::GetMonsterDef( const char *szMonsterName )
 {
     CLink<CMonsterDef> *pLink = m_llMonsterDefs->GetHead();
     CMonsterDef *pid;
@@ -378,7 +378,7 @@ bool CDungeon::SpawnMonster( int which_monster )
     return true;
 }
 
-CItemDef *CDungeon::GetItemDef( char *szItemName )
+CItemDef *CDungeon::GetItemDef( const char *szItemName )
 {
     CLink<CItemDef> *pLink = m_llItemDefs->GetHead();
     CItemDef *pid;
@@ -403,7 +403,7 @@ CItemDef *CDungeon::GetItemDef( int which_item )
         JLog( LOG_LEVEL_WARN, true, "got an invalid item: %d\n", which_item );
         return NULL;
     }
-    return m_llItemDefs->GetLink( which_item )->m_lpData;
+    return m_llItemDefs->GetNthLink( which_item )->m_lpData;
 }
 
 int CDungeon::ChooseItemForDepth( const int depth )

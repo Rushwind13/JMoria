@@ -616,7 +616,7 @@ Item <Morning Star>
 Item <Quarter Staff>
 {
     Plural        <Quarter Staves>
-    Type        <ITEM_IDX_STAFF>
+    Type        <ITEM_IDX_POLEARM>
     Value       15.0
     Flags       <ITEM_FLAG_2HANDED>
     Level        10

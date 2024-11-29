@@ -370,8 +370,9 @@
 #define MON_AI 7
 #define EFFECT_TYPE 8
 
-#define NUM_POTION_NAMES 32
-#define NUM_SCROLL_NAMES 32
+#define NUM_POTION_TYPES 32
+#define NUM_SCROLL_TYPES 32
+#define NUM_LUMBER_TYPES 32
 
 #include "TextEntry.h"
 class Constants
@@ -668,7 +669,7 @@ public:
 
     const char *PotionColor( const uint32 dwIndex )
     {
-        if( dwIndex >= NUM_POTION_NAMES )
+        if( dwIndex >= NUM_POTION_TYPES )
             return "";
         const char *PotionColors[] = {
             "Clear",      "White",   "Black",    "Red",    "Pink",    "Orange",  "Yellow",
@@ -682,7 +683,7 @@ public:
 
     char *PotionRGBA( const uint32 dwIndex )
     {
-        if( dwIndex >= NUM_POTION_NAMES )
+        if( dwIndex >= NUM_POTION_TYPES )
             return "0,0,0,0";
 
         char *PotionRGBAs[] = {
@@ -726,7 +727,7 @@ public:
 
     const char *ScrollName( const uint32 dwIndex )
     {
-        if( dwIndex >= NUM_SCROLL_NAMES )
+        if( dwIndex >= NUM_SCROLL_TYPES )
             return "";
 
         const char *ScrollNames[] = {
@@ -739,6 +740,66 @@ public:
             "des erumol",     "id est laborum" };
 
         return ScrollNames[dwIndex];
+    }
+
+    const char *Lumber( const uint32 dwIndex )
+    {
+        printf( "lumber %d\n", dwIndex );
+        if( dwIndex >= NUM_LUMBER_TYPES )
+            return "";
+
+        const char *myLumber[] = {
+            "Oak",      "Ash",       "Willow",   "Hazel", "Hawthorn", "Ebony",      "Yew",
+            "Maple",    "Birch",     "Pine",     "Cedar", "Walnut",   "Elm",        "Spruce",
+            "Cherry",   "Applewood", "Pearwood", "Holly", "Platinum", "Blackthorn", "Alder",
+            "Ironwood", "Heartwood", "Steel",    "Glass", "Plastic",  "Aluminum",   "Dragonbone",
+            "Iron",     "Silver",    "Gold",     "Bronze" };
+
+        return myLumber[dwIndex];
+    }
+
+    const char *LumberRGBA( const uint32 dwIndex )
+    {
+        printf( "lumberrgba %d\n", dwIndex );
+        if( dwIndex >= NUM_LUMBER_TYPES )
+            return "0,0,0,0";
+
+        const char *LumberRGBAs[] = {
+            "160,82,45,255",   // Oak
+            "150,100,80,255",  // Ash
+            "190,180,160,255", // Willow
+            "120,90,70,255",   // Hazel
+            "180,150,130,255", // Hawthorn
+            "30,15,10,255",    // Ebony
+            "100,80,60,255",   // Yew
+            "200,180,150,255", // Maple
+            "220,200,180,255", // Birch
+            "190,170,150,255", // Pine
+            "150,120,90,255",  // Cedar
+            "100,60,30,255",   // Walnut
+            "160,120,90,255",  // Elm
+            "180,160,140,255", // Spruce
+            "200,150,120,255", // Cherry
+            "220,180,150,255", // Applewood
+            "200,180,160,255", // Pearwood
+            "180,160,140,255", // Holly
+            "200,200,200,255", // Platinum
+            "100,80,60,255",   // Blackthorn
+            "180,160,140,255", // Alder
+            "120,100,80,255",  // Ironwood
+            "150,100,80,255",  // Heartwood
+            "160,160,160,255", // Steel
+            "200,200,200,255", // Glass
+            "200,200,200,255", // Plastic
+            "192,192,192,255", // Aluminum
+            "150,100,80,255",  // Dragonbone
+            "160,160,160,255", // Iron
+            "192,192,192,255", // Silver
+            "255,215,0,255",   // Gold
+            "205,127,50,255"   // Bronze
+        };
+
+        return LumberRGBAs[dwIndex];
     }
 
 public:

@@ -32,7 +32,7 @@ GIVEN( "^I spawn a ([A-Za-z ]+):([0-9]+)$" )
     JLog( LOG_LEVEL_INFO, true, "<%.2f %.2f>\n", VEC_EXPAND( context->vec_b ) );
     g_pGame->GetPlayer()->PickUp( context->vec_b );
 
-    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( context->index );
+    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item.c_str() );
 
     int compare = Util::jstrcmp( context->szBuffer, pid->m_szName );
     if( compare != 0 )
@@ -62,7 +62,7 @@ GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in inventory$" )
     ScenarioScope<TestCtx> context;
     REGEX_PARAM( std::string, item );
     REGEX_PARAM( int, item_id );
-    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
+    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item.c_str() );
     JLog( LOG_LEVEL_INFO, true, "Item is %s\n", pid->m_szName );
     int compare = Util::jstrcmp( item.c_str(), pid->m_szName );
     if( compare != 0 )
@@ -89,7 +89,7 @@ GIVEN( "^the ([A-Za-z ]+):([0-9]+) (is|is not) cursed$" )
     REGEX_PARAM( int, item_id );
     REGEX_PARAM( std::string, choice );
     bool cursed = ( choice == "is" ) ? true : false;
-    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
+    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item.c_str() );
     int compare = Util::jstrcmp( item.c_str(), pid->m_szName );
     if( compare != 0 )
     {
@@ -124,7 +124,7 @@ GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in equipment at ([-0-9]+)$" )
     REGEX_PARAM( std::string, item );
     REGEX_PARAM( int, item_id );
     REGEX_PARAM( int, equip_id );
-    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
+    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item.c_str() );
     int compare = Util::jstrcmp( item.c_str(), pid->m_szName );
     if( compare != 0 )
     {
@@ -171,7 +171,7 @@ WHEN( "^the player reads the scroll in inventory at ([-0-9]+)$" )
 {
     REGEX_PARAM( int, inv_id );
     ScenarioScope<TestCtx> context;
-    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetNthLink( inv_id );
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetLink( inv_id );
     JLog( LOG_LEVEL_ERROR, true, "Found item to read is %s\n", pLink->m_lpData->GetName() );
     g_pGame->GetPlayer()->Read( pLink );
 }
@@ -192,7 +192,7 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment) at ([-0-9]+)$" )
     JLinkList<CItem> *pList = ( list == "inventory" ) ? g_pGame->GetPlayer()->m_llInventory
                                                       : g_pGame->GetPlayer()->m_llEquipment;
     CItem *expected = NULL;
-    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
+    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item.c_str() );
     int compare = Util::jstrcmp( item.c_str(), pid->m_szName );
     if( compare != 0 )
     {
@@ -226,7 +226,7 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment) at ([-0-9]+)$"
     JLinkList<CItem> *pList = ( list == "inventory" ) ? g_pGame->GetPlayer()->m_llInventory
                                                       : g_pGame->GetPlayer()->m_llEquipment;
     CItem *expected = NULL;
-    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
+    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item.c_str() );
     int compare = Util::jstrcmp( item.c_str(), pid->m_szName );
     if( compare != 0 )
     {
@@ -239,7 +239,7 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment) at ([-0-9]+)$"
     EXPECT_EQ( compare, 0 );
     int index = ( list == "inventory" ) ? pid->m_dwIndex : equip_id;
     CLink<CItem> *pLink =
-        ( list == "inventory" ) ? pList->GetNthLink( index ) : pList->GetLink( index );
+        ( list == "inventory" ) ? pList->GetLink( index ) : pList->GetLink( index );
     CItem *actual = NULL;
 
     if( pLink )

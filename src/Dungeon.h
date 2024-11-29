@@ -140,9 +140,9 @@ public:
     bool IsCloseable( JVector &vPos );
     int IsStairs( JVector &vPos );
     CRoom *InRoom( JVector &vPos );
-    CMonsterDef *GetMonsterDef( char *szMonsterName );
+    CMonsterDef *GetMonsterDef( const char *szMonsterName );
     CMonsterDef *GetMonsterDef( int which_monster );
-    CItemDef *GetItemDef( char *szItemName );
+    CItemDef *GetItemDef( const char *szItemName );
     CItemDef *GetItemDef( int which_item );
     bool SpawnMonster( int which_monster );
     void RemoveMonster( CMonster *pMon );

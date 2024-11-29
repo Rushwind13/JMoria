@@ -6,30 +6,30 @@ Feature: Equipment
 
     Scenario: I can equip light sources
         Given I have a Player
-        Given I spawn a Torch:20
-        Given the Torch:20 is not cursed
-        Given the player has a Torch:20 in inventory
+        Given I spawn a Torch:13
+        Given the Torch:13 is not cursed
+        Given the player has a Torch:13 in inventory
         Given the player equips the item 20
-        Given the player has a Torch:20 in equipment at 11
+        Given the player has a Torch:13 in equipment at 11
         # And A torch is in the lighting equipment slot
 
     Scenario: Light sources light the area around me
         Given I have a Player
-        Given I spawn a Torch:20
-        Given the Torch:20 is not cursed
-        Given the player has a Torch:20 in inventory
+        Given I spawn a Torch:13
+        Given the Torch:13 is not cursed
+        Given the player has a Torch:13 in inventory
         Given the player equips the item 20
-        Given the player has a Torch:20 in equipment at 11
+        Given the player has a Torch:13 in equipment at 11
         Then the area near the player is lit
         # And A torch is in the lighting equipment slot
 
     Scenario: Light sources have a limited duration
         Given I have a Player
-        Given I spawn a Torch:20
-        Given the Torch:20 is not cursed
-        Given the player has a Torch:20 in inventory
+        Given I spawn a Torch:13
+        Given the Torch:13 is not cursed
+        Given the player has a Torch:13 in inventory
         Given the player equips the item 20
-        Given the player has a Torch:20 in equipment at 11
+        Given the player has a Torch:13 in equipment at 11
         Given the player has a nonzero lightsource
         # And A torch is in the lighting equipment slot
 

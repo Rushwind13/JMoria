@@ -27,6 +27,7 @@ Keyboard commands recognized:
 * *R* - rest until at full health, or until disturbed
 * *q* - quaff a potion
 * *r* - read a scroll
+* *z* - zap a wand
 * *N* - set character name
 * *Ctrl-T* - ^t - teleport (Note: will turn on Wizard Mode)
 * *Ctrl-F* - ^f - set player intrinsic flag (Note: needs Wizard Mode)

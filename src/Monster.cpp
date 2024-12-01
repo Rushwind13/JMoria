@@ -234,9 +234,11 @@ const char *CMonster::AttackFlavorText()
     case MON_FLAG_DROOL:
         return "drools on";
     case MON_FLAG_BREATHE:
-        char retval[32];
-        sprintf( retval, "breathes %s on", AttackEffect() );
-        return retval;
+        // TODO
+        //  char retval[32];
+        //  sprintf( retval, "breathes %s on", AttackEffect() );
+        //  return retval;
+        return "breathes on";
     }
     return "hits";
 }

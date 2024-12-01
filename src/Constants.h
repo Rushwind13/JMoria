@@ -166,7 +166,7 @@
 
 #define MON_FLAG_WARM 0x00000100
 #define MON_FLAG_EMPTY_MIND 0x00000200
-// #define MON_FLAG_x          0x00000400
+#define MON_FLAG_REGENERATE 0x00000400
 // #define MON_FLAG_x          0x00000800
 
 #define MON_FLAG_BREED 0x00008000
@@ -185,7 +185,7 @@
 // #define MON_COLOR_x          0x40000000
 // #define MON_COLOR_x          0x80000000
 
-#define NUM_MON_FLAGS 16
+#define NUM_MON_FLAGS 17
 
 // Effect Flags
 #define EFFECT_FLAG_FIRE 0x00000001
@@ -459,6 +459,7 @@ public:
         m_StringTable[i++].Init( "MON_FLAG_CRAWL", MON_FLAG_CRAWL );
         m_StringTable[i++].Init( "MON_FLAG_WARM", MON_FLAG_WARM );
         m_StringTable[i++].Init( "MON_FLAG_EMPTY_MIND", MON_FLAG_EMPTY_MIND );
+        m_StringTable[i++].Init( "MON_FLAG_REGENERATE", MON_FLAG_REGENERATE );
         m_StringTable[i++].Init( "MON_FLAG_BREED", MON_FLAG_BREED );
         m_StringTable[i++].Init( "MON_AI_DONTMOVE", MON_AI_DONTMOVE );
         m_StringTable[i++].Init( "MON_AI_100RANDOMMOVE", MON_AI_100RANDOMMOVE );

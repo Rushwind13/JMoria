@@ -25,7 +25,6 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
         if( keysym->mod & KMOD_SHIFT )
         {
             g_pGame->GetPlayer()->m_vVel = vTestDir;
-            // Add "modify" to the top of the state stack
             g_pGame->SetState( STATE_RUN );
             g_pGame->GetGameState()->HandleKey( keysym );
             retval = 0;
@@ -109,6 +108,15 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
 
         retval = 0;
     }
+
+    else if( IsZapCommand( keysym ) )
+    {
+        g_pGame->SetState( STATE_RANGED );
+        g_pGame->GetGameState()->HandleKey( keysym );
+        retval = 0;
+    }
+
+    // Wizard-mode commands
 
     else if( IsTeleportCommand( keysym ) )
     {
@@ -196,11 +204,11 @@ bool CCmdState::IsModifierNeeded( SDL_Keysym *keysym )
 {
     switch( keysym->sym )
     {
-    case SDLK_o:
     case SDLK_c:
+    case SDLK_o:
         return true;
         break;
-        // T ( but not t )
+        // T ( but not t  or ^t)
     case SDLK_t:
         if( keysym->mod & KMOD_SHIFT && !( keysym->mod & KMOD_CTRL ) )
         {
@@ -219,11 +227,12 @@ bool CCmdState::IsUseCommand( SDL_Keysym *keysym )
 {
     switch( keysym->sym )
     {
-    case SDLK_w:
-        // t (but not T)
-    case SDLK_t:
+        // t (but not T or ^t)
     case SDLK_d:
+    case SDLK_t:
+    case SDLK_q:
     case SDLK_r:
+    case SDLK_w:
     {
         if( !( keysym->mod & KMOD_SHIFT ) && !( keysym->mod & KMOD_CTRL ) )
         {
@@ -231,9 +240,6 @@ bool CCmdState::IsUseCommand( SDL_Keysym *keysym )
         }
         break;
     }
-    case SDLK_q:
-        return true;
-        break;
     default:
         return false;
         break;
@@ -355,6 +361,19 @@ bool CCmdState::IsSetIntrinsicCommand( SDL_Keysym *keysym )
         break;
     }
 
+    return false;
+}
+
+bool CCmdState::IsZapCommand( SDL_Keysym *keysym )
+{
+    switch( keysym->sym )
+    {
+    case SDLK_z:
+        if( keysym->mod == 0 )
+        {
+            return true;
+        }
+    }
     return false;
 }
 

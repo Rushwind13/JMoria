@@ -437,6 +437,21 @@ Weight      2.0
 Color        <225,225,50,255>
 }
 
+# Wands
+Item <Wand of Light>
+{
+Plural      <Wands of Light>
+Type        <ITEM_IDX_WAND>
+Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_LIGHT>,<EFFECT_MOD_LINE>
+Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_LIGHT>
+Damage      1d5 #  "bright light" damage
+Value       100.0
+Level       1
+Weight      4.0
+Color       <255,255,255,255>
+Flags       <ITEM_FLAG_STACKS,ITEM_FLAG_NO_COLLIDE>
+}
+
 # Weapons
 Item <Bastard sword>
 {
@@ -602,7 +617,7 @@ Item <Morning Star>
 Item <Quarter Staff>
 {
     Plural        <Quarter Staves>
-    Type        <ITEM_IDX_STAFF>
+    Type        <ITEM_IDX_POLEARM>
     Value       15.0
     Flags       <ITEM_FLAG_2HANDED>
     Level        10

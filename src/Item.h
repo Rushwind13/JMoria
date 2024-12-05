@@ -7,7 +7,14 @@
 class CEffect
 {
 public:
-    CEffect() : m_dwEffect( -1 ), m_szAmount( NULL ), m_fDuration( 0 ) {}
+    CEffect()
+        : m_dwEffect( -1 ),
+          m_dwFlags( 0 ),
+          m_dwModifier( 0 ),
+          m_szAmount( NULL ),
+          m_fDuration( 0 )
+    {
+    }
     ~CEffect() {}
     int m_dwEffect;
     int m_dwFlags;
@@ -112,6 +119,7 @@ public:
     int m_dwCount; // how many of this item are being carried?
     int m_dwFlags; // item cursed, or other specific to this instance, rather than in the general
                    // CItemDef
+    uint32 m_dwCharges; // for wands and staves and other items that have an "ammo count"
 protected:
     float m_fColorChangeInterval;
     JColor m_Color;
@@ -124,6 +132,7 @@ public:
     CItem()
         : m_vPos( 0, 0 ),
           m_dwFlags( 0 ),
+          m_dwCharges( 0 ),
           m_dwCount( 1 ),
           m_pllLink( NULL ),
           m_id( NULL ),

@@ -51,7 +51,8 @@ int CRangedState::OnHandleInit( SDL_Keysym *keysym )
 
         CMonster *pMon = g_pGame->GetPlayer()->GetTarget();
         if( pMon && ( g_pGame->GetDungeon()->PlayerCanSee(
-            pMon->GetPos(), pMon->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) ) )
+                        pMon->GetPos(),
+                        pMon->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) ) )
         {
             UsePlayerTarget();
         }
@@ -108,7 +109,7 @@ int CRangedState::OnHandleInit( SDL_Keysym *keysym )
             break;
         }
         m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
-        HandleKey(keysym);
+        HandleKey( keysym );
         return JSUCCESS;
     }
 
@@ -126,20 +127,20 @@ int CRangedState::OnHandleFire( SDL_Keysym *keysym )
     JLog( LOG_LEVEL_DEBUG, true, "Handling FIRE\n" );
     if( m_pSelected == NULL )
     {
-    retval = OnBaseHandleKey( keysym );
+        retval = OnBaseHandleKey( keysym );
 
-    if( retval == JRESETSTATE )
-    {
-        return JSUCCESS;
-    }
+        if( retval == JRESETSTATE )
+        {
+            return JSUCCESS;
+        }
 
-    if( retval != JSUCCESS )
-    {
-        JLog( LOG_LEVEL_WARN, true,
-              "FIRE cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
-        g_pGame->GetMsgs()->Printf( "Choose an item from equipment(a to z):\n" );
-        return JSUCCESS;
-    }
+        if( retval != JSUCCESS )
+        {
+            JLog( LOG_LEVEL_WARN, true,
+                  "FIRE cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
+            g_pGame->GetMsgs()->Printf( "Choose an item from equipment(a to z):\n" );
+            return JSUCCESS;
+        }
     }
 
     // We got a alpha key; do a "zap" of that item
@@ -183,27 +184,26 @@ int CRangedState::OnHandleZap( SDL_Keysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling ZAP\n" );
-    if( m_pSelected == NULL)
+    if( m_pSelected == NULL )
     {
-    retval = OnBaseHandleKey( keysym );
+        retval = OnBaseHandleKey( keysym );
 
-    if( retval == JRESETSTATE )
-    {
-        return JSUCCESS;
-    }
+        if( retval == JRESETSTATE )
+        {
+            return JSUCCESS;
+        }
 
-    if( retval != JSUCCESS )
-    {
-        JLog( LOG_LEVEL_WARN, true,
-              "ZAP cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
-        g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
-        return JSUCCESS;
-    }
+        if( retval != JSUCCESS )
+        {
+            JLog( LOG_LEVEL_WARN, true,
+                  "ZAP cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
+            g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
+            return JSUCCESS;
+        }
     }
     else
     {
-                    JLog(LOG_LEVEL_DEBUG, true, "have selection: %s\n", m_pSelected->m_lpData->GetName());
-
+        JLog( LOG_LEVEL_DEBUG, true, "have selection: %s\n", m_pSelected->m_lpData->GetName() );
     }
 
     JLog( LOG_LEVEL_DEBUG, true, "success, %s\n", m_pSelected->m_lpData->GetName() );
@@ -250,23 +250,23 @@ int CRangedState::OnHandleTarget( SDL_Keysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling TARGET modifier\n" );
-    if( !ReadyToLaunch())
+    if( !ReadyToLaunch() )
     {
         retval = OnBaseHandleKey( keysym );
 
-    if( retval == JRESETSTATE )
-    {
-        return 0;
+        if( retval == JRESETSTATE )
+        {
+            return 0;
+        }
+
+        if( retval != JSUCCESS )
+        {
+            JLog( LOG_LEVEL_WARN, true, "TARGET cmd still waiting for target.\n" );
+            g_pGame->GetMsgs()->Printf( "Choose target: * or Direction (1 2 3 4 6 7 8 9)\n" );
+            return JSUCCESS;
+        }
     }
 
-    if( retval != JSUCCESS )
-    {
-        JLog( LOG_LEVEL_WARN, true, "TARGET cmd still waiting for target.\n" );
-        g_pGame->GetMsgs()->Printf( "Choose target: * or Direction (1 2 3 4 6 7 8 9)\n" );
-        return JSUCCESS;
-    }
-    }
-        
     JLog( LOG_LEVEL_DEBUG, true, "TARGET modifier complete, RANGED state reset to previous\n" );
     eRangedModifier mod = RANGED_INIT;
     switch( m_cCommand )
@@ -284,7 +284,7 @@ int CRangedState::OnHandleTarget( SDL_Keysym *keysym )
     }
     m_eCurModifier = mod;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
-    HandleKey(keysym);
+    HandleKey( keysym );
 
     return JSUCCESS;
 }
@@ -372,9 +372,9 @@ int CRangedState::OnBaseHandleKey( SDL_Keysym *keysym )
         }
         break;
     case RANGED_TARGET:
-        if(ReadyToLaunch())
+        if( ReadyToLaunch() )
         {
-            JLog(LOG_LEVEL_DEBUG, true, "have target: <%d %d>\n", VEC_EXPAND(m_vTarget));
+            JLog( LOG_LEVEL_DEBUG, true, "have target: <%d %d>\n", VEC_EXPAND( m_vTarget ) );
             return JSUCCESS;
         }
         if( IsDirectional( keysym ) )
@@ -393,7 +393,7 @@ int CRangedState::OnBaseHandleKey( SDL_Keysym *keysym )
                 CLAMP( m_vTarget.x, 0, DUNG_WIDTH - 1 );
                 CLAMP( m_vTarget.y, 0, DUNG_HEIGHT - 1 );
             }
-            JLog(LOG_LEVEL_DEBUG, true, "made target: <%d %d>\n", VEC_EXPAND(m_vTarget));
+            JLog( LOG_LEVEL_DEBUG, true, "made target: <%d %d>\n", VEC_EXPAND( m_vTarget ) );
 
             BuildTrajectory();
 
@@ -471,7 +471,7 @@ bool CRangedState::DoTrajectory()
     {
         if( m_vCurrentPosition.IsZero() )
         {
-            m_vCurrentPosition.Init(VEC_EXPAND(g_pGame->GetPlayer()->m_vPos));
+            m_vCurrentPosition.Init( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
         }
         BuildTrajectory();
     }
@@ -590,5 +590,5 @@ void CRangedState::UsePlayerTarget()
     m_vTarget.Init( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos + vDelta ) );
 
     JLog( LOG_LEVEL_DEBUG, true, "cur <%d %d> tar <%d %d> del <%.2f %.2f>\n",
-            VEC_EXPAND( m_vCurrentPosition ), VEC_EXPAND( m_vTarget ), VEC_EXPAND( vDelta ) );
+          VEC_EXPAND( m_vCurrentPosition ), VEC_EXPAND( m_vTarget ), VEC_EXPAND( vDelta ) );
 }

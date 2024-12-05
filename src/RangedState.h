@@ -69,7 +69,7 @@ public:
 
     char GetCommand() { return m_cCommand; };
     int GetModifier() { return (int)m_eCurModifier; };
-    bool NeedsSelection() { return (m_pSelected == NULL);};
+    bool NeedsSelection() { return ( m_pSelected == NULL ); };
 
 protected:
 private:
@@ -87,7 +87,7 @@ private:
     bool ReadyToLaunch();
     bool DoLaunch();
 
-void UsePlayerTarget();
+    void UsePlayerTarget();
     int BuildTrajectory();
     bool DoTrajectory();
 

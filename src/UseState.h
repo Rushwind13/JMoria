@@ -16,6 +16,7 @@ enum eUseModifier
     USE_DROP,
     USE_QUAFF,
     USE_READ,
+    USE_ZAP,
     USE_MAX
 };
 
@@ -55,6 +56,7 @@ private:
     int OnHandleDrop( SDL_Keysym *keysym );
     int OnHandleQuaff( SDL_Keysym *keysym );
     int OnHandleRead( SDL_Keysym *keysym );
+    int OnHandleZap( SDL_Keysym *keysym );
 
     bool TestWield();
     bool DoWield();
@@ -70,6 +72,9 @@ private:
 
     bool TestRead();
     bool DoRead();
+
+    bool TestZap();
+    bool DoZap();
 
     void ResetToState( int newstate );
 };

@@ -33,6 +33,7 @@ private:
     bool IsTargetCommand( SDL_Keysym *keysym );
     bool IsTeleportCommand( SDL_Keysym *keysym );
     bool IsSetIntrinsicCommand( SDL_Keysym *keysym );
+    bool IsZapCommand( SDL_Keysym *keysym );
     bool IsCreateItemCommand( SDL_Keysym *keysym );
     bool IsSummonMonsterCommand( SDL_Keysym *keysym );
     bool IsStringInputCommand( SDL_Keysym *keysym );

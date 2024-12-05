@@ -44,6 +44,7 @@ protected:
     JLinkList<CMonsterDef> *m_llMonsterDefs;
     JLinkList<CItemDef> *m_llItemDefs;
     JVector m_vLookPos;
+    JVector m_vProjectilePos;
 
 private:
     Uint16 m_dwZoom;
@@ -88,6 +89,12 @@ public:
 
     void SetLookPosition( JVector vNewPos ) { m_vLookPos.Init( VEC_EXPAND( vNewPos ) ); }
     JVector GetLookPosition() { return m_vLookPos; }
+
+    void SetProjectilePosition( JVector vNewPos )
+    {
+        m_vProjectilePos.Init( VEC_EXPAND( vNewPos ) );
+    }
+    JVector GetProjectilePosition() { return m_vProjectilePos; }
 
     JResult OnChangeLevel( const int delta );
 

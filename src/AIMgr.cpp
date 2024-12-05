@@ -193,7 +193,7 @@ void CAIBrain::Move()
 void CAIBrain::CollideWithPlayer()
 {
     JLog( LOG_LEVEL_NOISE, true, "ouch! you ran into the player! " );
-    char szStatus[16];
+    char szStatus[32];
     float fDamageMult = 1.0f;
     // TODO: make this use all the attacks, not just the first one
     m_pParent->ChooseAttack();

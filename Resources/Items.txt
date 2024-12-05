@@ -444,11 +444,12 @@ Plural      <Wands of Light>
 Type        <ITEM_IDX_WAND>
 Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_LIGHT>,<EFFECT_MOD_LINE>
 Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_LIGHT>
+Damage      1d5 #  "bright light" damage
 Value       100.0
 Level       1
 Weight      4.0
 Color       <255,255,255,255>
-Flags       <ITEM_FLAG_STACKS>
+Flags       <ITEM_FLAG_STACKS,ITEM_FLAG_NO_COLLIDE>
 }
 
 # Weapons

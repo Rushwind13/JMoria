@@ -28,7 +28,8 @@
 #define STATE_INTRO 9
 #define STATE_LOOK 10
 #define STATE_TARGET 11
-#define STATE_MAX 12
+#define STATE_RANGED 12
+#define STATE_MAX 13
 
 // Various statuses that someone could have
 #define STATUS_INVALID -1
@@ -166,7 +167,7 @@
 
 #define MON_FLAG_WARM 0x00000100
 #define MON_FLAG_EMPTY_MIND 0x00000200
-// #define MON_FLAG_x          0x00000400
+#define MON_FLAG_HURT_BY_LIGHT 0x00000400
 // #define MON_FLAG_x          0x00000800
 
 #define MON_FLAG_BREED 0x00008000
@@ -185,7 +186,7 @@
 // #define MON_COLOR_x          0x40000000
 // #define MON_COLOR_x          0x80000000
 
-#define NUM_MON_FLAGS 16
+#define NUM_MON_FLAGS 17
 
 // Effect Flags
 #define EFFECT_FLAG_FIRE 0x00000001
@@ -341,7 +342,7 @@
 #define ITEM_FLAG_MAINHAND 0x00000040
 #define ITEM_FLAG_NEEDSAMMO 0x00000080
 
-// #define ITEM_FLAG_x 0x00000100
+#define ITEM_FLAG_NO_COLLIDE 0x00000100
 // #define ITEM_FLAG_x 0x00000200
 // #define ITEM_FLAG_x 0x00000400
 // #define ITEM_FLAG_x 0x00000800
@@ -353,7 +354,7 @@
 
 #define ITEM_COLOR_MULTI 0x10000000
 
-#define NUM_ITEM_FLAGS 8
+#define NUM_ITEM_FLAGS 9
 
 // Make sure you change below here if you added any flags.
 #define NUM_STRINGS                                                                                \
@@ -460,6 +461,7 @@ public:
         m_StringTable[i++].Init( "MON_FLAG_CRAWL", MON_FLAG_CRAWL );
         m_StringTable[i++].Init( "MON_FLAG_WARM", MON_FLAG_WARM );
         m_StringTable[i++].Init( "MON_FLAG_EMPTY_MIND", MON_FLAG_EMPTY_MIND );
+        m_StringTable[i++].Init( "MON_FLAG_HURT_BY_LIGHT", MON_FLAG_HURT_BY_LIGHT );
         m_StringTable[i++].Init( "MON_FLAG_BREED", MON_FLAG_BREED );
         m_StringTable[i++].Init( "MON_AI_DONTMOVE", MON_AI_DONTMOVE );
         m_StringTable[i++].Init( "MON_AI_100RANDOMMOVE", MON_AI_100RANDOMMOVE );
@@ -586,6 +588,7 @@ public:
         m_StringTable[i++].Init( "ITEM_FLAG_OFFHAND", ITEM_FLAG_OFFHAND );
         m_StringTable[i++].Init( "ITEM_FLAG_MAINHAND", ITEM_FLAG_MAINHAND );
         m_StringTable[i++].Init( "ITEM_FLAG_NEEDSAMMO", ITEM_FLAG_NEEDSAMMO );
+        m_StringTable[i++].Init( "ITEM_FLAG_NO_COLLIDE", ITEM_FLAG_NO_COLLIDE );
         m_StringTable[i++].Init( "ITEM_FLAG_HOLDING", ITEM_FLAG_HOLDING );
         m_StringTable[i++].Init( "ITEM_COLOR_MULTI", ITEM_COLOR_MULTI );
 
@@ -744,7 +747,6 @@ public:
 
     const char *Lumber( const uint32 dwIndex )
     {
-        printf( "lumber %d\n", dwIndex );
         if( dwIndex >= NUM_LUMBER_TYPES )
             return "";
 
@@ -760,7 +762,6 @@ public:
 
     const char *LumberRGBA( const uint32 dwIndex )
     {
-        printf( "lumberrgba %d\n", dwIndex );
         if( dwIndex >= NUM_LUMBER_TYPES )
             return "0,0,0,0";
 

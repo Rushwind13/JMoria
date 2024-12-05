@@ -18,6 +18,7 @@ CUseState::CUseState() : m_cCommand( 0 )
     m_pKeyHandlers[USE_DROP] = &CUseState::OnHandleDrop;
     m_pKeyHandlers[USE_QUAFF] = &CUseState::OnHandleQuaff;
     m_pKeyHandlers[USE_READ] = &CUseState::OnHandleRead;
+    m_pKeyHandlers[USE_ZAP] = &CUseState::OnHandleZap;
 
     m_eCurModifier = USE_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -258,6 +259,52 @@ int CUseState::OnHandleQuaff( SDL_Keysym *keysym )
     return 0;
 }
 
+int CUseState::OnHandleZap( SDL_Keysym *keysym )
+{
+    int retval;
+    JLog( LOG_LEVEL_DEBUG, true, "Handling ZAP\n" );
+    retval = OnBaseHandleKey( keysym, USE_ZAP );
+
+    if( retval == JRESETSTATE )
+    {
+        return 0;
+    }
+
+    if( retval != JSUCCESS )
+    {
+        JLog( LOG_LEVEL_WARN, true,
+              "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
+        g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
+        return 0;
+    }
+
+    // We got a alpha key; do a "zap" of that item
+    JLog( LOG_LEVEL_NOISE, true, "ZAP got a selection\n" );
+    if( TestZap() )
+    {
+        if( DoZap() )
+        {
+            // g_pGame->GetMsgs()->Printf( "The %s emits a ray of %s.\n",
+            // m_pSelected->m_lpData->GetName(), "blinding blue light" );
+            ResetToState( STATE_RANGED );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+        }
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "You can't zap a %s!\n", m_pSelected->m_lpData->GetName() );
+    }
+    m_pSelected = NULL;
+
+    JLog( LOG_LEVEL_DEBUG, true, "ZAP resetting game state to COMMAND, USE state to INIT\n" );
+    // One way or another, we're done with this state now.
+    ResetToState( STATE_COMMAND );
+    return 0;
+}
+
 int CUseState::OnHandleInit( SDL_Keysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing USE state...\n" );
@@ -287,6 +334,10 @@ int CUseState::OnHandleInit( SDL_Keysym *keysym )
         case SDLK_q:
             mod = USE_QUAFF;
             g_pGame->GetMsgs()->Printf( "Quaff which item? [a-z]\n" );
+            break;
+        case SDLK_z:
+            mod = USE_ZAP;
+            g_pGame->GetMsgs()->Printf( "Zap which item? [a-z]\n" );
             break;
         default:
             JLog( LOG_LEVEL_ERROR, true,
@@ -354,6 +405,7 @@ CLink<CItem> *CUseState::GetResponse( eUseModifier whichUse )
     case USE_READ:
     case USE_QUAFF:
     case USE_WIELD:
+    case USE_ZAP:
         pList = g_pGame->GetPlayer()->m_llInventory;
         pLink = pList->GetNthLink( m_dwSelected );
         break;
@@ -396,3 +448,8 @@ bool CUseState::DoQuaff() { return g_pGame->GetPlayer()->Quaff( m_pSelected ) ==
 bool CUseState::TestRead() { return g_pGame->GetPlayer()->IsReadable( m_pSelected ); }
 
 bool CUseState::DoRead() { return g_pGame->GetPlayer()->Read( m_pSelected ) == JSUCCESS; }
+
+//// Zap commands
+bool CUseState::TestZap() { return g_pGame->GetPlayer()->IsZappable( m_pSelected ); }
+
+bool CUseState::DoZap() { return g_pGame->GetPlayer()->Zap( m_pSelected ) == JSUCCESS; }

@@ -214,6 +214,50 @@ bool WithinRadius( const JIVector vOrigin, const JIVector vTarget, const uint8 d
     return vDelta.x + vDelta.y <= dsquared;
 }
 
+bool Bresenham( const JIVector vSource, const JIVector vTarget, bool ( *isWalkable )( JVector & ),
+                JLinkList<JIVector> *llLine )
+{
+    // Bresenham Line Algorithm
+    JIVector vDelta( abs( vTarget.x - vSource.x ), abs( vTarget.y - vSource.y ) );
+    JIVector vStep( vSource.x < vTarget.x ? 1 : -1, vSource.y < vTarget.y ? 1 : -1 );
+    int error = vDelta.x - vDelta.y;
+    int errorx2;
+
+    JVector vTest;
+    JIVector vCurrent = vSource;
+    bool alreadyAdded = false;
+    while( vCurrent.x != vTarget.x || vCurrent.y != vTarget.y )
+    {
+        if( llLine && !alreadyAdded )
+        {
+            llLine->Add( new JIVector( vCurrent ) );
+            alreadyAdded = true;
+        }
+        if( vCurrent != vSource )
+        {
+            vTest.Init( VEC_EXPAND( vCurrent ) );
+            if( !isWalkable( vTest ) )
+            {
+                return false;
+            }
+        }
+        errorx2 = error * 2;
+        if( errorx2 > -vDelta.y )
+        {
+            error -= vDelta.y;
+            vCurrent.x += vStep.x;
+            alreadyAdded = false;
+        }
+        if( errorx2 < vDelta.x )
+        {
+            error += vDelta.x;
+            vCurrent.y += vStep.y;
+            alreadyAdded = false;
+        }
+    }
+    return true;
+}
+
 #ifndef TURN_BASED
 unsigned int GetTickCount()
 {

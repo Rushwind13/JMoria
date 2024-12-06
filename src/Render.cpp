@@ -2,7 +2,7 @@
 // implementation of the SDL/OpenGL Render
 // Jimbo S. Harris 5/12/2002
 
-// #define DISPLAY_FRAMERATE
+#define DISPLAY_FRAMERATE
 // #define _DEBUG
 
 #include "Render.h"
@@ -46,7 +46,7 @@ JResult CRender::Init( int width, int height, int bpp )
 #ifdef DISPLAY_FRAMERATE
     m_dwFrames = 0;
     m_dwT0 = 0;
-    m_fps = new CDisplayText( JRect( 500, 450, 640, 480 ) );
+    m_fps = new CDisplayText( "../JMoria/", JRect( 500, 450, 640, 480 ) );
     m_fps->SetFlags( FLAG_TEXT_INVERSE );
 #endif
 
@@ -157,11 +157,11 @@ void CRender::PostDraw()
         GLint t = SDL_GetTicks();
         if( t - m_dwT0 >= 5000 )
         {
-#ifdef _DEBUG
+            // #ifdef _DEBUG
             GLfloat seconds = ( t - m_dwT0 ) / 1000.0f;
             GLfloat fps = m_dwFrames / seconds;
             m_fps->Printf( "%g FPS\n", fps );
-#endif // _DEBUG
+            // #endif // _DEBUG
             m_dwT0 = t;
             m_dwFrames = 0;
         }
@@ -270,7 +270,7 @@ void CRender::PreDrawObjects( JRect rcBounds, uint32 Texture, bool bTranslate, b
     glEnable( GL_BLEND );
     if( bInverse )
     {
-        glBlendFunc( GL_SRC_COLOR, GL_ONE_MINUS_SRC_ALPHA );
+        glBlendFunc( GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA );
     }
     else
     {

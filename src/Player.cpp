@@ -153,6 +153,7 @@ JResult CPlayer::SpawnPlayer()
         // try changing this to "iswalkable" -- might need to move that to dungeon. --Jimbo
         if( g_pGame->GetDungeon()->IsWalkableFor( vTryPos, true ) == DUNG_COLL_NO_COLLISION )
         {
+            m_pTarget = NULL;
             m_vPos = vTryPos;
             m_bHasSpawned = true;
             JLog( LOG_LEVEL_INFO, false, "Success! Spawned at <%.2f %.2f>\n",

@@ -32,8 +32,12 @@ JVector Near( const JVector vOrig, int distance = 1 );
 JRect Nearby( const JIVector vTarget, const int radius = 2 );
 bool Taxicab( const JIVector vOrigin, const JIVector vTarget, const uint8 distance = 2 );
 bool WithinRadius( const JIVector vOrigin, const JIVector vTarget, const uint8 distance = 2 );
-bool Bresenham( const JIVector vSource, const JIVector vTarget, bool ( *isWalkable )( JVector & ),
-                JLinkList<JIVector> *llLine = NULL );
+bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 distance,
+                bool ( *isWalkable )( JVector & ), JLinkList<JIVector> *llLine = NULL );
+int abs( const int a );
+int max( const int a, const int b );
+int gcd( const int a, const int b );
+float sqrt( const float a, const float epsilon = 0.0001f );
 #ifndef TURN_BASED
 unsigned int GetTickCount();
 #endif

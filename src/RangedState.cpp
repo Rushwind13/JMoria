@@ -289,7 +289,6 @@ int CRangedState::OnHandleTarget( SDL_Keysym *keysym )
     return JSUCCESS;
 }
 
-// TODO: this needs to allow monster collisions ;)
 bool CollisionCheck( JVector &vTest )
 {
     int collide_type = g_pGame->GetDungeon()->IsWalkableFor( vTest );
@@ -312,10 +311,8 @@ bool NoCollisionCheck( JVector &viTest ) { return true; }
 int CRangedState::BuildTrajectory()
 {
     m_llTrajectory = new JLinkList<JIVector>;
-    bool doesCollide =
-        ( m_pSelected->m_lpData->m_dwFlags & ITEM_FLAG_NO_COLLIDE ) == ITEM_FLAG_NO_COLLIDE;
-    Util::Bresenham( m_vCurrentPosition, m_vTarget,
-                     doesCollide ? NoCollisionCheck : NoCollisionCheck, m_llTrajectory );
+    Util::Bresenham( m_vCurrentPosition, m_vTarget, PROJECTILE_RANGE, NoCollisionCheck,
+                     m_llTrajectory );
 
     if( m_llTrajectory )
     {
@@ -381,11 +378,9 @@ int CRangedState::OnBaseHandleKey( SDL_Keysym *keysym )
         {
             // if player chooses direction,
             // find position at end of ray from player pos to item range
-            uint32 range = 8; // Util::Roll( "1d8" );
             JVector vSource = g_pGame->GetPlayer()->m_vPos;
             JVector vTarget;
             GetDir( keysym, vTarget );
-            vTarget *= range;
             m_vCurrentPosition.Init( VEC_EXPAND( vSource ) );
             m_vTarget.Init( VEC_EXPAND( vSource + vTarget ) );
             if( !Util::IsInWorld( vSource + vTarget ) )

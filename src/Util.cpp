@@ -214,9 +214,37 @@ bool WithinRadius( const JIVector vOrigin, const JIVector vTarget, const uint8 d
     return vDelta.x + vDelta.y <= dsquared;
 }
 
-bool Bresenham( const JIVector vSource, const JIVector vTarget, bool ( *isWalkable )( JVector & ),
-                JLinkList<JIVector> *llLine )
+float sqrt( const float a, const float epsilon )
 {
+    if( a < 0.0f )
+        return -1.0f;
+
+    float guess = 1.0f;
+    uint32 count = 0;
+    while( abs( ( guess * guess ) - a ) > epsilon )
+    {
+        guess = ( guess + a / guess ) * 0.5f;
+        count++;
+    }
+    printf( "sqrt count: %d\n", count );
+    return guess;
+}
+int max( const int a, const int b ) { return ( a >= b ) ? a : b; }
+int abs( const int a ) { return ( a >= 0 ) ? a : -a; }
+
+int gcd( const int a, const int b )
+{
+    if( b == 0 )
+        return a;
+    return ( Util::gcd( b, a % b ) );
+}
+
+bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 distance,
+                bool ( *isWalkable )( JVector & ), JLinkList<JIVector> *llLine )
+{
+    if( distance == 8 )
+        JLog( LOG_LEVEL_INFO, true, "bres from <%d %d> to  <%d %d> both should be in output\n",
+              VEC_EXPAND( vSource ), VEC_EXPAND( vTarget ) );
     // Bresenham Line Algorithm
     JIVector vDelta( abs( vTarget.x - vSource.x ), abs( vTarget.y - vSource.y ) );
     JIVector vStep( vSource.x < vTarget.x ? 1 : -1, vSource.y < vTarget.y ? 1 : -1 );
@@ -226,12 +254,23 @@ bool Bresenham( const JIVector vSource, const JIVector vTarget, bool ( *isWalkab
     JVector vTest;
     JIVector vCurrent = vSource;
     bool alreadyAdded = false;
-    while( vCurrent.x != vTarget.x || vCurrent.y != vTarget.y )
+    uint8 steps_remaining = distance;
+    // while( vCurrent.x != vTarget.x || vCurrent.y != vTarget.y )
+    while( true )
     {
+        if( distance == 8 && vCurrent.x == vTarget.x && vCurrent.y == vTarget.y )
+        {
+            JLog( LOG_LEVEL_INFO, true, "Bres reached target point with remaining steps: %d\n",
+                  steps_remaining );
+        }
         if( llLine && !alreadyAdded )
         {
+            JLog( LOG_LEVEL_INFO, true, "bres added <%d %d>\n", VEC_EXPAND( vCurrent ) );
             llLine->Add( new JIVector( vCurrent ) );
             alreadyAdded = true;
+            steps_remaining--;
+            if( steps_remaining == 0 )
+                break;
         }
         if( vCurrent != vSource )
         {

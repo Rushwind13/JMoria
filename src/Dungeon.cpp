@@ -607,7 +607,7 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
     // Check for obstacles along the line between
     // the player and the position
     //
-    return Util::Bresenham( vSource, vTarget, CollisionTest );
+    return Util::Bresenham( vSource, vTarget, SIGHT_DISTANCE_PLAYER, CollisionTest );
 }
 
 bool CDungeon::PlayerCanSee( JVector vCheck, uint32 dwFlags )

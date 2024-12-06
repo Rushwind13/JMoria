@@ -13,7 +13,8 @@
 
 #include "Dungeon.h"
 
-#define PROJECTILE_UPDATE_INTERVAL 5.0f
+#define PROJECTILE_RANGE 8
+#define PROJECTILE_UPDATE_INTERVAL 10.0f
 class CRangedState;
 typedef int ( CRangedState::*RangedKeyHandler )( SDL_Keysym *keysym );
 enum eRangedModifier

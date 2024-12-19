@@ -168,6 +168,7 @@ protected:
     bool m_bIsPlayerTarget;
 
 private:
+    char m_szCurrentFlavorText[64];
     // Member Functions
 public:
     CMonster();

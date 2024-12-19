@@ -135,8 +135,10 @@ int CTargetState::DoInit()
     {
         JLog( LOG_LEVEL_INFO, true, "No targets available.\n" );
         ResetToState( m_dwPreviousState );
-        return 0;
+        return JCOMPLETESTATE;
     }
+
+    return JSUCCESS;
 }
 int CTargetState::OnHandleInit( SDL_Keysym *keysym )
 {

@@ -226,7 +226,7 @@ float sqrt( const float a, const float epsilon )
         guess = ( guess + a / guess ) * 0.5f;
         count++;
     }
-    printf( "sqrt count: %d\n", count );
+    JLog( LOG_LEVEL_DEBUG, true, "sqrt count: %d\n", count );
     return guess;
 }
 int max( const int a, const int b ) { return ( a >= b ) ? a : b; }

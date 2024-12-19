@@ -314,7 +314,7 @@ int CRangedState::BuildTrajectory()
     Util::Bresenham( m_vCurrentPosition, m_vTarget, PROJECTILE_RANGE, NoCollisionCheck,
                      m_llTrajectory );
 
-    if( m_llTrajectory )
+    if( m_llTrajectory && m_llTrajectory->length() > 0 )
     {
         JLog( LOG_LEVEL_DEBUG, true, "length: %d\n", m_llTrajectory->length() );
         m_dwTrajectory = m_llTrajectory->length();
@@ -322,7 +322,9 @@ int CRangedState::BuildTrajectory()
     else
     {
         JLog( LOG_LEVEL_DEBUG, true, "yikes bad bres\n" );
+        return JBOGUSKEY;
     }
+    return JSUCCESS;
 }
 
 int CRangedState::OnHandleTrajectory( SDL_Keysym *keysym )
@@ -362,7 +364,7 @@ int CRangedState::OnBaseHandleKey( SDL_Keysym *keysym )
             {
                 g_pGame->GetMsgs()->Printf( "Please select a valid item.\n" );
 
-                return -1;
+                return JBOGUSKEY;
             }
 
             return JSUCCESS;
@@ -385,8 +387,8 @@ int CRangedState::OnBaseHandleKey( SDL_Keysym *keysym )
             m_vTarget.Init( VEC_EXPAND( vSource + vTarget ) );
             if( !Util::IsInWorld( vSource + vTarget ) )
             {
-                CLAMP( m_vTarget.x, 0, DUNG_WIDTH - 1 );
-                CLAMP( m_vTarget.y, 0, DUNG_HEIGHT - 1 );
+                m_vTarget.Init( CLAMP( m_vTarget.x, 0, DUNG_WIDTH - 1 ),
+                                CLAMP( m_vTarget.y, 0, DUNG_HEIGHT - 1 ) );
             }
             JLog( LOG_LEVEL_DEBUG, true, "made target: <%d %d>\n", VEC_EXPAND( m_vTarget ) );
 
@@ -504,7 +506,7 @@ bool CRangedState::DoTrajectory()
             JLog( LOG_LEVEL_ERROR, true, "very confused in DoTrajectory: %d\n", m_cCommand );
             break;
         }
-        if( m_pSelected->m_lpData->m_dwFlags & ITEM_FLAG_NO_COLLIDE == 0 )
+        if( ( m_pSelected->m_lpData->m_dwFlags & ITEM_FLAG_NO_COLLIDE ) == 0 )
         {
             JLog( LOG_LEVEL_DEBUG, true,
                   "Projectile collided. RANGED state complete, reset to CMD state.\n" );

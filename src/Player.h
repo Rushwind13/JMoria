@@ -72,6 +72,15 @@ public:
         Util::jstrcpy( m_szName, "Human" );
     }
 
+    ~CRace()
+    {
+        if( m_szName )
+        {
+            delete[] m_szName;
+            m_szName = NULL;
+        }
+    }
+
 public:
     char *m_szName;
 };
@@ -125,25 +134,43 @@ public:
             delete m_pClass;
             m_pClass = NULL;
         }
+        if( m_pRace )
+        {
+            delete m_pRace;
+            m_pRace = NULL;
+        }
         if( m_llInventory )
         {
             m_llInventory->Terminate();
+            delete m_llInventory;
             m_llInventory = NULL;
         }
         if( m_llEquipment )
         {
             m_llEquipment->Terminate();
+            delete m_llEquipment;
             m_llEquipment = NULL;
         }
         if( m_llActiveEffects )
         {
             m_llActiveEffects->Terminate();
+            delete m_llActiveEffects;
             m_llActiveEffects = NULL;
+        }
+        if( m_TileSet )
+        {
+            delete m_TileSet;
+            m_TileSet = NULL;
         }
         if( m_szDamage )
         {
             delete[] m_szDamage;
             m_szDamage = NULL;
+        }
+        if( m_szKilledBy )
+        {
+            delete[] m_szKilledBy;
+            m_szKilledBy = NULL;
         }
     };
     char *GetName() { return m_szName; }

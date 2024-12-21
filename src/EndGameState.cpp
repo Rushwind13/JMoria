@@ -45,6 +45,11 @@ CEndGameState::~CEndGameState()
         delete[] m_szTombstone;
         m_szTombstone = NULL;
     }
+    if( m_pScore )
+    {
+        delete m_pScore;
+        m_pScore = NULL;
+    }
 }
 
 int CEndGameState::OnHandleKey( SDL_Keysym *keysym )

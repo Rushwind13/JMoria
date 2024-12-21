@@ -66,8 +66,8 @@ protected:
 class CAIMgr
 {
 public:
-    CAIMgr();
-    virtual ~CAIMgr() {}
+    CAIMgr() : m_fTicks( 0.0f ), m_llAIBrains( NULL ) {};
+    ~CAIMgr();
     void Init();
 
     bool Update( float fCurTime );

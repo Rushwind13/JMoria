@@ -42,6 +42,20 @@ CDisplayText::CDisplayText( const char *szBasedir, JRect in, uint8 inAlpha )
     m_BoundingBoxColor.SetColor( 128, 170, 192, inAlpha );
 }
 
+CDisplayText::~CDisplayText()
+{
+    if( m_szText )
+    {
+        delete[] m_szText;
+        m_szText = NULL;
+    }
+    if( m_TileSet )
+    {
+        delete m_TileSet;
+        m_TileSet = NULL;
+    }
+}
+
 bool CDisplayText::Update( float fCurTime ) { return true; }
 
 // Setup functions

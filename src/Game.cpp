@@ -155,6 +155,12 @@ void CGame::Term()
         m_pPlayer = NULL;
     }
 
+    if( m_pAIMgr )
+    {
+        delete m_pAIMgr;
+        m_pAIMgr = NULL;
+    }
+
     JLog( LOG_LEVEL_DEBUG, true, "States..." );
     if( m_pClockStepState )
     {
@@ -311,6 +317,7 @@ void CGame::SetState( int eNewState )
         SDL_Keysym *keysym = new SDL_Keysym();
         keysym->sym = SDLK_SPACE;
         m_pCurState->HandleKey( keysym );
+        delete keysym;
     }
     break;
     case STATE_INTRO:
@@ -319,6 +326,7 @@ void CGame::SetState( int eNewState )
         SDL_Keysym *keysym = new SDL_Keysym();
         keysym->sym = SDLK_SPACE;
         m_pCurState->HandleKey( keysym );
+        delete keysym;
     }
     break;
     case STATE_CLOCKSTEP:
@@ -327,6 +335,7 @@ void CGame::SetState( int eNewState )
         SDL_Keysym *keysym = new SDL_Keysym();
         keysym->sym = SDLK_SPACE;
         m_pCurState->HandleKey( keysym );
+        delete keysym;
     }
     break;
     default:

@@ -32,7 +32,15 @@ CRangedState::CRangedState()
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }
 
-CRangedState::~CRangedState() {}
+CRangedState::~CRangedState()
+{
+    if( m_llTrajectory )
+    {
+        m_llTrajectory->Terminate();
+        delete m_llTrajectory;
+        m_llTrajectory = NULL;
+    }
+}
 
 int CRangedState::OnHandleKey( SDL_Keysym *keysym )
 {
@@ -419,6 +427,7 @@ void CRangedState::GosubState( int newstate )
     newkey->sym = SDLK_f;
     newkey->mod = 0;
     g_pGame->GetGameState()->HandleKey( newkey );
+    delete newkey;
     m_eCurModifier = RANGED_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }

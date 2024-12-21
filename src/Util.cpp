@@ -104,6 +104,7 @@ float Roll( const char *szFormat )
     }
 
     sides = atoi( c );
+    delete[] szToken;
     return Roll( dice, sides );
 }
 

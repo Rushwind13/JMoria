@@ -13,7 +13,14 @@ class CAttack
 {
 public:
     CAttack() : m_dwType( -1 ), m_dwEffect( -1 ), m_dwEffectFlags( -1 ), m_szDamage( NULL ) {}
-    ~CAttack() {}
+    ~CAttack()
+    {
+        if( m_szDamage )
+        {
+            delete[] m_szDamage;
+            m_szDamage = NULL;
+        }
+    }
     int m_dwType;
     int m_dwEffect;
     int m_dwEffectFlags;
@@ -70,11 +77,13 @@ public:
         if( m_llAttacks )
         {
             m_llAttacks->Terminate();
+            delete m_llAttacks;
             m_llAttacks = NULL;
         }
         if( m_Colors )
         {
             m_Colors->Terminate();
+            delete m_Colors;
             m_Colors = NULL;
         }
     }

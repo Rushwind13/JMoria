@@ -23,6 +23,16 @@ CTargetState::CTargetState()
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }
 
+CTargetState::~CTargetState()
+{
+    if( m_llTargets )
+    {
+        m_llTargets->Terminate();
+        delete m_llTargets;
+        m_llTargets = NULL;
+    }
+}
+
 int CTargetState::OnHandleKey( SDL_Keysym *keysym )
 {
     int retval;

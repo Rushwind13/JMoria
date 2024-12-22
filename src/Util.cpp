@@ -296,23 +296,10 @@ bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 dist
         }
         else
         {
-            vCurrent.x += vStep.x; // Always increment x
+            vCurrent.x += vStep.x; // Increment x if error is negative
             error += 2 * vDelta.y;
             alreadyAdded = false;
         }
-        // errorx2 += error * 2;
-        // if( errorx2 > -vDelta.y )
-        // {
-        //     error -= vDelta.y;
-        //     vCurrent.x += vStep.x;
-        //     alreadyAdded = false;
-        // }
-        // if( errorx2 < vDelta.x )
-        // {
-        //     error += vDelta.x;
-        //     vCurrent.y += vStep.y;
-        //     alreadyAdded = false;
-        // }
         JLog( LOG_LEVEL_NOISE, true, "bres still going\n" );
     }
     return true;

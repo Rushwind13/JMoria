@@ -249,8 +249,7 @@ bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 dist
     // Bresenham Line Algorithm
     JIVector vDelta( abs( vTarget.x - vSource.x ), abs( vTarget.y - vSource.y ) );
     JIVector vStep( vSource.x < vTarget.x ? 1 : -1, vSource.y < vTarget.y ? 1 : -1 );
-    int error = vDelta.x - vDelta.y;
-    int errorx2;
+    int error = 2 * ( vDelta.y - vDelta.x );
 
     JVector vTest;
     JIVector vCurrent = vSource;
@@ -266,7 +265,8 @@ bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 dist
         }
         if( !alreadyAdded )
         {
-            JLog( LOG_LEVEL_DEBUG, true, "bres added <%d %d>\n", VEC_EXPAND( vCurrent ) );
+            JLog( LOG_LEVEL_WARN, true, "bres added <%d %d> error: %d\n", VEC_EXPAND( vCurrent ),
+                  error );
             if( llLine )
                 llLine->Add( new JIVector( vCurrent ) );
             alreadyAdded = true;
@@ -287,17 +287,17 @@ bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 dist
                 return false;
             }
         }
-        errorx2 += error * 2;
-        if( errorx2 > -vDelta.y )
+
+        if( error > 0 )
         {
-            error -= vDelta.y;
-            vCurrent.x += vStep.x;
+            vCurrent.y += vStep.y; // Increment y if error is positive
+            error -= 2 * vDelta.x;
             alreadyAdded = false;
         }
-        if( errorx2 < vDelta.x )
+        else
         {
-            error += vDelta.x;
-            vCurrent.y += vStep.y;
+            vCurrent.x += vStep.x; // Increment x if error is negative
+            error += 2 * vDelta.y;
             alreadyAdded = false;
         }
         JLog( LOG_LEVEL_NOISE, true, "bres still going\n" );

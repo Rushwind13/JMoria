@@ -212,6 +212,11 @@ void CPlayer::DisplayStats()
         g_pGame->GetStats()->Printf( "Target: %s\n", m_pTarget->GetName() );
         g_pGame->GetStats()->Printf( "\n" );
         g_pGame->GetStats()->Printf( "\n" );
+        if( IsWizard() )
+        {
+            g_pGame->GetStats()->Printf( "Target Pos: <%.0f %.0f>\n",
+                                         VEC_EXPAND( m_pTarget->GetPos() ) );
+        }
     }
     if( IsWizard() )
     {

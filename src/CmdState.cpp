@@ -113,7 +113,7 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
     {
         g_pGame->SetState( STATE_RANGED );
         g_pGame->GetGameState()->HandleKey( keysym );
-        retval = 0;
+        retval = -1;
     }
 
     // Wizard-mode commands

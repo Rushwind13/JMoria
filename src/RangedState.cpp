@@ -528,7 +528,8 @@ bool CRangedState::DoTrajectory()
     case DUNG_COLL_PLAYER:
         break;
     default:
-        JLog( LOG_LEVEL_ERROR, true, "invalid collision type: %d\n", collide_type );
+        JLog( LOG_LEVEL_ERROR, true, "invalid collision at <%f %f> type: %d\n", VEC_EXPAND( vTest ),
+              collide_type );
         ResetToState( STATE_COMMAND );
         return false;
         break;
@@ -595,6 +596,6 @@ void CRangedState::UsePlayerTarget()
     vDelta *= 8.0f; // TODO: actual range of item
     m_vTarget.Init( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos + vDelta ) );
 
-    JLog( LOG_LEVEL_DEBUG, true, "cur <%d %d> tar <%d %d> del <%.2f %.2f>\n",
+    JLog( LOG_LEVEL_ERROR, true, "cur <%d %d> tar <%d %d> del <%.2f %.2f>\n",
           VEC_EXPAND( m_vCurrentPosition ), VEC_EXPAND( m_vTarget ), VEC_EXPAND( vDelta ) );
 }

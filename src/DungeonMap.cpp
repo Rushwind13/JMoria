@@ -630,10 +630,9 @@ void CDungeonMap::GetRoomRect( JRect &rcRoom, const int direction )
     }
     if( !rcRoom.IsWithinWorld() )
     {
-        rcRoom.top = CLAMP( rcRoom.top, 1, DUNG_HEIGHT - 2 );
-        rcRoom.bottom = CLAMP( rcRoom.bottom, 1, DUNG_HEIGHT - 2 );
-        rcRoom.left = CLAMP( rcRoom.left, 1, DUNG_WIDTH - 2 );
-        rcRoom.right = CLAMP( rcRoom.right, 1, DUNG_WIDTH - 2 );
+        rcRoom.Init(
+            CLAMP( rcRoom.left, 1, DUNG_WIDTH - 2 ), CLAMP( rcRoom.top, 1, DUNG_HEIGHT - 2 ),
+            CLAMP( rcRoom.right, 1, DUNG_WIDTH - 2 ), CLAMP( rcRoom.bottom, 1, DUNG_HEIGHT - 2 ) );
     }
 }
 
@@ -662,10 +661,9 @@ void CDungeonMap::GetHallRect( JRect &rcHall, const int direction )
     }
     if( !rcHall.IsWithinWorld() )
     {
-        rcHall.top = CLAMP( rcHall.top, 1, DUNG_HEIGHT - 2 );
-        rcHall.bottom = CLAMP( rcHall.bottom, 1, DUNG_HEIGHT - 2 );
-        rcHall.left = CLAMP( rcHall.left, 1, DUNG_WIDTH - 2 );
-        rcHall.right = CLAMP( rcHall.right, 1, DUNG_WIDTH - 2 );
+        rcHall.Init(
+            CLAMP( rcHall.left, 1, DUNG_WIDTH - 2 ), CLAMP( rcHall.top, 1, DUNG_HEIGHT - 2 ),
+            CLAMP( rcHall.right, 1, DUNG_WIDTH - 2 ), CLAMP( rcHall.bottom, 1, DUNG_HEIGHT - 2 ) );
     }
 }
 

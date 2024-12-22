@@ -15,7 +15,14 @@ public:
           m_fDuration( 0 )
     {
     }
-    ~CEffect() {}
+    ~CEffect()
+    {
+        if( m_szAmount )
+        {
+            delete[] m_szAmount;
+            m_szAmount = NULL;
+        }
+    }
     int m_dwEffect;
     int m_dwFlags;
     int m_dwModifier;
@@ -30,6 +37,8 @@ public:
     CItemDef()
         : m_szName( NULL ),
           m_szPlural( NULL ),
+          m_szUnidentifiedName( NULL ),
+          m_szUnidentifiedPlural( NULL ),
           m_szFlavor( NULL ),
           m_fSpeed( 0.0f ),
           m_fACBonus( 0.0f ),
@@ -61,6 +70,21 @@ public:
             delete[] m_szPlural;
             m_szPlural = NULL;
         }
+        if( m_szUnidentifiedName )
+        {
+            delete[] m_szUnidentifiedName;
+            m_szUnidentifiedName = NULL;
+        }
+        if( m_szUnidentifiedPlural )
+        {
+            delete[] m_szUnidentifiedPlural;
+            m_szUnidentifiedPlural = NULL;
+        }
+        if( m_szFlavor )
+        {
+            delete[] m_szFlavor;
+            m_szFlavor = NULL;
+        }
         if( m_szBaseDamage )
         {
             delete[] m_szBaseDamage;
@@ -69,11 +93,13 @@ public:
         if( m_Colors )
         {
             m_Colors->Terminate();
+            delete m_Colors;
             m_Colors = NULL;
         }
         if( m_llEffects )
         {
             m_llEffects->Terminate();
+            delete m_llEffects;
             m_llEffects = NULL;
         }
     }

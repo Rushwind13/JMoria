@@ -23,6 +23,16 @@ CTargetState::CTargetState()
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }
 
+CTargetState::~CTargetState()
+{
+    if( m_llTargets )
+    {
+        m_llTargets->Terminate();
+        delete m_llTargets;
+        m_llTargets = NULL;
+    }
+}
+
 int CTargetState::OnHandleKey( SDL_Keysym *keysym )
 {
     int retval;
@@ -135,8 +145,10 @@ int CTargetState::DoInit()
     {
         JLog( LOG_LEVEL_INFO, true, "No targets available.\n" );
         ResetToState( m_dwPreviousState );
-        return 0;
+        return JCOMPLETESTATE;
     }
+
+    return JSUCCESS;
 }
 int CTargetState::OnHandleInit( SDL_Keysym *keysym )
 {

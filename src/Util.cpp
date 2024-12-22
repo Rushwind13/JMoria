@@ -104,6 +104,7 @@ float Roll( const char *szFormat )
     }
 
     sides = atoi( c );
+    delete[] szToken;
     return Roll( dice, sides );
 }
 
@@ -226,7 +227,7 @@ float sqrt( const float a, const float epsilon )
         guess = ( guess + a / guess ) * 0.5f;
         count++;
     }
-    printf( "sqrt count: %d\n", count );
+    JLog( LOG_LEVEL_DEBUG, true, "sqrt count: %d\n", count );
     return guess;
 }
 int max( const int a, const int b ) { return ( a >= b ) ? a : b; }
@@ -256,31 +257,37 @@ bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 dist
     bool alreadyAdded = false;
     uint8 steps_remaining = distance;
     // while( vCurrent.x != vTarget.x || vCurrent.y != vTarget.y )
-    while( true )
+    while( steps_remaining > 0 )
     {
         if( distance == 8 && vCurrent.x == vTarget.x && vCurrent.y == vTarget.y )
         {
             JLog( LOG_LEVEL_INFO, true, "Bres reached target point with remaining steps: %d\n",
                   steps_remaining );
         }
-        if( llLine && !alreadyAdded )
+        if( !alreadyAdded )
         {
-            JLog( LOG_LEVEL_INFO, true, "bres added <%d %d>\n", VEC_EXPAND( vCurrent ) );
-            llLine->Add( new JIVector( vCurrent ) );
+            JLog( LOG_LEVEL_DEBUG, true, "bres added <%d %d>\n", VEC_EXPAND( vCurrent ) );
+            if( llLine )
+                llLine->Add( new JIVector( vCurrent ) );
             alreadyAdded = true;
             steps_remaining--;
+            JLog( LOG_LEVEL_NOISE, true, "bres remaining: %d\n", steps_remaining );
             if( steps_remaining == 0 )
+            {
+                JLog( LOG_LEVEL_DEBUG, true, "bres finished\n" );
                 break;
+            }
         }
         if( vCurrent != vSource )
         {
             vTest.Init( VEC_EXPAND( vCurrent ) );
             if( !isWalkable( vTest ) )
             {
+                JLog( LOG_LEVEL_DEBUG, true, "bres not walkable\n" );
                 return false;
             }
         }
-        errorx2 = error * 2;
+        errorx2 += error * 2;
         if( errorx2 > -vDelta.y )
         {
             error -= vDelta.y;
@@ -293,6 +300,7 @@ bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 dist
             vCurrent.y += vStep.y;
             alreadyAdded = false;
         }
+        JLog( LOG_LEVEL_NOISE, true, "bres still going\n" );
     }
     return true;
 }

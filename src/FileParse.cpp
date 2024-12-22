@@ -269,6 +269,7 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                     // <rgb1>
                     mdIn.m_Color.SetColor( color );
                 }
+                delete[] color;
             }
             else if( *szLine == '}' )
             {
@@ -464,8 +465,11 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                     }
                     else
                     {
-                        idIn.m_szUnidentifiedName = idIn.m_szName;
-                        idIn.m_szUnidentifiedPlural = idIn.m_szPlural;
+                        idIn.m_szUnidentifiedName = new char[Util::jstrlen( idIn.m_szName ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedName, idIn.m_szName );
+                        idIn.m_szUnidentifiedPlural =
+                            new char[Util::jstrlen( idIn.m_szPlural ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedPlural, idIn.m_szPlural );
                     }
                 }
             }
@@ -501,6 +505,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                     // <rgb1>
                     idIn.m_Color.SetColor( color );
                 }
+                delete[] color;
             }
             else if( strncasecmp( szLine, "effect", 6 ) == 0 )
             {
@@ -763,6 +768,7 @@ JLinkList<JColor> *CDataFile::ParseColors( char *szLine )
         outcolor = new JColor();
         outcolor->SetColor( temp );
         retval->Add( outcolor );
+        delete[] temp;
     }
 
     return retval;

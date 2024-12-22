@@ -874,6 +874,7 @@ JResult CPlayer::DoCreateEffects( CEffect *pEffect )
         return DoLightArea();
         break;
     }
+    return JBOGUSKEY;
 }
 
 JResult CPlayer::DoLightArea()
@@ -905,6 +906,7 @@ JResult CPlayer::DoDestroyEffects( CEffect *pEffect, int dwItemFlags )
         }
         break;
     }
+    return JBOGUSKEY;
 }
 
 JResult CPlayer::DoRemoveCurse()

@@ -825,6 +825,11 @@ void CDungeon::Term()
         delete[] m_Tiles;
         m_Tiles = NULL;
     }
+    if( m_TileSet )
+    {
+        delete m_TileSet;
+        m_TileSet = NULL;
+    }
 
     if( m_dtdlist )
     {

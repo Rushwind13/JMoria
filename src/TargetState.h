@@ -30,7 +30,7 @@ private:
     // Member Functions
 public:
     CTargetState();
-    ~CTargetState() {}
+    ~CTargetState();
 
     virtual void OnUpdate( float fCurTime ) {}
     virtual int OnBaseHandleKey( SDL_Keysym *keysym );

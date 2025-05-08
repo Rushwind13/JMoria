@@ -704,3 +704,122 @@ NPC <Tourist>
     Attack      <EFFECT_FLAG_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,<EFFECT_MOD_TIMED>
     Color       <<242, 212, 171>;<242, 212, 171>;<242, 212, 171>;<242, 212, 171>;<252, 252, 252>>
 }
+
+Monster <Fire Drake>
+{
+    Plural		<Fire Drakes>
+    Appear		<1d1>
+    Speed		1.4
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          50.0
+    Level       7
+    ExpValue	200.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,1d10
+    Color		<255,69,0,255>
+}
+
+Monster <Frost Drake>
+{
+    Plural		<Frost Drakes>
+    Appear		<1d1>
+    Speed		1.4
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          50.0
+    Level       7
+    ExpValue	200.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,1d10
+    Color		<0,69,255,255>
+}
+
+Monster <Storm Drake>
+{
+    Plural		<Storm Drakes>
+    Appear		<1d1>
+    Speed		1.4
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          50.0
+    Level       7
+    ExpValue	200.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,1d10
+    Color		<255,255,69,255>
+}
+
+Monster <Acid Drake>
+{
+    Plural		<Acid Drakes>
+    Appear		<1d1>
+    Speed		1.4
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          50.0
+    Level       7
+    ExpValue	200.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ACID>,1d10
+    Color		<69,69,69,255>
+}
+
+Monster <Venomous Spider>
+{
+    Plural		<Venomous Spiders>
+    Appear		<1d2>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          50.0
+    Level       7
+    ExpValue	180.0
+    Type		<MON_IDX_SPIDER>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d6
+    Color		<0,128,0,255>
+}
+
+Monster <Cursed Skeleton>
+{
+    Plural		<Cursed Skeletons>
+    Appear		<1d3>
+    Speed		0.7
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          40.0
+    Level       7
+    ExpValue	150.0
+    Type		<MON_IDX_SKELETON>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_AFRAID>,1d10
+    Color		<192,192,192,255>
+}
+
+# Monster <Troll Berserker>
+# {
+#     Plural		<Troll Berserkers>
+#     Appear		<1d1>
+#     Speed		0.75
+#     MoveType	<MON_AI_SEEKPLAYER>
+#     HD          <7d8>
+#     AC          45.0
+#     Level       8
+#     ExpValue	210.0
+#     Type		<MON_IDX_TROLL>
+#     Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+#     Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+#     Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,2d10
+#     Color		<34,139,34,255>
+# }

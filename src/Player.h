@@ -72,6 +72,15 @@ public:
         Util::jstrcpy( m_szName, "Human" );
     }
 
+    ~CRace()
+    {
+        if( m_szName )
+        {
+            delete[] m_szName;
+            m_szName = NULL;
+        }
+    }
+
 public:
     char *m_szName;
 };
@@ -98,7 +107,8 @@ public:
           m_dwIntrinsics( 0 ),
           m_bWizardMode( false ),
           m_pClass( NULL ),
-          m_pTarget( NULL )
+          m_pTarget( NULL ),
+          m_vRangedHitPosition( 0, 0 )
     {
         memset( m_szName, 0, MAX_STRING_LENGTH );
         Util::jstrcpy( m_szName, "Anonymous" );
@@ -124,25 +134,43 @@ public:
             delete m_pClass;
             m_pClass = NULL;
         }
+        if( m_pRace )
+        {
+            delete m_pRace;
+            m_pRace = NULL;
+        }
         if( m_llInventory )
         {
             m_llInventory->Terminate();
+            delete m_llInventory;
             m_llInventory = NULL;
         }
         if( m_llEquipment )
         {
             m_llEquipment->Terminate();
+            delete m_llEquipment;
             m_llEquipment = NULL;
         }
         if( m_llActiveEffects )
         {
             m_llActiveEffects->Terminate();
+            delete m_llActiveEffects;
             m_llActiveEffects = NULL;
+        }
+        if( m_TileSet )
+        {
+            delete m_TileSet;
+            m_TileSet = NULL;
         }
         if( m_szDamage )
         {
             delete[] m_szDamage;
             m_szDamage = NULL;
+        }
+        if( m_szKilledBy )
+        {
+            delete[] m_szKilledBy;
+            m_szKilledBy = NULL;
         }
     };
     char *GetName() { return m_szName; }
@@ -177,8 +205,14 @@ public:
     bool IsDrinkable( CLink<CItem> *pLink );
     JResult Quaff( CLink<CItem> *pLink );
 
+    bool IsFireable( CLink<CItem> *pLink );
+    JResult Fire( CLink<CItem> *pLink );
+
     bool IsReadable( CLink<CItem> *pLink );
     JResult Read( CLink<CItem> *pLink );
+
+    bool IsZappable( CLink<CItem> *pLink );
+    JResult Zap( CLink<CItem> *pLink );
 
     bool IsCastable( CLink<CItem> *pLink );
     JResult Magic( CLink<CItem> *pLink );
@@ -190,6 +224,7 @@ public:
     JResult DoHealEffects( CEffect *pEffect );
     JResult DoHealHP( CEffect *pEffect );
     JResult DoHitEffects( CEffect *pEffect );
+    JResult DoLightRay( CEffect *pEffect );
     JResult DoCreateEffects( CEffect *pEffect );
     JResult DoLightArea();
     JResult DoDestroyEffects( CEffect *pEffect, int dwFlags );
@@ -216,6 +251,11 @@ public:
         m_pTarget = pMon;
         if( pMon )
             pMon->SetAsTarget();
+    }
+    JVector GetRangedHitPosition() { return m_vRangedHitPosition; }
+    void SetRangedHitPosition( const JVector vPos )
+    {
+        m_vRangedHitPosition.Init( VEC_EXPAND( vPos ) );
     }
 
     float Attack();
@@ -270,5 +310,6 @@ protected:
     bool m_bWizardMode;
 
     CMonster *m_pTarget;
+    JVector m_vRangedHitPosition;
 };
 #endif // __PLAYER_H__

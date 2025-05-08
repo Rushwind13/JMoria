@@ -4,7 +4,17 @@
 #include "JMDefs.h"
 #include "Player.h"
 
-CAIMgr::CAIMgr() {}
+CAIBrain::CAIBrain() : m_dwMoveType( 0 ), m_fSpeed( 0.0f ), m_eBrainState( BRAINSTATE_INVALID ) {}
+
+CAIMgr::~CAIMgr()
+{
+    if( m_llAIBrains )
+    {
+        m_llAIBrains->Terminate();
+        delete m_llAIBrains;
+        m_llAIBrains = NULL;
+    }
+}
 
 void CAIMgr::Init() { m_llAIBrains = new JLinkList<CAIBrain>; }
 
@@ -28,8 +38,6 @@ bool CAIMgr::Update( float fCurTime )
 }
 
 void CAIMgr::DestroyBrain( CAIBrain *delete_me ) { m_llAIBrains->Remove( delete_me->m_pllLink ); }
-
-CAIBrain::CAIBrain() : m_dwMoveType( 0 ), m_fSpeed( 0.0f ), m_eBrainState( BRAINSTATE_INVALID ) {}
 
 bool CAIBrain::Update( float fCurTime )
 {
@@ -193,7 +201,7 @@ void CAIBrain::Move()
 void CAIBrain::CollideWithPlayer()
 {
     JLog( LOG_LEVEL_NOISE, true, "ouch! you ran into the player! " );
-    char szStatus[16];
+    char szStatus[32];
     float fDamageMult = 1.0f;
     // TODO: make this use all the attacks, not just the first one
     m_pParent->ChooseAttack();

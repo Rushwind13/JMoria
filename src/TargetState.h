@@ -24,12 +24,13 @@ protected:
     char m_cCommand;
     JLinkList<uint32> *m_llTargets;
     uint32 m_dwCurrentSelection;
+    int m_dwPreviousState;
 
 private:
     // Member Functions
 public:
     CTargetState();
-    ~CTargetState() {}
+    ~CTargetState();
 
     virtual void OnUpdate( float fCurTime ) {}
     virtual int OnBaseHandleKey( SDL_Keysym *keysym );
@@ -44,6 +45,8 @@ private:
 
     int OnHandleTarget( SDL_Keysym *keysym );
     int OnHandleInit( SDL_Keysym *keysym );
+
+    int DoInit();
 
     bool TestTarget();
     bool DoTarget();

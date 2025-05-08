@@ -41,7 +41,7 @@
 #    Level		1
 #    ExpValue	5.0
 #    Type		<MON_IDX_JELLY>
-#    Flags      <MON_FLAG_EMPTY_MIND>
+#    Flags      <MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
 #    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
 #    Attack     <EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,1d3
 #    Color		<255,0,0,255>
@@ -60,7 +60,7 @@ Monster <Giant Frog>
     Type		<MON_IDX_FROG>
     Flags       <MON_FLAG_WARM>
     Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Color		<71,165,0,255  >
+    Color		<71,165,0,255>
 }
 
 Monster <Death Slaad>
@@ -76,7 +76,7 @@ Monster <Death Slaad>
     Type		<MON_IDX_FROG>
     Flags       <MON_FLAG_WARM>
     Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d4
-    Color		<71,165,0,255  >
+    Color		<71,165,0,255>
 }
 
 Monster <Flaming Bat>
@@ -92,7 +92,7 @@ Monster <Flaming Bat>
     Type		<MON_IDX_BAT>
     Flags       <MON_FLAG_WARM>
     Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d8
-    Color		<255,100,0,255  >
+    Color		<255,100,0,255>
 }
 
  Monster <Floating Eye>
@@ -106,8 +106,9 @@ Monster <Flaming Bat>
      Level       1
      ExpValue	100.0
      Type		<MON_IDX_EYE>
+     Flags      <MON_FLAG_HURT_BY_LIGHT>
      Attack     <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d20
-     Color		<255,100,0,255  >
+     Color		<255,100,0,255>
 }
 #
 #Monster <Flaming Bat>
@@ -123,7 +124,7 @@ Monster <Flaming Bat>
 #    Type		<MON_IDX_BAT>
 #   Flags       <MON_FLAG_WARM>
 #    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,0d0
-#    Color		<255,100,0,255  >
+#    Color		<255,100,0,255>
 #}
 #
 #Monster <Flaming Bat>
@@ -139,7 +140,7 @@ Monster <Flaming Bat>
 #    Type		<MON_IDX_BAT>
 #   Flags       <MON_FLAG_WARM>
 #    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d8
-#    Color		<255,100,0,255  >
+#    Color		<255,100,0,255>
 #}
 #
 #Monster <Flaming Bat>
@@ -155,7 +156,7 @@ Monster <Flaming Bat>
 #    Type		<MON_IDX_BAT>
 #   Flags       <MON_FLAG_WARM>
 #    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d8
-#    Color		<255,100,0,255  >
+#    Color		<255,100,0,255>
 #}
 #
 #Monster <Flaming Bat>
@@ -171,7 +172,7 @@ Monster <Flaming Bat>
 #    Type		<MON_IDX_BAT>
 #   Flags       <MON_FLAG_WARM>
 #    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d8
-#    Color		<255,100,0,255  >
+#    Color		<255,100,0,255>
 #}
 #
 #Monster <Flaming Bat>
@@ -187,7 +188,7 @@ Monster <Flaming Bat>
 #    Type		<MON_IDX_BAT>
 #   Flags       <MON_FLAG_WARM>
 #    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d8
-#    Color		<255,100,0,255  >
+#    Color		<255,100,0,255>
 #}
 #
 #Monster <Flaming Bat>
@@ -203,7 +204,7 @@ Monster <Flaming Bat>
 #    Type		<MON_IDX_BAT>
 #   Flags       <MON_FLAG_WARM>
 #    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d8
-#    Color		<255,100,0,255  >
+#    Color		<255,100,0,255>
 #}
 #
 #Monster <Flaming Bat>
@@ -233,7 +234,7 @@ Monster <Shadow Mastiff>
     Level       15
     ExpValue	100.0
     Type		<MON_IDX_DOG>
-    Flags       <MON_FLAG_WARM>
+    Flags       <MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
     Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
     Color		<<255,255,255,32>;<0,0,0,255>>
 }
@@ -301,7 +302,7 @@ Monster <White Worm Mass>
     Type		<MON_IDX_WORM>
     Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d5
     Color		<255,255,255,255>
-    Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND>
+    Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
 }
 
 Monster <Red Worm Mass>
@@ -318,7 +319,7 @@ Monster <Red Worm Mass>
     Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CRAWL>,<EFFECT_FLAG_FIRE>,1d5
     Color		<255,0,0,255>
-    Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND>
+    Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
 }
 
 Monster <Blue Worm Mass>
@@ -335,7 +336,7 @@ Monster <Blue Worm Mass>
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CRAWL>,<EFFECT_FLAG_COLD>,1d5
     Color		<0,0,255,255>
-    Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND>
+    Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
 }
 
 Monster <Yellow Worm Mass>
@@ -352,7 +353,7 @@ Monster <Yellow Worm Mass>
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CRAWL>,<EFFECT_FLAG_POISON>,1d5
     Color		<214,201,17,255>
-    Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND>
+    Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
 }
 
 Monster <Green Worm Mass>
@@ -369,7 +370,7 @@ Monster <Green Worm Mass>
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CRAWL>,<EFFECT_FLAG_ACID>,1d5
     Color		<0,255,0,255>
-    Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND>
+    Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
 }
 
 Monster <Huge Spider>
@@ -537,7 +538,7 @@ Monster <Red Jelly>
     Level		1
     ExpValue	5.0
     Type		<MON_IDX_JELLY>
-    Flags       <MON_FLAG_EMPTY_MIND>
+    Flags       <MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
     Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,1d5
     Color		<255,0,0,255>
@@ -553,7 +554,7 @@ Monster <Green Jelly>
     Level		2
     ExpValue	5.0
     Type		<MON_IDX_JELLY>
-    Flags       <MON_FLAG_EMPTY_MIND>
+    Flags       <MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_ACID>,1d5
     Color		<12,255,0,255>
@@ -569,7 +570,7 @@ Monster <Yellow Mushroom Patch>
 	Level		1
 	ExpValue	2.0
 	Type		<MON_IDX_SHROOM>
-    Flags       <MON_FLAG_EMPTY_MIND>
+    Flags       <MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
 	Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,1d1
     Attack      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d5
 	Color		<255,255,0,255>

@@ -25,7 +25,14 @@ public:
         m_pdwVisited = new bool[4];
         memset( m_pdwVisited, false, 4 );
     };
-    ~CDungeonCreationStep() {}
+    ~CDungeonCreationStep()
+    {
+        if( m_pdwVisited )
+        {
+            delete[] m_pdwVisited;
+            m_pdwVisited = NULL;
+        }
+    }
 
     int m_dwIndex;
     int m_dwDirection;

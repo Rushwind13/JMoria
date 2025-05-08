@@ -13,6 +13,7 @@ class CEndGameState;
 class CIntroState;
 class CLookState;
 class CModState;
+class CRangedState;
 class CRestState;
 class CRunState;
 class CStringInputState;
@@ -82,6 +83,7 @@ protected:
     CIntroState *m_pIntroState;
     CLookState *m_pLookState;
     CModState *m_pModState;
+    CRangedState *m_pRangedState;
     CRestState *m_pRestState;
     CRunState *m_pRunState;
     CStringInputState *m_pStringInputState;

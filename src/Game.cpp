@@ -13,6 +13,7 @@
 #include "IntroState.h"
 #include "LookState.h"
 #include "ModState.h"
+#include "RangedState.h"
 #include "RestState.h"
 #include "RunState.h"
 #include "StringInputState.h"
@@ -39,6 +40,7 @@ CGame::CGame()
       m_pIntroState( NULL ),
       m_pLookState( NULL ),
       m_pModState( NULL ),
+      m_pRangedState( NULL ),
       m_pRestState( NULL ),
       m_pRunState( NULL ),
       m_pStringInputState( NULL ),
@@ -53,6 +55,7 @@ CGame::CGame()
     m_pIntroState = new CIntroState;
     m_pLookState = new CLookState;
     m_pModState = new CModState;
+    m_pRangedState = new CRangedState;
     m_pRestState = new CRestState;
     m_pRunState = new CRunState;
     m_pStringInputState = new CStringInputState;
@@ -152,6 +155,12 @@ void CGame::Term()
         m_pPlayer = NULL;
     }
 
+    if( m_pAIMgr )
+    {
+        delete m_pAIMgr;
+        m_pAIMgr = NULL;
+    }
+
     JLog( LOG_LEVEL_DEBUG, true, "States..." );
     if( m_pClockStepState )
     {
@@ -187,6 +196,12 @@ void CGame::Term()
     {
         delete m_pModState;
         m_pModState = NULL;
+    }
+
+    if( m_pRangedState )
+    {
+        delete m_pRangedState;
+        m_pRangedState = NULL;
     }
 
     if( m_pRestState )
@@ -281,6 +296,9 @@ void CGame::SetState( int eNewState )
     case STATE_STRINGINPUT:
         m_pCurState = reinterpret_cast<CStateBase *>( m_pStringInputState );
         break;
+    case STATE_RANGED:
+        m_pCurState = reinterpret_cast<CStateBase *>( m_pRangedState );
+        break;
     case STATE_REST:
         m_pCurState = reinterpret_cast<CStateBase *>( m_pRestState );
         break;
@@ -299,6 +317,7 @@ void CGame::SetState( int eNewState )
         SDL_Keysym *keysym = new SDL_Keysym();
         keysym->sym = SDLK_SPACE;
         m_pCurState->HandleKey( keysym );
+        delete keysym;
     }
     break;
     case STATE_INTRO:
@@ -307,6 +326,7 @@ void CGame::SetState( int eNewState )
         SDL_Keysym *keysym = new SDL_Keysym();
         keysym->sym = SDLK_SPACE;
         m_pCurState->HandleKey( keysym );
+        delete keysym;
     }
     break;
     case STATE_CLOCKSTEP:
@@ -315,6 +335,7 @@ void CGame::SetState( int eNewState )
         SDL_Keysym *keysym = new SDL_Keysym();
         keysym->sym = SDLK_SPACE;
         m_pCurState->HandleKey( keysym );
+        delete keysym;
     }
     break;
     default:
@@ -419,11 +440,11 @@ int CGame::Update()
 #ifdef TURN_BASED
 bool CGame::Update()
 {
-    float fCurTime = 0.0f;
+    float fCurTime = 1.0f;
     if( m_bReadyForUpdate )
     {
         m_fGameTime++;
-        fCurTime = 1.0f;
+        // fCurTime = 1.0f;
         m_bReadyForUpdate = false;
         // TODO: Why does the AI require 2 ticks to move the monster?
         GetAIMgr()->Update( fCurTime );
@@ -473,6 +494,22 @@ bool CGame::Update( float fCurTime )
         }
         GetUse()->Update( fCurTime );
     }
+    else if( m_eCurState == STATE_RANGED )
+    {
+        switch( reinterpret_cast<CRangedState *>( m_pCurState )->GetCommand() )
+        {
+        case SDLK_f:
+            GetPlayer()->DisplayEquipment( PLACEMENT_USE );
+            break;
+        case SDLK_z:
+            GetPlayer()->DisplayInventory( PLACEMENT_USE );
+            break;
+        default:
+            JLog( LOG_LEVEL_WARN, true, "Nothing to display for command\n" );
+            break;
+        }
+        GetUse()->Update( fCurTime );
+    }
     else if( m_eCurState == STATE_ENDGAME )
     {
         GetEnd()->Update( fCurTime );
@@ -503,6 +540,13 @@ void CGame::Draw()
     if( m_eCurState == STATE_USE )
     {
         GetUse()->Draw();
+    }
+    if( m_eCurState == STATE_RANGED )
+    {
+        if( m_pRangedState->NeedsSelection() )
+        {
+            GetUse()->Draw();
+        }
     }
     else if( m_eCurState == STATE_ENDGAME )
     {

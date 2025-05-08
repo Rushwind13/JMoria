@@ -10,13 +10,27 @@
 
 extern CGame *g_pGame;
 
-CTargetState::CTargetState() : m_cCommand( 0 ), m_llTargets( NULL ), m_dwCurrentSelection( 0 )
+CTargetState::CTargetState()
+    : m_cCommand( 0 ),
+      m_llTargets( NULL ),
+      m_dwCurrentSelection( 0 ),
+      m_dwPreviousState( STATE_COMMAND )
 {
     m_pKeyHandlers[TARGET_INIT] = &CTargetState::OnHandleInit;
     m_pKeyHandlers[TARGET_TARGET] = &CTargetState::OnHandleTarget;
 
     m_eCurModifier = TARGET_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
+}
+
+CTargetState::~CTargetState()
+{
+    if( m_llTargets )
+    {
+        m_llTargets->Terminate();
+        delete m_llTargets;
+        m_llTargets = NULL;
+    }
 }
 
 int CTargetState::OnHandleKey( SDL_Keysym *keysym )
@@ -63,12 +77,79 @@ int CTargetState::OnHandleTarget( SDL_Keysym *keysym )
     // }
 
     // JLog( LOG_LEVEL_DEBUG, true,
-    //       "TARGET modifier resetting game state to COMMAND, TARGET state to INIT\n" );
+    //       "TARGET modifier resetting game state to previous state, TARGET state to INIT\n" );
     // // One way or another, we're done with this state now.
-    // ResetToState( STATE_COMMAND );
+    // ResetToState( m_dwPreviousState );
     return 0;
 }
 
+int CTargetState::DoInit()
+{
+    m_eCurModifier = TARGET_TARGET;
+    m_dwCurrentSelection = 0;
+    m_llTargets = new JLinkList<uint32>;
+    // CMonster *pTarget = g_pGame->GetPlayer()->GetTarget();
+    // if( pTarget )
+    // {
+    //     if( g_pGame->GetDungeon()->PlayerCanSee(
+    //             pTarget->GetPos(),
+    //             pTarget->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) )
+    //             )
+    //     {
+    //         uint32 *dwTarget = new uint32( pTarget->m_pllLink->m_dwIndex );
+    //         m_llTargets->Add( dwTarget );
+    //     }
+    //     else
+    //     {
+
+    //         pTarget->UnsetAsTarget();
+    //     }
+    // }
+    CLink<CMonster> *pLink = g_pGame->GetDungeon()->m_llMonsters->GetHead();
+    CMonster *pMon = NULL;
+    CDungeonTile *monPos = NULL;
+    uint32 count = 0;
+    while( pLink != NULL )
+    {
+        if( !pLink->m_lpData )
+        {
+            pLink = pLink->next;
+            continue;
+        }
+        pMon = pLink->m_lpData;
+        monPos = g_pGame->GetDungeon()->GetTile( pMon->GetPos() );
+        bool bTargeted = false; //( pMon == g_pGame->GetPlayer()->GetTarget() );
+        bool bSeen = true;      //( ( monPos->m_dwFlags & DUNG_FLAG_SEEN ) == DUNG_FLAG_SEEN );
+        bool bPlayerSees = ( g_pGame->GetDungeon()->PlayerCanSee(
+            pMon->GetPos(), pMon->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) );
+
+        JLog( LOG_LEVEL_NOISE, true, "mon: %s target %d seen %d sees %d\n", pMon->GetName(),
+              bTargeted, bSeen, bPlayerSees );
+        if( /*!bTargeted && bSeen && /**/ bPlayerSees )
+        {
+            uint32 *dwTargetable = new uint32( count );
+            JLog( LOG_LEVEL_DEBUG, true, "Adding %s to targets mon %d at idx %d\n", pMon->GetName(),
+                  pMon->m_pllLink->m_dwIndex, *dwTargetable );
+            m_llTargets->Add( dwTargetable );
+            // if( !g_pGame->GetPlayer()->GetTarget() )
+            g_pGame->GetPlayer()->SetTarget( pMon );
+        }
+        pLink = pLink->next;
+        count++;
+    }
+    if( m_llTargets->length() )
+    {
+        JLog( LOG_LEVEL_INFO, true, "Total targetable monsters: %d\n", m_llTargets->length() );
+    }
+    else
+    {
+        JLog( LOG_LEVEL_INFO, true, "No targets available.\n" );
+        ResetToState( m_dwPreviousState );
+        return JCOMPLETESTATE;
+    }
+
+    return JSUCCESS;
+}
 int CTargetState::OnHandleInit( SDL_Keysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing look state...\n" );
@@ -81,90 +162,30 @@ int CTargetState::OnHandleInit( SDL_Keysym *keysym )
         {
         case SDLK_8:
             if( keysym->mod & KMOD_SHIFT )
+                DoInit();
+            break;
+        case SDLK_f:
+        case SDLK_z:
+            if( keysym->mod == 0 )
             {
-                mod = TARGET_TARGET;
-                m_dwCurrentSelection = 0;
-                m_llTargets = new JLinkList<uint32>;
-                // CMonster *pTarget = g_pGame->GetPlayer()->GetTarget();
-                // if( pTarget )
-                // {
-                //     if( g_pGame->GetDungeon()->PlayerCanSee(
-                //             pTarget->GetPos(),
-                //             pTarget->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) )
-                //             )
-                //     {
-                //         uint32 *dwTarget = new uint32( pTarget->m_pllLink->m_dwIndex );
-                //         m_llTargets->Add( dwTarget );
-                //     }
-                //     else
-                //     {
-
-                //         pTarget->UnsetAsTarget();
-                //     }
-                // }
-                CLink<CMonster> *pLink = g_pGame->GetDungeon()->m_llMonsters->GetHead();
-                CMonster *pMon = NULL;
-                CDungeonTile *monPos = NULL;
-                uint32 count = 0;
-                while( pLink != NULL )
-                {
-                    if( !pLink->m_lpData )
-                    {
-                        pLink = pLink->next;
-                        continue;
-                    }
-                    pMon = pLink->m_lpData;
-                    monPos = g_pGame->GetDungeon()->GetTile( pMon->GetPos() );
-                    bool bTargeted = false; //( pMon == g_pGame->GetPlayer()->GetTarget() );
-                    bool bSeen =
-                        true; //( ( monPos->m_dwFlags & DUNG_FLAG_SEEN ) == DUNG_FLAG_SEEN );
-                    bool bPlayerSees = ( g_pGame->GetDungeon()->PlayerCanSee(
-                        pMon->GetPos(),
-                        pMon->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) );
-
-                    JLog( LOG_LEVEL_NOISE, true, "mon: %s target %d seen %d sees %d\n",
-                          pMon->GetName(), bTargeted, bSeen, bPlayerSees );
-                    if( /*!bTargeted && bSeen && /**/ bPlayerSees )
-                    {
-                        uint32 *dwTargetable = new uint32( count );
-                        JLog( LOG_LEVEL_DEBUG, true, "Adding %s to targets mon %d at idx %d\n",
-                              pMon->GetName(), pMon->m_pllLink->m_dwIndex, *dwTargetable );
-                        m_llTargets->Add( dwTargetable );
-                        // if( !g_pGame->GetPlayer()->GetTarget() )
-                        g_pGame->GetPlayer()->SetTarget( pMon );
-                    }
-                    pLink = pLink->next;
-                    count++;
-                }
-                if( m_llTargets->length() )
-                {
-                    JLog( LOG_LEVEL_INFO, true, "Total targetable monsters: %d\n",
-                          m_llTargets->length() );
-                }
-                else
-                {
-                    JLog( LOG_LEVEL_INFO, true, "No targets available.\n" );
-                    ResetToState( STATE_COMMAND );
-                    return 0;
-                }
+                m_dwPreviousState = STATE_RANGED;
+                DoInit();
             }
             break;
         default:
             JLog( LOG_LEVEL_ERROR, true,
                   "There seems to be some kind of mistake; I don't handle mod: %d\n", m_cCommand );
-            ResetToState( STATE_COMMAND );
+            ResetToState( m_dwPreviousState );
             return 0;
             break;
         }
-
-        m_eCurModifier = mod;
         m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
         return 0;
     }
 
     JLog( LOG_LEVEL_ERROR, true,
           "Error: tried to init modify state when it was already initted...\n" );
-    ResetToState( STATE_COMMAND );
+    ResetToState( m_dwPreviousState );
     // shouldn't get here
     return JRESETSTATE;
 }
@@ -194,13 +215,13 @@ int CTargetState::OnBaseHandleKey( SDL_Keysym *keysym )
     {
         g_pGame->GetMsgs()->Printf( "Target selected.\n" );
         // now reset
-        ResetToState( STATE_COMMAND );
+        ResetToState( m_dwPreviousState );
         return JRESETSTATE;
     }
     else if( keysym->sym == SDLK_ESCAPE )
     {
         // ESC key gets us out of target mode
-        ResetToState( STATE_COMMAND );
+        ResetToState( m_dwPreviousState );
         return JRESETSTATE;
     }
 

@@ -41,7 +41,18 @@ void CItem::Init( CItemDef *pid )
 {
     m_id = pid;
     m_Color.SetColor( m_id->m_Color );
-    m_fRemainingDuration = Util::GetRandom( 0.0f, m_id->m_fDuration );
+    switch( m_id->m_dwIndex )
+    {
+    case ITEM_IDX_POTION:
+    case ITEM_IDX_SCROLL:
+    case ITEM_IDX_TORCH:
+        m_fRemainingDuration = Util::GetRandom( 0.0f, m_id->m_fDuration );
+        break;
+    case ITEM_IDX_STAFF:
+    case ITEM_IDX_WAND:
+        m_dwCharges = Util::Roll( "1d20" );
+        break;
+    }
 }
 
 void CItem::SetCursed( bool bCursed )

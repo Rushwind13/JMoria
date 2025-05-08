@@ -55,6 +55,12 @@ public:
             delete[] m_szKilledBy;
             m_szKilledBy = NULL;
         }
+
+        if( m_szToString )
+        {
+            delete[] m_szToString;
+            m_szToString = NULL;
+        }
     };
 
     void InitScore()

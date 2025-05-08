@@ -4,7 +4,7 @@ Feature: Equipment
     As a game engine
     I want to test many things about the character equipment
     
-    # @skip
+    @skip
     Scenario: I can equip things
         Given I have a Player
         Given I spawn a Dagger:37
@@ -15,7 +15,7 @@ Feature: Equipment
         Then The Dagger:37 is not in inventory at -1
         # And A dagger is in the primary weapon equipment slot
     
-    # @skip
+    @skip
     Scenario: Equipment goes to the proper slot
         Given I have a Player
         Given I spawn a Dagger:37
@@ -50,7 +50,7 @@ Feature: Equipment
     #     Given A pickaxe is in the primary weapon equipment slot
     #     Given A dagger is in the secondary weapon equipment slot
 
-    # @skip
+    @skip
     Scenario: Equipment can be taken off
         Given I have a Player
         Given I spawn a Dagger:37
@@ -63,7 +63,7 @@ Feature: Equipment
         Then The Dagger:37 is not in equipment at 0
         Then The Dagger:37 is in inventory at -1
 
-    # @skip
+    @skip
     Scenario: Cursed Equipment can be wielded
         Given I have a Player
         Given I spawn a Dagger:37
@@ -74,7 +74,7 @@ Feature: Equipment
         Then The Dagger:37 is not in inventory at -1
         # And A dagger is in the primary weapon equipment slot
 
-    # @skip
+    @skip
     Scenario: Cursed Equipment cannot be taken off
         Given I have a Player
         Given I spawn a Dagger:37
@@ -87,7 +87,7 @@ Feature: Equipment
         Then The Dagger:37 is in equipment at 0
         Then The Dagger:37 is not in inventory at -1
 
-    # @skip
+    @skip
     Scenario: Cursed Equipment can be uncursed with scroll of remove cruse
         Given I have a Player
         Given I spawn a Dagger:37
@@ -101,7 +101,7 @@ Feature: Equipment
         When the player reads the scroll in inventory at 0
         Then the equipped Dagger:37 at 0 is not cursed
 
-    # @skip
+    @skip
     Scenario: Cursed scroll of remove curse curses an equipped item
         Given I have a Player
         Given I spawn a Dagger:37
@@ -117,7 +117,7 @@ Feature: Equipment
         Then the player has a Dagger:37 in equipment at 0
         Then the equipped Dagger:37 at 0 is cursed
 
-    # @skip
+    @skip
     Scenario: New Equipment replaces old equipment
         Given I have a Player
         Given I spawn a Dagger:37
@@ -131,15 +131,23 @@ Feature: Equipment
         Then The Dagger:37 is in inventory at -1
         And The Long Sword:43 is in equipment at 0
 
-    # @skip
+    @skip
     Scenario: New Equipment does not replace cursed equipment
         Given I have a Player
         Given I spawn a Dagger:37
         Given the Dagger:37 is cursed
         Given the player has a Dagger:37 in inventory
-        Given the player equips the item 27
+        Given the player equips the item 37
         Given I spawn a Long Sword:43
         Given the player has a Long Sword:43 in inventory
-        Given the player equips the item 28
+        Given the player equips the item 43
         Then The Long Sword:43 is in inventory at -1
         And The Dagger:37 is in equipment at 0
+
+    Scenario: Unidentified cursed equipment does not display label cursed
+        Given I have a Player
+        Given I spawn a Dagger:27
+        Given the Dagger:27 is not identified
+        When I display equipment
+        Then the Dagger:27 is not labeled as cursed 
+

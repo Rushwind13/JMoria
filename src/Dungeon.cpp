@@ -559,6 +559,11 @@ void CDungeon::LightRoom( CRoom *pRoom )
     pRoom->SetFlags( DUNG_FLAG_SEEN );
 }
 
+bool CollisionTest( JVector &vTest )
+{
+    return g_pGame->GetDungeon()->IsWalkableFor( vTest ) == DUNG_COLL_NO_COLLISION;
+}
+
 bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFlags )
 {
     // can see things in the same room, if the room is LIT
@@ -602,40 +607,7 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
     // Check for obstacles along the line between
     // the player and the position
     //
-    // Bresenham Line Algorithm
-    // TODO: move this somewhere to be used for ranged and magic targeting
-    JLinkList<JIVector> *pLine = new JLinkList<JIVector>;
-    JIVector vDelta( abs( vTarget.x - vSource.x ), abs( vTarget.y - vSource.y ) );
-    JIVector vStep( vSource.x < vTarget.x ? 1 : -1, vSource.y < vTarget.y ? 1 : -1 );
-    int error = vDelta.x - vDelta.y;
-    int errorx2;
-
-    JVector vTest;
-    JIVector vCurrent = vSource;
-    while( vCurrent.x != vTarget.x || vCurrent.y != vTarget.y )
-    {
-        if( vCurrent != vSource )
-        {
-            vTest.Init( VEC_EXPAND( vCurrent ) );
-            int collide_type = g_pGame->GetDungeon()->IsWalkableFor( vTest );
-            if( collide_type != DUNG_COLL_NO_COLLISION )
-            {
-                return false;
-            }
-        }
-        errorx2 = error * 2;
-        if( errorx2 > -vDelta.y )
-        {
-            error -= vDelta.y;
-            vCurrent.x += vStep.x;
-        }
-        if( errorx2 < vDelta.x )
-        {
-            error += vDelta.x;
-            vCurrent.y += vStep.y;
-        }
-    }
-    return true;
+    return Util::Bresenham( vSource, vTarget, SIGHT_DISTANCE_PLAYER, CollisionTest );
 }
 
 bool CDungeon::PlayerCanSee( JVector vCheck, uint32 dwFlags )
@@ -712,6 +684,9 @@ void CDungeon::DrawDungeon()
     JVector DUNG_ASPECT;
     JVector vLook =
         ( g_pGame->GetGameStateIndex() == STATE_LOOK ) ? m_vLookPos : g_pGame->GetPlayer()->m_vPos;
+    JVector vProjectile = ( g_pGame->GetGameStateIndex() == STATE_RANGED )
+                              ? m_vProjectilePos
+                              : g_pGame->GetPlayer()->m_vPos;
     JColor color;
 
     for( vScreen.x = 0; vScreen.x < DUNG_WIDTH; vScreen.x++ )
@@ -751,6 +726,10 @@ void CDungeon::DrawDungeon()
             if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
             {
                 color = JColor( 100, 0, 100, 255 );
+            }
+            else if( g_pGame->GetGameStateIndex() == STATE_RANGED && vScreen == vProjectile )
+            {
+                color = JColor( 100, 100, 0, 255 );
             }
             else if( IsLit( vScreen ) )
             {
@@ -845,6 +824,11 @@ void CDungeon::Term()
     {
         delete[] m_Tiles;
         m_Tiles = NULL;
+    }
+    if( m_TileSet )
+    {
+        delete m_TileSet;
+        m_TileSet = NULL;
     }
 
     if( m_dtdlist )

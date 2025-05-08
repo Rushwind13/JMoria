@@ -19,6 +19,7 @@ JResult CTileset::Load( const char *szName, int dwCellWidth, int dwCellHeight )
     }
     else
     {
+        JLog( LOG_LEVEL_DEBUG, true, "loading %s\n", szName );
         TextureImage = IMG_Load( szName );
     }
 

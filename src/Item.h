@@ -7,8 +7,22 @@
 class CEffect
 {
 public:
-    CEffect() : m_dwEffect( -1 ), m_szAmount( NULL ), m_fDuration( 0 ) {}
-    ~CEffect() {}
+    CEffect()
+        : m_dwEffect( -1 ),
+          m_dwFlags( 0 ),
+          m_dwModifier( 0 ),
+          m_szAmount( NULL ),
+          m_fDuration( 0 )
+    {
+    }
+    ~CEffect()
+    {
+        if( m_szAmount )
+        {
+            delete[] m_szAmount;
+            m_szAmount = NULL;
+        }
+    }
     int m_dwEffect;
     int m_dwFlags;
     int m_dwModifier;
@@ -23,6 +37,8 @@ public:
     CItemDef()
         : m_szName( NULL ),
           m_szPlural( NULL ),
+          m_szUnidentifiedName( NULL ),
+          m_szUnidentifiedPlural( NULL ),
           m_szFlavor( NULL ),
           m_fSpeed( 0.0f ),
           m_fACBonus( 0.0f ),
@@ -54,6 +70,21 @@ public:
             delete[] m_szPlural;
             m_szPlural = NULL;
         }
+        if( m_szUnidentifiedName )
+        {
+            delete[] m_szUnidentifiedName;
+            m_szUnidentifiedName = NULL;
+        }
+        if( m_szUnidentifiedPlural )
+        {
+            delete[] m_szUnidentifiedPlural;
+            m_szUnidentifiedPlural = NULL;
+        }
+        if( m_szFlavor )
+        {
+            delete[] m_szFlavor;
+            m_szFlavor = NULL;
+        }
         if( m_szBaseDamage )
         {
             delete[] m_szBaseDamage;
@@ -62,11 +93,13 @@ public:
         if( m_Colors )
         {
             m_Colors->Terminate();
+            delete m_Colors;
             m_Colors = NULL;
         }
         if( m_llEffects )
         {
             m_llEffects->Terminate();
+            delete m_llEffects;
             m_llEffects = NULL;
         }
     }
@@ -112,6 +145,7 @@ public:
     int m_dwCount; // how many of this item are being carried?
     int m_dwFlags; // item cursed, or other specific to this instance, rather than in the general
                    // CItemDef
+    uint32 m_dwCharges; // for wands and staves and other items that have an "ammo count"
 protected:
     float m_fColorChangeInterval;
     JColor m_Color;
@@ -124,6 +158,7 @@ public:
     CItem()
         : m_vPos( 0, 0 ),
           m_dwFlags( 0 ),
+          m_dwCharges( 0 ),
           m_dwCount( 1 ),
           m_pllLink( NULL ),
           m_id( NULL ),

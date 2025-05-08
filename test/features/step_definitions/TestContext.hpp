@@ -21,7 +21,7 @@
 
 // main game pointer
 CGame *g_pGame = NULL;
-eLogLevel g_eLogLevel = LOG_LEVEL_WARN;
+eLogLevel g_eLogLevel = LOG_LEVEL_DEBUG;
 
 /*#######
 ##

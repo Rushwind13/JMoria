@@ -7,15 +7,18 @@ class CDungeon;
 class CPlayer;
 class CDisplayText;
 class CStateBase;
-class CCmdState;
-class CModState;
-class CUseState;
-class CStringInputState;
-class CIntroState;
-class CEndGameState;
 class CClockStepState;
+class CCmdState;
+class CEndGameState;
+class CIntroState;
+class CLookState;
+class CModState;
+class CRangedState;
 class CRestState;
 class CRunState;
+class CStringInputState;
+class CTargetState;
+class CUseState;
 class CAIMgr;
 
 class CGame
@@ -46,6 +49,7 @@ public:
     void Term();
     void Quit( int returncode );
     void SetState( int eNewState );
+    int GetGameStateIndex() { return m_eCurState; }
     CStateBase *GetGameState() { return m_pCurState; }
     float GetFTime() { return m_fGameTime; }
     int GetITime() { return (int)m_fGameTime; }
@@ -73,15 +77,18 @@ protected:
     CStateBase *m_pCurState;
     int m_eCurState;
 
-    CCmdState *m_pCmdState;
-    CModState *m_pModState;
-    CUseState *m_pUseState;
-    CStringInputState *m_pStringInputState;
-    CIntroState *m_pIntroState;
-    CEndGameState *m_pEndGameState;
     CClockStepState *m_pClockStepState;
+    CCmdState *m_pCmdState;
+    CEndGameState *m_pEndGameState;
+    CIntroState *m_pIntroState;
+    CLookState *m_pLookState;
+    CModState *m_pModState;
+    CRangedState *m_pRangedState;
     CRestState *m_pRestState;
     CRunState *m_pRunState;
+    CStringInputState *m_pStringInputState;
+    CTargetState *m_pTargetState;
+    CUseState *m_pUseState;
 
 private:
     CRender *m_pRender;

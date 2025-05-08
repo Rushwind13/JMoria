@@ -12,6 +12,11 @@ bool CDataFile::Open( const char *szFilename )
         return false;
     }
 
+    Util::Shuffle( PotionIndex, NUM_POTION_TYPES );
+    Util::Shuffle( ScrollIndex, NUM_SCROLL_TYPES );
+    Util::Shuffle( WandIndex, NUM_LUMBER_TYPES );
+    Util::Shuffle( StaffIndex, NUM_LUMBER_TYPES );
+
     return true;
 }
 
@@ -264,6 +269,7 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                     // <rgb1>
                     mdIn.m_Color.SetColor( color );
                 }
+                delete[] color;
             }
             else if( *szLine == '}' )
             {
@@ -379,6 +385,92 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 if( g_Constants.CompareType( "ITEM_IDX", szValue ) )
                 {
                     idIn.m_dwIndex = g_Constants.LookupString( szValue );
+                    if( idIn.m_dwIndex == ITEM_IDX_POTION )
+                    {
+                        int potion_index = PotionIndex[m_dwPotionCount];
+                        idIn.m_szFlavor =
+                            new char[Util::jstrlen( g_Constants.PotionColor( potion_index ) ) + 1];
+                        Util::jstrcpy( idIn.m_szFlavor, g_Constants.PotionColor( potion_index ) );
+                        char szUnID[100];
+                        sprintf( szUnID, "%s Potion", idIn.m_szFlavor );
+                        JLog( LOG_LEVEL_DEBUG, true, "Potion #%d - index %d color %s\n",
+                              m_dwPotionCount, potion_index, szUnID );
+                        idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
+
+                        sprintf( szUnID, "%s Potions", idIn.m_szFlavor );
+                        idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
+
+                        sprintf( szUnID, "%s", g_Constants.PotionRGBA( potion_index ) );
+                        idIn.m_Color.SetColor( szUnID );
+                        m_dwPotionCount++;
+                    }
+                    else if( idIn.m_dwIndex == ITEM_IDX_SCROLL )
+                    {
+                        int scroll_index = ScrollIndex[m_dwScrollCount];
+                        idIn.m_szFlavor =
+                            new char[Util::jstrlen( g_Constants.ScrollName( scroll_index ) ) + 1];
+                        Util::jstrcpy( idIn.m_szFlavor, g_Constants.ScrollName( scroll_index ) );
+                        char szUnID[100];
+                        sprintf( szUnID, "Scroll labeled %s", idIn.m_szFlavor );
+                        idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
+                        sprintf( szUnID, "Scrolls labeled %s", idIn.m_szFlavor );
+                        idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
+                        m_dwScrollCount++;
+                    }
+                    else if( idIn.m_dwIndex == ITEM_IDX_STAFF )
+                    {
+                        int staff_index = StaffIndex[m_dwStaffCount];
+                        idIn.m_szFlavor =
+                            new char[Util::jstrlen( g_Constants.Lumber( staff_index ) ) + 1];
+                        Util::jstrcpy( idIn.m_szFlavor, g_Constants.Lumber( staff_index ) );
+                        char szUnID[100];
+                        sprintf( szUnID, "%s Staff", idIn.m_szFlavor );
+                        JLog( LOG_LEVEL_DEBUG, true, "Staff #%d - index %d color %s\n",
+                              m_dwStaffCount, staff_index, szUnID );
+                        idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
+
+                        sprintf( szUnID, "%s Staves", idIn.m_szFlavor );
+                        idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
+
+                        sprintf( szUnID, "%s", g_Constants.LumberRGBA( staff_index ) );
+                        idIn.m_Color.SetColor( szUnID );
+                        m_dwStaffCount++;
+                    }
+                    else if( idIn.m_dwIndex == ITEM_IDX_WAND )
+                    {
+                        int wand_index = WandIndex[m_dwWandCount];
+                        idIn.m_szFlavor =
+                            new char[Util::jstrlen( g_Constants.Lumber( wand_index ) ) + 1];
+                        Util::jstrcpy( idIn.m_szFlavor, g_Constants.Lumber( wand_index ) );
+                        char szUnID[100];
+                        sprintf( szUnID, "%s Wand", idIn.m_szFlavor );
+                        JLog( LOG_LEVEL_DEBUG, true, "Wand #%d - index %d color %s\n",
+                              m_dwWandCount, wand_index, szUnID );
+                        idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
+
+                        sprintf( szUnID, "%s Wands", idIn.m_szFlavor );
+                        idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
+
+                        sprintf( szUnID, "%s", g_Constants.LumberRGBA( wand_index ) );
+                        idIn.m_Color.SetColor( szUnID );
+                        m_dwWandCount++;
+                    }
+                    else
+                    {
+                        idIn.m_szUnidentifiedName = new char[Util::jstrlen( idIn.m_szName ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedName, idIn.m_szName );
+                        idIn.m_szUnidentifiedPlural =
+                            new char[Util::jstrlen( idIn.m_szPlural ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedPlural, idIn.m_szPlural );
+                    }
                 }
             }
             else if( strncasecmp( szLine, "flags", 5 ) == 0 )
@@ -413,6 +505,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                     // <rgb1>
                     idIn.m_Color.SetColor( color );
                 }
+                delete[] color;
             }
             else if( strncasecmp( szLine, "effect", 6 ) == 0 )
             {
@@ -675,6 +768,7 @@ JLinkList<JColor> *CDataFile::ParseColors( char *szLine )
         outcolor = new JColor();
         outcolor->SetColor( temp );
         retval->Add( outcolor );
+        delete[] temp;
     }
 
     return retval;

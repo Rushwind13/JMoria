@@ -162,10 +162,12 @@ public:
     void Norm()
     {
         float len = Length();
+        float sign = -1.0f;
         if( len != 0.0f )
         {
-            x /= len;
-            y /= len;
+
+            x = ( ( x * x ) / len ) * ( ( x < 0.0f ) ? -1.0f : 1.0f );
+            y = ( ( y * y ) / len ) * ( ( y < 0.0f ) ? -1.0f : 1.0f );
         }
     }
     void printvec( const char *label ) { JLog( LOG_LEVEL_DEBUG, true, "%s: %f %f ", label, x, y ); }

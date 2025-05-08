@@ -38,6 +38,8 @@ void CMonster::Init( CMonsterDef *pmd )
     m_fCurHP = m_fHP;
     m_fCurAC = pmd->m_fBaseAC;
     m_pCurrentAttack = NULL;
+    m_bIsPlayerTarget = false;
+    memset( m_szCurrentFlavorText, 0, sizeof( char ) * 64 );
 }
 
 void CMonster::InitBrain( CMonsterDef *pmd )
@@ -118,7 +120,7 @@ JIVector CMonster::GetSpawnPoint( JIVector vRequestedSpawnPoint )
     bool bNear = vRequestedSpawnPoint.IsWithinWorld();
     if( bNear )
     {
-        JLog( LOG_LEVEL_INFO, true, "given <%d %d>...", VEC_EXPAND( vRequestedSpawnPoint ) );
+        JLog( LOG_LEVEL_INFO, false, "given <%d %d>...", VEC_EXPAND( vRequestedSpawnPoint ) );
         // return SpawnAt( vSpawnPoint );
         vTryPos.Init( VEC_EXPAND( vRequestedSpawnPoint ) );
     }
@@ -215,29 +217,43 @@ const char *CMonster::AttackEffect()
 const char *CMonster::AttackFlavorText()
 {
     if( m_pCurrentAttack == NULL )
-        return "misses";
+    {
+        Util::jstrcpy( m_szCurrentFlavorText, "misses" );
+        return m_szCurrentFlavorText;
+    }
     switch( m_pCurrentAttack->m_dwType )
     {
     case MON_FLAG_BITE:
-        return "bites";
+        Util::jstrcpy( m_szCurrentFlavorText, "bites" );
+        break;
     case MON_FLAG_CRAWL:
-        return "crawls on";
+        Util::jstrcpy( m_szCurrentFlavorText, "crawls on" );
+        break;
     case MON_FLAG_CLAW:
-        return "claws";
+        Util::jstrcpy( m_szCurrentFlavorText, "claws" );
+        break;
     case MON_FLAG_TRAMPLE:
-        return "tramples";
+        Util::jstrcpy( m_szCurrentFlavorText, "tramples" );
+        break;
     case MON_FLAG_SPORE:
-        return "releases a cloud of spores at";
+        Util::jstrcpy( m_szCurrentFlavorText, "releases a cloud of spores at" );
+        break;
     case MON_FLAG_TOUCH:
-        return "touches";
+        Util::jstrcpy( m_szCurrentFlavorText, "touches" );
+        break;
     case MON_FLAG_DROOL:
-        return "drools on";
+        Util::jstrcpy( m_szCurrentFlavorText, "drools on" );
+        break;
     case MON_FLAG_BREATHE:
-        char retval[32];
+        char retval[64];
         sprintf( retval, "breathes %s on", AttackEffect() );
-        return retval;
+        Util::jstrcpy( m_szCurrentFlavorText, retval );
+        break;
+    default:
+        Util::jstrcpy( m_szCurrentFlavorText, "hits" );
+        break;
     }
-    return "hits";
+    return m_szCurrentFlavorText;
 }
 
 float CMonster::Damage( float fDamageMult )
@@ -329,8 +345,16 @@ void CMonster::Draw()
 
     SetColor();
 
+    JColor color = m_md->m_Color;
+
+    if( m_bIsPlayerTarget )
+    {
+        JLog( LOG_LEVEL_NOISE, false, "drawing the target monster: %s\n", GetName() );
+        color = JColor( 100, 0, 0, 255 );
+    }
+
     // PreDraw();
-    g_pGame->GetDungeon()->m_TileSet->SetTileColor( m_md->m_Color );
+    g_pGame->GetDungeon()->m_TileSet->SetTileColor( color );
     g_pGame->GetDungeon()->m_TileSet->DrawTile( monster_tile, GetPos(), vSize, false );
     // PostDraw();
 }

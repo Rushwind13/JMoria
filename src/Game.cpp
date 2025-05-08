@@ -11,10 +11,13 @@
 #include "CmdState.h"
 #include "EndGameState.h"
 #include "IntroState.h"
+#include "LookState.h"
 #include "ModState.h"
+#include "RangedState.h"
 #include "RestState.h"
 #include "RunState.h"
 #include "StringInputState.h"
+#include "TargetState.h"
 #include "UseState.h"
 
 #include "DisplayText.h"
@@ -31,24 +34,33 @@ CGame::CGame()
       m_pPlayer( NULL ),
       m_pRender( NULL ),
       m_pCurState( NULL ),
-      m_pCmdState( NULL ),
-      m_pStringInputState( NULL ),
-      m_pIntroState( NULL ),
-      m_pEndGameState( NULL ),
       m_pClockStepState( NULL ),
+      m_pCmdState( NULL ),
+      m_pEndGameState( NULL ),
+      m_pIntroState( NULL ),
+      m_pLookState( NULL ),
+      m_pModState( NULL ),
+      m_pRangedState( NULL ),
       m_pRestState( NULL ),
+      m_pRunState( NULL ),
+      m_pStringInputState( NULL ),
+      m_pTargetState( NULL ),
+      m_pUseState( NULL ),
       m_eCurState( STATE_INVALID ),
       m_fGameTime( 0.0f )
 {
-    m_pCmdState = new CCmdState;
-    m_pModState = new CModState;
-    m_pUseState = new CUseState;
-    m_pStringInputState = new CStringInputState;
-    m_pIntroState = new CIntroState;
-    m_pEndGameState = new CEndGameState;
     m_pClockStepState = new CClockStepState;
+    m_pCmdState = new CCmdState;
+    m_pEndGameState = new CEndGameState;
+    m_pIntroState = new CIntroState;
+    m_pLookState = new CLookState;
+    m_pModState = new CModState;
+    m_pRangedState = new CRangedState;
     m_pRestState = new CRestState;
     m_pRunState = new CRunState;
+    m_pStringInputState = new CStringInputState;
+    m_pTargetState = new CTargetState;
+    m_pUseState = new CUseState;
 #ifdef TURN_BASED
     m_bReadyForUpdate = false;
 #endif // TURN_BASED
@@ -143,35 +155,23 @@ void CGame::Term()
         m_pPlayer = NULL;
     }
 
+    if( m_pAIMgr )
+    {
+        delete m_pAIMgr;
+        m_pAIMgr = NULL;
+    }
+
     JLog( LOG_LEVEL_DEBUG, true, "States..." );
+    if( m_pClockStepState )
+    {
+        delete m_pClockStepState;
+        m_pClockStepState = NULL;
+    }
+
     if( m_pCmdState )
     {
         delete m_pCmdState;
         m_pCmdState = NULL;
-    }
-
-    if( m_pModState )
-    {
-        delete m_pModState;
-        m_pModState = NULL;
-    }
-
-    if( m_pUseState )
-    {
-        delete m_pUseState;
-        m_pUseState = NULL;
-    }
-
-    if( m_pStringInputState )
-    {
-        delete m_pStringInputState;
-        m_pStringInputState = NULL;
-    }
-
-    if( m_pIntroState )
-    {
-        delete m_pIntroState;
-        m_pIntroState = NULL;
     }
 
     if( m_pEndGameState )
@@ -180,16 +180,58 @@ void CGame::Term()
         m_pEndGameState = NULL;
     }
 
-    if( m_pClockStepState )
+    if( m_pIntroState )
     {
-        delete m_pClockStepState;
-        m_pClockStepState = NULL;
+        delete m_pIntroState;
+        m_pIntroState = NULL;
+    }
+
+    if( m_pLookState )
+    {
+        delete m_pLookState;
+        m_pLookState = NULL;
+    }
+
+    if( m_pModState )
+    {
+        delete m_pModState;
+        m_pModState = NULL;
+    }
+
+    if( m_pRangedState )
+    {
+        delete m_pRangedState;
+        m_pRangedState = NULL;
     }
 
     if( m_pRestState )
     {
         delete m_pRestState;
         m_pRestState = NULL;
+    }
+
+    if( m_pRunState )
+    {
+        delete m_pRunState;
+        m_pRunState = NULL;
+    }
+
+    if( m_pStringInputState )
+    {
+        delete m_pStringInputState;
+        m_pStringInputState = NULL;
+    }
+
+    if( m_pTargetState )
+    {
+        delete m_pTargetState;
+        m_pTargetState = NULL;
+    }
+
+    if( m_pUseState )
+    {
+        delete m_pUseState;
+        m_pUseState = NULL;
     }
 
     JLog( LOG_LEVEL_DEBUG, true, "Message boxes..." );
@@ -245,14 +287,29 @@ void CGame::SetState( int eNewState )
     case STATE_COMMAND:
         m_pCurState = reinterpret_cast<CStateBase *>( m_pCmdState );
         break;
+    case STATE_LOOK:
+        m_pCurState = reinterpret_cast<CStateBase *>( m_pLookState );
+        break;
     case STATE_MODIFY:
         m_pCurState = reinterpret_cast<CStateBase *>( m_pModState );
         break;
-    case STATE_USE:
-        m_pCurState = reinterpret_cast<CStateBase *>( m_pUseState );
-        break;
     case STATE_STRINGINPUT:
         m_pCurState = reinterpret_cast<CStateBase *>( m_pStringInputState );
+        break;
+    case STATE_RANGED:
+        m_pCurState = reinterpret_cast<CStateBase *>( m_pRangedState );
+        break;
+    case STATE_REST:
+        m_pCurState = reinterpret_cast<CStateBase *>( m_pRestState );
+        break;
+    case STATE_RUN:
+        m_pCurState = reinterpret_cast<CStateBase *>( m_pRunState );
+        break;
+    case STATE_TARGET:
+        m_pCurState = reinterpret_cast<CStateBase *>( m_pTargetState );
+        break;
+    case STATE_USE:
+        m_pCurState = reinterpret_cast<CStateBase *>( m_pUseState );
         break;
     case STATE_ENDGAME:
     {
@@ -260,6 +317,7 @@ void CGame::SetState( int eNewState )
         SDL_Keysym *keysym = new SDL_Keysym();
         keysym->sym = SDLK_SPACE;
         m_pCurState->HandleKey( keysym );
+        delete keysym;
     }
     break;
     case STATE_INTRO:
@@ -268,6 +326,7 @@ void CGame::SetState( int eNewState )
         SDL_Keysym *keysym = new SDL_Keysym();
         keysym->sym = SDLK_SPACE;
         m_pCurState->HandleKey( keysym );
+        delete keysym;
     }
     break;
     case STATE_CLOCKSTEP:
@@ -276,14 +335,9 @@ void CGame::SetState( int eNewState )
         SDL_Keysym *keysym = new SDL_Keysym();
         keysym->sym = SDLK_SPACE;
         m_pCurState->HandleKey( keysym );
+        delete keysym;
     }
     break;
-    case STATE_REST:
-        m_pCurState = reinterpret_cast<CStateBase *>( m_pRestState );
-        break;
-    case STATE_RUN:
-        m_pCurState = reinterpret_cast<CStateBase *>( m_pRunState );
-        break;
     default:
         JLog( LOG_LEVEL_ERROR, true, "Tried to change to unknown state.\n" );
         break;
@@ -386,11 +440,11 @@ int CGame::Update()
 #ifdef TURN_BASED
 bool CGame::Update()
 {
-    float fCurTime = 0.0f;
+    float fCurTime = 1.0f;
     if( m_bReadyForUpdate )
     {
         m_fGameTime++;
-        fCurTime = 1.0f;
+        // fCurTime = 1.0f;
         m_bReadyForUpdate = false;
         // TODO: Why does the AI require 2 ticks to move the monster?
         GetAIMgr()->Update( fCurTime );
@@ -440,6 +494,22 @@ bool CGame::Update( float fCurTime )
         }
         GetUse()->Update( fCurTime );
     }
+    else if( m_eCurState == STATE_RANGED )
+    {
+        switch( reinterpret_cast<CRangedState *>( m_pCurState )->GetCommand() )
+        {
+        case SDLK_f:
+            GetPlayer()->DisplayEquipment( PLACEMENT_USE );
+            break;
+        case SDLK_z:
+            GetPlayer()->DisplayInventory( PLACEMENT_USE );
+            break;
+        default:
+            JLog( LOG_LEVEL_WARN, true, "Nothing to display for command\n" );
+            break;
+        }
+        GetUse()->Update( fCurTime );
+    }
     else if( m_eCurState == STATE_ENDGAME )
     {
         GetEnd()->Update( fCurTime );
@@ -470,6 +540,13 @@ void CGame::Draw()
     if( m_eCurState == STATE_USE )
     {
         GetUse()->Draw();
+    }
+    if( m_eCurState == STATE_RANGED )
+    {
+        if( m_pRangedState->NeedsSelection() )
+        {
+            GetUse()->Draw();
+        }
     }
     else if( m_eCurState == STATE_ENDGAME )
     {

@@ -336,7 +336,7 @@ JResult CDungeon::SpawnMonsters( const int depth )
     return JSUCCESS;
 }
 
-CMonsterDef *CDungeon::GetMonsterDef( char *szMonsterName )
+CMonsterDef *CDungeon::GetMonsterDef( const char *szMonsterName )
 {
     CLink<CMonsterDef> *pLink = m_llMonsterDefs->GetHead();
     CMonsterDef *pid;
@@ -378,7 +378,7 @@ bool CDungeon::SpawnMonster( int which_monster )
     return true;
 }
 
-CItemDef *CDungeon::GetItemDef( char *szItemName )
+CItemDef *CDungeon::GetItemDef( const char *szItemName )
 {
     CLink<CItemDef> *pLink = m_llItemDefs->GetHead();
     CItemDef *pid;
@@ -403,7 +403,7 @@ CItemDef *CDungeon::GetItemDef( int which_item )
         JLog( LOG_LEVEL_WARN, true, "got an invalid item: %d\n", which_item );
         return NULL;
     }
-    return m_llItemDefs->GetLink( which_item )->m_lpData;
+    return m_llItemDefs->GetNthLink( which_item )->m_lpData;
 }
 
 int CDungeon::ChooseItemForDepth( const int depth )
@@ -559,6 +559,11 @@ void CDungeon::LightRoom( CRoom *pRoom )
     pRoom->SetFlags( DUNG_FLAG_SEEN );
 }
 
+bool CollisionTest( JVector &vTest )
+{
+    return g_pGame->GetDungeon()->IsWalkableFor( vTest ) == DUNG_COLL_NO_COLLISION;
+}
+
 bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFlags )
 {
     // can see things in the same room, if the room is LIT
@@ -602,40 +607,7 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
     // Check for obstacles along the line between
     // the player and the position
     //
-    // Bresenham Line Algorithm
-    // TODO: move this somewhere to be used for ranged and magic targeting
-    JLinkList<JIVector> *pLine = new JLinkList<JIVector>;
-    JIVector vDelta( abs( vTarget.x - vSource.x ), abs( vTarget.y - vSource.y ) );
-    JIVector vStep( vSource.x < vTarget.x ? 1 : -1, vSource.y < vTarget.y ? 1 : -1 );
-    int error = vDelta.x - vDelta.y;
-    int errorx2;
-
-    JVector vTest;
-    JIVector vCurrent = vSource;
-    while( vCurrent.x != vTarget.x || vCurrent.y != vTarget.y )
-    {
-        if( vCurrent != vSource )
-        {
-            vTest.Init( VEC_EXPAND( vCurrent ) );
-            int collide_type = g_pGame->GetDungeon()->IsWalkableFor( vTest );
-            if( collide_type != DUNG_COLL_NO_COLLISION )
-            {
-                return false;
-            }
-        }
-        errorx2 = error * 2;
-        if( errorx2 > -vDelta.y )
-        {
-            error -= vDelta.y;
-            vCurrent.x += vStep.x;
-        }
-        if( errorx2 < vDelta.x )
-        {
-            error += vDelta.x;
-            vCurrent.y += vStep.y;
-        }
-    }
-    return true;
+    return Util::Bresenham( vSource, vTarget, SIGHT_DISTANCE_PLAYER, CollisionTest );
 }
 
 bool CDungeon::PlayerCanSee( JVector vCheck, uint32 dwFlags )
@@ -710,7 +682,12 @@ void CDungeon::DrawDungeon()
     // Brute force method; optimize this later
     JVector vScreen;
     JVector DUNG_ASPECT;
-    JVector vPlayer = g_pGame->GetPlayer()->m_vPos;
+    JVector vLook =
+        ( g_pGame->GetGameStateIndex() == STATE_LOOK ) ? m_vLookPos : g_pGame->GetPlayer()->m_vPos;
+    JVector vProjectile = ( g_pGame->GetGameStateIndex() == STATE_RANGED )
+                              ? m_vProjectilePos
+                              : g_pGame->GetPlayer()->m_vPos;
+    JColor color;
 
     for( vScreen.x = 0; vScreen.x < DUNG_WIDTH; vScreen.x++ )
     {
@@ -725,20 +702,43 @@ void CDungeon::DrawDungeon()
              {/* */
             CDungeonTile *curTile = GetTile( vScreen );
 
+            if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
+            {
+                ; // need to display this tile
+                // color = JColor( 100, 0, 100, 255 );
+            }
+
             // this tile doesn't exist, or it's not been seen
             // or something else is standing there
-            if( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_SEEN ) == 0 ) ||
-                ( g_pGame->GetPlayer()->IsWizard() &&
-                  ( curTile->m_dwFlags & ( DUNG_FLAG_SEEN | DUNG_FLAG_LIT ) ) == 0 ) ||
-                vScreen == vPlayer ||
-                ( curTile->m_pCurMonster != NULL &&
-                  PlayerCanSee( vScreen, curTile->m_pCurMonster->m_md->m_dwFlags &
-                                             ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) ) ||
-                ( curTile->m_pCurItem != NULL && PlayerCanSee( vScreen, MON_FLAG_EMPTY_MIND ) ) )
+            else if( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_SEEN ) == 0 ) ||
+                     ( g_pGame->GetPlayer()->IsWizard() &&
+                       ( curTile->m_dwFlags & ( DUNG_FLAG_SEEN | DUNG_FLAG_LIT ) ) == 0 ) ||
+                     vScreen == g_pGame->GetPlayer()->m_vPos ||
+                     ( curTile->m_pCurMonster != NULL &&
+                       PlayerCanSee( vScreen, curTile->m_pCurMonster->m_md->m_dwFlags &
+                                                  ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) ) ||
+                     ( curTile->m_pCurItem != NULL &&
+                       PlayerCanSee( vScreen, MON_FLAG_EMPTY_MIND ) ) )
             {
                 continue;
             }
-            JColor color = IsLit( vScreen ) ? JColor( 200, 200, 0, 255 ) : curTile->m_dtd->m_Color;
+
+            if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
+            {
+                color = JColor( 100, 0, 100, 255 );
+            }
+            else if( g_pGame->GetGameStateIndex() == STATE_RANGED && vScreen == vProjectile )
+            {
+                color = JColor( 100, 100, 0, 255 );
+            }
+            else if( IsLit( vScreen ) )
+            {
+                color = JColor( 200, 200, 0, 255 );
+            }
+            else
+            {
+                color = curTile->m_dtd->m_Color;
+            }
             m_TileSet->SetTileColor( color );
             m_TileSet->DrawTile( curTile->m_dtd->m_dwIndex, vScreen, vSize, true );
         }
@@ -824,6 +824,11 @@ void CDungeon::Term()
     {
         delete[] m_Tiles;
         m_Tiles = NULL;
+    }
+    if( m_TileSet )
+    {
+        delete m_TileSet;
+        m_TileSet = NULL;
     }
 
     if( m_dtdlist )

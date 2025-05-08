@@ -104,7 +104,24 @@ float Roll( const char *szFormat )
     }
 
     sides = atoi( c );
+    delete[] szToken;
     return Roll( dice, sides );
+}
+
+void Shuffle( int *array, const uint32 size )
+{
+    for( int i = 0; i < size; i++ )
+    {
+        array[i] = i;
+    }
+
+    for( int i = size - 1; i > 0; i-- )
+    {
+        int j = rand() % ( i + 1 );
+        int temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
 }
 
 bool IsInWorld( JIVector vIn ) { return vIn.IsInWorld(); }
@@ -196,6 +213,96 @@ bool WithinRadius( const JIVector vOrigin, const JIVector vTarget, const uint8 d
     vDelta.y *= vDelta.y;
     uint8 dsquared = distance * distance;
     return vDelta.x + vDelta.y <= dsquared;
+}
+
+float sqrt( const float a, const float epsilon )
+{
+    if( a < 0.0f )
+        return -1.0f;
+
+    float guess = 1.0f;
+    uint32 count = 0;
+    while( abs( ( guess * guess ) - a ) > epsilon )
+    {
+        guess = ( guess + a / guess ) * 0.5f;
+        count++;
+    }
+    JLog( LOG_LEVEL_DEBUG, true, "sqrt count: %d\n", count );
+    return guess;
+}
+int max( const int a, const int b ) { return ( a >= b ) ? a : b; }
+int abs( const int a ) { return ( a >= 0 ) ? a : -a; }
+
+int gcd( const int a, const int b )
+{
+    if( b == 0 )
+        return a;
+    return ( Util::gcd( b, a % b ) );
+}
+
+bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 distance,
+                bool ( *isWalkable )( JVector & ), JLinkList<JIVector> *llLine )
+{
+    if( distance == 8 )
+        JLog( LOG_LEVEL_INFO, true, "bres from <%d %d> to  <%d %d> both should be in output\n",
+              VEC_EXPAND( vSource ), VEC_EXPAND( vTarget ) );
+    // Bresenham Line Algorithm
+    JIVector vDelta( abs( vTarget.x - vSource.x ), abs( vTarget.y - vSource.y ) );
+    JIVector vStep( vSource.x < vTarget.x ? 1 : -1, vSource.y < vTarget.y ? 1 : -1 );
+    int error = 2 * ( vDelta.y - vDelta.x );
+
+    JVector vTest;
+    JIVector vCurrent = vSource;
+    bool alreadyAdded = false;
+    uint8 steps_remaining = distance;
+    // while( vCurrent.x != vTarget.x || vCurrent.y != vTarget.y )
+    while( steps_remaining > 0 )
+    {
+        if( distance == 8 && vCurrent.x == vTarget.x && vCurrent.y == vTarget.y )
+        {
+            JLog( LOG_LEVEL_INFO, true, "Bres reached target point with remaining steps: %d\n",
+                  steps_remaining );
+        }
+        if( !alreadyAdded )
+        {
+            JLog( LOG_LEVEL_WARN, true, "bres added <%d %d> error: %d\n", VEC_EXPAND( vCurrent ),
+                  error );
+            if( llLine )
+                llLine->Add( new JIVector( vCurrent ) );
+            alreadyAdded = true;
+            steps_remaining--;
+            JLog( LOG_LEVEL_NOISE, true, "bres remaining: %d\n", steps_remaining );
+            if( steps_remaining == 0 )
+            {
+                JLog( LOG_LEVEL_DEBUG, true, "bres finished\n" );
+                break;
+            }
+        }
+        if( vCurrent != vSource )
+        {
+            vTest.Init( VEC_EXPAND( vCurrent ) );
+            if( !isWalkable( vTest ) )
+            {
+                JLog( LOG_LEVEL_DEBUG, true, "bres not walkable\n" );
+                return false;
+            }
+        }
+
+        if( error > 0 )
+        {
+            vCurrent.y += vStep.y; // Increment y if error is positive
+            error -= 2 * vDelta.x;
+            alreadyAdded = false;
+        }
+        else
+        {
+            vCurrent.x += vStep.x; // Increment x if error is negative
+            error += 2 * vDelta.y;
+            alreadyAdded = false;
+        }
+        JLog( LOG_LEVEL_NOISE, true, "bres still going\n" );
+    }
+    return true;
 }
 
 #ifndef TURN_BASED

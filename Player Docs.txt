@@ -14,10 +14,13 @@ t - remove (take off) a piece of equipment
 < - go upstairs
 > - go downstairs
 d - drop
+* - choose target monster (choose target with .)
+: - look (look around with movement keys, choose target with .)
 . - rest one turn
 R - rest until at full health, or until disturbed
 q - quaff a potion
 r - read a scroll
+z - zap a wand
 N - set character name
 ^c - exit game
 ^t - wizard teleport (Note: will turn on Wizard Mode, which prevents score being saved)

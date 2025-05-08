@@ -41,7 +41,18 @@ void CItem::Init( CItemDef *pid )
 {
     m_id = pid;
     m_Color.SetColor( m_id->m_Color );
-    m_fRemainingDuration = Util::GetRandom( 0.0f, m_id->m_fDuration );
+    switch( m_id->m_dwIndex )
+    {
+    case ITEM_IDX_POTION:
+    case ITEM_IDX_SCROLL:
+    case ITEM_IDX_TORCH:
+        m_fRemainingDuration = Util::GetRandom( 0.0f, m_id->m_fDuration );
+        break;
+    case ITEM_IDX_STAFF:
+    case ITEM_IDX_WAND:
+        m_dwCharges = Util::Roll( "1d20" );
+        break;
+    }
 }
 
 void CItem::SetCursed( bool bCursed )
@@ -144,8 +155,8 @@ void CItem::SetColor()
     m_fColorChangeInterval = 0.0f;
 }
 
-unsigned char ItemIDs[ITEM_IDX_MAX + 1] = "|)[](]]\"=~{}{}&?!-_?$~//\\/|/|]";
-int EquipTypes[ITEM_IDX_MAX + 1] = {
+unsigned char ItemIDs[ITEM_IDX_MAX + 1] = "|)[](]]\"=~{}{}&?!-_?$~//\\/|/|]!";
+const int EquipTypes[ITEM_IDX_MAX + 1] = {
     EQUIP_IDX_MAIN_HAND, EQUIP_IDX_OFF_HAND,  EQUIP_IDX_ARMOR,     EQUIP_IDX_HELMET,
     EQUIP_IDX_CLOAK,     EQUIP_IDX_GLOVES,    EQUIP_IDX_BOOTS,     EQUIP_IDX_AMULET,
     EQUIP_IDX_RING,      EQUIP_IDX_TORCH,     EQUIP_IDX_MAIN_HAND, EQUIP_IDX_AMMO,
@@ -153,7 +164,7 @@ int EquipTypes[ITEM_IDX_MAX + 1] = {
     EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,
     EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,   EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND,
     EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND,
-    EQUIP_IDX_MAIN_HAND, EQUIP_IDX_BELT };
+    EQUIP_IDX_MAIN_HAND, EQUIP_IDX_BELT,      EQUIP_IDX_INVALID };
 
 int CItem::EquipType()
 {
@@ -162,6 +173,31 @@ int CItem::EquipType()
         return EQUIP_IDX_INVALID;
     return EquipTypes[item_type];
 }
+
+char *CItem::GetName()
+{
+    if( false ) // IsIdentified() ) // TODO: MIKE: ID goes here
+    {
+        return m_id->m_szName;
+    }
+    else
+    {
+        return m_id->m_szUnidentifiedName;
+    }
+}
+
+char *CItem::GetPlural()
+{
+    if( false ) // IsIdentified() )// TODO: MIKE: ID goes here
+    {
+        return m_id->m_szPlural;
+    }
+    else
+    {
+        return m_id->m_szUnidentifiedPlural;
+    }
+}
+
 void CItem::Draw()
 {
     // Don't draw if something else is there.

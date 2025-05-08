@@ -153,6 +153,7 @@ JResult CPlayer::SpawnPlayer()
         // try changing this to "iswalkable" -- might need to move that to dungeon. --Jimbo
         if( g_pGame->GetDungeon()->IsWalkableFor( vTryPos, true ) == DUNG_COLL_NO_COLLISION )
         {
+            m_pTarget = NULL;
             m_vPos = vTryPos;
             m_bHasSpawned = true;
             JLog( LOG_LEVEL_INFO, false, "Success! Spawned at <%.2f %.2f>\n",
@@ -206,8 +207,23 @@ void CPlayer::DisplayStats()
     g_pGame->GetStats()->Printf( "Light: %d turns\n", (int)LightSource() );
     g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "\n" );
+    if( m_pTarget )
+    {
+        g_pGame->GetStats()->Printf( "Target: %s\n", m_pTarget->GetName() );
+        g_pGame->GetStats()->Printf( "\n" );
+        g_pGame->GetStats()->Printf( "\n" );
+        if( IsWizard() )
+        {
+            g_pGame->GetStats()->Printf( "Target Pos: <%.0f %.0f>\n",
+                                         VEC_EXPAND( m_pTarget->GetPos() ) );
+        }
+    }
     if( IsWizard() )
+    {
         g_pGame->GetStats()->Printf( "** WIZARD MODE **\n" );
+        g_pGame->GetStats()->Printf( "\n" );
+        g_pGame->GetStats()->Printf( "Player Pos: <%.0f %.0f>\n", VEC_EXPAND( m_vPos ) );
+    }
 }
 
 void CPlayer::DisplayInventory( uint8 dwPlacement )
@@ -536,6 +552,7 @@ void CPlayer::OnKillMonster( CMonster *pMon )
 {
     m_fExperience += pMon->m_md->m_fExpValue / m_fLevel;
     GainLevel();
+    m_pTarget = NULL;
 }
 
 void CPlayer::GainLevel()
@@ -631,6 +648,26 @@ JResult CPlayer::Read( CLink<CItem> *pLink )
     {
         m_llInventory->Remove( pItem->m_pllLink, false ); // Scrolls are single-use
     }
+    return retval;
+}
+
+JResult CPlayer::Zap( CLink<CItem> *pLink )
+{
+    // this will get called multiple times for a single shot, if NO_COLLIDE is set,
+    // this function is to do damage to the monster in the current position
+    CItem *pItem = pLink->m_lpData;
+    CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
+    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
+    return retval;
+}
+
+JResult CPlayer::Fire( CLink<CItem> *pLink )
+{
+    // this will get called multiple times for a single shot, if NO_COLLIDE is set,
+    // this function is to do damage to the monster in the current position
+    CItem *pItem = pLink->m_lpData;
+    CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
+    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
     return retval;
 }
 
@@ -780,9 +817,57 @@ JResult CPlayer::DoHitEffects( CEffect *pEffect )
 {
     switch( pEffect->m_dwFlags )
     {
+    case EFFECT_FLAG_LIGHT:
+        return DoLightRay( pEffect );
+        break;
     default:
         break;
     }
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoLightRay( CEffect *pEffect )
+{
+    // if there is a monster at the position
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vRangedHitPosition );
+    if( !pTile )
+    {
+        return JBOGUSKEY;
+    }
+
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+
+        return JBOGUSKEY;
+    }
+    JLog( LOG_LEVEL_INFO, true, "monster: %s\n", pMon->GetName() );
+
+    // TODO: this should be "weaknesses" and re-use effect_flag_light instead of new "general flag"
+    if( ( pMon->m_md->m_dwFlags & MON_FLAG_HURT_BY_LIGHT ) == MON_FLAG_HURT_BY_LIGHT )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "that's gonna hurt\n" );
+
+        float fDamage = Util::Roll( "1d5" ); // pEffect->m_szAmount );
+
+        if( pMon->TakeDamage( fDamage ) == STATUS_DEAD )
+        {
+            g_pGame->GetMsgs()->Printf( "The %s shrivels away in the bright light!\n",
+                                        pMon->GetName() );
+            OnKillMonster( pMon );
+            g_pGame->GetDungeon()->RemoveMonster( pMon );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "The %s screams in agony.\n", pMon->GetName() );
+        }
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "The %s is unaffected.\n", pMon->GetName() );
+    }
+
     return JSUCCESS;
 }
 
@@ -794,6 +879,7 @@ JResult CPlayer::DoCreateEffects( CEffect *pEffect )
         return DoLightArea();
         break;
     }
+    return JBOGUSKEY;
 }
 
 JResult CPlayer::DoLightArea()
@@ -825,6 +911,7 @@ JResult CPlayer::DoDestroyEffects( CEffect *pEffect, int dwItemFlags )
         }
         break;
     }
+    return JBOGUSKEY;
 }
 
 JResult CPlayer::DoRemoveCurse()
@@ -980,6 +1067,21 @@ bool CPlayer::IsDrinkable( CLink<CItem> *pLink )
     return retval;
 }
 
+bool CPlayer::IsFireable( CLink<CItem> *pLink )
+{
+    bool retval = false;
+    switch( pLink->m_lpData->m_id->m_dwIndex )
+    {
+    case ITEM_IDX_BOW:
+    case ITEM_IDX_XBOW:
+        retval = true;
+        break;
+    default:
+        break;
+    }
+    return retval;
+}
+
 bool CPlayer::IsReadable( CLink<CItem> *pLink )
 {
     bool retval = false;
@@ -991,6 +1093,20 @@ bool CPlayer::IsReadable( CLink<CItem> *pLink )
         break;
     default:
         retval = false;
+        break;
+    }
+    return retval;
+}
+
+bool CPlayer::IsZappable( CLink<CItem> *pLink )
+{
+    bool retval = false;
+    switch( pLink->m_lpData->m_id->m_dwIndex )
+    {
+    case ITEM_IDX_WAND:
+        retval = true;
+        break;
+    default:
         break;
     }
     return retval;

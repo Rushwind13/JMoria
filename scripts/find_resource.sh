@@ -12,5 +12,5 @@ else
 fi
 
 # Use nl and sort -nr to reverse lines, which is cross-platform
-grep "^$TYPE" Resources/"${TYPE}s".txt | nl | sort -nr | cut -f2- | \
+grep "^$TYPE" Resources/"${TYPE}s".txt | nl | sort -n | cut -f2- | \
 awk -v obj="$OBJECT" 'tolower($0) ~ tolower("\\<"obj"\\>") {print NR-1, $0}'

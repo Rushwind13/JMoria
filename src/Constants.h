@@ -26,7 +26,10 @@
 #define STATE_REST 7
 #define STATE_RUN 8
 #define STATE_INTRO 9
-#define STATE_MAX 10
+#define STATE_LOOK 10
+#define STATE_TARGET 11
+#define STATE_RANGED 12
+#define STATE_MAX 13
 
 // Various statuses that someone could have
 #define STATUS_INVALID -1
@@ -36,11 +39,11 @@
 #define STATUS_FULL 3
 #define STATUS_HUNGRY 4
 #define STATUS_STARVING 5
-#define STATUS_CONFUSED 6
-#define STATUS_STUNNED 7
-#define STATUS_AFRAID 8
-#define STATUS_SLEEPING 9
-#define STATUS_MAX 10
+// #define STATUS_CONFUSED 6
+// #define STATUS_STUNNED 7
+// #define STATUS_AFRAID 8
+// #define STATUS_SLEEPING 9
+#define STATUS_MAX 6
 
 #define DIR_INVALID -1
 #define DIR_NONE -1
@@ -164,7 +167,7 @@
 
 #define MON_FLAG_WARM 0x00000100
 #define MON_FLAG_EMPTY_MIND 0x00000200
-// #define MON_FLAG_x          0x00000400
+#define MON_FLAG_HURT_BY_LIGHT 0x00000400
 // #define MON_FLAG_x          0x00000800
 
 #define MON_FLAG_BREED 0x00008000
@@ -183,7 +186,7 @@
 // #define MON_COLOR_x          0x40000000
 // #define MON_COLOR_x          0x80000000
 
-#define NUM_MON_FLAGS 16
+#define NUM_MON_FLAGS 17
 
 // Effect Flags
 #define EFFECT_FLAG_FIRE 0x00000001
@@ -320,7 +323,8 @@
 #define ITEM_IDX_MACE 27
 #define ITEM_IDX_2H_SWORD 28
 #define ITEM_IDX_BELT 29
-#define ITEM_IDX_MAX 30
+#define ITEM_IDX_FUEL 30
+#define ITEM_IDX_MAX 31
 
 // TODO: Might need to switch from "ITEM/MONSTER"
 //       to "types of harm" / "types of aid"
@@ -338,7 +342,7 @@
 #define ITEM_FLAG_MAINHAND 0x00000040
 #define ITEM_FLAG_NEEDSAMMO 0x00000080
 
-// #define ITEM_FLAG_x 0x00000100
+#define ITEM_FLAG_NO_COLLIDE 0x00000100
 // #define ITEM_FLAG_x 0x00000200
 // #define ITEM_FLAG_x 0x00000400
 // #define ITEM_FLAG_x 0x00000800
@@ -350,7 +354,7 @@
 
 #define ITEM_COLOR_MULTI 0x10000000
 
-#define NUM_ITEM_FLAGS 8
+#define NUM_ITEM_FLAGS 9
 
 // Make sure you change below here if you added any flags.
 #define NUM_STRINGS                                                                                \
@@ -366,6 +370,10 @@
 #define EFFECT_MOD 6
 #define MON_AI 7
 #define EFFECT_TYPE 8
+
+#define NUM_POTION_TYPES 32
+#define NUM_SCROLL_TYPES 32
+#define NUM_LUMBER_TYPES 32
 
 #include "TextEntry.h"
 class Constants
@@ -453,6 +461,7 @@ public:
         m_StringTable[i++].Init( "MON_FLAG_CRAWL", MON_FLAG_CRAWL );
         m_StringTable[i++].Init( "MON_FLAG_WARM", MON_FLAG_WARM );
         m_StringTable[i++].Init( "MON_FLAG_EMPTY_MIND", MON_FLAG_EMPTY_MIND );
+        m_StringTable[i++].Init( "MON_FLAG_HURT_BY_LIGHT", MON_FLAG_HURT_BY_LIGHT );
         m_StringTable[i++].Init( "MON_FLAG_BREED", MON_FLAG_BREED );
         m_StringTable[i++].Init( "MON_AI_DONTMOVE", MON_AI_DONTMOVE );
         m_StringTable[i++].Init( "MON_AI_100RANDOMMOVE", MON_AI_100RANDOMMOVE );
@@ -570,6 +579,7 @@ public:
         m_StringTable[i++].Init( "ITEM_IDX_POLEARM", ITEM_IDX_POLEARM );
         m_StringTable[i++].Init( "ITEM_IDX_SHOVEL", ITEM_IDX_SHOVEL );
         m_StringTable[i++].Init( "ITEM_IDX_BELT", ITEM_IDX_BELT );
+        m_StringTable[i++].Init( "ITEM_IDX_FUEL", ITEM_IDX_FUEL );
 
         // Item flags
         m_StringTable[i++].Init( "ITEM_FLAG_CURSED", ITEM_FLAG_CURSED );
@@ -578,6 +588,7 @@ public:
         m_StringTable[i++].Init( "ITEM_FLAG_OFFHAND", ITEM_FLAG_OFFHAND );
         m_StringTable[i++].Init( "ITEM_FLAG_MAINHAND", ITEM_FLAG_MAINHAND );
         m_StringTable[i++].Init( "ITEM_FLAG_NEEDSAMMO", ITEM_FLAG_NEEDSAMMO );
+        m_StringTable[i++].Init( "ITEM_FLAG_NO_COLLIDE", ITEM_FLAG_NO_COLLIDE );
         m_StringTable[i++].Init( "ITEM_FLAG_HOLDING", ITEM_FLAG_HOLDING );
         m_StringTable[i++].Init( "ITEM_COLOR_MULTI", ITEM_COLOR_MULTI );
 
@@ -590,7 +601,6 @@ public:
             JLog( LOG_LEVEL_ERROR, true, "got %d strings instead, misconfiguration error!\n", i );
         }
     };
-    TextEntry *m_StringTable;
 
     bool CompareType( const char *type, const char *szIn )
     {
@@ -659,5 +669,143 @@ public:
         }
         return m_StringTable[offset + index].m_szString;
     }
+
+    const char *PotionColor( const uint32 dwIndex )
+    {
+        if( dwIndex >= NUM_POTION_TYPES )
+            return "";
+        const char *PotionColors[] = {
+            "Clear",      "White",   "Black",    "Red",    "Pink",    "Orange",  "Yellow",
+            "Green",      "Blue",    "Purple",   "Brown",  "Gray",    "Golden",  "Silver",
+            "Ruby",       "Emerald", "Sapphire", "Amber",  "Rose",    "Lilac",   "Teal",
+            "Turquoise",  "Navy",    "Olive",    "Maroon", "Crimson", "Fuchsia", "Lavender",
+            "Chartreuse", "Gloopy",  "Bubbling", "Glowing" };
+        JLog( LOG_LEVEL_NOISE, true, "index %d value %s\n", dwIndex, PotionColors[dwIndex] );
+        return PotionColors[dwIndex];
+    }
+
+    char *PotionRGBA( const uint32 dwIndex )
+    {
+        if( dwIndex >= NUM_POTION_TYPES )
+            return "0,0,0,0";
+
+        char *PotionRGBAs[] = {
+            "255,255,255,10",  // Clear
+            "255,255,255,255", // White
+            "0,0,0,255",       // Black
+            "255,0,0,255",     // Red
+            "255,192,203,255", // Pink
+            "255,165,0,255",   // Orange
+            "255,255,0,255",   // Yellow
+            "0,128,0,255",     // Green
+            "0,0,255,255",     // Blue
+            "128,0,128,255",   // Purple
+            "165,42,42,255",   // Brown
+            "128,128,128,255", // Gray
+            "255,215,0,255",   // Golden
+            "192,192,192,255", // Silver
+            "220,20,60,255",   // Ruby
+            "0,128,0,255",     // Emerald
+            "0,0,255,255",     // Sapphire
+            "255,191,0,255",   // Amber
+            "255,228,225,255", // Rose
+            "221,160,221,255", // Lilac
+            "0,128,128,255",   // Teal
+            "64,224,208,255",  // Turquoise
+            "0,0,128,255",     // Navy
+            "128,128,0,255",   // Olive
+            "128,0,0,255",     // Maroon
+            "220,20,60,255",   // Crimson
+            "255,0,255,255",   // Fuchsia
+            "230,230,250,255", // Lavender
+            "127,255,0,255",   // Chartreuse
+            "127,127,127,255", //  "Gloopy"
+            "225,225,255,255", // "Bubbling"
+            "127,255,0,255"    // "Glowing"
+        };
+
+        JLog( LOG_LEVEL_NOISE, true, "index %d value %s\n", dwIndex, PotionRGBAs[dwIndex] );
+        return PotionRGBAs[dwIndex];
+    }
+
+    const char *ScrollName( const uint32 dwIndex )
+    {
+        if( dwIndex >= NUM_SCROLL_TYPES )
+            return "";
+
+        const char *ScrollNames[] = {
+            "pizza",          "dolphin",       "coffee",       "doggos",       "dolor sit",
+            "amet consect",   "etur adipis",   "elit sed",     "do eius",      "mod tempor",
+            "didunt utbore",  "et aliqua",     "ut enim ad",   "veniam quis",  "nostrud exer",
+            "ullamco labo",   "ris nisi ut",   "aliquip ex",   "comm sequat",  "duis aute ir",
+            "uredo lorin",    "epre deriti",   "volute velit", "esse cillum",  "eu fugiat",
+            "nulla pariatur", "excesint occa", "ecat pidatat", "proident sun", "incul pafic",
+            "des erumol",     "id est laborum" };
+
+        return ScrollNames[dwIndex];
+    }
+
+    const char *Lumber( const uint32 dwIndex )
+    {
+        if( dwIndex >= NUM_LUMBER_TYPES )
+            return "";
+
+        const char *myLumber[] = {
+            "Oak",      "Ash",       "Willow",   "Hazel", "Hawthorn", "Ebony",      "Yew",
+            "Maple",    "Birch",     "Pine",     "Cedar", "Walnut",   "Elm",        "Spruce",
+            "Cherry",   "Applewood", "Pearwood", "Holly", "Platinum", "Blackthorn", "Alder",
+            "Ironwood", "Heartwood", "Steel",    "Glass", "Plastic",  "Aluminum",   "Dragonbone",
+            "Iron",     "Silver",    "Gold",     "Bronze" };
+
+        return myLumber[dwIndex];
+    }
+
+    const char *LumberRGBA( const uint32 dwIndex )
+    {
+        if( dwIndex >= NUM_LUMBER_TYPES )
+            return "0,0,0,0";
+
+        const char *LumberRGBAs[] = {
+            "160,82,45,255",   // Oak
+            "150,100,80,255",  // Ash
+            "190,180,160,255", // Willow
+            "120,90,70,255",   // Hazel
+            "180,150,130,255", // Hawthorn
+            "30,15,10,255",    // Ebony
+            "100,80,60,255",   // Yew
+            "200,180,150,255", // Maple
+            "220,200,180,255", // Birch
+            "190,170,150,255", // Pine
+            "150,120,90,255",  // Cedar
+            "100,60,30,255",   // Walnut
+            "160,120,90,255",  // Elm
+            "180,160,140,255", // Spruce
+            "200,150,120,255", // Cherry
+            "220,180,150,255", // Applewood
+            "200,180,160,255", // Pearwood
+            "180,160,140,255", // Holly
+            "200,200,200,255", // Platinum
+            "100,80,60,255",   // Blackthorn
+            "180,160,140,255", // Alder
+            "120,100,80,255",  // Ironwood
+            "150,100,80,255",  // Heartwood
+            "160,160,160,255", // Steel
+            "200,200,200,255", // Glass
+            "200,200,200,255", // Plastic
+            "192,192,192,255", // Aluminum
+            "150,100,80,255",  // Dragonbone
+            "160,160,160,255", // Iron
+            "192,192,192,255", // Silver
+            "255,215,0,255",   // Gold
+            "205,127,50,255"   // Bronze
+        };
+
+        return LumberRGBAs[dwIndex];
+    }
+
+public:
+    TextEntry *m_StringTable;
+
+protected:
 };
 #endif // __CONSTANTS_H__

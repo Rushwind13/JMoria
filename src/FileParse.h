@@ -34,6 +34,15 @@ protected:
 
 private:
     FILE *m_fp;
+    int PotionIndex[NUM_POTION_TYPES];
+    int ScrollIndex[NUM_SCROLL_TYPES];
+    int WandIndex[NUM_LUMBER_TYPES];
+    int StaffIndex[NUM_LUMBER_TYPES];
+
+    uint32 m_dwPotionCount = 0;
+    uint32 m_dwScrollCount = 0;
+    uint32 m_dwWandCount = 0;
+    uint32 m_dwStaffCount = 0;
     // Member functions
 public:
 protected:

@@ -129,3 +129,17 @@ DUNGEON GENERATION: (as of 1.27.06, hardcoded 16x16 dungeon back in)
 
 BUGS:
 - 2d8 bastard sword replaced by 1d8 long sword without choosing to wield
+
+TESTS / QA:
+- Unskipped and exercised the `equipment` and `game` feature scenarios (these cover equipping/unequipping, cursed-item behavior, scrolls of remove curse, and some AI brain logic). The scenarios had been annotated with `@skip` and are now enabled.
+- Short-term followups:
+  - Stabilize the Equipment feature steps: ensure step definitions handle inventory index mapping and cursed-item edge cases (some steps assume fixed inventory indices which can be flaky).
+  - Make the AI/brain scenarios deterministic: currently the tests rely on map generation and random spawns; add deterministic seeding or small handcrafted map fixtures for AI tests.
+  - Separate fast unit tests (Rects, Vectors, Utils) from heavier integration tests (dungeon generation, full game init) so CI can run quick checks on every push.
+  - Mock or stub heavy subsystems (tileset/texture loading) in test harness to avoid platform-dependent failures.
+
+Ideas for future work on this area:
+  - Add test fixtures for controlled dungeon layouts (tiny handcrafted levels) used by AI and item tests so results are repeatable.
+  - Expand equipment tests to include ring-slot behavior, two-handed weapons, and weapon swapping.
+  - Add a `test-only` fast-path to initialize the game state without full renderer/texture setup (used by many step definitions today).
+  - Add CI (GitHub Actions) that runs the unit tests and a smaller subset of integration tests on each PR, with a nightly job to run the full feature suite.

@@ -31,7 +31,6 @@ Feature: Game
         Then the game initalized successfully
         And the Red Dragon spawned successfully
         And the Red Dragon wants to move toward the player
-    @skip
     Scenario: AI state changes work
         Given I have a game
         And I initialize the game

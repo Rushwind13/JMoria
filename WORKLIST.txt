@@ -129,3 +129,55 @@ DUNGEON GENERATION: (as of 1.27.06, hardcoded 16x16 dungeon back in)
 
 BUGS:
 - 2d8 bastard sword replaced by 1d8 long sword without choosing to wield
+
+ITEMS (auto-generated summary)
+-----------------------------
+Purpose: surface current GitHub issues, code locations, and tests that handle and validate Items, plus short synopses and suggested next work items.
+
+Relevant GitHub issues (high-level)
+- #77  — Item Effects: design of EFFECT_FLAG_/EFFECT_MOD_/EFFECT_TYPE_ system (intrinsics, modifiers, durations). Important for how Items apply effects to players/monsters.
+- #114 — Identify spell: behavior and acceptance criteria for identifying items (known intrinsics vs unknown). Affects inventory display and ID mechanics.
+- #43  — Lady Teldra refuses to leave her sheath: unique item behavior and special-case intrinsics/unique restrictions.
+- #128 — Magic Weapons taxonomy: normal, cursed, magic, ego, unique — gameplay and spawn rules.
+- #120 — Inventory stacks: which items stack (potions, scrolls, ammo), UX and implementation notes.
+- #99  — equipment bug: recent bug around equip/remove that touches item lifecycle and inventory/equipment updates.
+- #38  — implement remove curse spell (closed): acceptance criteria for handling cursed items and stack/display behavior.
+- #58  — Equipment type is separate from Item type (closed): refactor that separates item type and equip slot mapping.
+
+Relevant code locations
+- `src/Item.h` — definitions for `CItem`, `CItemDef`, and `CEffect`. Core data model for items (flags, counts, charges, effects, colors, durability/duration).
+- `src/Item.cpp` — implementation: creation, spawning, drawing, EquipType(), GetName()/GetPlural(), stacking checks, SetCursed, Init (charges/duration) and mapping `ItemIDs` and `EquipTypes` tables.
+- `Resources/Items.txt` — canonical item definitions (flavors, types, effects, flags, stacking rules, colors, durations). Primary data source that is parsed into ItemDefs.
+- `src/FileParse.cpp` / `src/FileParse.h` (not explicitly read here) — file parser (watch for reported parsing bugs, e.g. issue #91 referencing Items.txt parsing causing crash).
+- `src/Player.cpp`, `src/Player.h` — (not opened here) will contain wield/remove/equipment interactions; inspect for equip/remove turn costs and cursed behavior.
+
+Tests and feature specs
+- `test/features/items.feature` — simple feature that checks item creation path (exists and CreateItem scenario). Basic BDD acceptance.
+- `test/step_definitions/ItemSteps.cpp` — not present (file read failed). There may be no dedicated C++ step defs for items, or they live elsewhere (check `test/step_definitions/AllSteps.cpp`).
+
+Quick synopsis of functionality
+- Item model: `CItemDef` stores the template (name, damage/AC, effects, flags like `ITEM_FLAG_STACKS`), `CItem` is the instance (position, count, instance flags, charges, remaining duration).
+- Creation flow: `CItem::CreateItem()` -> `Init()` -> `SpawnItem()` -> `SpawnAt()` -> placed into dungeon tile's `m_pCurItem` and global item list.
+- Display/ID: `GetName()`/`GetPlural()` currently return unidentified names (ID system TODO). `ItemIDs` & `EquipTypes` map item indices to display glyphs and equip slots.
+- Effects: `CItemDef` carries `m_llEffects` (list of `CEffect`) which are parsed from `Items.txt` and drive intrinsics like light, resist, heal, etc.
+
+Immediate risks / known gaps
+- Parsing: issue #91 indicates Items.txt can cause crashes if effect parsing is malformed — ensure `FileParse` robustly validates and logs bad entries.
+- Identification/known intrinsics: issue #114 pending — items currently show unidentified names; need `KnownIntrinsics` on instances and proper display logic.
+- Inventory stacks: behavior implemented via `ITEM_FLAG_STACKS` in `Items.txt` and `CItem::IsStackable()` but tests/specs still evolving (#120).
+- Tests: `items.feature` is very small; more BDD cases required for identify, stacking, cursed behavior, unique-item constraints, and Create/Spawn edge cases.
+
+Suggested next work (small, actionable)
+1) Harden parsing: add validation & tests for `Resources/Items.txt` entries to avoid runtime crashes (focus on EFFECT_* parsing). (owner: FileParse)
+2) Implement item identification flags on `CItem` (e.g., `m_dwKnownIntrinsics`) and wire `GetName()`/`GetPlural()` to show identified text per #114.
+3) Add BDD scenarios for: identifying items (scroll of identify), Remove Curse behavior and UI flows (#38/#114), stacking rules (#120), and unique item spawn rules (#43/#128).
+4) Add unit tests around `CItem::SpawnAt()` and `CanPlaceItemAt()` to ensure spawn logic and collision checks are solid (#67/#91).
+5) Audit equip/remove lifecycle in `Player` and `Item` (fix edge cases in #99), and add tests for remove/wield interactions.
+6) Add a small `test/features/items_extended.feature` that covers: create, spawn, identify, stack, cursed, unique, and equip interactions.
+
+Files to inspect next (developer checklist)
+- `src/Player.cpp` / `src/Player.h` (wield/remove/display strings)
+- `src/FileParse.*` (robustness & parsing tests)
+- `test/step_definitions/AllSteps.cpp` (where item step definitions may live)
+
+Notes: I did not modify item source files — this is a WORKLIST update only. If you'd like, I can open follow-up PRs or implement one small task (e.g., add identify-flag and basic display) next.

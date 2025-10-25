@@ -129,3 +129,23 @@ DUNGEON GENERATION: (as of 1.27.06, hardcoded 16x16 dungeon back in)
 
 BUGS:
 - 2d8 bastard sword replaced by 1d8 long sword without choosing to wield
+
+TARGETING / LINE-OF-SIGHT (TargetState)
+- Files to review: `src/TargetState.h`, `src/TargetState.cpp`, `src/Dungeon.cpp` (PlayerCanSee / CanSeeEachOther), `src/Util.cpp` (Bresenham), `src/RangedState.cpp`.
+- Tests: existing features that touch visibility include `test/features/dungeonmap.feature` and `test/features/light.feature`. There are no dedicated `targeting` or `ranged` feature tests — add `test/features/targeting.feature` and `test/features/ranged.feature`.
+- Synopsis: `CTargetState::DoInit()` builds a list of targetable monsters by iterating the monster list and calling `CDungeon::PlayerCanSee()` for each. `PlayerCanSee()` applies special-sense checks (ESP/infra), range checks, and finally calls `Util::Bresenham()` with a collision callback to determine line-of-sight. Ranged attacks also rely on `Util::Bresenham()` to compute projectile paths and collisions.
+- Race conditions / edge cases:
+  - `DoInit()` stores monster indices (list positions) as targets. If monsters move, die, or the monster list mutates before the player confirms a target, indices can point to the wrong monster or become invalid.
+  - LOS depends on the current map state via the `isWalkable` callback; environment changes (doors, tunneling) between selection and confirm can change outcome.
+  - `Util::Bresenham()` mixes logging and list-collection; consider making a pure, testable line generator and a separate collision-check pass.
+
+- Short-term fixes (low-risk):
+  - Store `CMonster*` or a stable unique id in the target list instead of an index; on confirm re-validate `IsAlive()` and `PlayerCanSee()` before committing.
+  - Re-run LOS check at confirm (`.`) and reject/stutter if the target is no longer valid (present a message and refresh target list).
+  - Add unit tests for `Util::Bresenham()` (horizontal/vertical/diagonal, obstacle, distance cap) and an acceptance test for selecting a target that moves/dies before confirm.
+
+- Mid/long-term improvements:
+  - Make LOS computation pure and split line-generation from collision checks to enable deterministic unit testing.
+  - Maintain a cached visible-set recomputed when the player or world state changes; use it for fast, consistent target lists.
+  - Consider a target "mark" (persistent id) for tracking targets across list reordering.
+  - Add UI feedback (draw computed line while targeting) but always re-validate on confirm.

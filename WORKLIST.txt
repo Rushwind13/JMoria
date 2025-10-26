@@ -129,3 +129,60 @@ DUNGEON GENERATION: (as of 1.27.06, hardcoded 16x16 dungeon back in)
 
 BUGS:
 - 2d8 bastard sword replaced by 1d8 long sword without choosing to wield
+
+OUTSTANDING / NOT COVERED BY CURRENT WORKLIST PRS
+- Ranged combat and ammo handling (issue #39)
+  - Implement bows, arrows, quivers, and firing logic.
+  - Ensure ranged projectiles collide with dungeon geometry and creatures, and can land on the floor.
+  - Add tests for firing, ammo decrement, and hit/deflection logic.
+
+- Scoring and win condition refinement (issue #42)
+  - Decide point formula (depth, XP, level, kills, time) and implement score sorting.
+  - Add acceptance tests for winners vs. non-winners and ensure high-score persistence.
+
+- AI and pathing gaps (issues #45, #62)
+  - MON_AI_SEEK should follow a target position or the player; verify brain update logic and add tests.
+  - Audit RANDOMMOVE and SEEK behaviors; add determinism tests to prevent regressions.
+
+- Build tagging and crash diagnostics (issue #69)
+  - Tag builds and add a reproducible build artefact during CI.
+  - Add a minimal crash handler to dump stack traces (platform-safe) to ease debugging.
+
+- Races and vision intrinsics (issue #112, #71)
+  - Add race system (race definitions, per-race intrinsics like infravision/ESP).
+  - Update character creation and tests for race-based behavior.
+
+- Item/wand charges and lantern fuel (issue #121)
+  - Implement scroll-of-recharging, wand charge accounting, and lantern refueling with oil.
+  - Add resource limits and tests for overflow/underflow behaviors.
+
+- Search command and detection (issue #117)
+  - Implement the Search command with radius and stat-based chances to reveal secrets and traps.
+  - Add integration tests and UI guidance for search results.
+
+- Identify / item knowledge system (issue #114)
+  - Items should store discovered intrinsics (KNOWN flags) and the Identify action should reveal them.
+  - Implement progressive identification and tests for discoverability.
+
+- Skipped tests and test coverage gaps
+  - Several feature tests are marked `@skip` (see `test/features/equipment.feature`, `test/features/game.feature`).
+  - Unskip and fix the small set of failing tests, starting with `equipment.feature` and `game.feature` scenarios.
+
+Suggested next steps to add to WORKLIST for sprint planning
+- Priority 1 (blocking/low-effort):
+  - Unskip failing tests, run full `runtests.sh`, and collect failures (assign owners).
+  - Implement build tags / crash diagnostics (low risk, high value).
+
+- Priority 2 (medium effort):
+  - Implement ranged attacks (core gameplay improvement).
+  - Implement wand/lamp charge mechanics.
+  - Implement Identify system and Item known-intrinsics.
+
+- Priority 3 (larger features):
+  - Scoring/win condition polish and high-score tests.
+  - Race system and race-based vision/intrinsics.
+  - AI pathing overhaul and deterministic tests for SEEK/RANDOMMOVE.
+
+Notes and references:
+- Open PRs already cover many WORKLIST areas (AI-generated PRs 143-148 addressing dungeon, targeting, inventory, items, monsters, and player updates). The items above are present as issues and are not yet fully covered by those draft PRs, or require additional tests and CI work to complete.
+- See GitHub issues: #39 (ranged), #42 (scoring), #45 (AI seek), #69 (tag builds), #112 (races), #114 (identify), #117 (search), #121 (lantern/wand fuel), and test skips under `test/features/*` for concrete starting points.

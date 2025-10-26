@@ -189,6 +189,35 @@ WHEN( "^the player reads the scroll in inventory at ([-0-9]+)$" )
 
 WHEN( "^I display equipment$" ) { JLog( LOG_LEVEL_DEBUG, true, "Display the equipment\n" ); }
 
+/* Programmatic API steps */
+WHEN( "^I programmatically wield the spawned item$" )
+{
+    ScenarioScope<TestCtx> context;
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    CItem *pItem = pTile->m_pCurItem;
+    ASSERT_NE( pItem, (CItem *)NULL );
+    uint32 dwInst = pItem->GetInstanceId();
+    /* pick up the spawned item into inventory so programmatic APIs can find it */
+    g_pGame->GetPlayer()->PickUp( context->vec_b );
+    context->result = g_pGame->GetPlayer()->WieldItem( dwInst );
+    context->result_int = (int)dwInst;
+    EXPECT_EQ( context->result, JSUCCESS );
+}
+
+WHEN( "^I programmatically quaff the spawned item$" )
+{
+    ScenarioScope<TestCtx> context;
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    CItem *pItem = pTile->m_pCurItem;
+    ASSERT_NE( pItem, (CItem *)NULL );
+    uint32 dwInst = pItem->GetInstanceId();
+    /* pick up the spawned item into inventory so programmatic APIs can find it */
+    g_pGame->GetPlayer()->PickUp( context->vec_b );
+    context->result = g_pGame->GetPlayer()->QuaffItem( dwInst );
+    context->result_int = (int)dwInst;
+    EXPECT_EQ( context->result, JSUCCESS );
+}
+
 /*#######
 ##
 ## THEN
@@ -286,6 +315,36 @@ THEN( "^the equipped ([A-Za-z ]+):([0-9]+) at ([-0-9]+) (is|is not) cursed$" )
 
     JLog( LOG_LEVEL_DEBUG, true, "Cursed state is %d\n", actual );
     EXPECT_EQ( actual, expected );
+}
+
+THEN( "^the spawned item is equipped at ([-0-9]+)$" )
+{
+    REGEX_PARAM( int, equip_id );
+    ScenarioScope<TestCtx> context;
+    int wanted_slot = EQUIP_IDX_MAIN_HAND + equip_id;
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llEquipment->GetLink( wanted_slot );
+    ASSERT_NE( pLink, (CLink<CItem> *)NULL );
+    CItem *actual = pLink->m_lpData;
+    ASSERT_NE( actual, (CItem *)NULL );
+    EXPECT_EQ( actual->GetInstanceId(), (uint32)context->result_int );
+}
+
+THEN( "^the spawned item is removed from inventory$" )
+{
+    ScenarioScope<TestCtx> context;
+    uint32 dwInst = (uint32)context->result_int;
+    bool found = false;
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData && pLink->m_lpData->GetInstanceId() == dwInst )
+        {
+            found = true;
+            break;
+        }
+        pLink = g_pGame->GetPlayer()->m_llInventory->GetNext( pLink );
+    }
+    EXPECT_FALSE( found );
 }
 
 THEN( "^the ([A-Za-z ]+):([0-9]+) is not labeled as cursed$" )

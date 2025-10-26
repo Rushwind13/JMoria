@@ -131,15 +131,13 @@ BUGS:
 - 2d8 bastard sword replaced by 1d8 long sword without choosing to wield
 
 INVENTORY / EQUIPMENT WORKLIST:
-- Unskip and stabilize equipment tests (many tests exist in `test/features/equipment.feature`).
-- Improve item identity vs. type handling: consider adding unique instance IDs to `CItem` so tests and gameplay can reference specific instances instead of only item types.
-- Add a small programmatic `CPlayer` API for wield/remove/drop/read/quaff that tests can call directly (decouple UI `UseState` from core logic).
-- Clarify and improve multi-slot equipment (rings, two-handed weapons vs shields); add helper functions and tests for ring slots and slot conflicts.
-- Harden cursed/uncurse flows and add tests (reading scrolls, effects on equipped items, failure modes when removing cursed gear).
-- Add tests for consumption/charges/duration (Quaff/Read/Zap/Fire) and for stacking behavior in inventory.
+ 
+PR#145 Checklist (feat/inventory):
+- [x] Run `test/features/equipment.feature` locally and capture failing steps
+- [x] Add unique instance IDs to `CItem` and update factories/serialization
+- [x] Implement programmatic `CPlayer` API methods: Wield/Remove/Drop/Read/Quaff
+- [ ] Harden cursed/uncurse flows and add targeted tests
+- [ ] Implement/verify multi-slot equipment rules (rings, two-handed vs shield) and add tests
+- [ ] Add consumption/charges/duration and stacking tests for consumables
 
-Next steps:
-- Run the equipment.feature scenarios regularly in CI; fix failing steps or code as discovered.
-- Prioritize adding instance IDs and the programmatic API (low-risk, high-payoff for tests).
-- Unskip and implement commented scenarios once API and instance handling are stable.
 - Document the inventory contract (functions, side-effects, equipment indices) in the Developer's Guide.

@@ -12,6 +12,21 @@
 
 extern CGame *g_pGame;
 
+// Helper: find an inventory link by item instance id
+static CLink<CItem> *FindInventoryLinkByInstance( JLinkList<CItem> *pList, uint32 dwInstanceId )
+{
+    if( pList == NULL )
+        return NULL;
+    CLink<CItem> *pLink = pList->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData && pLink->m_lpData->GetInstanceId() == dwInstanceId )
+            return pLink;
+        pLink = pList->GetNext( pLink );
+    }
+    return NULL;
+}
+
 void CPlayer::Init( const char *szBasedir )
 {
     // Initialize all the player stuff, baby.
@@ -396,6 +411,47 @@ float CPlayer::LightSource()
     CItem *pTorch = pLink->m_lpData;
 
     return pTorch->GetDuration();
+}
+
+JResult CPlayer::WieldItem( uint32 dwInstanceId )
+{
+    CLink<CItem> *pLink = FindInventoryLinkByInstance( m_llInventory, dwInstanceId );
+    if( pLink == NULL )
+        return JBOGUSKEY;
+    return Wield( pLink );
+}
+
+bool CPlayer::RemoveItem( uint32 dwInstanceId )
+{
+    CLink<CItem> *pLink = FindInventoryLinkByInstance( m_llEquipment, dwInstanceId );
+    if( pLink == NULL )
+        return false;
+    return RemoveEquipment( pLink );
+}
+
+bool CPlayer::DropItem( uint32 dwInstanceId )
+{
+    CLink<CItem> *pLink = FindInventoryLinkByInstance( m_llInventory, dwInstanceId );
+    if( pLink == NULL )
+        return false;
+    CItem *pItem = pLink->m_lpData;
+    return Drop( pItem );
+}
+
+JResult CPlayer::ReadItem( uint32 dwInstanceId )
+{
+    CLink<CItem> *pLink = FindInventoryLinkByInstance( m_llInventory, dwInstanceId );
+    if( pLink == NULL )
+        return JBOGUSKEY;
+    return Read( pLink );
+}
+
+JResult CPlayer::QuaffItem( uint32 dwInstanceId )
+{
+    CLink<CItem> *pLink = FindInventoryLinkByInstance( m_llInventory, dwInstanceId );
+    if( pLink == NULL )
+        return JBOGUSKEY;
+    return Quaff( pLink );
 }
 
 void CPlayer::UpdateLight( float fValue, bool bReset )

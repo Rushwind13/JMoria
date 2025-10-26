@@ -10,6 +10,9 @@
 #include "Dungeon.h"
 #include "Player.h"
 
+// Simple instance id generator for items
+static uint32 s_nextItemInstanceId = 1;
+
 JResult CItem::CreateItem( CItemDef *pid, JVector vSpawnPoint, bool bNear )
 {
     //    int desired = Util::Roll(pid->m_szAppear);
@@ -40,6 +43,11 @@ JResult CItem::CreateItem( CItemDef *pid, JVector vSpawnPoint, bool bNear )
 void CItem::Init( CItemDef *pid )
 {
     m_id = pid;
+    // assign a unique instance id when initializing the item
+    if( m_dwInstanceId == 0 )
+    {
+        m_dwInstanceId = s_nextItemInstanceId++;
+    }
     m_Color.SetColor( m_id->m_Color );
     switch( m_id->m_dwIndex )
     {

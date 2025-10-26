@@ -170,8 +170,8 @@ public:
     void Init( CItemDef *pid );
     void SetCursed( int likelihood );
     void SetCursed( bool bCursed );
-    char *GetName();
-    char *GetPlural();
+    const char *GetName();
+    const char *GetPlural();
     bool IsStackable() { return ( m_id->m_dwFlags & ITEM_FLAG_STACKS ) == ITEM_FLAG_STACKS; }
     bool IsOpenable() { return false; }   // for chests, etc.
     bool IsCloseable() { return false; }  // closeable pickup?

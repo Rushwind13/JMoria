@@ -147,7 +147,7 @@ GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in equipment at ([-0-9]+)$" )
     EXPECT_NE( expected, actual );
 
     const char *want = item.c_str();
-    char *have = actual->GetName();
+    const char *have = actual->GetName();
 
     EXPECT_EQ( Util::jstrcmp( want, have ), 0 );
 }
@@ -270,7 +270,7 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment) at ([-0-9]+)$" )
     EXPECT_NE( expected, actual );
 
     const char *want = item.c_str();
-    char *have = actual->GetName();
+    const char *have = actual->GetName();
 
     int result = Util::jstrcmp( want, have );
     if( result != 0 )

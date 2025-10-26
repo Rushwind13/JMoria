@@ -592,7 +592,7 @@ void CPlayer::HandleCollision( JVector vPos, int dwCollideType )
     if( dwCollideType == DUNG_COLL_MONSTER )
     {
         char szStatus[16];
-        char *szMonster;
+        const char *szMonster;
         float fRoll = 0.0f;
         float fDamageMult = 1.0f;
         bool bHit;
@@ -703,7 +703,7 @@ void CPlayer::GainLevel()
 
 bool CPlayer::Hit( float &fRoll ) { return ( fRoll >= m_fArmorClass ); }
 
-int CPlayer::TakeDamage( float fDamage, char *szMon )
+int CPlayer::TakeDamage( float fDamage, const char *szMon )
 {
 #ifdef CLOCKSTEP
     return STATUS_ALIVE;
@@ -722,9 +722,9 @@ int CPlayer::TakeDamage( float fDamage, char *szMon )
     {
         m_fCurHitPoints = 0;
         retval = STATUS_DEAD;
-        m_szKilledBy = new char[Util::jstrlen( szMon ) + 1];
-        memset( m_szKilledBy, 0, Util::jstrlen( szMon ) + 1 );
-        Util::jstrcpy( m_szKilledBy, szMon );
+    m_szKilledBy = new char[Util::jstrlen( szMon ) + 1];
+    memset( m_szKilledBy, 0, Util::jstrlen( szMon ) + 1 );
+    Util::jstrcpy( m_szKilledBy, szMon );
         // This is the end of the game; make the game end on next update.
         JLog( LOG_LEVEL_INFO, true,
               "\n\n%s died on dungeon level %d, while level %d, killed by a %s.\n\n", m_szName,

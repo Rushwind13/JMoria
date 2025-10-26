@@ -182,11 +182,11 @@ int CItem::EquipType()
     return EquipTypes[item_type];
 }
 
-char *CItem::GetName()
+const char *CItem::GetName()
 {
     if( false ) // IsIdentified() ) // TODO: MIKE: ID goes here
     {
-        return m_id->m_szName;
+        return const_cast<const char*>(m_id->m_szName);
     }
     else
     {
@@ -194,11 +194,11 @@ char *CItem::GetName()
     }
 }
 
-char *CItem::GetPlural()
+const char *CItem::GetPlural()
 {
     if( false ) // IsIdentified() )// TODO: MIKE: ID goes here
     {
-        return m_id->m_szPlural;
+        return const_cast<const char*>(m_id->m_szPlural);
     }
     else
     {

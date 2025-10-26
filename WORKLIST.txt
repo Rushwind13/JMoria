@@ -136,8 +136,8 @@ PR#145 Checklist (feat/inventory):
 - [x] Run `test/features/equipment.feature` locally and capture failing steps
 - [x] Add unique instance IDs to `CItem` and update factories/serialization
 - [x] Implement programmatic `CPlayer` API methods: Wield/Remove/Drop/Read/Quaff
-- [ ] Harden cursed/uncurse flows and add targeted tests
-- [ ] Implement/verify multi-slot equipment rules (rings, two-handed vs shield) and add tests
+- [x] Harden cursed/uncurse flows and add targeted tests
+- [x] Implement/verify multi-slot equipment rules (rings, two-handed vs shield) and add tests
 - [ ] Add consumption/charges/duration and stacking tests for consumables
  - [x] Add programmatic tests for Remove/Drop/Read
 

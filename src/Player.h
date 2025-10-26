@@ -173,7 +173,7 @@ public:
             m_szKilledBy = NULL;
         }
     };
-    char *GetName() { return m_szName; }
+    const char *GetName() { return m_szName; }
     float GetLevel() { return m_fLevel; }
     CClass *GetClass() { return m_pClass; }
     CRace *GetRace() { return m_pRace; }
@@ -269,7 +269,7 @@ public:
     float Damage( float fDamageMult );
 
     bool Hit( float &fRoll );
-    int TakeDamage( float fDamage, char *szMon );
+    int TakeDamage( float fDamage, const char *szMon );
 
     void OnKillMonster( CMonster *pMon );
 

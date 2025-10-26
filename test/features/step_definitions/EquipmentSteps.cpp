@@ -351,3 +351,78 @@ THEN( "^the ([A-Za-z ]+):([0-9]+) is not labeled as cursed$" )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Showing label on equipment\n" );
 }
+
+WHEN( "^I programmatically remove the spawned item$" )
+{
+    ScenarioScope<TestCtx> context;
+    uint32 dwInst = (uint32)context->result_int;
+    /* Expect the item to be currently equipped */
+    bool ok = g_pGame->GetPlayer()->RemoveItem( dwInst );
+    EXPECT_TRUE( ok );
+}
+
+WHEN( "^I programmatically drop the spawned item$" )
+{
+    ScenarioScope<TestCtx> context;
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    CItem *pItem = pTile->m_pCurItem;
+    ASSERT_NE( pItem, (CItem *)NULL );
+    uint32 dwInst = pItem->GetInstanceId();
+    /* pick up the spawned item into inventory so programmatic APIs can find it */
+    g_pGame->GetPlayer()->PickUp( context->vec_b );
+     context->result_int = (int)dwInst;
+     JLog( LOG_LEVEL_INFO, true, "[DROP STEP] before DropItem: dwInst=%u context->result_int=%d\n", dwInst, context->result_int );
+     bool ok = g_pGame->GetPlayer()->DropItem( dwInst );
+     EXPECT_TRUE( ok );
+     /* ensure tile at spawn location now contains the item */
+     CDungeonTile *pGround = g_pGame->GetDungeon()->GetTile( context->vec_b );
+     ASSERT_NE( pGround->m_pCurItem, (CItem *)NULL );
+     /* store the actual instance id from the ground tile to the scenario context
+         (some runs didn't preserve the previously-stored id reliably), then
+         assert equality. */
+     uint32 dwGroundInst = pGround->m_pCurItem->GetInstanceId();
+     context->result_int = (int)dwGroundInst;
+     JLog( LOG_LEVEL_INFO, true, "[DROP STEP] after DropItem: groundInst=%u context->result_int=%d\n", dwGroundInst, context->result_int );
+     EXPECT_EQ( dwGroundInst, dwInst );
+}
+
+WHEN( "^I programmatically read the spawned item$" )
+{
+    ScenarioScope<TestCtx> context;
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    CItem *pItem = pTile->m_pCurItem;
+    ASSERT_NE( pItem, (CItem *)NULL );
+    uint32 dwInst = pItem->GetInstanceId();
+    /* pick up the spawned item into inventory so programmatic APIs can find it */
+    g_pGame->GetPlayer()->PickUp( context->vec_b );
+    context->result = g_pGame->GetPlayer()->ReadItem( dwInst );
+    context->result_int = (int)dwInst;
+    EXPECT_EQ( context->result, JSUCCESS );
+}
+
+THEN( "^the spawned item is back in inventory$" )
+{
+    ScenarioScope<TestCtx> context;
+    uint32 dwInst = (uint32)context->result_int;
+    bool found = false;
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData && pLink->m_lpData->GetInstanceId() == dwInst )
+        {
+            found = true;
+            break;
+        }
+        pLink = g_pGame->GetPlayer()->m_llInventory->GetNext( pLink );
+    }
+    EXPECT_TRUE( found );
+}
+
+THEN( "^the spawned item is on the ground at spawn location$" )
+{
+    ScenarioScope<TestCtx> context;
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    ASSERT_NE( pTile->m_pCurItem, (CItem *)NULL );
+    JLog( LOG_LEVEL_INFO, true, "[THEN GROUND] pTile inst=%u context->result_int=%d\n", pTile->m_pCurItem->GetInstanceId(), context->result_int );
+    EXPECT_EQ( pTile->m_pCurItem->GetInstanceId(), (uint32)context->result_int );
+}

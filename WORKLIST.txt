@@ -139,5 +139,6 @@ PR#145 Checklist (feat/inventory):
 - [ ] Harden cursed/uncurse flows and add targeted tests
 - [ ] Implement/verify multi-slot equipment rules (rings, two-handed vs shield) and add tests
 - [ ] Add consumption/charges/duration and stacking tests for consumables
+ - [x] Add programmatic tests for Remove/Drop/Read
 
 - Document the inventory contract (functions, side-effects, equipment indices) in the Developer's Guide.

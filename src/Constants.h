@@ -623,7 +623,7 @@ public:
         int i;
         for( i = 0; i < NUM_STRINGS; i++ )
         {
-            char *curr = m_StringTable[i].m_szString;
+            const char *curr = m_StringTable[i].m_szString;
             if( Util::jstrcmp( curr, szIn ) == 0 )
             {
                 return m_StringTable[i].m_dwValue;
@@ -689,12 +689,12 @@ public:
         return PotionColors[dwIndex];
     }
 
-    char *PotionRGBA( const uint32 dwIndex )
+    const char *PotionRGBA( const uint32 dwIndex )
     {
         if( dwIndex >= NUM_POTION_TYPES )
             return "0,0,0,0";
 
-        char *PotionRGBAs[] = {
+        const char *PotionRGBAs[] = {
             "255,255,255,10",  // Clear
             "255,255,255,255", // White
             "0,0,0,255",       // Black

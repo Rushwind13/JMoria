@@ -8,7 +8,7 @@ class TextEntry
     // Member variables
 public:
     TextEntry() : m_szString( 0 ), m_dwValue( 0 ) {}
-    TextEntry( char *szIn, int dwIn ) { Init( szIn, dwIn ); }
+    TextEntry( const char *szIn, int dwIn ) { Init( szIn, dwIn ); }
 
     ~TextEntry()
     {

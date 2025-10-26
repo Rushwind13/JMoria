@@ -149,3 +149,19 @@ TARGETING / LINE-OF-SIGHT (TargetState)
   - Maintain a cached visible-set recomputed when the player or world state changes; use it for fast, consistent target lists.
   - Consider a target "mark" (persistent id) for tracking targets across list reordering.
   - Add UI feedback (draw computed line while targeting) but always re-validate on confirm.
+
+INVENTORY / EQUIPMENT WORKLIST:
+ 
+PR#145 Checklist (feat/inventory):
+- [x] Run `test/features/equipment.feature` locally and capture failing steps
+- [x] Add unique instance IDs to `CItem` and update factories/serialization
+- [x] Implement programmatic `CPlayer` API methods: Wield/Remove/Drop/Read/Quaff
+- [x] Harden cursed/uncurse flows and add targeted tests
+- [x] Implement/verify multi-slot equipment rules (rings, two-handed vs shield) and add tests
+- [ ] Add consumption/charges/duration and stacking tests for consumables
+ - [x] Add programmatic tests for Remove/Drop/Read
+
+- Document the inventory contract (functions, side-effects, equipment indices) in the Developer's Guide.
+ - [ ] Write tests for identified, non-identified, uncursed, cursed, and magical items (identified vs
+   unidentified, uncursed vs cursed, and magic vs mundane) and add them to the programmatic test
+   suite under PR#145.

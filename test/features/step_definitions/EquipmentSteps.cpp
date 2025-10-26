@@ -218,6 +218,27 @@ WHEN( "^I programmatically quaff the spawned item$" )
     EXPECT_EQ( context->result, JSUCCESS );
 }
 
+/* non-asserting / attempt variants for negative tests */
+WHEN( "^I programmatically attempt to wield the spawned item$" )
+{
+    ScenarioScope<TestCtx> context;
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    CItem *pItem = pTile->m_pCurItem;
+    ASSERT_NE( pItem, (CItem *)NULL );
+    uint32 dwInst = pItem->GetInstanceId();
+    g_pGame->GetPlayer()->PickUp( context->vec_b );
+    context->result = g_pGame->GetPlayer()->WieldItem( dwInst );
+    context->result_int = (int)dwInst;
+}
+
+WHEN( "^I programmatically attempt to remove the spawned item$" )
+{
+    ScenarioScope<TestCtx> context;
+    uint32 dwInst = (uint32)context->result_int;
+    /* attempt to remove and store boolean result for assertion in THEN */
+    context->result_bool = g_pGame->GetPlayer()->RemoveItem( dwInst );
+}
+
 /*#######
 ##
 ## THEN
@@ -425,4 +446,16 @@ THEN( "^the spawned item is on the ground at spawn location$" )
     ASSERT_NE( pTile->m_pCurItem, (CItem *)NULL );
     JLog( LOG_LEVEL_INFO, true, "[THEN GROUND] pTile inst=%u context->result_int=%d\n", pTile->m_pCurItem->GetInstanceId(), context->result_int );
     EXPECT_EQ( pTile->m_pCurItem->GetInstanceId(), (uint32)context->result_int );
+}
+
+THEN( "^the programmatic remove failed$" )
+{
+    ScenarioScope<TestCtx> context;
+    EXPECT_FALSE( context->result_bool );
+}
+
+THEN( "^the programmatic wield failed$" )
+{
+    ScenarioScope<TestCtx> context;
+    EXPECT_NE( context->result, JSUCCESS );
 }

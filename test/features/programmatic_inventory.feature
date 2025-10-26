@@ -32,3 +32,21 @@ Feature: Programmatic inventory API
     Given I spawn a Scroll of Light:20
     When I programmatically read the spawned item
     Then the spawned item is removed from inventory
+
+  Scenario: Programmatic remove (unequip) of a cursed dagger should fail
+    Given I have a Player
+    Given I spawn a Dagger:37
+    Given the Dagger:37 is cursed
+    When I programmatically wield the spawned item
+    When I programmatically attempt to remove the spawned item
+    Then the programmatic remove failed
+    Then The Dagger:37 is in equipment at 0
+
+  Scenario: Programmatic wielding two-handed weapon should unequip shield
+    Given I have a Player
+    Given I spawn a Small Wooden Shield:29
+    When I programmatically wield the spawned item
+    Given I spawn a Battle Axe:42
+    When I programmatically wield the spawned item
+    Then The Small Wooden Shield:29 is not in equipment at 1
+    And The Battle Axe:42 is in equipment at 0

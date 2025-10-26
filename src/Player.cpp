@@ -327,6 +327,59 @@ bool CPlayer::IsWieldable( CLink<CItem> *pLink )
 JResult CPlayer::Wield( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
+    // Debug dump of current equipment slots (index -> item name)
+    {
+        CLink<CItem> *pL = m_llEquipment->GetHead();
+        while( pL )
+        {
+            if( pL->m_lpData )
+            {
+                JLog( LOG_LEVEL_DEBUG, true, "Wield(): equipment slot %d = %s\n", pL->m_dwIndex,
+                      pL->m_lpData->GetName() );
+            }
+            else
+            {
+                JLog( LOG_LEVEL_DEBUG, true, "Wield(): equipment slot %d = (empty)\n", pL->m_dwIndex );
+            }
+            pL = m_llEquipment->GetNext( pL );
+        }
+    }
+    // If the new item is two-handed, we must ensure both hands are free.
+    // Attempt to remove any existing main-hand and off-hand equipment first.
+    if( pItem->m_id && ( pItem->m_id->m_dwFlags & ITEM_FLAG_2HANDED ) )
+    {
+        // Remove any existing main-hand weapons and any off-hand items (shields)
+        // Iterate over equipment and remove matching links. Capture next link before removal.
+        CLink<CItem> *pL = m_llEquipment->GetHead();
+        while( pL )
+        {
+            CLink<CItem> *pNext = m_llEquipment->GetNext( pL );
+            if( pL->m_lpData )
+            {
+                CItem *pEquipped = pL->m_lpData;
+                bool isMain = ( pEquipped->EquipType() == EQUIP_IDX_MAIN_HAND );
+                bool isOffHandFlag = ( pEquipped->m_id && ( pEquipped->m_id->m_dwFlags & ITEM_FLAG_OFFHAND ) );
+                if( isMain || isOffHandFlag )
+                {
+                    JLog( LOG_LEVEL_DEBUG, true, "Wield(): removing equipped %s (main=%d offflag=%d)\n",
+                          pEquipped->GetName(), isMain, (int)isOffHandFlag );
+                    bool removed = RemoveEquipment( pL );
+                    if( !removed )
+                    {
+                        JLog( LOG_LEVEL_WARN, true, "Could not remove %s to equip two-handed %s\n",
+                              pEquipped->GetName(), pItem->GetName() );
+                        return JBOGUSKEY;
+                    }
+                    else
+                    {
+                        g_pGame->GetMsgs()->Printf( "You were wielding the %s...",
+                                                    pEquipped->GetName() );
+                    }
+                }
+            }
+            pL = pNext;
+        }
+    }
 
     // You can only wield one thing of a given type at a time
     CLink<CItem> *pCurrEquip = m_llEquipment->GetLink( pItem->EquipType(), true );
@@ -358,6 +411,30 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
         Util::jstrcpy( m_szDamage, pItem->m_id->m_szBaseDamage );
     m_fDamageModifier += pItem->m_id->m_fBonusToDamage;
     m_fToHitModifier += pItem->m_id->m_fBonusToHit;
+
+    // Defensive: if this is a two-handed weapon, ensure off-hand is clear.
+    if( pItem->m_id && ( pItem->m_id->m_dwFlags & ITEM_FLAG_2HANDED ) )
+    {
+        CLink<CItem> *pOffCheck = NULL;
+        {
+            CLink<CItem> *pL = m_llEquipment->GetHead();
+                while( pL )
+            {
+                if( pL->m_lpData && pL->m_dwIndex == EQUIP_IDX_OFF_HAND )
+                {
+                    pOffCheck = pL;
+                    break;
+                }
+                pL = m_llEquipment->GetNext( pL );
+            }
+        }
+        if( pOffCheck != NULL && pOffCheck->m_lpData != NULL )
+        {
+            JLog( LOG_LEVEL_WARN, true, "Two-handed equip: off-hand still occupied by %s; removing now.\n",
+                  pOffCheck->m_lpData->GetName() );
+            RemoveEquipment( pOffCheck );
+        }
+    }
 
     return JSUCCESS;
 }

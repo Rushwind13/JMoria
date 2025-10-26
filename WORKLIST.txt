@@ -142,3 +142,6 @@ PR#145 Checklist (feat/inventory):
  - [x] Add programmatic tests for Remove/Drop/Read
 
 - Document the inventory contract (functions, side-effects, equipment indices) in the Developer's Guide.
+ - [ ] Write tests for identified, non-identified, uncursed, cursed, and magical items (identified vs
+   unidentified, uncursed vs cursed, and magic vs mundane) and add them to the programmatic test
+   suite under PR#145.

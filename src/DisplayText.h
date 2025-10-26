@@ -45,7 +45,7 @@ public:
     ~CDisplayText();
     bool Update( float fCurTime );
     void Draw();
-    void DrawStr( int x, int y, char *szString );
+    void DrawStr( int x, int y, const char *szString );
     void Printf( const char *fmt, ... );
     void DisplayFixedList( JLinkList<CItem> *pList, const CDisplayMeta *pMeta,
                            const uint8 dwIndex = DUNG_IDX_INVALID );
@@ -72,7 +72,7 @@ protected:
     void PostDraw();
 
     void Paginate();
-    void DrawStr( int x, int y, bool bBoundsCheck, int dwYMax, char *szString );
+    void DrawStr( int x, int y, bool bBoundsCheck, int dwYMax, const char *szString );
     void DrawBoundingBox();
     void DrawFormattedStr( const char *str );
 

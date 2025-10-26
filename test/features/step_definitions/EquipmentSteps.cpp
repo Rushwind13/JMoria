@@ -147,7 +147,7 @@ GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in equipment at ([-0-9]+)$" )
     EXPECT_NE( expected, actual );
 
     const char *want = item.c_str();
-    char *have = actual->GetName();
+    const char *have = actual->GetName();
 
     EXPECT_EQ( Util::jstrcmp( want, have ), 0 );
 }
@@ -189,6 +189,56 @@ WHEN( "^the player reads the scroll in inventory at ([-0-9]+)$" )
 
 WHEN( "^I display equipment$" ) { JLog( LOG_LEVEL_DEBUG, true, "Display the equipment\n" ); }
 
+/* Programmatic API steps */
+WHEN( "^I programmatically wield the spawned item$" )
+{
+    ScenarioScope<TestCtx> context;
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    CItem *pItem = pTile->m_pCurItem;
+    ASSERT_NE( pItem, (CItem *)NULL );
+    uint32 dwInst = pItem->GetInstanceId();
+    /* pick up the spawned item into inventory so programmatic APIs can find it */
+    g_pGame->GetPlayer()->PickUp( context->vec_b );
+    context->result = g_pGame->GetPlayer()->WieldItem( dwInst );
+    context->result_int = (int)dwInst;
+    EXPECT_EQ( context->result, JSUCCESS );
+}
+
+WHEN( "^I programmatically quaff the spawned item$" )
+{
+    ScenarioScope<TestCtx> context;
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    CItem *pItem = pTile->m_pCurItem;
+    ASSERT_NE( pItem, (CItem *)NULL );
+    uint32 dwInst = pItem->GetInstanceId();
+    /* pick up the spawned item into inventory so programmatic APIs can find it */
+    g_pGame->GetPlayer()->PickUp( context->vec_b );
+    context->result = g_pGame->GetPlayer()->QuaffItem( dwInst );
+    context->result_int = (int)dwInst;
+    EXPECT_EQ( context->result, JSUCCESS );
+}
+
+/* non-asserting / attempt variants for negative tests */
+WHEN( "^I programmatically attempt to wield the spawned item$" )
+{
+    ScenarioScope<TestCtx> context;
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    CItem *pItem = pTile->m_pCurItem;
+    ASSERT_NE( pItem, (CItem *)NULL );
+    uint32 dwInst = pItem->GetInstanceId();
+    g_pGame->GetPlayer()->PickUp( context->vec_b );
+    context->result = g_pGame->GetPlayer()->WieldItem( dwInst );
+    context->result_int = (int)dwInst;
+}
+
+WHEN( "^I programmatically attempt to remove the spawned item$" )
+{
+    ScenarioScope<TestCtx> context;
+    uint32 dwInst = (uint32)context->result_int;
+    /* attempt to remove and store boolean result for assertion in THEN */
+    context->result_bool = g_pGame->GetPlayer()->RemoveItem( dwInst );
+}
+
 /*#######
 ##
 ## THEN
@@ -220,7 +270,7 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment) at ([-0-9]+)$" )
     EXPECT_NE( expected, actual );
 
     const char *want = item.c_str();
-    char *have = actual->GetName();
+    const char *have = actual->GetName();
 
     int result = Util::jstrcmp( want, have );
     if( result != 0 )
@@ -288,7 +338,124 @@ THEN( "^the equipped ([A-Za-z ]+):([0-9]+) at ([-0-9]+) (is|is not) cursed$" )
     EXPECT_EQ( actual, expected );
 }
 
+THEN( "^the spawned item is equipped at ([-0-9]+)$" )
+{
+    REGEX_PARAM( int, equip_id );
+    ScenarioScope<TestCtx> context;
+    int wanted_slot = EQUIP_IDX_MAIN_HAND + equip_id;
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llEquipment->GetLink( wanted_slot );
+    ASSERT_NE( pLink, (CLink<CItem> *)NULL );
+    CItem *actual = pLink->m_lpData;
+    ASSERT_NE( actual, (CItem *)NULL );
+    EXPECT_EQ( actual->GetInstanceId(), (uint32)context->result_int );
+}
+
+THEN( "^the spawned item is removed from inventory$" )
+{
+    ScenarioScope<TestCtx> context;
+    uint32 dwInst = (uint32)context->result_int;
+    bool found = false;
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData && pLink->m_lpData->GetInstanceId() == dwInst )
+        {
+            found = true;
+            break;
+        }
+        pLink = g_pGame->GetPlayer()->m_llInventory->GetNext( pLink );
+    }
+    EXPECT_FALSE( found );
+}
+
 THEN( "^the ([A-Za-z ]+):([0-9]+) is not labeled as cursed$" )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Showing label on equipment\n" );
+}
+
+WHEN( "^I programmatically remove the spawned item$" )
+{
+    ScenarioScope<TestCtx> context;
+    uint32 dwInst = (uint32)context->result_int;
+    /* Expect the item to be currently equipped */
+    bool ok = g_pGame->GetPlayer()->RemoveItem( dwInst );
+    EXPECT_TRUE( ok );
+}
+
+WHEN( "^I programmatically drop the spawned item$" )
+{
+    ScenarioScope<TestCtx> context;
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    CItem *pItem = pTile->m_pCurItem;
+    ASSERT_NE( pItem, (CItem *)NULL );
+    uint32 dwInst = pItem->GetInstanceId();
+    /* pick up the spawned item into inventory so programmatic APIs can find it */
+    g_pGame->GetPlayer()->PickUp( context->vec_b );
+     context->result_int = (int)dwInst;
+     JLog( LOG_LEVEL_INFO, true, "[DROP STEP] before DropItem: dwInst=%u context->result_int=%d\n", dwInst, context->result_int );
+     bool ok = g_pGame->GetPlayer()->DropItem( dwInst );
+     EXPECT_TRUE( ok );
+     /* ensure tile at spawn location now contains the item */
+     CDungeonTile *pGround = g_pGame->GetDungeon()->GetTile( context->vec_b );
+     ASSERT_NE( pGround->m_pCurItem, (CItem *)NULL );
+     /* store the actual instance id from the ground tile to the scenario context
+         (some runs didn't preserve the previously-stored id reliably), then
+         assert equality. */
+     uint32 dwGroundInst = pGround->m_pCurItem->GetInstanceId();
+     context->result_int = (int)dwGroundInst;
+     JLog( LOG_LEVEL_INFO, true, "[DROP STEP] after DropItem: groundInst=%u context->result_int=%d\n", dwGroundInst, context->result_int );
+     EXPECT_EQ( dwGroundInst, dwInst );
+}
+
+WHEN( "^I programmatically read the spawned item$" )
+{
+    ScenarioScope<TestCtx> context;
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    CItem *pItem = pTile->m_pCurItem;
+    ASSERT_NE( pItem, (CItem *)NULL );
+    uint32 dwInst = pItem->GetInstanceId();
+    /* pick up the spawned item into inventory so programmatic APIs can find it */
+    g_pGame->GetPlayer()->PickUp( context->vec_b );
+    context->result = g_pGame->GetPlayer()->ReadItem( dwInst );
+    context->result_int = (int)dwInst;
+    EXPECT_EQ( context->result, JSUCCESS );
+}
+
+THEN( "^the spawned item is back in inventory$" )
+{
+    ScenarioScope<TestCtx> context;
+    uint32 dwInst = (uint32)context->result_int;
+    bool found = false;
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData && pLink->m_lpData->GetInstanceId() == dwInst )
+        {
+            found = true;
+            break;
+        }
+        pLink = g_pGame->GetPlayer()->m_llInventory->GetNext( pLink );
+    }
+    EXPECT_TRUE( found );
+}
+
+THEN( "^the spawned item is on the ground at spawn location$" )
+{
+    ScenarioScope<TestCtx> context;
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    ASSERT_NE( pTile->m_pCurItem, (CItem *)NULL );
+    JLog( LOG_LEVEL_INFO, true, "[THEN GROUND] pTile inst=%u context->result_int=%d\n", pTile->m_pCurItem->GetInstanceId(), context->result_int );
+    EXPECT_EQ( pTile->m_pCurItem->GetInstanceId(), (uint32)context->result_int );
+}
+
+THEN( "^the programmatic remove failed$" )
+{
+    ScenarioScope<TestCtx> context;
+    EXPECT_FALSE( context->result_bool );
+}
+
+THEN( "^the programmatic wield failed$" )
+{
+    ScenarioScope<TestCtx> context;
+    EXPECT_NE( context->result, JSUCCESS );
 }

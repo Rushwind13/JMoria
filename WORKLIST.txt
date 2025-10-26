@@ -170,3 +170,19 @@ Notes:
 
 BUGS:
 - 2d8 bastard sword replaced by 1d8 long sword without choosing to wield
+
+INVENTORY / EQUIPMENT WORKLIST:
+ 
+PR#145 Checklist (feat/inventory):
+- [x] Run `test/features/equipment.feature` locally and capture failing steps
+- [x] Add unique instance IDs to `CItem` and update factories/serialization
+- [x] Implement programmatic `CPlayer` API methods: Wield/Remove/Drop/Read/Quaff
+- [x] Harden cursed/uncurse flows and add targeted tests
+- [x] Implement/verify multi-slot equipment rules (rings, two-handed vs shield) and add tests
+- [ ] Add consumption/charges/duration and stacking tests for consumables
+ - [x] Add programmatic tests for Remove/Drop/Read
+
+- Document the inventory contract (functions, side-effects, equipment indices) in the Developer's Guide.
+ - [ ] Write tests for identified, non-identified, uncursed, cursed, and magical items (identified vs
+   unidentified, uncursed vs cursed, and magic vs mundane) and add them to the programmatic test
+   suite under PR#145.

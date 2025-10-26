@@ -173,7 +173,7 @@ public:
             m_szKilledBy = NULL;
         }
     };
-    char *GetName() { return m_szName; }
+    const char *GetName() { return m_szName; }
     float GetLevel() { return m_fLevel; }
     CClass *GetClass() { return m_pClass; }
     CRace *GetRace() { return m_pRace; }
@@ -198,6 +198,13 @@ public:
 
     bool IsWieldable( CLink<CItem> *pLink );
     JResult Wield( CLink<CItem> *pItem );
+    
+    // Programmatic API: operations by item instance id (helpers for tests)
+    JResult WieldItem( uint32 dwInstanceId );
+    bool RemoveItem( uint32 dwInstanceId );
+    bool DropItem( uint32 dwInstanceId );
+    JResult ReadItem( uint32 dwInstanceId );
+    JResult QuaffItem( uint32 dwInstanceId );
 
     bool IsRemovable( CLink<CItem> *pLink );
     bool RemoveEquipment( CLink<CItem> *pLink );
@@ -262,7 +269,7 @@ public:
     float Damage( float fDamageMult );
 
     bool Hit( float &fRoll );
-    int TakeDamage( float fDamage, char *szMon );
+    int TakeDamage( float fDamage, const char *szMon );
 
     void OnKillMonster( CMonster *pMon );
 

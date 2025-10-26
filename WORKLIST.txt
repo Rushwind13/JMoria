@@ -129,3 +129,55 @@ DUNGEON GENERATION: (as of 1.27.06, hardcoded 16x16 dungeon back in)
 
 BUGS:
 - 2d8 bastard sword replaced by 1d8 long sword without choosing to wield
+
+PLAYERS (focus: player behavior, NOT inventory/equipment)
+-----------------------------------------------
+Summary
+- Core player code: `src/Player.h`, `src/Player.cpp` (spawn, update, movement, collision, combat, targeting, light, effects, wizard mode, rendering hooks).
+- Player-related tests (player behavior, excluding inventory/equipment):
+  - `test/features/game.feature` + `test/features/step_definitions/GameSteps.cpp` (player presence; monster AI interaction)
+  - `test/features/light.feature` + `test/features/step_definitions/LightSteps.cpp` (light source / lit area behavior)
+  - `test/features/brains.feature` + `test/features/step_definitions/BrainSteps.cpp` (AI seeking player)
+  - `test/features/tilesets.feature` + `test/features/step_definitions/TilesetSteps.cpp` (player tileset rendering)
+
+Relevant GitHub issues (player-focused)
+- #45 MON_AI_SEEK seeks "target pos", not "player" — AI/targeting vs player position
+- #39 Implement ranged attacks — ranged fire, ammo, targeting, quivers
+- #42 JMoria Scoring and Win condition — scoring and end-state behavior for player
+- #43 Lady Teldra refuses to leave her sheath — unique-weapon/player interactions
+- #72 Fog of war / sight distance — LOS, lighting, infravision/telepathy
+- #116 Look command — `:` look / `*` target behavior and race conditions
+- #115 Infravision / Telepathy — intrinsics affecting player perception
+- #117 Search command and search ability — finding secret doors / traps
+
+Existing player functionality (high level)
+- SpawnPlayer(): places player on an open tile via dungeon helper functions.
+- Update(): HP/MP regen timing, light decay, active effect expiry, disturbance checks.
+- Movement & collision: Move(), HandleCollision(), CheckDisturbance() (doors/stairs/rubble set disturbed flag).
+- Combat: Attack(), Damage(), Hit(), TakeDamage(), OnKillMonster() and effect handlers.
+- Targeting: SetTarget/GetTarget and SetRangedHitPosition for ranged targeting.
+- Light & intrinsics: LightSource(), UpdateLight(), DisplayStats() prints intrinsics.
+- Wizard: SetWizard()/IsWizard() — debug/visibility toggles.
+
+Gaps and recommended WORKLIST items (player-only, prioritized)
+1) Movement & collision edge cases (high)
+  - Add unit tests for diagonal squeeze, run vs walk disturbance, and collision return codes.
+2) Targeting / Look UI race conditions (high)
+  - Tests for `:` (look) and `*` (target). Simulate monsters moving while targeting to reveal races.
+3) Ranged attacks & targeting (mid)
+  - Implement Fire/arrow behavior, ammo consumption, projectile collision, directional vs targeted fire.
+4) Combat math & effects (mid)
+  - Deterministic tests for Attack/Damage/Hit/TakeDamage and effect application with stubbed RNG.
+5) Light, intrinsics, and visibility (mid-high)
+  - Tests and fixes for infra/ESP, torch TTL, UpdateLight -> dungeon IsLit interaction, and wizard overrides.
+6) Spawn determinism & error handling (low-mid)
+  - Ensure SpawnPlayer handles edge cases (no open tiles) and is deterministic for tests.
+7) Resting/regeneration & disturbance (low)
+  - Verify rest (R) behavior and interruption handling via tests.
+8) Active effects lifecycle (low)
+  - Tests for DoEffects, UndoIntrinsicEffects, and expiry in UpdateActiveEffects.
+9) Wizard mode behavior tests (low)
+  - Ensure wizard commands and debug displays do not break normal flows.
+
+Concrete next steps
+- If desired, append this section to WORKLIST.txt (done). Then pick a high-priority item (movement or targeting) and I can scaffold deterministic unit tests and run the test suite.

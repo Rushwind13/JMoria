@@ -33,6 +33,59 @@ MONSTERS:
 - Tiamat
 - You must defeat 17 Warriors from the Hall of Heroes in combat, before you may face Tiamat.
 
+MONSTERS (code, tests, issues) — summary and next work items
+---------------------------------------------------------
+Current code locations (primary):
+ - `src/Monster.h` / `src/Monster.cpp` — monster runtime object, attacks, spawning, drawing, breeding, HP/AC, AI brain hookup.
+ - `src/FileParse.h` / `src/FileParse.cpp` — `CDataFile::ReadMonster()` reads `Resources/Monsters.txt` into `CMonsterDef`.
+ - `src/Dungeon.h` / `src/Dungeon.cpp` — owns `m_llMonsterDefs` (list of `CMonsterDef`) and loads `Resources/Monsters.txt` on init.
+ - `src/StringInputState.cpp` — wizard / debug commands that can look up `GetMonsterDef(name)` and spawn monsters.
+ - `src/TargetState.cpp` — targeting / choosing monsters for player actions.
+ - `Resources/Monsters.txt` — canonical monster configuration file parsed at runtime and used in tests.
+
+Tests and validation:
+ - `test/features/monsters.feature` — BDD scenarios that validate parsing of `Monsters.txt` and creating `CMonster` instances.
+ - `test/features/step_definitions/MonsterSteps.cpp` — step defs used by the feature tests (reads monster defs, inits monsters, asserts name is correct).
+
+Representative functionality summary:
+ - Monster definitions (`CMonsterDef`) contain name/plural, speed, move type, HD, AC, level, exp, tile index, flags, attacks, and color(s).
+ - `CDataFile::ReadMonster()` parses `Resources/Monsters.txt` into `CMonsterDef` objects; `Dungeon` loads these into `m_llMonsterDefs`.
+ - `CMonster` instances are created from a `CMonsterDef` via `CMonster::CreateMonster` / `InitAndSpawn`; spawn logic tries to find a walkable tile (respecting line-of-sight when spawning "near").
+ - When spawned successfully `SpawnAt()` sets the tile's `m_pCurMonster` and links the monster into `g_pGame->GetDungeon()->m_llMonsters` and into the AI manager's brain list.
+ - Combat primitives implemented: ChooseAttack(), Attack(), Damage(), Hit(), TakeDamage(). Drawing maps monster index to a tile via `MonIDs[]` and uses colors from the def.
+ - Monster behaviors present: seek player, random move, dontmove, timed breeding, multi-hued color switching, and basic effect mapping for attacks.
+
+Known issues / GitHub threads relevant to Monsters (high-signal):
+ - #110 — "Monsters shall not move during use commands" — player actions that require selection currently allow monsters to take a turn in between.
+ - #91 — "Monster attack effects crash game" — parsing of attack/effect fields can be malformed and crash when attacks are executed; FileParse validations are implicated.
+ - #66 / #68 — spawn/appear handling edge cases: monsters can be left in invalid positions or SpawnAt() failures leak/leave broken state.
+ - #72 / #115 — visibility / sight / infravision / fog-of-war interactions with monsters (disturbing runs, see-through-walls intrinsics).
+ - #62 — AI mode `100RANDOMMOVE` behavior regression (some move types may be broken in updates).
+ - #39, #43 — design issues: ranged attacks and unique-item (Lady Teldra) interactions with monsters.
+
+Suggested next work items (small-to-medium, test-first):
+ 1. Add unit tests for `CDataFile::ReadMonster()` validation paths (malformed Attack lines, missing fields). Fail fast on invalid attack effect tokens. (Low risk)
+ 2. Add a unit test that exercises `CMonster::SpawnAt()` failure modes and asserts no leaked monster/brain links (fix leaking / cleanup on failure). (Medium priority)
+ 3. Harden parsing in `FileParse.cpp`: validate attack token counts and effect flags, return clear errors for invalid lines and log file/line for quick fixes (addresses #91). (Medium)
+ 4. Add an integration test that simulates a player 'use' command path (e.g., open -> pick direction) to ensure monsters don't get extra turns while waiting for player selection (addresses #110). (Medium)
+ 5. Add lookup APIs and tests for `Dungeon::GetMonsterDef(name|index)` behavior (already exists; add tests to avoid regressions). (Low)
+ 6. Create tests around AI movement types (SEEK, RANDOMMOVE, DONTMOVE) to lock in expected behavior and prevent regressions (#62). (Medium)
+ 7. Add continuous validation script that parses `Resources/Monsters.txt` and `Resources/Items.txt` to catch format issues before runtime (CI job or local test). (Low)
+ 8. Consider migrating `Resources/Monsters.txt` to a stricter, machine-parseable format (JSON/YAML) or add a lightweight schema/validator layer to catch mistakes early. (Longer-term)
+
+Quick notes on design improvements:
+ - Decouple AI/brain lifecycle management so failed spawns don't add dangling brain objects; centralize monster registration in one helper.
+ - Normalize error handling for file parsing to return `nullptr` or error codes and avoid partially-initialized objects leaking into global lists.
+ - Add explicit unit tests for Attack parsing (type, damage string, effect flags) and for Damage/TakeDamage/Hit math.
+
+Files to inspect first when working on Monsters:
+ - `src/FileParse.cpp` (ReadMonster implementation)
+ - `src/Monster.cpp` (CreateMonster, InitAndSpawn, SpawnAt, Attack/TakeDamage)
+ - `Resources/Monsters.txt` (source of truth for definitions)
+ - `test/features/monsters.feature` + `test/features/step_definitions/MonsterSteps.cpp` (BDD tests)
+
+If you want, I can implement item (1) and (2) now: add parser validation tests and a SpawnAt failure test, then run the test suite. Which would you prefer I start with?
+
 
 ITEMS:
 - Magic items "x of Protection", "y of Resist Fire", but scramble the varieties each game of course.

@@ -186,3 +186,19 @@ Suggested next steps to add to WORKLIST for sprint planning
 Notes and references:
 - Open PRs already cover many WORKLIST areas (AI-generated PRs 143-148 addressing dungeon, targeting, inventory, items, monsters, and player updates). The items above are present as issues and are not yet fully covered by those draft PRs, or require additional tests and CI work to complete.
 - See GitHub issues: #39 (ranged), #42 (scoring), #45 (AI seek), #69 (tag builds), #112 (races), #114 (identify), #117 (search), #121 (lantern/wand fuel), and test skips under `test/features/*` for concrete starting points.
+
+INVENTORY / EQUIPMENT WORKLIST:
+ 
+PR#145 Checklist (feat/inventory):
+- [x] Run `test/features/equipment.feature` locally and capture failing steps
+- [x] Add unique instance IDs to `CItem` and update factories/serialization
+- [x] Implement programmatic `CPlayer` API methods: Wield/Remove/Drop/Read/Quaff
+- [x] Harden cursed/uncurse flows and add targeted tests
+- [x] Implement/verify multi-slot equipment rules (rings, two-handed vs shield) and add tests
+- [ ] Add consumption/charges/duration and stacking tests for consumables
+ - [x] Add programmatic tests for Remove/Drop/Read
+
+- Document the inventory contract (functions, side-effects, equipment indices) in the Developer's Guide.
+ - [ ] Write tests for identified, non-identified, uncursed, cursed, and magical items (identified vs
+   unidentified, uncursed vs cursed, and magic vs mundane) and add them to the programmatic test
+   suite under PR#145.

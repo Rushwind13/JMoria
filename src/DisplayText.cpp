@@ -86,19 +86,19 @@ void CDisplayText::Draw()
     PostDraw();
 }
 
-void CDisplayText::DrawStr( int x, int y, char *szString )
+void CDisplayText::DrawStr( int x, int y, const char *szString )
 {
     PreDraw();
     DrawStr( x, y, false, 0, szString );
     PostDraw();
 }
 
-void CDisplayText::DrawStr( int x, int y, bool bBoundsCheck, int dwYMax, char *szString )
+void CDisplayText::DrawStr( int x, int y, bool bBoundsCheck, int dwYMax, const char *szString )
 {
     JLog( LOG_LEVEL_NOISE, true, "Trying to draw string: %s\n", szString );
     JVector vScreen( (float)x, (float)y );
     JVector vSize( (float)FONT_DRAW_W, (float)FONT_DRAW_H );
-    char *ptr = szString;
+    const char *ptr = szString;
     int index;
 
     m_TileSet->PreDrawTile();

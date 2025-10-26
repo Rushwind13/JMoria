@@ -37,7 +37,7 @@ static JResult JLog( eLogLevel eLogLevel, bool verbose, const char *format, ... 
     if( eLogLevel >= g_eLogLevel )
     {
         va_list args;
-        va_start( args, mod_format );
+        va_start( args, format );
         vprintf( mod_format, args );
         va_end( args );
     }

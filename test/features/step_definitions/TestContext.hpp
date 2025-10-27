@@ -59,6 +59,9 @@ struct TestCtx
     CItemDef *ItemDef;
     JResult Success;
 
+    // added item instance for identify tests
+    CItem *Item = NULL;
+
     // MonsterDef
     CDataFile dfMonsters;
     CMonsterDef *monsterDef;

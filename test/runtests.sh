@@ -5,6 +5,7 @@ if [[ "$1" == "--build" ]]; then
   # If it is, build the project and return
   cd ..
   make clean
+  make
   make test
   cd -
   shift

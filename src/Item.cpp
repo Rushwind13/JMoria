@@ -184,26 +184,31 @@ int CItem::EquipType()
 
 const char *CItem::GetName()
 {
-    if( false ) // IsIdentified() ) // TODO: MIKE: ID goes here
+    // If we have any known intrinsics for this instance, treat the item as identified
+    // for display purposes and show the real name. Otherwise fall back to the
+    // unidentified/flavor name when available.
+    if( m_dwKnownIntrinsics != 0 )
     {
-        return const_cast<const char*>(m_id->m_szName);
+        return m_id->m_szName;
     }
-    else
-    {
+
+    if( m_id->m_szUnidentifiedName )
         return m_id->m_szUnidentifiedName;
-    }
+
+    return m_id->m_szName;
 }
 
 const char *CItem::GetPlural()
 {
-    if( false ) // IsIdentified() )// TODO: MIKE: ID goes here
+    if( m_dwKnownIntrinsics != 0 )
     {
-        return const_cast<const char*>(m_id->m_szPlural);
+        return m_id->m_szPlural;
     }
-    else
-    {
+
+    if( m_id->m_szUnidentifiedPlural )
         return m_id->m_szUnidentifiedPlural;
-    }
+
+    return m_id->m_szPlural;
 }
 
 void CItem::Draw()

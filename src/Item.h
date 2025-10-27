@@ -147,6 +147,7 @@ public:
                    // CItemDef
     uint32 m_dwCharges; // for wands and staves and other items that have an "ammo count"
     uint32 m_dwInstanceId; // unique instance id for this item
+    uint32 m_dwKnownIntrinsics; // which intrinsics about this item are known to the player
 protected:
     float m_fColorChangeInterval;
     JColor m_Color;
@@ -161,7 +162,8 @@ public:
           m_dwFlags( 0 ),
           m_dwCharges( 0 ),
                     m_dwInstanceId( 0 ),
-          m_dwCount( 1 ),
+                    m_dwCount( 1 ),
+                    m_dwKnownIntrinsics( 0 ),
           m_pllLink( NULL ),
           m_id( NULL ),
           m_fRemainingDuration( 0.0f ) {};
@@ -200,6 +202,10 @@ public:
     void PreDraw();
     void Draw();
     void PostDraw();
+
+    // Known-intrinsics helpers
+    bool IsKnownIntrinsic( uint32 dwFlag ) { return ( m_dwKnownIntrinsics & dwFlag ) == dwFlag; }
+    void SetKnownIntrinsic( uint32 dwFlag ) { m_dwKnownIntrinsics |= dwFlag; }
 
 protected:
     void SetColor();

@@ -1,3 +1,5 @@
+## New for 2025: AI Support
+https://chatgpt.com/g/g-68900dcbb5788191a6fe3edc36c4bca7-jmoria-development
 ## MacOS Getting Started
 * you will need XCode to be installed from App Store
 * you will need `xcode-select --install` done (this is done by XCode install)

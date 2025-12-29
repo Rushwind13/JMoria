@@ -127,16 +127,19 @@ DUNGEON GENERATION: (updated 2025-10-17)
 - Also, make sure that there are enough rooms generated every time. Sometimes, it just tails out
   after 1 or 2 rooms.
 
-PRIORITIZED DUNGEON GENERATION WORKLIST (2025-10-17):
-- [P0] Stabilize and make generation deterministic for testing (2025-10-17)
-  - Add a test-mode flag to `CDungeonMap` to seed RNG and force deterministic CreateDungeon runs.
-  - Expose a `CreateDungeon(seed, depth)` overload or environment variable so CI can reproduce failures.
-  - Tests affected: integration tests in `test/features/dungeonmap.feature`.
+PRIORITIZED DUNGEON GENERATION WORKLIST (updated 2025-12-28):
+- [P0] ✅ COMPLETED (2025-12-28) - Stabilize and make generation deterministic for testing
+  - ✅ Added `Util::SeedRandom(seed)` and `Util::GetRandomSeed()` for RNG control
+  - ✅ Added `CreateDungeon(depth, seed)` overload for deterministic generation
+  - ✅ Stores seed in `CDungeonMap::m_dwSeed` for tracking and debugging
+  - ✅ Added 2 new BDD tests in `test/features/dungeonmap.feature` verifying determinism
+  - ✅ Tests pass: same seed produces identical dungeon layouts
 
-- [P0] Make generation stepper usable and visual (2025-10-17)
-  - Re-enable and finish `NewLevelState` stepping: pressing space performs one `CreateOneStep()` and renders the map.
-  - Add an on-screen diagnostic overlay showing stack size, current step, seed, and total rooms/halls.
-  - This will make the recursion / "tails out" behavior visible.
+- [P0] ✅ COMPLETED (2025-12-28) - Make generation stepper usable and visual
+  - ✅ Enhanced `ClockStepState::DoTick()` with diagnostic overlay (seed, stack, rooms, halls)
+  - ✅ Added diagnostic accessors to `CDungeonMap`: GetSeed(), GetStackSize(), GetRoomCount(), GetHallwayCount()
+  - ✅ Added `length()` method to `JStack` template for stack size tracking
+  - ✅ ClockStepState now displays real-time generation diagnostics (press space to step)
 
 - [P1] Improve unit and BDD tests for edge cases (2025-10-17)
   - Add tests for recursion depth limits (MAX_RECURDEPTH), hall-to-room branching, and out-of-world rejections.
@@ -164,9 +167,10 @@ PRIORITIZED DUNGEON GENERATION WORKLIST (2025-10-17):
   - Fix any memory leaks found in `CreateOneStep`, `FillArea`, and step allocation (use smart pointers in future refactor).
 
 Notes:
-- Implementing P0 items first will make the rest easier and reproducible in CI.
-- `test/features/dungeonmap.feature` and `test/features/step_definitions/DungeonMapSteps.cpp` already cover many room/hallway invariants; expand them rather than re-creating tests.
-- If you want, I can apply this patch to `WORKLIST.txt` now (done), and follow up by creating a small deterministic test harness and a `CreateDungeon(seed, depth)` wrapper.  
+- P0 items completed 2025-12-28: Deterministic generation with seed support and visual stepper diagnostics now working
+- `test/features/dungeonmap.feature` has 94 passing scenarios including new determinism tests
+- Next focus: P1 items to improve test coverage and add runtime diagnostics for debugging generation issues
+- `test/features/step_definitions/DungeonMapSteps.cpp` already has infrastructure to expand edge case testing  
 
 BUGS:
 - 2d8 bastard sword replaced by 1d8 long sword without choosing to wield

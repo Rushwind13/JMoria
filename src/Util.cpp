@@ -17,6 +17,21 @@
 
 namespace Util
 {
+// RNG seed management for deterministic generation
+static unsigned int g_RandomSeed = 0;
+
+void SeedRandom( unsigned int seed )
+{
+    g_RandomSeed = seed;
+    srand( seed );
+    JLog( LOG_LEVEL_DEBUG, true, "RNG seeded with: %u\n", seed );
+}
+
+unsigned int GetRandomSeed()
+{
+    return g_RandomSeed;
+}
+
 // The RNG in all its glory
 float GetRandom( float lo, float hi )
 {

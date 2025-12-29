@@ -17,7 +17,7 @@ int main( int argc, char **argv )
     // whether or not the window is active
     int isActive = true;
 
-    srand( (unsigned)time( NULL ) );
+    Util::SeedRandom( (unsigned)time( NULL ) );
 
     JResult result;
     g_pGame = new CGame;

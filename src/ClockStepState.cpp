@@ -16,7 +16,7 @@
 
 extern CGame *g_pGame;
 
-CClockStepState::CClockStepState() : m_dwClock( 0 ), m_dwStep( 1 )
+CClockStepState::CClockStepState() : m_dwClock( 0 ), m_dwStep( 1 ), m_bShowDiagnostics( true )
 {
     m_pKeyHandlers[CLOCKSTEP_INIT] = &CClockStepState::OnHandleInit;
     m_pKeyHandlers[CLOCKSTEP_TICK] = &CClockStepState::OnHandleTick;
@@ -103,7 +103,21 @@ void CClockStepState::ResetToState( int newstate )
 bool CClockStepState::DoTick()
 {
     m_dwClock += m_dwStep;
-    g_pGame->GetStats()->Printf( "Tick! %d\n", m_dwClock );
+    
+    if( m_bShowDiagnostics && g_pGame->GetDungeon() && g_pGame->GetDungeon()->GetCurLevel() )
+    {
+        CDungeonMap *pMap = g_pGame->GetDungeon()->GetCurLevel();
+        g_pGame->GetStats()->Printf( "Tick! %d\n", m_dwClock );
+        g_pGame->GetStats()->Printf( "Seed: %u\n", pMap->GetSeed() );
+        g_pGame->GetStats()->Printf( "Stack: %d\n", pMap->GetStackSize() );
+        g_pGame->GetStats()->Printf( "Rooms: %d\n", pMap->GetRoomCount() );
+        g_pGame->GetStats()->Printf( "Halls: %d\n", pMap->GetHallwayCount() );
+    }
+    else
+    {
+        g_pGame->GetStats()->Printf( "Tick! %d\n", m_dwClock );
+    }
+    
     g_pGame->SetReadyForUpdate( true );
     g_pGame->GetDungeon()->Tick( m_dwClock );
     return true;

@@ -147,6 +147,7 @@ public:
     bool IsCloseable( JVector &vPos );
     int IsStairs( JVector &vPos );
     CRoom *InRoom( JVector &vPos );
+    CDungeonMap *GetCurLevel() { return m_dmCurLevel; }
     CMonsterDef *GetMonsterDef( const char *szMonsterName );
     CMonsterDef *GetMonsterDef( int which_monster );
     CItemDef *GetItemDef( const char *szItemName );

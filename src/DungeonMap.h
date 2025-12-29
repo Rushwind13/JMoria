@@ -127,7 +127,8 @@ public:
           m_stkDungeonMapCreation( NULL ),
           m_llRooms( NULL ),
           m_llHallways( NULL ),
-          m_dwDepth( 0 )
+          m_dwDepth( 0 ),
+          m_dwSeed( 0 )
     {
         m_stkDungeonMapCreation = new JStack<CDungeonCreationStep>;
     };
@@ -163,10 +164,19 @@ private:
     JLinkList<CRoom> *m_llRooms;
     JLinkList<CRoom> *m_llHallways;
     uint32 m_dwDepth;
+    unsigned int m_dwSeed;
 
     // Member functions
 public:
     void CreateDungeon( const int depth );
+    void CreateDungeon( const int depth, const unsigned int seed );
+    
+    // Diagnostic accessors
+    int GetStackSize() const { return m_stkDungeonMapCreation ? m_stkDungeonMapCreation->length() : 0; }
+    int GetRoomCount() const { return m_llRooms ? m_llRooms->length() : 0; }
+    int GetHallwayCount() const { return m_llHallways ? m_llHallways->length() : 0; }
+    unsigned int GetSeed() const { return m_dwSeed; }
+    
     void InitDungeonCreate( JIVector &vOrigin );
     bool CreateOneStep();
     int Opposite( int direction );

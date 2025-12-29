@@ -1,6 +1,7 @@
 
 #include "DungeonMap.h"
 #include "DisplayText.h"
+#include <ctime>
 
 #ifdef FIXED_DUNGEON
 Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH] = {
@@ -37,6 +38,9 @@ void CDungeonMap::CreateDungeon( const int depth )
     m_llHallways = new JLinkList<CRoom>;
     JRect rcWorld( 0, 0, DUNG_WIDTH - 1, DUNG_HEIGHT - 1 );
     m_dwDepth = depth;
+    
+    // Use current RNG seed (seeded in main)
+    m_dwSeed = Util::GetRandomSeed();
 
     // First, fill the whole dungeon with rock
     FillDungeonArea( DUNG_IDX_WALL, rcWorld, false );
@@ -97,6 +101,16 @@ void CDungeonMap::CreateDungeon( const int depth )
     // JIVector vPos(20,20);
     InitDungeonCreate( vPos );
 #endif
+}
+
+// Deterministic overload for testing - seeds RNG with explicit value
+void CDungeonMap::CreateDungeon( const int depth, const unsigned int seed )
+{
+    // Seed RNG for deterministic generation
+    Util::SeedRandom( seed );
+    
+    // Call regular CreateDungeon which will pick up the seed
+    CreateDungeon( depth );
 }
 
 bool CDungeonMap::CheckArea( CDungeonCreationStep *pStep )

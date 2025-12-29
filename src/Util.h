@@ -12,6 +12,8 @@
 
 namespace Util
 {
+void SeedRandom( unsigned int seed );
+unsigned int GetRandomSeed();
 float GetRandom( float lo, float hi );
 int GetRandom( int lo, int hi );
 JIVector GetRandomPoint( const JRect rcIn );

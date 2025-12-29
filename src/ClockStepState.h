@@ -36,6 +36,7 @@ protected:
 private:
     int m_dwClock;
     int m_dwStep;
+    bool m_bShowDiagnostics;
 
     // Member Functions
 public:

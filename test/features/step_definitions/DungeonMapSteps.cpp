@@ -162,6 +162,91 @@ THEN( "^The JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) is now filled with
     }
 }
 
+// Deterministic generation tests
+GIVEN( "^I create a dungeon at depth ([0-9]+) with seed ([0-9]+)$" )
+{
+    REGEX_PARAM( int, depth );
+    REGEX_PARAM( unsigned int, seed );
+    ScenarioScope<TestCtx> context;
+    context->map.CreateDungeon( depth, seed );
+}
+
+THEN( "^The dungeon has seed ([0-9]+)$" )
+{
+    REGEX_PARAM( unsigned int, expected_seed );
+    ScenarioScope<TestCtx> context;
+    EXPECT_EQ( context->map.GetSeed(), expected_seed );
+}
+
+THEN( "^The dungeon has ([0-9]+) rooms$" )
+{
+    REGEX_PARAM( int, expected_rooms );
+    ScenarioScope<TestCtx> context;
+    int actual_rooms = context->map.GetRoomCount();
+    JLog( LOG_LEVEL_INFO, true, "Room count: %d (expected %d)\n", actual_rooms, expected_rooms );
+    EXPECT_EQ( actual_rooms, expected_rooms );
+}
+
+THEN( "^The dungeon has ([0-9]+) hallways$" )
+{
+    REGEX_PARAM( int, expected_halls );
+    ScenarioScope<TestCtx> context;
+    int actual_halls = context->map.GetHallwayCount();
+    JLog( LOG_LEVEL_INFO, true, "Hallway count: %d (expected %d)\n", actual_halls, expected_halls );
+    EXPECT_EQ( actual_halls, expected_halls );
+}
+
+THEN( "^The dungeon matches another dungeon with the same seed$" )
+{
+    ScenarioScope<TestCtx> context;
+    // Store original map tile data
+    CDungeonMapTile *original_tiles = new CDungeonMapTile[DUNG_WIDTH * DUNG_HEIGHT];
+    for( int i = 0; i < DUNG_WIDTH * DUNG_HEIGHT; i++ )
+    {
+        JIVector vPos( i % DUNG_WIDTH, i / DUNG_WIDTH );
+        if( context->map.GetTile( vPos ) )
+        {
+            original_tiles[i] = *context->map.GetTile( vPos );
+        }
+    }
+    
+    unsigned int seed = context->map.GetSeed();
+    int depth = 1; // Assume depth 1 for test
+    
+    // Create a new dungeon with same seed
+    CDungeonMap map2;
+    map2.CreateDungeon( depth, seed );
+    
+    // Compare tile types
+    bool maps_match = true;
+    int differences = 0;
+    for( int i = 0; i < DUNG_WIDTH * DUNG_HEIGHT; i++ )
+    {
+        JIVector vPos( i % DUNG_WIDTH, i / DUNG_WIDTH );
+        if( context->map.GetTile( vPos ) && map2.GetTile( vPos ) )
+        {
+            Uint8 type1 = context->map.GetTile( vPos )->GetType();
+            Uint8 type2 = map2.GetTile( vPos )->GetType();
+            if( type1 != type2 )
+            {
+                maps_match = false;
+                differences++;
+                if( differences <= 5 ) // Log first 5 differences
+                {
+                    JLog( LOG_LEVEL_ERROR, true, "Tile mismatch at <%d %d>: %d vs %d\n", 
+                          VEC_EXPAND( vPos ), type1, type2 );
+                }
+            }
+        }
+    }
+    
+    delete[] original_tiles;
+    
+    JLog( LOG_LEVEL_INFO, true, "Maps %s (differences: %d)\n", 
+          maps_match ? "MATCH" : "DO NOT MATCH", differences );
+    EXPECT_TRUE( maps_match );
+}
+
 THEN( "^The JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) is (now|not) lit$" )
 {
     REGEX_PARAM( float, l );

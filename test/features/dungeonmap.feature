@@ -150,4 +150,12 @@ Feature: Dungeon Creation
         Given I have a room create step
         Given I have a E hallway create step
         When I create a S hallway create step
-        Then the S hallway meets the E hallway
+        Then the S hallway meets the E hallway        Then the S hallway meets the E hallway
+
+    Scenario: Deterministic dungeon generation with seed
+        Given I create a dungeon at depth 1 with seed 12345
+        Then The dungeon has seed 12345
+
+    Scenario: Same seed produces same dungeon layout
+        Given I create a dungeon at depth 1 with seed 99999
+        Then The dungeon matches another dungeon with the same seed

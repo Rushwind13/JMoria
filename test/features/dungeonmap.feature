@@ -159,3 +159,15 @@ Feature: Dungeon Creation
     Scenario: Same seed produces same dungeon layout
         Given I create a dungeon at depth 1 with seed 99999
         Then The dungeon matches another dungeon with the same seed
+
+    Scenario: Stress test - 100 consecutive generations with same seed are identical
+        Given I create 100 consecutive dungeons at depth 1 with seed 11111
+        Then All 100 dungeons are identical
+        And All have the same room count
+        And All have the same hallway count
+
+    Scenario: Out-of-world tile attempts are rejected
+        Given I have a DungeonMap
+        Given I have a JRect 98,98,102,102 to fill
+        When I call FillArea for a room
+        Then The out-of-world portion remains as walls

@@ -19,6 +19,8 @@
 #include <TextEntry.h>
 #include <TileSet.h>
 
+#include <vector>
+
 // main game pointer
 CGame *g_pGame = NULL;
 eLogLevel g_eLogLevel = LOG_LEVEL_DEBUG;
@@ -28,6 +30,13 @@ eLogLevel g_eLogLevel = LOG_LEVEL_DEBUG;
 ## CONTEXT
 ##
 #######*/
+struct DungeonSnapshot
+{
+    int rooms;
+    int hallways;
+    int stack_depth;
+};
+
 struct TestCtx
 {
     JVector vec;
@@ -52,6 +61,9 @@ struct TestCtx
     CDungeonMap map;
     CDungeonCreationStep *pStep;
     CRoom *pRoom;
+    
+    // Stress testing
+    std::vector<DungeonSnapshot> dungeon_history;
 
     // AI Brain
     CAIBrain *brain;

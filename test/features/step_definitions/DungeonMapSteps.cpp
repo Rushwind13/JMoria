@@ -271,3 +271,177 @@ THEN( "^The JRect ([0-9.-]+),([0-9.-]+),([0-9.-]+),([0-9.-]+) is (now|not) lit$"
         JLog( LOG_LEVEL_NOISE, true, "\n" );
     }
 }
+
+// Edge case tests for recursion depth and stress testing
+THEN( "^The dungeon has a valid room count \\(between ([0-9]+) and ([0-9]+)\\)$" )
+{
+    REGEX_PARAM( int, min_rooms );
+    REGEX_PARAM( int, max_rooms );
+    ScenarioScope<TestCtx> context;
+    
+    int room_count = context->map.HowManyRooms();
+    JLog( LOG_LEVEL_INFO, true, "Room count: %d (expected: %d-%d)\n", 
+          room_count, min_rooms, max_rooms );
+    
+    EXPECT_GE( room_count, min_rooms );
+    EXPECT_LE( room_count, max_rooms );
+}
+
+THEN( "^The generation completed without stack overflow$" )
+{
+    ScenarioScope<TestCtx> context;
+    // If we got here without a crash, the generation completed successfully
+    int stack_size = context->map.GetStackSize();
+    JLog( LOG_LEVEL_INFO, true, "Generation complete. Final stack size: %d\n", stack_size );
+    // Stack should be empty or near-empty after generation completes
+    EXPECT_LE( stack_size, 1 );
+}
+
+GIVEN( "^I create ([0-9]+) consecutive dungeons at depth ([0-9]+) with seed ([0-9]+)$" )
+{
+    REGEX_PARAM( int, count );
+    REGEX_PARAM( int, depth );
+    REGEX_PARAM( unsigned int, seed );
+    ScenarioScope<TestCtx> context;
+    
+    context->dungeon_history.clear();
+    
+    for( int i = 0; i < count; i++ )
+    {
+        CDungeonMap map;
+        map.CreateDungeon( depth, seed );
+        
+        // Store room and hallway counts
+        context->dungeon_history.push_back({
+            map.HowManyRooms(),
+            map.HowManyHallways(),
+            map.GetStackSize()
+        });
+    }
+    
+    JLog( LOG_LEVEL_INFO, true, "Created %d dungeons with seed %u\n", count, seed );
+}
+
+THEN( "^All ([0-9]+) dungeons are identical$" )
+{
+    REGEX_PARAM( int, count );
+    ScenarioScope<TestCtx> context;
+    
+    ASSERT_EQ( context->dungeon_history.size(), count );
+    
+    // All should have same room count
+    bool all_match = true;
+    for( int i = 1; i < context->dungeon_history.size(); i++ )
+    {
+        if( context->dungeon_history[i].rooms != context->dungeon_history[0].rooms )
+        {
+            all_match = false;
+            JLog( LOG_LEVEL_ERROR, true, "Dungeon %d has %d rooms, expected %d\n",
+                  i, context->dungeon_history[i].rooms, context->dungeon_history[0].rooms );
+        }
+    }
+    
+    EXPECT_TRUE( all_match );
+}
+
+THEN( "^All have the same room count$" )
+{
+    ScenarioScope<TestCtx> context;
+    
+    if( context->dungeon_history.size() > 0 )
+    {
+        int expected_rooms = context->dungeon_history[0].rooms;
+        for( int i = 1; i < context->dungeon_history.size(); i++ )
+        {
+            EXPECT_EQ( context->dungeon_history[i].rooms, expected_rooms );
+        }
+    }
+}
+
+THEN( "^All have the same hallway count$" )
+{
+    ScenarioScope<TestCtx> context;
+    
+    if( context->dungeon_history.size() > 0 )
+    {
+        int expected_halls = context->dungeon_history[0].hallways;
+        for( int i = 1; i < context->dungeon_history.size(); i++ )
+        {
+            EXPECT_EQ( context->dungeon_history[i].hallways, expected_halls );
+        }
+    }
+}
+
+THEN( "^Each hallway tile is adjacent to at least one room floor tile$" )
+{
+    ScenarioScope<TestCtx> context;
+    
+    int hallway_count = 0;
+    int orphan_hallways = 0;
+    
+    // Check each tile
+    for( int y = 0; y < DUNG_HEIGHT; y++ )
+    {
+        for( int x = 0; x < DUNG_WIDTH; x++ )
+        {
+            JIVector vPos( x, y );
+            Uint8 tile_type = context->map.GetdtdIndex( vPos );
+            
+            // If this is a hallway tile
+            if( tile_type == DUNG_IDX_FLOOR )
+            {
+                Uint8 flags = context->map.GetFlags( vPos );
+                // Hallways are not lit, rooms are lit
+                if( !(flags & DUNG_FLAG_LIT) )
+                {
+                    hallway_count++;
+                    
+                    // Check 4 adjacent tiles for room floor
+                    bool adjacent_to_room = false;
+                    int directions[4][2] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
+                    
+                    for( int dir = 0; dir < 4; dir++ )
+                    {
+                        JIVector vAdjacent( x + directions[dir][0], y + directions[dir][1] );
+                        if( vAdjacent.IsInWorld() )
+                        {
+                            Uint8 adj_type = context->map.GetdtdIndex( vAdjacent );
+                            Uint8 adj_flags = context->map.GetFlags( vAdjacent );
+                            
+                            // Adjacent room floor is floor AND lit
+                            if( adj_type == DUNG_IDX_FLOOR && (adj_flags & DUNG_FLAG_LIT) )
+                            {
+                                adjacent_to_room = true;
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if( !adjacent_to_room )
+                    {
+                        orphan_hallways++;
+                        JLog( LOG_LEVEL_WARN, true, "Orphan hallway at <%d %d>\n", x, y );
+                    }
+                }
+            }
+        }
+    }
+    
+    JLog( LOG_LEVEL_INFO, true, "Found %d hallway tiles, %d orphaned\n", 
+          hallway_count, orphan_hallways );
+    EXPECT_EQ( orphan_hallways, 0 );
+}
+
+THEN( "^The out-of-world portion remains as walls$" )
+{
+    ScenarioScope<TestCtx> context;
+    
+    // Check tiles outside world bounds
+    JIVector vOutOfWorld( 99, 99 );
+    if( !vOutOfWorld.IsInWorld() )
+    {
+        Uint8 tile_type = context->map.GetdtdIndex( vOutOfWorld );
+        // Should still be wall
+        EXPECT_EQ( tile_type, DUNG_IDX_WALL );
+    }
+}

@@ -12,13 +12,17 @@
 
 #define DUNG_HALL_MINLENGTH 2
 #define DUNG_HALL_MAXLENGTH 8
+
+// Maximum consecutive failures before abandoning a creation step to prevent "tails out"
+#define MAX_STEP_FAILURES 3
 class CDungeonCreationStep
 {
 public:
     CDungeonCreationStep()
         : m_dwIndex( DUNG_CREATE_STEP_INVALID ),
           m_dwDirection( DIR_NONE ),
-          m_dwRecurDepth( MAX_RECURDEPTH )
+          m_dwRecurDepth( MAX_RECURDEPTH ),
+          m_dwFailureCount( 0 )
     {
         m_vPos.Init();
         m_rcArea.Init( 0, 0, 0, 0 );
@@ -37,6 +41,7 @@ public:
     int m_dwIndex;
     int m_dwDirection;
     int m_dwRecurDepth;
+    int m_dwFailureCount;  // Track consecutive failed attempts
     JIVector m_vPos;
     JRect m_rcArea;
     bool *m_pdwVisited;
@@ -124,9 +129,11 @@ struct DungeonGenDiagnostics
     int steps_skipped;        // Steps that failed creation (recursion depth, conflicts)
     int fill_operations;      // Total FillArea calls
     int conflicts_detected;   // Conflicts found during CheckArea
+    int repeated_failures;    // Steps abandoned due to repeated failures (tails out prevention)
     
     DungeonGenDiagnostics() : steps_created(0), rooms_created(0), hallways_created(0), 
-                              steps_skipped(0), fill_operations(0), conflicts_detected(0) {}
+                              steps_skipped(0), fill_operations(0), conflicts_detected(0),
+                              repeated_failures(0) {}
 };
 
 // CDungeonMap:

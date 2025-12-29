@@ -380,8 +380,10 @@ bool CDungeonMap::CreateOneStep()
         g_pGame->GetStats()->Printf( "Dungeon creation complete.\n" );
 #ifdef DUNGEN_DEBUG
         JLog( LOG_LEVEL_INFO, true, "[DUNGEN] Generation complete: %d steps, %d rooms, %d halls, "
-              "%d skipped, %d fill ops\n", m_diagnostics.steps_created, m_diagnostics.rooms_created,
-              m_diagnostics.hallways_created, m_diagnostics.steps_skipped, m_diagnostics.fill_operations );
+              "%d skipped, %d fill ops, %d abandoned (tails out prevention)\n", 
+              m_diagnostics.steps_created, m_diagnostics.rooms_created,
+              m_diagnostics.hallways_created, m_diagnostics.steps_skipped, 
+              m_diagnostics.fill_operations, m_diagnostics.repeated_failures );
 #endif
         return false;
     }
@@ -390,10 +392,10 @@ bool CDungeonMap::CreateOneStep()
 
 #ifdef DUNGEN_DEBUG
     m_diagnostics.steps_created++;
-    JLog( LOG_LEVEL_NOISE, true, "[DUNGEN] Step %d: creating %s at <%d %d, %d %d> (depth=%d)\n", 
+    JLog( LOG_LEVEL_NOISE, true, "[DUNGEN] Step %d: creating %s at <%d %d, %d %d> (depth=%d, fail_count=%d)\n", 
           m_diagnostics.steps_created,
           pCurStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM ? "room" : "hallway",
-          RECT_EXPAND( pCurStep->m_rcArea ), pCurStep->m_dwRecurDepth );
+          RECT_EXPAND( pCurStep->m_rcArea ), pCurStep->m_dwRecurDepth, pCurStep->m_dwFailureCount );
 #endif
 
     JLog( LOG_LEVEL_DEBUG, true, "creating %d %s at <%d %d, %d %d>\n", pCurStep->m_dwDirection,
@@ -412,6 +414,8 @@ bool CDungeonMap::CreateOneStep()
         // Use num_halls instead of forcing all 4 directions
         int dirs[4];
         RandomDirections( dirs );
+        int halls_created = 0;
+        int halls_failed = 0;
         for( int index = 0; index <= num_halls; index++ )
         {
             int dir = dirs[index];
@@ -429,6 +433,7 @@ bool CDungeonMap::CreateOneStep()
             {
                 AddDoor( vHall, dir );
                 m_stkDungeonMapCreation->Push( pNewStep );
+                halls_created++;
 #ifdef DUNGEN_DEBUG
                 m_diagnostics.hallways_created++;
                 JLog( LOG_LEVEL_NOISE, true, "[DUNGEN] Hallway created, pushed to stack\n" );
@@ -437,9 +442,20 @@ bool CDungeonMap::CreateOneStep()
 #ifdef DUNGEN_DEBUG
             else
             {
+                halls_failed++;
                 m_diagnostics.steps_skipped++;
                 JLog( LOG_LEVEL_NOISE, true, "[DUNGEN] Hallway creation failed (conflict or depth limit)\n" );
             }
+#endif
+        }
+        
+        // Track repeated failures: if all hallway attempts failed, this is a dead-end branch
+        if( halls_created == 0 && halls_failed > 0 )
+        {
+            pCurStep->m_dwFailureCount++;
+#ifdef DUNGEN_DEBUG
+            m_diagnostics.repeated_failures++;
+            JLog( LOG_LEVEL_NOISE, true, "[DUNGEN] Dead-end room: all %d hallway attempts failed\n", halls_failed );
 #endif
         }
     }

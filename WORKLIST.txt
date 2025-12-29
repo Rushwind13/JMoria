@@ -135,11 +135,29 @@ PRIORITIZED DUNGEON GENERATION WORKLIST (updated 2025-12-28):
   - ✅ Added 2 new BDD tests in `test/features/dungeonmap.feature` verifying determinism
   - ✅ Tests pass: same seed produces identical dungeon layouts
 
-- [P0] ✅ COMPLETED (2025-12-28) - Make generation stepper usable and visual
+- [P0] ✅ COMPLETED (2025-12-28) - Make generation stepper usable and visual (PR#143)
   - ✅ Enhanced `ClockStepState::DoTick()` with diagnostic overlay (seed, stack, rooms, halls)
   - ✅ Added diagnostic accessors to `CDungeonMap`: GetSeed(), GetStackSize(), GetRoomCount(), GetHallwayCount()
   - ✅ Added `length()` method to `JStack` template for stack size tracking
-  - ✅ ClockStepState now displays real-time generation diagnostics (press space to step)
+  - ✅ ClockStepState now displays real-time generation diagnostics (press SPACE to step)
+  - ✅ Fixed all NULL pointer crashes when player not spawned (Draw, UpdateSeen, PlayerCanSee, IsLit, Update)
+  - ✅ Deferred player spawn until ESC pressed in CLOCKSTEP mode
+  - ✅ Added m_bLevelPopulated flag to prevent scenery/items/monsters respawning every tick
+  - ✅ Fixed SPACE key to stop advancing after generation completes
+  - ✅ Fixed dungeon visibility - bypassed DUNG_FLAG_SEEN check in CLOCKSTEP mode
+  - ✅ Centered viewport on entire dungeon (100x100) instead of player position
+  - ✅ Tiles render at normal scale with natural colors from tile definitions
+  - STATUS: Visual stepper fully functional - dungeon generates step-by-step with diagnostics overlay
+
+- [P1] Clean up and document CLOCKSTEP implementation (2025-12-28)
+  - Remove temporary debugging code and commented-out sections from DrawDungeon()
+  - Document CLOCKSTEP architecture in Developer's Guide:
+    * How to enable: Add -DCLOCKSTEP to Makefile CFLAGS
+    * State flow: INTRO → CLOCKSTEP → COMMAND (on ESC)
+    * Key controls: SPACE advances one tick, ESC spawns player and starts game
+    * Rendering adjustments: viewport centering, visibility bypass, lighting override
+  - Add comments explaining why player spawn is deferred and how m_bLevelPopulated works
+  - Consider making CLOCKSTEP a runtime flag instead of compile-time for easier testing
 
 - [P1] Improve unit and BDD tests for edge cases (2025-10-17)
   - Add tests for recursion depth limits (MAX_RECURDEPTH), hall-to-room branching, and out-of-world rejections.
@@ -167,9 +185,10 @@ PRIORITIZED DUNGEON GENERATION WORKLIST (updated 2025-12-28):
   - Fix any memory leaks found in `CreateOneStep`, `FillArea`, and step allocation (use smart pointers in future refactor).
 
 Notes:
-- P0 items completed 2025-12-28: Deterministic generation with seed support and visual stepper diagnostics now working
+- P0 items completed 2025-12-28: Deterministic generation and visual stepper (PR#143) fully working
 - `test/features/dungeonmap.feature` has 94 passing scenarios including new determinism tests
-- Next focus: P1 items to improve test coverage and add runtime diagnostics for debugging generation issues
+- Visual stepper allows watching dungeon generation step-by-step with real-time diagnostics
+- Next focus: P1 cleanup/documentation and edge case testing
 - `test/features/step_definitions/DungeonMapSteps.cpp` already has infrastructure to expand edge case testing  
 
 BUGS:

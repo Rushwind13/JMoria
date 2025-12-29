@@ -157,6 +157,8 @@ public:
     JResult Modify( JVector &vPos );
     CItem *PickUp( JVector &vPickupPos );
     void Drop( CItem *pItem, JVector &vDropPos );
+    void PopulateLevel( const int depth ); // Place scenery, items, and monsters
+    void SetDrawFlag( bool bDraw ) { m_bDraw = bDraw; }
 
 protected:
     JRect m_Rect;

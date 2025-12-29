@@ -9,14 +9,17 @@
 #include "ClockStepState.h"
 
 #include "DisplayText.h"
+#include "Dungeon.h"
+#include "DungeonConstants.h"
 #include "DungeonTile.h"
 #include "Game.h"
+#include "Player.h"
 
 #include "FileParse.h"
 
 extern CGame *g_pGame;
 
-CClockStepState::CClockStepState() : m_dwClock( 0 ), m_dwStep( 1 ), m_bShowDiagnostics( true )
+CClockStepState::CClockStepState() : m_dwClock( 0 ), m_dwStep( 1 ), m_bShowDiagnostics( true ), m_bLevelPopulated( false )
 {
     m_pKeyHandlers[CLOCKSTEP_INIT] = &CClockStepState::OnHandleInit;
     m_pKeyHandlers[CLOCKSTEP_TICK] = &CClockStepState::OnHandleTick;
@@ -71,8 +74,21 @@ int CClockStepState::OnHandleInit( SDL_Keysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing CLOCKSTEP state...\n" );
 
-    g_pGame->GetStats()->Clear();
-    DoTick();
+    // Create the initial dungeon level
+    if( g_pGame && g_pGame->GetDungeon() && g_pGame->GetDungeon()->depth == 0 )
+    {
+        g_pGame->GetDungeon()->OnChangeLevel( DUNG_CFG_START_LEVEL );
+        m_bLevelPopulated = false;
+    }
+
+    if( g_pGame && g_pGame->GetStats() )
+    {
+        g_pGame->GetStats()->Clear();
+        g_pGame->GetStats()->Printf( "CLOCKSTEP Mode\n" );
+        g_pGame->GetStats()->Printf( "Press SPACE to step through generation\n" );
+        g_pGame->GetStats()->Printf( "Press ESC when done to spawn player\n" );
+    }
+    
     m_eCurModifier = CLOCKSTEP_TICK;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
     return 0;
@@ -82,7 +98,22 @@ int CClockStepState::OnBaseHandleKey( SDL_Keysym *keysym )
 {
     if( keysym->sym == SDLK_RETURN || keysym->sym == SDLK_SPACE )
     {
-        return JCOMPLETESTATE;
+        // Only continue ticking if generation not complete
+        if( !m_bLevelPopulated )
+            return JCOMPLETESTATE;
+        else
+            return -1; // Ignore SPACE after generation complete
+    }
+    
+    if( keysym->sym == SDLK_ESCAPE )
+    {
+        // Exit CLOCKSTEP mode and spawn player
+        g_pGame->GetPlayer()->m_bHasSpawned = false;
+        g_pGame->GetPlayer()->SpawnPlayer();
+        g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
+                                    g_pGame->GetDungeon()->depth );
+        ResetToState( STATE_COMMAND );
+        return JSUCCESS;
     }
 
     return -1;
@@ -104,7 +135,15 @@ bool CClockStepState::DoTick()
 {
     m_dwClock += m_dwStep;
     
-    if( m_bShowDiagnostics && g_pGame->GetDungeon() && g_pGame->GetDungeon()->GetCurLevel() )
+    // Safety check for dungeon and level
+    if( !g_pGame || !g_pGame->GetDungeon() || !g_pGame->GetDungeon()->GetCurLevel() )
+    {
+        JLog( LOG_LEVEL_ERROR, true, "DoTick called but dungeon not ready!\n" );
+        g_pGame->GetStats()->Printf( "ERROR: Dungeon not initialized\n" );
+        return false;
+    }
+    
+    if( m_bShowDiagnostics )
     {
         CDungeonMap *pMap = g_pGame->GetDungeon()->GetCurLevel();
         g_pGame->GetStats()->Printf( "Tick! %d\n", m_dwClock );
@@ -119,6 +158,22 @@ bool CClockStepState::DoTick()
     }
     
     g_pGame->SetReadyForUpdate( true );
-    g_pGame->GetDungeon()->Tick( m_dwClock );
+    bool bStillGenerating = g_pGame->GetDungeon()->Tick( m_dwClock );
+    
+    // Force dungeon to redraw after each generation step
+    g_pGame->GetDungeon()->SetDrawFlag( true );
+    
+    if( !bStillGenerating && !m_bLevelPopulated )
+    {
+        g_pGame->GetStats()->Printf( "\nGeneration complete!\n" );
+        g_pGame->GetStats()->Printf( "Placing scenery, items, and monsters...\n" );
+        
+        // Now that dungeon is complete, place scenery/items/monsters (only once)
+        g_pGame->GetDungeon()->PopulateLevel( g_pGame->GetDungeon()->depth );
+        m_bLevelPopulated = true;
+        
+        g_pGame->GetStats()->Printf( "Press ESC to spawn player.\n" );
+    }
+    
     return true;
 }

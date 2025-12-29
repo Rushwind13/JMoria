@@ -135,6 +135,10 @@ void CPlayer::CheckDisturbance()
 
 void CPlayer::Draw()
 {
+    // Don't draw if player hasn't been spawned yet (e.g., in CLOCKSTEP mode)
+    if( !m_bHasSpawned )
+        return;
+        
     Uint8 player_tile = '@' - ' ' - 1; // TileIDs[TILE_IDX_PLAYER] - ' ' - 1;
     JVector DUNG_ASPECT;
     JColor player_color( 255, 255, 255, 255 );

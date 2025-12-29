@@ -114,7 +114,9 @@ void CDungeon::Init( const char *szBasedir )
 
     m_bDraw = true;
 
+#ifndef CLOCKSTEP
     OnChangeLevel( DUNG_CFG_START_LEVEL );
+#endif
 }
 
 JResult CDungeon::TerminateLevel()
@@ -162,6 +164,8 @@ JResult CDungeon::CreateNewLevel( const int delta )
 
     CreateMap();
 
+#ifndef CLOCKSTEP
+    // In normal mode, place scenery/items/monsters immediately after dungeon creation
     PlaceScenery( depth );
 
     // Place items appropriate to this level.
@@ -169,9 +173,20 @@ JResult CDungeon::CreateNewLevel( const int delta )
 
     // Spawn monsters appropriate to this level.
     SpawnMonsters( depth );
+#else
+    // In CLOCKSTEP mode, these will be placed after dungeon generation completes
+    JLog( LOG_LEVEL_INFO, false, "CLOCKSTEP: Scenery/items/monsters will be placed after generation.\n" );
+#endif
 
     m_bDraw = true;
     return JSUCCESS;
+}
+
+void CDungeon::PopulateLevel( const int depth )
+{
+    PlaceScenery( depth );
+    PlaceItems( depth );
+    SpawnMonsters( depth );
 }
 
 JResult CDungeon::CreateMap()
@@ -180,16 +195,18 @@ JResult CDungeon::CreateMap()
     // Create the randomized dungeon
     m_dmCurLevel = new CDungeonMap;
     m_dmCurLevel->CreateDungeon( depth );
-#ifdef CLOCKSTEP
-    Tick( 0 );
-#else
+#ifndef CLOCKSTEP
+    // In normal mode, complete the dungeon immediately
     while( m_dmCurLevel->CreateOneStep() )
         ;
-#endif
-
+        
     JLog( LOG_LEVEL_INFO, true, "Rooms in current level: %d\n", m_dmCurLevel->HowManyRooms() );
     JLog( LOG_LEVEL_INFO, true, "Hallways in current level: %d\n",
           m_dmCurLevel->HowManyHallways() );
+#else
+    // In CLOCKSTEP mode, dungeon will be generated step-by-step via Tick() calls
+    JLog( LOG_LEVEL_INFO, true, "CLOCKSTEP: Dungeon generation ready. Press SPACE to step.\n" );
+#endif
 
     InitDungeonTiles();
 
@@ -462,6 +479,9 @@ JResult CDungeon::OnChangeLevel( const int delta )
 
     // Create new level
     CreateNewLevel( delta );
+    
+#ifndef CLOCKSTEP
+    // In normal mode, spawn player immediately after level creation
     g_pGame->GetPlayer()->m_bHasSpawned = false;
     g_pGame->GetPlayer()->SpawnPlayer();
     JLog( LOG_LEVEL_INFO, false, "done.\n" );
@@ -469,6 +489,10 @@ JResult CDungeon::OnChangeLevel( const int delta )
           depth );
     g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
                                 depth );
+#else
+    // In CLOCKSTEP mode, player will be spawned manually after generation completes
+    JLog( LOG_LEVEL_INFO, false, "done.\n" );
+#endif
 
     return JSUCCESS;
 }
@@ -487,6 +511,8 @@ bool CDungeon::Tick( const int dwClock )
     }/**/
 
     bool bWorking = m_dmCurLevel->CreateOneStep();
+#ifndef CLOCKSTEP
+    // Auto-advance to next level when generation completes (disabled in CLOCKSTEP mode)
     if( bWorking == false )
     {
         counter++;
@@ -496,21 +522,25 @@ bool CDungeon::Tick( const int dwClock )
             OnChangeLevel( 1 );
         }
     }
+#endif
 
     InitDungeonTiles();
-    return true;
+    return bWorking;
 }
 
 bool CDungeon::Update( float fCurTime )
 {
-    CLink<CItem> *pLink = m_llItems->GetHead();
-    CItem *pItem;
+    if( m_llItems )
+    {   
+        CLink<CItem> *pLink = m_llItems->GetHead();
+        CItem *pItem;
 
-    while( pLink != NULL )
-    {
-        pItem = pLink->m_lpData;
-        pItem->Update( fCurTime );
-        pLink = m_llItems->GetNext( pLink );
+        while( pLink != NULL )
+        {
+            pItem = pLink->m_lpData;
+            pItem->Update( fCurTime );
+            pLink = m_llItems->GetNext( pLink );
+        }
     }
 
     UpdateSeen();
@@ -519,6 +549,10 @@ bool CDungeon::Update( float fCurTime )
 
 JResult CDungeon::UpdateSeen()
 {
+    // In CLOCKSTEP mode, player may not be spawned yet
+    if( !g_pGame->GetPlayer() || !g_pGame->GetPlayer()->m_bHasSpawned )
+        return JSUCCESS;
+        
     JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
     JRect rcSeen = Util::Nearby( vPlayer, 1 );
 
@@ -612,6 +646,10 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
 
 bool CDungeon::PlayerCanSee( JVector vCheck, uint32 dwFlags )
 {
+    // In CLOCKSTEP mode, player may not exist yet
+    if( !g_pGame->GetPlayer() || !g_pGame->GetPlayer()->m_bHasSpawned )
+        return true; // Show everything when no player
+        
     if( g_pGame->GetPlayer()->IsWizard() )
         return true;
 
@@ -670,6 +708,10 @@ void CDungeon::Draw()
 
 bool CDungeon::IsLit( JVector vPos )
 {
+    // In CLOCKSTEP mode, player may not exist yet - consider everything lit
+    if( !g_pGame->GetPlayer() || !g_pGame->GetPlayer()->m_bHasSpawned )
+        return true;
+        
     if( !g_pGame->GetPlayer()->LightSource() )
         return false;
     JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
@@ -681,12 +723,22 @@ void CDungeon::DrawDungeon()
 {
     // Brute force method; optimize this later
     JVector vScreen;
-    JVector DUNG_ASPECT;
-    JVector vLook =
-        ( g_pGame->GetGameStateIndex() == STATE_LOOK ) ? m_vLookPos : g_pGame->GetPlayer()->m_vPos;
+#ifdef DUNG_FONT_COURIER
+    JVector vSize( 1.0f, 1.0f );
+#else
+    JVector vSize( 0.75f, 1.0f );
+#endif
+    
+    // In CLOCKSTEP mode, player may not be spawned yet
+    JVector vDefaultPos( DUNG_WIDTH / 2, DUNG_HEIGHT / 2 );
+    JVector vPlayerPos = ( g_pGame->GetPlayer() && g_pGame->GetPlayer()->m_bHasSpawned ) 
+                         ? g_pGame->GetPlayer()->m_vPos 
+                         : vDefaultPos;
+    
+    JVector vLook = ( g_pGame->GetGameStateIndex() == STATE_LOOK ) ? m_vLookPos : vPlayerPos;
     JVector vProjectile = ( g_pGame->GetGameStateIndex() == STATE_RANGED )
                               ? m_vProjectilePos
-                              : g_pGame->GetPlayer()->m_vPos;
+                              : vPlayerPos;
     JColor color;
 
     for( vScreen.x = 0; vScreen.x < DUNG_WIDTH; vScreen.x++ )
@@ -710,19 +762,40 @@ void CDungeon::DrawDungeon()
 
             // this tile doesn't exist, or it's not been seen
             // or something else is standing there
-            else if( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_SEEN ) == 0 ) ||
-                     ( g_pGame->GetPlayer()->IsWizard() &&
-                       ( curTile->m_dwFlags & ( DUNG_FLAG_SEEN | DUNG_FLAG_LIT ) ) == 0 ) ||
-                     vScreen == g_pGame->GetPlayer()->m_vPos ||
-                     ( curTile->m_pCurMonster != NULL &&
-                       PlayerCanSee( vScreen, curTile->m_pCurMonster->m_md->m_dwFlags &
-                                                  ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) ) ||
-                     ( curTile->m_pCurItem != NULL &&
-                       PlayerCanSee( vScreen, MON_FLAG_EMPTY_MIND ) ) )
+            // In CLOCKSTEP mode, show all tiles regardless of visibility
+            else if( g_pGame->GetGameStateIndex() != STATE_CLOCKSTEP &&
+                     ( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_SEEN ) == 0 ) ||
+                       ( g_pGame->GetPlayer()->IsWizard() &&
+                         ( curTile->m_dwFlags & ( DUNG_FLAG_SEEN | DUNG_FLAG_LIT ) ) == 0 ) ||
+                       vScreen == g_pGame->GetPlayer()->m_vPos ||
+                       ( curTile->m_pCurMonster != NULL &&
+                         PlayerCanSee( vScreen, curTile->m_pCurMonster->m_md->m_dwFlags &
+                                                    ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) ) ||
+                       ( curTile->m_pCurItem != NULL &&
+                         PlayerCanSee( vScreen, MON_FLAG_EMPTY_MIND ) ) ) )
             {
                 continue;
             }
 
+            // In CLOCKSTEP mode, display all tiles as red for visibility
+            // Draw player position in green
+            // if( g_pGame->GetGameStateIndex() == STATE_CLOCKSTEP )
+            // {
+            //     if( g_pGame->GetPlayer() && g_pGame->GetPlayer()->m_bHasSpawned && 
+            //         vScreen == g_pGame->GetPlayer()->m_vPos )
+            //     {
+            //         color = JColor( 0, 255, 0, 255 ); // Green for player
+            //     }
+            //     else if( vScreen.x == DUNG_WIDTH / 2 || vScreen.y == DUNG_HEIGHT / 2 )
+            //     {
+            //         color = JColor( 255, 0, 0, 255 ); // Red for halfway
+            //     }
+            //     else
+            //     {
+            //         color = JColor( 255, 255, 0, 255 ); // Red for tiles
+            //     }
+            // }
+            // else 
             if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
             {
                 color = JColor( 100, 0, 100, 255 );
@@ -731,7 +804,7 @@ void CDungeon::DrawDungeon()
             {
                 color = JColor( 100, 100, 0, 255 );
             }
-            else if( IsLit( vScreen ) )
+            else if( g_pGame->GetGameStateIndex() != STATE_CLOCKSTEP && IsLit( vScreen ) )
             {
                 color = JColor( 200, 200, 0, 255 );
             }
@@ -749,6 +822,9 @@ void CDungeon::DisturbPlayer() { g_pGame->GetPlayer()->m_bIsDisturbed = true; }
 
 void CDungeon::DrawItems()
 {
+    if( !m_llItems )
+        return;
+
     CLink<CItem> *pLink = m_llItems->GetHead();
     CItem *pItem;
 
@@ -766,6 +842,8 @@ void CDungeon::DrawItems()
 
 void CDungeon::DrawMonsters()
 {
+    if( !m_llMonsters )
+        return;
     CLink<CMonster> *pLink = m_llMonsters->GetHead();
     CMonster *pMon;
 
@@ -786,7 +864,7 @@ void CDungeon::PreDraw()
     if( g_pGame->GetPlayer() != NULL )
     {
 #ifdef CLOCKSTEP
-        m_dwZoom = DUNG_WIDTH;
+        m_dwZoom = DUNG_WIDTH / 2;
 #endif
         int xinitval = m_dwZoom;
         // int xinitval = 16;
@@ -794,8 +872,14 @@ void CDungeon::PreDraw()
 
 #define ORIGIN_PLAYER
 #ifdef ORIGIN_PLAYER
+#ifdef CLOCKSTEP
+        // In CLOCKSTEP mode, center on the entire dungeon
+        int xorigin = 0;
+        int yorigin = 0;
+#else
         int xorigin = (int)g_pGame->GetPlayer()->m_vPos.x - DUNG_WIDTH / 2;
         int yorigin = (int)g_pGame->GetPlayer()->m_vPos.y - DUNG_HEIGHT / 2;
+#endif
 #else
         int xorigin = 0; // + is left (?!)
         int yorigin = 0; // + is up

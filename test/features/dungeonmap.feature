@@ -171,3 +171,14 @@ Feature: Dungeon Creation
         Given I have a JRect 98,98,102,102 to fill
         When I call FillArea for a room
         Then The out-of-world portion remains as walls
+
+    Scenario: Dungeon can be exported to fixture file
+        Given I create a dungeon at depth 1 with seed 42
+        When I export the dungeon to a fixture file
+        Then The fixture file exists
+
+    Scenario: Dungeon fixture can be imported
+        Given I create a dungeon at depth 2 with seed 55
+        When I export the dungeon to a fixture file
+        And I import the fixture file into a new dungeon
+        Then The imported dungeon has the same structure

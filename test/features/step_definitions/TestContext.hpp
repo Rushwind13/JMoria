@@ -20,6 +20,7 @@
 #include <TileSet.h>
 
 #include <vector>
+#include <string>
 
 // main game pointer
 CGame *g_pGame = NULL;
@@ -61,6 +62,10 @@ struct TestCtx
     CDungeonMap map;
     CDungeonCreationStep *pStep;
     CRoom *pRoom;
+    
+    // Fixture / Regression testing
+    std::string fixture_filename;
+    CDungeonMap imported_map;
     
     // Stress testing
     std::vector<DungeonSnapshot> dungeon_history;

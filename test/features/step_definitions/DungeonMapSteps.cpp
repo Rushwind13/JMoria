@@ -445,3 +445,100 @@ THEN( "^The out-of-world portion remains as walls$" )
         EXPECT_EQ( tile_type, DUNG_IDX_WALL );
     }
 }
+
+WHEN( "^I export the dungeon to a fixture file$" )
+{
+    ScenarioScope<TestCtx> context;
+    context->fixture_filename = "/tmp/test_dungeon.fixture";
+    EXPECT_TRUE( context->map.ExportDungeon( context->fixture_filename.c_str() ) );
+}
+
+THEN( "^The fixture file exists$" )
+{
+    ScenarioScope<TestCtx> context;
+    FILE *fp = fopen( context->fixture_filename.c_str(), "r" );
+    EXPECT_NE( fp, (FILE *)NULL );
+    if( fp ) fclose( fp );
+}
+
+WHEN( "^I import the fixture file into a new dungeon$" )
+{
+    ScenarioScope<TestCtx> context;
+    EXPECT_TRUE( context->imported_map.ImportDungeon( context->fixture_filename.c_str() ) );
+}
+
+THEN( "^The imported dungeon has the same structure$" )
+{
+    ScenarioScope<TestCtx> context;
+    // CompareDungeon validates that tiles and flags match
+    EXPECT_TRUE( context->map.CompareDungeon( context->imported_map ) );
+}
+
+THEN( "^The fixture file has valid JMORIA header$" )
+{
+    ScenarioScope<TestCtx> context;
+    FILE *fp = fopen( context->fixture_filename.c_str(), "r" );
+    ASSERT_NE( fp, (FILE *)NULL );
+    
+    char buf[256];
+    EXPECT_TRUE( fgets( buf, sizeof(buf), fp ) != NULL );
+    
+    // Remove newline for comparison
+    char *newline = strchr( buf, '\n' );
+    if( newline ) *newline = '\0';
+    
+    EXPECT_STREQ( buf, "JMORIA_FIXTURE_v1" );
+    fclose( fp );
+}
+
+THEN( "^The fixture metadata contains correct seed and depth$" )
+{
+    ScenarioScope<TestCtx> context;
+    FILE *fp = fopen( context->fixture_filename.c_str(), "r" );
+    ASSERT_NE( fp, (FILE *)NULL );
+    
+    char buf[512];
+    // Skip header
+    fgets( buf, sizeof(buf), fp );
+    
+    // Read metadata
+    EXPECT_TRUE( fgets( buf, sizeof(buf), fp ) != NULL );
+    
+    unsigned int seed, depth;
+    int width, height, rooms, hallways;
+    int result = sscanf( buf, "seed=%u,depth=%u,width=%d,height=%d,rooms=%d,hallways=%d",
+                         &seed, &depth, &width, &height, &rooms, &hallways );
+    
+    EXPECT_EQ( result, 6 );
+    EXPECT_EQ( seed, 42 );
+    EXPECT_EQ( depth, 1 );
+    EXPECT_EQ( width, DUNG_WIDTH );
+    EXPECT_EQ( height, DUNG_HEIGHT );
+    
+    fclose( fp );
+}
+
+THEN( "^The fixture file contains ([0-9]+) tile rows$" )
+{
+    REGEX_PARAM( int, expected_rows );
+    ScenarioScope<TestCtx> context;
+    FILE *fp = fopen( context->fixture_filename.c_str(), "r" );
+    ASSERT_NE( fp, (FILE *)NULL );
+    
+    char buf[4096];
+    int row_count = 0;
+    
+    // Skip header and metadata (2 lines)
+    fgets( buf, sizeof(buf), fp );
+    fgets( buf, sizeof(buf), fp );
+    
+    // Count tile rows
+    while( fgets( buf, sizeof(buf), fp ) )
+    {
+        if( buf[0] != '\0' && buf[0] != '\n' )
+            row_count++;
+    }
+    
+    EXPECT_EQ( row_count, expected_rows );
+    fclose( fp );
+}

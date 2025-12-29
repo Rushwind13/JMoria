@@ -49,6 +49,7 @@ void jstrcpy( char *dest, const char *src );
 int jstrlen( const char *s1 );
 int jstrcmp( const char *s1, const char *s2 );
 int jstrncmp( const char *s1, const char *s2, const uint32 count );
+double GetTimeInMillis(); // High-resolution timing for performance measurement
 }; // namespace Util
 
 #endif // __UTIL_H__

@@ -11,6 +11,7 @@
 #ifndef TURN_BASED
 #include <sys/time.h>
 #endif
+#include <sys/time.h>
 
 #include "JMDefs.h"
 #include "Util.h"
@@ -422,6 +423,15 @@ int jstrncmp( const char *s1, const char *s2, const uint32 count )
         p2++;
     }
     return 0;
+}
+
+// High-resolution timing for performance measurement
+// Returns current time in milliseconds with microsecond precision
+double GetTimeInMillis()
+{
+    struct timeval tv;
+    gettimeofday( &tv, NULL );
+    return ( tv.tv_sec * 1000.0 ) + ( tv.tv_usec / 1000.0 );
 }
 
 } // namespace Util

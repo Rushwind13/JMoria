@@ -130,10 +130,14 @@ struct DungeonGenDiagnostics
     int fill_operations;      // Total FillArea calls
     int conflicts_detected;   // Conflicts found during CheckArea
     int repeated_failures;    // Steps abandoned due to repeated failures (tails out prevention)
+    double start_time_ms;     // Generation start time in milliseconds
+    double end_time_ms;       // Generation end time in milliseconds
+    double total_time_ms;     // Total generation time in milliseconds
     
     DungeonGenDiagnostics() : steps_created(0), rooms_created(0), hallways_created(0), 
                               steps_skipped(0), fill_operations(0), conflicts_detected(0),
-                              repeated_failures(0) {}
+                              repeated_failures(0), start_time_ms(0.0), end_time_ms(0.0),
+                              total_time_ms(0.0) {}
 };
 
 // CDungeonMap:
@@ -200,9 +204,15 @@ public:
     unsigned int GetSeed() const { return m_dwSeed; }
     const DungeonGenDiagnostics& GetDiagnostics() const { return m_diagnostics; }
     
+    // Fixture management for regression testing
+    bool ExportDungeon( const char *pszFilename ) const;
+    bool ImportDungeon( const char *pszFilename );
+    bool CompareDungeon( const CDungeonMap &other ) const;
+    
     void InitDungeonCreate( JIVector &vOrigin );
     bool CreateOneStep();
     int Opposite( int direction );
+    void GetAdjacentDirections( int primary_dir, int &adj1, int &adj2 ) const;
     CDungeonCreationStep *MakeRoomStep( const JIVector &vPos, const int direction,
                                         const int recurdepth );
     CDungeonCreationStep *MakeHallStep( const JIVector &vPos, const int direction,

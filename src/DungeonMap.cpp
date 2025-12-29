@@ -353,6 +353,35 @@ int CDungeonMap::Opposite( int direction )
     return DIR_NONE;
 }
 
+// Get the two adjacent directions to a given cardinal direction
+// For example, DIR_NORTH has adjacent directions DIR_WEST and DIR_EAST
+void CDungeonMap::GetAdjacentDirections( int primary_dir, int &adj1, int &adj2 ) const
+{
+    switch( primary_dir )
+    {
+    case DIR_NORTH:
+        adj1 = DIR_WEST;
+        adj2 = DIR_EAST;
+        break;
+    case DIR_SOUTH:
+        adj1 = DIR_EAST;
+        adj2 = DIR_WEST;
+        break;
+    case DIR_WEST:
+        adj1 = DIR_NORTH;
+        adj2 = DIR_SOUTH;
+        break;
+    case DIR_EAST:
+        adj1 = DIR_SOUTH;
+        adj2 = DIR_NORTH;
+        break;
+    default:
+        adj1 = DIR_NONE;
+        adj2 = DIR_NONE;
+        break;
+    }
+}
+
 void RandomDirections( int r[] )
 {
     // initial range of numbers
@@ -471,6 +500,41 @@ bool CDungeonMap::CreateOneStep()
             if( !vRoom.IsWithinWorld() )
                 break;
             pNewStep = MakeRoomStep( vRoom, dir, pCurStep->m_dwRecurDepth + 1 );
+            
+            // Alternate direction fallback: if primary direction fails, try adjacent directions
+            if( pNewStep == NULL )
+            {
+                int adj1, adj2;
+                GetAdjacentDirections( dir, adj1, adj2 );
+                
+                // Try first adjacent direction
+                JIVector vRoomAdj1 = GetHallOrigin( pCurStep, DUNG_CREATE_STEP_MAKE_ROOM );
+                if( vRoomAdj1.IsWithinWorld() && pNewStep == NULL )
+                {
+                    pNewStep = MakeRoomStep( vRoomAdj1, adj1, pCurStep->m_dwRecurDepth + 1 );
+                    if( pNewStep != NULL )
+                        dir = adj1;
+                }
+                
+                // Try second adjacent direction if first failed
+                if( pNewStep == NULL )
+                {
+                    JIVector vRoomAdj2 = GetHallOrigin( pCurStep, DUNG_CREATE_STEP_MAKE_ROOM );
+                    if( vRoomAdj2.IsWithinWorld() )
+                    {
+                        pNewStep = MakeRoomStep( vRoomAdj2, adj2, pCurStep->m_dwRecurDepth + 1 );
+                        if( pNewStep != NULL )
+                            dir = adj2;
+                    }
+                }
+#ifdef DUNGEN_DEBUG
+                if( pNewStep != NULL )
+                {
+                    JLog( LOG_LEVEL_NOISE, true, "[DUNGEN] Room creation succeeded via alternate direction fallback\n" );
+                }
+#endif
+            }
+            
             if( pNewStep != NULL )
             {
                 AddDoor( vRoom, dir );
@@ -484,7 +548,7 @@ bool CDungeonMap::CreateOneStep()
             else
             {
                 m_diagnostics.steps_skipped++;
-                JLog( LOG_LEVEL_NOISE, true, "[DUNGEN] Room creation failed (conflict or depth limit)\n" );
+                JLog( LOG_LEVEL_NOISE, true, "[DUNGEN] Room creation failed after trying primary and adjacent directions\n" );
             }
 #endif
         }
@@ -596,6 +660,9 @@ void CDungeonMap::AddDoor( const JIVector vHall, int direction )
 
 void CDungeonMap::InitDungeonCreate( JIVector &vOrigin )
 {
+    // Start timing for performance measurement
+    m_diagnostics.start_time_ms = Util::GetTimeInMillis();
+    
     CDungeonCreationStep *step = MakeRoomStep( vOrigin, DIR_NONE, 0 );
     m_stkDungeonMapCreation->Push( step );
 }
@@ -845,6 +912,192 @@ JIVector &CDungeonMap::GetWallOrigin( CDungeonCreationStep *pStep, const int dir
         break;
     }
     return pStep->m_vPos;
+}
+
+// Export dungeon layout to fixture file for regression testing
+// Format: CSV with header row, then grid of tile types
+bool CDungeonMap::ExportDungeon( const char *pszFilename ) const
+{
+    if( !pszFilename || !m_dmtTiles )
+        return false;
+
+    FILE *fp = fopen( pszFilename, "w" );
+    if( !fp )
+        return false;
+
+    // Write header with metadata
+    fprintf( fp, "JMORIA_FIXTURE_v1\n" );
+    fprintf( fp, "seed=%u,depth=%u,width=%d,height=%d,rooms=%d,hallways=%d\n",
+             m_dwSeed, m_dwDepth, DUNG_WIDTH, DUNG_HEIGHT, 
+             m_llRooms ? m_llRooms->length() : 0,
+             m_llHallways ? m_llHallways->length() : 0 );
+
+    // Write tile grid: each row separated by newline
+    for( int y = 0; y < DUNG_HEIGHT; y++ )
+    {
+        for( int x = 0; x < DUNG_WIDTH; x++ )
+        {
+            CDungeonMapTile *pTile = &m_dmtTiles[y * DUNG_WIDTH + x];
+            Uint8 type = pTile->GetType();
+            uint32 flags = pTile->GetFlags();
+            
+            // Format: type or type:flags (hex) if flags present
+            if( flags != 0 )
+                fprintf( fp, "%d:%x", type, flags );
+            else
+                fprintf( fp, "%d", type );
+            
+            // Comma-separated within row, newline at end
+            if( x < DUNG_WIDTH - 1 )
+                fprintf( fp, "," );
+        }
+        fprintf( fp, "\n" );
+    }
+
+    fclose( fp );
+    return true;
+}
+
+// Import dungeon layout from fixture file
+bool CDungeonMap::ImportDungeon( const char *pszFilename )
+{
+    if( !pszFilename )
+        return false;
+
+    FILE *fp = fopen( pszFilename, "r" );
+    if( !fp )
+        return false;
+
+    char buf[4096];
+    
+    // Read and validate header
+    if( !fgets( buf, sizeof(buf), fp ) )
+    {
+        fclose( fp );
+        return false;
+    }
+    
+    // Check header (account for newline at end of fgets)
+    char *newline = strchr( buf, '\n' );
+    if( newline ) *newline = '\0';
+    
+    if( strcmp( buf, "JMORIA_FIXTURE_v1" ) != 0 )
+    {
+        fclose( fp );
+        return false;
+    }
+
+    // Read metadata line
+    unsigned int seed, depth;
+    int width, height, rooms, hallways;
+    if( !fgets( buf, sizeof(buf), fp ) ||
+        sscanf( buf, "seed=%u,depth=%u,width=%d,height=%d,rooms=%d,hallways=%d",
+                &seed, &depth, &width, &height, &rooms, &hallways ) != 6 )
+    {
+        fclose( fp );
+        return false;
+    }
+
+    // Validate dimensions
+    if( width != DUNG_WIDTH || height != DUNG_HEIGHT )
+    {
+        fclose( fp );
+        return false;
+    }
+
+    // Allocate tiles if needed
+    if( !m_dmtTiles )
+    {
+        m_dmtTiles = new CDungeonMapTile[DUNG_WIDTH * DUNG_HEIGHT];
+    }
+
+    m_dwSeed = seed;
+    m_dwDepth = depth;
+
+    // Read tile grid
+    for( int y = 0; y < DUNG_HEIGHT; y++ )
+    {
+        if( !fgets( buf, sizeof(buf), fp ) )
+        {
+            fclose( fp );
+            return false;
+        }
+
+        int x = 0;
+        char *ptr = buf;
+        while( x < DUNG_WIDTH && ptr )
+        {
+            Uint8 type = 0;
+            uint32 flags = 0;
+            int type_int = 0;
+
+            // Parse type and optional flags
+            if( sscanf( ptr, "%d", &type_int ) == 1 )
+            {
+                type = (Uint8)type_int;
+            }
+            else
+            {
+                fclose( fp );
+                return false;
+            }
+
+            // Check for flags (after colon)
+            char *colon = strchr( ptr, ':' );
+            if( colon )
+            {
+                if( sscanf( colon + 1, "%x", (unsigned int *)&flags ) == 1 )
+                {
+                    // successfully parsed flags
+                }
+            }
+
+            CDungeonMapTile *pTile = &m_dmtTiles[y * DUNG_WIDTH + x];
+            pTile->SetType( type );
+            if( flags != 0 )
+                pTile->SetFlags( flags );
+
+            // Move to next tile (comma or newline)
+            ptr = strchr( ptr, ',' );
+            if( ptr )
+                ptr++;
+            x++;
+        }
+
+        if( x != DUNG_WIDTH )
+        {
+            fclose( fp );
+            return false;
+        }
+    }
+
+    fclose( fp );
+    return true;
+}
+
+// Compare current dungeon with another dungeon
+// Returns true if layout (tiles only) matches
+bool CDungeonMap::CompareDungeon( const CDungeonMap &other ) const
+{
+    if( !m_dmtTiles || !other.m_dmtTiles )
+        return false;
+
+    for( int y = 0; y < DUNG_HEIGHT; y++ )
+    {
+        for( int x = 0; x < DUNG_WIDTH; x++ )
+        {
+            const CDungeonMapTile *pTile1 = &m_dmtTiles[y * DUNG_WIDTH + x];
+            const CDungeonMapTile *pTile2 = &other.m_dmtTiles[y * DUNG_WIDTH + x];
+
+            if( pTile1->GetType() != pTile2->GetType() ||
+                pTile1->GetFlags() != pTile2->GetFlags() )
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
 }
 
 JIVector &CDungeonMap::GetHallOrigin( CDungeonCreationStep *pStep, int step_type )

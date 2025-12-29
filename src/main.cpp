@@ -78,6 +78,14 @@ int main( int argc, char **argv )
                 g_pGame->Draw();
             }
             lastTick = curTime;
+            
+            // Frame rate cap: limit to ~30fps to prevent 90%+ CPU usage
+            // Each frame should take ~33ms (1000ms / 30fps)
+            unsigned int frameTime = Util::GetTickCount() - curTime;
+            if( frameTime < 33 )
+            {
+                SDL_Delay( 33 - frameTime );
+            }
         }
 #endif // TURN_BASED
     }

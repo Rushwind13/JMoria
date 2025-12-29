@@ -21,6 +21,8 @@ extern CGame *g_pGame;
 
 CClockStepState::CClockStepState() : m_dwClock( 0 ), m_dwStep( 1 ), m_bShowDiagnostics( true ), m_bLevelPopulated( false )
 {
+    // m_bLevelPopulated: Tracks whether scenery/items/monsters have been placed.
+    // Prevents re-spawning on every tick after generation completes.
     m_pKeyHandlers[CLOCKSTEP_INIT] = &CClockStepState::OnHandleInit;
     m_pKeyHandlers[CLOCKSTEP_TICK] = &CClockStepState::OnHandleTick;
 
@@ -74,7 +76,9 @@ int CClockStepState::OnHandleInit( SDL_Keysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing CLOCKSTEP state...\n" );
 
-    // Create the initial dungeon level
+    // Create the initial dungeon level without spawning player yet.
+    // Player spawn is deferred to avoid NULL pointer crashes during generation
+    // (many functions check g_pGame->GetPlayer()->m_bHasSpawned)
     if( g_pGame && g_pGame->GetDungeon() && g_pGame->GetDungeon()->depth == 0 )
     {
         g_pGame->GetDungeon()->OnChangeLevel( DUNG_CFG_START_LEVEL );
@@ -98,7 +102,9 @@ int CClockStepState::OnBaseHandleKey( SDL_Keysym *keysym )
 {
     if( keysym->sym == SDLK_RETURN || keysym->sym == SDLK_SPACE )
     {
-        // Only continue ticking if generation not complete
+        // Only continue ticking if generation not complete.
+        // After PopulateLevel() called (m_bLevelPopulated=true), SPACE is ignored
+        // to prevent re-calling PopulateLevel() and duplicating scenery/items/monsters.
         if( !m_bLevelPopulated )
             return JCOMPLETESTATE;
         else
@@ -168,7 +174,8 @@ bool CClockStepState::DoTick()
         g_pGame->GetStats()->Printf( "\nGeneration complete!\n" );
         g_pGame->GetStats()->Printf( "Placing scenery, items, and monsters...\n" );
         
-        // Now that dungeon is complete, place scenery/items/monsters (only once)
+        // PopulateLevel() called exactly once after generation completes.
+        // m_bLevelPopulated flag prevents duplicate spawns on subsequent ticks.
         g_pGame->GetDungeon()->PopulateLevel( g_pGame->GetDungeon()->depth );
         m_bLevelPopulated = true;
         

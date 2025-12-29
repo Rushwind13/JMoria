@@ -744,25 +744,16 @@ void CDungeon::DrawDungeon()
     for( vScreen.x = 0; vScreen.x < DUNG_WIDTH; vScreen.x++ )
     {
         for( vScreen.y = 0; vScreen.y < DUNG_HEIGHT; vScreen.y++ )
-        { /* */
-
-            /*for( vScreen.x = vPlayer.x - SCREEN_MIN_XOFF; vScreen.x < vPlayer.x + SCREEN_MAX_XOFF;
-             vScreen.x++ )
-             {
-             for( vScreen.y = vPlayer.y - SCREEN_MIN_YOFF; vScreen.y < vPlayer.y + SCREEN_MAX_YOFF;
-             vScreen.y++ )
-             {/* */
+        {
             CDungeonTile *curTile = GetTile( vScreen );
 
             if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
             {
                 ; // need to display this tile
-                // color = JColor( 100, 0, 100, 255 );
             }
 
-            // this tile doesn't exist, or it's not been seen
-            // or something else is standing there
-            // In CLOCKSTEP mode, show all tiles regardless of visibility
+            // In CLOCKSTEP mode, show all tiles regardless of visibility (bypasses DUNG_FLAG_SEEN check)
+            // In normal gameplay, only show tiles that have been explored or are occupied
             else if( g_pGame->GetGameStateIndex() != STATE_CLOCKSTEP &&
                      ( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_SEEN ) == 0 ) ||
                        ( g_pGame->GetPlayer()->IsWizard() &&
@@ -777,25 +768,7 @@ void CDungeon::DrawDungeon()
                 continue;
             }
 
-            // In CLOCKSTEP mode, display all tiles as red for visibility
-            // Draw player position in green
-            // if( g_pGame->GetGameStateIndex() == STATE_CLOCKSTEP )
-            // {
-            //     if( g_pGame->GetPlayer() && g_pGame->GetPlayer()->m_bHasSpawned && 
-            //         vScreen == g_pGame->GetPlayer()->m_vPos )
-            //     {
-            //         color = JColor( 0, 255, 0, 255 ); // Green for player
-            //     }
-            //     else if( vScreen.x == DUNG_WIDTH / 2 || vScreen.y == DUNG_HEIGHT / 2 )
-            //     {
-            //         color = JColor( 255, 0, 0, 255 ); // Red for halfway
-            //     }
-            //     else
-            //     {
-            //         color = JColor( 255, 255, 0, 255 ); // Red for tiles
-            //     }
-            // }
-            // else 
+            // Determine tile color based on game state
             if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
             {
                 color = JColor( 100, 0, 100, 255 );

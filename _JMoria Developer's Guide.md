@@ -112,3 +112,93 @@ A 5-unit-long east-west hallway in the upper-left corner of the world would have
 
 #### Boundary checking is key to this problem
 The boundary checking has a boatload of little off-by-one errors, as you can imagine.
+
+
+## CLOCKSTEP Mode: Visual Dungeon Generation Debugger
+
+CLOCKSTEP mode enables step-by-step visualization of dungeon generation for debugging the complex room/hallway creation algorithm.
+
+### Enabling CLOCKSTEP
+
+Add the `-DCLOCKSTEP` flag to `CFLAGS` in the Makefile:
+```makefile
+CFLAGS = -c -w -I../JMoria/src -std=c++14 -Wno-comment -Wno-delete-non-virtual-dtor -DCLOCKSTEP
+```
+
+Rebuild with `make clean && make`.
+
+### Controls
+
+- **SPACE** - Advance dungeon generation by one tick (calls `CreateOneStep()`)
+- **ESC** - Complete generation, spawn player, and transition to normal gameplay
+
+### How It Works
+
+**State Flow**: `STATE_INTRO` → `STATE_CLOCKSTEP` → `STATE_COMMAND`
+
+When CLOCKSTEP mode is active:
+
+1. **Initialization** (`OnHandleInit`):
+   - Creates initial dungeon level via `OnChangeLevel()`
+   - Sets `m_bLevelPopulated = false`
+   - Does NOT spawn player yet (deferred to avoid NULL crashes)
+   - Displays control instructions in Stats panel
+
+2. **Generation Loop** (`DoTick` on SPACE press):
+   - Calls `Dungeon::Tick()` which calls `DungeonMap::CreateOneStep()`
+   - Updates diagnostics overlay:
+     - Current tick count
+     - Random seed (for reproducibility)
+     - Stack depth (creation algorithm state)
+     - Room and hallway counts
+   - Forces dungeon redraw after each step
+   - Returns `true` while still generating, `false` when complete
+
+3. **Population** (after generation completes):
+   - Calls `PopulateLevel()` exactly once to place:
+     - Scenery (stairs, doors, rubble)
+     - Items (weapons, potions, scrolls)
+     - Monsters
+   - Sets `m_bLevelPopulated = true` to prevent duplicate spawns
+   - SPACE key now ignored (returns -1)
+
+4. **Player Spawn** (on ESC):
+   - Spawns player at valid location
+   - Transitions to `STATE_COMMAND` (normal gameplay)
+
+### Implementation Details
+
+**Deferred Player Spawn**: Player is NOT spawned during generation because many rendering and game logic functions check `g_pGame->GetPlayer()->m_bHasSpawned`. Spawning early causes NULL pointer crashes in:
+- `CDungeon::Draw()` - player position for camera centering
+- `CDungeon::UpdateSeen()` - player vision radius
+- `CDungeon::PlayerCanSee()` - line-of-sight checks
+- `CDungeon::IsLit()` - light source from player
+
+**Level Population Guard**: The `m_bLevelPopulated` flag ensures `PopulateLevel()` is called exactly once. Without this guard, pressing SPACE after generation would re-call `PopulateLevel()` every tick, creating duplicate stairs/items/monsters.
+
+**Viewport Adjustments** (`PreDraw()` in CLOCKSTEP mode):
+- Zoom set to `DUNG_WIDTH / 2` (50) to show entire 100×100 dungeon
+- Origin set to (0, 0) instead of player-centered
+- Creates rect `(-50, 50, 50, -50)` showing full dungeon centered on screen
+
+**Rendering Adjustments** (`DrawDungeon()` in CLOCKSTEP mode):
+- Visibility check bypassed: `g_pGame->GetGameStateIndex() != STATE_CLOCKSTEP` added to DUNG_FLAG_SEEN check
+- Lighting override disabled: `IsLit()` color (yellow) skipped in CLOCKSTEP
+- Tiles render with natural colors from `m_dtd->m_Color` definitions:
+  - Floor: light gray (192, 192, 192)
+  - Walls: dark gray (64, 64, 64)
+  - Doors: purple (64, 32, 128)
+
+### Code Locations
+
+- State machine: [src/ClockStepState.h](src/ClockStepState.h), [src/ClockStepState.cpp](src/ClockStepState.cpp)
+- Dungeon generation: [src/DungeonMap.cpp](src/DungeonMap.cpp) `CreateOneStep()`
+- Rendering adjustments: [src/Dungeon.cpp](src/Dungeon.cpp) `DrawDungeon()`, `PreDraw()`
+- Makefile: [Makefile](Makefile) line with `CFLAGS` definition
+
+### Debugging Tips
+
+- Use fixed seeds for reproducible dungeons: `CreateDungeon(depth, seed)`
+- Check diagnostics overlay for stuck generation (stack depth not changing)
+- Watch room/hall counts to verify placement algorithm working
+- Use BDD tests in [test/features/dungeonmap.feature](test/features/dungeonmap.feature) for regression testing

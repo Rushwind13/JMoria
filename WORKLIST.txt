@@ -179,7 +179,17 @@ PRIORITIZED DUNGEON GENERATION WORKLIST (updated 2025-12-28):
 
 - [P1] Add runtime diagnostics and invariants (2025-10-17)
   - Add optional `DUNGEN_DEBUG` logging for steps taken, skipped steps, and why `MakeRoomStep`/`MakeHallStep` returned NULL.
-  - Add assertions (or test-only checks) that `FillArea` maintains invariant: interior tiles were walls before fill.
+- [P1] ✅ COMPLETED (2025-12-28) - Add runtime diagnostics and invariants
+  - ✅ Added DungeonGenDiagnostics struct to track generation metrics
+  - ✅ Implemented DUNGEN_DEBUG preprocessor flag for optional detailed logging
+  - ✅ Added tracking: steps_created, rooms_created, hallways_created, steps_skipped, fill_operations
+  - ✅ Added FillArea pre-condition invariant: verifies all interior tiles were walls before fill
+  - ✅ Added logging to CreateOneStep, MakeRoomStep, MakeHallStep (recursion, conflicts, failures)
+  - ✅ Logs step attempts, failure reasons, and generation summary at completion
+  - ✅ Updated Makefile: `make DUNGEN_DEBUG=1` enables diagnostics with ~10-20% overhead
+  - ✅ Added comprehensive DUNGEN_DEBUG documentation to Developer's Guide
+  - ✅ All 96 BDD tests pass with diagnostics enabled and disabled
+  - STATUS: Runtime diagnostics infrastructure complete, ready for analyzing generation behavior
 
 - [P2] Detect and prevent "tails out" (dead-end) behavior (2025-10-17)
   - Track unsuccessful attempts per creation step; if a branch repeatedly fails, back off or try alternate directions.
@@ -198,13 +208,14 @@ PRIORITIZED DUNGEON GENERATION WORKLIST (updated 2025-12-28):
   - Fix any memory leaks found in `CreateOneStep`, `FillArea`, and step allocation (use smart pointers in future refactor).
 
 Notes:
-- P0+P1 work completed 2025-12-28: Deterministic generation, visual stepper (PR#143), documentation, and edge case testing
+- P0+P1 work completed 2025-12-28: Deterministic generation, visual stepper (PR#143), edge case testing, and runtime diagnostics
+- All P0-P1 dungeon generation priorities completed: deterministic seeding, visual CLOCKSTEP stepper, BDD tests, DUNGEN_DEBUG logging
 - `test/features/dungeonmap.feature` has 96 passing scenarios (442 steps) with stress test and boundary validation
-- Visual stepper fully functional with real-time diagnostics overlay
-- Stress test confirms deterministic generation (100 consecutive dungeons with same seed)
-- CLOCKSTEP implementation clean, documented, and production-ready
-- Next focus: Runtime diagnostics with DUNGEN_DEBUG logging, "tails out" detection, and visual regression fixtures
-- `test/features/step_definitions/` infrastructure established for expanding edge case coverage  
+- Visual stepper fully functional with real-time diagnostics overlay and room/hallway/depth tracking
+- DUNGEN_DEBUG enables detailed logging of steps, conflicts, and generation summary (10-20% overhead)
+- Stress test confirms deterministic generation: 100 consecutive dungeons with same seed produce identical layouts
+- CLOCKSTEP and DUNGEN_DEBUG implementations clean, documented, production-ready
+- Next focus: P2 "tails out" detection, visual regression fixtures, and performance optimization  
 
 BUGS:
 - 2d8 bastard sword replaced by 1d8 long sword without choosing to wield

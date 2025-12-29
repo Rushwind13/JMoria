@@ -115,6 +115,20 @@ protected:
 private:
 };
 
+// Dungeon generation diagnostics structure
+struct DungeonGenDiagnostics
+{
+    int steps_created;        // Total creation steps processed
+    int rooms_created;        // Successful room steps
+    int hallways_created;     // Successful hallway steps
+    int steps_skipped;        // Steps that failed creation (recursion depth, conflicts)
+    int fill_operations;      // Total FillArea calls
+    int conflicts_detected;   // Conflicts found during CheckArea
+    
+    DungeonGenDiagnostics() : steps_created(0), rooms_created(0), hallways_created(0), 
+                              steps_skipped(0), fill_operations(0), conflicts_detected(0) {}
+};
+
 // CDungeonMap:
 // holder class for dungeon generation
 // algorithm.
@@ -165,6 +179,7 @@ private:
     JLinkList<CRoom> *m_llHallways;
     uint32 m_dwDepth;
     unsigned int m_dwSeed;
+    DungeonGenDiagnostics m_diagnostics;
 
     // Member functions
 public:
@@ -176,6 +191,7 @@ public:
     int GetRoomCount() const { return m_llRooms ? m_llRooms->length() : 0; }
     int GetHallwayCount() const { return m_llHallways ? m_llHallways->length() : 0; }
     unsigned int GetSeed() const { return m_dwSeed; }
+    const DungeonGenDiagnostics& GetDiagnostics() const { return m_diagnostics; }
     
     void InitDungeonCreate( JIVector &vOrigin );
     bool CreateOneStep();

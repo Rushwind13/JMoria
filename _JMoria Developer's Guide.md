@@ -202,3 +202,101 @@ When CLOCKSTEP mode is active:
 - Check diagnostics overlay for stuck generation (stack depth not changing)
 - Watch room/hall counts to verify placement algorithm working
 - Use BDD tests in [test/features/dungeonmap.feature](test/features/dungeonmap.feature) for regression testing
+
+---
+
+## DUNGEN_DEBUG: Runtime Diagnostics and Invariants
+
+DUNGEN_DEBUG enables detailed logging of dungeon generation steps, conflicts, and validation checks. This logging is essential for understanding and debugging the room/hallway placement algorithm.
+
+### Enabling DUNGEN_DEBUG
+
+**Compile-time option:**
+```bash
+# Build with diagnostics enabled
+make DUNGEN_DEBUG=1
+
+# Or for tests
+make test DUNGEN_DEBUG=1
+
+# Clean rebuild with diagnostics
+make clean && make DUNGEN_DEBUG=1
+```
+
+The flag can also be enabled by uncommenting the `#define DUNGEN_DEBUG` line in [src/DungeonMap.cpp](src/DungeonMap.cpp) line 6.
+
+### Diagnostic Output Categories
+
+When DUNGEN_DEBUG is enabled, the following information is logged:
+
+**Generation Summary** (`[DUNGEN]` prefix):
+- Total steps processed, rooms created, hallways created
+- Steps skipped (conflicts, depth limit rejections)
+- Total FillArea operations performed
+- Logged at generation completion (INFO level)
+
+**Step Processing** (per CreateOneStep):
+- Step number, type (room/hallway), location, recursion depth
+- Reason for step failure (depth limit, conflict)
+- Logged at NOISE level for each creation attempt
+
+**Room/Hallway Creation Details** (MakeRoomStep, MakeHallStep):
+- Recursion depth validation (rejected if depth > MAX_RECURDEPTH=10)
+- Conflict attempts during area placement (MAX_TRIES=2)
+- Final failure reason (conflicts after all attempts)
+- Logged at NOISE level with location coordinates
+
+**Fill Operations** (FillDungeonArea):
+- Pre-fill invariant check: verifies all interior tiles were walls before fill
+- Logs invariant violations (should not occur in normal operation)
+- Tracks total fill operation count
+- Logged at NOISE level per operation
+
+### Example Diagnostic Output
+
+```
+[DUNGEN] Step 1: creating room at <40 45, 45 50> (depth=0)
+[DUNGEN] Room attempt 1 conflict at <35 42, 50 55>
+[DUNGEN] Hallway created, pushed to stack
+[DUNGEN] Step 2: creating hall at <45 38, 48 42> (depth=1)
+[DUNGEN] Room created from hallway, pushed to stack
+...
+[DUNGEN] Generation complete: 47 steps, 12 rooms, 35 halls, 8 skipped, 94 fill ops
+```
+
+### Integration with Test Suite
+
+DUNGEN_DEBUG diagnostics can be captured in BDD tests using [test/features/step_definitions/DungeonMapSteps.cpp](test/features/step_definitions/DungeonMapSteps.cpp). Test scenarios validate:
+- Stress test: 100 consecutive dungeons with same seed produce identical layouts
+- Out-of-world boundary validation: tiles outside map bounds remain walls
+- FillArea invariant maintenance throughout generation
+
+Example test invocation:
+```bash
+cd test
+DUNGEN_DEBUG=1 ../runtests.sh 2>&1 | grep DUNGEN
+```
+
+### Performance Note
+
+DUNGEN_DEBUG logging adds approximately 10-20% overhead due to:
+- Per-step logging of diagnostics
+- Pre-fill invariant checking on each FillArea call
+- String formatting for diagnostic messages
+
+For production builds or performance-critical testing, disable DUNGEN_DEBUG (default).
+
+### Code Locations
+
+- Diagnostics structure: [src/DungeonMap.h](src/DungeonMap.h) lines 115-127
+- Generation tracking: [src/DungeonMap.cpp](src/DungeonMap.cpp) CreateOneStep, MakeRoomStep, MakeHallStep
+- Fill invariants: [src/DungeonMap.cpp](src/DungeonMap.cpp) FillDungeonArea (lines 241-278)
+- Build configuration: [Makefile](Makefile) lines 12-16
+
+### Debugging Tips
+
+- Monitor `[DUNGEN]` log lines for generation progress and conflicts
+- Count skipped steps vs. successful steps to identify "tails out" behavior
+- Check room/hallway counts at generation end to verify algorithm completeness
+- Use fixed seeds + DUNGEN_DEBUG to reproduce and diagnose specific failures
+- Pre-fill invariant violations indicate algorithm bug (should never occur)

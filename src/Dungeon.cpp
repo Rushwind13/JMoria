@@ -821,6 +821,73 @@ void CDungeon::PostDraw()
     g_pGame->GetRender()->PostDrawObjects();
 }
 
+/**
+ * Helper: Apply run-length encoding to a map row.
+ * Example: "######..##" becomes "#6.2#2"
+ * Returns the number of characters written to output.
+ */
+static int RLEEncodeRow( const char *row, int len, char *output )
+{
+    int outIdx = 0;
+    int i = 0;
+
+    while( i < len )
+    {
+        char c = row[i];
+        int count = 1;
+
+        // Count consecutive identical characters
+        while( i + count < len && row[i + count] == c )
+        {
+            count++;
+        }
+
+        // Write character
+        if( c == '"' )
+        {
+            output[outIdx++] = '\\';
+            output[outIdx++] = '"';
+        }
+        else if( c == '\\' )
+        {
+            output[outIdx++] = '\\';
+            output[outIdx++] = '\\';
+        }
+        else
+        {
+            output[outIdx++] = c;
+        }
+
+        // Write count if > 1
+        if( count > 1 )
+        {
+            outIdx += sprintf( output + outIdx, "%d", count );
+        }
+
+        i += count;
+    }
+
+    return outIdx;
+}
+
+/**
+ * Helper: Check if a row is all walls (can be skipped).
+ */
+static bool IsAllWalls( const char *row, int len )
+{
+    for( int i = 0; i < len; i++ )
+    {
+        if( row[i] != '#' )
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+#define VIEW_RADIUS 10
+#define VIEW_SIZE ( VIEW_RADIUS * 2 + 1 )
+
 void CDungeon::DumpToAILog()
 {
     if( !AILog_IsActive() )
@@ -828,37 +895,61 @@ void CDungeon::DumpToAILog()
         return;
     }
 
-    // Build a 2D ASCII map of the dungeon
-    // We'll represent the visible portion or full dungeon
-    char map[DUNG_HEIGHT][DUNG_WIDTH + 1];
-
-    // Initialize map with tile characters
-    for( int y = 0; y < DUNG_HEIGHT; y++ )
+    CPlayer *player = g_pGame->GetPlayer();
+    if( !player )
     {
-        for( int x = 0; x < DUNG_WIDTH; x++ )
+        return;
+    }
+
+    int px = (int)player->m_vPos.x;
+    int py = (int)player->m_vPos.y;
+
+    // Calculate visible bounds (21x21 centered on player)
+    int viewMinX = px - VIEW_RADIUS;
+    int viewMaxX = px + VIEW_RADIUS;
+    int viewMinY = py - VIEW_RADIUS;
+    int viewMaxY = py + VIEW_RADIUS;
+
+    // Clamp to dungeon bounds
+    if( viewMinX < 0 ) viewMinX = 0;
+    if( viewMinY < 0 ) viewMinY = 0;
+    if( viewMaxX >= DUNG_WIDTH ) viewMaxX = DUNG_WIDTH - 1;
+    if( viewMaxY >= DUNG_HEIGHT ) viewMaxY = DUNG_HEIGHT - 1;
+
+    int viewWidth = viewMaxX - viewMinX + 1;
+    int viewHeight = viewMaxY - viewMinY + 1;
+
+    // Build visible area map
+    char map[VIEW_SIZE][VIEW_SIZE + 1];
+
+    for( int vy = 0; vy < viewHeight; vy++ )
+    {
+        int worldY = viewMinY + vy;
+        for( int vx = 0; vx < viewWidth; vx++ )
         {
-            CDungeonTile *tile = m_Tiles + ( y * DUNG_WIDTH ) + x;
+            int worldX = viewMinX + vx;
+            CDungeonTile *tile = m_Tiles + ( worldY * DUNG_WIDTH ) + worldX;
             if( tile && tile->m_dtd )
             {
                 int tileType = tile->m_dtd->m_dwType;
                 if( tileType >= 0 && tileType < DUNG_IDX_MAX )
                 {
-                    map[y][x] = TileIDs[tileType];
+                    map[vy][vx] = TileIDs[tileType];
                 }
                 else
                 {
-                    map[y][x] = ' ';
+                    map[vy][vx] = ' ';
                 }
             }
             else
             {
-                map[y][x] = ' ';
+                map[vy][vx] = ' ';
             }
         }
-        map[y][DUNG_WIDTH] = '\0';
+        map[vy][viewWidth] = '\0';
     }
 
-    // Overlay items
+    // Overlay items in visible area
     if( m_llItems )
     {
         CLink<CItem> *pCur = m_llItems->GetHead();
@@ -869,17 +960,17 @@ void CDungeon::DumpToAILog()
             {
                 int x = (int)item->m_vPos.x;
                 int y = (int)item->m_vPos.y;
-                if( x >= 0 && x < DUNG_WIDTH && y >= 0 && y < DUNG_HEIGHT )
+                if( x >= viewMinX && x <= viewMaxX && y >= viewMinY && y <= viewMaxY )
                 {
                     int itemIdx = item->m_id ? item->m_id->m_dwIndex : 0;
-                    map[y][x] = ItemIDs[itemIdx];
+                    map[y - viewMinY][x - viewMinX] = ItemIDs[itemIdx];
                 }
             }
             pCur = m_llItems->GetNext( pCur );
         }
     }
 
-    // Overlay monsters
+    // Overlay monsters in visible area
     if( m_llMonsters )
     {
         CLink<CMonster> *pCur = m_llMonsters->GetHead();
@@ -890,10 +981,10 @@ void CDungeon::DumpToAILog()
             {
                 int x = (int)mon->GetPos().x;
                 int y = (int)mon->GetPos().y;
-                if( x >= 0 && x < DUNG_WIDTH && y >= 0 && y < DUNG_HEIGHT )
+                if( x >= viewMinX && x <= viewMaxX && y >= viewMinY && y <= viewMaxY )
                 {
                     int monIdx = mon->m_md ? mon->m_md->m_dwIndex : 0;
-                    map[y][x] = MonIDs[monIdx];
+                    map[y - viewMinY][x - viewMinX] = MonIDs[monIdx];
                 }
             }
             pCur = m_llMonsters->GetNext( pCur );
@@ -901,56 +992,48 @@ void CDungeon::DumpToAILog()
     }
 
     // Overlay player
-    CPlayer *player = g_pGame->GetPlayer();
-    if( player )
+    if( px >= viewMinX && px <= viewMaxX && py >= viewMinY && py <= viewMaxY )
     {
-        int px = (int)player->m_vPos.x;
-        int py = (int)player->m_vPos.y;
-        if( px >= 0 && px < DUNG_WIDTH && py >= 0 && py < DUNG_HEIGHT )
-        {
-            map[py][px] = '@';
-        }
+        map[py - viewMinY][px - viewMinX] = '@';
     }
 
-    // Build JSON output
-    // Format: {"type":"dungeon","turn":N,"level":N,"depth_ft":N,"map":[...]}
-    char buffer[200000]; // Large buffer for full dungeon
+    // Build JSON output with RLE-encoded visible map
+    char buffer[20000];
     int offset = 0;
 
     offset += sprintf( buffer + offset, "{\"type\":\"dungeon\"" );
     offset += sprintf( buffer + offset, ",\"turn\":%d", g_pGame->GetTurnCount() );
     offset += sprintf( buffer + offset, ",\"level\":%d", depth );
     offset += sprintf( buffer + offset, ",\"depth_ft\":%d", depth * 50 );
-    offset += sprintf( buffer + offset, ",\"width\":%d", DUNG_WIDTH );
-    offset += sprintf( buffer + offset, ",\"height\":%d", DUNG_HEIGHT );
+    offset += sprintf( buffer + offset, ",\"view\":{\"x\":%d,\"y\":%d,\"w\":%d,\"h\":%d}",
+                       viewMinX, viewMinY, viewWidth, viewHeight );
 
-    // Add map as array of strings
+    // Add map as array of RLE-encoded strings, skipping all-wall rows
     offset += sprintf( buffer + offset, ",\"map\":[" );
-    for( int y = 0; y < DUNG_HEIGHT; y++ )
+    bool firstRow = true;
+    for( int vy = 0; vy < viewHeight; vy++ )
     {
-        if( y > 0 )
+        // Skip all-wall rows
+        if( IsAllWalls( map[vy], viewWidth ) )
+        {
+            continue;
+        }
+
+        if( !firstRow )
         {
             offset += sprintf( buffer + offset, "," );
         }
-        // Escape the row string for JSON
-        offset += sprintf( buffer + offset, "\"" );
-        for( int x = 0; x < DUNG_WIDTH; x++ )
-        {
-            char c = map[y][x];
-            if( c == '"' )
-            {
-                offset += sprintf( buffer + offset, "\\\"" );
-            }
-            else if( c == '\\' )
-            {
-                offset += sprintf( buffer + offset, "\\\\" );
-            }
-            else
-            {
-                buffer[offset++] = c;
-            }
-        }
-        offset += sprintf( buffer + offset, "\"" );
+        firstRow = false;
+
+        // Output row index and RLE-encoded content
+        offset += sprintf( buffer + offset, "[%d,\"", vy );
+
+        char rleBuffer[256];
+        int rleLen = RLEEncodeRow( map[vy], viewWidth, rleBuffer );
+        memcpy( buffer + offset, rleBuffer, rleLen );
+        offset += rleLen;
+
+        offset += sprintf( buffer + offset, "\"]" );
     }
     offset += sprintf( buffer + offset, "]" );
 

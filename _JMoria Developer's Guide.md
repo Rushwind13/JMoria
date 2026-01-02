@@ -436,3 +436,36 @@ Test fixture system ([test/fixtures/](test/fixtures/)) enables CI performance mo
 - 15fps: `if( frameTime < 66 ) SDL_Delay( 66 - frameTime );`
 
 ---
+
+## Developer Prompts
+
+The open PRs in the repo represent updates to WORKLIST.txt covering needed enhancements/fixes to several functional areas. Check open PRs for the current suggestions, then surface Github issues, code, and tests that are not currently covered by WORKLIST suggestions within existing PRs. Provide a brief synopsis of outstanding functionality, and update WORKLIST.txt with ideas for future work on the project.
+
+We are going to work on open PR#145. Confirm that the correct branch is checked out, and then surface a list of work items based upon the already-edited files in the PR.
+
+To update the dungeon creation WORKLIST, surface code and tests that handle and validate dungeon generation, with a brief synopsis of functionality, and ideas for future work on this part of the project
+
+
+To update the TargetState WORKLIST, surface code and tests that handle and validate line-of-sight, and targeting, with a brief synopsis of functionality, noting any race conditions with targeting and line-drawing, and ideas for future work on this part of the project
+
+To update the INVENTORY WORKLIST, surface code and tests that handle and validate Inventory and Equipment, with a brief synopsis of functionality, and ideas for future work on this part of the project
+
+To update the WORKLIST.txt for , surface code and tests that handle and validate Inventory and Equipment, with a brief synopsis of functionality, and ideas for future work on this part of the project
+
+Surface any skipped tests, with a brief synopsis of skipped functionality. Then, unskip the tests, run all tests, and append WORKLIST.txt with ideas for future work on this part of the project. Leave tests in a working state, with as many working as possible.
+
+To update the WORKLIST.txt for Items; surface Github issues, code, and tests that handle and validate Items, with a brief synopsis of functionality, and ideas for future work on this part of the project.
+
+To update the WORKLIST.txt for Monsters; surface Github issues, code, and tests that handle and validate Monsters, with a brief synopsis of functionality, and ideas for future work on this part of the project.
+
+To update the WORKLIST.txt for Players; surface Github issues, code, and tests that handle and validate Players, ignoring anything to do with Inventory or Equipment, with a brief synopsis of functionality, and ideas for future work on this part of the project.
+
+To update the WORKLIST.txt for IDENTIFY, we are going to continue the work that was started in PR#126. 
+Confirm that you can read PR #126
+Confirm that you can read Issue #114 and Issue #128
+In addition, Use the entirety of Issue#114 and Issue#128, including followup comments (ignore images).
+Make sure that you are using the feat/identify branch
+
+There are code callouts where isIdentified() would be useful, surface any code or tests that relate to item identification, including what is displayed when an item is partially identified, and how item statuses can be identifed. Give a brief synopsis of the existing functionality, a brief synopsis of the enhancements, and update the WORKLIST with a checklist of ideas for future work on the project.
+
+---

@@ -1,5 +1,14 @@
 ## New for 2025: AI Support
 https://chatgpt.com/g/g-68900dcbb5788191a6fe3edc36c4bca7-jmoria-development
+## Linux/Ubuntu Getting Started
+```bash
+sudo ./install/linux/ubuntu/install-deps.sh
+make
+./jmoria
+```
+
+The install script installs: build-essential, libsdl2-dev, libsdl2-image-dev, libgl1-mesa-dev
+
 ## MacOS Getting Started
 * you will need XCode to be installed from App Store
 * you will need `xcode-select --install` done (this is done by XCode install)
@@ -8,8 +17,7 @@ https://chatgpt.com/g/g-68900dcbb5788191a6fe3edc36c4bca7-jmoria-development
 * If you get this far, then `make` should work to create the game executable.
 * to set up cucumber tests, `brew install googletest cucumber-cpp`
 * needed to `git clone` the cucumber-cpp repo and
-* do the cmake stuff in the readme
-* 
+* do the cmake stuff in the readme 
 
 ## Setup clang-format as pre-commit
 

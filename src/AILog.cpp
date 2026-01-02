@@ -91,6 +91,51 @@ static void AILog_ArchiveOldSessions()
     }
 }
 
+/**
+ * Counts existing session files to determine the next session number.
+ * Only counts files matching session-NNN-* pattern (3-digit number followed by dash).
+ */
+static int AILog_GetNextSessionNumber()
+{
+    if( strlen( g_szLogDir ) == 0 )
+    {
+        return 1;
+    }
+
+    DIR *dir = opendir( g_szLogDir );
+    if( dir == NULL )
+    {
+        return 1;
+    }
+
+    int maxNum = 0;
+    struct dirent *entry;
+    while( ( entry = readdir( dir ) ) != NULL )
+    {
+        const char *name = entry->d_name;
+
+        // Parse session-NNN- pattern (must be 3 digits followed by dash)
+        if( strncmp( name, "session-", 8 ) == 0 )
+        {
+            // Check if next 3 chars are digits and 4th is a dash
+            if( name[8] >= '0' && name[8] <= '9' &&
+                name[9] >= '0' && name[9] <= '9' &&
+                name[10] >= '0' && name[10] <= '9' &&
+                name[11] == '-' )
+            {
+                int num = atoi( name + 8 );
+                if( num > maxNum )
+                {
+                    maxNum = num;
+                }
+            }
+        }
+    }
+    closedir( dir );
+
+    return maxNum + 1;
+}
+
 void AILog_Init( const char *basedir )
 {
     if( g_pAILogFile != NULL )
@@ -101,14 +146,16 @@ void AILog_Init( const char *basedir )
     // Store the log directory path for archiving
     sprintf( g_szLogDir, "%sai-logs/", basedir );
 
-    // Generate filename with timestamp
+    // Get next session number and timestamp
+    int sessionNum = AILog_GetNextSessionNumber();
     char timestamp[32];
     time_t now = time( NULL );
     struct tm *tm_info = localtime( &now );
     strftime( timestamp, sizeof( timestamp ), "%Y-%m-%dT%H-%M-%S", tm_info );
 
+    // Format: session-NNN-TIMESTAMP.jsonl (NNN is zero-padded for sorting)
     char filename[256];
-    sprintf( filename, "%ssession-%s.jsonl", g_szLogDir, timestamp );
+    sprintf( filename, "%ssession-%03d-%s.jsonl", g_szLogDir, sessionNum, timestamp );
 
     g_pAILogFile = fopen( filename, "w" );
     if( g_pAILogFile == NULL )

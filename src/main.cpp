@@ -1,6 +1,7 @@
 #include "JMDefs.h"
 #include <time.h>
 #include "SDL2/SDL.h"
+#include "AILog.h"
 
 // Frame rate limiting configuration
 // #define DISPLAY_FRAMERATE  // Enable FPS counter display
@@ -35,6 +36,9 @@ int main( int argc, char **argv )
         JLog( LOG_LEVEL_ERROR, true, "Error in game initialization. Terminating.\n" );
         exit( 1 );
     }
+
+    // Initialize AI logging for game observability
+    AILog_Init( "../JMoria/" );
 
     atexit( Term );
 
@@ -141,5 +145,7 @@ int main( int argc, char **argv )
 
 void Term()
 {
+    // Terminate AI logging
+    AILog_Term();
     // g_pGame->GetRender()->Term();
 }

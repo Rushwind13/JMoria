@@ -1,6 +1,8 @@
 #include "AIMgr.h"
+#include "AILog.h"
 #include "DisplayText.h"
 #include "Dungeon.h"
+#include "Game.h"
 #include "JMDefs.h"
 #include "Player.h"
 
@@ -192,9 +194,35 @@ void CAIBrain::Move()
     if( m_dwMoveType != MON_AI_DONTMOVE )
     {
         JLog( LOG_LEVEL_NOISE, true, "on the move " );
+        JVector vOldPos = m_vPos;
         g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster = NULL;
         m_vPos += m_vVel;
         g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster = m_pParent;
+
+        const char *szState = "unknown";
+        switch( m_eBrainState )
+        {
+        case BRAINSTATE_REST:
+            szState = "rest";
+            break;
+        case BRAINSTATE_GOTODEST:
+            szState = "gotodest";
+            break;
+        case BRAINSTATE_SEEK:
+            szState = "seek";
+            break;
+        case BRAINSTATE_IDLE:
+            szState = "idle";
+            break;
+        default:
+            break;
+        }
+
+        AILog_Event( "monster_move",
+                     "\"monster\":\"%s\",\"from\":{\"x\":%d,\"y\":%d},\"to\":{\"x\":%d,\"y\":%d},"
+                     "\"state\":\"%s\"",
+                     m_pParent->GetName(), (int)vOldPos.x, (int)vOldPos.y,
+                     (int)m_vPos.x, (int)m_vPos.y, szState );
     }
 }
 
@@ -229,6 +257,20 @@ void CAIBrain::CollideWithPlayer()
         float fDamage = m_pParent->Damage( fDamageMult );
         g_pGame->GetPlayer()->TakeDamage( fDamage, m_pParent->GetName() );
         m_pParent->AttackDone();
+
+        AILog_Event( "combat",
+                     "\"attacker\":\"%s\",\"defender\":\"Player\",\"roll\":%d,"
+                     "\"hit\":true,\"damage\":%d,\"defender_hp\":%d",
+                     m_pParent->GetName(), (int)fRoll, (int)fDamage,
+                     (int)g_pGame->GetPlayer()->GetHP() );
+    }
+    else
+    {
+        AILog_Event( "combat",
+                     "\"attacker\":\"%s\",\"defender\":\"Player\",\"roll\":%d,"
+                     "\"hit\":false,\"damage\":0,\"defender_hp\":%d",
+                     m_pParent->GetName(), (int)fRoll,
+                     (int)g_pGame->GetPlayer()->GetHP() );
     }
 }
 

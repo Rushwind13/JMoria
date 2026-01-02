@@ -22,6 +22,7 @@
 
 #include "DisplayText.h"
 #include "Render.h"
+#include "AILog.h"
 
 #include "AIMgr.h"
 
@@ -47,7 +48,8 @@ CGame::CGame()
       m_pTargetState( NULL ),
       m_pUseState( NULL ),
       m_eCurState( STATE_INVALID ),
-      m_fGameTime( 0.0f )
+      m_fGameTime( 0.0f ),
+      m_dwTurnCount( 0 )
 {
     m_pClockStepState = new CClockStepState;
     m_pCmdState = new CCmdState;
@@ -444,6 +446,7 @@ bool CGame::Update()
     if( m_bReadyForUpdate )
     {
         m_fGameTime++;
+        IncrementTurn();
         // fCurTime = 1.0f;
         m_bReadyForUpdate = false;
         // TODO: Why does the AI require 2 ticks to move the monster?
@@ -636,4 +639,12 @@ void CGame::HandleEvents( int &isActive, int &done )
             break;
         }
     }
+}
+
+void CGame::IncrementTurn()
+{
+    m_dwTurnCount++;
+    AILog_Event( "turn", "\"turn\":%d", m_dwTurnCount );
+    // Dump dungeon state for AI observability
+    GetDungeon()->DumpToAILog();
 }

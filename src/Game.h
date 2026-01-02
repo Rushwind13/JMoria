@@ -54,6 +54,8 @@ public:
     float GetFTime() { return m_fGameTime; }
     int GetITime() { return (int)m_fGameTime; }
     int GetTime() { return GetITime(); }
+    uint32 GetTurnCount() { return m_dwTurnCount; }
+    void IncrementTurn();
 
 #ifdef TURN_BASED
     void SetReadyForUpdate( const bool isReady ) { m_bReadyForUpdate = isReady; }
@@ -95,6 +97,7 @@ private:
 
     int m_dwNextTime;
     float m_fGameTime;
+    uint32 m_dwTurnCount;
 #ifdef TURN_BASED
     bool m_bReadyForUpdate;
 #endif

@@ -22,3 +22,7 @@ bin/
 test/vendor/
 test/.bundle/
 test/Gemfile.lock
+
+# AI Logs (keep directory, ignore log files)
+ai-logs/*.jsonl
+ai-logs/*.gz

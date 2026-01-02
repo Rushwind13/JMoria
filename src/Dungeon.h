@@ -77,6 +77,7 @@ public:
     void DrawItems();
     void DrawMonsters();
     void PostDraw();
+    void DumpToAILog();
     void Init( const char *szBasedir );
     void Term();
     bool Tick( const int dwClock );

@@ -10,8 +10,11 @@
 #include "FileParse.h"
 #include "Player.h"
 #include "Render.h"
+#include "AILog.h"
 
 unsigned char TileIDs[DUNG_IDX_MAX + 1] = ".#+'<<>>:#@";
+extern unsigned char MonIDs[];
+extern unsigned char ItemIDs[];
 int ModifiedTileTypes[DUNG_IDX_MAX + 1] = { DUNG_IDX_INVALID, DUNG_IDX_INVALID, DUNG_IDX_OPEN_DOOR,
                                             DUNG_IDX_DOOR,    DUNG_IDX_INVALID, DUNG_IDX_INVALID,
                                             DUNG_IDX_FLOOR,   DUNG_IDX_DOOR,    DUNG_IDX_INVALID };
@@ -816,6 +819,212 @@ void CDungeon::PostDraw()
     m_TileSet->PostDrawTile();
 
     g_pGame->GetRender()->PostDrawObjects();
+}
+
+void CDungeon::DumpToAILog()
+{
+    if( !AILog_IsActive() )
+    {
+        return;
+    }
+
+    // Build a 2D ASCII map of the dungeon
+    // We'll represent the visible portion or full dungeon
+    char map[DUNG_HEIGHT][DUNG_WIDTH + 1];
+
+    // Initialize map with tile characters
+    for( int y = 0; y < DUNG_HEIGHT; y++ )
+    {
+        for( int x = 0; x < DUNG_WIDTH; x++ )
+        {
+            CDungeonTile *tile = m_Tiles + ( y * DUNG_WIDTH ) + x;
+            if( tile && tile->m_dtd )
+            {
+                int tileType = tile->m_dtd->m_dwType;
+                if( tileType >= 0 && tileType < DUNG_IDX_MAX )
+                {
+                    map[y][x] = TileIDs[tileType];
+                }
+                else
+                {
+                    map[y][x] = ' ';
+                }
+            }
+            else
+            {
+                map[y][x] = ' ';
+            }
+        }
+        map[y][DUNG_WIDTH] = '\0';
+    }
+
+    // Overlay items
+    if( m_llItems )
+    {
+        CLink<CItem> *pCur = m_llItems->GetHead();
+        while( pCur )
+        {
+            CItem *item = pCur->m_lpData;
+            if( item )
+            {
+                int x = (int)item->m_vPos.x;
+                int y = (int)item->m_vPos.y;
+                if( x >= 0 && x < DUNG_WIDTH && y >= 0 && y < DUNG_HEIGHT )
+                {
+                    int itemIdx = item->m_id ? item->m_id->m_dwIndex : 0;
+                    map[y][x] = ItemIDs[itemIdx];
+                }
+            }
+            pCur = m_llItems->GetNext( pCur );
+        }
+    }
+
+    // Overlay monsters
+    if( m_llMonsters )
+    {
+        CLink<CMonster> *pCur = m_llMonsters->GetHead();
+        while( pCur )
+        {
+            CMonster *mon = pCur->m_lpData;
+            if( mon )
+            {
+                int x = (int)mon->GetPos().x;
+                int y = (int)mon->GetPos().y;
+                if( x >= 0 && x < DUNG_WIDTH && y >= 0 && y < DUNG_HEIGHT )
+                {
+                    int monIdx = mon->m_md ? mon->m_md->m_dwIndex : 0;
+                    map[y][x] = MonIDs[monIdx];
+                }
+            }
+            pCur = m_llMonsters->GetNext( pCur );
+        }
+    }
+
+    // Overlay player
+    CPlayer *player = g_pGame->GetPlayer();
+    if( player )
+    {
+        int px = (int)player->m_vPos.x;
+        int py = (int)player->m_vPos.y;
+        if( px >= 0 && px < DUNG_WIDTH && py >= 0 && py < DUNG_HEIGHT )
+        {
+            map[py][px] = '@';
+        }
+    }
+
+    // Build JSON output
+    // Format: {"type":"dungeon","turn":N,"level":N,"depth_ft":N,"map":[...]}
+    char buffer[200000]; // Large buffer for full dungeon
+    int offset = 0;
+
+    offset += sprintf( buffer + offset, "{\"type\":\"dungeon\"" );
+    offset += sprintf( buffer + offset, ",\"turn\":%d", g_pGame->GetTurnCount() );
+    offset += sprintf( buffer + offset, ",\"level\":%d", depth );
+    offset += sprintf( buffer + offset, ",\"depth_ft\":%d", depth * 50 );
+    offset += sprintf( buffer + offset, ",\"width\":%d", DUNG_WIDTH );
+    offset += sprintf( buffer + offset, ",\"height\":%d", DUNG_HEIGHT );
+
+    // Add map as array of strings
+    offset += sprintf( buffer + offset, ",\"map\":[" );
+    for( int y = 0; y < DUNG_HEIGHT; y++ )
+    {
+        if( y > 0 )
+        {
+            offset += sprintf( buffer + offset, "," );
+        }
+        // Escape the row string for JSON
+        offset += sprintf( buffer + offset, "\"" );
+        for( int x = 0; x < DUNG_WIDTH; x++ )
+        {
+            char c = map[y][x];
+            if( c == '"' )
+            {
+                offset += sprintf( buffer + offset, "\\\"" );
+            }
+            else if( c == '\\' )
+            {
+                offset += sprintf( buffer + offset, "\\\\" );
+            }
+            else
+            {
+                buffer[offset++] = c;
+            }
+        }
+        offset += sprintf( buffer + offset, "\"" );
+    }
+    offset += sprintf( buffer + offset, "]" );
+
+    // Add room/hallway counts if available
+    if( m_dmCurLevel )
+    {
+        offset += sprintf( buffer + offset, ",\"rooms\":%d", m_dmCurLevel->HowManyRooms() );
+        offset += sprintf( buffer + offset, ",\"hallways\":%d", m_dmCurLevel->HowManyHallways() );
+    }
+
+    // Add player info
+    if( player )
+    {
+        offset += sprintf( buffer + offset, ",\"player\":{\"x\":%d,\"y\":%d,\"hp\":%d,\"max_hp\":%d}",
+                           (int)player->m_vPos.x, (int)player->m_vPos.y,
+                           (int)player->GetHP(), (int)player->GetMaxHP() );
+    }
+
+    // Add monster list
+    offset += sprintf( buffer + offset, ",\"monsters\":[" );
+    bool firstMon = true;
+    if( m_llMonsters )
+    {
+        CLink<CMonster> *pCur = m_llMonsters->GetHead();
+        while( pCur )
+        {
+            CMonster *mon = pCur->m_lpData;
+            if( mon )
+            {
+                if( !firstMon )
+                {
+                    offset += sprintf( buffer + offset, "," );
+                }
+                firstMon = false;
+                int monIdx = mon->m_md ? mon->m_md->m_dwIndex : 0;
+                offset += sprintf( buffer + offset,
+                                   "{\"name\":\"%s\",\"char\":\"%c\",\"x\":%d,\"y\":%d,\"hp\":%d}",
+                                   mon->GetName(), MonIDs[monIdx],
+                                   (int)mon->GetPos().x, (int)mon->GetPos().y,
+                                   (int)mon->m_fCurHP );
+            }
+            pCur = m_llMonsters->GetNext( pCur );
+        }
+    }
+    offset += sprintf( buffer + offset, "]" );
+
+    // Add item list
+    offset += sprintf( buffer + offset, ",\"items\":[" );
+    bool firstItem = true;
+    if( m_llItems )
+    {
+        CLink<CItem> *pCur = m_llItems->GetHead();
+        while( pCur )
+        {
+            CItem *item = pCur->m_lpData;
+            if( item )
+            {
+                if( !firstItem )
+                {
+                    offset += sprintf( buffer + offset, "," );
+                }
+                firstItem = false;
+                int itemIdx = item->m_id ? item->m_id->m_dwIndex : 0;
+                offset += sprintf( buffer + offset,
+                                   "{\"name\":\"%s\",\"char\":\"%c\",\"x\":%d,\"y\":%d}",
+                                   item->GetName(), ItemIDs[itemIdx],
+                                   (int)item->m_vPos.x, (int)item->m_vPos.y );
+            }
+            pCur = m_llItems->GetNext( pCur );
+        }
+    }
+    offset += sprintf( buffer + offset, "]}" );
+
+    AILog_Write( buffer );
 }
 
 void CDungeon::Term()

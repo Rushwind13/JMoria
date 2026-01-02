@@ -6,7 +6,11 @@
 // #define _DEBUG
 
 #include "Render.h"
+#ifdef __APPLE__
 #include "OpenGL/gl.h"
+#else
+#include <GL/gl.h>
+#endif
 #include "SDL2/SDL.h"
 
 #ifdef DISPLAY_FRAMERATE

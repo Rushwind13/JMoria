@@ -265,7 +265,7 @@ bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 dist
         }
         if( !alreadyAdded )
         {
-            JLog( LOG_LEVEL_WARN, true, "bres added <%d %d> error: %d\n", VEC_EXPAND( vCurrent ),
+            JLog( LOG_LEVEL_NOISE, true, "bres added <%d %d> error: %d\n", VEC_EXPAND( vCurrent ),
                   error );
             if( llLine )
                 llLine->Add( new JIVector( vCurrent ) );

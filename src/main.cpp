@@ -1,5 +1,6 @@
 #include "JMDefs.h"
 #include <time.h>
+#include "SDL2/SDL.h"
 
 // The global game pointer
 CGame *g_pGame = NULL;
@@ -49,6 +50,16 @@ int main( int argc, char **argv )
             bRetVal = g_pGame->Update();
             // Draw the dungeon, player, text
             g_pGame->Draw();
+
+            /**
+             * Frame rate limiting for turn-based mode:
+             * Without this delay, the main loop runs as fast as possible,
+             * consuming 100% CPU while waiting for player input. Since this
+             * is a turn-based game, we don't need thousands of frames per
+             * second - 60 FPS (16ms per frame) is more than sufficient for
+             * responsive input handling while keeping CPU usage reasonable.
+             */
+            SDL_Delay( 16 );
         }
 #else
         {

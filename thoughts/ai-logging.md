@@ -364,9 +364,28 @@ for row_idx, rle_row in event["map"]:
 
 ---
 
+## Enabling AI Logging
+
+AI logging is **off by default** to avoid overhead during normal play.
+
+To enable AI logging, set the environment variable before running:
+
+```bash
+JMORIA_AI_LOG=1 ./jmoria
+```
+
+Or export it for the session:
+
+```bash
+export JMORIA_AI_LOG=1
+./jmoria
+```
+
+---
+
 ## Future Enhancements
 
-- [ ] Command-line flag to enable/disable AI logging
+- [x] ~~Command-line flag to enable/disable AI logging~~ (env var: `JMORIA_AI_LOG=1`)
 - [ ] Real-time log streaming via WebSocket
 - [ ] Log viewer/replay tool
 - [ ] Compress logs in-place after session ends

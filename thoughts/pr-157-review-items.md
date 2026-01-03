@@ -46,10 +46,10 @@ Status key: `[ ]` pending, `[x]` done, `[~]` partial, `[-]` wontfix
 
 ## Documentation
 
-- [ ] **thoughts/ai-logging.md:14**: JSON may hurt at some point (noted, acceptable for now)
-- [ ] **thoughts/ai-logging.md:369**: AI logging should be off by default
+- [-] **thoughts/ai-logging.md:14**: JSON may hurt at some point (noted, acceptable for now)
+- [x] **thoughts/ai-logging.md:369**: AI logging should be off by default (env var: JMORIA_AI_LOG=1)
 - [ ] **thoughts/ai-logging.md:371**: Future: AI should be able to play (send input, watch logs)
-- [ ] **thoughts/architecture.md:1**: Wrong filename - should be `doc/rendering_architecture.md`
+- [x] **thoughts/architecture.md:1**: Wrong filename - moved to `doc/rendering_architecture.md`
 
 ---
 
@@ -62,8 +62,8 @@ Status key: `[ ]` pending, `[x]` done, `[~]` partial, `[-]` wontfix
 | Game.cpp/h | 4 | 0 |
 | Player.cpp/h | 0 | 2 |
 | main.cpp | 2 | 0 |
-| Documentation | 0 | 4 |
-| **Total** | **14** | **12** |
+| Documentation | 2 | 2 |
+| **Total** | **16** | **10** |
 
 ---
 
@@ -76,6 +76,8 @@ Items marked done in this PR:
 - JRect::Contains for bounds checking
 - Removed m_dwTurnCount, use m_fGameTime via GetITime()
 - Moved AILog init/term to CGame (owned by g_pGame)
+- AI logging off by default (env var JMORIA_AI_LOG=1 to enable)
+- Moved architecture.md to doc/rendering_architecture.md
 
 Deferred items (separate PRs or future work):
 - Move RLE encoding to Render

@@ -144,6 +144,13 @@ void AILog_Init( const char *basedir )
         return; // Already initialized
     }
 
+    // AI logging is off by default. Set JMORIA_AI_LOG=1 to enable.
+    const char *envVal = getenv( "JMORIA_AI_LOG" );
+    if( envVal == NULL || envVal[0] == '0' )
+    {
+        return; // AI logging disabled
+    }
+
     // Store the log directory path for archiving
     sprintf( g_szLogDir, "%sai-logs/", basedir );
 

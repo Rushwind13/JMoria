@@ -305,27 +305,46 @@ The logging system uses several techniques to reduce file size:
 
 ## Tips for AI Assistants
 
+> **Note:** The log format has changed from JSON to a custom human-readable text format.
+> See `ai-logs/FORMAT.example` for the current format specification.
+
+### Claude Slash Commands
+
+Claude Code includes project-local slash commands for AI log analysis:
+
+```
+/ai-sessions           # List all game sessions
+
+/ai-dive               # Analyze most recent session
+/ai-dive session-016   # Analyze specific session
+/ai-dive --map         # Include map snapshots
+
+/ai-state              # Show current game state
+/ai-state session-016  # Show state from specific session
+
+/ai-monitor            # Get instructions for live monitoring
+```
+
+### Analysis Scripts
+
+The `ai-scripts/` directory contains shell scripts and Python tools:
+
+```bash
+./ai-scripts/list-sessions.sh          # List all sessions
+./ai-scripts/deep-dive.py              # Full session analysis
+./ai-scripts/deep-dive.py --map        # Include map snapshots
+./ai-scripts/show-state.sh             # Current game state
+./ai-scripts/monitor-live.sh brief     # Live monitoring
+```
+
 ### Real-time Monitoring
 
 ```bash
 # Watch the latest log file
-tail -f ai-logs/session-*-$(date +%Y-%m-%d)*.jsonl | jq .
+./ai-scripts/monitor-live.sh brief
 
 # Filter to just combat events
-tail -f ai-logs/session-*.jsonl | grep combat | jq .
-```
-
-### Quick Analysis
-
-```bash
-# How many monsters killed? (check for killed:true)
-grep '"killed":true' ai-logs/session-*.jsonl | jq -r '.defender' | sort | uniq -c
-
-# Player's HP over time
-grep '"type":"dungeon"' ai-logs/session-*.jsonl | jq '.player.hp'
-
-# What items exist on current level?
-grep '"type":"dungeon"' ai-logs/session-*.jsonl | tail -1 | jq '.items[].name'
+./ai-scripts/monitor-live.sh combat
 ```
 
 ### Reconstructing the Map

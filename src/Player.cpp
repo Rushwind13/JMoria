@@ -768,6 +768,13 @@ int CPlayer::TakeDamage( float fDamage, const char *szMon )
         JLog( LOG_LEVEL_INFO, true,
               "\n\n%s died on dungeon level %d, while level %d, killed by a %s.\n\n", m_szName,
               g_pGame->GetDungeon()->depth, (int)m_fLevel, m_szKilledBy );
+
+        AILog_Event( "player_death",
+                     "\"killed_by\":\"%s\",\"dungeon_level\":%d,\"player_level\":%d,"
+                     "\"player_name\":\"%s\",\"position\":{\"x\":%d,\"y\":%d}",
+                     m_szKilledBy, g_pGame->GetDungeon()->depth, (int)m_fLevel,
+                     m_szName, (int)m_vPos.x, (int)m_vPos.y );
+
         g_pGame->SetState( STATE_ENDGAME );
     }
     return retval;

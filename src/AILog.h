@@ -27,6 +27,10 @@ void AILog_Text( const char *format, ... );
 // Write a blank line to separate events
 void AILog_BlankLine();
 
+// Write formatted text + blank line (for standalone events like TURN, MOVE, COMBAT)
+// Example: AILog_Event("TURN %d", 42) writes "TURN 42\n\n"
+void AILog_Event( const char *format, ... );
+
 // Get current timestamp in ISO 8601 format
 // buffer: Output buffer (should be at least 32 bytes)
 void AILog_Timestamp( char *buffer );

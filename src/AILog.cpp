@@ -175,8 +175,7 @@ void AILog_Init( const char *basedir )
     // Write session start event
     char ts[32];
     AILog_Timestamp( ts );
-    AILog_Text( "SESSION_START %s", ts );
-    AILog_BlankLine();
+    AILog_Event( "SESSION_START %s", ts );
 
     // Flush immediately so we don't lose the start event
     fflush( g_pAILogFile );
@@ -195,8 +194,7 @@ void AILog_Term()
     // Write session end event
     char ts[32];
     AILog_Timestamp( ts );
-    AILog_Text( "SESSION_END %s", ts );
-    AILog_BlankLine();
+    AILog_Event( "SESSION_END %s", ts );
 
     fclose( g_pAILogFile );
     g_pAILogFile = NULL;
@@ -243,6 +241,23 @@ void AILog_BlankLine()
 
     fprintf( g_pAILogFile, "\n" );
     fflush( g_pAILogFile );
+}
+
+void AILog_Event( const char *format, ... )
+{
+    if( g_pAILogFile == NULL )
+    {
+        return;
+    }
+
+    char buffer[4096];
+    va_list args;
+    va_start( args, format );
+    vsprintf( buffer, format, args );
+    va_end( args );
+
+    AILog_Write( buffer );
+    AILog_BlankLine();
 }
 
 const char *AILog_Name( const char *name )

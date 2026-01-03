@@ -184,6 +184,5 @@ void CDungeon::DumpToAILog()
         }
     }
 
-    AILog_Text( "ENDDUNGEON" );
-    AILog_BlankLine();
+    AILog_Event( "ENDDUNGEON" );
 }

@@ -224,10 +224,9 @@ void CAIBrain::Move()
         m_vPos += m_vVel;
         g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster = m_pParent;
 
-        AILog_Text( "MOVE monster:%s from:%d,%d to:%d,%d state:%s",
-                    AILog_Name( m_pParent->GetName() ), (int)vOldPos.x, (int)vOldPos.y,
-                    (int)m_vPos.x, (int)m_vPos.y, m_szState );
-        AILog_BlankLine();
+        AILog_Event( "MOVE monster:%s from:%d,%d to:%d,%d state:%s",
+                     AILog_Name( m_pParent->GetName() ), (int)vOldPos.x, (int)vOldPos.y,
+                     (int)m_vPos.x, (int)m_vPos.y, m_szState );
     }
 }
 
@@ -263,17 +262,15 @@ void CAIBrain::CollideWithPlayer()
         g_pGame->GetPlayer()->TakeDamage( fDamage, m_pParent->GetName() );
         m_pParent->AttackDone();
 
-        AILog_Text( "COMBAT attacker:%s defender:Player hit:true damage:%d hp:%d",
-                    AILog_Name( m_pParent->GetName() ), (int)fDamage,
-                    (int)g_pGame->GetPlayer()->GetHP() );
-        AILog_BlankLine();
+        AILog_Event( "COMBAT attacker:%s defender:Player hit:true damage:%d hp:%d",
+                     AILog_Name( m_pParent->GetName() ), (int)fDamage,
+                     (int)g_pGame->GetPlayer()->GetHP() );
     }
     else
     {
-        AILog_Text( "COMBAT attacker:%s defender:Player hit:false damage:0 hp:%d",
-                    AILog_Name( m_pParent->GetName() ),
-                    (int)g_pGame->GetPlayer()->GetHP() );
-        AILog_BlankLine();
+        AILog_Event( "COMBAT attacker:%s defender:Player hit:false damage:0 hp:%d",
+                     AILog_Name( m_pParent->GetName() ),
+                     (int)g_pGame->GetPlayer()->GetHP() );
     }
 }
 

@@ -1,5 +1,17 @@
 # AI Instructions for JMoria
 
+## Development Workflow
+
+**BEFORE COMMITTING**, always:
+
+1. **Build**: `make` - ensure code compiles
+2. **Run tests**: `./test/runtests.sh` - all tests must pass
+3. Then commit and push
+
+Do NOT skip tests to save time. Broken commits waste more time than running tests.
+
+---
+
 ## AI Observability System
 
 JMoria has an AI logging system that records gameplay for analysis. This helps AI assistants understand game behavior and assist with debugging.

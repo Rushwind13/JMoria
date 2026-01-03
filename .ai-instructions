@@ -1,0 +1,127 @@
+# AI Instructions for JMoria
+
+## Development Workflow
+
+**BEFORE COMMITTING**, always:
+
+1. **Build**: `make` - ensure code compiles
+2. **Run tests**: `./test/runtests.sh` - all tests must pass
+3. Then commit and push
+
+Do NOT skip tests to save time. Broken commits waste more time than running tests.
+
+---
+
+## AI Observability System
+
+JMoria has an AI logging system that records gameplay for analysis. This helps AI assistants understand game behavior and assist with debugging.
+
+### Directory Structure
+
+```
+ai-logs/     Game session logs (.log files)
+ai-scripts/  Analysis tools
+```
+
+### Quick Start
+
+```bash
+# List all game sessions with basic stats
+./ai-scripts/list-sessions.sh
+
+# Analyze most recent session (recommended)
+./ai-scripts/deep-dive.py
+
+# Analyze specific session (partial name match works)
+./ai-scripts/deep-dive.py session-016
+
+# Show current game state (last dungeon snapshot)
+./ai-scripts/show-state.sh
+
+# Watch live game (if game is running)
+./ai-scripts/monitor-live.sh brief
+```
+
+### Log Format
+
+Logs use a custom human-readable text format (NOT JSON):
+
+```
+SESSION_START 2026-01-03T10:44:41
+
+TURN 1
+
+DUNGEON turn:1 level:1 depth:50ft
+  VIEW 57,0 21x19
+  PLAYER 67,8 hp:9/9
+  MAP
+    0: #9@.3#7
+    7: #5'#8
+  ENDMAP
+  ROOMS 4
+  HALLS 6
+  MON Green_Jelly J 70,21 hp:6
+  ITEM Dagger ( 54,23
+ENDDUNGEON
+
+MOVE player from:67,8 to:68,8 result:floor
+
+COMBAT attacker:Player defender:Orc hit:true damage:3 hp:4 killed:false
+
+DEATH killed_by:Clear_Icky_Thing level:2 pos:82,14
+
+SESSION_END 2026-01-03T10:45:22
+```
+
+### Format Rules
+
+- Event types are UPPERCASE at start of line
+- Key:value pairs use colons, no spaces around colon
+- Coordinates use x,y format
+- Names use underscores instead of spaces: `Green_Jelly` not `Green Jelly`
+- Map uses RLE encoding: `#9` = 9 walls, `.3` = 3 floors
+- DUNGEON blocks have indented sub-sections
+- Blank line separates events
+
+### Encoding
+
+**IMPORTANT**: Log files use Latin-1 encoding (not UTF-8) because scroll names contain Lorem Ipsum text with accented characters.
+
+When reading logs in Python:
+```python
+with open(filepath, 'r', encoding='latin-1') as f:
+    lines = f.readlines()
+```
+
+### What NOT to Do
+
+- Do NOT use `dd`, `hexdump`, or other binary tools to debug logs. Use the provided scripts or Read tool.
+- Do NOT parse as JSON. This is a custom text format.
+- Do NOT assume UTF-8 encoding. Use Latin-1.
+
+### Common Analysis Tasks
+
+| Task | Command |
+|------|---------|
+| Session overview | `./ai-scripts/deep-dive.py` |
+| With map snapshots | `./ai-scripts/deep-dive.py --map` |
+| With event timeline | `./ai-scripts/deep-dive.py --timeline` |
+| Current state only | `./ai-scripts/show-state.sh` |
+| All sessions | `./ai-scripts/list-sessions.sh` |
+| Watch combat live | `./ai-scripts/monitor-live.sh combat` |
+
+### Understanding Output
+
+Key fields to look for:
+- `killed:true` in COMBAT = monster was killed
+- `killed:false` in COMBAT = monster survived
+- `hp:X/Y` in PLAYER = current/max HP
+- `hp:X` in MON = monster's current HP
+- `result:floor` in MOVE = normal movement
+- `result:wall` in MOVE = blocked by wall
+- DEATH event = game over, player died
+
+### For More Details
+
+- `ai-logs/FORMAT.example` - Complete format specification with examples
+- `ai-scripts/README.md` - Documentation for all analysis scripts

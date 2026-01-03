@@ -1,6 +1,7 @@
 #include "JMDefs.h"
 #include <time.h>
 #include "SDL2/SDL.h"
+#include "AILog.h"
 
 // Frame rate limiting configuration
 // #define DISPLAY_FRAMERATE  // Enable FPS counter display

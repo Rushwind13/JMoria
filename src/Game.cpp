@@ -4,6 +4,7 @@
 
 #include "Game.h"
 #include "Dungeon.h"
+#include "JLog.h"
 #include "Player.h"
 #include "TileSet.h"
 
@@ -22,6 +23,7 @@
 
 #include "DisplayText.h"
 #include "Render.h"
+#include "AILog.h"
 
 #include "AIMgr.h"
 
@@ -72,6 +74,9 @@ JResult CGame::Init( const char *szBasedir )
     // Initialize all the game stuff, baby.
 
     g_Constants.Init();
+
+    // Initialize AI logging
+    JLog_InitAI( szBasedir );
 
     // Init the Render
     m_pRender = new CRender;
@@ -270,6 +275,10 @@ void CGame::Term()
         delete m_pEndGameDT;
         m_pEndGameDT = NULL;
     }
+
+    // Terminate AI logging
+    JLog_TermAI();
+
     JLog( LOG_LEVEL_DEBUG, true, "done.\n" );
 }
 
@@ -443,7 +452,7 @@ bool CGame::Update()
     float fCurTime = 1.0f;
     if( m_bReadyForUpdate )
     {
-        m_fGameTime++;
+        IncrementTurn();
         // fCurTime = 1.0f;
         m_bReadyForUpdate = false;
         // TODO: Why does the AI require 2 ticks to move the monster?
@@ -636,4 +645,12 @@ void CGame::HandleEvents( int &isActive, int &done )
             break;
         }
     }
+}
+
+void CGame::IncrementTurn()
+{
+    m_fGameTime++;
+    AILog_Event( "TURN %d", GetITime() );
+    // Dump dungeon state for AI observability
+    GetDungeon()->DumpToAILog();
 }

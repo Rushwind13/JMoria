@@ -1,10 +1,37 @@
 #include "AIMgr.h"
+#include "AILog.h"
 #include "DisplayText.h"
 #include "Dungeon.h"
+#include "Game.h"
 #include "JMDefs.h"
 #include "Player.h"
 
-CAIBrain::CAIBrain() : m_dwMoveType( 0 ), m_fSpeed( 0.0f ), m_eBrainState( BRAINSTATE_INVALID ) {}
+CAIBrain::CAIBrain() : m_dwMoveType( 0 ), m_fSpeed( 0.0f ), m_eBrainState( BRAINSTATE_INVALID ), m_szState( "invalid" ) {}
+
+void CAIBrain::SetState( eBrainState newState )
+{
+    m_eBrainState = newState;
+    m_fStateTicks = 0.0f;
+
+    switch( newState )
+    {
+    case BRAINSTATE_REST:
+        m_szState = "rest";
+        break;
+    case BRAINSTATE_GOTODEST:
+        m_szState = "gotodest";
+        break;
+    case BRAINSTATE_SEEK:
+        m_szState = "seek";
+        break;
+    case BRAINSTATE_IDLE:
+        m_szState = "idle";
+        break;
+    default:
+        m_szState = "unknown";
+        break;
+    }
+}
 
 CAIMgr::~CAIMgr()
 {
@@ -192,9 +219,14 @@ void CAIBrain::Move()
     if( m_dwMoveType != MON_AI_DONTMOVE )
     {
         JLog( LOG_LEVEL_NOISE, true, "on the move " );
+        JVector vOldPos = m_vPos;
         g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster = NULL;
         m_vPos += m_vVel;
         g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster = m_pParent;
+
+        AILog_Event( "MOVE monster:%s from:%d,%d to:%d,%d state:%s",
+                     AILog_Name( m_pParent->GetName() ), (int)vOldPos.x, (int)vOldPos.y,
+                     (int)m_vPos.x, (int)m_vPos.y, m_szState );
     }
 }
 
@@ -229,6 +261,16 @@ void CAIBrain::CollideWithPlayer()
         float fDamage = m_pParent->Damage( fDamageMult );
         g_pGame->GetPlayer()->TakeDamage( fDamage, m_pParent->GetName() );
         m_pParent->AttackDone();
+
+        AILog_Event( "COMBAT attacker:%s defender:Player hit:true damage:%d hp:%d",
+                     AILog_Name( m_pParent->GetName() ), (int)fDamage,
+                     (int)g_pGame->GetPlayer()->GetHP() );
+    }
+    else
+    {
+        AILog_Event( "COMBAT attacker:%s defender:Player hit:false damage:0 hp:%d",
+                     AILog_Name( m_pParent->GetName() ),
+                     (int)g_pGame->GetPlayer()->GetHP() );
     }
 }
 

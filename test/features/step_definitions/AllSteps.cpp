@@ -3,6 +3,7 @@
 
 #include "FirstSteps.cpp"
 
+#include "AIRenderSteps.cpp"
 #include "BrainSteps.cpp"
 #include "DungeonMapSteps.cpp"
 #include "EquipmentSteps.cpp"

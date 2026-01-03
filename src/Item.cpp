@@ -164,6 +164,16 @@ void CItem::SetColor()
 }
 
 unsigned char ItemIDs[ITEM_IDX_MAX + 1] = "|)[](]]\"=~{}{}&?!-_?$~//\\/|/|]!";
+
+char CItem::GetChar()
+{
+    if( !m_id )
+    {
+        return '?';
+    }
+    return ItemIDs[m_id->m_dwIndex];
+}
+
 const int EquipTypes[ITEM_IDX_MAX + 1] = {
     EQUIP_IDX_MAIN_HAND, EQUIP_IDX_OFF_HAND,  EQUIP_IDX_ARMOR,     EQUIP_IDX_HELMET,
     EQUIP_IDX_CLOAK,     EQUIP_IDX_GLOVES,    EQUIP_IDX_BOOTS,     EQUIP_IDX_AMULET,

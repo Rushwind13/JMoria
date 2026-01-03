@@ -175,6 +175,8 @@ public:
     };
     const char *GetName() { return m_szName; }
     float GetLevel() { return m_fLevel; }
+    float GetHP() { return m_fCurHitPoints; }
+    float GetMaxHP() { return m_fHitPoints; }
     CClass *GetClass() { return m_pClass; }
     CRace *GetRace() { return m_pRace; }
     float GetExperience() { return m_fExperience; }

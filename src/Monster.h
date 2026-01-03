@@ -141,6 +141,8 @@ public:
         return m_md->m_szName;
     };
 
+    char GetChar(); // Returns ASCII character for AI logging
+
     float Attack();
     void ChooseAttack();
     const char *AttackFlavorText();

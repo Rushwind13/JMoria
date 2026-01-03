@@ -54,6 +54,7 @@ public:
     float GetFTime() { return m_fGameTime; }
     int GetITime() { return (int)m_fGameTime; }
     int GetTime() { return GetITime(); }
+    void IncrementTurn();
 
 #ifdef TURN_BASED
     void SetReadyForUpdate( const bool isReady ) { m_bReadyForUpdate = isReady; }

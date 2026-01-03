@@ -1,5 +1,6 @@
 #include "CmdState.h"
 
+#include "AILog.h"
 #include "DisplayText.h"
 #include "Dungeon.h"
 #include "DungeonTile.h"

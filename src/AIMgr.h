@@ -41,14 +41,11 @@ public:
     bool UpdateGoToDest( float fCurTime );
     bool UpdateSeek( float fCurTime );
 
-    void SetState( eBrainState newState )
-    {
-        m_eBrainState = newState;
-        m_fStateTicks = 0.0f;
-    }
+    void SetState( eBrainState newState );
     void SetParent( CMonster *newParent ) { m_pParent = newParent; };
 
     eBrainState GetState() { return m_eBrainState; };
+    const char *GetStateString() { return m_szState; };
 #ifdef UNIT_TEST
 public:
 #else
@@ -59,6 +56,7 @@ protected:
     float m_fStateTicks;
     JVector m_vVel;
     eBrainState m_eBrainState;
+    const char *m_szState;
 
     CMonster *m_pParent;
 };

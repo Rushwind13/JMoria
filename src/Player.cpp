@@ -3,6 +3,7 @@
 // implementation of the Player
 
 #include "Player.h"
+#include "AILog.h"
 #include "DisplayText.h"
 #include "Dungeon.h"
 #include "Game.h"
@@ -306,6 +307,11 @@ void CPlayer::PickUp( JVector &vPickupPos )
                     g_pGame->GetMsgs()->Printf( "You have %d %s.\n", pExists->m_lpData->m_dwCount,
                                                 pExists->m_lpData->GetPlural() );
 
+                    AILog_Event( "ITEM pickup name:%s count:%d pos:%d,%d",
+                                 AILog_Name( pExists->m_lpData->GetName() ),
+                                 pExists->m_lpData->m_dwCount,
+                                 (int)vPickupPos.x, (int)vPickupPos.y );
+
                     g_pGame->GetDungeon()->GetTile( vPickupPos )->m_pCurItem = NULL;
                     return;
                 }
@@ -314,6 +320,9 @@ void CPlayer::PickUp( JVector &vPickupPos )
         }
         pItem->m_pllLink = m_llInventory->Add( pItem, pItem->m_id->m_dwIndex );
         g_pGame->GetMsgs()->Printf( "You have a %s.\n", pItem->GetName() );
+
+        AILog_Event( "ITEM pickup name:%s count:1 pos:%d,%d",
+                     AILog_Name( pItem->GetName() ), (int)vPickupPos.x, (int)vPickupPos.y );
 
         g_pGame->GetDungeon()->GetTile( vPickupPos )->m_pCurItem = NULL;
     }
@@ -566,6 +575,7 @@ void CPlayer::UpdateLight( float fValue, bool bReset )
 
 int CPlayer::Move( JVector vDir )
 {
+    JVector vOldPos = m_vPos;
     JVector vPos = m_vPos + vDir;
 
     int dwCollideType = g_pGame->GetDungeon()->IsWalkableFor( vPos, true );
@@ -573,9 +583,13 @@ int CPlayer::Move( JVector vDir )
     {
     case DUNG_COLL_NO_COLLISION:
         m_vPos = vPos;
+        AILog_Event( "MOVE player from:%d,%d to:%d,%d result:floor",
+                     (int)vOldPos.x, (int)vOldPos.y, (int)vPos.x, (int)vPos.y );
         break;
     case DUNG_COLL_ITEM:
         m_vPos = vPos;
+        AILog_Event( "MOVE player from:%d,%d to:%d,%d result:item",
+                     (int)vOldPos.x, (int)vOldPos.y, (int)vPos.x, (int)vPos.y );
         HandleCollision( vPos, dwCollideType );
         break;
     default:
@@ -627,9 +641,23 @@ void CPlayer::HandleCollision( JVector vPos, int dwCollideType )
             {
                 sprintf( szStatus, "have slain" );
                 g_pGame->GetMsgs()->Printf( "You %s the %s.\n", szStatus, szMonster );
+
+                AILog_Event( "COMBAT attacker:Player defender:%s hit:true damage:%d hp:0 killed:true",
+                             AILog_Name( szMonster ), (int)fDamage );
+
                 OnKillMonster( pMon );
                 g_pGame->GetDungeon()->RemoveMonster( pMon );
             }
+            else
+            {
+                AILog_Event( "COMBAT attacker:Player defender:%s hit:true damage:%d hp:%d killed:false",
+                             AILog_Name( szMonster ), (int)fDamage, (int)pMon->m_fCurHP );
+            }
+        }
+        else
+        {
+            AILog_Event( "COMBAT attacker:Player defender:%s hit:false damage:0 hp:%d",
+                         AILog_Name( szMonster ), (int)pMon->m_fCurHP );
         }
     }
     else if( dwCollideType == DUNG_COLL_ITEM )
@@ -729,6 +757,11 @@ int CPlayer::TakeDamage( float fDamage, const char *szMon )
         JLog( LOG_LEVEL_INFO, true,
               "\n\n%s died on dungeon level %d, while level %d, killed by a %s.\n\n", m_szName,
               g_pGame->GetDungeon()->depth, (int)m_fLevel, m_szKilledBy );
+
+        AILog_Event( "DEATH killed_by:%s level:%d pos:%d,%d",
+                     AILog_Name( m_szKilledBy ), g_pGame->GetDungeon()->depth,
+                     (int)m_vPos.x, (int)m_vPos.y );
+
         g_pGame->SetState( STATE_ENDGAME );
     }
     return retval;

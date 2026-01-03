@@ -28,6 +28,7 @@ enum eLogLevel
     LOG_LEVEL_INFO,
     LOG_LEVEL_WARN,
     LOG_LEVEL_ERROR,
+    LOG_LEVEL_AI,  // AI observability logging (to file)
     LOG_LEVEL_MAX
 };
 extern eLogLevel g_eLogLevel;

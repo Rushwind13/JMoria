@@ -1,0 +1,182 @@
+# JMoria AI Log Format
+# This file documents the custom text format used for AI observability logs.
+# Session files use the same format but without these comment lines.
+
+# ============================================================================
+# SESSION EVENTS
+# ============================================================================
+
+# Session start - always first line
+SESSION_START 2026-01-03T10:44:41
+
+# Session end - always last line (if game exits cleanly)
+SESSION_END 2026-01-03T10:45:22
+
+# ============================================================================
+# TURN EVENT
+# ============================================================================
+
+# Marks the start of a new game turn
+# Format: TURN <turn_number>
+TURN 42
+
+# ============================================================================
+# DUNGEON STATE BLOCK
+# ============================================================================
+
+# Complete game state snapshot, logged once per turn
+# This is a multi-line block from DUNGEON to ENDDUNGEON
+
+DUNGEON turn:42 level:1 depth:50ft
+  VIEW 57,0 21x19
+  PLAYER 67,8 hp:9/9
+  MAP
+    0: #9@.3#7
+    1: #9.4#7
+    7: #5'#8
+  ENDMAP
+  ROOMS 4
+  HALLS 6
+  MON Green_Jelly J 70,21 hp:6
+  MON Yellow_Mushroom , 52,24 hp:3
+  ITEM Steel_Shield ) 54,23
+  ITEM Scroll_of_Light ? 64,11
+ENDDUNGEON
+
+# DUNGEON block fields:
+#   turn:<n>     - Current turn number
+#   level:<n>    - Dungeon level (1-50)
+#   depth:<n>ft  - Depth in feet (level * 50)
+#
+# VIEW: viewport origin and size (x,y widthxheight)
+# PLAYER: position and health (x,y hp:current/max)
+# MAP: RLE-encoded ASCII map (see below)
+# ROOMS: number of rooms on level
+# HALLS: number of hallway segments
+# MON: monster (Name char x,y hp:current)
+# ITEM: item on ground (Name char x,y)
+
+# ============================================================================
+# MAP RLE ENCODING
+# ============================================================================
+
+# Maps use Run-Length Encoding to compress repeated characters.
+# A character followed by a number means "repeat N times".
+#
+# Examples:
+#   #9      = "#########" (9 walls)
+#   .3      = "..."       (3 floor tiles)
+#   #9@.3#7 = "#########@...#######"
+#
+# Map symbols:
+#   #  Wall
+#   .  Floor
+#   @  Player
+#   +  Closed door
+#   '  Open door
+#   <  Stairs up
+#   >  Stairs down
+#   A-Z  Monsters (letter = monster type)
+#   a-z  Monsters (letter = monster type)
+#   ,    Mushroom patch
+#   (    Weapon
+#   )    Armor/shield
+#   ?    Scroll
+#   !    Potion
+#   =    Ring
+#   /    Wand
+#   ~    Food
+#   $    Gold
+
+# ============================================================================
+# MOVEMENT EVENTS
+# ============================================================================
+
+# Player movement
+# Format: MOVE player from:<x>,<y> to:<x>,<y> result:<type>
+# Result types: floor, item, wall, door, stairs
+MOVE player from:67,8 to:68,8 result:floor
+MOVE player from:68,8 to:69,8 result:item
+
+# Monster movement
+# Format: MOVE monster:<name> from:<x>,<y> to:<x>,<y> state:<ai_state>
+# AI states: seek, gotodest, idle, rest
+MOVE monster:Green_Jelly from:70,21 to:70,20 state:seek
+MOVE monster:Orc from:45,12 to:44,12 state:gotodest
+
+# ============================================================================
+# COMBAT EVENTS
+# ============================================================================
+
+# Combat - player or monster attacks
+# Format: COMBAT attacker:<name> defender:<name> hit:<bool> damage:<n> hp:<n> [killed:<bool>]
+
+# Player hits monster, doesn't kill
+COMBAT attacker:Player defender:Green_Jelly hit:true damage:3 hp:4 killed:false
+
+# Player hits monster, kills it
+COMBAT attacker:Player defender:Orc hit:true damage:5 hp:0 killed:true
+
+# Player misses
+COMBAT attacker:Player defender:Giant_Ant hit:false damage:0 hp:12
+
+# Monster hits player
+COMBAT attacker:Giant_Ant defender:Player hit:true damage:2 hp:7
+
+# Monster misses player
+COMBAT attacker:Kobold defender:Player hit:false damage:0 hp:9
+
+# ============================================================================
+# ITEM EVENTS
+# ============================================================================
+
+# Item pickup
+# Format: ITEM pickup name:<name> count:<n> pos:<x>,<y>
+ITEM pickup name:Dagger count:1 pos:45,24
+ITEM pickup name:Arrow count:12 pos:32,18
+
+# ============================================================================
+# LEVEL CHANGE EVENTS
+# ============================================================================
+
+# Player uses stairs
+# Format: LEVEL_CHANGE <direction> from:<level> to:<level> depth:<n>ft
+LEVEL_CHANGE down from:1 to:2 depth:100ft
+LEVEL_CHANGE up from:3 to:2 depth:100ft
+
+# ============================================================================
+# DEATH EVENT
+# ============================================================================
+
+# Player dies - game over
+# Format: DEATH killed_by:<monster> level:<n> pos:<x>,<y>
+DEATH killed_by:Fire_Drake level:3 pos:82,14
+
+# ============================================================================
+# FORMAT RULES
+# ============================================================================
+
+# 1. Event types are UPPERCASE at start of line
+# 2. Key:value pairs use colons, no spaces around colon
+# 3. Coordinates use x,y format (comma-separated, no spaces)
+# 4. Names use underscores instead of spaces: Green_Jelly not "Green Jelly"
+# 5. DUNGEON blocks have indented (2 spaces) sub-sections
+# 6. Blank line separates top-level events
+# 7. File encoding is Latin-1 (scroll names may contain accented characters)
+
+# ============================================================================
+# PARSING TIPS
+# ============================================================================
+
+# For line-by-line parsing:
+#   - Check first word for event type
+#   - Split on spaces, then split key:value on colon
+#   - DUNGEON block: collect lines until ENDDUNGEON
+#   - MAP block: collect lines until ENDMAP, then decode RLE
+#
+# Python example:
+#   with open(logfile, 'r', encoding='latin-1') as f:
+#       for line in f:
+#           if line.startswith('COMBAT'):
+#               parts = line.split()
+#               # parts[1] = "attacker:Player", etc.

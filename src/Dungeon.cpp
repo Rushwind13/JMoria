@@ -827,8 +827,6 @@ void CDungeon::PostDraw()
     g_pGame->GetRender()->PostDrawObjects();
 }
 
-// DumpToAILog() implementation moved to DungeonAILog.cpp
-
 void CDungeon::Term()
 {
     if( m_Tiles )

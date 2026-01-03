@@ -17,3 +17,8 @@ jmoria
 
 # Cucumber
 bin/
+
+# Ruby Bundler (test dependencies)
+test/vendor/
+test/.bundle/
+test/Gemfile.lock

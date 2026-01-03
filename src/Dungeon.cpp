@@ -909,33 +909,28 @@ void CDungeon::DumpToAILog()
         return;
     }
 
-    int px = (int)player->m_vPos.x;
-    int py = (int)player->m_vPos.y;
+    JIVector playerPos( (int)player->m_vPos.x, (int)player->m_vPos.y );
 
-    // Calculate visible bounds (21x21 centered on player)
-    int viewMinX = px - VIEW_RADIUS;
-    int viewMaxX = px + VIEW_RADIUS;
-    int viewMinY = py - VIEW_RADIUS;
-    int viewMaxY = py + VIEW_RADIUS;
+    // Calculate visible bounds (21x21 centered on player), clamped to dungeon
+    JRect viewBounds(
+        playerPos.x - VIEW_RADIUS < 0 ? 0 : playerPos.x - VIEW_RADIUS,
+        playerPos.y - VIEW_RADIUS < 0 ? 0 : playerPos.y - VIEW_RADIUS,
+        playerPos.x + VIEW_RADIUS >= DUNG_WIDTH ? DUNG_WIDTH - 1 : playerPos.x + VIEW_RADIUS,
+        playerPos.y + VIEW_RADIUS >= DUNG_HEIGHT ? DUNG_HEIGHT - 1 : playerPos.y + VIEW_RADIUS
+    );
 
-    // Clamp to dungeon bounds
-    if( viewMinX < 0 ) viewMinX = 0;
-    if( viewMinY < 0 ) viewMinY = 0;
-    if( viewMaxX >= DUNG_WIDTH ) viewMaxX = DUNG_WIDTH - 1;
-    if( viewMaxY >= DUNG_HEIGHT ) viewMaxY = DUNG_HEIGHT - 1;
-
-    int viewWidth = viewMaxX - viewMinX + 1;
-    int viewHeight = viewMaxY - viewMinY + 1;
+    int viewWidth = viewBounds.Width() + 1;
+    int viewHeight = viewBounds.Height() + 1;
 
     // Build visible area map
     char map[VIEW_SIZE][VIEW_SIZE + 1];
 
     for( int vy = 0; vy < viewHeight; vy++ )
     {
-        int worldY = viewMinY + vy;
+        int worldY = viewBounds.top + vy;
         for( int vx = 0; vx < viewWidth; vx++ )
         {
-            int worldX = viewMinX + vx;
+            int worldX = viewBounds.left + vx;
             CDungeonTile *tile = m_Tiles + ( worldY * DUNG_WIDTH ) + worldX;
             if( tile && tile->m_dtd )
             {
@@ -966,12 +961,11 @@ void CDungeon::DumpToAILog()
             CItem *item = pCur->m_lpData;
             if( item )
             {
-                int x = (int)item->m_vPos.x;
-                int y = (int)item->m_vPos.y;
-                if( x >= viewMinX && x <= viewMaxX && y >= viewMinY && y <= viewMaxY )
+                JIVector itemPos( (int)item->m_vPos.x, (int)item->m_vPos.y );
+                if( viewBounds.Contains( itemPos ) )
                 {
                     int itemIdx = item->m_id ? item->m_id->m_dwIndex : 0;
-                    map[y - viewMinY][x - viewMinX] = ItemIDs[itemIdx];
+                    map[itemPos.y - viewBounds.top][itemPos.x - viewBounds.left] = ItemIDs[itemIdx];
                 }
             }
             pCur = m_llItems->GetNext( pCur );
@@ -987,12 +981,11 @@ void CDungeon::DumpToAILog()
             CMonster *mon = pCur->m_lpData;
             if( mon )
             {
-                int x = (int)mon->GetPos().x;
-                int y = (int)mon->GetPos().y;
-                if( x >= viewMinX && x <= viewMaxX && y >= viewMinY && y <= viewMaxY )
+                JIVector monPos( (int)mon->GetPos().x, (int)mon->GetPos().y );
+                if( viewBounds.Contains( monPos ) )
                 {
                     int monIdx = mon->m_md ? mon->m_md->m_dwIndex : 0;
-                    map[y - viewMinY][x - viewMinX] = MonIDs[monIdx];
+                    map[monPos.y - viewBounds.top][monPos.x - viewBounds.left] = MonIDs[monIdx];
                 }
             }
             pCur = m_llMonsters->GetNext( pCur );
@@ -1000,9 +993,9 @@ void CDungeon::DumpToAILog()
     }
 
     // Overlay player
-    if( px >= viewMinX && px <= viewMaxX && py >= viewMinY && py <= viewMaxY )
+    if( viewBounds.Contains( playerPos ) )
     {
-        map[py - viewMinY][px - viewMinX] = '@';
+        map[playerPos.y - viewBounds.top][playerPos.x - viewBounds.left] = '@';
     }
 
     // Build JSON output with RLE-encoded visible map
@@ -1014,7 +1007,7 @@ void CDungeon::DumpToAILog()
     offset += sprintf( buffer + offset, ",\"level\":%d", depth );
     offset += sprintf( buffer + offset, ",\"depth_ft\":%d", depth * 50 );
     offset += sprintf( buffer + offset, ",\"view\":{\"x\":%d,\"y\":%d,\"w\":%d,\"h\":%d}",
-                       viewMinX, viewMinY, viewWidth, viewHeight );
+                       viewBounds.left, viewBounds.top, viewWidth, viewHeight );
 
     // Add map as array of RLE-encoded strings, skipping all-wall rows
     offset += sprintf( buffer + offset, ",\"map\":[" );

@@ -77,3 +77,12 @@ THEN( "^WalkSeek was successful$" )
 
     EXPECT_EQ( actual, true );
 }
+
+THEN( "^GetStateString returns \"([^\"]*)\"$" )
+{
+    REGEX_PARAM( std::string, expected );
+    ScenarioScope<TestCtx> context;
+    const char *actual = context->brain->GetStateString();
+
+    EXPECT_STREQ( expected.c_str(), actual );
+}

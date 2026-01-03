@@ -6,7 +6,32 @@
 #include "JMDefs.h"
 #include "Player.h"
 
-CAIBrain::CAIBrain() : m_dwMoveType( 0 ), m_fSpeed( 0.0f ), m_eBrainState( BRAINSTATE_INVALID ) {}
+CAIBrain::CAIBrain() : m_dwMoveType( 0 ), m_fSpeed( 0.0f ), m_eBrainState( BRAINSTATE_INVALID ), m_szState( "invalid" ) {}
+
+void CAIBrain::SetState( eBrainState newState )
+{
+    m_eBrainState = newState;
+    m_fStateTicks = 0.0f;
+
+    switch( newState )
+    {
+    case BRAINSTATE_REST:
+        m_szState = "rest";
+        break;
+    case BRAINSTATE_GOTODEST:
+        m_szState = "gotodest";
+        break;
+    case BRAINSTATE_SEEK:
+        m_szState = "seek";
+        break;
+    case BRAINSTATE_IDLE:
+        m_szState = "idle";
+        break;
+    default:
+        m_szState = "unknown";
+        break;
+    }
+}
 
 CAIMgr::~CAIMgr()
 {
@@ -199,30 +224,11 @@ void CAIBrain::Move()
         m_vPos += m_vVel;
         g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster = m_pParent;
 
-        const char *szState = "unknown";
-        switch( m_eBrainState )
-        {
-        case BRAINSTATE_REST:
-            szState = "rest";
-            break;
-        case BRAINSTATE_GOTODEST:
-            szState = "gotodest";
-            break;
-        case BRAINSTATE_SEEK:
-            szState = "seek";
-            break;
-        case BRAINSTATE_IDLE:
-            szState = "idle";
-            break;
-        default:
-            break;
-        }
-
         AILog_Event( "monster_move",
                      "\"monster\":\"%s\",\"from\":{\"x\":%d,\"y\":%d},\"to\":{\"x\":%d,\"y\":%d},"
                      "\"state\":\"%s\"",
                      m_pParent->GetName(), (int)vOldPos.x, (int)vOldPos.y,
-                     (int)m_vPos.x, (int)m_vPos.y, szState );
+                     (int)m_vPos.x, (int)m_vPos.y, m_szState );
     }
 }
 

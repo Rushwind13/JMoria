@@ -9,7 +9,59 @@ https://chatgpt.com/g/g-68900dcbb5788191a6fe3edc36c4bca7-jmoria-development
 * to set up cucumber tests, `brew install googletest cucumber-cpp`
 * needed to `git clone` the cucumber-cpp repo and
 * do the cmake stuff in the readme
-* 
+
+## Linux (Ubuntu/Debian) Getting Started
+
+### Build Dependencies
+```bash
+sudo apt-get update
+sudo apt-get install build-essential libsdl2-dev libsdl2-image-dev libgl1-mesa-dev
+```
+
+### Build the Game
+```bash
+make
+./jmoria
+```
+
+### Test Dependencies (Optional)
+```bash
+sudo ./install/linux/ubuntu/install-test-deps.sh
+```
+
+Or manually:
+```bash
+# Install Google Test and dependencies
+sudo apt-get install libgtest-dev cmake nlohmann-json3-dev libboost-all-dev libasio-dev libtclap-dev
+cd /usr/src/gtest && sudo cmake . && sudo make && sudo cp lib/*.a /usr/lib/
+
+# Install Ruby and Bundler (cucumber 2.x required for wire protocol)
+sudo apt-get install ruby ruby-dev
+sudo gem install bundler
+
+# Build cucumber-cpp from source
+git clone https://github.com/cucumber/cucumber-cpp.git /tmp/cucumber-cpp
+cd /tmp/cucumber-cpp
+cmake -E make_directory build
+cmake -E chdir build cmake -DCUKE_ENABLE_EXAMPLES=off -DCUKE_ENABLE_GTEST=on ..
+cmake --build build
+sudo cmake --build build --target install
+sudo ldconfig
+
+# Install cucumber gems (in test directory)
+cd /path/to/JMoria/test
+bundle config set --local path 'vendor/bundle'
+bundle install
+```
+
+**Note:** cucumber-cpp uses the wire protocol which is only compatible with
+cucumber-ruby 2.x. The `test/Gemfile` specifies the correct version.
+
+### Run Tests
+```bash
+cd test
+./runtests.sh --build
+```
 
 ## Setup clang-format as pre-commit
 

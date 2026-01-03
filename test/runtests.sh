@@ -32,5 +32,5 @@ if [[ -n "$1" ]]; then
   TEST_TO_RUN="$1"
 fi
 
-# Run the Cucumber tests
-cucumber --tags ~@skip features/$TEST_TO_RUN.feature
+# Run the Cucumber tests (using bundle exec for cucumber 2.x compatibility)
+bundle exec cucumber --tags ~@skip features/$TEST_TO_RUN.feature

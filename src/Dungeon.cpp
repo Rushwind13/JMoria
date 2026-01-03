@@ -1003,7 +1003,7 @@ void CDungeon::DumpToAILog()
     int offset = 0;
 
     offset += sprintf( buffer + offset, "{\"type\":\"dungeon\"" );
-    offset += sprintf( buffer + offset, ",\"turn\":%d", g_pGame->GetTurnCount() );
+    offset += sprintf( buffer + offset, ",\"turn\":%d", g_pGame->GetITime() );
     offset += sprintf( buffer + offset, ",\"level\":%d", depth );
     offset += sprintf( buffer + offset, ",\"depth_ft\":%d", depth * 50 );
     offset += sprintf( buffer + offset, ",\"view\":{\"x\":%d,\"y\":%d,\"w\":%d,\"h\":%d}",

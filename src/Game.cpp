@@ -48,8 +48,7 @@ CGame::CGame()
       m_pTargetState( NULL ),
       m_pUseState( NULL ),
       m_eCurState( STATE_INVALID ),
-      m_fGameTime( 0.0f ),
-      m_dwTurnCount( 0 )
+      m_fGameTime( 0.0f )
 {
     m_pClockStepState = new CClockStepState;
     m_pCmdState = new CCmdState;
@@ -445,7 +444,6 @@ bool CGame::Update()
     float fCurTime = 1.0f;
     if( m_bReadyForUpdate )
     {
-        m_fGameTime++;
         IncrementTurn();
         // fCurTime = 1.0f;
         m_bReadyForUpdate = false;
@@ -643,8 +641,8 @@ void CGame::HandleEvents( int &isActive, int &done )
 
 void CGame::IncrementTurn()
 {
-    m_dwTurnCount++;
-    AILog_Event( "turn", "\"turn\":%d", m_dwTurnCount );
+    m_fGameTime++;
+    JLog( LOG_LEVEL_AI, false, "{\"type\":\"turn\",\"turn\":%d}\n", GetITime() );
     // Dump dungeon state for AI observability
     GetDungeon()->DumpToAILog();
 }

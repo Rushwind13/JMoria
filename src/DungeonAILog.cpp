@@ -118,64 +118,38 @@ void CDungeon::DumpToAILog()
         map[playerPos.y - viewBounds.top][playerPos.x - viewBounds.left] = '@';
     }
 
-    // Build JSON output with RLE-encoded visible map
-    char buffer[20000];
-    int offset = 0;
+    // Output DUNGEON event in text format
+    AILog_Text( "DUNGEON turn:%d level:%d depth:%dft",
+                g_pGame->GetITime(), depth, depth * 50 );
+    AILog_Text( "  VIEW %d,%d %dx%d",
+                viewBounds.left, viewBounds.top, viewWidth, viewHeight );
+    AILog_Text( "  PLAYER %d,%d hp:%d/%d",
+                (int)player->m_vPos.x, (int)player->m_vPos.y,
+                (int)player->GetHP(), (int)player->GetMaxHP() );
 
-    offset += sprintf( buffer + offset, "{\"type\":\"dungeon\"" );
-    offset += sprintf( buffer + offset, ",\"turn\":%d", g_pGame->GetITime() );
-    offset += sprintf( buffer + offset, ",\"level\":%d", depth );
-    offset += sprintf( buffer + offset, ",\"depth_ft\":%d", depth * 50 );
-    offset += sprintf( buffer + offset, ",\"view\":{\"x\":%d,\"y\":%d,\"w\":%d,\"h\":%d}",
-                       viewBounds.left, viewBounds.top, viewWidth, viewHeight );
-
-    // Add map as array of RLE-encoded strings, skipping all-wall rows
-    offset += sprintf( buffer + offset, ",\"map\":[" );
-    bool firstRow = true;
+    // Output map with RLE-encoded rows, skipping all-wall rows
+    AILog_Text( "  MAP" );
     for( int vy = 0; vy < viewHeight; vy++ )
     {
-        // Skip all-wall rows
         if( AIRender_IsAllWalls( map[vy], viewWidth ) )
         {
             continue;
         }
 
-        if( !firstRow )
-        {
-            offset += sprintf( buffer + offset, "," );
-        }
-        firstRow = false;
-
-        // Output row index and RLE-encoded content
-        offset += sprintf( buffer + offset, "[%d,\"", vy );
-
         char rleBuffer[256];
-        int rleLen = AIRender_RLEEncodeRow( map[vy], viewWidth, rleBuffer );
-        memcpy( buffer + offset, rleBuffer, rleLen );
-        offset += rleLen;
-
-        offset += sprintf( buffer + offset, "\"]" );
+        AIRender_RLEEncodeRow( map[vy], viewWidth, rleBuffer );
+        AILog_Text( "    %d: %s", vy, rleBuffer );
     }
-    offset += sprintf( buffer + offset, "]" );
+    AILog_Text( "  ENDMAP" );
 
-    // Add room/hallway counts if available
+    // Room/hallway counts
     if( m_dmCurLevel )
     {
-        offset += sprintf( buffer + offset, ",\"rooms\":%d", m_dmCurLevel->HowManyRooms() );
-        offset += sprintf( buffer + offset, ",\"hallways\":%d", m_dmCurLevel->HowManyHallways() );
+        AILog_Text( "  ROOMS %d", m_dmCurLevel->HowManyRooms() );
+        AILog_Text( "  HALLS %d", m_dmCurLevel->HowManyHallways() );
     }
 
-    // Add player info
-    if( player )
-    {
-        offset += sprintf( buffer + offset, ",\"player\":{\"x\":%d,\"y\":%d,\"hp\":%d,\"max_hp\":%d}",
-                           (int)player->m_vPos.x, (int)player->m_vPos.y,
-                           (int)player->GetHP(), (int)player->GetMaxHP() );
-    }
-
-    // Add monster list
-    offset += sprintf( buffer + offset, ",\"monsters\":[" );
-    bool firstMon = true;
+    // Monster list
     if( m_llMonsters )
     {
         CLink<CMonster> *pCur = m_llMonsters->GetHead();
@@ -184,25 +158,16 @@ void CDungeon::DumpToAILog()
             CMonster *mon = pCur->m_lpData;
             if( mon )
             {
-                if( !firstMon )
-                {
-                    offset += sprintf( buffer + offset, "," );
-                }
-                firstMon = false;
-                offset += sprintf( buffer + offset,
-                                   "{\"name\":\"%s\",\"char\":\"%c\",\"x\":%d,\"y\":%d,\"hp\":%d}",
-                                   mon->GetName(), mon->GetChar(),
-                                   (int)mon->GetPos().x, (int)mon->GetPos().y,
-                                   (int)mon->m_fCurHP );
+                AILog_Text( "  MON %s %c %d,%d hp:%d",
+                            AILog_Name( mon->GetName() ), mon->GetChar(),
+                            (int)mon->GetPos().x, (int)mon->GetPos().y,
+                            (int)mon->m_fCurHP );
             }
             pCur = m_llMonsters->GetNext( pCur );
         }
     }
-    offset += sprintf( buffer + offset, "]" );
 
-    // Add item list
-    offset += sprintf( buffer + offset, ",\"items\":[" );
-    bool firstItem = true;
+    // Item list
     if( m_llItems )
     {
         CLink<CItem> *pCur = m_llItems->GetHead();
@@ -211,20 +176,14 @@ void CDungeon::DumpToAILog()
             CItem *item = pCur->m_lpData;
             if( item )
             {
-                if( !firstItem )
-                {
-                    offset += sprintf( buffer + offset, "," );
-                }
-                firstItem = false;
-                offset += sprintf( buffer + offset,
-                                   "{\"name\":\"%s\",\"char\":\"%c\",\"x\":%d,\"y\":%d}",
-                                   item->GetName(), item->GetChar(),
-                                   (int)item->m_vPos.x, (int)item->m_vPos.y );
+                AILog_Text( "  ITEM %s %c %d,%d",
+                            AILog_Name( item->GetName() ), item->GetChar(),
+                            (int)item->m_vPos.x, (int)item->m_vPos.y );
             }
             pCur = m_llItems->GetNext( pCur );
         }
     }
-    offset += sprintf( buffer + offset, "]}" );
 
-    AILog_Write( buffer );
+    AILog_Text( "ENDDUNGEON" );
+    AILog_BlankLine();
 }

@@ -1,6 +1,6 @@
 // AILog.cpp
-// JSON Lines logging for AI observability (integrated with JLog)
-// Writes structured events to ai-logs/session-<timestamp>.jsonl
+// Text logging for AI observability
+// Writes human-readable events to ai-logs/session-<NNN>-<timestamp>.log
 
 #include "AILog.h"
 #include "JMDefs.h"
@@ -48,7 +48,7 @@ static void AILog_ArchiveOldSessions()
         return;
     }
 
-    // Collect all .jsonl files
+    // Collect all .log files
     std::vector<std::string> sessions;
     struct dirent *entry;
     while( ( entry = readdir( dir ) ) != NULL )
@@ -56,8 +56,8 @@ static void AILog_ArchiveOldSessions()
         const char *name = entry->d_name;
         size_t len = strlen( name );
 
-        // Check for .jsonl extension
-        if( len > 6 && strcmp( name + len - 6, ".jsonl" ) == 0 )
+        // Check for .log extension
+        if( len > 4 && strcmp( name + len - 4, ".log" ) == 0 )
         {
             sessions.push_back( std::string( name ) );
         }
@@ -161,9 +161,9 @@ void AILog_Init( const char *basedir )
     struct tm *tm_info = localtime( &now );
     strftime( timestamp, sizeof( timestamp ), "%Y-%m-%dT%H-%M-%S", tm_info );
 
-    // Format: session-NNN-TIMESTAMP.jsonl (NNN is zero-padded for sorting)
+    // Format: session-NNN-TIMESTAMP.log (NNN is zero-padded for sorting)
     char filename[256];
-    sprintf( filename, "%ssession-%03d-%s.jsonl", g_szLogDir, sessionNum, timestamp );
+    sprintf( filename, "%ssession-%03d-%s.log", g_szLogDir, sessionNum, timestamp );
 
     g_pAILogFile = fopen( filename, "w" );
     if( g_pAILogFile == NULL )
@@ -175,7 +175,8 @@ void AILog_Init( const char *basedir )
     // Write session start event
     char ts[32];
     AILog_Timestamp( ts );
-    AILog_Event( "session_start", "\"timestamp\":\"%s\"", ts );
+    AILog_Text( "SESSION_START %s", ts );
+    AILog_BlankLine();
 
     // Flush immediately so we don't lose the start event
     fflush( g_pAILogFile );
@@ -194,7 +195,8 @@ void AILog_Term()
     // Write session end event
     char ts[32];
     AILog_Timestamp( ts );
-    AILog_Event( "session_end", "\"timestamp\":\"%s\"", ts );
+    AILog_Text( "SESSION_END %s", ts );
+    AILog_BlankLine();
 
     fclose( g_pAILogFile );
     g_pAILogFile = NULL;
@@ -205,42 +207,55 @@ bool AILog_IsActive()
     return g_pAILogFile != NULL;
 }
 
-void AILog_Write( const char *json )
+void AILog_Write( const char *text )
 {
     if( g_pAILogFile == NULL )
     {
         return;
     }
 
-    fprintf( g_pAILogFile, "%s\n", json );
+    fprintf( g_pAILogFile, "%s\n", text );
     fflush( g_pAILogFile ); // Flush after each write for real-time visibility
 }
 
-void AILog_Event( const char *type, const char *format, ... )
+void AILog_Text( const char *format, ... )
 {
     if( g_pAILogFile == NULL )
     {
         return;
     }
 
-    // Build the JSON object
     char buffer[4096];
-    int offset = sprintf( buffer, "{\"type\":\"%s\"", type );
-
-    // Add additional fields if format is provided
-    if( format != NULL && strlen( format ) > 0 )
-    {
-        offset += sprintf( buffer + offset, "," );
-
-        va_list args;
-        va_start( args, format );
-        offset += vsprintf( buffer + offset, format, args );
-        va_end( args );
-    }
-
-    offset += sprintf( buffer + offset, "}" );
+    va_list args;
+    va_start( args, format );
+    vsprintf( buffer, format, args );
+    va_end( args );
 
     AILog_Write( buffer );
+}
+
+void AILog_BlankLine()
+{
+    if( g_pAILogFile == NULL )
+    {
+        return;
+    }
+
+    fprintf( g_pAILogFile, "\n" );
+    fflush( g_pAILogFile );
+}
+
+const char *AILog_Name( const char *name )
+{
+    static char buffer[256];
+    int i = 0;
+    while( name[i] && i < 255 )
+    {
+        buffer[i] = ( name[i] == ' ' ) ? '_' : name[i];
+        i++;
+    }
+    buffer[i] = '\0';
+    return buffer;
 }
 
 // JLog-compatible wrappers (for JLog.h integration)

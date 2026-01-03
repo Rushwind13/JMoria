@@ -650,7 +650,8 @@ void CGame::HandleEvents( int &isActive, int &done )
 void CGame::IncrementTurn()
 {
     m_fGameTime++;
-    JLog( LOG_LEVEL_AI, false, "{\"type\":\"turn\",\"turn\":%d}\n", GetITime() );
+    AILog_Text( "TURN %d", GetITime() );
+    AILog_BlankLine();
     // Dump dungeon state for AI observability
     GetDungeon()->DumpToAILog();
 }

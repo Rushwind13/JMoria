@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <time.h>
 
-// AILog - JSON Lines logging for AI observability
-// Writes structured JSON events to ai-logs/session-<timestamp>.jsonl
+// AILog - Text logging for AI observability
+// Writes human-readable events to ai-logs/session-<NNN>-<timestamp>.log
 
 // Initialize AI logging - opens log file
 // basedir: Base directory for the game (e.g., "../JMoria/")
@@ -17,19 +17,22 @@ void AILog_Term();
 // Check if AI logging is active
 bool AILog_IsActive();
 
-// Write a raw JSON line to the log
-// json: Complete JSON object as a string (without trailing newline)
-void AILog_Write( const char *json );
+// Write a line of text to the log (adds newline)
+void AILog_Write( const char *text );
 
-// Convenience function to write a simple JSON object
-// type: Event type string
-// format: printf-style format for additional JSON fields
-// Example: AILog_Event("turn", "\"turn\":%d", 42)
-// Produces: {"type":"turn","turn":42}
-void AILog_Event( const char *type, const char *format, ... );
+// Write formatted text to the log (printf-style, adds newline)
+// Example: AILog_Text("TURN %d", 42)
+void AILog_Text( const char *format, ... );
+
+// Write a blank line to separate events
+void AILog_BlankLine();
 
 // Get current timestamp in ISO 8601 format
 // buffer: Output buffer (should be at least 32 bytes)
 void AILog_Timestamp( char *buffer );
+
+// Helper: Convert name to underscore format (spaces to underscores)
+// Returns pointer to static buffer - NOT thread safe
+const char *AILog_Name( const char *name );
 
 #endif // __AILOG_H__

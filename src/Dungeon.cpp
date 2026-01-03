@@ -474,10 +474,8 @@ JResult CDungeon::OnChangeLevel( const int delta )
     g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
                                 depth );
 
-    AILog_Event( "level_change",
-                 "\"direction\":\"%s\",\"from_level\":%d,\"to_level\":%d,"
-                 "\"from_depth_ft\":%d,\"to_depth_ft\":%d",
-                 direction, oldDepth, depth, oldDepth * 50, depth * 50 );
+    AILog_Text( "LEVEL_CHANGE %s from:%d to:%d depth:%dft", direction, oldDepth, depth, depth * 50 );
+    AILog_BlankLine();
 
     return JSUCCESS;
 }

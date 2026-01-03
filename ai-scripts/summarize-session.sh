@@ -11,17 +11,15 @@ LOG_DIR="$SCRIPT_DIR/../ai-logs"
 
 # Find the session file
 if [ -n "$1" ]; then
-    # Try exact match first, then partial
     if [ -f "$1" ]; then
         SESSION="$1"
     elif [ -f "$LOG_DIR/$1" ]; then
         SESSION="$LOG_DIR/$1"
     else
-        SESSION=$(ls -t "$LOG_DIR"/*"$1"*.jsonl 2>/dev/null | head -1)
+        SESSION=$(ls -t "$LOG_DIR"/*"$1"*.log 2>/dev/null | head -1)
     fi
 else
-    # Most recent session
-    SESSION=$(ls -t "$LOG_DIR"/*.jsonl 2>/dev/null | head -1)
+    SESSION=$(ls -t "$LOG_DIR"/*.log 2>/dev/null | head -1)
 fi
 
 if [ -z "$SESSION" ] || [ ! -f "$SESSION" ]; then
@@ -34,33 +32,30 @@ echo "=== SESSION SUMMARY ==="
 echo "File: $(basename "$SESSION")"
 echo ""
 
-# Duration
-TURNS=$(grep -c '"type":"turn"' "$SESSION" 2>/dev/null || echo 0)
+TURNS=$(grep -c '^TURN ' "$SESSION" 2>/dev/null || echo 0)
 echo "Duration: $TURNS turns"
 echo ""
 
-# Levels visited
 echo "Levels Explored:"
-grep '"type":"dungeon"' "$SESSION" | jq -r '.level' | sort -u | while read lvl; do
+grep '^DUNGEON ' "$SESSION" | sed 's/.*level:\([0-9]*\).*/\1/' | sort -u | while read lvl; do
     depth=$((lvl * 50))
     echo "  - Level $lvl ($depth ft)"
 done
 echo ""
 
-# Items collected
 echo "Items Collected:"
-grep '"action":"pickup"' "$SESSION" 2>/dev/null | jq -r '.item' | sort | uniq -c | sort -rn | while read count item; do
-    echo "  $count x $item"
-done
-if ! grep -q '"action":"pickup"' "$SESSION" 2>/dev/null; then
+if grep -q '^ITEM pickup' "$SESSION" 2>/dev/null; then
+    grep '^ITEM pickup' "$SESSION" | sed 's/.*name:\([^ ]*\).*/\1/' | tr '_' ' ' | sort | uniq -c | sort -rn | while read count item; do
+        echo "  $count x $item"
+    done
+else
     echo "  (none)"
 fi
 echo ""
 
-# Combat summary
 echo "Combat Encounters:"
-if grep -q '"type":"combat"' "$SESSION" 2>/dev/null; then
-    grep '"type":"combat"' "$SESSION" | jq -r '.defender' | sort | uniq -c | sort -rn | while read count target; do
+if grep -q '^COMBAT ' "$SESSION" 2>/dev/null; then
+    grep '^COMBAT ' "$SESSION" | sed 's/.*defender:\([^ ]*\).*/\1/' | tr '_' ' ' | sort | uniq -c | sort -rn | while read count target; do
         echo "  $count attacks on $target"
     done
 else
@@ -68,9 +63,8 @@ else
 fi
 echo ""
 
-# Monsters killed (workaround for Bug #156: check HP instead of killed flag)
 echo "Monsters Defeated:"
-KILLS=$(grep '"type":"combat"' "$SESSION" 2>/dev/null | jq -r 'select(.defender != "Player") | select(.defender_hp == 0 or .defender_hp < 0.01) | .defender' | sort | uniq -c | sort -rn)
+KILLS=$(grep '^COMBAT ' "$SESSION" 2>/dev/null | grep 'killed:true' | sed 's/.*defender:\([^ ]*\).*/\1/' | tr '_' ' ' | sort | uniq -c | sort -rn)
 if [ -n "$KILLS" ]; then
     echo "$KILLS" | while read count monster; do
         echo "  $count x $monster"
@@ -80,33 +74,32 @@ else
 fi
 echo ""
 
-# Final state
 echo "Final State:"
-FINAL=$(grep '"type":"dungeon"' "$SESSION" | tail -1)
-if [ -n "$FINAL" ]; then
-    LEVEL=$(echo "$FINAL" | jq -r '.level')
-    DEPTH=$(echo "$FINAL" | jq -r '.depth_ft')
-    HP=$(echo "$FINAL" | jq -r '.player.hp')
-    MAX_HP=$(echo "$FINAL" | jq -r '.player.max_hp')
-    PX=$(echo "$FINAL" | jq -r '.player.x')
-    PY=$(echo "$FINAL" | jq -r '.player.y')
-    echo "  Level: $LEVEL ($DEPTH ft)"
-    echo "  HP: $HP / $MAX_HP"
-    echo "  Position: ($PX, $PY)"
+LAST_DUNGEON_LINE=$(grep -n '^DUNGEON ' "$SESSION" | tail -1 | cut -d: -f1)
+if [ -n "$LAST_DUNGEON_LINE" ]; then
+    LEVEL=$(sed -n "${LAST_DUNGEON_LINE}p" "$SESSION" | sed 's/.*level:\([0-9]*\).*/\1/')
+    DEPTH=$((LEVEL * 50))
+    PLAYER_LINE=$(sed -n "${LAST_DUNGEON_LINE},\$p" "$SESSION" | grep '  PLAYER' | head -1)
+    if [ -n "$PLAYER_LINE" ]; then
+        POS=$(echo "$PLAYER_LINE" | awk '{print $2}')
+        HP_INFO=$(echo "$PLAYER_LINE" | grep -o 'hp:[0-9]*/[0-9]*')
+        echo "  Level: $LEVEL ($DEPTH ft)"
+        echo "  HP: $(echo "$HP_INFO" | sed 's/hp://')"
+        echo "  Position: ($POS)"
+    else
+        echo "  Level: $LEVEL ($DEPTH ft)"
+    fi
 else
     echo "  (no dungeon data)"
 fi
 echo ""
 
-# Check if player died
-if grep -q '"type":"session_end"' "$SESSION"; then
+# Check outcome
+if grep -q '^DEATH ' "$SESSION" 2>/dev/null; then
+    KILLER=$(grep '^DEATH ' "$SESSION" | tail -1 | sed 's/.*killed_by:\([^ ]*\).*/\1/' | tr '_' ' ')
+    echo "Outcome: DIED (killed by $KILLER)"
+elif grep -q '^SESSION_END' "$SESSION"; then
     echo "Outcome: Session ended normally"
 else
-    # Check last combat - did player get hit and HP go to 0?
-    LAST_PLAYER_HP=$(grep '"type":"dungeon"' "$SESSION" | tail -1 | jq -r '.player.hp')
-    if [ "$LAST_PLAYER_HP" = "0" ] || [ "$(echo "$LAST_PLAYER_HP < 1" | bc -l 2>/dev/null)" = "1" ]; then
-        echo "Outcome: DIED"
-    else
-        echo "Outcome: Survived (session may still be active)"
-    fi
+    echo "Outcome: Survived (session may still be active)"
 fi

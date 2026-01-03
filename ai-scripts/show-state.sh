@@ -14,10 +14,10 @@ if [ -n "$1" ]; then
     elif [ -f "$LOG_DIR/$1" ]; then
         SESSION="$LOG_DIR/$1"
     else
-        SESSION=$(ls -t "$LOG_DIR"/*"$1"*.jsonl 2>/dev/null | head -1)
+        SESSION=$(ls -t "$LOG_DIR"/*"$1"*.log 2>/dev/null | head -1)
     fi
 else
-    SESSION=$(ls -t "$LOG_DIR"/*.jsonl 2>/dev/null | head -1)
+    SESSION=$(ls -t "$LOG_DIR"/*.log 2>/dev/null | head -1)
 fi
 
 if [ -z "$SESSION" ] || [ ! -f "$SESSION" ]; then
@@ -25,39 +25,11 @@ if [ -z "$SESSION" ] || [ ! -f "$SESSION" ]; then
     exit 1
 fi
 
-# Get the most recent dungeon state
-DUNGEON=$(grep '"type":"dungeon"' "$SESSION" | tail -1)
-
-if [ -z "$DUNGEON" ]; then
-    echo "No dungeon state found in session"
-    exit 1
-fi
-
-echo "=== CURRENT STATE ==="
-echo ""
-
-# Basic info
-TURN=$(echo "$DUNGEON" | jq -r '.turn')
-LEVEL=$(echo "$DUNGEON" | jq -r '.level')
-DEPTH=$(echo "$DUNGEON" | jq -r '.depth_ft')
-echo "Turn: $TURN"
-echo "Level: $LEVEL ($DEPTH ft)"
-echo ""
-
-# Player
-echo "=== PLAYER ==="
-echo "$DUNGEON" | jq -r '.player | "Position: (\(.x), \(.y))\nHP: \(.hp) / \(.max_hp)"'
-echo ""
-
-# Decode and display the map
-echo "=== MAP (21x21 viewport) ==="
-echo "$DUNGEON" | jq -r '.map[] | "\(.[0]): \(.[1])"' | while read line; do
-    ROW_IDX=$(echo "$line" | cut -d: -f1)
-    RLE=$(echo "$line" | cut -d: -f2- | sed 's/^ //')
-
-    # Decode RLE
-    DECODED=""
-    i=0
+# Decode RLE function
+decode_rle() {
+    local RLE="$1"
+    local DECODED=""
+    local i=0
     while [ $i -lt ${#RLE} ]; do
         CHAR="${RLE:$i:1}"
         i=$((i + 1))
@@ -77,26 +49,79 @@ echo "$DUNGEON" | jq -r '.map[] | "\(.[0]): \(.[1])"' | while read line; do
             DECODED="${DECODED}${CHAR}"
         done
     done
+    echo "$DECODED"
+}
 
+echo "=== CURRENT STATE ==="
+echo ""
+
+# Find the last DUNGEON block
+LAST_DUNGEON_LINE=$(grep -n '^DUNGEON ' "$SESSION" | tail -1 | cut -d: -f1)
+
+if [ -z "$LAST_DUNGEON_LINE" ]; then
+    echo "No dungeon state found in session"
+    exit 1
+fi
+
+# Extract the dungeon block
+DUNGEON_BLOCK=$(sed -n "${LAST_DUNGEON_LINE},/^ENDDUNGEON/p" "$SESSION")
+
+# Basic info
+DUNGEON_HEADER=$(echo "$DUNGEON_BLOCK" | head -1)
+TURN=$(echo "$DUNGEON_HEADER" | sed 's/.*turn:\([0-9]*\).*/\1/')
+LEVEL=$(echo "$DUNGEON_HEADER" | sed 's/.*level:\([0-9]*\).*/\1/')
+DEPTH=$((LEVEL * 50))
+echo "Turn: $TURN"
+echo "Level: $LEVEL ($DEPTH ft)"
+echo ""
+
+# Player
+echo "=== PLAYER ==="
+PLAYER_LINE=$(echo "$DUNGEON_BLOCK" | grep '  PLAYER')
+if [ -n "$PLAYER_LINE" ]; then
+    POS=$(echo "$PLAYER_LINE" | awk '{print $2}')
+    HP_INFO=$(echo "$PLAYER_LINE" | grep -o 'hp:[0-9]*/[0-9]*' | sed 's/hp://')
+    echo "Position: ($POS)"
+    echo "HP: $HP_INFO"
+fi
+echo ""
+
+# Map
+echo "=== MAP (21x21 viewport) ==="
+echo "$DUNGEON_BLOCK" | grep '    [0-9]*:' | while read line; do
+    ROW_IDX=$(echo "$line" | sed 's/^[[:space:]]*//' | cut -d: -f1)
+    RLE=$(echo "$line" | cut -d: -f2- | sed 's/^ //')
+    DECODED=$(decode_rle "$RLE")
     printf "%2d: %s\n" "$ROW_IDX" "$DECODED"
 done
 echo ""
 
 # Monsters
 echo "=== MONSTERS ==="
-MONSTER_COUNT=$(echo "$DUNGEON" | jq '.monsters | length')
-if [ "$MONSTER_COUNT" -gt 0 ]; then
-    echo "$DUNGEON" | jq -r '.monsters[] | "  \(.char) \(.name) at (\(.x),\(.y)) HP:\(.hp)"'
+MONSTERS=$(echo "$DUNGEON_BLOCK" | grep '  MON ')
+if [ -n "$MONSTERS" ]; then
+    echo "$MONSTERS" | while read line; do
+        NAME=$(echo "$line" | awk '{print $2}' | tr '_' ' ')
+        CHAR=$(echo "$line" | awk '{print $3}')
+        POS=$(echo "$line" | awk '{print $4}')
+        HP=$(echo "$line" | grep -o 'hp:[0-9]*' | cut -d: -f2)
+        echo "  $CHAR $NAME at ($POS) HP:$HP"
+    done
 else
     echo "  (none visible)"
 fi
 echo ""
 
-# Items on ground
+# Items
 echo "=== ITEMS ON GROUND ==="
-ITEM_COUNT=$(echo "$DUNGEON" | jq '.items | length')
-if [ "$ITEM_COUNT" -gt 0 ]; then
-    echo "$DUNGEON" | jq -r '.items[] | "  \(.char) \(.name) at (\(.x),\(.y))"'
+ITEMS=$(echo "$DUNGEON_BLOCK" | grep '  ITEM ')
+if [ -n "$ITEMS" ]; then
+    echo "$ITEMS" | while read line; do
+        NAME=$(echo "$line" | awk '{print $2}' | tr '_' ' ')
+        CHAR=$(echo "$line" | awk '{print $3}')
+        POS=$(echo "$line" | awk '{print $4}')
+        echo "  $CHAR $NAME at ($POS)"
+    done
 else
     echo "  (none visible)"
 fi

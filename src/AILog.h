@@ -6,6 +6,7 @@
 
 // AILog - Text logging for AI observability
 // Writes human-readable events to ai-logs/session-<NNN>-<timestamp>.log
+// See ai-logs/FORMAT.example for complete format documentation
 
 // Initialize AI logging - opens log file
 // basedir: Base directory for the game (e.g., "../JMoria/")

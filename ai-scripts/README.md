@@ -9,7 +9,8 @@ Shell scripts and Python tools for analyzing JMoria game sessions from AI logs.
 
 ## Log Format
 
-JMoria uses a human-readable text format (`.log` files):
+JMoria uses a human-readable text format (`.log` files).
+See `ai-logs/FORMAT.example` for complete format specification.
 
 ```
 SESSION_START 2026-01-03T10:44:41

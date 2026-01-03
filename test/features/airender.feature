@@ -1,4 +1,5 @@
 # language: en
+# See ai-logs/FORMAT.example for complete AI log format documentation
 Feature: AI Render
     So that my AI logging produces correct output
     As a game engine

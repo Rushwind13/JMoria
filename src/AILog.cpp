@@ -1,8 +1,9 @@
 // AILog.cpp
-// JSON Lines logging for AI observability
+// JSON Lines logging for AI observability (integrated with JLog)
 // Writes structured events to ai-logs/session-<timestamp>.jsonl
 
 #include "AILog.h"
+#include "JMDefs.h"
 #include <algorithm>
 #include <cstdarg>
 #include <cstdlib>
@@ -12,8 +13,8 @@
 #include <sys/stat.h>
 #include <vector>
 
-// Global file handle for AI log
-static FILE *g_pAILogFile = NULL;
+// Global file handle for AI log (exported for JLog.h)
+FILE *g_pAILogFile = NULL;
 static char g_szLogDir[256] = {0};
 
 /**
@@ -234,3 +235,8 @@ void AILog_Event( const char *type, const char *format, ... )
 
     AILog_Write( buffer );
 }
+
+// JLog-compatible wrappers (for JLog.h integration)
+void JLog_InitAI( const char *basedir ) { AILog_Init( basedir ); }
+void JLog_TermAI() { AILog_Term(); }
+bool JLog_IsAIActive() { return AILog_IsActive(); }

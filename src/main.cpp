@@ -37,9 +37,6 @@ int main( int argc, char **argv )
         exit( 1 );
     }
 
-    // Initialize AI logging for game observability
-    JLog_InitAI( "../JMoria/" );
-
     atexit( Term );
 
     unsigned int curTime = 0;
@@ -145,7 +142,5 @@ int main( int argc, char **argv )
 
 void Term()
 {
-    // Terminate AI logging
-    JLog_TermAI();
     // g_pGame->GetRender()->Term();
 }

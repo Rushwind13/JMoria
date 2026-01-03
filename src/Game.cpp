@@ -4,6 +4,7 @@
 
 #include "Game.h"
 #include "Dungeon.h"
+#include "JLog.h"
 #include "Player.h"
 #include "TileSet.h"
 
@@ -73,6 +74,9 @@ JResult CGame::Init( const char *szBasedir )
     // Initialize all the game stuff, baby.
 
     g_Constants.Init();
+
+    // Initialize AI logging
+    JLog_InitAI( szBasedir );
 
     // Init the Render
     m_pRender = new CRender;
@@ -271,6 +275,10 @@ void CGame::Term()
         delete m_pEndGameDT;
         m_pEndGameDT = NULL;
     }
+
+    // Terminate AI logging
+    JLog_TermAI();
+
     JLog( LOG_LEVEL_DEBUG, true, "done.\n" );
 }
 

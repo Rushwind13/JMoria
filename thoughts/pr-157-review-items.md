@@ -42,7 +42,7 @@ Status key: `[ ]` pending, `[x]` done, `[~]` partial, `[-]` wontfix
 ## main.cpp
 
 - [x] **Line 41**: AI log directory creation belongs in JLog code
-- [ ] **Line 149**: `AILog_Init`/`AILog_Term` pattern should be owned by `g_pGame`
+- [x] **Line 149**: `AILog_Init`/`AILog_Term` pattern should be owned by `g_pGame`
 
 ## Documentation
 
@@ -61,9 +61,9 @@ Status key: `[ ]` pending, `[x]` done, `[~]` partial, `[-]` wontfix
 | Dungeon.cpp | 6 | 6 |
 | Game.cpp/h | 4 | 0 |
 | Player.cpp/h | 0 | 2 |
-| main.cpp | 1 | 1 |
+| main.cpp | 2 | 0 |
 | Documentation | 0 | 4 |
-| **Total** | **13** | **13** |
+| **Total** | **14** | **12** |
 
 ---
 
@@ -75,6 +75,7 @@ Items marked done in this PR:
 - JVector/JRect usage in DumpToAILog
 - JRect::Contains for bounds checking
 - Removed m_dwTurnCount, use m_fGameTime via GetITime()
+- Moved AILog init/term to CGame (owned by g_pGame)
 
 Deferred items (separate PRs or future work):
 - Move RLE encoding to Render

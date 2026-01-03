@@ -131,6 +131,14 @@ BUGS:
 - 2d8 bastard sword replaced by 1d8 long sword without choosing to wield
 - AI log combat 'killed' flag reports false when monster HP reaches 0 (src/Player.cpp HandleCollision)
 
+
+AI OBSERVABILITY / LOGGING:
+- Design privileged vs open AI log data model
+  - "Privileged" logs: developer/debug info (secret doors, hidden monsters, trap locations before triggered)
+  - "Open" logs: gaming companion safe info (only what player can see/knows)
+  - Use case: AI assistant that helps player without spoiling secrets
+  - Consider: separate log levels? filtered views? separate event streams?
+
 INVENTORY / EQUIPMENT WORKLIST:
  
 PR#145 Checklist (feat/inventory):

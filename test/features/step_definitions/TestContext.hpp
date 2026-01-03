@@ -10,6 +10,7 @@
 #include "Item.h"
 #include "Monster.h"
 #include <AIMgr.h>
+#include <AIRender.h>
 #include <Constants.h>
 #include <Dungeon.h>
 #include <DungeonMap.h>

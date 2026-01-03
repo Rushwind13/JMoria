@@ -11,10 +11,9 @@
 #include "Player.h"
 #include "Render.h"
 #include "AILog.h"
+#include "AIRender.h"
 
 unsigned char TileIDs[DUNG_IDX_MAX + 1] = ".#+'<<>>:#@";
-extern unsigned char MonIDs[];
-extern unsigned char ItemIDs[];
 int ModifiedTileTypes[DUNG_IDX_MAX + 1] = { DUNG_IDX_INVALID, DUNG_IDX_INVALID, DUNG_IDX_OPEN_DOOR,
                                             DUNG_IDX_DOOR,    DUNG_IDX_INVALID, DUNG_IDX_INVALID,
                                             DUNG_IDX_FLOOR,   DUNG_IDX_DOOR,    DUNG_IDX_INVALID };
@@ -829,73 +828,6 @@ void CDungeon::PostDraw()
     g_pGame->GetRender()->PostDrawObjects();
 }
 
-/**
- * Helper: Apply run-length encoding to a map row.
- * Example: "######..##" becomes "#6.2#2"
- * Returns the number of characters written to output.
- */
-static int RLEEncodeRow( const char *row, int len, char *output )
-{
-    int outIdx = 0;
-    int i = 0;
-
-    while( i < len )
-    {
-        char c = row[i];
-        int count = 1;
-
-        // Count consecutive identical characters
-        while( i + count < len && row[i + count] == c )
-        {
-            count++;
-        }
-
-        // Write character
-        if( c == '"' )
-        {
-            output[outIdx++] = '\\';
-            output[outIdx++] = '"';
-        }
-        else if( c == '\\' )
-        {
-            output[outIdx++] = '\\';
-            output[outIdx++] = '\\';
-        }
-        else
-        {
-            output[outIdx++] = c;
-        }
-
-        // Write count if > 1
-        if( count > 1 )
-        {
-            outIdx += sprintf( output + outIdx, "%d", count );
-        }
-
-        i += count;
-    }
-
-    return outIdx;
-}
-
-/**
- * Helper: Check if a row is all walls (can be skipped).
- */
-static bool IsAllWalls( const char *row, int len )
-{
-    for( int i = 0; i < len; i++ )
-    {
-        if( row[i] != '#' )
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-#define VIEW_RADIUS 10
-#define VIEW_SIZE ( VIEW_RADIUS * 2 + 1 )
-
 void CDungeon::DumpToAILog()
 {
     if( !AILog_IsActive() )
@@ -934,14 +866,22 @@ void CDungeon::DumpToAILog()
             CDungeonTile *tile = m_Tiles + ( worldY * DUNG_WIDTH ) + worldX;
             if( tile && tile->m_dtd )
             {
-                int tileType = tile->m_dtd->m_dwType;
-                if( tileType >= 0 && tileType < DUNG_IDX_MAX )
+                // Only show tiles that have been seen (prevents AI from "cheating")
+                if( !( tile->m_dwFlags & DUNG_FLAG_SEEN ) )
                 {
-                    map[vy][vx] = TileIDs[tileType];
+                    map[vy][vx] = ' ';
                 }
                 else
                 {
-                    map[vy][vx] = ' ';
+                    int tileType = tile->m_dtd->m_dwType;
+                    if( tileType >= 0 && tileType < DUNG_IDX_MAX )
+                    {
+                        map[vy][vx] = TileIDs[tileType];
+                    }
+                    else
+                    {
+                        map[vy][vx] = ' ';
+                    }
                 }
             }
             else
@@ -964,8 +904,7 @@ void CDungeon::DumpToAILog()
                 JIVector itemPos( (int)item->m_vPos.x, (int)item->m_vPos.y );
                 if( viewBounds.Contains( itemPos ) )
                 {
-                    int itemIdx = item->m_id ? item->m_id->m_dwIndex : 0;
-                    map[itemPos.y - viewBounds.top][itemPos.x - viewBounds.left] = ItemIDs[itemIdx];
+                    map[itemPos.y - viewBounds.top][itemPos.x - viewBounds.left] = item->GetChar();
                 }
             }
             pCur = m_llItems->GetNext( pCur );
@@ -984,8 +923,7 @@ void CDungeon::DumpToAILog()
                 JIVector monPos( (int)mon->GetPos().x, (int)mon->GetPos().y );
                 if( viewBounds.Contains( monPos ) )
                 {
-                    int monIdx = mon->m_md ? mon->m_md->m_dwIndex : 0;
-                    map[monPos.y - viewBounds.top][monPos.x - viewBounds.left] = MonIDs[monIdx];
+                    map[monPos.y - viewBounds.top][monPos.x - viewBounds.left] = mon->GetChar();
                 }
             }
             pCur = m_llMonsters->GetNext( pCur );
@@ -1015,7 +953,7 @@ void CDungeon::DumpToAILog()
     for( int vy = 0; vy < viewHeight; vy++ )
     {
         // Skip all-wall rows
-        if( IsAllWalls( map[vy], viewWidth ) )
+        if( AIRender_IsAllWalls( map[vy], viewWidth ) )
         {
             continue;
         }
@@ -1030,7 +968,7 @@ void CDungeon::DumpToAILog()
         offset += sprintf( buffer + offset, "[%d,\"", vy );
 
         char rleBuffer[256];
-        int rleLen = RLEEncodeRow( map[vy], viewWidth, rleBuffer );
+        int rleLen = AIRender_RLEEncodeRow( map[vy], viewWidth, rleBuffer );
         memcpy( buffer + offset, rleBuffer, rleLen );
         offset += rleLen;
 
@@ -1069,10 +1007,9 @@ void CDungeon::DumpToAILog()
                     offset += sprintf( buffer + offset, "," );
                 }
                 firstMon = false;
-                int monIdx = mon->m_md ? mon->m_md->m_dwIndex : 0;
                 offset += sprintf( buffer + offset,
                                    "{\"name\":\"%s\",\"char\":\"%c\",\"x\":%d,\"y\":%d,\"hp\":%d}",
-                                   mon->GetName(), MonIDs[monIdx],
+                                   mon->GetName(), mon->GetChar(),
                                    (int)mon->GetPos().x, (int)mon->GetPos().y,
                                    (int)mon->m_fCurHP );
             }
@@ -1097,10 +1034,9 @@ void CDungeon::DumpToAILog()
                     offset += sprintf( buffer + offset, "," );
                 }
                 firstItem = false;
-                int itemIdx = item->m_id ? item->m_id->m_dwIndex : 0;
                 offset += sprintf( buffer + offset,
                                    "{\"name\":\"%s\",\"char\":\"%c\",\"x\":%d,\"y\":%d}",
-                                   item->GetName(), ItemIDs[itemIdx],
+                                   item->GetName(), item->GetChar(),
                                    (int)item->m_vPos.x, (int)item->m_vPos.y );
             }
             pCur = m_llItems->GetNext( pCur );

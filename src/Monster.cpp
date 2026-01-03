@@ -338,6 +338,16 @@ void CMonster::SetColor()
 }
 
 unsigned char MonIDs[MON_IDX_MAX + 1] = "abcddefghhikllmnoprsuwxyzABCDFFFGGHIJKLOPRSTUVWWXY&.,$t";
+
+char CMonster::GetChar()
+{
+    if( !m_md )
+    {
+        return '?';
+    }
+    return MonIDs[m_md->m_dwIndex];
+}
+
 void CMonster::Draw()
 {
     Uint8 monster_tile = MonIDs[m_md->m_dwIndex] - ' ' - 1;

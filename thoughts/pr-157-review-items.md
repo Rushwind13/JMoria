@@ -13,19 +13,19 @@ Status key: `[ ]` pending, `[x]` done, `[~]` partial, `[-]` wontfix
 
 ## Dungeon.cpp
 
-- [ ] **Line 16**: Code smell - extern MonIDs/ItemIDs violates separation of dungeon/item/monster draw
+- [x] **Line 16**: Code smell - extern MonIDs/ItemIDs violates separation of dungeon/item/monster draw
 - [x] **Line 829**: RLE encoding belongs in Draw/Render, not Dungeon
-- [ ] **Line 876**: RLE is a render concern; AI should ignore unlit tiles; use class structures instead of string traversal
+- [x] **Line 876**: RLE is a render concern; AI should ignore unlit tiles; use class structures instead of string traversal
 - [x] **Line 891**: Use `JLog(LOG_LEVEL_AI, ...)` instead of AILog
 - [x] **Line 904**: Use `JVector` instead of separate px, py variables
 - [x] **Line 908**: Use `JRect` for view bounds
 - [x] **Line 914**: Use `JVector.IsInWorld()` for bounds checking
 - [ ] **Line 923**: Performance concern - lots of stack allocation every frame
-- [ ] **Line 937**: Abstract tile char lookup - already exists somewhere
+- [x] **Line 937**: Abstract tile char lookup - already exists somewhere
 - [x] **Line 963**: Use existing "is pos in rect" function (Util.h or JRect::Contains)
 - [x] **Line 984**: Use pos in rect (JRect::Contains)
 - [ ] **Line 1004**: Bit-banging output is correct JMoria behavior, but JSON compatibility is awkward
-- [ ] **Line 1017**: Wall type should use DUNG_FLAG_LIT or distinguish tunnelable walls
+- [-] **Line 1017**: Wall type should use DUNG_FLAG_LIT or distinguish tunnelable walls (deferred)
 
 ## Game.cpp / Game.h
 
@@ -58,12 +58,12 @@ Status key: `[ ]` pending, `[x]` done, `[~]` partial, `[-]` wontfix
 | Area | Done | Pending |
 |------|------|---------|
 | AIMgr.cpp | 2 | 0 |
-| Dungeon.cpp | 6 | 6 |
+| Dungeon.cpp | 10 | 2 |
 | Game.cpp/h | 4 | 0 |
 | Player.cpp/h | 0 | 2 |
 | main.cpp | 2 | 0 |
 | Documentation | 2 | 2 |
-| **Total** | **16** | **10** |
+| **Total** | **20** | **6** |
 
 ---
 
@@ -79,8 +79,15 @@ Items marked done in this PR:
 - AI logging off by default (env var JMORIA_AI_LOG=1 to enable)
 - Moved architecture.md to doc/rendering_architecture.md
 
-Deferred items (separate PRs or future work):
-- Move RLE encoding to Render
-- Remove extern MonIDs/ItemIDs
-- AI logging off by default
+Refactoring completed (AIRender extraction):
+- Created src/AIRender.h/cpp with RLE encoding utilities
+- Added CMonster::GetChar() and CItem::GetChar() methods
+- Removed extern MonIDs/ItemIDs declarations from Dungeon.cpp
+- DumpToAILog uses AIRender_RLEEncodeRow and AIRender_IsAllWalls
+- Added DUNG_FLAG_SEEN visibility check for tiles (AI can't see unexplored areas)
+
+Deferred items (future work):
+- Performance: stack allocation per frame (acceptable for now)
+- JSON bit-banging output style (matches JMoria culture)
+- Wall type distinction (tunnelable vs regular)
 - AI playing capability

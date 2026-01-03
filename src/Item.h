@@ -173,6 +173,7 @@ public:
     const char *GetName();
     const char *GetPlural();
     bool IsStackable() { return ( m_id->m_dwFlags & ITEM_FLAG_STACKS ) == ITEM_FLAG_STACKS; }
+    char GetChar(); // Returns ASCII character for AI logging
     bool IsOpenable() { return false; }   // for chests, etc.
     bool IsCloseable() { return false; }  // closeable pickup?
     bool IsTunnelable() { return false; } // Tunnelable pickup? unlikely.

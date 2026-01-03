@@ -500,6 +500,114 @@ g_pGame->GetMsgs()->Printf("...")
 
 ---
 
+## 12. Testing Standards
+
+### Framework
+
+JMoria uses **Cucumber-cpp** (BDD) with **Google Test** for assertions.
+
+### Directory Structure
+
+```
+test/
+├── features/                    # BDD scenarios (.feature files)
+│   ├── brains.feature          # AI Brain tests
+│   ├── monsters.feature        # Monster tests
+│   ├── game.feature            # Integration tests
+│   ├── dungeonmap.feature      # Dungeon generation
+│   └── step_definitions/       # C++ step implementations
+│       ├── AllSteps.cpp        # Aggregates all steps
+│       ├── BrainSteps.cpp      # Brain test steps
+│       ├── TestContext.hpp     # Shared test state
+│       └── ...
+├── runtests.sh                 # Test runner script
+└── Makefile                    # Test build config
+```
+
+### Running Tests
+
+```bash
+cd test && ./runtests.sh              # Run all tests
+cd test && ./runtests.sh brains       # Run specific feature
+cd test && ./runtests.sh --build      # Rebuild before running
+```
+
+### Writing a Feature Test
+
+**1. Create scenario in `.feature` file:**
+```gherkin
+Scenario: Can set brain state
+    Given I have a brain
+    When I set the brain state to 2
+    Then GetState returns 2
+```
+
+**2. Implement steps in `*Steps.cpp`:**
+```cpp
+GIVEN( "^I have a brain$" )
+{
+    ScenarioScope<TestCtx> context;
+    context->brain = new CAIBrain;
+}
+
+WHEN( "^I set the brain state to ([0-9]+)$" )
+{
+    REGEX_PARAM( int, desired );
+    ScenarioScope<TestCtx> context;
+    context->brain->SetState( (eBrainState)desired );
+}
+
+THEN( "^GetState returns ([0-9]+)$" )
+{
+    REGEX_PARAM( int, expected );
+    ScenarioScope<TestCtx> context;
+    EXPECT_EQ( expected, context->brain->GetState() );
+}
+```
+
+### Test Context
+
+Tests share state via `TestContext.hpp`:
+- `g_pGame = NULL` (no full game initialization)
+- `context->brain` - CAIBrain for AI tests
+- `context->monster` - CMonster for monster tests
+- `context->result_bool` - Store method return values
+
+### Test Isolation Constraints
+
+Since `g_pGame = NULL` in tests:
+- Cannot test methods that call `g_pGame->GetDungeon()`
+- Cannot test `CAIBrain::Move()` directly (requires dungeon)
+- Use `GameSteps.cpp` for integration tests requiring full game
+
+### TDD Workflow (Red/Green/Refactor)
+
+1. **Red**: Write failing test first
+2. **Green**: Write minimal code to pass
+3. **Refactor**: Clean up while tests stay green
+
+### When to Write Tests
+
+| Situation | Action |
+|-----------|--------|
+| Adding new method | Write test first |
+| Adding member variable with behavior | Test the behavior |
+| Fixing a bug | Write test that reproduces bug first |
+| Modifying existing behavior | Ensure existing tests pass, add new if needed |
+
+### Skipping Tests
+
+Use `@skip` tag for temporarily disabled tests:
+```gherkin
+@skip
+Scenario: AI state changes work
+    ...
+```
+
+Run `./runtests.sh` to see which tests are skipped.
+
+---
+
 ## Summary Checklist
 
 Before submitting code, verify:
@@ -518,3 +626,5 @@ Before submitting code, verify:
 - [ ] Calculated values cached where appropriate
 - [ ] Plain text format for logs (no manual JSON)
 - [ ] No duplicate infrastructure
+- [ ] Tests written for new functionality (TDD preferred)
+- [ ] Existing tests still pass

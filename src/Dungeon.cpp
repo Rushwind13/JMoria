@@ -200,25 +200,23 @@ JResult CDungeon::CreateMap()
     while( m_dmCurLevel->CreateOneStep() )
         ;
     
-    // Record end time and calculate total generation time
+    // Retrieve diagnostics with finalized timing from dungeon generation
     const DungeonGenDiagnostics& diag = m_dmCurLevel->GetDiagnostics();
-    double end_time = Util::GetTimeInMillis();
-    double total_time = end_time - diag.start_time_ms;
         
     JLog( LOG_LEVEL_INFO, true, "Rooms in current level: %d\n", m_dmCurLevel->HowManyRooms() );
     JLog( LOG_LEVEL_INFO, true, "Hallways in current level: %d\n",
           m_dmCurLevel->HowManyHallways() );
     JLog( LOG_LEVEL_INFO, true, "Generation time: %.2f ms (%.3f seconds)\n", 
-          total_time, total_time / 1000.0 );
+          diag.total_time_ms, diag.total_time_ms / 1000.0 );
 #ifdef DUNGEN_DEBUG
-    JLog( LOG_LEVEL_INFO, true, "[DUNGEN] Generation complete in %.2f ms\n", total_time );
+    JLog( LOG_LEVEL_INFO, true, "[DUNGEN] Generation complete in %.2f ms\n", diag.total_time_ms );
     JLog( LOG_LEVEL_INFO, true, "[DUNGEN]   Steps: %d created, %d rooms, %d halls, %d skipped\n",
           diag.steps_created, diag.rooms_created, diag.hallways_created, diag.steps_skipped );
     JLog( LOG_LEVEL_INFO, true, "[DUNGEN]   Fill operations: %d, Conflicts: %d, Repeated failures: %d\n",
           diag.fill_operations, diag.conflicts_detected, diag.repeated_failures );
-    if( total_time > 0.0 )
+    if( diag.total_time_ms > 0.0 )
     {
-        double steps_per_sec = ( diag.steps_created * 1000.0 ) / total_time;
+        double steps_per_sec = ( diag.steps_created * 1000.0 ) / diag.total_time_ms;
         JLog( LOG_LEVEL_INFO, true, "[DUNGEN]   Performance: %.1f steps/second\n", steps_per_sec );
     }
 #endif

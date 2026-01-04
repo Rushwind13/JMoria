@@ -42,8 +42,15 @@ void CDungeonMap::CreateDungeon( const int depth )
     JRect rcWorld( 0, 0, DUNG_WIDTH - 1, DUNG_HEIGHT - 1 );
     m_dwDepth = depth;
     
-    // Use current RNG seed (seeded in main)
+    // Capture current RNG seed for determinism and debugging
     m_dwSeed = Util::GetRandomSeed();
+    
+    // Warn if seed appears uninitialized (could cause subtle determinism issues)
+    if( m_dwSeed == 0 )
+    {
+        JLog( LOG_LEVEL_WARN, false, 
+              "[DUNGEN] Warning: RNG seed is 0, generation may be unintentionally deterministic\n" );
+    }
 
     // First, fill the whole dungeon with rock
     FillDungeonArea( DUNG_IDX_WALL, rcWorld, false );
@@ -174,6 +181,11 @@ void TweakBorders( JRect &rcIn, int direction )
     }
 }
 
+// CheckBorder: Validates that a 1-tile border around a proposed area is suitable
+// for room/hallway placement. Border tiles must be either:
+// - DUNG_IDX_WALL (solid rock): Indicates space for new construction
+// - Doors: Allows connecting to existing rooms/hallways through doorways
+// This enables natural dungeon connectivity while preventing room overlaps.
 bool CDungeonMap::CheckBorder( const JRect area, int direction )
 {
     JRect rcEdges( area.left - 1, area.top - 1, area.right + 1, area.bottom + 1 );
@@ -191,13 +203,14 @@ bool CDungeonMap::CheckBorder( const JRect area, int direction )
         {
             vCheck.x = x;
             int type = GetTile( vCheck )->GetType();
+            // Allow walls (space for new construction) and doors (connecting points)
             if( type != DUNG_IDX_WALL && !IsDoor( type ) )
             {
                 JLog( LOG_LEVEL_NOISE, true,
                       "border check failed. Wanted <%d %d, %d %d>, but <%d %d> was %d\n",
                       RECT_EXPAND( area ), VEC_EXPAND( vCheck ), GetTile( vCheck )->GetType() );
-                // TODO: ... what if we allow overlaps? This is just a border check... the interior
-                // is OK.
+                // Reject if border contains non-wall, non-door tiles (floor, stairs, etc.)
+                // This prevents room overlaps while allowing door connections
                 return false;
             }
         }
@@ -406,6 +419,10 @@ bool CDungeonMap::CreateOneStep()
     CLink<CDungeonCreationStep> *pLink = m_stkDungeonMapCreation->Pop();
     if( pLink == NULL || pLink->m_lpData == NULL )
     {
+        // Finalize timing when generation completes
+        m_diagnostics.end_time_ms = Util::GetTimeInMillis();
+        m_diagnostics.total_time_ms = m_diagnostics.end_time_ms - m_diagnostics.start_time_ms;
+        
         g_pGame->GetStats()->Printf( "Dungeon creation complete.\n" );
 #ifdef DUNGEN_DEBUG
         JLog( LOG_LEVEL_INFO, true, "[DUNGEN] Generation complete: %d steps, %d rooms, %d halls, "
@@ -413,6 +430,8 @@ bool CDungeonMap::CreateOneStep()
               m_diagnostics.steps_created, m_diagnostics.rooms_created,
               m_diagnostics.hallways_created, m_diagnostics.steps_skipped, 
               m_diagnostics.fill_operations, m_diagnostics.repeated_failures );
+        JLog( LOG_LEVEL_INFO, true, "[DUNGEN] Total generation time: %.2f ms\n", 
+              m_diagnostics.total_time_ms );
 #endif
         return false;
     }
@@ -828,8 +847,14 @@ void CDungeonMap::GetRoomRect( JRect &rcRoom, const int direction )
         rcRoom.SetHeight( vSize.y );
         break;
     }
+    // Explicit boundary checking with warning instead of silent clamping
     if( !rcRoom.IsWithinWorld() )
     {
+#ifdef DUNGEN_DEBUG
+        JLog( LOG_LEVEL_WARNING, true, 
+              "[DUNGEN] Warning: Room rect <%d %d, %d %d> exceeds world bounds, clamping\n",
+              RECT_EXPAND( rcRoom ) );
+#endif
         rcRoom.Init(
             CLAMP( rcRoom.left, 1, DUNG_WIDTH - 2 ), CLAMP( rcRoom.top, 1, DUNG_HEIGHT - 2 ),
             CLAMP( rcRoom.right, 1, DUNG_WIDTH - 2 ), CLAMP( rcRoom.bottom, 1, DUNG_HEIGHT - 2 ) );
@@ -859,8 +884,14 @@ void CDungeonMap::GetHallRect( JRect &rcHall, const int direction )
         rcHall.SetHeight( 0 );
         break;
     }
+    // Explicit boundary checking with warning instead of silent clamping
     if( !rcHall.IsWithinWorld() )
     {
+#ifdef DUNGEN_DEBUG
+        JLog( LOG_LEVEL_WARNING, true, 
+              "[DUNGEN] Warning: Hall rect <%d %d, %d %d> exceeds world bounds, clamping\n",
+              RECT_EXPAND( rcHall ) );
+#endif
         rcHall.Init(
             CLAMP( rcHall.left, 1, DUNG_WIDTH - 2 ), CLAMP( rcHall.top, 1, DUNG_HEIGHT - 2 ),
             CLAMP( rcHall.right, 1, DUNG_WIDTH - 2 ), CLAMP( rcHall.bottom, 1, DUNG_HEIGHT - 2 ) );

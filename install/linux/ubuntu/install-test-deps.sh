@@ -17,6 +17,8 @@ apt-get update
 apt-get install -y libgtest-dev cmake nlohmann-json3-dev libboost-all-dev libasio-dev libtclap-dev
 
 # Build and install gtest libraries
+# libgtest-dev installs source to /usr/src/gtest (symlink to googletest)
+# We must compile it manually - see https://github.com/google/googletest
 echo "Building gtest libraries..."
 cd /usr/src/gtest
 cmake .
@@ -24,6 +26,9 @@ make
 cp lib/*.a /usr/lib/ 2>/dev/null || cp *.a /usr/lib/
 
 # Install Ruby and Bundler
+# cucumber-cpp uses the "wire protocol" to connect Ruby cucumber (test runner)
+# with C++ step definitions. Wire protocol requires cucumber-ruby 2.x.
+# See: https://github.com/cucumber/cucumber-cpp
 echo "Installing Ruby and Bundler..."
 apt-get install -y ruby ruby-dev
 gem install bundler

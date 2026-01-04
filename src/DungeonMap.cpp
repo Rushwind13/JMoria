@@ -706,7 +706,19 @@ CDungeonCreationStep *CDungeonMap::MakeRoomStep( const JIVector &vPos, const int
     JRect rcTry( pStep->m_rcArea );
     while( !bPlacementSucceeded && attempt_count < MAX_TRIES )
     {
-        GetRoomRect( pStep->m_rcArea, pStep->m_dwDirection );
+        JResult rectResult = GetRoomRect( pStep->m_rcArea, pStep->m_dwDirection );
+        if( rectResult != JSUCCESS )
+        {
+            // Geometry generation failed (clamping or degenerate rect)
+            // Skip this attempt and try again
+            JLog( LOG_LEVEL_WARN, true, 
+                  "[DUNGEN] MakeRoomStep: GetRoomRect failed on attempt %d\n", 
+                  attempt_count + 1 );
+            pStep->m_rcArea.Init( rcTry );
+            attempt_count++;
+            continue;
+        }
+        
         bPlacementSucceeded = CheckArea( pStep );
         if( !bPlacementSucceeded )
         {
@@ -766,7 +778,19 @@ CDungeonCreationStep *CDungeonMap::MakeHallStep( const JIVector &vPos, const int
     JRect rcTry( pStep->m_rcArea );
     while( !bPlacementSucceeded && attempt_count < MAX_TRIES )
     {
-        GetHallRect( pStep->m_rcArea, pStep->m_dwDirection );
+        JResult rectResult = GetHallRect( pStep->m_rcArea, pStep->m_dwDirection );
+        if( rectResult != JSUCCESS )
+        {
+            // Geometry generation failed (clamping or invalid rect)
+            // Skip this attempt and try again
+            JLog( LOG_LEVEL_WARN, true, 
+                  "[DUNGEN] MakeHallStep: GetHallRect failed on attempt %d\n", 
+                  attempt_count + 1 );
+            pStep->m_rcArea.Init( rcTry );
+            attempt_count++;
+            continue;
+        }
+        
         bPlacementSucceeded = CheckArea( pStep );
         if( !bPlacementSucceeded )
         {
@@ -801,7 +825,7 @@ CDungeonCreationStep *CDungeonMap::MakeHallStep( const JIVector &vPos, const int
     return pStep;
 }
 
-void CDungeonMap::GetRoomRect( JRect &rcRoom, const int direction )
+JResult CDungeonMap::GetRoomRect( JRect &rcRoom, const int direction )
 {
     JIVector vSize( 0, 0 );
     vSize.Init( Util::GetRandom( DUNG_ROOM_MINWIDTH, DUNG_ROOM_MAXWIDTH ),
@@ -835,11 +859,30 @@ void CDungeonMap::GetRoomRect( JRect &rcRoom, const int direction )
         break;
     }
     
-    // Clamp to world bounds with optional warning (DRY: uses JRect::ClampToWorld)
-    rcRoom.ClampToWorld( true );
+    // Check if clamping is needed (indicates out-of-bounds geometry)
+    bool bClamped = rcRoom.ClampToWorld( true );
+    
+    // Check for degenerate rectangles (0 or negative width/height)
+    if( rcRoom.Width() <= 0 || rcRoom.Height() <= 0 )
+    {
+        JLog( LOG_LEVEL_WARN, true, 
+              "[DUNGEN] GetRoomRect produced degenerate rect <%d %d, %d %d> (w=%d h=%d)\n",
+              RECT_EXPAND( rcRoom ), rcRoom.Width(), rcRoom.Height() );
+        return -1;
+    }
+    
+    // If clamping occurred, the geometry may be corrupted
+    if( bClamped )
+    {
+        JLog( LOG_LEVEL_WARN, true, 
+              "[DUNGEN] GetRoomRect required clamping - geometry may be corrupted\n" );
+        return -1;
+    }
+    
+    return JSUCCESS;
 }
 
-void CDungeonMap::GetHallRect( JRect &rcHall, const int direction )
+JResult CDungeonMap::GetHallRect( JRect &rcHall, const int direction )
 {
     int length = Util::GetRandom( DUNG_HALL_MINLENGTH, DUNG_HALL_MAXLENGTH );
     switch( direction )
@@ -862,8 +905,28 @@ void CDungeonMap::GetHallRect( JRect &rcHall, const int direction )
         break;
     }
     
-    // Clamp to world bounds with optional warning (DRY: uses JRect::ClampToWorld)
-    rcHall.ClampToWorld( true );
+    // Check if clamping is needed (indicates out-of-bounds geometry)
+    bool bClamped = rcHall.ClampToWorld( true );
+    
+    // Hallways can have 0 width or 0 height (they're 1-dimensional corridors)
+    // But they shouldn't have negative dimensions
+    if( rcHall.Width() < 0 || rcHall.Height() < 0 )
+    {
+        JLog( LOG_LEVEL_WARN, true, 
+              "[DUNGEN] GetHallRect produced invalid rect <%d %d, %d %d> (w=%d h=%d)\n",
+              RECT_EXPAND( rcHall ), rcHall.Width(), rcHall.Height() );
+        return -1;
+    }
+    
+    // If clamping occurred, the geometry may be corrupted
+    if( bClamped )
+    {
+        JLog( LOG_LEVEL_WARN, true, 
+              "[DUNGEN] GetHallRect required clamping - geometry may be corrupted\n" );
+        return -1;
+    }
+    
+    return JSUCCESS;
 }
 
 JIVector &CDungeonMap::GetWallOrigin( CDungeonCreationStep *pStep, const int direction )

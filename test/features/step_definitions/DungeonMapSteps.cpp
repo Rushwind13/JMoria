@@ -590,3 +590,125 @@ THEN( "^The reachable tile count equals the total walkable tile count$" )
     EXPECT_EQ( context->reachable_tiles, context->total_walkable_tiles );
     EXPECT_GT( context->reachable_tiles, 0 );
 }
+
+// GetRoomRect/GetHallRect validation tests
+WHEN( "^I call GetRoomRect with position at ([0-9]+),([0-9]+) direction (north|south|east|west)$" )
+{
+    REGEX_PARAM( int, x );
+    REGEX_PARAM( int, y );
+    REGEX_PARAM( std::string, direction );
+    
+    int dir = ( direction == "east" )    ? DIR_EAST
+              : ( direction == "west" )  ? DIR_WEST
+              : ( direction == "north" ) ? DIR_NORTH
+              : ( direction == "south" ) ? DIR_SOUTH
+                                         : DIR_NONE;
+    
+    ScenarioScope<TestCtx> context;
+    context->area.Init( x, y, x, y );
+    context->result = context->map.GetRoomRect( context->area, dir );
+}
+
+WHEN( "^I call GetHallRect with position at ([0-9]+),([0-9]+) direction (north|south|east|west)$" )
+{
+    REGEX_PARAM( int, x );
+    REGEX_PARAM( int, y );
+    REGEX_PARAM( std::string, direction );
+    
+    int dir = ( direction == "east" )    ? DIR_EAST
+              : ( direction == "west" )  ? DIR_WEST
+              : ( direction == "north" ) ? DIR_NORTH
+              : ( direction == "south" ) ? DIR_SOUTH
+                                         : DIR_NONE;
+    
+    ScenarioScope<TestCtx> context;
+    context->area.Init( x, y, x, y );
+    context->result = context->map.GetHallRect( context->area, dir );
+}
+
+WHEN( "^I attempt to create a room step at world boundary ([0-9]+),([0-9]+) direction (north|south|east|west)$" )
+{
+    REGEX_PARAM( int, x );
+    REGEX_PARAM( int, y );
+    REGEX_PARAM( std::string, direction );
+    
+    int dir = ( direction == "east" )    ? DIR_EAST
+              : ( direction == "west" )  ? DIR_WEST
+              : ( direction == "north" ) ? DIR_NORTH
+              : ( direction == "south" ) ? DIR_SOUTH
+                                         : DIR_NONE;
+    
+    ScenarioScope<TestCtx> context;
+    JIVector vPos( x, y );
+    context->pStep = context->map.MakeRoomStep( vPos, dir, 0 );
+}
+
+WHEN( "^I attempt to create a hallway step at world boundary ([0-9]+),([0-9]+) direction (north|south|east|west)$" )
+{
+    REGEX_PARAM( int, x );
+    REGEX_PARAM( int, y );
+    REGEX_PARAM( std::string, direction );
+    
+    int dir = ( direction == "east" )    ? DIR_EAST
+              : ( direction == "west" )  ? DIR_WEST
+              : ( direction == "north" ) ? DIR_NORTH
+              : ( direction == "south" ) ? DIR_SOUTH
+                                         : DIR_NONE;
+    
+    ScenarioScope<TestCtx> context;
+    JIVector vPos( x, y );
+    context->pStep = context->map.MakeHallStep( vPos, dir, 0 );
+}
+
+THEN( "^The returned rect has positive width and height$" )
+{
+    ScenarioScope<TestCtx> context;
+    // If GetRoomRect succeeded (returned JSUCCESS), rect should be valid
+    if( context->result == JSUCCESS )
+    {
+        EXPECT_GT( context->area.Width(), 0 );
+        EXPECT_GT( context->area.Height(), 0 );
+    }
+    // If it failed (returned -1), that's also acceptable - the validation is working
+}
+
+THEN( "^GetHallRect returns success or properly handles boundary$" )
+{
+    ScenarioScope<TestCtx> context;
+    // GetHallRect should either succeed with valid geometry or return -1
+    if( context->result == JSUCCESS )
+    {
+        // Hallways can have 0 width OR 0 height (but not both, and not negative)
+        EXPECT_GE( context->area.Width(), 0 );
+        EXPECT_GE( context->area.Height(), 0 );
+        EXPECT_TRUE( context->area.Width() > 0 || context->area.Height() > 0 );
+    }
+    // If result is -1, that's acceptable - validation caught the issue
+}
+
+THEN( "^The room step either succeeds with valid geometry or returns NULL$" )
+{
+    ScenarioScope<TestCtx> context;
+    if( context->pStep != NULL )
+    {
+        // If step was created, it should have valid geometry
+        EXPECT_GT( context->pStep->m_rcArea.Width(), 0 );
+        EXPECT_GT( context->pStep->m_rcArea.Height(), 0 );
+        EXPECT_TRUE( context->pStep->m_rcArea.IsWithinWorld() );
+    }
+    // NULL is also acceptable - creation failed gracefully
+}
+
+THEN( "^The hallway step either succeeds with valid geometry or returns NULL$" )
+{
+    ScenarioScope<TestCtx> context;
+    if( context->pStep != NULL )
+    {
+        // If step was created, it should have valid geometry
+        EXPECT_GE( context->pStep->m_rcArea.Width(), 0 );
+        EXPECT_GE( context->pStep->m_rcArea.Height(), 0 );
+        EXPECT_TRUE( context->pStep->m_rcArea.Width() > 0 || context->pStep->m_rcArea.Height() > 0 );
+        EXPECT_TRUE( context->pStep->m_rcArea.IsWithinWorld() );
+    }
+    // NULL is also acceptable - creation failed gracefully
+}

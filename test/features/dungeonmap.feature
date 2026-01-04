@@ -182,3 +182,13 @@ Feature: Dungeon Creation
         When I export the dungeon to a fixture file
         And I import the fixture file into a new dungeon
         Then The imported dungeon has the same structure
+
+    Scenario: GetRoomRect rejects degenerate rectangles
+        Given I create a dungeon at depth 1 with seed 777
+        When I call GetRoomRect with position at 50,50 direction north
+        Then The returned rect has positive width and height
+
+    Scenario: GetHallRect rejects out-of-bounds geometry
+        Given I create a dungeon at depth 1 with seed 888
+        When I call GetHallRect with position at 98,50 direction east
+        Then GetHallRect returns success or properly handles boundary

@@ -1,5 +1,12 @@
 ## New for 2025: AI Support
 https://chatgpt.com/g/g-68900dcbb5788191a6fe3edc36c4bca7-jmoria-development
+## Linux/Ubuntu Getting Started
+```bash
+sudo ./install/linux/ubuntu/install-deps.sh
+### Test Dependencies (Optional)
+sudo ./install/linux/ubuntu/install-test-deps.sh
+```
+
 ## MacOS Getting Started
 * you will need XCode to be installed from App Store
 * you will need `xcode-select --install` done (this is done by XCode install)
@@ -9,7 +16,23 @@ https://chatgpt.com/g/g-68900dcbb5788191a6fe3edc36c4bca7-jmoria-development
 * to set up cucumber tests, `brew install googletest cucumber-cpp`
 * needed to `git clone` the cucumber-cpp repo and
 * do the cmake stuff in the readme
-*
+
+## Build and Test
+
+### Build the Game
+```bash
+make
+./jmoria
+```
+
+**Note:** cucumber-cpp uses the wire protocol which is only compatible with
+cucumber-ruby 2.x. The `test/Gemfile` specifies the correct version.
+
+### Run Tests
+```bash
+cd test
+./runtests.sh --build
+```
 
 ## Setup clang-format as pre-commit
 

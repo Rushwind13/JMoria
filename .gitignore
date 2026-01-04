@@ -17,3 +17,9 @@ jmoria
 
 # Cucumber
 bin/
+
+# Ruby Bundler (test dependencies)
+# Gemfile.lock ignored - generated per-platform (Linux vs Mac)
+test/vendor/
+test/.bundle/
+test/Gemfile.lock

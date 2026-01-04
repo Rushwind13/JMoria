@@ -19,8 +19,6 @@ Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH] = {
     0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 }; /* */
 #endif
 
-uint8 MAX_TRIES = 2;
-
 // Use the following algorithm to create a randomized dungeon
 // filled with rooms (of various types) and corridors:
 // 1.  Fill the whole map with solid earth
@@ -107,8 +105,6 @@ void CDungeonMap::CreateDungeon( const int depth )
     // Next, carve out a room in the middle
     JIVector vPos( Util::GetRandom( DUNG_ROOM_MAXWIDTH, DUNG_WIDTH - DUNG_ROOM_MAXWIDTH - 1 ),
                    Util::GetRandom( DUNG_ROOM_MAXHEIGHT, DUNG_HEIGHT - DUNG_ROOM_MAXHEIGHT - 1 ) );
-    // JIVector vPos(DUNG_WIDTH/2, DUNG_HEIGHT/2);
-    // JIVector vPos(20,20);
     InitDungeonCreate( vPos );
 #endif
 }
@@ -458,7 +454,6 @@ bool CDungeonMap::CreateOneStep()
     {
         // push hallways onto stack
         int num_halls = Util::GetRandom( 2, 4 );
-        // num_halls = 1;
         // Use num_halls instead of forcing all 4 directions
         int dirs[4];
         RandomDirections( dirs );
@@ -511,7 +506,7 @@ bool CDungeonMap::CreateOneStep()
     case DUNG_CREATE_STEP_MAKE_HALLWAY:
     {
         int pick_next = Util::Roll( "1d100" );
-        if( pick_next <= 80 )
+        if( pick_next <= HALLWAY_LEADS_TO_ROOM_PERCENT )
         {
             // Make a (single) room, in the direction of this hallway
             int dir = pCurStep->m_dwDirection;
@@ -576,7 +571,6 @@ bool CDungeonMap::CreateOneStep()
             // make a random number of hallways, continuing from this one.
             // push either rooms or hallways onto stack
             int num_halls = Util::GetRandom( 2, 4 );
-            // num_halls = 4;
             // Use num_rooms instead of forcing all 4 directions
             int dirs[4];
             RandomDirections( dirs );
@@ -589,8 +583,6 @@ bool CDungeonMap::CreateOneStep()
                         num_halls++;
                     continue;
                 }
-                // if( pCurStep->m_dwDirection == dir )
-                //     continue;
                 JIVector vHall = GetHallOrigin( pCurStep, DUNG_CREATE_STEP_MAKE_HALLWAY );
                 if( !vHall.IsWithinWorld() )
                     break;
@@ -707,34 +699,34 @@ CDungeonCreationStep *CDungeonMap::MakeRoomStep( const JIVector &vPos, const int
     // TODO: eventually, put in diff. types of rooms
     // randomly sized rectangular room
 
-    bool dwDone = false;
-    int count = 0;
+    bool bPlacementSucceeded = false;
+    int attempt_count = 0;
 
     JRect rcTry( pStep->m_rcArea );
-    while( !dwDone && count < MAX_TRIES )
+    while( !bPlacementSucceeded && attempt_count < MAX_TRIES )
     {
         GetRoomRect( pStep->m_rcArea, pStep->m_dwDirection );
-        dwDone = CheckArea( pStep );
-        if( !dwDone )
+        bPlacementSucceeded = CheckArea( pStep );
+        if( !bPlacementSucceeded )
         {
             // this one didn't work, need to "un-shift" the rect for the next try.
 #ifdef DUNGEN_DEBUG
             JLog( LOG_LEVEL_NOISE, true, "[DUNGEN] Room attempt %d conflict at <%d %d, %d %d>\n",
-                  count + 1, RECT_EXPAND( pStep->m_rcArea ) );
+                  attempt_count + 1, RECT_EXPAND( pStep->m_rcArea ) );
 #endif
             JLog( LOG_LEVEL_NOISE, true, "un-shifting <%d %d, %d %d> back to <%d %d, %d %d>\n",
                   RECT_EXPAND( pStep->m_rcArea ), RECT_EXPAND( rcTry ) );
             pStep->m_rcArea.Init( rcTry );
         }
-        count++;
+        attempt_count++;
     }
 
-    if( !dwDone )
+    if( !bPlacementSucceeded )
     {
         // can't find a good match for this room.
 #ifdef DUNGEN_DEBUG
         JLog( LOG_LEVEL_NOISE, true, "[DUNGEN] Room <%d %d> failed after %d attempts (conflicts)\n",
-              vPos.x, vPos.y, count );
+              vPos.x, vPos.y, attempt_count );
 #endif
         g_pGame->GetStats()->Printf( "...room <%d %d> conflicts. terminated.\n",
                                      VEC_EXPAND( vPos ) );
@@ -743,9 +735,6 @@ CDungeonCreationStep *CDungeonMap::MakeRoomStep( const JIVector &vPos, const int
         delete pStep;
         return NULL;
     }
-    // put a door where the room and hallway meet
-    // if( recurdepth > 0 )
-    //     AddDoor( pStep->m_vPos, pStep->m_dwDirection );
 
     JLog( LOG_LEVEL_DEBUG, true, "success!\n" );
     return pStep;
@@ -770,34 +759,34 @@ CDungeonCreationStep *CDungeonMap::MakeHallStep( const JIVector &vPos, const int
     pStep->m_vPos.Init( vPos.x, vPos.y );
     pStep->m_rcArea.Init( pStep->m_vPos, 0, 0 );
 
-    bool dwDone = false;
-    int count = 0;
+    bool bPlacementSucceeded = false;
+    int attempt_count = 0;
 
     JRect rcTry( pStep->m_rcArea );
-    while( !dwDone && count < MAX_TRIES )
+    while( !bPlacementSucceeded && attempt_count < MAX_TRIES )
     {
         GetHallRect( pStep->m_rcArea, pStep->m_dwDirection );
-        dwDone = CheckArea( pStep );
-        if( !dwDone )
+        bPlacementSucceeded = CheckArea( pStep );
+        if( !bPlacementSucceeded )
         {
             // this one didn't work, need to "un-shift" the rect for the next try.
 #ifdef DUNGEN_DEBUG
             JLog( LOG_LEVEL_NOISE, true, "[DUNGEN] Hall attempt %d conflict at <%d %d, %d %d>\n",
-                  count + 1, RECT_EXPAND( pStep->m_rcArea ) );
+                  attempt_count + 1, RECT_EXPAND( pStep->m_rcArea ) );
 #endif
             JLog( LOG_LEVEL_NOISE, true, "un-shifting <%d %d, %d %d> back to <%d %d, %d %d>\n",
                   RECT_EXPAND( pStep->m_rcArea ), RECT_EXPAND( rcTry ) );
             pStep->m_rcArea.Init( rcTry );
         }
-        count++;
+        attempt_count++;
     }
 
-    if( !dwDone )
+    if( !bPlacementSucceeded )
     {
         // can't find a good match for this hallway.
 #ifdef DUNGEN_DEBUG
         JLog( LOG_LEVEL_NOISE, true, "[DUNGEN] Hall <%d %d> failed after %d attempts (conflicts)\n",
-              vPos.x, vPos.y, count );
+              vPos.x, vPos.y, attempt_count );
 #endif
         g_pGame->GetStats()->Printf( "...hall <%d %d> conflicts. terminated.\n",
                                      VEC_EXPAND( vPos ) );
@@ -806,8 +795,6 @@ CDungeonCreationStep *CDungeonMap::MakeHallStep( const JIVector &vPos, const int
         delete pStep;
         return NULL;
     }
-    // put a door where the room and hallway meet
-    // AddDoor( pStep->m_vPos, pStep->m_dwDirection );
 
     JLog( LOG_LEVEL_DEBUG, true, "success!\n" );
     return pStep;
@@ -818,7 +805,6 @@ void CDungeonMap::GetRoomRect( JRect &rcRoom, const int direction )
     JIVector vSize( 0, 0 );
     vSize.Init( Util::GetRandom( DUNG_ROOM_MINWIDTH, DUNG_ROOM_MAXWIDTH ),
                 Util::GetRandom( DUNG_ROOM_MINHEIGHT, DUNG_ROOM_MAXHEIGHT ) );
-    // vSize.Init(5,5);
     switch( direction )
     {
     case DIR_NORTH:
@@ -864,7 +850,6 @@ void CDungeonMap::GetRoomRect( JRect &rcRoom, const int direction )
 void CDungeonMap::GetHallRect( JRect &rcHall, const int direction )
 {
     int length = Util::GetRandom( DUNG_HALL_MINLENGTH, DUNG_HALL_MAXLENGTH );
-    // length=5;
     switch( direction )
     {
     case DIR_NORTH:

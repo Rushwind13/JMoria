@@ -833,18 +833,9 @@ void CDungeonMap::GetRoomRect( JRect &rcRoom, const int direction )
         rcRoom.SetHeight( vSize.y );
         break;
     }
-    // Explicit boundary checking with warning instead of silent clamping
-    if( !rcRoom.IsWithinWorld() )
-    {
-#ifdef DUNGEN_DEBUG
-        JLog( LOG_LEVEL_WARNING, true, 
-              "[DUNGEN] Warning: Room rect <%d %d, %d %d> exceeds world bounds, clamping\n",
-              RECT_EXPAND( rcRoom ) );
-#endif
-        rcRoom.Init(
-            CLAMP( rcRoom.left, 1, DUNG_WIDTH - 2 ), CLAMP( rcRoom.top, 1, DUNG_HEIGHT - 2 ),
-            CLAMP( rcRoom.right, 1, DUNG_WIDTH - 2 ), CLAMP( rcRoom.bottom, 1, DUNG_HEIGHT - 2 ) );
-    }
+    
+    // Clamp to world bounds with optional warning (DRY: uses JRect::ClampToWorld)
+    rcRoom.ClampToWorld( true );
 }
 
 void CDungeonMap::GetHallRect( JRect &rcHall, const int direction )
@@ -869,18 +860,9 @@ void CDungeonMap::GetHallRect( JRect &rcHall, const int direction )
         rcHall.SetHeight( 0 );
         break;
     }
-    // Explicit boundary checking with warning instead of silent clamping
-    if( !rcHall.IsWithinWorld() )
-    {
-#ifdef DUNGEN_DEBUG
-        JLog( LOG_LEVEL_WARNING, true, 
-              "[DUNGEN] Warning: Hall rect <%d %d, %d %d> exceeds world bounds, clamping\n",
-              RECT_EXPAND( rcHall ) );
-#endif
-        rcHall.Init(
-            CLAMP( rcHall.left, 1, DUNG_WIDTH - 2 ), CLAMP( rcHall.top, 1, DUNG_HEIGHT - 2 ),
-            CLAMP( rcHall.right, 1, DUNG_WIDTH - 2 ), CLAMP( rcHall.bottom, 1, DUNG_HEIGHT - 2 ) );
-    }
+    
+    // Clamp to world bounds with optional warning (DRY: uses JRect::ClampToWorld)
+    rcHall.ClampToWorld( true );
 }
 
 JIVector &CDungeonMap::GetWallOrigin( CDungeonCreationStep *pStep, const int direction )

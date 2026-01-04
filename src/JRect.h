@@ -9,6 +9,11 @@
 
 #include "JVector.h"
 
+// CLAMP macro for boundary checking (avoid circular dependency with Util.h)
+#ifndef CLAMP
+#define CLAMP( val, lo, hi ) ( val <= lo ? lo : ( val >= hi ? hi : val ) )
+#endif
+
 #define RECT_EXPAND( r ) ( r ).left, ( r ).top, ( r ).right, ( r ).bottom
 #define VIEWRECT_EXPAND( r ) ( r ).left, ( r ).right, ( r ).top, ( r ).bottom
 
@@ -128,6 +133,34 @@ public:
             return false;
         }
         return IsValidRect();
+    }
+
+    // Clamps rectangle coordinates to valid world bounds (1 tile from edges for walls)
+    // Returns true if clamping was performed, false if already within bounds
+    // Optionally logs a warning when clamping occurs (requires DUNGEN_DEBUG)
+    bool ClampToWorld( bool bLogWarning = true )
+    {
+        if( IsWithinWorld() )
+        {
+            return false;  // No clamping needed
+        }
+
+#ifdef DUNGEN_DEBUG
+        if( bLogWarning )
+        {
+            JLog( LOG_LEVEL_WARN, true, 
+                  "[DUNGEN] Warning: Rect <%d %d, %d %d> exceeds world bounds, clamping\n",
+                  left, top, right, bottom );
+        }
+#endif
+
+        // Clamp to valid world bounds (leaving 1 tile border for walls)
+        left = CLAMP( left, 1, DUNG_WIDTH - 2 );
+        top = CLAMP( top, 1, DUNG_HEIGHT - 2 );
+        right = CLAMP( right, 1, DUNG_WIDTH - 2 );
+        bottom = CLAMP( bottom, 1, DUNG_HEIGHT - 2 );
+
+        return true;  // Clamping was performed
     }
 };
 

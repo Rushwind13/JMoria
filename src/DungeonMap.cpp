@@ -628,16 +628,16 @@ void CDungeonMap::AddDoor( const JIVector vHall, int direction )
     switch( direction )
     {
     case DIR_NORTH:
-        vDoor.y++;
+        vDoor.y += DOOR_OFFSET; // Move 1 tile inward from hallway start to room wall
         break;
     case DIR_SOUTH:
-        vDoor.y--;
+        vDoor.y -= DOOR_OFFSET; // Move 1 tile inward from hallway start to room wall
         break;
     case DIR_WEST:
-        vDoor.x++;
+        vDoor.x += DOOR_OFFSET; // Move 1 tile inward from hallway start to room wall
         break;
     case DIR_EAST:
-        vDoor.x--;
+        vDoor.x -= DOOR_OFFSET; // Move 1 tile inward from hallway start to room wall
         break;
     case DIR_NONE:
         break;
@@ -873,7 +873,7 @@ JIVector &CDungeonMap::GetWallOrigin( CDungeonCreationStep *pStep, const int dir
         // note: someday, this should be a random spot on the wall, rather than width/2
         pStep->m_vPos.Init(
             pStep->m_rcArea.Left() + ( Util::GetRandom( 1, pStep->m_rcArea.Width() - 1 ) ),
-            pStep->m_rcArea.Top() - 2 ); // -1... does a room's rect include its walls?
+            pStep->m_rcArea.Top() - WALL_OFFSET ); // Position hallway 2 tiles away from room edge
         JLog( LOG_LEVEL_NOISE, true,
               "[%d>%d]GetWallOrigin creating north %s, starting at <%d %d>\n",
               pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1,
@@ -883,7 +883,7 @@ JIVector &CDungeonMap::GetWallOrigin( CDungeonCreationStep *pStep, const int dir
     case DIR_SOUTH:
         pStep->m_vPos.Init( pStep->m_rcArea.Left() +
                                 ( Util::GetRandom( 1, pStep->m_rcArea.Width() - 1 ) ),
-                            pStep->m_rcArea.Bottom() + 2 );
+                            pStep->m_rcArea.Bottom() + WALL_OFFSET ); // Position hallway 2 tiles away from room edge
         JLog( LOG_LEVEL_NOISE, true,
               "[%d>%d]GetWallOrigin creating south %s, starting at <%d %d>\n",
               pStep->m_dwRecurDepth, pStep->m_dwRecurDepth + 1,
@@ -891,7 +891,7 @@ JIVector &CDungeonMap::GetWallOrigin( CDungeonCreationStep *pStep, const int dir
               VEC_EXPAND( pStep->m_vPos ) );
         break;
     case DIR_WEST:
-        pStep->m_vPos.Init( pStep->m_rcArea.Left() - 2,
+        pStep->m_vPos.Init( pStep->m_rcArea.Left() - WALL_OFFSET, // Position hallway 2 tiles away from room edge
                             pStep->m_rcArea.Top() +
                                 ( Util::GetRandom( 1, pStep->m_rcArea.Height() - 1 ) ) );
         JLog( LOG_LEVEL_NOISE, true, "[%d>%d]GetWallOrigin creating west %s, starting at <%d %d>\n",
@@ -900,7 +900,7 @@ JIVector &CDungeonMap::GetWallOrigin( CDungeonCreationStep *pStep, const int dir
               VEC_EXPAND( pStep->m_vPos ) );
         break;
     case DIR_EAST:
-        pStep->m_vPos.Init( pStep->m_rcArea.Right() + 2,
+        pStep->m_vPos.Init( pStep->m_rcArea.Right() + WALL_OFFSET, // Position hallway 2 tiles away from room edge
                             pStep->m_rcArea.Top() +
                                 ( Util::GetRandom( 1, pStep->m_rcArea.Height() - 1 ) ) );
         JLog( LOG_LEVEL_NOISE, true, "[%d>%d]GetWallOrigin creating east %s, starting at <%d %d>\n",

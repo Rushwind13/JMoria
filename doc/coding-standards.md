@@ -78,12 +78,16 @@ if (x >= 0 && x < DUNG_WIDTH && y >= 0 && y < DUNG_HEIGHT) { ... }
 
 ## 2. Utility Functions
 
+### Minimal External Dependencies
+
+JMoria avoids external library dependencies. Do not use standard library headers like `<stdio.h>`, `<stdlib.h>`, `<cmath>`, or `<string.h>` directly. Instead, use the project's own implementations.
+
 ### Prefer Util.h Functions
 
 Check `src/Util.h` for existing utility functions before writing new ones.
 
 **Available utilities:**
-- `Util::jstrcpy()`, `Util::jstrcmp()` - String operations
+- `Util::jstrcpy()`, `Util::jstrcmp()` - String operations (use instead of `<string.h>`)
 - `Util::Nearby()` - Check if two positions are adjacent
 - `Util::WithinRadius()` - Check distance between positions
 - `Util::GetTickCount()` - Platform-independent time
@@ -96,7 +100,7 @@ Use existing class methods instead of reimplementing functionality.
 ```cpp
 JVector pos = monster->GetPos();
 const char* name = item->GetName();
-vec.printvec();  // For debug output
+vec.printvec("label");  // Debug output: void printvec( const char *label )
 ```
 
 **Bad:**
@@ -568,17 +572,10 @@ THEN( "^GetState returns ([0-9]+)$" )
 ### Test Context
 
 Tests share state via `TestContext.hpp`:
-- `g_pGame = NULL` (no full game initialization)
+- `g_pGame` - Global pointer to the Game, shared by all tests
 - `context->brain` - CAIBrain for AI tests
 - `context->monster` - CMonster for monster tests
 - `context->result_bool` - Store method return values
-
-### Test Isolation Constraints
-
-Since `g_pGame = NULL` in tests:
-- Cannot test methods that call `g_pGame->GetDungeon()`
-- Cannot test `CAIBrain::Move()` directly (requires dungeon)
-- Use `GameSteps.cpp` for integration tests requiring full game
 
 ### TDD Workflow (Red/Green/Refactor)
 

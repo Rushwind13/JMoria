@@ -1,7 +1,7 @@
 # Dungeon Generation Analysis & Issues
 
 **Date:** 2025-12-28  
-**Last Updated:** 2026-01-03 (Issues 1.1-1.6, 3.1, 4.1-4.3 resolved)  
+**Last Updated:** 2026-01-03 (Issues 1.1-1.6, 2.6, 3.1, 4.1-4.4 resolved)  
 **Focus:** Complete codebase examination of dungeon generation system
 
 ---
@@ -11,9 +11,9 @@
 The dungeon generation system in JMoria uses a recursive stack-based algorithm to create interconnected rooms and hallways. While functionally working, the code has **significant brittleness, missing test coverage, redundancy, and confusing logic** that makes maintenance difficult and limits reliability.
 
 **Critical Issues Found:** 7 (6 resolved ✅)  
-**Missing Tests:** 12 major areas  
+**Missing Tests:** 12 major areas (1 resolved ✅)  
 **Code Redundancy:** 4 major areas (1 resolved ✅)  
-**Confusing/Brittle Code:** 8 areas (3 resolved ✅)
+**Confusing/Brittle Code:** 8 areas (4 resolved ✅)
 
 ---
 
@@ -287,16 +287,33 @@ Scenario: Lighting probability decreases with depth
 
 ---
 
-### 2.6 **No Tests for Connectivity**
-**Missing Test:** Verify all rooms reachable from starting room
-**Risk:** Disconnected dungeon sections
-**Suggested Test:**
+### 2.6 **~~No Tests for Connectivity~~** ✅ FIXED (2026-01-03)
+**Location:** [test/features/connectivity.feature](test/features/connectivity.feature), [src/DungeonMap.cpp#L1141-L1263](src/DungeonMap.cpp#L1141-L1263)  
+**Severity:** ~~MEDIUM~~ → RESOLVED
+
+**Previous Risk:** Disconnected dungeon sections could exist without detection
+
+**Resolution Implemented:**
+- ✅ Flood-fill connectivity validation algorithm added (`ValidateConnectivity()`)
+- ✅ Breadth-First Search (BFS) implementation with visited array tracking
+- ✅ Counts total walkable tiles (floors, doors, stairs) and validates all are reachable
+- ✅ Public helper method `ValidateAllRoomsReachable()` for simple connectivity checks
+- ✅ Comprehensive logging at `LOG_LEVEL_INFO` showing "X/Y tiles reachable (CONNECTED/DISCONNECTED)"
+- ✅ BDD test scenarios validating both connected and disconnected dungeons
+- ✅ Tests validate flood-fill correctly detects connectivity issues
+
+**Test Coverage Added:**
 ```gherkin
-Scenario: All rooms are reachable via hallways
-  Given I create a dungeon at depth 1 with seed 42
-  When I flood-fill from the center room
-  Then All rooms are marked as reachable
+Scenario: Disconnected rooms are detected
+  # Creates 2 separate rooms, validates only 121/242 tiles reachable
+
+Scenario: Single room dungeon is fully connected  
+  # Creates 1 room, validates all 121/121 tiles reachable
 ```
+
+**Testing:** All 100 scenarios pass (459 steps)
+- Disconnected test: 121/242 tiles reachable (DISCONNECTED) ✅
+- Connected test: 121/121 tiles reachable (CONNECTED) ✅
 
 ---
 

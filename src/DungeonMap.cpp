@@ -419,7 +419,8 @@ bool CDungeonMap::CreateOneStep()
         m_diagnostics.end_time_ms = Util::GetTimeInMillis();
         m_diagnostics.total_time_ms = m_diagnostics.end_time_ms - m_diagnostics.start_time_ms;
         
-        g_pGame->GetStats()->Printf( "Dungeon creation complete.\n" );
+        if( g_pGame )
+            g_pGame->GetStats()->Printf( "Dungeon creation complete.\n" );
 #ifdef DUNGEN_DEBUG
         JLog( LOG_LEVEL_INFO, true, "[DUNGEN] Generation complete: %d steps, %d rooms, %d halls, "
               "%d skipped, %d fill ops, %d abandoned (tails out prevention)\n", 
@@ -1137,4 +1138,126 @@ JIVector &CDungeonMap::GetHallOrigin( CDungeonCreationStep *pStep, int step_type
     }
 
     return pStep->m_vPos;
+}
+
+// Flood-fill connectivity validation
+// Returns true if the dungeon is fully connected
+// Sets reachable_tiles to the number of walkable tiles reached
+// Sets total_walkable_tiles to the total number of walkable tiles in the dungeon
+bool CDungeonMap::ValidateConnectivity( int &reachable_tiles, int &total_walkable_tiles ) const
+{
+    if( !m_dmtTiles )
+        return false;
+
+    // Create visited array
+    bool *visited = new bool[DUNG_WIDTH * DUNG_HEIGHT];
+    memset( visited, false, DUNG_WIDTH * DUNG_HEIGHT );
+
+    // Count total walkable tiles (floors, doors, stairs)
+    total_walkable_tiles = 0;
+    JIVector start_pos;
+    bool found_start = false;
+    
+    for( int y = 0; y < DUNG_HEIGHT; y++ )
+    {
+        for( int x = 0; x < DUNG_WIDTH; x++ )
+        {
+            const CDungeonMapTile *pTile = &m_dmtTiles[y * DUNG_WIDTH + x];
+            Uint8 type = pTile->GetType();
+            
+            // Count walkable tiles
+            if( type == DUNG_IDX_FLOOR || type == DUNG_IDX_DOOR || 
+                type == DUNG_IDX_OPEN_DOOR || type == DUNG_IDX_SECRET_DOOR ||
+                type == DUNG_IDX_UPSTAIRS || type == DUNG_IDX_LONG_UPSTAIRS ||
+                type == DUNG_IDX_DOWNSTAIRS || type == DUNG_IDX_LONG_DOWNSTAIRS )
+            {
+                total_walkable_tiles++;
+                
+                // Remember first walkable tile as starting point
+                if( !found_start )
+                {
+                    start_pos.Init( x, y );
+                    found_start = true;
+                }
+            }
+        }
+    }
+
+    // If no walkable tiles, dungeon is empty (technically "connected")
+    if( total_walkable_tiles == 0 )
+    {
+        delete[] visited;
+        reachable_tiles = 0;
+        return true;
+    }
+
+    // Flood-fill using a queue (BFS)
+    JIVector *queue = new JIVector[DUNG_WIDTH * DUNG_HEIGHT];
+    int queue_head = 0;
+    int queue_tail = 0;
+    
+    // Start flood-fill from first walkable tile
+    queue[queue_tail++] = start_pos;
+    visited[start_pos.y * DUNG_WIDTH + start_pos.x] = true;
+    reachable_tiles = 1;
+
+    // BFS flood-fill
+    while( queue_head < queue_tail )
+    {
+        JIVector current = queue[queue_head++];
+        
+        // Check all 4 directions
+        static const int dx[] = { 0, 0, -1, 1 };
+        static const int dy[] = { -1, 1, 0, 0 };
+        
+        for( int i = 0; i < 4; i++ )
+        {
+            JIVector neighbor( current.x + dx[i], current.y + dy[i] );
+            
+            // Skip if out of bounds
+            if( !neighbor.IsInWorld() )
+                continue;
+            
+            int idx = neighbor.y * DUNG_WIDTH + neighbor.x;
+            
+            // Skip if already visited
+            if( visited[idx] )
+                continue;
+            
+            // Check if tile is walkable
+            const CDungeonMapTile *pTile = &m_dmtTiles[idx];
+            Uint8 type = pTile->GetType();
+            
+            if( type == DUNG_IDX_FLOOR || type == DUNG_IDX_DOOR || 
+                type == DUNG_IDX_OPEN_DOOR || type == DUNG_IDX_SECRET_DOOR ||
+                type == DUNG_IDX_UPSTAIRS || type == DUNG_IDX_LONG_UPSTAIRS ||
+                type == DUNG_IDX_DOWNSTAIRS || type == DUNG_IDX_LONG_DOWNSTAIRS )
+            {
+                visited[idx] = true;
+                queue[queue_tail++] = neighbor;
+                reachable_tiles++;
+            }
+        }
+    }
+
+    delete[] queue;
+    delete[] visited;
+
+    // Dungeon is connected if all walkable tiles are reachable
+    bool is_connected = ( reachable_tiles == total_walkable_tiles );
+    
+    JLog( LOG_LEVEL_INFO, true,
+          "Connectivity: %d/%d tiles reachable (%s)\n",
+          reachable_tiles, total_walkable_tiles,
+          is_connected ? "CONNECTED" : "DISCONNECTED" );
+    
+    return is_connected;
+}
+
+// Simpler interface: returns true if all rooms are reachable
+bool CDungeonMap::ValidateAllRoomsReachable() const
+{
+    int reachable = 0;
+    int total = 0;
+    return ValidateConnectivity( reachable, total );
 }

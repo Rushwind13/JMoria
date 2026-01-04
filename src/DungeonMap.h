@@ -301,6 +301,10 @@ protected:
 
     void MakeRoom( const JIVector *vPos, const int direction, const int recurdepth );
     void MakeHall( const JIVector *vPos, const int direction, const int recurdepth );
+    
+    // Connectivity validation
+    bool ValidateConnectivity( int &reachable_tiles, int &total_walkable_tiles ) const;
+    bool ValidateAllRoomsReachable() const;
 
     CDungeonMapTile *GetTile( JIVector vPos )
     {

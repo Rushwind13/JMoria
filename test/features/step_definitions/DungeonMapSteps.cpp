@@ -542,3 +542,51 @@ THEN( "^The fixture file contains ([0-9]+) tile rows$" )
     EXPECT_EQ( row_count, expected_rows );
     fclose( fp );
 }
+
+// Connectivity validation steps
+WHEN( "^I validate dungeon connectivity$" )
+{
+    ScenarioScope<TestCtx> context;
+
+    context->connectivity_result = context->map.ValidateConnectivity( 
+        context->reachable_tiles, 
+        context->total_walkable_tiles );
+}
+
+THEN( "^All tiles are reachable$" )
+{
+    ScenarioScope<TestCtx> context;
+    EXPECT_TRUE( context->connectivity_result );
+    EXPECT_EQ( context->reachable_tiles, context->total_walkable_tiles );
+}
+
+THEN( "^Not all tiles are reachable$" )
+{
+    ScenarioScope<TestCtx> context;
+    EXPECT_FALSE( context->connectivity_result );
+    EXPECT_LT( context->reachable_tiles, context->total_walkable_tiles );
+    EXPECT_GT( context->reachable_tiles, 0 );
+    EXPECT_GT( context->total_walkable_tiles, context->reachable_tiles );
+}
+
+THEN( "^The dungeon is fully connected$" )
+{
+    ScenarioScope<TestCtx> context;
+    EXPECT_TRUE( context->map.ValidateAllRoomsReachable() );
+}
+
+THEN( "^At least ([0-9]+) tiles are reachable$" )
+{
+    REGEX_PARAM( int, min_reachable );
+    ScenarioScope<TestCtx> context;
+    // Use context variables to get the data
+    context->map.ValidateConnectivity( context->reachable_tiles, context->total_walkable_tiles );
+    EXPECT_GE( context->reachable_tiles, min_reachable );
+}
+
+THEN( "^The reachable tile count equals the total walkable tile count$" )
+{
+    ScenarioScope<TestCtx> context;
+    EXPECT_EQ( context->reachable_tiles, context->total_walkable_tiles );
+    EXPECT_GT( context->reachable_tiles, 0 );
+}

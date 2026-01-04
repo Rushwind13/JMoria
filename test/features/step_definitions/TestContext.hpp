@@ -69,6 +69,11 @@ struct TestCtx
     
     // Stress testing
     std::vector<DungeonSnapshot> dungeon_history;
+    
+    // Connectivity validation
+    bool connectivity_result = false;
+    int reachable_tiles = 0;
+    int total_walkable_tiles = 0;
 
     // AI Brain
     CAIBrain *brain;

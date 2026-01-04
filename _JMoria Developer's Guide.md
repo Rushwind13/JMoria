@@ -22,6 +22,10 @@ Use the following branch naming convention:
 
 Create a Pull Request to `develop` when your feature is ready for review.
 
+## Coding Standards
+
+For code style, naming conventions, and patterns used in this codebase, see [doc/coding-standards.md](doc/coding-standards.md).
+
 ## Adding a new Monster
 1) If you are creating a new flavor of an existing monster (adding a new type of orc), you just need to:
         a) edit *Monsters.txt*

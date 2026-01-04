@@ -557,7 +557,48 @@ if( pick_next <= 80 )  // ⚠️ What does 80 mean?
 
 ---
 
-### 4.4 **Unclear GetWallOrigin() vs GetHallOrigin()**
+### 4.4 **~~Obscure +2/-2 Offsets~~** ✅ FIXED (2026-01-03)
+**Locations:**
+- [src/DungeonMap.cpp#L876](src/DungeonMap.cpp#L876) (GetWallOrigin - north)
+- [src/DungeonMap.cpp#L886](src/DungeonMap.cpp#L886) (GetWallOrigin - south)
+- [src/DungeonMap.cpp#L893](src/DungeonMap.cpp#L893) (GetWallOrigin - west)
+- [src/DungeonMap.cpp#L903](src/DungeonMap.cpp#L903) (GetWallOrigin - east)
+- [src/DungeonMap.cpp#L630](src/DungeonMap.cpp#L630) (AddDoor - north)
+- [src/DungeonMap.cpp#L633](src/DungeonMap.cpp#L633) (AddDoor - south)
+- [src/DungeonMap.cpp#L636](src/DungeonMap.cpp#L636) (AddDoor - west)
+- [src/DungeonMap.cpp#L639](src/DungeonMap.cpp#L639) (AddDoor - east)
+
+**Previous Problem:**
+```cpp
+pStep->m_vPos.Init(x, pStep->m_rcArea.Top() - 2);  // Why -2?
+vDoor.y++;  // Why increment?
+```
+
+**Resolution Implemented:**
+- ✅ Added `WALL_OFFSET 2` constant to DungeonConstants.h (Issue 4.2)
+- ✅ Added `DOOR_OFFSET 1` constant to DungeonConstants.h (Issue 4.2)
+- ✅ Replaced all hardcoded +2/-2 with WALL_OFFSET in GetWallOrigin (4 locations)
+- ✅ Replaced all hardcoded +1/-1 with DOOR_OFFSET in AddDoor (4 locations)
+- ✅ Added explanatory comments: "Position hallway 2 tiles away from room edge"
+- ✅ Added explanatory comments: "Move 1 tile inward from hallway start to room wall"
+
+**Spatial Relationships Documented:**
+```
+Room wall → (WALL_OFFSET=2 tiles) → Hallway start
+Hallway start → (DOOR_OFFSET=1 tile) → Door position (on room wall)
+```
+
+**Benefits:**
+- Named constants clarify intent
+- Comments explain spatial relationships
+- Easier to adjust tile spacing if needed
+- Consistent offset values across all directions
+
+**Testing:** All 98 test scenarios pass (449 steps)
+
+---
+
+### 4.5 **Unclear GetWallOrigin() vs GetHallOrigin()**
 **Locations:**
 - [src/DungeonMap.cpp#L872-L918](src/DungeonMap.cpp#L872-L918) (`GetWallOrigin`)
 - [src/DungeonMap.cpp#L1051-L1093](src/DungeonMap.cpp#L1051-L1093) (`GetHallOrigin`)
@@ -571,23 +612,6 @@ if( pick_next <= 80 )  // ⚠️ What does 80 mean?
 **Recommendation:**
 - Rename to `GetRandomRoomWallPoint()` and `GetHallwayEndPoint()`
 - Add docstrings explaining use cases
-
----
-
-### 4.5 **Obscure +2/-2 Offsets**
-**Locations:** Throughout `GetWallOrigin`, `GetHallOrigin`, `AddDoor`
-
-```cpp
-pStep->m_vPos.Init(x, pStep->m_rcArea.Top() - 2);  // Why -2?
-```
-
-**Problem:** No explanation for +2/-2 offsets (presumably for door+wall thickness)
-
-**Recommendation:** Add constants:
-```cpp
-#define WALL_THICKNESS 1
-#define DOOR_OFFSET (WALL_THICKNESS + 1)  // Skip wall, land in empty space
-```
 
 ---
 

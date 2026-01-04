@@ -1,0 +1,4 @@
+source 'https://rubygems.org'
+
+# cucumber-cpp requires cucumber-ruby 2.x (not compatible with 3.x+)
+gem 'cucumber', '~> 2.0'

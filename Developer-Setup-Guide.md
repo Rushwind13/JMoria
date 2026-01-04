@@ -3,11 +3,9 @@ https://chatgpt.com/g/g-68900dcbb5788191a6fe3edc36c4bca7-jmoria-development
 ## Linux/Ubuntu Getting Started
 ```bash
 sudo ./install/linux/ubuntu/install-deps.sh
-make
-./jmoria
+### Test Dependencies (Optional)
+sudo ./install/linux/ubuntu/install-test-deps.sh
 ```
-
-The install script installs: build-essential, libsdl2-dev, libsdl2-image-dev, libgl1-mesa-dev
 
 ## MacOS Getting Started
 * you will need XCode to be installed from App Store
@@ -17,7 +15,24 @@ The install script installs: build-essential, libsdl2-dev, libsdl2-image-dev, li
 * If you get this far, then `make` should work to create the game executable.
 * to set up cucumber tests, `brew install googletest cucumber-cpp`
 * needed to `git clone` the cucumber-cpp repo and
-* do the cmake stuff in the readme 
+* do the cmake stuff in the readme
+
+## Build and Test
+
+### Build the Game
+```bash
+make
+./jmoria
+```
+
+**Note:** cucumber-cpp uses the wire protocol which is only compatible with
+cucumber-ruby 2.x. The `test/Gemfile` specifies the correct version.
+
+### Run Tests
+```bash
+cd test
+./runtests.sh --build
+```
 
 ## Setup clang-format as pre-commit
 

@@ -3,28 +3,22 @@
 CC = g++
 CC_FLAGS = -w
 TEST_CC_FLAGS_COMMON = -I../JMoria/src -std=c++14 -Wno-comment -Wno-delete-non-virtual-dtor
-LD_FLAGS_LINUX = -L/lib/x86_64-linux-gnu -lGL -lSDL2 -lSDL2_image
-TEST_LD_FLAGS_LINUX = -L/usr/local/lib -lcucumber-cpp -lgtest
-
-# Standard Homebrew search paths for headers (MODIFIED: Removed /opt/homebrew)
-LOCAL_INCLUDE_PATHS = -I/usr/local/include
-# Standard Homebrew search paths for libraries (MODIFIED: Removed /opt/homebrew)
-LOCAL_LIB_PATHS = -L/usr/local/lib
 
 OS := $(shell uname -s)
 
 ifeq ($(OS),Darwin)
 # macOS specific flags (Frameworks and libc++)
+# Homebrew search paths for both Intel (/usr/local) and Apple Silicon (/opt/homebrew) Macs
+LOCAL_INCLUDE_PATHS = -I/usr/local/include -I/opt/homebrew/include
+LOCAL_LIB_PATHS = -L/usr/local/lib -L/opt/homebrew/lib
 TEST_CC_FLAGS = $(TEST_CC_FLAGS_COMMON) -framework OpenGL $(LOCAL_INCLUDE_PATHS)
-# NEW: Add LOCAL_LIB_PATHS to the main application linker flags
 LD_FLAGS = $(LOCAL_LIB_PATHS) -lSDL2 -lSDL2_image -framework OpenGL
-# Update TEST_LD_FLAGS to use LOCAL_LIB_PATHS for robustness
-TEST_LD_FLAGS = $(LOCAL_LIB_PATHS) -lcucumber-cpp -lc++ -lboost_program_options -lboost_regex -lboost_filesystem -lboost_system -lgtest
+TEST_LD_FLAGS = $(LOCAL_LIB_PATHS) -lcucumber-cpp -lboost_program_options -lboost_regex -lboost_filesystem -Wl,-force_load,/opt/homebrew/lib/libgtest.a /opt/homebrew/lib/libgtest_main.a -lpthread
 else
 # Linux/Other specific flags
-TEST_CC_FLAGS = $(TEST_CC_FLAGS_COMMON)
-LD_FLAGS = $(LD_FLAGS_LINUX)
-TEST_LD_FLAGS = $(TEST_LD_FLAGS_LINUX)
+TEST_CC_FLAGS = $(TEST_CC_FLAGS_COMMON) -I/usr/local/include
+LD_FLAGS = -L/usr/local/lib -L/lib/x86_64-linux-gnu -lGL -lSDL2 -lSDL2_image
+TEST_LD_FLAGS = -L/usr/local/lib -lcucumber-cpp -lgtest
 endif
 
 EXEC = jmoria

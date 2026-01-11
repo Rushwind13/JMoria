@@ -1,7 +1,7 @@
 # Dungeon Generation Analysis & Issues
 
 **Date:** 2025-12-28  
-**Last Updated:** 2026-01-03 (Issues 1.1-1.6, 2.6, 3.1, 4.1-4.4 resolved; Issue 1.4 resolved 2026-01-03)  
+**Last Updated:** 2026-01-11 (Sections 3.4, refactoring priorities clarified)  
 **Focus:** Complete codebase examination of dungeon generation system
 
 ---
@@ -10,22 +10,32 @@
 
 The dungeon generation system in JMoria uses a recursive stack-based algorithm to create interconnected rooms and hallways. While functionally working, the code has **significant brittleness, missing test coverage, redundancy, and confusing logic** that makes maintenance difficult and limits reliability.
 
-**Critical Issues Found:** 7 (7 resolved ✅)  
-**Missing Tests:** 12 major areas (2 resolved ✅)  
-**Code Redundancy:** 4 major areas (1 resolved ✅)  
-**Confusing/Brittle Code:** 8 areas (4 resolved ✅)
+### Overall Status
+- **Critical Issues:** 7 resolved ✅ / 7
+- **Missing Tests:** 2 resolved ✅ / 12
+- **Code Redundancy:** 2 resolved ✅ / 4 (3.1: ✅, 3.4: ✅, 3.2: ⚠️ NEXT, 3.3: pending)
+- **Confusing/Brittle Code:** 4 resolved ✅ / 8 (4.1-4.7 resolved)
+
+### Recent Completion (2026-01-11)
+- **Section 3.4:** Removed all `#ifdef DUNGEN_DEBUG` guards, added `LOG_LEVEL_NOISIER` enum
+- Logging is now always-on with runtime verbosity control (no compile-time flags)
+- All 100 test scenarios pass (447 steps)
+
+### Next Refactoring Priority
+- **Section 3.2:** Extract duplicate logging/restoration logic (~10 lines, 2 locations)
 
 ---
 
-## 2026-01-11 Update: Tails-Out Mitigation
+## 2026-01-11 Update: Debug Logging Refactoring
 
-To further reduce "tails out" dead-end branches, a mitigation was added to the generation stepper:
+Removed all conditional compilation (`#ifdef DUNGEN_DEBUG`) from verbose logging:
 
-- When a room creation step detects a dead end (all hallway attempts from that room fail), the algorithm now attempts a single backtracking hallway in the opposite direction of entry.
-- This provides an alternate growth path and reduces the likelihood of generation tailing out after 1–2 rooms.
-- Implementation location: `CDungeonMap::CreateOneStep()` in the `DUNG_CREATE_STEP_MAKE_ROOM` case; invokes `Opposite()`, `GetWallOrigin()`, and `MakeHallStep()`; on success pushes the new hallway step and places a door.
-- Diagnostics: increments `hallways_created` on success and `steps_skipped` on failure under `DUNGEN_DEBUG` logs; also counts `repeated_failures` for visibility.
-- Verified: Build succeeds and the full BDD suite passes (100 scenarios, 447 steps).
+- Added new `LOG_LEVEL_NOISIER` enum (lowest verbosity level)
+- Made all per-step logging unconditional with `LOG_LEVEL_NOISIER`
+- Kept safety-critical invariant checks and diagnostic counters always-on
+- Logging now controlled dynamically by `g_eLogLevel` instead of compile-time flags
+- ~17+ preprocessor blocks eliminated from DungeonMap.cpp, JRect.h, Dungeon.cpp
+- Benefits: cleaner code, runtime control, always available diagnostics
 
 ## 1. CRITICAL ISSUES
 
@@ -495,36 +505,73 @@ Scenario: Full-size dungeon generation completes in reasonable time
 
 ---
 
-### 3.2 **Duplicate Logging Logic**
+### 3.2 **Duplicate Logging Logic** ⚠️ NEXT PRIORITY
 **Locations:**
-- [src/DungeonMap.cpp#L701-L708](src/DungeonMap.cpp#L701-L708) (room creation)
-- [src/DungeonMap.cpp#L764-L771](src/DungeonMap.cpp#L764-L771) (hallway creation)
+- [src/DungeonMap.cpp#L735-L744](src/DungeonMap.cpp#L735-L744) (CreateRoom placement conflict)
+- [src/DungeonMap.cpp#L800-L809](src/DungeonMap.cpp#L800-L809) (CreateHallway placement conflict)
 
-**Problem:** Identical "un-shifting rect" log pattern
+**Problem:** Identical 10-line pattern repeated in both functions:
+1. Log conflict attempt with count and rect location
+2. Log "un-shifting" rect back to previous value
+3. Restore the rect for next attempt
+
+**Current Code Pattern (CreateRoom):**
+```cpp
+JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Room attempt %d conflict at <%d %d, %d %d>\n",
+      attempt_count + 1, RECT_EXPAND( pStep->m_rcArea ) );
+JLog( LOG_LEVEL_NOISE, true, "un-shifting <%d %d, %d %d> back to <%d %d, %d %d>\n",
+      RECT_EXPAND( pStep->m_rcArea ), RECT_EXPAND( rcTry ) );
+pStep->m_rcArea.Init( rcTry );
+```
 
 **Recommendation:**
 ```cpp
-void LogRectConflict(const char *feature_type, int attempt, const JRect &area, const JRect &original)
+void CDungeonMap::LogAndRestorePlacementConflict( 
+    const char *feature_type, 
+    int attempt, 
+    CDungeonCreationStep *pStep,
+    const JRect &previous_rect )
 {
-#ifdef DUNGEN_DEBUG
-    JLog(LOG_LEVEL_NOISE, true, "[DUNGEN] %s attempt %d conflict at <%d %d, %d %d>\n",
-         feature_type, attempt + 1, RECT_EXPAND(area));
-#endif
-    JLog(LOG_LEVEL_NOISE, true, "un-shifting <%d %d, %d %d> back to <%d %d, %d %d>\n",
-         RECT_EXPAND(area), RECT_EXPAND(original));
+    JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] %s attempt %d conflict at <%d %d, %d %d>\n",
+          feature_type, attempt, RECT_EXPAND( pStep->m_rcArea ) );
+    JLog( LOG_LEVEL_NOISE, true, "un-shifting <%d %d, %d %d> back to <%d %d, %d %d>\n",
+          RECT_EXPAND( pStep->m_rcArea ), RECT_EXPAND( previous_rect ) );
+    pStep->m_rcArea.Init( previous_rect );
 }
+
+// Then in both CreateRoom and CreateHallway:
+LogAndRestorePlacementConflict( "Room", attempt_count + 1, pStep, rcTry );
+LogAndRestorePlacementConflict( "Hall", attempt_count + 1, pStep, rcTry );
 ```
+
+**Benefits:**
+- Single source of truth for conflict logging/restoration
+- Easier to modify conflict behavior (e.g., logging level changes)
+- ~10 lines of duplicate code eliminated
+- Clearer intent: "log and restore" is a single operation
 
 ---
 
 ### 3.3 **Duplicate Direction Selection Logic**
 **Locations:**
-- [src/DungeonMap.cpp#L443-L493](src/DungeonMap.cpp#L443-L493) (room → hallways)
-- [src/DungeonMap.cpp#L562-L595](src/DungeonMap.cpp#L562-L595) (hall → branch halls)
+- [src/DungeonMap.cpp#L468-L535](src/DungeonMap.cpp#L468-L535) (ProcessRoom - create 2-4 hallways)
+- [src/DungeonMap.cpp#L603-L628](src/DungeonMap.cpp#L603-L628) (ProcessHallway - create 2-4 branch hallways)
 
-**Problem:** Nearly identical logic for iterating randomized directions, checking opposite direction, creating steps
+**Problem:** Nearly identical logic for iterating randomized directions:
+```
+1. Get random direction list (RandomDirections)
+2. Loop through directions: for (int i = 0; i <= num; i++)
+3. Check if direction is opposite of parent (Opposite check & skip)
+4. Attempt to create step in that direction
+5. Track success/failure
+```
 
-**Recommendation:**
+**Code Duplication (~25 lines in each location):**
+- Both ProcessRoom and ProcessHallway have identical direction iteration logic
+- Only difference: CreateHallway vs CreateRoom function call
+- Only difference: "Hallway" vs "Branch hallway" in logging
+
+**Recommendation:** Extract to helper function
 ```cpp
 struct DirectionAttempt {
     int direction;
@@ -532,16 +579,28 @@ struct DirectionAttempt {
     CDungeonCreationStep *step;
 };
 
-// Refactor to:
 std::vector<DirectionAttempt> TryCreateStepsInDirections(
-    CDungeonCreationStep *pCurStep,
     int num_attempts,
-    int step_type,  // ROOM or HALLWAY
-    bool allow_opposite = false)
+    int parent_direction,
+    int step_type,           // DUNG_CREATE_STEP_MAKE_ROOM or MAKE_HALLWAY
+    CDungeonCreationStep *pParentStep,
+    const char *context_label )  // "Hallway" or "Branch hallway"
 {
-    // ... unified logic ...
+    // Unified logic for:
+    // - RandomDirections()
+    // - Loop with opposite check
+    // - CreateRoom/CreateHallway dispatch based on step_type
+    // - Unified logging
+    // - Returns results for caller to push to stack
 }
 ```
+
+**Benefits:**
+- DRY: single source for direction selection algorithm
+- Easier testing: can test direction algorithm independently
+- Easier modification: changes in one place
+- ~25 lines of duplicate code eliminated
+- Architecture becomes clearer: "expand in random directions" is a primitive operation
 
 ---
 

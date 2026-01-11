@@ -501,6 +501,34 @@ bool CDungeonMap::CreateOneStep()
             m_diagnostics.repeated_failures++;
             JLog( LOG_LEVEL_NOISE, true, "[DUNGEN] Dead-end room: all %d hallway attempts failed\n", halls_failed );
 #endif
+
+            // Mitigation: allow a single backtracking hallway in the opposite direction
+            // This provides an alternate growth path to reduce tails-out dead ends.
+            if( pCurStep->m_dwDirection != DIR_NONE )
+            {
+                int back_dir = Opposite( pCurStep->m_dwDirection );
+                JIVector vHallBack = GetWallOrigin( pCurStep, back_dir );
+                if( vHallBack.IsWithinWorld() )
+                {
+                    CDungeonCreationStep *pBackStep = MakeHallStep( vHallBack, back_dir, pCurStep->m_dwRecurDepth + 1 );
+                    if( pBackStep != NULL )
+                    {
+                        AddDoor( vHallBack, back_dir );
+                        m_stkDungeonMapCreation->Push( pBackStep );
+#ifdef DUNGEN_DEBUG
+                        m_diagnostics.hallways_created++;
+                        JLog( LOG_LEVEL_NOISE, true, "[DUNGEN] Backtracking hallway created to mitigate dead-end room\n" );
+#endif
+                    }
+#ifdef DUNGEN_DEBUG
+                    else
+                    {
+                        m_diagnostics.steps_skipped++;
+                        JLog( LOG_LEVEL_NOISE, true, "[DUNGEN] Backtracking hallway creation failed\n" );
+                    }
+#endif
+                }
+            }
         }
     }
     break;

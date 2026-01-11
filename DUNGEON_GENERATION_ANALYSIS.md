@@ -17,6 +17,16 @@ The dungeon generation system in JMoria uses a recursive stack-based algorithm t
 
 ---
 
+## 2026-01-11 Update: Tails-Out Mitigation
+
+To further reduce "tails out" dead-end branches, a mitigation was added to the generation stepper:
+
+- When a room creation step detects a dead end (all hallway attempts from that room fail), the algorithm now attempts a single backtracking hallway in the opposite direction of entry.
+- This provides an alternate growth path and reduces the likelihood of generation tailing out after 1–2 rooms.
+- Implementation location: `CDungeonMap::CreateOneStep()` in the `DUNG_CREATE_STEP_MAKE_ROOM` case; invokes `Opposite()`, `GetWallOrigin()`, and `MakeHallStep()`; on success pushes the new hallway step and places a door.
+- Diagnostics: increments `hallways_created` on success and `steps_skipped` on failure under `DUNGEN_DEBUG` logs; also counts `repeated_failures` for visibility.
+- Verified: Build succeeds and the full BDD suite passes (100 scenarios, 447 steps).
+
 ## 1. CRITICAL ISSUES
 
 ### 1.1 **~~Inconsistent MAX_TRIES Definition~~** ✅ FIXED (2026-01-02)

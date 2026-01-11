@@ -215,9 +215,23 @@ PRIORITIZED DUNGEON GENERATION WORKLIST (updated 2025-12-28):
     - STATUS: Alternate direction fallback functional, tested, and integrated
   
   - [P2 Phase 3] DEFERRED - Add dedicated BDD tests for alternate direction fallback
+      - [P2 Phase 2b] ✅ COMPLETED (2026-01-11) - Backtracking hallway mitigation for dead-end rooms
+        - ✅ When a room is detected as a dead end (all hallway attempts failed), attempt one hallway in the opposite direction of entry
+        - ✅ Creates an alternate growth path to reduce tails-out behavior after 1–2 rooms
+        - ✅ Implementation in `CDungeonMap::CreateOneStep()` (room case) using `Opposite()`, `GetWallOrigin()`, `MakeHallStep()`, and `AddDoor()`
+        - ✅ Diagnostics updated: `hallways_created` and `steps_skipped` reflect mitigation outcomes under `DUNGEN_DEBUG`
+        - ✅ Full build and BDD suite pass (100 scenarios, 447 steps)
+
     - Alternate direction fallback feature is already validated by 96 existing BDD tests
     - Integration testing shows fallback successfully creates rooms when primary fails
     - Dedicated test suite deferred to future enhancement phase
+
+  - [P2 Phase 3] TODO (2026-01-11) - Add BDD tests for tails-out mitigation (backtracking hallway)
+    - Add scenario: "Dead-end room triggers backtracking hallway" (seeded layout prone to dead ends)
+    - Assert diagnostics: `repeated_failures` increments, `hallways_created` increases when backtracking succeeds
+    - Add scenario: "Backtracking hallway fails gracefully" (world-edge or heavy conflict case)
+    - Place scenarios in `test/features/dungeonmap.feature` and step defs in `test/features/step_definitions/DungeonMapSteps.cpp`
+    - Gate with `@tails_out` tag to allow selective runs
 
 - [P2 Phase 4] ✅ COMPLETED (2025-12-28) - Visual regression fixtures
   - ✅ Designed text-based CSV fixture format with metadata header and tile grid

@@ -11,7 +11,7 @@ else
     OPENGL="-lGL"
 fi
 
-# Compile
+# Compile (C++14 required for gtest)
 g++ -c -o bin/AllSteps.o features/step_definitions/AllSteps.cpp -I../../JMoria/src -std=c++14 -Wno-comment -Wno-delete-non-virtual-dtor
 
 # Link (exclude main.o to avoid duplicate globals when linking test runner)

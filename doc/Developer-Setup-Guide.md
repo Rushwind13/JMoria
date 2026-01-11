@@ -1,0 +1,66 @@
+## New for 2025: AI Support
+https://chatgpt.com/g/g-68900dcbb5788191a6fe3edc36c4bca7-jmoria-development
+## Linux/Ubuntu Getting Started
+```bash
+sudo ./install/linux/ubuntu/install-deps.sh
+### Test Dependencies (Optional)
+sudo ./install/linux/ubuntu/install-test-deps.sh
+```
+
+## MacOS Getting Started
+* you will need XCode to be installed from App Store
+* you will need `xcode-select --install` done (this is done by XCode install)
+* SDL2, SDL2_image required `brew install sdl2 sdl2_image`
+* OpenGL will be on your machine already
+* If you get this far, then `make` should work to create the game executable.
+* to set up cucumber tests, `brew install googletest cucumber-cpp`
+* needed to `git clone` the cucumber-cpp repo and
+* do the cmake stuff in the readme
+
+## Build and Test
+
+### Build the Game
+```bash
+make
+./jmoria
+```
+
+**Note:** cucumber-cpp uses the wire protocol which is only compatible with
+cucumber-ruby 2.x. The `test/Gemfile` specifies the correct version.
+
+### Run Tests
+```bash
+cd test
+./runtests.sh --build
+```
+
+## Setup clang-format as pre-commit
+
+Add the following script to .git/hooks/pre-commit
+https://ortogonal.github.io/cpp/git-clang-format/
+```bash
+#!/bin/sh
+
+if git rev-parse --verify HEAD >/dev/null 2>&1
+then
+against=HEAD
+else
+# Initial commit: diff against an empty tree object
+against=4b825dc642cb6eb9a060e54bf8d69288fbee4904
+fi
+
+# Test clang-format
+clangformatout=$(git clang-format --diff --staged -q)
+
+# Redirect output to stderr.
+exec 1>&2
+
+if [ "$clangformatout" != "" ]
+then
+    echo "Format error!"
+    echo "Use git clang-format"
+    exit 1
+fi
+```
+
+This will check for formatting errors for staged changes.

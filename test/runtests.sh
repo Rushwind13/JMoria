@@ -32,5 +32,6 @@ if [[ -n "$1" ]]; then
   TEST_TO_RUN="$1"
 fi
 
-# Run the Cucumber tests
-cucumber --publish-quiet --tags "not @skip" features/$TEST_TO_RUN.feature
+# Run the Cucumber tests (using bundle exec for cucumber 2.x compatibility)
+# Note: --publish-quiet not available in cucumber 2.x
+bundle exec cucumber --tags ~@skip features/$TEST_TO_RUN.feature

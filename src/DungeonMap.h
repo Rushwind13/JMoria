@@ -218,10 +218,21 @@ public:
     // Step creation and validation
     int Opposite( int direction );
     void GetAdjacentDirections( int primary_dir, int &adj1, int &adj2 ) const;
+    
+    // Public API for creating steps
     CDungeonCreationStep *CreateRoom( const JIVector &vPos, const int direction,
                                       const int recurdepth );
     CDungeonCreationStep *CreateHallway( const JIVector &vPos, const int direction,
                                          const int recurdepth );
+    
+    // Private helpers for unified step creation
+    CDungeonCreationStep *CreateStep( int step_type, const JIVector &vPos, 
+                                     const int direction, const int recurdepth );
+    void ExpandInRandomDirections( CDungeonCreationStep *pParent, int num_children, 
+                                   int child_step_type, bool allow_backtracking,
+                                   int *out_created = NULL, int *out_failed = NULL );
+    bool TryCreateRoomWithFallback( CDungeonCreationStep *pCurStep );
+    
     JResult GetRoomRect( JRect &rcRoom, const int direction );
     JResult GetHallRect( JRect &rcHall, const int direction );
     JIVector &GetWallOrigin( CDungeonCreationStep *pStep, const int direction );

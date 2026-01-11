@@ -459,176 +459,69 @@ bool CDungeonMap::ProcessStep()
 
 // Process room creation: attempt to create 2-4 hallways from random walls
 // If all attempts fail (dead-end), try one backtracking hallway
+// Process room creation: attempt to create 2-4 hallways from random walls
+// If all attempts fail (dead-end), try one backtracking hallway
 void CDungeonMap::ProcessRoom( CDungeonCreationStep *pCurStep )
 {
-    CDungeonCreationStep *pNewStep = NULL;
-    
-    // push hallways onto stack
+    // Create 2-4 hallways in random directions
     int num_halls = Util::GetRandom( 2, 4 );
-        // Use num_halls instead of forcing all 4 directions
-        int dirs[4];
-        RandomDirections( dirs );
-        int halls_created = 0;
-        int halls_failed = 0;
-        for( int index = 0; index <= num_halls; index++ )
-        {
-            int dir = dirs[index];
-            if( pCurStep->m_dwDirection == Opposite( dir ) )
-            {
-                if( num_halls < 4 )
-                    num_halls++;
-                continue;
-            }
-            JIVector vHall = GetWallOrigin( pCurStep, dir );
-            if( !vHall.IsWithinWorld() )
-                continue;
-            pNewStep = CreateHallway( vHall, dir, pCurStep->m_dwRecurDepth + 1 );
-            if( pNewStep != NULL )
-            {
-                AddDoor( vHall, dir );
-                m_stkDungeonMapCreation->Push( pNewStep );
-                halls_created++;
-                m_diagnostics.hallways_created++;
-                JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Hallway created, pushed to stack\n" );
-            }
-            else
-            {
-                halls_failed++;
-                m_diagnostics.steps_skipped++;
-                JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Hallway creation failed (conflict or depth limit)\n" );
-            }
-        }
-        
-        // Track repeated failures: if all hallway attempts failed, this is a dead-end branch
-        if( halls_created == 0 && halls_failed > 0 )
-        {
-            pCurStep->m_dwFailureCount++;
-            m_diagnostics.repeated_failures++;
-            JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Dead-end room: all %d hallway attempts failed\n", halls_failed );
+    int halls_created = 0;
+    int halls_failed = 0;
+    
+    ExpandInRandomDirections( pCurStep, num_halls, DUNG_CREATE_STEP_MAKE_HALLWAY, 
+                             false, &halls_created, &halls_failed );
+    
+    // Track repeated failures: if all hallway attempts failed, this is a dead-end branch
+    if( halls_created == 0 && halls_failed > 0 )
+    {
+        pCurStep->m_dwFailureCount++;
+        m_diagnostics.repeated_failures++;
+        JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Dead-end room: all %d hallway attempts failed\n", halls_failed );
 
-            // Mitigation: allow a single backtracking hallway in the opposite direction
-            // This provides an alternate growth path to reduce tails-out dead ends.
-            if( pCurStep->m_dwDirection != DIR_NONE )
+        // Mitigation: allow a single backtracking hallway in the opposite direction
+        // This provides an alternate growth path to reduce tails-out dead ends.
+        if( pCurStep->m_dwDirection != DIR_NONE )
+        {
+            int back_dir = Opposite( pCurStep->m_dwDirection );
+            JIVector vHallBack = GetWallOrigin( pCurStep, back_dir );
+            if( vHallBack.IsWithinWorld() )
             {
-                int back_dir = Opposite( pCurStep->m_dwDirection );
-                JIVector vHallBack = GetWallOrigin( pCurStep, back_dir );
-                if( vHallBack.IsWithinWorld() )
+                CDungeonCreationStep *pBackStep = CreateHallway( vHallBack, back_dir, pCurStep->m_dwRecurDepth + 1 );
+                if( pBackStep != NULL )
                 {
-                    CDungeonCreationStep *pBackStep = CreateHallway( vHallBack, back_dir, pCurStep->m_dwRecurDepth + 1 );
-                    if( pBackStep != NULL )
-                    {
-                        AddDoor( vHallBack, back_dir );
-                        m_stkDungeonMapCreation->Push( pBackStep );
-                        m_diagnostics.hallways_created++;
-                        JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Backtracking hallway created to mitigate dead-end room\n" );
-                    }
-                    else
-                    {
-                        m_diagnostics.steps_skipped++;
-                        JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Backtracking hallway creation failed\n" );
-                    }
+                    AddDoor( vHallBack, back_dir );
+                    m_stkDungeonMapCreation->Push( pBackStep );
+                    m_diagnostics.hallways_created++;
+                    JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Backtracking hallway created to mitigate dead-end room\n" );
+                }
+                else
+                {
+                    m_diagnostics.steps_skipped++;
+                    JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Backtracking hallway creation failed\n" );
                 }
             }
         }
+    }
 }
 
 // Process hallway creation: 80% chance to create a room, 20% chance to branch hallways
 // Uses alternate direction fallback for room creation
 void CDungeonMap::ProcessHallway( CDungeonCreationStep *pCurStep )
 {
-    CDungeonCreationStep *pNewStep = NULL;
-    
     int pick_next = Util::Roll( "1d100" );
+    
     if( pick_next <= HALLWAY_LEADS_TO_ROOM_PERCENT )
     {
-        // Make a (single) room, in the direction of this hallway
-        int dir = pCurStep->m_dwDirection;
-        JIVector vRoom = GetHallOrigin( pCurStep, DUNG_CREATE_STEP_MAKE_ROOM );
-        if( !vRoom.IsWithinWorld() )
-            return;
-            pNewStep = CreateRoom( vRoom, dir, pCurStep->m_dwRecurDepth + 1 );
-            
-            // Alternate direction fallback: if primary direction fails, try adjacent directions
-            if( pNewStep == NULL )
-            {
-                int adj1, adj2;
-                GetAdjacentDirections( dir, adj1, adj2 );
-                
-                // Try first adjacent direction
-                JIVector vRoomAdj1 = GetHallOrigin( pCurStep, DUNG_CREATE_STEP_MAKE_ROOM );
-                if( vRoomAdj1.IsWithinWorld() && pNewStep == NULL )
-                {
-                    pNewStep = CreateRoom( vRoomAdj1, adj1, pCurStep->m_dwRecurDepth + 1 );
-                    if( pNewStep != NULL )
-                        dir = adj1;
-                }
-                
-                // Try second adjacent direction if first failed
-                if( pNewStep == NULL )
-                {
-                    JIVector vRoomAdj2 = GetHallOrigin( pCurStep, DUNG_CREATE_STEP_MAKE_ROOM );
-                    if( vRoomAdj2.IsWithinWorld() )
-                    {
-                        pNewStep = CreateRoom( vRoomAdj2, adj2, pCurStep->m_dwRecurDepth + 1 );
-                        if( pNewStep != NULL )
-                            dir = adj2;
-                    }
-                }
-                if( pNewStep != NULL )
-                {
-                    JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Room creation succeeded via alternate direction fallback\n" );
-                }
-            }
-            
-            if( pNewStep != NULL )
-            {
-                AddDoor( vRoom, dir );
-                m_stkDungeonMapCreation->Push( pNewStep );
-                m_diagnostics.rooms_created++;
-                JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Room created from hallway, pushed to stack\n" );
-            }
-            else
-            {
-                m_diagnostics.steps_skipped++;
-                JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Room creation failed after trying primary and adjacent directions\n" );
-            }
-        }
-        else if( pick_next <= 100 )
-        {
-            // make a random number of hallways, continuing from this one.
-            // push either rooms or hallways onto stack
-            int num_halls = Util::GetRandom( 2, 4 );
-            // Use num_rooms instead of forcing all 4 directions
-            int dirs[4];
-            RandomDirections( dirs );
-            for( int index = 0; index <= num_halls; index++ )
-            {
-                int dir = dirs[index];
-                if( pCurStep->m_dwDirection == Opposite( dir ) )
-                {
-                    if( num_halls < 4 )
-                        num_halls++;
-                    continue;
-                }
-                JIVector vHall = GetHallOrigin( pCurStep, DUNG_CREATE_STEP_MAKE_HALLWAY );
-                if( !vHall.IsWithinWorld() )
-                    break;
-                pNewStep = CreateHallway( vHall, dir, pCurStep->m_dwRecurDepth + 1 );
-                if( pNewStep != NULL )
-                {
-                    AddDoor( vHall, pCurStep->m_dwDirection );
-                    m_stkDungeonMapCreation->Push( pNewStep );
-                    m_diagnostics.hallways_created++;
-                    JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Branch hallway created, pushed to stack\n" );
-                }
-                else
-                {
-                    m_diagnostics.steps_skipped++;
-                    JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Branch hallway creation failed\n" );
-                }
-            }
-        }
+        // Make a (single) room, with alternate direction fallback if needed
+        TryCreateRoomWithFallback( pCurStep );
     }
+    else if( pick_next <= 100 )
+    {
+        // Make 2-4 branch hallways in random directions
+        int num_halls = Util::GetRandom( 2, 4 );
+        ExpandInRandomDirections( pCurStep, num_halls, DUNG_CREATE_STEP_MAKE_HALLWAY, false );
+    }
+}
 
 void CDungeonMap::AddDoor( const JIVector vHall, int direction )
 {
@@ -694,138 +587,227 @@ void CDungeonMap::InitDungeonCreate( JIVector &vOrigin )
     m_stkDungeonMapCreation->Push( step );
 }
 
-CDungeonCreationStep *CDungeonMap::CreateRoom( const JIVector &vPos, const int direction,
-                                                 const int recurdepth )
+// Helper: Try to create a room from a hallway with alternate direction fallback
+// Returns true if room was successfully created and pushed to stack
+bool CDungeonMap::TryCreateRoomWithFallback( CDungeonCreationStep *pCurStep )
 {
+    int dir = pCurStep->m_dwDirection;
+    JIVector vRoom = GetHallOrigin( pCurStep, DUNG_CREATE_STEP_MAKE_ROOM );
+    
+    if( !vRoom.IsWithinWorld() )
+        return false;
+    
+    // Try primary direction first
+    CDungeonCreationStep *pNewStep = CreateRoom( vRoom, dir, pCurStep->m_dwRecurDepth + 1 );
+    
+    // If primary fails, try adjacent directions
+    if( pNewStep == NULL )
+    {
+        int adj1, adj2;
+        GetAdjacentDirections( dir, adj1, adj2 );
+        
+        // Try first adjacent direction
+        JIVector vRoomAdj1 = GetHallOrigin( pCurStep, DUNG_CREATE_STEP_MAKE_ROOM );
+        if( vRoomAdj1.IsWithinWorld() )
+        {
+            pNewStep = CreateRoom( vRoomAdj1, adj1, pCurStep->m_dwRecurDepth + 1 );
+            if( pNewStep != NULL )
+                dir = adj1;
+        }
+        
+        // Try second adjacent direction if first failed
+        if( pNewStep == NULL )
+        {
+            JIVector vRoomAdj2 = GetHallOrigin( pCurStep, DUNG_CREATE_STEP_MAKE_ROOM );
+            if( vRoomAdj2.IsWithinWorld() )
+            {
+                pNewStep = CreateRoom( vRoomAdj2, adj2, pCurStep->m_dwRecurDepth + 1 );
+                if( pNewStep != NULL )
+                    dir = adj2;
+            }
+        }
+        
+        if( pNewStep != NULL )
+        {
+            JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Room creation succeeded via alternate direction fallback\n" );
+        }
+    }
+    
+    // If we got a room, push it to stack
+    if( pNewStep != NULL )
+    {
+        AddDoor( vRoom, dir );
+        m_stkDungeonMapCreation->Push( pNewStep );
+        m_diagnostics.rooms_created++;
+        JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Room created from hallway, pushed to stack\n" );
+        return true;
+    }
+    else
+    {
+        m_diagnostics.steps_skipped++;
+        JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Room creation failed after trying primary and adjacent directions\n" );
+        return false;
+    }
+}
+
+// Helper: Expand a parent step by creating N children in random directions
+// Handles the common pattern of: random directions, opposite check, create, push to stack
+void CDungeonMap::ExpandInRandomDirections( CDungeonCreationStep *pParent, int num_children,
+                                            int child_step_type, bool allow_backtracking,
+                                            int *out_created, int *out_failed )
+{
+    const char *child_type_name = (child_step_type == DUNG_CREATE_STEP_MAKE_ROOM) ? "Room" : "Hallway";
+    int dirs[4];
+    RandomDirections( dirs );
+    int created = 0;
+    int failed = 0;
+    
+    for( int index = 0; index <= num_children; index++ )
+    {
+        int dir = dirs[index];
+        
+        // Skip opposite direction unless backtracking is allowed
+        if( !allow_backtracking && pParent->m_dwDirection == Opposite( dir ) )
+        {
+            if( num_children < 4 )
+                num_children++;
+            continue;
+        }
+        
+        // Get origin point based on child type
+        JIVector vOrigin = (child_step_type == DUNG_CREATE_STEP_MAKE_ROOM)
+            ? GetHallOrigin( pParent, DUNG_CREATE_STEP_MAKE_ROOM )
+            : GetWallOrigin( pParent, dir );
+            
+        if( !vOrigin.IsWithinWorld() )
+            continue;
+        
+        // Create child step
+        CDungeonCreationStep *pChild = CreateStep( child_step_type, vOrigin, dir, 
+                                                   pParent->m_dwRecurDepth + 1 );
+        
+        if( pChild != NULL )
+        {
+            AddDoor( vOrigin, dir );
+            m_stkDungeonMapCreation->Push( pChild );
+            created++;
+            
+            // Update diagnostics
+            if( child_step_type == DUNG_CREATE_STEP_MAKE_ROOM )
+                m_diagnostics.rooms_created++;
+            else
+                m_diagnostics.hallways_created++;
+                
+            JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] %s created, pushed to stack\n", child_type_name );
+        }
+        else
+        {
+            failed++;
+            m_diagnostics.steps_skipped++;
+            JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] %s creation failed (conflict or depth limit)\n", 
+                  child_type_name );
+        }
+    }
+    
+    // Return counts if requested
+    if( out_created ) *out_created = created;
+    if( out_failed ) *out_failed = failed;
+}
+
+// Unified step creation with type-specific behavior
+// Handles depth checking, initialization, placement loop, and conflict resolution
+CDungeonCreationStep *CDungeonMap::CreateStep( int step_type, const JIVector &vPos,
+                                               const int direction, const int recurdepth )
+{
+    const char *type_name = (step_type == DUNG_CREATE_STEP_MAKE_ROOM) ? "Room" : "Hall";
+    
+    // Check recursion depth
     if( recurdepth > MAX_RECURDEPTH )
     {
-        JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] CreateRoom rejected: recursion depth %d > %d\n", 
-              recurdepth, MAX_RECURDEPTH );
+        JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Create%s rejected: recursion depth %d > %d\n", 
+              type_name, recurdepth, MAX_RECURDEPTH );
         return NULL;
     }
-    JLog( LOG_LEVEL_DEBUG, true, "Creating a room step\n" );
+    
+    JLog( LOG_LEVEL_DEBUG, true, "Creating a %s step\n", 
+          step_type == DUNG_CREATE_STEP_MAKE_ROOM ? "room" : "hall" );
+    
+    // Initialize step
     CDungeonCreationStep *pStep = new CDungeonCreationStep();
-    pStep->m_dwIndex = DUNG_CREATE_STEP_MAKE_ROOM;
+    pStep->m_dwIndex = step_type;
     pStep->m_dwDirection = direction;
     pStep->m_dwRecurDepth = recurdepth;
     pStep->m_vPos.Init( vPos.x, vPos.y );
     pStep->m_rcArea.Init( pStep->m_vPos, 0, 0 );
-    // TODO: eventually, put in diff. types of rooms
-    // randomly sized rectangular room
-
+    
+    // Placement attempt loop
     bool bPlacementSucceeded = false;
     int attempt_count = 0;
-
     JRect rcTry( pStep->m_rcArea );
+    
     while( !bPlacementSucceeded && attempt_count < MAX_TRIES )
     {
-        JResult rectResult = GetRoomRect( pStep->m_rcArea, pStep->m_dwDirection );
+        // Get geometry based on step type
+        JResult rectResult = (step_type == DUNG_CREATE_STEP_MAKE_ROOM) 
+            ? GetRoomRect( pStep->m_rcArea, pStep->m_dwDirection )
+            : GetHallRect( pStep->m_rcArea, pStep->m_dwDirection );
+            
         if( rectResult != JSUCCESS )
         {
             // Geometry generation failed (clamping or degenerate rect)
-            // Skip this attempt and try again
             JLog( LOG_LEVEL_WARN, true, 
-                  "[DUNGEN] CreateRoom: GetRoomRect failed on attempt %d\n", 
-                  attempt_count + 1 );
+                  "[DUNGEN] Create%s: Get%sRect failed on attempt %d\n", 
+                  type_name, type_name, attempt_count + 1 );
             pStep->m_rcArea.Init( rcTry );
             attempt_count++;
             continue;
         }
         
+        // Check for conflicts
         bPlacementSucceeded = CheckArea( pStep );
         if( !bPlacementSucceeded )
         {
-            // this one didn't work, need to "un-shift" the rect for the next try.
-            JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Room attempt %d conflict at <%d %d, %d %d>\n",
-                  attempt_count + 1, RECT_EXPAND( pStep->m_rcArea ) );
+            // Log conflict and restore rect for next attempt
+            JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] %s attempt %d conflict at <%d %d, %d %d>\n",
+                  type_name, attempt_count + 1, RECT_EXPAND( pStep->m_rcArea ) );
             JLog( LOG_LEVEL_NOISE, true, "un-shifting <%d %d, %d %d> back to <%d %d, %d %d>\n",
                   RECT_EXPAND( pStep->m_rcArea ), RECT_EXPAND( rcTry ) );
             pStep->m_rcArea.Init( rcTry );
         }
         attempt_count++;
     }
-
+    
+    // Handle placement failure
     if( !bPlacementSucceeded )
     {
-        // can't find a good match for this room.
-        JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Room <%d %d> failed after %d attempts (conflicts)\n",
-              vPos.x, vPos.y, attempt_count );
-        g_pGame->GetStats()->Printf( "...room <%d %d> conflicts. terminated.\n",
+        JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] %s <%d %d> failed after %d attempts (conflicts)\n",
+              type_name, vPos.x, vPos.y, attempt_count );
+        g_pGame->GetStats()->Printf( "...%s <%d %d> conflicts. terminated.\n",
+                                     step_type == DUNG_CREATE_STEP_MAKE_ROOM ? "room" : "hall",
                                      VEC_EXPAND( vPos ) );
-        JLog( LOG_LEVEL_DEBUG, true, "...room <%d %d> conflicts. terminated.\n",
+        JLog( LOG_LEVEL_DEBUG, true, "...%s <%d %d> conflicts. terminated.\n",
+              step_type == DUNG_CREATE_STEP_MAKE_ROOM ? "room" : "hall",
               VEC_EXPAND( vPos ) );
         delete pStep;
         return NULL;
     }
-
+    
     JLog( LOG_LEVEL_DEBUG, true, "success!\n" );
     return pStep;
 }
 
+// Public wrapper for creating room steps
+CDungeonCreationStep *CDungeonMap::CreateRoom( const JIVector &vPos, const int direction,
+                                                 const int recurdepth )
+{
+    return CreateStep( DUNG_CREATE_STEP_MAKE_ROOM, vPos, direction, recurdepth );
+}
+
+// Public wrapper for creating hallway steps
 CDungeonCreationStep *CDungeonMap::CreateHallway( const JIVector &vPos, const int direction,
                                                  const int recurdepth )
 {
-    if( recurdepth > MAX_RECURDEPTH )
-    {
-        JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] CreateHallway rejected: recursion depth %d > %d\n",
-              recurdepth, MAX_RECURDEPTH );
-        return NULL;
-    }
-    JLog( LOG_LEVEL_DEBUG, true, "Creating a hall step\n" );
-    CDungeonCreationStep *pStep = new CDungeonCreationStep();
-    pStep->m_dwIndex = DUNG_CREATE_STEP_MAKE_HALLWAY;
-    pStep->m_dwRecurDepth = recurdepth;
-    pStep->m_dwDirection = direction;
-    pStep->m_vPos.Init( vPos.x, vPos.y );
-    pStep->m_rcArea.Init( pStep->m_vPos, 0, 0 );
-
-    bool bPlacementSucceeded = false;
-    int attempt_count = 0;
-
-    JRect rcTry( pStep->m_rcArea );
-    while( !bPlacementSucceeded && attempt_count < MAX_TRIES )
-    {
-        JResult rectResult = GetHallRect( pStep->m_rcArea, pStep->m_dwDirection );
-        if( rectResult != JSUCCESS )
-        {
-            // Geometry generation failed (clamping or invalid rect)
-            // Skip this attempt and try again
-            JLog( LOG_LEVEL_WARN, true, 
-                  "[DUNGEN] CreateHallway: GetHallRect failed on attempt %d\n", 
-                  attempt_count + 1 );
-            pStep->m_rcArea.Init( rcTry );
-            attempt_count++;
-            continue;
-        }
-        
-        bPlacementSucceeded = CheckArea( pStep );
-        if( !bPlacementSucceeded )
-        {
-            // this one didn't work, need to "un-shift" the rect for the next try.
-            JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Hall attempt %d conflict at <%d %d, %d %d>\n",
-                  attempt_count + 1, RECT_EXPAND( pStep->m_rcArea ) );
-            JLog( LOG_LEVEL_NOISE, true, "un-shifting <%d %d, %d %d> back to <%d %d, %d %d>\n",
-                  RECT_EXPAND( pStep->m_rcArea ), RECT_EXPAND( rcTry ) );
-            pStep->m_rcArea.Init( rcTry );
-        }
-        attempt_count++;
-    }
-
-    if( !bPlacementSucceeded )
-    {
-        // can't find a good match for this hallway.
-        JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Hall <%d %d> failed after %d attempts (conflicts)\n",
-              vPos.x, vPos.y, attempt_count );
-        g_pGame->GetStats()->Printf( "...hall <%d %d> conflicts. terminated.\n",
-                                     VEC_EXPAND( vPos ) );
-        JLog( LOG_LEVEL_DEBUG, true, "...hall <%d %d> conflicts. terminated.\n",
-              VEC_EXPAND( vPos ) );
-        delete pStep;
-        return NULL;
-    }
-
-    JLog( LOG_LEVEL_DEBUG, true, "success!\n" );
-    return pStep;
+    return CreateStep( DUNG_CREATE_STEP_MAKE_HALLWAY, vPos, direction, recurdepth );
 }
 
 JResult CDungeonMap::GetRoomRect( JRect &rcRoom, const int direction )

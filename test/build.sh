@@ -11,6 +11,9 @@ else
     OPENGL="-lGL"
 fi
 
+# Create output directory if it doesn't exist
+mkdir -p bin
+
 # Compile (C++14 required for gtest)
 g++ -c -o bin/AllSteps.o features/step_definitions/AllSteps.cpp -I../../JMoria/src -std=c++14 -Wno-comment -Wno-delete-non-virtual-dtor
 

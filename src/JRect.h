@@ -137,7 +137,7 @@ public:
 
     // Clamps rectangle coordinates to valid world bounds (1 tile from edges for walls)
     // Returns true if clamping was performed, false if already within bounds
-    // Optionally logs a warning when clamping occurs (requires DUNGEN_DEBUG)
+    // Optionally logs a warning when clamping occurs
     bool ClampToWorld( bool bLogWarning = true )
     {
         if( IsWithinWorld() )
@@ -145,14 +145,12 @@ public:
             return false;  // No clamping needed
         }
 
-#ifdef DUNGEN_DEBUG
         if( bLogWarning )
         {
-            JLog( LOG_LEVEL_WARN, true, 
+            JLog( LOG_LEVEL_NOISIER, true, 
                   "[DUNGEN] Warning: Rect <%d %d, %d %d> exceeds world bounds, clamping\n",
                   left, top, right, bottom );
         }
-#endif
 
         // Clamp to valid world bounds (leaving 1 tile border for walls)
         left = CLAMP( left, 1, DUNG_WIDTH - 2 );

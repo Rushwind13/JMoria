@@ -209,14 +209,19 @@ public:
     bool ImportDungeon( const char *pszFilename );
     bool CompareDungeon( const CDungeonMap &other ) const;
     
+    // Generation control flow
     void InitDungeonCreate( JIVector &vOrigin );
-    bool CreateOneStep();
+    bool ProcessStep();
+    void ProcessRoom( CDungeonCreationStep *pCurStep );
+    void ProcessHallway( CDungeonCreationStep *pCurStep );
+    
+    // Step creation and validation
     int Opposite( int direction );
     void GetAdjacentDirections( int primary_dir, int &adj1, int &adj2 ) const;
-    CDungeonCreationStep *MakeRoomStep( const JIVector &vPos, const int direction,
-                                        const int recurdepth );
-    CDungeonCreationStep *MakeHallStep( const JIVector &vPos, const int direction,
-                                        const int recurdepth );
+    CDungeonCreationStep *CreateRoom( const JIVector &vPos, const int direction,
+                                      const int recurdepth );
+    CDungeonCreationStep *CreateHallway( const JIVector &vPos, const int direction,
+                                         const int recurdepth );
     JResult GetRoomRect( JRect &rcRoom, const int direction );
     JResult GetHallRect( JRect &rcHall, const int direction );
     JIVector &GetWallOrigin( CDungeonCreationStep *pStep, const int direction );
@@ -298,9 +303,6 @@ protected:
     void FillArea( const CDungeonCreationStep *pStep );
     void AddDoor( JIVector vHall, int direction );
     bool IsDoor( const int type );
-
-    void MakeRoom( const JIVector *vPos, const int direction, const int recurdepth );
-    void MakeHall( const JIVector *vPos, const int direction, const int recurdepth );
     
     // Connectivity validation
     bool ValidateConnectivity( int &reachable_tiles, int &total_walkable_tiles ) const;

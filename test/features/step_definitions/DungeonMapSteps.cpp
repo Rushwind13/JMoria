@@ -41,7 +41,7 @@ GIVEN( "^I have a room create step$" )
 {
     ScenarioScope<TestCtx> context;
     JIVector vRoom( 50, 50 );
-    context->pStep = context->map.MakeRoomStep( vRoom, DIR_NONE, 0 );
+    context->pStep = context->map.CreateRoom( vRoom, DIR_NONE, 0 );
 
     JLog( LOG_LEVEL_ERROR, false, "room: <%d %d %d %d>\n",
           RECT_EXPAND( context->pStep->m_rcArea ) );
@@ -51,7 +51,7 @@ GIVEN( "^I have a E hallway create step$" )
 {
     ScenarioScope<TestCtx> context;
     JIVector vHallway = context->map.GetWallOrigin( context->pStep, DIR_EAST );
-    context->pStep = context->map.MakeHallStep( vHallway, DIR_EAST, 1 );
+    context->pStep = context->map.CreateHallway( vHallway, DIR_EAST, 1 );
     context->area.Init( context->pStep->m_rcArea );
     JLog( LOG_LEVEL_ERROR, false, "E hallway: <%d %d %d %d>\n", RECT_EXPAND( context->area ) );
 }
@@ -65,7 +65,7 @@ WHEN( "^I create a S hallway create step$" )
 {
     ScenarioScope<TestCtx> context;
     context->vec_i = context->map.GetHallOrigin( context->pStep, DUNG_CREATE_STEP_MAKE_HALLWAY );
-    context->pStep = context->map.MakeHallStep( context->vec_i, DIR_SOUTH, 2 );
+    context->pStep = context->map.CreateHallway( context->vec_i, DIR_SOUTH, 2 );
 
     JLog( LOG_LEVEL_ERROR, false, "S origin: <%d %d>\n", VEC_EXPAND( context->vec_i ) );
 }
@@ -640,7 +640,7 @@ WHEN( "^I attempt to create a room step at world boundary ([0-9]+),([0-9]+) dire
     
     ScenarioScope<TestCtx> context;
     JIVector vPos( x, y );
-    context->pStep = context->map.MakeRoomStep( vPos, dir, 0 );
+    context->pStep = context->map.CreateRoom( vPos, dir, 0 );
 }
 
 WHEN( "^I attempt to create a hallway step at world boundary ([0-9]+),([0-9]+) direction (north|south|east|west)$" )
@@ -657,7 +657,7 @@ WHEN( "^I attempt to create a hallway step at world boundary ([0-9]+),([0-9]+) d
     
     ScenarioScope<TestCtx> context;
     JIVector vPos( x, y );
-    context->pStep = context->map.MakeHallStep( vPos, dir, 0 );
+    context->pStep = context->map.CreateHallway( vPos, dir, 0 );
 }
 
 THEN( "^The returned rect has positive width and height$" )

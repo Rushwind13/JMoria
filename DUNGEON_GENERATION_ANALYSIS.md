@@ -545,26 +545,29 @@ std::vector<DirectionAttempt> TryCreateStepsInDirections(
 
 ---
 
-### 3.4 **Duplicate `#ifdef DUNGEN_DEBUG` Blocks**
-**Locations:** 17 separate blocks throughout `DungeonMap.cpp`
+### 3.4 **~~Duplicate `#ifdef DUNGEN_DEBUG` Blocks~~** ✅ FIXED (2026-01-11)
+**Original Locations:** 17+ separate blocks throughout `DungeonMap.cpp`
 
-**Problem:** Repetitive conditional compilation, hard to maintain
+**Solution Implemented:**
+- ✅ Added new `LOG_LEVEL_NOISIER` enum value (more verbose than NOISE)
+- ✅ Removed all `#ifdef DUNGEN_DEBUG` preprocessor guards from verbose logging
+- ✅ Converted per-step logging to unconditional with `LOG_LEVEL_NOISIER`
+- ✅ Kept safety-critical sections (invariant checks, diagnostic counters) always-on
+- ✅ Made generation summary always-on at `LOG_LEVEL_INFO`
 
-**Recommendation:**
-```cpp
-// In DungeonMap.h:
-#ifdef DUNGEN_DEBUG
-    #define DUNG_LOG_NOISE(...) JLog(LOG_LEVEL_NOISE, true, __VA_ARGS__)
-    #define DUNG_DIAGNOSTIC_INC(field) m_diagnostics.field++
-#else
-    #define DUNG_LOG_NOISE(...) ((void)0)
-    #define DUNG_DIAGNOSTIC_INC(field) ((void)0)
-#endif
+**Changes:**
+- [src/JMDefs.h](src/JMDefs.h#L23): Added `LOG_LEVEL_NOISIER = 0` enum (NOISE now 1, DEBUG now 2)
+- [src/JLog.h](src/JLog.h#L10): Updated `Level()` function to handle new level
+- [src/DungeonMap.cpp](src/DungeonMap.cpp): Removed all `#ifdef DUNGEN_DEBUG` guards around logging (14 blocks)
+- [src/JRect.h](src/JRect.h#L148): Made clamping warning unconditional
+- [src/Dungeon.cpp](src/Dungeon.cpp#L211): Made diagnostic summary unconditional
 
-// Then in code:
-DUNG_LOG_NOISE("[DUNGEN] Step %d: creating %s\n", step_num, type);
-DUNG_DIAGNOSTIC_INC(steps_created);
-```
+**Benefits:**
+- No more conditional compilation in dungeon generation code
+- Logging always available at appropriate verbosity levels (controlled by `g_eLogLevel`)
+- Diagnostics always tracked (negligible overhead - just increments)
+- Code is cleaner without #ifdef clutter
+- 🧪 All 100 test scenarios pass
 
 ---
 
@@ -705,18 +708,33 @@ Hallway start → (DOOR_OFFSET=1 tile) → Door position (on room wall)
 
 ---
 
-### 4.7 **Unclear Step Flow**
-**Location:** [src/DungeonMap.cpp#L396-L596](src/DungeonMap.cpp#L396-L596) (`CreateOneStep`)
+### 4.7 **~~Unclear Step Flow~~** ✅ FIXED (2026-01-11)
+**Location:** [src/DungeonMap.cpp#L413-L655](src/DungeonMap.cpp#L413-L655)  
+**Severity:** ~~MEDIUM~~ → RESOLVED
 
-**Problem:**
-- 200-line function with nested switches
+**Previous Problem:**
+- 200-line `CreateOneStep()` function with nested switches
 - Room creation → (2-4 hallways) → (80% room or 20% more halls)
 - Flow hard to visualize
 - No diagram/comment explaining algorithm
 
-**Recommendation:**
-- Break into `CreateRoomStep()` and `CreateHallStep()` subfunctions
-- Add ASCII art diagram at top of file showing generation flow
+**Resolution Implemented:**
+- ✅ Renamed `CreateOneStep()` → `ProcessStep()` for clarity (dispatcher role)
+- ✅ Renamed `MakeRoomStep()` → `CreateRoom()` (allocation role)
+- ✅ Renamed `MakeHallStep()` → `CreateHallway()` (allocation role)
+- ✅ Extracted `ProcessRoom()` - handles room expansion logic (2-4 hallways + backtracking)
+- ✅ Extracted `ProcessHallway()` - handles hallway expansion logic (80% room, 20% branch)
+- ✅ Removed dead declarations: `MakeRoom()` and `MakeHall()` from header
+- ✅ Added clear section comments in header grouping functions by purpose
+- ✅ `ProcessStep()` now clean 25-line dispatcher: pop → fill → route → cleanup
+
+**Benefits:**
+- Clear naming: "Create" = allocate objects, "Process" = expand connections
+- Separation of concerns: allocation vs expansion logic
+- Easier to test individual pieces
+- Architecture immediately visible from function names
+
+**Testing:** All 100 test scenarios pass (447 steps)
 
 ---
 

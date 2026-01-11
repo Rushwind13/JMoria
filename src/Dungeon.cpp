@@ -197,7 +197,7 @@ JResult CDungeon::CreateMap()
     m_dmCurLevel->CreateDungeon( depth );
 #ifndef CLOCKSTEP
     // In normal mode, complete the dungeon immediately
-    while( m_dmCurLevel->CreateOneStep() )
+    while( m_dmCurLevel->ProcessStep() )
         ;
     
     // Retrieve diagnostics with finalized timing from dungeon generation
@@ -208,7 +208,6 @@ JResult CDungeon::CreateMap()
           m_dmCurLevel->HowManyHallways() );
     JLog( LOG_LEVEL_INFO, true, "Generation time: %.2f ms (%.3f seconds)\n", 
           diag.total_time_ms, diag.total_time_ms / 1000.0 );
-#ifdef DUNGEN_DEBUG
     JLog( LOG_LEVEL_INFO, true, "[DUNGEN] Generation complete in %.2f ms\n", diag.total_time_ms );
     JLog( LOG_LEVEL_INFO, true, "[DUNGEN]   Steps: %d created, %d rooms, %d halls, %d skipped\n",
           diag.steps_created, diag.rooms_created, diag.hallways_created, diag.steps_skipped );
@@ -219,7 +218,6 @@ JResult CDungeon::CreateMap()
         double steps_per_sec = ( diag.steps_created * 1000.0 ) / diag.total_time_ms;
         JLog( LOG_LEVEL_INFO, true, "[DUNGEN]   Performance: %.1f steps/second\n", steps_per_sec );
     }
-#endif
 #else
     // In CLOCKSTEP mode, dungeon will be generated step-by-step via Tick() calls
     JLog( LOG_LEVEL_INFO, true, "CLOCKSTEP: Dungeon generation ready. Press SPACE to step.\n" );
@@ -527,7 +525,7 @@ bool CDungeon::Tick( const int dwClock )
         m_bDraw = true;
     }/**/
 
-    bool bWorking = m_dmCurLevel->CreateOneStep();
+    bool bWorking = m_dmCurLevel->ProcessStep();
 #ifndef CLOCKSTEP
     // Auto-advance to next level when generation completes (disabled in CLOCKSTEP mode)
     if( bWorking == false )

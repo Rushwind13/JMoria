@@ -33,8 +33,14 @@ struct ASCIILayout
     ASCIILayoutRegion use;
     ASCIILayoutRegion endgame;
 
-    static ASCIILayout Create80x24();
-    static ASCIILayout Create125x40();
+    // Dynamically compute layout for any terminal size
+    static ASCIILayout CreateForSize( int w, int h );
+
+    // Threshold: inventory panel shown permanently when terminal is this wide
+    static constexpr int INV_AUTO_WIDTH = 100;
+    static constexpr int STATS_WIDTH = 25;
+    static constexpr int INV_WIDTH = 25;
+    static constexpr int MSG_HEIGHT = 5;
 };
 
 class CRenderASCII : public IRenderBackend
@@ -69,6 +75,9 @@ public:
     int GetTextInset() const override { return 1; }
     int GetMaxTextWidth() const override { return m_layout.termWidth * 6; }
     int GetMaxTextHeight() const override { return m_layout.termHeight * 8; }
+
+    // Check if terminal was resized and recalculate layout
+    bool CheckResize();
 
 private:
     bool m_bInitted;

@@ -51,7 +51,7 @@ CGame::CGame()
       m_eCurState( STATE_INVALID ),
       m_fGameTime( 0.0f ),
       m_eRenderMode( RenderMode::OpenGL ),
-      m_bShowStats( false ),
+      m_bShowStats( true ),
       m_bShowInv( false ),
       m_bShowEquip( false )
 {
@@ -544,6 +544,11 @@ void CGame::Draw()
     GetRender()->PreDraw();
 
     bool bASCII = ( m_eRenderMode == RenderMode::ASCII );
+
+    // After resize, auto-show inventory if terminal is wide enough
+    if( bASCII && GetRender()->GetScreenWidth() >= 100 )
+        m_bShowInv = true;
+
     bool bOverlayState = ( m_eCurState == STATE_INTRO || m_eCurState == STATE_ENDGAME );
 
     // In ASCII mode, overlay states (intro/endgame) take the full screen
@@ -685,6 +690,10 @@ void CGame::HandleEventsASCII( int &isActive, int &done )
     int ch = getch();
     if( ch == ERR )
         return; // no input available
+
+    // Terminal resize: consume the event, PreDraw handles the actual resize
+    if( ch == KEY_RESIZE )
+        return;
 
     SDL_Keysym keysym;
     memset( &keysym, 0, sizeof( keysym ) );

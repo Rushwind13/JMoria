@@ -54,6 +54,10 @@ public:
 	// ASCII: returns termWidth*6 x termHeight*8.
 	virtual int GetMaxTextWidth() const { return 9999; }
 	virtual int GetMaxTextHeight() const { return 9999; }
+
+	// Check if terminal was resized. Returns true if layout changed.
+	// OpenGL: always false. ASCII: detects ncurses resize.
+	virtual bool CheckResize() { return false; }
 };
 
 #endif // __RENDERBASE_H__

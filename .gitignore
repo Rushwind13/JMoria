@@ -24,3 +24,4 @@ bin/
 test/vendor/
 test/.bundle/
 test/Gemfile.lock
+.goo.swp

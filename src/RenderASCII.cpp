@@ -6,46 +6,57 @@
 #include "RenderASCII.h"
 #include <cstring>
 
-// ---- ASCIILayout factory methods ----
+// ---- ASCIILayout factory ----
 
-// 80x24 layout:
-// Row 0-1:   Messages (80 wide, 2 tall)
-// Row 2-21:  Stats(12) | Dungeon(50) | Inventory(18)
-// Row 2-11:  (inventory top half)
-// Row 12-21: (equipment bottom half)
-// Row 22-23: Status line
-ASCIILayout ASCIILayout::Create80x24()
+// Dynamically compute layout for any terminal size.
+// Stats panel always on the left, dungeon fills the middle,
+// inventory/equipment on the right only when terminal is wide enough.
+ASCIILayout ASCIILayout::CreateForSize( int w, int h )
 {
     ASCIILayout l;
-    l.termWidth = 80;
-    l.termHeight = 24;
+    l.termWidth = w;
+    l.termHeight = h;
 
-    l.messages  = { 0, 0, 80, 5 };
-    l.dungeon   = { 0, 5, 80, 24 };
-    // Fly-out panels: drawn over the dungeon when toggled
-    l.stats     = { 0, 5, 25, 24 };
-    l.inventory = { 55, 5, 80, 15 };
-    l.equipment = { 55, 15, 80, 24 };
-    l.use       = { 20, 5, 60, 24 };
-    l.endgame   = { 0, 0, 80, 24 };
+    int msgH = MSG_HEIGHT;
+    if( h < 12 ) msgH = 2; // very small terminal
+    int bodyTop = msgH;
+    int bodyBottom = h;
 
-    return l;
-}
+    l.messages = { 0, 0, w, msgH };
+    l.endgame = { 0, 0, w, h };
 
-// 125x40 layout: more room for everything
-ASCIILayout ASCIILayout::Create125x40()
-{
-    ASCIILayout l;
-    l.termWidth = 125;
-    l.termHeight = 40;
+    // Stats panel (always on left)
+    int statsRight = STATS_WIDTH;
+    if( statsRight > w / 3 ) statsRight = w / 3; // don't take more than 1/3
+    l.stats = { 0, bodyTop, statsRight, bodyBottom };
 
-    l.messages  = { 0, 0, 125, 3 };
-    l.stats     = { 0, 3, 20, 38 };
-    l.dungeon   = { 20, 3, 95, 38 };
-    l.inventory = { 95, 3, 125, 20 };
-    l.equipment = { 95, 20, 125, 38 };
-    l.use       = { 30, 5, 90, 38 };
-    l.endgame   = { 0, 0, 125, 40 };
+    // Inventory/equipment panel (right side, only when wide enough)
+    int invLeft = w;
+    if( w >= INV_AUTO_WIDTH )
+    {
+        invLeft = w - INV_WIDTH;
+        int invMid = bodyTop + ( bodyBottom - bodyTop ) / 2;
+        l.inventory = { invLeft, bodyTop, w, invMid };
+        l.equipment = { invLeft, invMid, w, bodyBottom };
+    }
+    else
+    {
+        // Fly-out positions (drawn over dungeon when toggled)
+        int flyRight = w;
+        int flyLeft = w - INV_WIDTH;
+        if( flyLeft < w / 2 ) flyLeft = w / 2;
+        int flyMid = bodyTop + ( bodyBottom - bodyTop ) / 2;
+        l.inventory = { flyLeft, bodyTop, flyRight, flyMid };
+        l.equipment = { flyLeft, flyMid, flyRight, bodyBottom };
+    }
+
+    // Dungeon fills the space between stats and inventory
+    l.dungeon = { statsRight, bodyTop, invLeft, bodyBottom };
+
+    // Use panel (center overlay)
+    int useLeft = w / 4;
+    int useRight = 3 * w / 4;
+    l.use = { useLeft, bodyTop, useRight, bodyBottom };
 
     return l;
 }
@@ -64,12 +75,6 @@ CRenderASCII::CRenderASCII()
 
 JResult CRenderASCII::Init( int width, int height, int bpp )
 {
-    // Pick layout based on requested size
-    if( width >= 125 && height >= 40 )
-        m_layout = ASCIILayout::Create125x40();
-    else
-        m_layout = ASCIILayout::Create80x24();
-
     // Initialize ncurses
     initscr();
     raw();
@@ -79,10 +84,26 @@ JResult CRenderASCII::Init( int width, int height, int bpp )
     nodelay( stdscr, TRUE ); // non-blocking getch
     timeout( 0 );
 
+    // Use actual terminal size (ignore requested width/height)
+    int termW, termH;
+    getmaxyx( stdscr, termH, termW );
+    m_layout = ASCIILayout::CreateForSize( termW, termH );
+
     InitColors();
 
     m_bInitted = true;
     return JSUCCESS;
+}
+
+bool CRenderASCII::CheckResize()
+{
+    int termW, termH;
+    getmaxyx( stdscr, termH, termW );
+    if( termW == m_layout.termWidth && termH == m_layout.termHeight )
+        return false;
+
+    m_layout = ASCIILayout::CreateForSize( termW, termH );
+    return true;
 }
 
 void CRenderASCII::Term()
@@ -168,6 +189,7 @@ char CRenderASCII::TileIndexToChar( int tileIndex )
 
 void CRenderASCII::PreDraw()
 {
+    CheckResize();
     erase(); // clear the virtual screen
 }
 

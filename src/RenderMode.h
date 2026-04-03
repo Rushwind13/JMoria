@@ -7,6 +7,7 @@
 
 enum class RenderMode
 {
+	None,
 	OpenGL,
 	ASCII
 };

@@ -77,7 +77,7 @@ public:
     int m_dwFlags;
     int m_dwType;         // DTD_WALL, DTD_FLOOR, etc.
     int m_dwModifiedType; // DOOR->OPENDOOR, etc.
-    int m_dwIndex;        // index into tileset for this type
+    char m_chTile;        // ASCII character to draw for this tile type
     int m_dwBaseHP;       // for busting down walls, disarming traps, etc.
     JColor m_Color;       // add a little color to the world
 protected:

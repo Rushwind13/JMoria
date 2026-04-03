@@ -1,14 +1,9 @@
 #include "JMDefs.h"
-#include <time.h>
-#include <cstring>
-#include "SDL2/SDL.h"
+#include "JTimer.h"
 #include "RenderMode.h"
-
-// Frame rate limiting configuration
-// #define DISPLAY_FRAMERATE  // Enable FPS counter display
-#define LIMIT_FRAMERATE       // Lock rendering to 30 FPS
-#define TARGET_FPS 30
-#define TARGET_FRAME_TIME (1000 / TARGET_FPS)  // milliseconds per frame
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
 
 // The global game pointer
 CGame *g_pGame = NULL;
@@ -29,7 +24,7 @@ int main( int argc, char **argv )
     srand( (unsigned)time( NULL ) );
 
     // Parse command-line arguments
-    RenderMode renderMode = RenderMode::OpenGL;
+    RenderMode renderMode = RenderMode::None;
     for( int i = 1; i < argc; i++ )
     {
         if( strcmp( argv[i], "--renderer=ascii" ) == 0 )
@@ -38,16 +33,22 @@ int main( int argc, char **argv )
             renderMode = RenderMode::OpenGL;
     }
 
-    // ASCII mode: need SDL timer subsystem for SDL_GetTicks / SDL_Delay
-    // OpenGL mode: CRender::InitSDL handles full SDL initialization
-    if( renderMode == RenderMode::ASCII )
+    // Apply defaults / validate based on compiled renderer support
+#if defined( RENDER_ASCII ) && defined( RENDER_OPENGL )
+    if( renderMode == RenderMode::None )
     {
-        if( SDL_Init( SDL_INIT_TIMER ) < 0 )
-        {
-            fprintf( stderr, "SDL timer init failed: %s\n", SDL_GetError() );
-            exit( 1 );
-        }
+        printf( "Usage: %s --renderer=ascii|opengl\n", argv[0] );
+        exit( 1 );
     }
+#elif defined( RENDER_ASCII )
+    if( renderMode == RenderMode::OpenGL )
+        printf( "Warning: OpenGL renderer not compiled in, using ASCII.\n" );
+    renderMode = RenderMode::ASCII;
+#elif defined( RENDER_OPENGL )
+    if( renderMode == RenderMode::ASCII )
+        printf( "Warning: ASCII renderer not compiled in, using OpenGL.\n" );
+    renderMode = RenderMode::OpenGL;
+#endif
 
     JResult result;
     g_pGame = new CGame;
@@ -63,7 +64,7 @@ int main( int argc, char **argv )
 
     unsigned int curTime = 0;
 #ifndef TURN_BASED
-    unsigned int lastTick = Util::GetTickCount();
+    unsigned int lastTick = JTimer::GetTicks();
 #endif // TURN_BASED
     unsigned int nextTime = 0;
 #ifdef LIMIT_FRAMERATE
@@ -79,7 +80,7 @@ int main( int argc, char **argv )
 #ifdef TURN_BASED
         {
 #ifdef LIMIT_FRAMERATE
-            frameStartTime = SDL_GetTicks();
+            frameStartTime = JTimer::GetTicks();
 #endif
             // handle the events in the queue
             g_pGame->HandleEvents( isActive, done );
@@ -96,19 +97,19 @@ int main( int argc, char **argv )
              * second - 30 FPS is more than sufficient for responsive input
              * handling while keeping CPU usage reasonable.
              */
-            frameElapsedTime = SDL_GetTicks() - frameStartTime;
+            frameElapsedTime = JTimer::GetTicks() - frameStartTime;
             if( frameElapsedTime < TARGET_FRAME_TIME )
             {
-                SDL_Delay( TARGET_FRAME_TIME - frameElapsedTime );
+                JTimer::Delay( TARGET_FRAME_TIME - frameElapsedTime );
             }
 #endif // LIMIT_FRAMERATE
         }
 #else
         {
 #ifdef LIMIT_FRAMERATE
-            frameStartTime = SDL_GetTicks();
+            frameStartTime = JTimer::GetTicks();
 #endif
-            curTime = Util::GetTickCount();
+            curTime = JTimer::GetTicks();
             if( curTime > nextTime )
             {
 // 			if( g_pGame->GetPlayer() != NULL )
@@ -141,10 +142,10 @@ int main( int argc, char **argv )
              * the deltaTime passed to Update(), which may impact game speed if
              * physics/movement calculations rely on consistent timing.
              */
-            frameElapsedTime = SDL_GetTicks() - frameStartTime;
+            frameElapsedTime = JTimer::GetTicks() - frameStartTime;
             if( frameElapsedTime < TARGET_FRAME_TIME )
             {
-                SDL_Delay( TARGET_FRAME_TIME - frameElapsedTime );
+                JTimer::Delay( TARGET_FRAME_TIME - frameElapsedTime );
             }
 #endif // LIMIT_FRAMERATE
         }

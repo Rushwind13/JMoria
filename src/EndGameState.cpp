@@ -52,14 +52,14 @@ CEndGameState::~CEndGameState()
     }
 }
 
-int CEndGameState::OnHandleKey( SDL_Keysym *keysym )
+int CEndGameState::OnHandleKey( JKeysym *keysym )
 {
     int retval;
     retval = ( ( *this ).*( m_pCurKeyHandler ) )( keysym );
     return retval;
 }
 
-int CEndGameState::OnHandleTomb( SDL_Keysym *keysym )
+int CEndGameState::OnHandleTomb( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling TOMB modifier\n" );
@@ -99,7 +99,7 @@ int CEndGameState::OnHandleTomb( SDL_Keysym *keysym )
     return 0;
 }
 
-int CEndGameState::OnHandleScores( SDL_Keysym *keysym )
+int CEndGameState::OnHandleScores( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling SCORES modifier\n" );
@@ -130,7 +130,7 @@ int CEndGameState::OnHandleScores( SDL_Keysym *keysym )
     return 0;
 }
 
-int CEndGameState::OnHandleInit( SDL_Keysym *keysym )
+int CEndGameState::OnHandleInit( JKeysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing endgame state...\n" );
 
@@ -143,9 +143,9 @@ int CEndGameState::OnHandleInit( SDL_Keysym *keysym )
     return 0;
 }
 
-int CEndGameState::OnBaseHandleKey( SDL_Keysym *keysym )
+int CEndGameState::OnBaseHandleKey( JKeysym *keysym )
 {
-    if( keysym->sym == SDLK_RETURN || keysym->sym == SDLK_SPACE )
+    if( keysym->sym == JKEY_RETURN || keysym->sym == JKEY_SPACE )
     {
         return JCOMPLETESTATE;
     }

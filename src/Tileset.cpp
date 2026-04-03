@@ -1,12 +1,15 @@
 #include "TileSet.h"
 
+#ifdef RENDER_TILESET_POSTLOAD_NEEDED
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
+#endif
 
 #include "RenderBase.h"
 
 JResult CTileset::Load( const char *szName, int dwCellWidth, int dwCellHeight )
 {
+#ifdef RENDER_TILESET_POSTLOAD_NEEDED
     SDL_Surface *TextureImage;
     JResult retval = JSUCCESS;
 
@@ -29,7 +32,6 @@ JResult CTileset::Load( const char *szName, int dwCellWidth, int dwCellHeight )
         return JERROR();
     }
 
-#ifdef RENDER_TILESET_POSTLOAD_NEEDED
     // Turn this image into an OpenGL texture
     if( g_pGame )
     {
@@ -42,19 +44,28 @@ JResult CTileset::Load( const char *szName, int dwCellWidth, int dwCellHeight )
         JLog( LOG_LEVEL_WARN, true,
               "g_pGame not initialized yet, when loading %s -- m_Texture not created.\n", szName );
     }
-#endif
 
     m_dwTilesPerRow = TextureImage->w / dwCellWidth;
     m_vTexels.x = 1.0f / (float)m_dwTilesPerRow;
     m_vTexels.y = (float)dwCellHeight / (float)TextureImage->h;
 
-#ifdef RENDER_TILESET_POSTLOAD_NEEDED // destroy the temporary surface
+    // destroy the temporary surface
     if( TextureImage )
     {
         SDL_FreeSurface( TextureImage );
     }
-#endif
     return retval;
+#else
+    // ASCII-only: no image to load.
+    // Compute grid metrics from the known sprite sheet layout.
+    // SmallText6X8.png is 570x8 (95 chars), Courier.png is 960x128 (30 per row).
+    // In ASCII mode we only need m_dwTilesPerRow and m_vTexels for DrawChar→DrawTile conversion,
+    // but since the ASCII renderer bypasses tile coords entirely, these are best-effort defaults.
+    m_dwTilesPerRow = 95;
+    m_vTexels.x = 1.0f / (float)m_dwTilesPerRow;
+    m_vTexels.y = 1.0f;
+    return JSUCCESS;
+#endif
 }
 
 bool CTileset::DrawTile( int dwIndex, const JFVector &vPos, JVector &vSize, bool bIsTextured )
@@ -78,7 +89,17 @@ bool CTileset::DrawTile( int dwIndex, const JFVector &vPos, JVector &vSize, bool
     return true;
 }
 
-void CTileset::PreDrawTile() { g_pGame->GetRender()->PreDrawTile(); }
+bool CTileset::DrawChar( char ch, const JFVector &vPos, JVector &vSize )
+{
+    g_pGame->GetRender()->DrawChar( vPos, vSize, ch );
+    return true;
+}
+
+void CTileset::PreDrawTile()
+{
+    g_pGame->GetRender()->SetTileMetrics( m_dwTilesPerRow, m_vTexels );
+    g_pGame->GetRender()->PreDrawTile();
+}
 
 void CTileset::PostDrawTile() { g_pGame->GetRender()->PostDrawTile(); }
 

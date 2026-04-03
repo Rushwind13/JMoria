@@ -2,6 +2,8 @@
 //
 // ncurses-based ASCII renderer for JMoria
 //
+#include "JMDefs.h"
+#ifdef RENDER_ASCII
 
 #include "RenderASCII.h"
 #include <cmath>
@@ -328,26 +330,26 @@ void CRenderASCII::SetTileColor( JColor color )
 bool CRenderASCII::DrawTile( const JFVector &vPos, JVector &vSize, JIVector &vTile,
                              JFVector &vTexels )
 {
-    // vTile is the position on the font texture in tile units.
-    // Convert tile index back to ASCII char.
-    // The tileset stores tiles in a grid; the index into the ASCII range is:
-    //   index = vTile.y * tilesPerRow + vTile.x
-    // For the 6x8 font on a typical texture, tilesPerRow varies,
-    // but the original code does: index = charValue - ' ' - 1
-    // and GetTile does: vTile.x = index % tilesPerRow, vTile.y = index / tilesPerRow
-    // We can recover the linear index and convert back.
-    // tilesPerRow = textureWidth / cellWidth. For SmallText6X8.png (96px wide, 6px cells) = 16
+    // Legacy path: recover the character from tile grid coordinates.
+    // New code should call DrawChar() directly instead.
     int tilesPerRow = (int)( 1.0f / vTexels.x + 0.5f );
     int tileIndex = vTile.y * tilesPerRow + vTile.x;
-
     char ch = TileIndexToChar( tileIndex );
 
+    return DrawChar( vPos, vSize, ch );
+}
+
+bool CRenderASCII::DrawTile( const JFVector &vPos, JVector &vSize, JIVector &vTile )
+{
+    // Untextured tile — draw a solid block
+    return DrawChar( vPos, vSize, '#' );
+}
+
+bool CRenderASCII::DrawChar( const JFVector &vPos, JVector &vSize, char ch )
+{
     int screenX = MapX( vPos.x );
     int screenY = MapY( vPos.y );
 
-    // Clip to the dungeon region when drawing world-space tiles
-    // Add 3-unit safety margin to prevent edge clipping artifacts
-    // when viewport center shifts with player movement
     bool isPixelSpace = ( m_currentBounds.left >= 0 && m_currentBounds.right > 500 );
     if( !isPixelSpace )
     {
@@ -367,38 +369,6 @@ bool CRenderASCII::DrawTile( const JFVector &vPos, JVector &vSize, JIVector &vTi
         attron( COLOR_PAIR( pair ) );
 
     mvaddch( screenY, screenX, ch );
-
-    if( m_bHasColor )
-        attroff( COLOR_PAIR( pair ) );
-
-    return true;
-}
-
-bool CRenderASCII::DrawTile( const JFVector &vPos, JVector &vSize, JIVector &vTile )
-{
-    // Untextured tile — draw a solid block
-    int screenX = MapX( vPos.x );
-    int screenY = MapY( vPos.y );
-
-    bool isPixelSpace = ( m_currentBounds.left >= 0 && m_currentBounds.right > 500 );
-    if( !isPixelSpace )
-    {
-        if( screenX < m_layout.dungeon.left || screenX >= m_layout.dungeon.right ||
-            screenY < m_layout.dungeon.top  || screenY >= m_layout.dungeon.bottom )
-            return false;
-    }
-    else
-    {
-        if( screenX < 0 || screenX >= m_layout.termWidth ||
-            screenY < 0 || screenY >= m_layout.termHeight )
-            return false;
-    }
-
-    int pair = GetColorPair( m_currentColor );
-    if( m_bHasColor )
-        attron( COLOR_PAIR( pair ) );
-
-    mvaddch( screenY, screenX, '#' );
 
     if( m_bHasColor )
         attroff( COLOR_PAIR( pair ) );
@@ -447,3 +417,4 @@ void CRenderASCII::DrawTextBoundingBox( JRect rect, JColor color )
     if( m_bHasColor )
         attroff( COLOR_PAIR( pair ) );
 }
+#endif // RENDER_ASCII

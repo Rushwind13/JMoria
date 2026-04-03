@@ -36,6 +36,16 @@ public:
 	// UI drawing
 	virtual void	DrawTextBoundingBox( JRect rect, JColor color ) = 0;
 
+	// Character-based drawing (ASCII-first path)
+	// Renderers implement this to draw a printable ASCII character at a position.
+	// ASCII renderer: maps to terminal cell and mvaddch directly.
+	// OpenGL renderer: converts character to tile grid coords and draws a textured quad.
+	virtual bool DrawChar( const JFVector &vPos, JVector &vSize, char ch ) = 0;
+
+	// Store tileset metrics so the OpenGL renderer can convert characters to texture coords.
+	// ASCII renderer can ignore this. Called by CTileset::PreDrawTile().
+	virtual void SetTileMetrics( int tilesPerRow, JFVector vTexels ) {}
+
 	// Texture loading (optional; backends that don't use textures can no-op)
 	virtual JResult	PostLoadTexture( uint32 &texture, void *data, int dwColorsPerPixel, bool bIsBMP, int dwImageWidth, int dwImageHeight, int dwCellWidth, int dwCellHeight ) { return 0; };
 

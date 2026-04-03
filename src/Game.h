@@ -3,7 +3,9 @@
 #include "JMDefs.h"
 #include "RenderMode.h"
 
+#ifdef RENDER_OPENGL
 class CRender;
+#endif
 class IRenderBackend;
 class CDungeon;
 class CPlayer;
@@ -29,7 +31,7 @@ public:
     CGame();
     ~CGame() { Quit( 0 ); }
 
-    JResult Init( const char *szBasedir, RenderMode mode = RenderMode::OpenGL );
+    JResult Init( const char *szBasedir, RenderMode mode );
 #ifdef TURN_BASED
     bool Update(); // someday figure out why this doesn't work...
 #else
@@ -109,8 +111,10 @@ private:
     bool m_bShowInv;
     bool m_bShowEquip;
 
+#ifdef RENDER_ASCII
     void HandleEventsASCII( int &isActive, int &done );
     void UpdateASCIILayout();
+#endif
 
     int m_dwNextTime;
     float m_fGameTime;

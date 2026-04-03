@@ -33,7 +33,7 @@ void CDungeon::Init( const char *szBasedir )
     {
         m_dtdlist[i].m_dwType = i;
         m_dtdlist[i].m_dwModifiedType = ModifiedTileTypes[i];
-        m_dtdlist[i].m_dwIndex = TileIDs[i] - ' ' - 1;
+        m_dtdlist[i].m_chTile = TileIDs[i];
         switch( m_dtdlist[i].m_dwType )
         {
         case DUNG_IDX_FLOOR:
@@ -776,7 +776,7 @@ void CDungeon::DrawDungeon()
                 color = curTile->m_dtd->m_Color;
             }
             m_TileSet->SetTileColor( color );
-            m_TileSet->DrawTile( curTile->m_dtd->m_dwIndex, vScreen, vSize, true );
+            m_TileSet->DrawChar( curTile->m_dtd->m_chTile, vScreen, vSize );
         }
     }
 }
@@ -839,8 +839,13 @@ void CDungeon::PreDraw()
         m_Rect.Init( xorigin - xinitval, yorigin + yinitval, xorigin + xinitval,
                      yorigin - yinitval );
     }
+#ifdef RENDER_TILESET_POSTLOAD_NEEDED
     g_pGame->GetRender()->PreDrawObjects( m_Rect, m_TileSet->Texture(), true, false,
                                           &m_vfTranslate );
+#else
+    g_pGame->GetRender()->PreDrawObjects( m_Rect, 0, true, false,
+                                          &m_vfTranslate );
+#endif
 
     // Do any external setup that needs doing.
     m_TileSet->PreDrawTile();

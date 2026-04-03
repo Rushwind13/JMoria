@@ -444,7 +444,7 @@ void CGame::HandleEvents(int &isActive, int &done)
                 break;
             case SDL_WINDOWEVENT_RESIZED:
             // used to be SDL_VIDEORESIZE:
-                retval = GetRender()->ResizeWindow( event.window.data1, event.window.data2 );
+                retval = static_cast<CRender*>(GetRender())->ResizeWindow( event.window.data1, event.window.data2 );
                 if( retval != JSUCCESS )
                 {
                     Quit(retval);

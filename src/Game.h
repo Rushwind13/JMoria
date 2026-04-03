@@ -1,8 +1,10 @@
 #ifndef __GAME_H__
 #define __GAME_H__
 #include "JMDefs.h"
+#include "RenderMode.h"
 
 class CRender;
+class IRenderBackend;
 class CDungeon;
 class CPlayer;
 class CDisplayText;
@@ -27,7 +29,7 @@ public:
     CGame();
     ~CGame() { Quit( 0 ); }
 
-    JResult Init( const char *szBasedir );
+    JResult Init( const char *szBasedir, RenderMode mode = RenderMode::OpenGL );
 #ifdef TURN_BASED
     bool Update(); // someday figure out why this doesn't work...
 #else
@@ -36,7 +38,7 @@ public:
     void HandleEvents( int &isActive, int &done );
     void Draw();
 
-    CRender *GetRender() { return m_pRender; }
+    IRenderBackend *GetRender() { return m_pRender; }
     CDungeon *GetDungeon() { return m_pDungeon; }
     CPlayer *GetPlayer() { return m_pPlayer; }
     CDisplayText *GetMsgs() { return m_pMsgsDT; }
@@ -54,6 +56,14 @@ public:
     float GetFTime() { return m_fGameTime; }
     int GetITime() { return (int)m_fGameTime; }
     int GetTime() { return GetITime(); }
+
+    // ASCII fly-out panel toggles
+    void ToggleStats() { m_bShowStats = !m_bShowStats; }
+    void ToggleInv() { m_bShowInv = !m_bShowInv; }
+    void ToggleEquip() { m_bShowEquip = !m_bShowEquip; }
+    bool IsShowingStats() const { return m_bShowStats; }
+    bool IsShowingInv() const { return m_bShowInv; }
+    bool IsShowingEquip() const { return m_bShowEquip; }
 
 #ifdef TURN_BASED
     void SetReadyForUpdate( const bool isReady ) { m_bReadyForUpdate = isReady; }
@@ -91,7 +101,16 @@ protected:
     CUseState *m_pUseState;
 
 private:
-    CRender *m_pRender;
+    IRenderBackend *m_pRender;
+    RenderMode m_eRenderMode;
+
+    // ASCII fly-out panel visibility (toggled by c/i/e keys)
+    bool m_bShowStats;
+    bool m_bShowInv;
+    bool m_bShowEquip;
+
+    void HandleEventsASCII( int &isActive, int &done );
+    void UpdateASCIILayout();
 
     int m_dwNextTime;
     float m_fGameTime;

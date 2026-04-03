@@ -1,3 +1,4 @@
+.vscode
 .DS_Store
 *.psd
 #*.png
@@ -23,3 +24,4 @@ bin/
 test/vendor/
 test/.bundle/
 test/Gemfile.lock
+.goo.swp

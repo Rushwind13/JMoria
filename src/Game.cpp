@@ -22,6 +22,8 @@
 
 #include "DisplayText.h"
 #include "Render.h"
+#include "RenderASCII.h"
+#include <curses.h>
 
 #include "AIMgr.h"
 
@@ -47,7 +49,11 @@ CGame::CGame()
       m_pTargetState( NULL ),
       m_pUseState( NULL ),
       m_eCurState( STATE_INVALID ),
-      m_fGameTime( 0.0f )
+      m_fGameTime( 0.0f ),
+      m_eRenderMode( RenderMode::OpenGL ),
+      m_bShowStats( true ),
+      m_bShowInv( false ),
+      m_bShowEquip( false )
 {
     m_pClockStepState = new CClockStepState;
     m_pCmdState = new CCmdState;
@@ -66,16 +72,26 @@ CGame::CGame()
 #endif // TURN_BASED
 };
 
-JResult CGame::Init( const char *szBasedir )
+JResult CGame::Init( const char *szBasedir, RenderMode mode )
 {
     JResult result;
     // Initialize all the game stuff, baby.
 
     g_Constants.Init();
 
+    m_eRenderMode = mode;
+
     // Init the Render
-    m_pRender = new CRender;
-    result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
+    if( m_eRenderMode == RenderMode::ASCII )
+    {
+        m_pRender = new CRenderASCII;
+        result = m_pRender->Init( 80, 24, 0 );
+    }
+    else
+    {
+        m_pRender = new CRender;
+        result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
+    }
     if( result != JSUCCESS )
     {
         m_pRender->Term();
@@ -99,6 +115,12 @@ JResult CGame::Init( const char *szBasedir )
 
     m_pEndGameDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, 480 ), 255 );
     m_pEndGameDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
+
+    if( m_eRenderMode == RenderMode::ASCII )
+    {
+        UpdateASCIILayout();
+        m_bShowInv = ( m_pRender->GetScreenWidth() >= ASCIILayout::INV_AUTO_WIDTH );
+    }
 
     m_pAIMgr = new CAIMgr;
     m_pAIMgr->Init();
@@ -523,20 +545,69 @@ bool CGame::Update( float fCurTime )
     return true;
 }
 
+// Convert ASCIILayout regions (char coords) to pixel-space JRects
+// that DisplayText expects (x*6, y*8).
+void CGame::UpdateASCIILayout()
+{
+    CRenderASCII *pASCII = static_cast<CRenderASCII *>( m_pRender );
+    const ASCIILayout &l = pASCII->GetLayout();
+
+    auto toPixelRect = []( const ASCIILayoutRegion &r ) {
+        return JRect( r.left * 6, r.top * 8, r.right * 6, r.bottom * 8 );
+    };
+
+    m_pMsgsDT->SetRect( toPixelRect( l.messages ) );
+    m_pStatsDT->SetRect( toPixelRect( l.stats ) );
+    m_pInvDT->SetRect( toPixelRect( l.inventory ) );
+    m_pEquipDT->SetRect( toPixelRect( l.equipment ) );
+    m_pUseDT->SetRect( toPixelRect( l.use ) );
+    m_pEndGameDT->SetRect( toPixelRect( l.endgame ) );
+    m_pEndGameDT->SetContentMargin( 0, 0 );
+}
+
 void CGame::Draw()
 {
+    bool bResized = GetRender()->CheckResize();
     GetRender()->PreDraw();
 
-    // Draw the dungeon
-    GetDungeon()->Draw();
+    bool bASCII = ( m_eRenderMode == RenderMode::ASCII );
 
-    // Draw the player
-    GetPlayer()->Draw();
+    // After resize, update DisplayText rects and auto-show/hide inventory
+    if( bASCII && bResized )
+    {
+        UpdateASCIILayout();
+        m_bShowInv = ( GetRender()->GetScreenWidth() >= ASCIILayout::INV_AUTO_WIDTH );
+    }
 
-    GetMsgs()->Draw();
-    GetStats()->Draw();
-    GetInv()->Draw();
-    GetEquip()->Draw();
+    bool bOverlayState = ( m_eCurState == STATE_INTRO || m_eCurState == STATE_ENDGAME );
+
+    // In ASCII mode, overlay states (intro/endgame) take the full screen
+    // and shouldn't show dungeon/player/stats underneath
+    if( !bASCII || !bOverlayState )
+    {
+        // Draw the dungeon
+        GetDungeon()->Draw();
+
+        // Draw the player
+        GetPlayer()->Draw();
+
+        GetMsgs()->Draw();
+
+        // In ASCII mode, stats/inv/equip are fly-out panels toggled by c/i/e
+        if( !bASCII )
+        {
+            GetStats()->Draw();
+            GetInv()->Draw();
+            GetEquip()->Draw();
+        }
+        else
+        {
+            if( m_bShowStats ) GetStats()->Draw();
+            if( m_bShowInv ) GetInv()->Draw();
+            if( m_bShowEquip ) GetEquip()->Draw();
+        }
+    }
+
     if( m_eCurState == STATE_USE )
     {
         GetUse()->Draw();
@@ -564,6 +635,12 @@ void CGame::Draw()
 
 void CGame::HandleEvents( int &isActive, int &done )
 {
+    if( m_eRenderMode == RenderMode::ASCII )
+    {
+        HandleEventsASCII( isActive, done );
+        return;
+    }
+
     // used to collect events
     SDL_Event event;
     JResult retval;
@@ -586,7 +663,7 @@ void CGame::HandleEvents( int &isActive, int &done )
                 break;
             case SDL_WINDOWEVENT_RESIZED:
                 // used to be SDL_VIDEORESIZE:
-                retval = GetRender()->ResizeWindow( event.window.data1, event.window.data2 );
+                retval = static_cast<CRender*>(GetRender())->ResizeWindow( event.window.data1, event.window.data2 );
                 if( retval != JSUCCESS )
                 {
                     Quit( retval );
@@ -635,5 +712,124 @@ void CGame::HandleEvents( int &isActive, int &done )
             JLog( LOG_LEVEL_NOISE, true, "unhandled event type: %d\n", event.type );
             break;
         }
+    }
+}
+
+void CGame::HandleEventsASCII( int &isActive, int &done )
+{
+    int ch = getch();
+    if( ch == ERR )
+        return; // no input available
+
+    // Terminal resize: consume the event, PreDraw handles the actual resize
+    if( ch == KEY_RESIZE )
+        return;
+
+    SDL_Keysym keysym;
+    memset( &keysym, 0, sizeof( keysym ) );
+
+    // Map ncurses keys to SDL keysyms
+    // For ASCII printable characters, SDLK values match ASCII codes
+    if( ch >= 'a' && ch <= 'z' )
+    {
+        keysym.sym = (SDL_Keycode)ch;
+        keysym.mod = KMOD_NONE;
+    }
+    else if( ch >= 'A' && ch <= 'Z' )
+    {
+        // Uppercase: map to lowercase sym + shift modifier
+        keysym.sym = (SDL_Keycode)( ch - 'A' + 'a' );
+        keysym.mod = KMOD_SHIFT;
+    }
+    else if( ch >= 1 && ch <= 26 )
+    {
+        // Ctrl+letter: ch 1 = Ctrl+A, ch 3 = Ctrl+C, etc.
+        keysym.sym = (SDL_Keycode)( 'a' + ch - 1 );
+        keysym.mod = KMOD_CTRL;
+    }
+    else if( ch >= '0' && ch <= '9' )
+    {
+        keysym.sym = (SDL_Keycode)ch;
+        keysym.mod = KMOD_NONE;
+    }
+    else
+    {
+        // Map special keys
+        switch( ch )
+        {
+        case '\n':
+        case '\r':
+        case KEY_ENTER:
+            keysym.sym = SDLK_RETURN;
+            break;
+        case 27: // Escape
+            keysym.sym = SDLK_ESCAPE;
+            break;
+        case ' ':
+            keysym.sym = SDLK_SPACE;
+            break;
+        case '.':
+            keysym.sym = SDLK_PERIOD;
+            break;
+        case '>': // Shift+.
+            keysym.sym = SDLK_PERIOD;
+            keysym.mod = KMOD_SHIFT;
+            break;
+        case ',':
+            keysym.sym = SDLK_COMMA;
+            break;
+        case '<': // Shift+,
+            keysym.sym = SDLK_COMMA;
+            keysym.mod = KMOD_SHIFT;
+            break;
+        case ';':
+            keysym.sym = SDLK_SEMICOLON;
+            break;
+        case KEY_BACKSPACE:
+        case 127: // DEL on some terminals
+            keysym.sym = SDLK_BACKSPACE;
+            break;
+        case KEY_DC: // ncurses Delete key
+            keysym.sym = SDLK_DELETE;
+            break;
+        case KEY_F(1):
+            keysym.sym = SDLK_F1;
+            break;
+        default:
+            // Unknown key, ignore
+            return;
+        }
+    }
+
+    // ASCII fly-out panel toggles: i=inventory, e=equipment, C=character stats
+    // These are display-only and don't consume a game turn.
+    if( m_eCurState == STATE_COMMAND )
+    {
+        if( keysym.sym == SDLK_i && keysym.mod == KMOD_NONE )
+        {
+            ToggleInv();
+            return;
+        }
+        if( keysym.sym == SDLK_e && keysym.mod == KMOD_NONE )
+        {
+            ToggleEquip();
+            return;
+        }
+        if( keysym.sym == SDLK_c && ( keysym.mod & KMOD_SHIFT ) )
+        {
+            ToggleStats();
+            return;
+        }
+    }
+
+    JResult retval = m_pCurState->HandleKey( &keysym );
+    if( retval == JBOGUSKEY )
+    {
+        JLog( LOG_LEVEL_ERROR, true, "Bogus command: 0x%x\n", keysym.sym );
+        GetMsgs()->Printf( "Unrecognized command: 0x%x\n", keysym.sym );
+    }
+    else if( retval == JQUITREQUEST )
+    {
+        Quit( 0 );
     }
 }

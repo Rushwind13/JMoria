@@ -17,8 +17,9 @@ class CDisplayText;
 #define SCREEN_BPP 32
 
 #include "JMDefs.h"
+#include "RenderBase.h"
 
-class CRender
+class CRender : public IRenderBackend
 {
 public:
     CRender()
@@ -70,6 +71,10 @@ public:
     virtual JResult PostLoadTexture( uint32 &texture, void *data, int dwColorsPerPixel, bool bIsBMP,
                                      int dwImageWidth, int dwImageHeight, int dwCellWidth,
                                      int dwCellHeight );
+
+    // IRenderBackend configuration
+    int GetScreenWidth() const override { return m_dwScreenWidth; }
+    int GetScreenHeight() const override { return m_dwScreenHeight; }
 
 protected:
     int m_dwScreenWidth;

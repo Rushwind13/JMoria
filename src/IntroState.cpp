@@ -12,6 +12,7 @@
 #include "DisplayText.h"
 #include "DungeonTile.h"
 #include "Game.h"
+#include "RenderBase.h"
 
 #include "FileParse.h"
 
@@ -167,12 +168,21 @@ void CIntroState::ResetToState( int newstate )
 //// Splash commands
 bool CIntroState::DoSplash()
 {
+    // Center the splash art: ~44 chars wide, ~24 lines tall (including leading newlines)
+    int screenW = g_pGame->GetRender()->GetScreenWidth();
+    int screenH = g_pGame->GetRender()->GetScreenHeight();
+    int marginX = ( screenW * 6 - 44 * 6 ) / 2;
+    int marginY = ( screenH * 8 - 24 * 8 ) / 2;
+    if( marginX < 0 ) marginX = 0;
+    if( marginY < 0 ) marginY = 0;
+    g_pGame->GetEnd()->SetContentMargin( marginX, marginY );
     g_pGame->GetEnd()->Printf( m_szSplash, VERSION, COPYRIGHT, AUTHOR );
     return true;
 }
 //// Create commands
 bool CIntroState::DoCharacterCreation()
 {
+    g_pGame->GetEnd()->SetContentMargin( 0, 0 );
     g_pGame->GetEnd()->Printf(
         "Character Creation Screen goes here...\n\n\nYou are the eldest son of a human merchant. "
         "You have dark hair and a charming smile.\n\nForward to Battle! Onward for Glory!\n" );

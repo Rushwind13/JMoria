@@ -11,7 +11,7 @@
 #include "EndGameState.h"
 #include "Item.h"
 #include "JMDefs.h"
-#include "Render.h"
+#include "RenderBase.h"
 
 class CGame;
 
@@ -30,6 +30,8 @@ CDisplayText::CDisplayText( const char *szBasedir, JRect in, uint8 inAlpha )
       m_szDrawPtr( NULL ),
       m_vPos( m_Rect.Left(), m_Rect.Top() ),
       m_dwFlags( FLAG_TEXT_NONE ),
+      m_dwMarginLeft( 0 ),
+      m_dwMarginTop( 0 ),
       m_rcViewport( 0, 480, 640, 0 )
 {
     m_szText = new char[TEXT_MAXCHARS];
@@ -58,6 +60,21 @@ CDisplayText::~CDisplayText()
 
 bool CDisplayText::Update( float fCurTime ) { return true; }
 
+void CDisplayText::SetRect( JRect in )
+{
+    m_Rect = in;
+    m_dwWidth = in.Width();
+    m_dwHeight = in.Height();
+    m_dwUsedLines = m_dwHeight / FONT_DRAW_H;
+    m_vPos.Init( m_Rect.Left(), m_Rect.Top() );
+}
+
+void CDisplayText::SetContentMargin( int left, int top )
+{
+    m_dwMarginLeft = left;
+    m_dwMarginTop = top;
+}
+
 // Setup functions
 void CDisplayText::PreDraw()
 {
@@ -82,7 +99,20 @@ void CDisplayText::Draw()
     Paginate();
     PreDraw();
     DrawBoundingBox();
-    DrawStr( m_Rect.Left(), m_Rect.Top(), true, m_Rect.Bottom(), m_szDrawPtr );
+
+    // In ASCII mode, text must be inset so it doesn't collide with box-drawing chars.
+    // Also clamp bottom to the renderer's actual screen height so text doesn't
+    // overflow past the bottom border.
+    int inset = g_pGame->GetRender()->GetTextInset();
+    int insetX = inset * FONT_DRAW_W;
+    int insetY = inset * FONT_DRAW_H;
+    int maxH = g_pGame->GetRender()->GetMaxTextHeight();
+    int drawBottom = m_Rect.Bottom() - insetY;
+    if( drawBottom > maxH - insetY )
+        drawBottom = maxH - insetY;
+    DrawStr( m_Rect.Left() + insetX + m_dwMarginLeft,
+             m_Rect.Top() + insetY + m_dwMarginTop,
+             true, drawBottom, m_szDrawPtr );
     PostDraw();
 }
 
@@ -156,7 +186,18 @@ void CDisplayText::Paginate()
     int dwAddLinesMax;
     char *ptr;
 
-    dwAddLinesMax = m_dwUsedLines + m_dwFreeLines;
+    // Account for text inset reducing available lines, and clamp to
+    // the renderer's actual screen height (e.g. 24 rows in ASCII mode
+    // vs the 60-row pixel-rect for the endgame/intro panel).
+    int inset = g_pGame->GetRender()->GetTextInset();
+    int maxLines = g_pGame->GetRender()->GetMaxTextHeight() / FONT_DRAW_H;
+    int usedLines = m_dwUsedLines;
+    if( usedLines > maxLines )
+        usedLines = maxLines;
+    usedLines -= ( 2 * inset );
+    if( usedLines < 1 ) usedLines = 1;
+
+    dwAddLinesMax = usedLines + m_dwFreeLines;
 
     ptr = strchr( m_szText, nul );
     while( ptr > m_szText )
@@ -174,9 +215,9 @@ void CDisplayText::Paginate()
         ptr--;
     }
 
-    if( ptr == m_szText && dwAddLines > m_dwUsedLines )
+    if( ptr == m_szText && dwAddLines > usedLines )
     {
-        m_dwFreeLines = dwAddLines - m_dwUsedLines + 1;
+        m_dwFreeLines = dwAddLines - usedLines + 1;
     }
 
     m_szDrawPtr = ptr;
@@ -203,7 +244,18 @@ void CDisplayText::DrawFormattedStr( const char *szString )
     char szBuffer2[TEXT_MAXCHARS];
     char *ptr;
     char *ptr2;
-    JIVector vPos( m_Rect.Left(), m_Rect.Top() );
+
+    // Account for text inset so wrapping uses the interior width.
+    // Also clamp to the renderer's max text width so lines that exceed
+    // the terminal width get wrapped instead of silently clipped.
+    int inset = g_pGame->GetRender()->GetTextInset();
+    int insetX = inset * FONT_DRAW_W;
+    int maxW = g_pGame->GetRender()->GetMaxTextWidth();
+    int wrapLeft = m_Rect.Left() + insetX;
+    int wrapRight = m_Rect.Right() - insetX;
+    if( wrapRight > maxW - insetX )
+        wrapRight = maxW - insetX;
+    JIVector vPos( wrapLeft, m_Rect.Top() );
 
     Util::jstrcpy( szBuffer, szString );
     ptr = szBuffer;
@@ -216,10 +268,10 @@ void CDisplayText::DrawFormattedStr( const char *szString )
         }
         else if( *ptr == '\n' )
         {
-            vPos.x = m_Rect.Left();
+            vPos.x = wrapLeft;
         }
 
-        if( vPos.x > m_Rect.Right() )
+        if( vPos.x > wrapRight )
         {
             ptr++;
 
@@ -246,8 +298,29 @@ void CDisplayText::DrawFormattedStr( const char *szString )
                 ptr2 = szBuffer2;
             }
 
-            Util::jstrcat( ptr, ptr2 );
-            vPos.x = m_Rect.Left();
+            // Guard against buffer overflow: each wrap adds a '\n' byte,
+            // so the total can exceed TEXT_MAXCHARS. Truncate if needed.
+            int used = (int)( ptr - szBuffer );
+            int remain = Util::jstrlen( ptr2 );
+            if( used + remain < TEXT_MAXCHARS )
+            {
+                Util::jstrcat( ptr, ptr2 );
+            }
+            else
+            {
+                // Truncate: copy as much as fits
+                int avail = TEXT_MAXCHARS - used - 1;
+                if( avail > 0 )
+                {
+                    memcpy( ptr, ptr2, avail );
+                    ptr[avail] = nul;
+                }
+                else
+                {
+                    *ptr = nul;
+                }
+            }
+            vPos.x = wrapLeft;
         }
         else
         {
@@ -263,7 +336,12 @@ void CDisplayText::DrawFormattedStr( const char *szString )
         ptr = strchr( ptr, '\n' );
         if( !ptr )
         {
-            assert( !"CDisplayText::DrawFormattedString: string too long!" );
+            // Can't free enough room — truncate szBuffer to fit
+            int avail = TEXT_MAXCHARS - Util::jstrlen( m_szText ) - 1;
+            if( avail < 0 ) avail = 0;
+            szBuffer[avail] = nul;
+            ptr = m_szText;
+            break;
         }
 
         ptr++;

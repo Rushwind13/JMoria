@@ -3,7 +3,7 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_image.h"
 
-#include "Render.h"
+#include "RenderBase.h"
 
 JResult CTileset::Load( const char *szName, int dwCellWidth, int dwCellHeight )
 {

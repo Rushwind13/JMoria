@@ -280,7 +280,14 @@ void CRenderASCII::PostDrawTile()
 
 void CRenderASCII::SetTileColor( JColor color )
 {
-    m_currentColor = color;
+    // In OpenGL, black text sits on a translucent colored quad and is readable.
+    // In the terminal the background is black, so remap black text to white.
+    Uint8 r, g, b, a;
+    color.GetColor( r, g, b, a );
+    if( r < 40 && g < 40 && b < 40 )
+        m_currentColor.SetColor( 255, 255, 255, a );
+    else
+        m_currentColor = color;
 }
 
 bool CRenderASCII::DrawTile( const JFVector &vPos, JVector &vSize, JIVector &vTile,

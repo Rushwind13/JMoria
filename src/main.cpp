@@ -1,34 +1,13 @@
 #include "JMDefs.h"
-#include <time.h>
-#include <cstring>
-#include <chrono>
-#include <thread>
+#include "JTimer.h"
 #include "RenderMode.h"
-
-// Frame rate limiting configuration
-// #define DISPLAY_FRAMERATE  // Enable FPS counter display
-#define LIMIT_FRAMERATE       // Lock rendering to 30 FPS
-#define TARGET_FPS 30
-#define TARGET_FRAME_TIME (1000 / TARGET_FPS)  // milliseconds per frame
+#include <cstring>
+#include <cstdlib>
+#include <ctime>
 
 // The global game pointer
 CGame *g_pGame = NULL;
 eLogLevel g_eLogLevel = LOG_LEVEL_INFO;
-
-// Platform-independent timing (replaces SDL_GetTicks / SDL_Delay)
-static auto g_startTime = std::chrono::steady_clock::now();
-
-static unsigned int GetTicks()
-{
-    auto now = std::chrono::steady_clock::now();
-    return (unsigned int)std::chrono::duration_cast<std::chrono::milliseconds>( now - g_startTime )
-        .count();
-}
-
-static void Delay( unsigned int ms )
-{
-    std::this_thread::sleep_for( std::chrono::milliseconds( ms ) );
-}
 
 JIVector g_vDirDelta[] = { JIVector( 0, -1 ), JIVector( 0, 1 ), JIVector( -1, 0 ),
                            JIVector( 1, 0 ) };
@@ -85,7 +64,7 @@ int main( int argc, char **argv )
 
     unsigned int curTime = 0;
 #ifndef TURN_BASED
-    unsigned int lastTick = Util::GetTickCount();
+    unsigned int lastTick = JTimer::GetTicks();
 #endif // TURN_BASED
     unsigned int nextTime = 0;
 #ifdef LIMIT_FRAMERATE
@@ -101,7 +80,7 @@ int main( int argc, char **argv )
 #ifdef TURN_BASED
         {
 #ifdef LIMIT_FRAMERATE
-            frameStartTime = GetTicks();
+            frameStartTime = JTimer::GetTicks();
 #endif
             // handle the events in the queue
             g_pGame->HandleEvents( isActive, done );
@@ -118,19 +97,19 @@ int main( int argc, char **argv )
              * second - 30 FPS is more than sufficient for responsive input
              * handling while keeping CPU usage reasonable.
              */
-            frameElapsedTime = GetTicks() - frameStartTime;
+            frameElapsedTime = JTimer::GetTicks() - frameStartTime;
             if( frameElapsedTime < TARGET_FRAME_TIME )
             {
-                Delay( TARGET_FRAME_TIME - frameElapsedTime );
+                JTimer::Delay( TARGET_FRAME_TIME - frameElapsedTime );
             }
 #endif // LIMIT_FRAMERATE
         }
 #else
         {
 #ifdef LIMIT_FRAMERATE
-            frameStartTime = GetTicks();
+            frameStartTime = JTimer::GetTicks();
 #endif
-            curTime = Util::GetTickCount();
+            curTime = JTimer::GetTicks();
             if( curTime > nextTime )
             {
 // 			if( g_pGame->GetPlayer() != NULL )
@@ -163,10 +142,10 @@ int main( int argc, char **argv )
              * the deltaTime passed to Update(), which may impact game speed if
              * physics/movement calculations rely on consistent timing.
              */
-            frameElapsedTime = GetTicks() - frameStartTime;
+            frameElapsedTime = JTimer::GetTicks() - frameStartTime;
             if( frameElapsedTime < TARGET_FRAME_TIME )
             {
-                Delay( TARGET_FRAME_TIME - frameElapsedTime );
+                JTimer::Delay( TARGET_FRAME_TIME - frameElapsedTime );
             }
 #endif // LIMIT_FRAMERATE
         }

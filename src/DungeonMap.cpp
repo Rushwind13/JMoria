@@ -356,7 +356,7 @@ bool CDungeonMap::CreateOneStep()
         // Use num_halls instead of forcing all 4 directions
         int dirs[4];
         RandomDirections( dirs );
-        for( int index = 0; index <= num_halls; index++ )
+        for( int index = 0; index < num_halls; index++ )
         {
             int dir = dirs[index];
             if( pCurStep->m_dwDirection == Opposite( dir ) )

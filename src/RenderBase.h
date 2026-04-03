@@ -47,6 +47,13 @@ public:
 	// ASCII mode returns 1 because box-drawing chars occupy cells; OpenGL returns 0
 	// because the bounding box is a translucent quad behind the text.
 	virtual int GetTextInset() const { return 0; }
+
+	// Maximum text display area in pixel-space units (FONT_DRAW_W=6, FONT_DRAW_H=8).
+	// Used to clamp wrap/pagination when the pixel rect exceeds the actual screen.
+	// OpenGL: returns large values (no extra clamping needed).
+	// ASCII: returns termWidth*6 x termHeight*8.
+	virtual int GetMaxTextWidth() const { return 9999; }
+	virtual int GetMaxTextHeight() const { return 9999; }
 };
 
 #endif // __RENDERBASE_H__

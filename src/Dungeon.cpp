@@ -576,27 +576,21 @@ bool SightCollisionTest( JVector &vTest )
         return false;
 
     int type = curTile->m_dtd->m_dwType;
-    int modifiedType = curTile->m_dtd->m_dwModifiedType;
     
     // Explicitly block sight-blocking obstacles
     // Walls and rubble always block sight
     if( type == DUNG_IDX_WALL || type == DUNG_IDX_RUBBLE )
         return false;  // Blocked
     
-    // Check if this is a door by base type
+    // Closed/secret doors block sight - check CURRENT type, not modified type
     if( type == DUNG_IDX_DOOR || type == DUNG_IDX_SECRET_DOOR )
-    {
-        // Check the modified type to see if it's actually open
-        // modifiedType will be DUNG_IDX_OPEN_DOOR if door is open
-        if( modifiedType == DUNG_IDX_OPEN_DOOR )
-            return true;  // Open door allows sight through
-        else
-            return false; // Closed door blocks sight
-    }
+        return false;  // Closed door blocks sight
+    
+    // Open doors allow sight through
+    if( type == DUNG_IDX_OPEN_DOOR )
+        return true;  // Open door allows sight through
     
     // Everything else allows sight (floors, stairs, etc.)
-    // This is more permissive than using IsWalkableFor, which is intentional -
-    // you can see through/over things you can't walk through (like stairs)
     return true;  // Allow sight
 }
 
@@ -652,18 +646,15 @@ bool CDungeon::PlayerCanSee( JVector vCheck, uint32 dwFlags )
     if( g_pGame->GetPlayer()->IsWizard() )
         return true;
 
-    // Adjacent tiles (3x3 grid around player) are always visible
-    // This includes all 8 surrounding tiles plus the tile the player is on
     JVector playerPos = g_pGame->GetPlayer()->m_vPos;
-    int dx = abs( (int)vCheck.x - (int)playerPos.x );
-    int dy = abs( (int)vCheck.y - (int)playerPos.y );
-    if( dx <= 1 && dy <= 1 )
+    JIVector viCheck( VEC_EXPAND( vCheck ) );
+    JIVector viPlayer( VEC_EXPAND( playerPos ) );
+
+    // The player's own tile is always visible
+    if( vCheck == playerPos )
         return true;
 
-    // Check for sight distance first
-    JIVector viCheck( VEC_EXPAND( vCheck ) );
-    JIVector viPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
-
+    // All other tiles require line-of-sight checks
     dwFlags |= g_pGame->GetPlayer()->GetIntrinsic( EFFECT_FLAG_ESP | EFFECT_FLAG_INFRA );
 
     return CanSeeEachOther( viPlayer, viCheck, dwFlags );

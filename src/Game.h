@@ -31,7 +31,7 @@ public:
     CGame();
     ~CGame() { Quit( 0 ); }
 
-    JResult Init( const char *szBasedir, RenderMode mode = RenderMode::OpenGL );
+    JResult Init( const char *szBasedir, RenderMode mode );
 #ifdef TURN_BASED
     bool Update(); // someday figure out why this doesn't work...
 #else

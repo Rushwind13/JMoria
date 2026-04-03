@@ -45,7 +45,7 @@ int main( int argc, char **argv )
     srand( (unsigned)time( NULL ) );
 
     // Parse command-line arguments
-    RenderMode renderMode = RenderMode::OpenGL;
+    RenderMode renderMode = RenderMode::None;
     for( int i = 1; i < argc; i++ )
     {
         if( strcmp( argv[i], "--renderer=ascii" ) == 0 )
@@ -53,6 +53,23 @@ int main( int argc, char **argv )
         else if( strcmp( argv[i], "--renderer=opengl" ) == 0 )
             renderMode = RenderMode::OpenGL;
     }
+
+    // Apply defaults / validate based on compiled renderer support
+#if defined( RENDER_ASCII ) && defined( RENDER_OPENGL )
+    if( renderMode == RenderMode::None )
+    {
+        printf( "Usage: %s --renderer=ascii|opengl\n", argv[0] );
+        exit( 1 );
+    }
+#elif defined( RENDER_ASCII )
+    if( renderMode == RenderMode::OpenGL )
+        printf( "Warning: OpenGL renderer not compiled in, using ASCII.\n" );
+    renderMode = RenderMode::ASCII;
+#elif defined( RENDER_OPENGL )
+    if( renderMode == RenderMode::ASCII )
+        printf( "Warning: ASCII renderer not compiled in, using OpenGL.\n" );
+    renderMode = RenderMode::OpenGL;
+#endif
 
     JResult result;
     g_pGame = new CGame;

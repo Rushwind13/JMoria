@@ -54,7 +54,7 @@ CGame::CGame()
       m_pUseState( NULL ),
       m_eCurState( STATE_INVALID ),
       m_fGameTime( 0.0f ),
-      m_eRenderMode( RenderMode::OpenGL ),
+      m_eRenderMode( RenderMode::None ),
       m_bShowStats( true ),
       m_bShowInv( false ),
       m_bShowEquip( false )

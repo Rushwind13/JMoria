@@ -339,33 +339,35 @@ struct JMoriaConfig
 
 ### Phase 1: Infrastructure (Refactoring)
 
-**Task 1.1: Create Abstract Renderer Interface**
+**Task 1.1: Create Abstract Renderer Interface** ✅ DONE
 - Files: `RenderBase.h` (new)
 - Define IRenderBackend interface
 - Document all required methods
 
-**Task 1.2: Refactor CRender to Use Interface**
-- Files: `Render.h`, `Render.cpp`
+**Task 1.2: Refactor CRender to Use Interface** ✅ DONE
+- Files: `Render.h`, `Render.cpp`, `Game.h`, `Game.cpp`
 - Make CRender implement IRenderBackend
 - Keep OpenGL implementation unchanged
 - Update CGame to use IRenderBackend pointer
 
-**Task 1.3: Update DisplayText for Abstraction**
-- Files: `DisplayText.h`, `DisplayText.cpp`
-- Remove direct OpenGL dependencies
-- Use renderer interface methods
-- Make char width/height configurable
+**Task 1.3: Update DisplayText for Abstraction** ✅ DONE
+- Files: `DisplayText.cpp`
+- Replaced `#include "Render.h"` with `#include "RenderBase.h"`
+- DisplayText now only depends on IRenderBackend interface
+- DisplayText.h needed no changes (no direct renderer dependency)
 
-**Task 1.4: Update Dungeon Rendering**
-- Files: `Dungeon.h`, `Dungeon.cpp`
-- Use renderer interface for tile drawing
-- Make viewport calculations renderer-agnostic
+**Task 1.4: Update Dungeon Rendering** ✅ DONE
+- Files: `Dungeon.cpp`
+- Replaced `#include "Render.h"` with `#include "RenderBase.h"`
+- Dungeon now only depends on IRenderBackend interface
+- Dungeon.h needed no changes
 
-**Task 1.5: Update TileSet**
-- Files: `TileSet.h`, `Tileset.cpp`
-- Add ASCII character mapping
-- Support both texture and ASCII modes
-- Use existing MonIDs/ItemIDs arrays
+**Task 1.5: Update TileSet** ✅ DONE
+- Files: `Tileset.cpp`
+- Replaced `#include "Render.h"` with `#include "RenderBase.h"`
+- TileSet now only depends on IRenderBackend interface
+- TileSet.h needed no changes
+- SDL2 includes retained for texture loading (image I/O, not renderer-specific)
 
 ### Phase 2: ASCII Single-Window Renderer
 

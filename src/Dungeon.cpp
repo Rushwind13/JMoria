@@ -6,7 +6,7 @@
 
 // TODO: this is for the collision defines; should move those someplace more useful --Jimbo
 #include "CmdState.h"
-#include "Render.h"
+#include "RenderBase.h"
 #include "Player.h"
 #include "FileParse.h"
 #include "DisplayText.h"

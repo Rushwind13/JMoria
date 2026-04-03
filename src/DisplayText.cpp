@@ -9,7 +9,7 @@
 
 #include "JMDefs.h"
 #include "DisplayText.h"
-#include "Render.h"
+#include "RenderBase.h"
 #include "Item.h"
 #include "EndGameState.h"
 

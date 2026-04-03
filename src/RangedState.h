@@ -16,7 +16,7 @@
 #define PROJECTILE_RANGE 8
 #define PROJECTILE_UPDATE_INTERVAL 10.0f
 class CRangedState;
-typedef int ( CRangedState::*RangedKeyHandler )( SDL_Keysym *keysym );
+typedef int ( CRangedState::*RangedKeyHandler )( JKeysym *keysym );
 enum eRangedModifier
 {
     RANGED_INVALID = -1,
@@ -65,8 +65,8 @@ public:
             m_fStateTicks -= PROJECTILE_UPDATE_INTERVAL;
         }
     };
-    virtual int OnBaseHandleKey( SDL_Keysym *keysym );
-    virtual int OnHandleKey( SDL_Keysym *keysym );
+    virtual int OnBaseHandleKey( JKeysym *keysym );
+    virtual int OnHandleKey( JKeysym *keysym );
 
     char GetCommand() { return m_cCommand; };
     int GetModifier() { return (int)m_eCurModifier; };
@@ -74,12 +74,12 @@ public:
 
 protected:
 private:
-    int OnHandleFire( SDL_Keysym *keysym );
-    int OnHandleInit( SDL_Keysym *keysym );
-    int OnHandleLaunch( SDL_Keysym *keysym );
-    int OnHandleTarget( SDL_Keysym *keysym );
-    int OnHandleTrajectory( SDL_Keysym *keysym );
-    int OnHandleZap( SDL_Keysym *keysym );
+    int OnHandleFire( JKeysym *keysym );
+    int OnHandleInit( JKeysym *keysym );
+    int OnHandleLaunch( JKeysym *keysym );
+    int OnHandleTarget( JKeysym *keysym );
+    int OnHandleTrajectory( JKeysym *keysym );
+    int OnHandleZap( JKeysym *keysym );
 
     void ResetToState( int newstate );
     void GosubState( int newstate );

@@ -61,14 +61,14 @@ CIntroState::~CIntroState()
     }
 }
 
-int CIntroState::OnHandleKey( SDL_Keysym *keysym )
+int CIntroState::OnHandleKey( JKeysym *keysym )
 {
     int retval;
     retval = ( ( *this ).*( m_pCurKeyHandler ) )( keysym );
     return retval;
 }
 
-int CIntroState::OnHandleSplash( SDL_Keysym *keysym )
+int CIntroState::OnHandleSplash( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling SPLASH modifier\n" );
@@ -103,7 +103,7 @@ int CIntroState::OnHandleSplash( SDL_Keysym *keysym )
     return 0;
 }
 
-int CIntroState::OnHandleCharacterCreate( SDL_Keysym *keysym )
+int CIntroState::OnHandleCharacterCreate( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling CREATE modifier\n" );
@@ -133,7 +133,7 @@ int CIntroState::OnHandleCharacterCreate( SDL_Keysym *keysym )
     return 0;
 }
 
-int CIntroState::OnHandleInit( SDL_Keysym *keysym )
+int CIntroState::OnHandleInit( JKeysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing intro state...\n" );
 
@@ -144,9 +144,9 @@ int CIntroState::OnHandleInit( SDL_Keysym *keysym )
     return 0;
 }
 
-int CIntroState::OnBaseHandleKey( SDL_Keysym *keysym )
+int CIntroState::OnBaseHandleKey( JKeysym *keysym )
 {
-    if( keysym->sym == SDLK_RETURN || keysym->sym == SDLK_SPACE )
+    if( keysym->sym == JKEY_RETURN || keysym->sym == JKEY_SPACE )
     {
         return JCOMPLETESTATE;
     }

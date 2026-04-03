@@ -18,6 +18,7 @@ class CDisplayText;
 
 #include "JMDefs.h"
 #include "RenderBase.h"
+#include "SDL2/SDL.h"
 
 class CRender : public IRenderBackend
 {

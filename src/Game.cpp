@@ -24,6 +24,7 @@
 #include "Render.h"
 #include "RenderASCII.h"
 #include <curses.h>
+#include "SDL2/SDL.h"
 
 #include "AIMgr.h"
 
@@ -336,28 +337,25 @@ void CGame::SetState( int eNewState )
     case STATE_ENDGAME:
     {
         m_pCurState = reinterpret_cast<CStateBase *>( m_pEndGameState );
-        SDL_Keysym *keysym = new SDL_Keysym();
-        keysym->sym = SDLK_SPACE;
-        m_pCurState->HandleKey( keysym );
-        delete keysym;
+        JKeysym keysym;
+        keysym.sym = JKEY_SPACE;
+        m_pCurState->HandleKey( &keysym );
     }
     break;
     case STATE_INTRO:
     {
         m_pCurState = reinterpret_cast<CStateBase *>( m_pIntroState );
-        SDL_Keysym *keysym = new SDL_Keysym();
-        keysym->sym = SDLK_SPACE;
-        m_pCurState->HandleKey( keysym );
-        delete keysym;
+        JKeysym keysym;
+        keysym.sym = JKEY_SPACE;
+        m_pCurState->HandleKey( &keysym );
     }
     break;
     case STATE_CLOCKSTEP:
     {
         m_pCurState = reinterpret_cast<CStateBase *>( m_pClockStepState );
-        SDL_Keysym *keysym = new SDL_Keysym();
-        keysym->sym = SDLK_SPACE;
-        m_pCurState->HandleKey( keysym );
-        delete keysym;
+        JKeysym keysym;
+        keysym.sym = JKEY_SPACE;
+        m_pCurState->HandleKey( &keysym );
     }
     break;
     default:
@@ -520,10 +518,10 @@ bool CGame::Update( float fCurTime )
     {
         switch( reinterpret_cast<CRangedState *>( m_pCurState )->GetCommand() )
         {
-        case SDLK_f:
+        case JKEY_f:
             GetPlayer()->DisplayEquipment( PLACEMENT_USE );
             break;
-        case SDLK_z:
+        case JKEY_z:
             GetPlayer()->DisplayInventory( PLACEMENT_USE );
             break;
         default:
@@ -672,18 +670,23 @@ void CGame::HandleEvents( int &isActive, int &done )
             }
             break;
         case SDL_KEYDOWN:
-            // handle key presses
-            retval = m_pCurState->HandleKey( &event.key.keysym );
+        {
+            // Translate SDL keysym to JMoria keysym at the boundary
+            JKeysym jkey;
+            jkey.sym = (JKeycode)event.key.keysym.sym;
+            jkey.mod = (JKeymod)event.key.keysym.mod;
+            retval = m_pCurState->HandleKey( &jkey );
             if( retval == JBOGUSKEY )
             {
-                JLog( LOG_LEVEL_ERROR, true, "Bogus command: 0x%x\n", event.key.keysym.sym );
-                GetMsgs()->Printf( "Unrecognized command: 0x%x\n", event.key.keysym.sym );
+                JLog( LOG_LEVEL_ERROR, true, "Bogus command: 0x%x\n", jkey.sym );
+                GetMsgs()->Printf( "Unrecognized command: 0x%x\n", jkey.sym );
             }
             else if( retval == JQUITREQUEST )
             {
                 Quit( 0 );
             }
             break;
+        }
         case SDL_QUIT:
             // handle quit requests
             done = true;
@@ -725,32 +728,32 @@ void CGame::HandleEventsASCII( int &isActive, int &done )
     if( ch == KEY_RESIZE )
         return;
 
-    SDL_Keysym keysym;
+    JKeysym keysym;
     memset( &keysym, 0, sizeof( keysym ) );
 
     // Map ncurses keys to SDL keysyms
     // For ASCII printable characters, SDLK values match ASCII codes
     if( ch >= 'a' && ch <= 'z' )
     {
-        keysym.sym = (SDL_Keycode)ch;
-        keysym.mod = KMOD_NONE;
+        keysym.sym = (JKeycode)ch;
+        keysym.mod = JMOD_NONE;
     }
     else if( ch >= 'A' && ch <= 'Z' )
     {
         // Uppercase: map to lowercase sym + shift modifier
-        keysym.sym = (SDL_Keycode)( ch - 'A' + 'a' );
-        keysym.mod = KMOD_SHIFT;
+        keysym.sym = (JKeycode)( ch - 'A' + 'a' );
+        keysym.mod = JMOD_SHIFT;
     }
     else if( ch >= 1 && ch <= 26 )
     {
         // Ctrl+letter: ch 1 = Ctrl+A, ch 3 = Ctrl+C, etc.
-        keysym.sym = (SDL_Keycode)( 'a' + ch - 1 );
-        keysym.mod = KMOD_CTRL;
+        keysym.sym = (JKeycode)( 'a' + ch - 1 );
+        keysym.mod = JMOD_CTRL;
     }
     else if( ch >= '0' && ch <= '9' )
     {
-        keysym.sym = (SDL_Keycode)ch;
-        keysym.mod = KMOD_NONE;
+        keysym.sym = (JKeycode)ch;
+        keysym.mod = JMOD_NONE;
     }
     else
     {
@@ -760,40 +763,40 @@ void CGame::HandleEventsASCII( int &isActive, int &done )
         case '\n':
         case '\r':
         case KEY_ENTER:
-            keysym.sym = SDLK_RETURN;
+            keysym.sym = JKEY_RETURN;
             break;
         case 27: // Escape
-            keysym.sym = SDLK_ESCAPE;
+            keysym.sym = JKEY_ESCAPE;
             break;
         case ' ':
-            keysym.sym = SDLK_SPACE;
+            keysym.sym = JKEY_SPACE;
             break;
         case '.':
-            keysym.sym = SDLK_PERIOD;
+            keysym.sym = JKEY_PERIOD;
             break;
         case '>': // Shift+.
-            keysym.sym = SDLK_PERIOD;
-            keysym.mod = KMOD_SHIFT;
+            keysym.sym = JKEY_PERIOD;
+            keysym.mod = JMOD_SHIFT;
             break;
         case ',':
-            keysym.sym = SDLK_COMMA;
+            keysym.sym = JKEY_COMMA;
             break;
         case '<': // Shift+,
-            keysym.sym = SDLK_COMMA;
-            keysym.mod = KMOD_SHIFT;
+            keysym.sym = JKEY_COMMA;
+            keysym.mod = JMOD_SHIFT;
             break;
         case ';':
-            keysym.sym = SDLK_SEMICOLON;
+            keysym.sym = JKEY_SEMICOLON;
             break;
         case KEY_BACKSPACE:
         case 127: // DEL on some terminals
-            keysym.sym = SDLK_BACKSPACE;
+            keysym.sym = JKEY_BACKSPACE;
             break;
         case KEY_DC: // ncurses Delete key
-            keysym.sym = SDLK_DELETE;
+            keysym.sym = JKEY_DELETE;
             break;
         case KEY_F(1):
-            keysym.sym = SDLK_F1;
+            keysym.sym = JKEY_F1;
             break;
         default:
             // Unknown key, ignore
@@ -805,17 +808,17 @@ void CGame::HandleEventsASCII( int &isActive, int &done )
     // These are display-only and don't consume a game turn.
     if( m_eCurState == STATE_COMMAND )
     {
-        if( keysym.sym == SDLK_i && keysym.mod == KMOD_NONE )
+        if( keysym.sym == JKEY_i && keysym.mod == JMOD_NONE )
         {
             ToggleInv();
             return;
         }
-        if( keysym.sym == SDLK_e && keysym.mod == KMOD_NONE )
+        if( keysym.sym == JKEY_e && keysym.mod == JMOD_NONE )
         {
             ToggleEquip();
             return;
         }
-        if( keysym.sym == SDLK_c && ( keysym.mod & KMOD_SHIFT ) )
+        if( keysym.sym == JKEY_c && ( keysym.mod & JMOD_SHIFT ) )
         {
             ToggleStats();
             return;

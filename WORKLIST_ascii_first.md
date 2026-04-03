@@ -56,19 +56,29 @@ The draw pipeline should pass characters, not tile grid coordinates.
 
 SDL types (`SDL_Keysym`, `SDL_Keycode`, `SDLK_*`, `KMOD_*`, `Uint8`) are used throughout the game logic. For ASCII-only builds, these need alternatives.
 
-- [ ] **2.1** Create `JKeys.h` — define JMoria key types that mirror the SDL keysym interface
-  - `JKeysym` struct with `sym` and `mod` fields
-  - Key constants (`JKEY_a`..`JKEY_z`, `JKEY_RETURN`, `JKEY_ESCAPE`, etc.)
-  - Modifier flags (`JMOD_SHIFT`, `JMOD_CTRL`, etc.)
-  - When `RENDER_OPENGL` is defined, these can be typedefs/aliases to SDL equivalents
-  - When ASCII-only, they're standalone integer constants matching the same values
-- [ ] **2.2** Create `JTypes.h` — define `JUint8` / `JSint8` without SDL dependency
-  - Simple: `typedef uint8_t JUint8;` etc. (from `<cstdint>`)
-  - Or: when SDL is available, alias to `Uint8`
-- [ ] **2.3** Update `StateBase.h` to use `JKeysym` instead of `SDL_Keysym`
-- [ ] **2.4** Update all state classes (`CmdState`, `ModState`, `LookState`, etc.) to use JMoria key types
-- [ ] **2.5** Update `JColor.h` to use `JUint8` instead of `Uint8`
-- [ ] **2.6** Update `HandleEventsASCII()` in `Game.cpp` to produce `JKeysym` instead of `SDL_Keysym`
+- [x] **2.1** Create `JKeys.h` — define JMoria key types that mirror the SDL keysym interface
+  - `JKeysym` struct with `sym` and `mod` fields (with default constructor)
+  - `JKeycode` (`int32_t`) and `JKeymod` (`uint16_t`) typedefs
+  - Key constants (`JKEY_a`..`JKEY_z`, `JKEY_RETURN`, `JKEY_ESCAPE`, `JKEY_F1`, arrows, keypad, etc.)
+  - Modifier flags (`JMOD_SHIFT`, `JMOD_CTRL`, `JMOD_NONE`, etc.)
+  - Values match SDL2 exactly so OpenGL event translation is a trivial cast
+- [x] **2.2** Create `JTypes.h` — define `Uint8` / `Sint8` / `Uint16` without SDL dependency
+  - `typedef uint8_t Uint8; typedef int8_t Sint8; typedef uint16_t Uint16;` (from `<cstdint>`)
+- [x] **2.3** Update `StateBase.h` to use `JKeysym` instead of `SDL_Keysym`
+  - Includes `JKeys.h` instead of `SDL2/SDL.h`
+  - All `SDLK_*` → `JKEY_*`, `KMOD_*` → `JMOD_*`
+- [x] **2.4** Update all state classes (`CmdState`, `ModState`, `LookState`, etc.) to use JMoria key types
+  - Mass-replaced `SDL_Keysym` → `JKeysym`, `SDLK_*` → `JKEY_*`, `KMOD_*` → `JMOD_*` across 13 state .h/.cpp pairs
+  - Function pointer typedefs updated (`typedef int (CXxxState::*XxxKeyHandler)(JKeysym *keysym)`)
+  - `RangedState::GosubState()` — stack-allocated JKeysym instead of heap-allocated SDL_Keysym
+- [x] **2.5** Update `JColor.h` to use `Uint8` from `JTypes.h` instead of `SDL2/SDL.h`
+  - Removed SDL include, added `<cstdlib>` and `<cstring>` for `atoi`/`strtok`
+  - `JMDefs.h` updated to include `JTypes.h`
+- [x] **2.6** Update `HandleEventsASCII()` and `HandleEvents()` in `Game.cpp`
+  - ASCII path: produces `JKeysym` with `JKEY_*` / `JMOD_*` directly (was already constructing SDL_Keysym)
+  - OpenGL path: translates `SDL_Keysym` → `JKeysym` at the event boundary
+  - `SetState()` — stack-allocated JKeysym instead of heap-allocated SDL_Keysym (3 instances)
+  - `Render.h` — added direct `#include "SDL2/SDL.h"` (OpenGL renderer needs SDL)
 
 ### Phase 3: Decouple Tileset from SDL_image
 
@@ -116,9 +126,9 @@ SDL types (`SDL_Keysym`, `SDL_Keycode`, `SDLK_*`, `KMOD_*`, `Uint8`) are used th
 - [ ] **7.4** ASCII-only binary runs on a headless machine (no X11/Wayland/display)
 - [ ] **7.5** Existing tests still pass in all three build configurations
 
-## Open Questions
+## Open Questions (all answered; AI look here)
 
-- Should `RenderMode` enum still exist in ASCII-only builds? (Probably not — just compile it out)
-- Should the `--renderer=` CLI arg be a no-op when only one renderer is compiled? (Probably yes, with a warning)
-- Do we want a `JTimer` abstraction or is `#ifdef` in `main.cpp` sufficient?
-- Test step definitions use SDL types — do tests need to support ASCII-only builds?
+- Should `RenderMode` enum still exist in ASCII-only builds? (Probably not — just compile it out) correct, compile it out
+- Should the `--renderer=` CLI arg be a no-op when only one renderer is compiled? (Probably yes, with a warning) yes
+- Do we want a `JTimer` abstraction or is `#ifdef` in `main.cpp` sufficient? prefer JTimer unless it's trivial
+- Test step definitions use SDL types — do tests need to support ASCII-only builds? yes

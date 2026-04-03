@@ -5,6 +5,8 @@
 #endif // __WIN32__
 #include <stdio.h>
 
+#include "JTypes.h"
+
 typedef int JResult;
 typedef unsigned int uint32;
 typedef unsigned char uint8;

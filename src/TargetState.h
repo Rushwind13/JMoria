@@ -7,7 +7,7 @@
 
 class CTargetState;
 class CMonster;
-typedef int ( CTargetState::*TargetKeyHandler )( SDL_Keysym *keysym );
+typedef int ( CTargetState::*TargetKeyHandler )( JKeysym *keysym );
 enum eTargetModifier
 {
     TARGET_INVALID = -1,
@@ -33,8 +33,8 @@ public:
     ~CTargetState();
 
     virtual void OnUpdate( float fCurTime ) {}
-    virtual int OnBaseHandleKey( SDL_Keysym *keysym );
-    virtual int OnHandleKey( SDL_Keysym *keysym );
+    virtual int OnBaseHandleKey( JKeysym *keysym );
+    virtual int OnHandleKey( JKeysym *keysym );
 
 protected:
 private:
@@ -43,8 +43,8 @@ private:
 
     eTargetModifier m_eCurModifier;
 
-    int OnHandleTarget( SDL_Keysym *keysym );
-    int OnHandleInit( SDL_Keysym *keysym );
+    int OnHandleTarget( JKeysym *keysym );
+    int OnHandleInit( JKeysym *keysym );
 
     int DoInit();
 

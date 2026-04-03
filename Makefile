@@ -3,7 +3,7 @@
 CC = g++
 CC_FLAGS = -w
 TEST_CC_FLAGS_COMMON = -I../JMoria/src -std=c++17 -Wno-comment -Wno-delete-non-virtual-dtor -DGTEST_HAS_PTHREAD=1
-LD_FLAGS_LINUX = -L/lib/x86_64-linux-gnu -lGL -lSDL2 -lSDL2_image
+LD_FLAGS_LINUX = -L/lib/x86_64-linux-gnu -lGL -lSDL2 -lSDL2_image -lncurses
 TEST_LD_FLAGS_LINUX = -L/usr/local/lib -lcucumber-cpp -lboost_program_options -lboost_regex -lboost_filesystem -lgtest -lgtest_main
 
 OS := $(shell uname -s)
@@ -16,7 +16,7 @@ LOCAL_LIB_PATHS = -L/usr/local/lib -L /opt/homebrew/lib -L/opt/homebrew/opt/boos
 # macOS specific flags (Frameworks and libc++)
 TEST_CC_FLAGS = $(TEST_CC_FLAGS_COMMON) -framework OpenGL $(LOCAL_INCLUDE_PATHS)
 # NEW: Add LOCAL_LIB_PATHS to the main application linker flags
-LD_FLAGS = $(LOCAL_LIB_PATHS) -lSDL2 -lSDL2_image -framework OpenGL
+LD_FLAGS = $(LOCAL_LIB_PATHS) -lSDL2 -lSDL2_image -lncurses -framework OpenGL
 # Update TEST_LD_FLAGS to use LOCAL_LIB_PATHS for robustness
 TEST_LD_FLAGS = $(LOCAL_LIB_PATHS) -lcucumber-cpp -lboost_program_options -lboost_regex -lboost_filesystem /opt/homebrew/Cellar/googletest/1.17.0/lib/libgtest.a /opt/homebrew/Cellar/googletest/1.17.0/lib/libgtest_main.a
 else

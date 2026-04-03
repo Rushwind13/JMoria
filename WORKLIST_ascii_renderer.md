@@ -371,43 +371,42 @@ struct JMoriaConfig
 
 ### Phase 2: ASCII Single-Window Renderer
 
-**Task 2.1: Implement RenderASCII Base**
-- Files: `RenderASCII.h` (new), `RenderASCII.cpp` (new)
-- Initialize ncurses
-- Implement double buffering
-- Basic character output
+**Task 2.1: Implement RenderASCII Base** ✅ DONE
+- Files: `src/RenderASCII.h` (new), `src/RenderASCII.cpp` (new)
+- Initialize ncurses (raw mode, no echo, hidden cursor, non-blocking input)
+- Uses ncurses erase()/refresh() for double buffering
+- Implements full IRenderBackend interface
 
-**Task 2.2: Implement Color Support**
-- Add ncurses color pair management
-- Map JColor to terminal colors
-- Handle terminals without color support
+**Task 2.2: Implement Color Support** ✅ DONE
+- 8 ncurses color pairs (white, red, green, yellow, blue, magenta, cyan, dark)
+- Maps JColor RGBA to nearest terminal color via dominant channel detection
+- Graceful fallback when terminal has no color support
 
-**Task 2.3: Define ASCII Layouts**
-- Files: `ASCIILayout.h` (new), `ASCIILayout.cpp` (new)
-- Create 80x24 standard layout
-- Create 125x40 extended layout
-- Make layout customizable
+**Task 2.3: Define ASCII Layouts** ✅ DONE
+- ASCIILayout struct with regions defined inline in RenderASCII.h/cpp (no separate files needed)
+- 80x24 standard layout: messages(2 rows) | stats(12w) + dungeon(50w) + inv/equip(18w) 
+- 125x40 extended layout: messages(3 rows) | stats(20w) + dungeon(75w) + inv/equip(30w)
+- Layout auto-selected based on Init() size parameters
 
-**Task 2.4: Implement Dungeon Viewport**
-- World-to-screen coordinate conversion
-- Camera following player
-- Partial dungeon rendering
-- Handle viewport clipping
+**Task 2.4: Implement Dungeon Viewport** ✅ DONE
+- MapX/MapY convert world tile coords to terminal dungeon region chars
+- Camera following player via PreDrawObjects bounds (same as OpenGL path)
+- Translation support for dungeon centering
+- Bounds checking prevents drawing outside terminal
 
-**Task 2.5: Implement Text Region Rendering**
-- Map DisplayText regions to layout regions
-- Handle text scrolling in constrained space
-- Implement bounding box rendering (using box-drawing chars)
+**Task 2.5: Implement Text Region Rendering** ✅ DONE
+- MapX/MapY detect pixel-space context (DisplayText) vs world-space (Dungeon)
+- Pixel coords divided by FONT_DRAW_W/H (6/8) to get terminal char positions
+- Box-drawing characters (ACS_ULCORNER, ACS_HLINE, etc.) for bounding boxes
 
-**Task 2.6: Tile-to-ASCII Mapping**
-- Use existing MonIDs array for monsters
-- Use existing ItemIDs array for items
-- Define dungeon tile ASCII mappings:
-  - Wall: '#'
-  - Floor: '.'
-  - Door: '+'
-  - Open door: '\''
-  - Rubble: ':'
+**Task 2.6: Tile-to-ASCII Mapping** ✅ DONE
+- TileIndexToChar() reverses the font texture index back to ASCII: index + ' ' + 1
+- Existing MonIDs/ItemIDs/TileIDs arrays already produce correct tile indices
+- No separate mapping needed — the font lookup IS the ASCII char
+
+**Task 2.7: Build System Updates** ✅ DONE
+- Added `-lncurses` to both macOS and Linux linker flags in Makefile
+- RenderASCII.cpp auto-discovered by wildcard `$(wildcard src/*.cpp)`
   - Stairs up: '<'
   - Stairs down: '>'
   - Player: '@'

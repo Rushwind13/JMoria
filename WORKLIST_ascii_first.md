@@ -127,13 +127,19 @@ SDL types (`SDL_Keysym`, `SDL_Keycode`, `SDLK_*`, `KMOD_*`, `Uint8`) are used th
 
 ### Phase 6: Makefile Build Modes
 
-- [ ] **6.1** Add Makefile targets:
+- [x] **6.1** Add Makefile targets:
   - `make` / `make all` — builds with both renderers (default, current behavior)
   - `make ascii` — builds ASCII-only (no SDL, no OpenGL, no SDL_image; links only ncurses)
   - `make opengl` — builds OpenGL-only (no ncurses)
-- [ ] **6.2** Conditional source file lists (exclude `Render.cpp` or `RenderASCII.cpp`)
-- [ ] **6.3** Conditional linker flags (drop `-lSDL2 -lSDL2_image -framework OpenGL` for ASCII-only)
-- [ ] **6.4** Pass `-DRENDER_ASCII` / `-DRENDER_OPENGL` via `CC_FLAGS`
+- [x] **6.2** Source files all compile in every mode — `#ifdef` guards in Phase 5 make excluded renderers compile to empty translation units (no need for conditional source lists)
+- [x] **6.3** Conditional linker flags via `RENDER_MODE` variable (`ascii`/`opengl`/`both`)
+  - ASCII: links only `-lncurses`
+  - OpenGL: links `-lSDL2 -lSDL2_image -framework OpenGL` (macOS) / `-lGL` (Linux), no ncurses
+  - Both: links all libraries (default)
+- [x] **6.4** `RENDER_DEFINES` passes `-DRENDER_ASCII` / `-DRENDER_OPENGL` via compile rule
+- [x] Verified: `make` (default/both) builds clean
+- [x] Verified: `make ascii` builds clean, links only ncurses
+- [x] Verified: `make opengl` builds clean, links only SDL2+OpenGL
 
 ### Phase 7: Validation
 

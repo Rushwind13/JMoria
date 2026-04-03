@@ -21,10 +21,13 @@
 #include "UseState.h"
 
 #include "DisplayText.h"
+#ifdef RENDER_OPENGL
 #include "Render.h"
-#include "RenderASCII.h"
-#include <curses.h>
 #include "SDL2/SDL.h"
+#endif
+#ifdef RENDER_ASCII
+#include "RenderASCII.h"
+#endif
 
 #include "AIMgr.h"
 
@@ -83,6 +86,7 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     m_eRenderMode = mode;
 
     // Init the Render
+#if defined( RENDER_ASCII ) && defined( RENDER_OPENGL )
     if( m_eRenderMode == RenderMode::ASCII )
     {
         m_pRender = new CRenderASCII;
@@ -93,6 +97,13 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
         m_pRender = new CRender;
         result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
     }
+#elif defined( RENDER_ASCII )
+    m_pRender = new CRenderASCII;
+    result = m_pRender->Init( 80, 24, 0 );
+#elif defined( RENDER_OPENGL )
+    m_pRender = new CRender;
+    result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
+#endif
     if( result != JSUCCESS )
     {
         m_pRender->Term();
@@ -119,8 +130,10 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
 
     if( m_eRenderMode == RenderMode::ASCII )
     {
+#ifdef RENDER_ASCII
         UpdateASCIILayout();
         m_bShowInv = ( m_pRender->GetScreenWidth() >= ASCIILayout::INV_AUTO_WIDTH );
+#endif
     }
 
     m_pAIMgr = new CAIMgr;
@@ -545,6 +558,7 @@ bool CGame::Update( float fCurTime )
 
 // Convert ASCIILayout regions (char coords) to pixel-space JRects
 // that DisplayText expects (x*6, y*8).
+#ifdef RENDER_ASCII
 void CGame::UpdateASCIILayout()
 {
     CRenderASCII *pASCII = static_cast<CRenderASCII *>( m_pRender );
@@ -562,6 +576,7 @@ void CGame::UpdateASCIILayout()
     m_pEndGameDT->SetRect( toPixelRect( l.endgame ) );
     m_pEndGameDT->SetContentMargin( 0, 0 );
 }
+#endif // RENDER_ASCII
 
 void CGame::Draw()
 {
@@ -571,11 +586,13 @@ void CGame::Draw()
     bool bASCII = ( m_eRenderMode == RenderMode::ASCII );
 
     // After resize, update DisplayText rects and auto-show/hide inventory
+#ifdef RENDER_ASCII
     if( bASCII && bResized )
     {
         UpdateASCIILayout();
         m_bShowInv = ( GetRender()->GetScreenWidth() >= ASCIILayout::INV_AUTO_WIDTH );
     }
+#endif
 
     bool bOverlayState = ( m_eCurState == STATE_INTRO || m_eCurState == STATE_ENDGAME );
 
@@ -633,12 +650,15 @@ void CGame::Draw()
 
 void CGame::HandleEvents( int &isActive, int &done )
 {
+#ifdef RENDER_ASCII
     if( m_eRenderMode == RenderMode::ASCII )
     {
         HandleEventsASCII( isActive, done );
         return;
     }
+#endif
 
+#ifdef RENDER_OPENGL
     // used to collect events
     SDL_Event event;
     JResult retval;
@@ -716,8 +736,10 @@ void CGame::HandleEvents( int &isActive, int &done )
             break;
         }
     }
+#endif // RENDER_OPENGL
 }
 
+#ifdef RENDER_ASCII
 void CGame::HandleEventsASCII( int &isActive, int &done )
 {
     int ch = getch();
@@ -836,3 +858,4 @@ void CGame::HandleEventsASCII( int &isActive, int &done )
         Quit( 0 );
     }
 }
+#endif // RENDER_ASCII

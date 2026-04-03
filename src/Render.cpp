@@ -1,6 +1,8 @@
 // Render.cpp
 // implementation of the SDL/OpenGL Render
 // Jimbo S. Harris 5/12/2002
+#include "JMDefs.h"
+#ifdef RENDER_OPENGL
 
 // #define DISPLAY_FRAMERATE
 // #define _DEBUG
@@ -349,3 +351,4 @@ bool CRender::DrawChar( const JFVector &vPos, JVector &vSize, char ch )
 
     return DrawTile( vPos, vSize, vTile, m_vTileMetricsTexels );
 }
+#endif // RENDER_OPENGL

@@ -88,7 +88,11 @@ void CDisplayText::PreDraw()
     {
         bInverse = false;
     }
+#ifdef RENDER_TILESET_POSTLOAD_NEEDED
     g_pGame->GetRender()->PreDrawObjects( m_rcViewport, m_TileSet->Texture(), false, bInverse );
+#else
+    g_pGame->GetRender()->PreDrawObjects( m_rcViewport, 0, false, bInverse );
+#endif
 }
 
 void CDisplayText::PostDraw() { g_pGame->GetRender()->PostDrawObjects(); }

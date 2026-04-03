@@ -105,15 +105,25 @@ SDL types (`SDL_Keysym`, `SDL_Keycode`, `SDLK_*`, `KMOD_*`, `Uint8`) are used th
 
 ### Phase 5: Compile Flag Infrastructure
 
-- [ ] **5.1** Define `RENDER_ASCII` and `RENDER_OPENGL` flags
-  - `JMDefs.h` or a new `BuildConfig.h`
-  - Both defined = runtime selection (current behavior)
-  - Only one = that renderer only
-- [ ] **5.2** Guard `#include "Render.h"` / `#include "RenderASCII.h"` in `Game.cpp` with flags
-- [ ] **5.3** Guard renderer creation in `Game::Init()` with flags
-- [ ] **5.4** Guard `HandleEventsASCII()` and SDL event loop in `Game.cpp`
-- [ ] **5.5** Guard `#include <curses.h>` in `Game.cpp` with `RENDER_ASCII`
-- [ ] **5.6** Guard whole files: `Render.cpp` excluded when `!RENDER_OPENGL`, `RenderASCII.cpp` excluded when `!RENDER_ASCII`
+- [x] **5.1** Define `RENDER_ASCII` and `RENDER_OPENGL` flags in `JMDefs.h`
+  - If neither is defined externally, both are defined (default = runtime selection)
+  - `RENDER_TILESET_POSTLOAD_NEEDED` now gated on `RENDER_OPENGL`
+- [x] **5.2** Guard `#include "Render.h"` / `#include "RenderASCII.h"` in `Game.cpp` with flags
+  - `Render.h` + `SDL2/SDL.h` under `#ifdef RENDER_OPENGL`
+  - `RenderASCII.h` under `#ifdef RENDER_ASCII` (curses.h comes transitively)
+- [x] **5.3** Guard renderer creation in `Game::Init()` with flags
+  - `#if defined(RENDER_ASCII) && defined(RENDER_OPENGL)` for runtime selection
+  - Single-renderer `#elif` paths for each
+- [x] **5.4** Guard `HandleEventsASCII()` and SDL event loop in `Game.cpp`
+  - ASCII dispatch under `#ifdef RENDER_ASCII`, SDL event loop under `#ifdef RENDER_OPENGL`
+  - `HandleEventsASCII` definition and `UpdateASCIILayout` under `#ifdef RENDER_ASCII`
+  - `CRender` forward declaration in `Game.h` under `#ifdef RENDER_OPENGL`
+- [x] **5.5** Removed redundant `#include <curses.h>` from `Game.cpp` (already in `RenderASCII.h`)
+- [x] **5.6** Guard whole files: `Render.cpp` / `RenderASCII.cpp` wrapped in `#ifdef RENDER_OPENGL` / `#ifdef RENDER_ASCII`
+- [x] **5.7** Guard `m_TileSet->Texture()` calls in `DisplayText.cpp` and `Dungeon.cpp`
+  - Pass `0` when `RENDER_TILESET_POSTLOAD_NEEDED` is not defined
+- [x] Verified: `make CC_FLAGS="-DRENDER_ASCII"` compiles with zero errors
+- [x] Verified: default `make` (both renderers) compiles with zero errors
 
 ### Phase 6: Makefile Build Modes
 

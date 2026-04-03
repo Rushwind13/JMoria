@@ -2,6 +2,8 @@
 //
 // ncurses-based ASCII renderer for JMoria
 //
+#include "JMDefs.h"
+#ifdef RENDER_ASCII
 
 #include "RenderASCII.h"
 #include <cmath>
@@ -415,3 +417,4 @@ void CRenderASCII::DrawTextBoundingBox( JRect rect, JColor color )
     if( m_bHasColor )
         attroff( COLOR_PAIR( pair ) );
 }
+#endif // RENDER_ASCII

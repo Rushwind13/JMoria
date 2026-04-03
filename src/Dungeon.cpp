@@ -839,8 +839,13 @@ void CDungeon::PreDraw()
         m_Rect.Init( xorigin - xinitval, yorigin + yinitval, xorigin + xinitval,
                      yorigin - yinitval );
     }
+#ifdef RENDER_TILESET_POSTLOAD_NEEDED
     g_pGame->GetRender()->PreDrawObjects( m_Rect, m_TileSet->Texture(), true, false,
                                           &m_vfTranslate );
+#else
+    g_pGame->GetRender()->PreDrawObjects( m_Rect, 0, true, false,
+                                          &m_vfTranslate );
+#endif
 
     // Do any external setup that needs doing.
     m_TileSet->PreDrawTile();

@@ -42,6 +42,11 @@ public:
 	// Configuration
 	virtual int GetScreenWidth() const = 0;
 	virtual int GetScreenHeight() const = 0;
+
+	// Text inset: number of character cells to inset text from bounding box edges.
+	// ASCII mode returns 1 because box-drawing chars occupy cells; OpenGL returns 0
+	// because the bounding box is a translucent quad behind the text.
+	virtual int GetTextInset() const { return 0; }
 };
 
 #endif // __RENDERBASE_H__

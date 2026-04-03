@@ -82,7 +82,13 @@ void CDisplayText::Draw()
     Paginate();
     PreDraw();
     DrawBoundingBox();
-    DrawStr( m_Rect.Left(), m_Rect.Top(), true, m_Rect.Bottom(), m_szDrawPtr );
+
+    // In ASCII mode, text must be inset so it doesn't collide with box-drawing chars
+    int inset = g_pGame->GetRender()->GetTextInset();
+    int insetX = inset * FONT_DRAW_W;
+    int insetY = inset * FONT_DRAW_H;
+    DrawStr( m_Rect.Left() + insetX, m_Rect.Top() + insetY,
+             true, m_Rect.Bottom() - insetY, m_szDrawPtr );
     PostDraw();
 }
 
@@ -156,7 +162,12 @@ void CDisplayText::Paginate()
     int dwAddLinesMax;
     char *ptr;
 
-    dwAddLinesMax = m_dwUsedLines + m_dwFreeLines;
+    // Account for text inset reducing available lines
+    int inset = g_pGame->GetRender()->GetTextInset();
+    int usedLines = m_dwUsedLines - ( 2 * inset );
+    if( usedLines < 1 ) usedLines = 1;
+
+    dwAddLinesMax = usedLines + m_dwFreeLines;
 
     ptr = strchr( m_szText, nul );
     while( ptr > m_szText )
@@ -174,9 +185,9 @@ void CDisplayText::Paginate()
         ptr--;
     }
 
-    if( ptr == m_szText && dwAddLines > m_dwUsedLines )
+    if( ptr == m_szText && dwAddLines > usedLines )
     {
-        m_dwFreeLines = dwAddLines - m_dwUsedLines + 1;
+        m_dwFreeLines = dwAddLines - usedLines + 1;
     }
 
     m_szDrawPtr = ptr;
@@ -203,7 +214,13 @@ void CDisplayText::DrawFormattedStr( const char *szString )
     char szBuffer2[TEXT_MAXCHARS];
     char *ptr;
     char *ptr2;
-    JIVector vPos( m_Rect.Left(), m_Rect.Top() );
+
+    // Account for text inset so wrapping uses the interior width
+    int inset = g_pGame->GetRender()->GetTextInset();
+    int insetX = inset * FONT_DRAW_W;
+    int wrapLeft = m_Rect.Left() + insetX;
+    int wrapRight = m_Rect.Right() - insetX;
+    JIVector vPos( wrapLeft, m_Rect.Top() );
 
     Util::jstrcpy( szBuffer, szString );
     ptr = szBuffer;
@@ -216,10 +233,10 @@ void CDisplayText::DrawFormattedStr( const char *szString )
         }
         else if( *ptr == '\n' )
         {
-            vPos.x = m_Rect.Left();
+            vPos.x = wrapLeft;
         }
 
-        if( vPos.x > m_Rect.Right() )
+        if( vPos.x > wrapRight )
         {
             ptr++;
 
@@ -247,7 +264,7 @@ void CDisplayText::DrawFormattedStr( const char *szString )
             }
 
             Util::jstrcat( ptr, ptr2 );
-            vPos.x = m_Rect.Left();
+            vPos.x = wrapLeft;
         }
         else
         {

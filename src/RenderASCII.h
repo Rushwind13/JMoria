@@ -66,6 +66,7 @@ public:
 
     int GetScreenWidth() const override { return m_layout.termWidth; }
     int GetScreenHeight() const override { return m_layout.termHeight; }
+    int GetTextInset() const override { return 1; }
 
 private:
     bool m_bInitted;

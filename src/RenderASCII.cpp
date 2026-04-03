@@ -4,6 +4,7 @@
 //
 
 #include "RenderASCII.h"
+#include <cmath>
 #include <cstring>
 
 // ---- ASCIILayout factory ----
@@ -189,7 +190,6 @@ char CRenderASCII::TileIndexToChar( int tileIndex )
 
 void CRenderASCII::PreDraw()
 {
-    CheckResize();
     erase(); // clear the virtual screen
 }
 
@@ -252,12 +252,12 @@ int CRenderASCII::MapX( float worldX )
     }
     else
     {
-        // World space (Dungeon): 1:1 tile-to-char mapping centered in viewport
-        float boundsLeft = (float)m_currentBounds.left;
-        float boundsRight = (float)m_currentBounds.right;
-        float boundsCenter = ( boundsLeft + boundsRight ) / 2.0f;
+        // World space (Dungeon): 1:1 tile-to-char mapping.
+        // Tile positions are integers; use integer math to avoid rounding errors.
+        int tileX = (int)roundf( x );
+        int centerX = ( m_currentBounds.left + m_currentBounds.right ) / 2;
         int viewCenter = m_layout.dungeon.left + m_layout.dungeon.Width() / 2;
-        return viewCenter + (int)( x - boundsCenter + 0.5f );
+        return viewCenter + ( tileX - centerX );
     }
 }
 
@@ -276,16 +276,12 @@ int CRenderASCII::MapY( float worldY )
     }
     else
     {
-        // World space (Dungeon): 1:1 tile-to-char mapping centered in viewport.
-        // JRect: Init(xo-zoom, yo+zoom, xo+zoom, yo-zoom)
-        //   top=yo+zoom, bottom=yo-zoom → center = (top+bottom)/2 = yo
-        // OpenGL: glOrtho(VIEWRECT_EXPAND) feeds top as "bottom" param,
-        //   so higher world Y → bottom of screen → higher terminal row.
-        float boundsTop = (float)m_currentBounds.top;
-        float boundsBottom = (float)m_currentBounds.bottom;
-        float boundsCenter = ( boundsTop + boundsBottom ) / 2.0f;
+        // World space (Dungeon): 1:1 tile-to-char mapping.
+        // Higher world Y → higher terminal row (matching OpenGL convention).
+        int tileY = (int)roundf( y );
+        int centerY = ( m_currentBounds.top + m_currentBounds.bottom ) / 2;
         int viewCenter = m_layout.dungeon.top + m_layout.dungeon.Height() / 2;
-        return viewCenter + (int)( y - boundsCenter + 0.5f );
+        return viewCenter + ( tileY - centerY );
     }
 }
 

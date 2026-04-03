@@ -116,6 +116,12 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     m_pEndGameDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, 480 ), 255 );
     m_pEndGameDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
 
+    if( m_eRenderMode == RenderMode::ASCII )
+    {
+        UpdateASCIILayout();
+        m_bShowInv = ( m_pRender->GetScreenWidth() >= ASCIILayout::INV_AUTO_WIDTH );
+    }
+
     m_pAIMgr = new CAIMgr;
     m_pAIMgr->Init();
 
@@ -539,15 +545,39 @@ bool CGame::Update( float fCurTime )
     return true;
 }
 
+// Convert ASCIILayout regions (char coords) to pixel-space JRects
+// that DisplayText expects (x*6, y*8).
+void CGame::UpdateASCIILayout()
+{
+    CRenderASCII *pASCII = static_cast<CRenderASCII *>( m_pRender );
+    const ASCIILayout &l = pASCII->GetLayout();
+
+    auto toPixelRect = []( const ASCIILayoutRegion &r ) {
+        return JRect( r.left * 6, r.top * 8, r.right * 6, r.bottom * 8 );
+    };
+
+    m_pMsgsDT->SetRect( toPixelRect( l.messages ) );
+    m_pStatsDT->SetRect( toPixelRect( l.stats ) );
+    m_pInvDT->SetRect( toPixelRect( l.inventory ) );
+    m_pEquipDT->SetRect( toPixelRect( l.equipment ) );
+    m_pUseDT->SetRect( toPixelRect( l.use ) );
+    m_pEndGameDT->SetRect( toPixelRect( l.endgame ) );
+    m_pEndGameDT->SetContentMargin( 0, 0 );
+}
+
 void CGame::Draw()
 {
+    bool bResized = GetRender()->CheckResize();
     GetRender()->PreDraw();
 
     bool bASCII = ( m_eRenderMode == RenderMode::ASCII );
 
-    // After resize, auto-show inventory if terminal is wide enough
-    if( bASCII && GetRender()->GetScreenWidth() >= 100 )
-        m_bShowInv = true;
+    // After resize, update DisplayText rects and auto-show/hide inventory
+    if( bASCII && bResized )
+    {
+        UpdateASCIILayout();
+        m_bShowInv = ( GetRender()->GetScreenWidth() >= ASCIILayout::INV_AUTO_WIDTH );
+    }
 
     bool bOverlayState = ( m_eCurState == STATE_INTRO || m_eCurState == STATE_ENDGAME );
 
@@ -741,8 +771,16 @@ void CGame::HandleEventsASCII( int &isActive, int &done )
         case '.':
             keysym.sym = SDLK_PERIOD;
             break;
+        case '>': // Shift+.
+            keysym.sym = SDLK_PERIOD;
+            keysym.mod = KMOD_SHIFT;
+            break;
         case ',':
             keysym.sym = SDLK_COMMA;
+            break;
+        case '<': // Shift+,
+            keysym.sym = SDLK_COMMA;
+            keysym.mod = KMOD_SHIFT;
             break;
         case ';':
             keysym.sym = SDLK_SEMICOLON;
@@ -761,7 +799,6 @@ void CGame::HandleEventsASCII( int &isActive, int &done )
             // Unknown key, ignore
             return;
         }
-        keysym.mod = KMOD_NONE;
     }
 
     // ASCII fly-out panel toggles: i=inventory, e=equipment, C=character stats

@@ -110,6 +110,7 @@ private:
     bool m_bShowEquip;
 
     void HandleEventsASCII( int &isActive, int &done );
+    void UpdateASCIILayout();
 
     int m_dwNextTime;
     float m_fGameTime;

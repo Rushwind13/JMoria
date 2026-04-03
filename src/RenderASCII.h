@@ -77,7 +77,9 @@ public:
     int GetMaxTextHeight() const override { return m_layout.termHeight * 8; }
 
     // Check if terminal was resized and recalculate layout
-    bool CheckResize();
+    bool CheckResize() override;
+
+    const ASCIILayout &GetLayout() const { return m_layout; }
 
 private:
     bool m_bInitted;

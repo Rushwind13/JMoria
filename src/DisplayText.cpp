@@ -30,6 +30,8 @@ CDisplayText::CDisplayText( const char *szBasedir, JRect in, uint8 inAlpha )
       m_szDrawPtr( NULL ),
       m_vPos( m_Rect.Left(), m_Rect.Top() ),
       m_dwFlags( FLAG_TEXT_NONE ),
+      m_dwMarginLeft( 0 ),
+      m_dwMarginTop( 0 ),
       m_rcViewport( 0, 480, 640, 0 )
 {
     m_szText = new char[TEXT_MAXCHARS];
@@ -57,6 +59,21 @@ CDisplayText::~CDisplayText()
 }
 
 bool CDisplayText::Update( float fCurTime ) { return true; }
+
+void CDisplayText::SetRect( JRect in )
+{
+    m_Rect = in;
+    m_dwWidth = in.Width();
+    m_dwHeight = in.Height();
+    m_dwUsedLines = m_dwHeight / FONT_DRAW_H;
+    m_vPos.Init( m_Rect.Left(), m_Rect.Top() );
+}
+
+void CDisplayText::SetContentMargin( int left, int top )
+{
+    m_dwMarginLeft = left;
+    m_dwMarginTop = top;
+}
 
 // Setup functions
 void CDisplayText::PreDraw()
@@ -93,7 +110,8 @@ void CDisplayText::Draw()
     int drawBottom = m_Rect.Bottom() - insetY;
     if( drawBottom > maxH - insetY )
         drawBottom = maxH - insetY;
-    DrawStr( m_Rect.Left() + insetX, m_Rect.Top() + insetY,
+    DrawStr( m_Rect.Left() + insetX + m_dwMarginLeft,
+             m_Rect.Top() + insetY + m_dwMarginTop,
              true, drawBottom, m_szDrawPtr );
     PostDraw();
 }

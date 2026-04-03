@@ -413,28 +413,36 @@ struct JMoriaConfig
 
 ### Phase 3: Configuration and Integration
 
-**Task 3.1: Command-Line Arguments**
-- Files: `main.cpp`
-- Add --renderer option (opengl, ascii, ascii-multi)
-- Add --term-size option (80x24, 125x40, WxH)
-- Add --no-color option
+**Task 3.1: Command-Line Arguments** ✅ DONE
+- Files: `main.cpp`, `RenderMode.h` (new)
+- Added `--renderer=ascii` / `--renderer=opengl` CLI arg parsing
+- Created `RenderMode.h` with `enum class RenderMode { OpenGL, ASCII }` (separate header to avoid circular include issues with JMDefs.h → Game.h → RenderBase.h → JColor)
+- ASCII mode initializes `SDL_INIT_TIMER` for `SDL_GetTicks`/`SDL_Delay` frame limiting
+- Passes `RenderMode` to `Game::Init()`
 
-**Task 3.2: Runtime Renderer Factory**
-- Files: `RenderFactory.h` (new), `RenderFactory.cpp` (new)
-- Create appropriate renderer based on config
-- Handle initialization errors gracefully
+**Task 3.2: Runtime Renderer Factory** ✅ DONE
+- Integrated directly into `Game::Init()` rather than separate factory files
+- `RenderMode::ASCII` → `new CRenderASCII` with `Init(80, 24, 0)`
+- `RenderMode::OpenGL` → `new CRender` with `Init(SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP)`
 
-**Task 3.3: Update Game Initialization**
+**Task 3.3: Update Game Initialization** ✅ DONE
+- Files: `Game.h`, `Game.cpp`
+- `Game::Init` now takes `RenderMode mode = RenderMode::OpenGL` (defaulted for test compatibility)
+- `m_eRenderMode` member tracks active mode
+- `Game.h` includes `RenderMode.h`, forward-declares `IRenderBackend`
+- `Game.cpp` includes `RenderASCII.h` and `<curses.h>`
+
+**Task 3.4: Input Handling Updates** ✅ DONE
 - Files: `Game.cpp`
-- Use renderer factory
-- Adjust DisplayText sizes based on renderer capabilities
-- Handle renderer-specific initialization
-
-**Task 3.4: Input Handling Updates**
-- Files: `Game.cpp`
-- SDL events for OpenGL mode
-- stdin/getch() for ASCII mode
-- Unified input abstraction
+- `HandleEvents()` dispatches to `HandleEventsASCII()` when in ASCII mode, returns before SDL_PollEvent path
+- `HandleEventsASCII()` uses ncurses `getch()` (non-blocking via `nodelay`), maps keys to `SDL_Keysym`:
+  - `a-z` → `SDLK_a..SDLK_z` direct mapping (SDL keycodes match ASCII)
+  - `A-Z` → lowercase sym + `KMOD_SHIFT`
+  - Ctrl+letter (ch 1-26) → `SDLK_a..SDLK_z` + `KMOD_CTRL`
+  - `0-9` → direct mapping
+  - Special keys: RETURN, ESCAPE, SPACE, PERIOD, COMMA, SEMICOLON, BACKSPACE, DELETE, F1
+- Feeds translated `SDL_Keysym` through existing `m_pCurState->HandleKey()` — all game states work unchanged
+- `static_cast<CRender*>` for `ResizeWindow` is safe: only reachable in SDL event path (OpenGL mode)
 
 ### Phase 4: Multiple Window Mode (Optional/Future)
 

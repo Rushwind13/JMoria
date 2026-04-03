@@ -22,6 +22,8 @@
 
 #include "DisplayText.h"
 #include "Render.h"
+#include "RenderASCII.h"
+#include <curses.h>
 
 #include "AIMgr.h"
 
@@ -47,7 +49,8 @@ CGame::CGame()
       m_pTargetState( NULL ),
       m_pUseState( NULL ),
       m_eCurState( STATE_INVALID ),
-      m_fGameTime( 0.0f )
+      m_fGameTime( 0.0f ),
+      m_eRenderMode( RenderMode::OpenGL )
 {
     m_pClockStepState = new CClockStepState;
     m_pCmdState = new CCmdState;
@@ -66,16 +69,26 @@ CGame::CGame()
 #endif // TURN_BASED
 };
 
-JResult CGame::Init( const char *szBasedir )
+JResult CGame::Init( const char *szBasedir, RenderMode mode )
 {
     JResult result;
     // Initialize all the game stuff, baby.
 
     g_Constants.Init();
 
+    m_eRenderMode = mode;
+
     // Init the Render
-    m_pRender = new CRender;
-    result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
+    if( m_eRenderMode == RenderMode::ASCII )
+    {
+        m_pRender = new CRenderASCII;
+        result = m_pRender->Init( 80, 24, 0 );
+    }
+    else
+    {
+        m_pRender = new CRender;
+        result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
+    }
     if( result != JSUCCESS )
     {
         m_pRender->Term();
@@ -564,6 +577,12 @@ void CGame::Draw()
 
 void CGame::HandleEvents( int &isActive, int &done )
 {
+    if( m_eRenderMode == RenderMode::ASCII )
+    {
+        HandleEventsASCII( isActive, done );
+        return;
+    }
+
     // used to collect events
     SDL_Event event;
     JResult retval;
@@ -635,5 +654,92 @@ void CGame::HandleEvents( int &isActive, int &done )
             JLog( LOG_LEVEL_NOISE, true, "unhandled event type: %d\n", event.type );
             break;
         }
+    }
+}
+
+void CGame::HandleEventsASCII( int &isActive, int &done )
+{
+    int ch = getch();
+    if( ch == ERR )
+        return; // no input available
+
+    SDL_Keysym keysym;
+    memset( &keysym, 0, sizeof( keysym ) );
+
+    // Map ncurses keys to SDL keysyms
+    // For ASCII printable characters, SDLK values match ASCII codes
+    if( ch >= 'a' && ch <= 'z' )
+    {
+        keysym.sym = (SDL_Keycode)ch;
+        keysym.mod = KMOD_NONE;
+    }
+    else if( ch >= 'A' && ch <= 'Z' )
+    {
+        // Uppercase: map to lowercase sym + shift modifier
+        keysym.sym = (SDL_Keycode)( ch - 'A' + 'a' );
+        keysym.mod = KMOD_SHIFT;
+    }
+    else if( ch >= 1 && ch <= 26 )
+    {
+        // Ctrl+letter: ch 1 = Ctrl+A, ch 3 = Ctrl+C, etc.
+        keysym.sym = (SDL_Keycode)( 'a' + ch - 1 );
+        keysym.mod = KMOD_CTRL;
+    }
+    else if( ch >= '0' && ch <= '9' )
+    {
+        keysym.sym = (SDL_Keycode)ch;
+        keysym.mod = KMOD_NONE;
+    }
+    else
+    {
+        // Map special keys
+        switch( ch )
+        {
+        case '\n':
+        case '\r':
+        case KEY_ENTER:
+            keysym.sym = SDLK_RETURN;
+            break;
+        case 27: // Escape
+            keysym.sym = SDLK_ESCAPE;
+            break;
+        case ' ':
+            keysym.sym = SDLK_SPACE;
+            break;
+        case '.':
+            keysym.sym = SDLK_PERIOD;
+            break;
+        case ',':
+            keysym.sym = SDLK_COMMA;
+            break;
+        case ';':
+            keysym.sym = SDLK_SEMICOLON;
+            break;
+        case KEY_BACKSPACE:
+        case 127: // DEL on some terminals
+            keysym.sym = SDLK_BACKSPACE;
+            break;
+        case KEY_DC: // ncurses Delete key
+            keysym.sym = SDLK_DELETE;
+            break;
+        case KEY_F(1):
+            keysym.sym = SDLK_F1;
+            break;
+        default:
+            // Unknown key, ignore
+            return;
+        }
+        keysym.mod = KMOD_NONE;
+    }
+
+    JResult retval = m_pCurState->HandleKey( &keysym );
+    if( retval == JBOGUSKEY )
+    {
+        JLog( LOG_LEVEL_ERROR, true, "Bogus command: 0x%x\n", keysym.sym );
+        GetMsgs()->Printf( "Unrecognized command: 0x%x\n", keysym.sym );
+    }
+    else if( retval == JQUITREQUEST )
+    {
+        Quit( 0 );
     }
 }

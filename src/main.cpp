@@ -1,6 +1,8 @@
 #include "JMDefs.h"
 #include <time.h>
+#include <cstring>
 #include "SDL2/SDL.h"
+#include "RenderMode.h"
 
 // Frame rate limiting configuration
 // #define DISPLAY_FRAMERATE  // Enable FPS counter display
@@ -26,10 +28,31 @@ int main( int argc, char **argv )
 
     srand( (unsigned)time( NULL ) );
 
+    // Parse command-line arguments
+    RenderMode renderMode = RenderMode::OpenGL;
+    for( int i = 1; i < argc; i++ )
+    {
+        if( strcmp( argv[i], "--renderer=ascii" ) == 0 )
+            renderMode = RenderMode::ASCII;
+        else if( strcmp( argv[i], "--renderer=opengl" ) == 0 )
+            renderMode = RenderMode::OpenGL;
+    }
+
+    // ASCII mode: need SDL timer subsystem for SDL_GetTicks / SDL_Delay
+    // OpenGL mode: CRender::InitSDL handles full SDL initialization
+    if( renderMode == RenderMode::ASCII )
+    {
+        if( SDL_Init( SDL_INIT_TIMER ) < 0 )
+        {
+            fprintf( stderr, "SDL timer init failed: %s\n", SDL_GetError() );
+            exit( 1 );
+        }
+    }
+
     JResult result;
     g_pGame = new CGame;
 
-    result = g_pGame->Init( "../JMoria/" );
+    result = g_pGame->Init( "../JMoria/", renderMode );
     if( result != JSUCCESS )
     {
         JLog( LOG_LEVEL_ERROR, true, "Error in game initialization. Terminating.\n" );

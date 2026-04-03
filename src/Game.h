@@ -1,6 +1,7 @@
 #ifndef __GAME_H__
 #define __GAME_H__
 #include "JMDefs.h"
+#include "RenderMode.h"
 
 class CRender;
 class IRenderBackend;
@@ -28,7 +29,7 @@ public:
     CGame();
     ~CGame() { Quit( 0 ); }
 
-    JResult Init( const char *szBasedir );
+    JResult Init( const char *szBasedir, RenderMode mode = RenderMode::OpenGL );
 #ifdef TURN_BASED
     bool Update(); // someday figure out why this doesn't work...
 #else
@@ -93,6 +94,9 @@ protected:
 
 private:
     IRenderBackend *m_pRender;
+    RenderMode m_eRenderMode;
+
+    void HandleEventsASCII( int &isActive, int &done );
 
     int m_dwNextTime;
     float m_fGameTime;

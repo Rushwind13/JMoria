@@ -12,13 +12,16 @@
 #include "StateBase.h"
 
 class CStringInputState;
-typedef int (CStringInputState::*StringInputKeyHandler)(SDL_Keysym *keysym);
+typedef int ( CStringInputState::*StringInputKeyHandler )( SDL_Keysym *keysym );
 enum eStringInputModifier
 {
-    SI_INVALID=-1,
-    SI_INIT=0,
-    SI_NAME=1,
+    SI_INVALID = -1,
+    SI_INIT = 0,
+    SI_NAME = 1,
     SI_HAGGLE,
+    SI_FLAG,
+    SI_ITEM,
+    SI_MONSTER,
     SI_MAX
 };
 class CStringInputState : public CStateBase
@@ -27,32 +30,45 @@ class CStringInputState : public CStateBase
 public:
 protected:
     char m_cCommand;
-    StringInputKeyHandler    m_pKeyHandlers[SI_MAX];
-    StringInputKeyHandler    m_pCurKeyHandler;
-    
-    eStringInputModifier    m_eCurModifier;
+    StringInputKeyHandler m_pKeyHandlers[SI_MAX];
+    StringInputKeyHandler m_pCurKeyHandler;
+
+    eStringInputModifier m_eCurModifier;
     char m_szInput[MAX_STRING_LENGTH];
+
 private:
-    
     // Member Functions
 public:
     CStringInputState();
-    ~CStringInputState() {};
-    
-    virtual void OnUpdate() {};
+    ~CStringInputState() {}
+
+    virtual void OnUpdate( float fCurTime ) {}
     virtual int OnBaseHandleKey( SDL_Keysym *keysym );
     virtual int OnHandleKey( SDL_Keysym *keysym );
+
 protected:
 private:
     int OnHandleName( SDL_Keysym *keysym );
+    int OnHandleFlag( SDL_Keysym *keysym );
+    int OnHandleItem( SDL_Keysym *keysym );
+    int OnHandleMonster( SDL_Keysym *keysym );
     int OnHandleHaggle( SDL_Keysym *keysym );
     int OnHandleInit( SDL_Keysym *keysym );
 
     bool TestName();
     bool DoName();
-    
+
     bool TestHaggle();
     bool DoHaggle();
+
+    bool TestFlag();
+    bool DoFlag();
+
+    bool TestItem();
+    bool DoItem();
+
+    bool TestMonster();
+    bool DoMonster();
 
     void ResetToState( int newstate );
 };

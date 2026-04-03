@@ -2,13 +2,8 @@
 #define __JMDEFS_H__
 #ifdef __WIN32__
 #include "windows.h"
-#endif //__WIN32__
+#endif // __WIN32__
 #include <stdio.h>
-#include "Util.h"
-
-#include "JRect.h"
-#include "JVector.h"
-#include "JColor.h"
 
 typedef int JResult;
 typedef unsigned int uint32;
@@ -16,47 +11,63 @@ typedef unsigned char uint8;
 
 #define nul '\0'
 
-#define JSUCCESS		0
-#define JQUITREQUEST	1
-#define JRESETSTATE		2
-#define JCOMPLETESTATE  3
-#define JBOGUSKEY		-1
+#define JSUCCESS 0
+#define JQUITREQUEST 1
+#define JRESETSTATE 2
+#define JCOMPLETESTATE 3
+#define JBOGUSKEY -1
 
-#define INVALID_LENGTH	-1
+#define INVALID_LENGTH -1
 #define MAX_STRING_LENGTH 32
 
-#define JERROR() printf("An error occurred: %s %d\n", __FILE__, __LINE__ );
+enum eLogLevel
+{
+    LOG_LEVEL_INVALID = -1,
+    LOG_LEVEL_NOISE = 0,
+    LOG_LEVEL_DEBUG = 1,
+    LOG_LEVEL_INFO,
+    LOG_LEVEL_WARN,
+    LOG_LEVEL_ERROR,
+    LOG_LEVEL_MAX
+};
+extern eLogLevel g_eLogLevel;
+
+#include "JLog.h"
+
+#include "JRect.h"
+#include "JVector.h"
+
+#define JERROR() JLog( LOG_LEVEL_ERROR, true, "An error occurred: %s %d\n", __FILE__, __LINE__ );
 
 #define TURN_BASED
-//#define CLOCKSTEP
-
-#include "DungeonConstants.h"
+// #define CLOCKSTEP
 
 #include "Constants.h"
-
+#include "DungeonConstants.h"
 #include "Game.h"
+#include "JColor.h"
+#include "Util.h"
 
 class CGame;
 extern CGame *g_pGame;
 extern JIVector g_vDirDelta[];
 extern Constants g_Constants;
 
-
-#define DUNG_COLL_NO_COLLISION (Sint8)(-1)
-#define DUNG_COLL_MONSTER (Sint8)(-2)
-#define DUNG_COLL_PLAYER (Sint8)(-3)
-#define DUNG_COLL_ITEM (Sint8)(-4)
+#define DUNG_COLL_NO_COLLISION ( Sint8 )( -1 )
+#define DUNG_COLL_MONSTER ( Sint8 )( -2 )
+#define DUNG_COLL_PLAYER ( Sint8 )( -3 )
+#define DUNG_COLL_ITEM ( Sint8 )( -4 )
 
 #define PLACEMENT_INVALID_PLACEMENT -1
-#define PLACEMENT_INV                1
-#define PLACEMENT_EQUIP              2
-#define PLACEMENT_USE                3
-#define PLACEMENT_MAX                4
+#define PLACEMENT_INV 1
+#define PLACEMENT_EQUIP 2
+#define PLACEMENT_USE 3
+#define PLACEMENT_MAX 4
 
 // SDL sees the mouse wheel as buttons 4&5
 // but has no constants for them.
-#define MOUSE_WHEEL_UP		4
-#define MOUSE_WHEEL_DOWN	5
+#define MOUSE_WHEEL_UP 4
+#define MOUSE_WHEEL_DOWN 5
 
 // OpenGL needs this defined. vanilla SDL does not.
 #define RENDER_TILESET_POSTLOAD_NEEDED

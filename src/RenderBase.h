@@ -34,7 +34,7 @@ public:
 	virtual void	PostDrawObjects() = 0;
 
 	// UI drawing
-	virtual void	DrawTextBoundingBox( JRect rect, uint8 alpha=25 ) = 0;
+	virtual void	DrawTextBoundingBox( JRect rect, JColor color ) = 0;
 
 	// Texture loading (optional; backends that don't use textures can no-op)
 	virtual JResult	PostLoadTexture( uint32 &texture, void *data, int dwColorsPerPixel, bool bIsBMP, int dwImageWidth, int dwImageHeight, int dwCellWidth, int dwCellHeight ) { return 0; };

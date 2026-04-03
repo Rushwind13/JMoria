@@ -26,13 +26,6 @@ LD_FLAGS = $(LD_FLAGS_LINUX)
 TEST_LD_FLAGS = $(TEST_LD_FLAGS_LINUX)
 endif
 
-# Optional: Enable dungeon generation diagnostics
-# To enable: make DUNGEN_DEBUG=1
-ifdef DUNGEN_DEBUG
-  CC_FLAGS += -DDUNGEN_DEBUG
-  TEST_CC_FLAGS += -DDUNGEN_DEBUG
-endif
-
 EXEC = jmoria
 TEST_DIR = test/bin
 TEST_EXEC = AllSteps
@@ -61,4 +54,5 @@ test: $(TEST_EXEC)
 
 clean:
 	rm -f $(EXEC) $(OBJECTS) $(TEST_DIR)/$(TEST_EXEC) $(TEST_OBJECTS)
-	rm -rf $(TEST_DIR)
+	-rmdir $(TEST_DIR)
+

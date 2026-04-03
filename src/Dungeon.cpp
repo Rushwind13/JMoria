@@ -6,75 +6,68 @@
 
 // TODO: this is for the collision defines; should move those someplace more useful --Jimbo
 #include "CmdState.h"
-#include "RenderBase.h"
-#include "Player.h"
-#include "FileParse.h"
 #include "DisplayText.h"
+#include "FileParse.h"
+#include "Player.h"
+#include "RenderBase.h"
 
-unsigned char TileIDs[DUNG_IDX_MAX+1]			= ".#+'<<>>:@";
-int			  ModifiedTileTypes[DUNG_IDX_MAX+1] =
-{
-	DUNG_IDX_INVALID,
-	DUNG_IDX_INVALID,
-	DUNG_IDX_OPEN_DOOR,
-	DUNG_IDX_DOOR,
-	DUNG_IDX_INVALID,
-	DUNG_IDX_INVALID,
-	DUNG_IDX_FLOOR,
-	DUNG_IDX_INVALID
-};
-//extern Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH];
+unsigned char TileIDs[DUNG_IDX_MAX + 1] = ".#+'<<>>:#@";
+int ModifiedTileTypes[DUNG_IDX_MAX + 1] = { DUNG_IDX_INVALID, DUNG_IDX_INVALID, DUNG_IDX_OPEN_DOOR,
+                                            DUNG_IDX_DOOR,    DUNG_IDX_INVALID, DUNG_IDX_INVALID,
+                                            DUNG_IDX_FLOOR,   DUNG_IDX_DOOR,    DUNG_IDX_INVALID };
+// extern Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH];
 
 // Setup - the one-time-run stuff to set up the Dungeon
 //
 // create all the dungeon tile types,
 // read the monsters config data
 
-void CDungeon::Init()
+void CDungeon::Init( const char *szBasedir )
 {
-	int i;
-	// Initialize all the Dungeon stuff, baby.
-	m_dtdlist = new CDungeonTileDef[DUNG_IDX_MAX];
+    int i;
+    // Initialize all the Dungeon stuff, baby.
+    m_dtdlist = new CDungeonTileDef[DUNG_IDX_MAX];
 
-	// Create the dungeon tile defs (at the moment, there are 7 or so entries in this array)
-	for( i = DUNG_IDX_FLOOR; i < DUNG_IDX_MAX; i++ )
-	{
-		m_dtdlist[i].m_dwType = i;
-		m_dtdlist[i].m_dwModifiedType = ModifiedTileTypes[i];
-		m_dtdlist[i].m_dwIndex = TileIDs[i] - ' ' - 1;
-		switch(m_dtdlist[i].m_dwType)
-		{
-		case DUNG_IDX_FLOOR:
-			m_dtdlist[i].m_Color.SetColor(192,192,192,255);
-			break;
-		case DUNG_IDX_WALL:
-			m_dtdlist[i].m_Color.SetColor(64,64,64,255);
-			break;
-		case DUNG_IDX_DOOR:
-			m_dtdlist[i].m_Color.SetColor(64,32,128,255);
-			break;
-		case DUNG_IDX_OPEN_DOOR:
-			m_dtdlist[i].m_Color.SetColor(192,192,192,255);
-                break;
+    // Create the dungeon tile defs (at the moment, there are 7 or so entries in this array)
+    for( i = DUNG_IDX_FLOOR; i < DUNG_IDX_MAX; i++ )
+    {
+        m_dtdlist[i].m_dwType = i;
+        m_dtdlist[i].m_dwModifiedType = ModifiedTileTypes[i];
+        m_dtdlist[i].m_dwIndex = TileIDs[i] - ' ' - 1;
+        switch( m_dtdlist[i].m_dwType )
+        {
+        case DUNG_IDX_FLOOR:
+            m_dtdlist[i].m_Color.SetColor( 192, 192, 192, 255 );
+            break;
+        case DUNG_IDX_WALL:
+        case DUNG_IDX_SECRET_DOOR:
+            m_dtdlist[i].m_Color.SetColor( 64, 64, 64, 255 );
+            break;
+        case DUNG_IDX_DOOR:
+            m_dtdlist[i].m_Color.SetColor( 64, 32, 128, 255 );
+            break;
+        case DUNG_IDX_OPEN_DOOR:
+            m_dtdlist[i].m_Color.SetColor( 192, 192, 192, 255 );
+            break;
         case DUNG_IDX_UPSTAIRS:
         case DUNG_IDX_LONG_UPSTAIRS:
-			m_dtdlist[i].m_Color.SetColor(175,175,175,255);
-                break;
+            m_dtdlist[i].m_Color.SetColor( 175, 175, 175, 255 );
+            break;
         case DUNG_IDX_DOWNSTAIRS:
         case DUNG_IDX_LONG_DOWNSTAIRS:
-			m_dtdlist[i].m_Color.SetColor(195,195,195,255);
-			break;
-		case DUNG_IDX_RUBBLE:
-			m_dtdlist[i].m_Color.SetColor(200,100,64,255);
-			break;
-		case DUNG_IDX_PLAYER:
-			m_dtdlist[i].m_Color.SetColor(255,255,255,255);
-			break;
-		default:
-			m_dtdlist[i].m_Color.SetColor(0,0,0,255);
-			break;
-		}
-	}
+            m_dtdlist[i].m_Color.SetColor( 195, 195, 195, 255 );
+            break;
+        case DUNG_IDX_RUBBLE:
+            m_dtdlist[i].m_Color.SetColor( 200, 100, 64, 255 );
+            break;
+        case DUNG_IDX_PLAYER:
+            m_dtdlist[i].m_Color.SetColor( 255, 255, 255, 255 );
+            break;
+        default:
+            m_dtdlist[i].m_Color.SetColor( 0, 0, 0, 255 );
+            break;
+        }
+    }
 
     // Load the monster list from config
     // TODO: Make this a method on CMonsterDef.
@@ -82,12 +75,14 @@ void CDungeon::Init()
 
     CMonsterDef *pmd;
     CDataFile dfMonsters;
-    dfMonsters.Open("Resources/Monsters.txt");
+    char szMonsterFile[256];
+    sprintf( szMonsterFile, "%s%s", szBasedir, "Resources/Monsters.txt" );
+    dfMonsters.Open( szMonsterFile );
 
     pmd = new CMonsterDef;
-    while( dfMonsters.ReadMonster(*pmd) )
+    while( dfMonsters.ReadMonster( *pmd ) )
     {
-        m_llMonsterDefs->Add(pmd);
+        m_llMonsterDefs->Add( pmd );
         pmd = new CMonsterDef;
     }
 
@@ -99,12 +94,14 @@ void CDungeon::Init()
 
     CItemDef *pid;
     CDataFile dfItems;
-    dfItems.Open("Resources/Items.txt");
+    char szItemFilename[256];
+    sprintf( szItemFilename, "%s%s", szBasedir, "Resources/Items.txt" );
+    dfItems.Open( szItemFilename );
 
     pid = new CItemDef;
-    while( dfItems.ReadItem(*pid) )
+    while( dfItems.ReadItem( *pid ) )
     {
-        m_llItemDefs->Add(pid);
+        m_llItemDefs->Add( pid );
         pid = new CItemDef;
     }
 
@@ -116,8 +113,8 @@ void CDungeon::Init()
     m_TileSet = new DUNG_TILESET;
 
     m_bDraw = true;
-    
-    CreateNewLevel(DUNG_CFG_START_LEVEL);
+
+    OnChangeLevel( DUNG_CFG_START_LEVEL );
 }
 
 JResult CDungeon::TerminateLevel()
@@ -125,7 +122,7 @@ JResult CDungeon::TerminateLevel()
     m_bDraw = false;
     if( m_Tiles )
     {
-        delete [] m_Tiles;
+        delete[] m_Tiles;
         m_Tiles = NULL;
     }
     if( m_dmCurLevel )
@@ -145,25 +142,33 @@ JResult CDungeon::TerminateLevel()
         delete m_llItems;
         m_llItems = NULL;
     }
+    if( m_llOpenArea )
+    {
+        m_llOpenArea->Terminate();
+        delete m_llOpenArea;
+        m_llOpenArea = NULL;
+    }
 
     return JSUCCESS;
 }
 
-JResult CDungeon::CreateNewLevel(const int delta)
+JResult CDungeon::CreateNewLevel( const int delta )
 {
     depth += delta;
-    if( depth < 1 ) depth = 1;
-    if( depth > DUNG_MAXDEPTH ) depth = DUNG_MAXDEPTH;
+    if( depth < 1 )
+        depth = 1;
+    if( depth > DUNG_MAXDEPTH )
+        depth = DUNG_MAXDEPTH;
 
     CreateMap();
-    
-    PlaceScenery(depth);
+
+    PlaceScenery( depth );
 
     // Place items appropriate to this level.
-    PlaceItems(depth);
+    PlaceItems( depth );
 
     // Spawn monsters appropriate to this level.
-    SpawnMonsters(depth);
+    SpawnMonsters( depth );
 
     m_bDraw = true;
     return JSUCCESS;
@@ -171,86 +176,105 @@ JResult CDungeon::CreateNewLevel(const int delta)
 
 JResult CDungeon::CreateMap()
 {
-    m_Tiles = new CDungeonTile[DUNG_HEIGHT*DUNG_WIDTH];
+    m_Tiles = new CDungeonTile[DUNG_HEIGHT * DUNG_WIDTH];
     // Create the randomized dungeon
     m_dmCurLevel = new CDungeonMap;
-    m_dmCurLevel->CreateDungeon(depth);
+    m_dmCurLevel->CreateDungeon( depth );
 #ifdef CLOCKSTEP
-    Tick(0);
+    Tick( 0 );
 #else
-    while( m_dmCurLevel->CreateOneStep() );
+    while( m_dmCurLevel->CreateOneStep() )
+        ;
 #endif
 
+    JLog( LOG_LEVEL_INFO, true, "Rooms in current level: %d\n", m_dmCurLevel->HowManyRooms() );
+    JLog( LOG_LEVEL_INFO, true, "Hallways in current level: %d\n",
+          m_dmCurLevel->HowManyHallways() );
+
     InitDungeonTiles();
-    
+
     return JSUCCESS;
 }
 
 JResult CDungeon::InitDungeonTiles()
 {
-    JIVector vDungeon(DUNG_HEIGHT,DUNG_WIDTH);
+    JIVector vDungeon;
+    JIVector *vOpen = new JIVector( -1, -1 );
     Uint8 dung_tile_type = DUNG_IDX_INVALID;
-    float open_area = 0.0f;
+    int open_area = 0;
+
+    if( m_llOpenArea == NULL )
+    {
+        m_llOpenArea = new JLinkList<JIVector>;
+    }
     // Create the dungeon array (at the moment, there are 16*16 entries in this list)
     // Set position, Tile type, and Flags for entire dungeon
     for( vDungeon.y = 0; vDungeon.y < DUNG_HEIGHT; vDungeon.y++ )
     {
         for( vDungeon.x = 0; vDungeon.x < DUNG_WIDTH; vDungeon.x++ )
         {
-            GetITile(vDungeon)->m_vPos.x = (float)vDungeon.x;
-            GetITile(vDungeon)->m_vPos.y = (float)vDungeon.y;
-            dung_tile_type = m_dmCurLevel->GetdtdIndex(vDungeon);
-            if( dung_tile_type == DUNG_IDX_FLOOR ) open_area++;
-            GetITile(vDungeon)->m_dtd = &m_dtdlist[dung_tile_type];
-            GetITile(vDungeon)->m_dwFlags = m_dmCurLevel->GetFlags(vDungeon);
+            GetITile( vDungeon )->m_vPos.x = (float)vDungeon.x;
+            GetITile( vDungeon )->m_vPos.y = (float)vDungeon.y;
+            dung_tile_type = m_dmCurLevel->GetdtdIndex( vDungeon );
+            if( dung_tile_type == DUNG_IDX_FLOOR )
+            {
+                vOpen = new JIVector( VEC_EXPAND( vDungeon ) );
+                m_llOpenArea->Add( vOpen );
+                open_area++;
+            }
+            GetITile( vDungeon )->m_dtd = &m_dtdlist[dung_tile_type];
+            GetITile( vDungeon )->m_dwFlags = m_dmCurLevel->GetFlags( vDungeon );
         }
     }
-    
-    m_fOpenFloorArea = open_area;
+
+    // delete vOpen;
+
+    m_fOpenFloorArea = (float)open_area;
     return JSUCCESS;
 }
 
-JResult CDungeon::PlaceScenery(const int depth)
+JResult CDungeon::PlaceScenery( const int depth )
 {
-    int upstairs = (depth > 1)? Util::GetRandom(1, 5):0;
-    int long_upstairs = (depth > 1)? Util::GetRandom(0,2):0;
-    int downstairs = (depth < DUNG_MAXDEPTH)? Util::GetRandom(1, 5):0;
-    int long_downstairs = (depth < DUNG_MAXDEPTH)? Util::GetRandom(0,2):0;
-    
-    PlaceStairs(upstairs, DUNG_IDX_UPSTAIRS);
-    PlaceStairs(long_upstairs, DUNG_IDX_LONG_UPSTAIRS);
-    PlaceStairs(downstairs, DUNG_IDX_DOWNSTAIRS);
-    PlaceStairs(long_downstairs, DUNG_IDX_LONG_DOWNSTAIRS);
-    
+    int upstairs = ( depth > 1 ) ? Util::GetRandom( 1, 5 ) : 0;
+    int long_upstairs = ( depth > 1 ) ? Util::GetRandom( 0, 2 ) : 0;
+    int downstairs = ( depth < DUNG_MAXDEPTH ) ? Util::GetRandom( 1, 5 ) : 0;
+    int long_downstairs = ( depth < DUNG_MAXDEPTH ) ? Util::GetRandom( 0, 2 ) : 0;
+
+    PlaceStairs( upstairs, DUNG_IDX_UPSTAIRS );
+    PlaceStairs( long_upstairs, DUNG_IDX_LONG_UPSTAIRS );
+    PlaceStairs( downstairs, DUNG_IDX_DOWNSTAIRS );
+    PlaceStairs( long_downstairs, DUNG_IDX_LONG_DOWNSTAIRS );
+
     // Doors (open, closed, locked, secret, broken)
     // Traps
     // Rubble (very rare)
     // Gold Veins (only in walls, can run a couple deep)
-    
+
     return JSUCCESS;
 }
 
-JResult CDungeon::PlaceStairs(const int desired, const int type)
+JResult CDungeon::PlaceStairs( const int desired, const int type )
 {
     int count = 0;
     bool bStairsSpawned = false;
+    JIVector *vOpen;
     while( count < desired )
     {
         bStairsSpawned = false;
-        printf("Trying to spawn stairs type: %d...", type);
+        JLog( LOG_LEVEL_INFO, false, "Trying to spawn stairs type: %d...", type );
         JVector vTryPos;
         while( !bStairsSpawned )
         {
-            vTryPos.Init( (float)(Util::GetRandom(0, DUNG_WIDTH-1)), (float)(Util::GetRandom(0, DUNG_HEIGHT-1)) );
-            
-            //printf("Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
-            //g_pGame->GetMsgs()->Printf( "Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
-            
-            if( CanPlaceStairsAt(vTryPos) == DUNG_COLL_NO_COLLISION )
+            JLog( LOG_LEVEL_INFO, false, "." );
+            vOpen = g_pGame->GetDungeon()->AnyOpenTile();
+            vTryPos.Init( VEC_EXPAND( *vOpen ) );
+
+            if( CanPlaceStairsAt( vTryPos ) == DUNG_COLL_NO_COLLISION )
             {
-                GetTile(vTryPos)->m_dtd = &m_dtdlist[type];
+                GetTile( vTryPos )->m_dtd = &m_dtdlist[type];
                 bStairsSpawned = true;
-                printf( "Success!\n" );
+                JLog( LOG_LEVEL_INFO, false, "Success! Spawned at <%.2f %.2f>\n",
+                      VEC_EXPAND( vTryPos ) );
             }
         }
         count++;
@@ -258,21 +282,24 @@ JResult CDungeon::PlaceStairs(const int desired, const int type)
     return JSUCCESS;
 }
 
-JResult CDungeon::PlaceItems(const int depth)
+JResult CDungeon::PlaceItems( const int depth )
 {
     m_llItems = new JLinkList<CItem>;
 
-    int desired_items = int (m_fOpenFloorArea * DUNG_CFG_MONSTERS_PER_LEVEL);
-    printf("Possible spawn points: %0.2f  desired items: %d\n", m_fOpenFloorArea, desired_items);
+    int desired_items = int( m_fOpenFloorArea * DUNG_CFG_ITEMS_PER_LEVEL );
+    JLog( LOG_LEVEL_INFO, false, "\nPossible spawn points: %0.2f  desired items: %d\n",
+          m_fOpenFloorArea, desired_items );
 
     while( desired_items > 0 )
     {
-        int which_item = ChooseItemForDepth(depth);
+        int which_item = ChooseItemForDepth( depth );
+        CItemDef *chosen_item = GetItemDef( which_item );
+        if( chosen_item == NULL )
+            continue;
+        JLog( LOG_LEVEL_NOISE, true, "Choosing item %d, called %s", which_item,
+              chosen_item->m_szName );
 
-        CItemDef *chosen_item = m_llItemDefs->GetLink(which_item)->m_lpData;
-        printf("Choosing item %d, called %s\n", which_item, chosen_item->m_szName);
-
-        CItem::CreateItem(chosen_item);
+        CItem::CreateItem( chosen_item );
 
         desired_items--;
     }
@@ -280,12 +307,13 @@ JResult CDungeon::PlaceItems(const int depth)
     return JSUCCESS;
 }
 
-JResult CDungeon::SpawnMonsters(const int depth)
+JResult CDungeon::SpawnMonsters( const int depth )
 {
     m_llMonsters = new JLinkList<CMonster>;
 
-    int desired_monsters = int (m_fOpenFloorArea * DUNG_CFG_MONSTERS_PER_LEVEL);
-    printf("Possible spawn points: %0.2f  desired monsters: %d\n", m_fOpenFloorArea, desired_monsters);
+    int desired_monsters = int( m_fOpenFloorArea * DUNG_CFG_MONSTERS_PER_LEVEL );
+    JLog( LOG_LEVEL_INFO, false, "\nPossible spawn points: %0.2f  desired monsters: %d\n",
+          m_fOpenFloorArea, desired_monsters );
 
     while( desired_monsters > 0 )
     {
@@ -294,76 +322,153 @@ JResult CDungeon::SpawnMonsters(const int depth)
         // TODO: make this into a method on CMonster.
 #define RANDOM_MONSTER
 #ifdef RANDOM_MONSTER
-        int which_monster = ChooseMonsterForDepth(depth);
+        int which_monster = ChooseMonsterForDepth( depth );
 #else
-        int which_monster = m_llMonsterDefs->length()-1;
-        //which_monster = 0;
+        int which_monster = m_llMonsterDefs->length() - 1;
+        // which_monster = 0;
 #endif // RANDOM_MONSTER
-        if( which_monster == MON_IDX_INVALID )
+        if( SpawnMonster( which_monster ) )
         {
-            printf("Couldn't find a suitable monster.\n");
-            return JERROR();
+            desired_monsters--;
         }
-        CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(which_monster)->m_lpData;
-        printf("Choosing monster %d, called %s\n", which_monster, chosen_monster->m_szName);
-
-        CMonster::CreateMonster(chosen_monster);
-
-        desired_monsters--;
     }
 
     return JSUCCESS;
 }
 
-int CDungeon::ChooseItemForDepth(const int depth)
+CMonsterDef *CDungeon::GetMonsterDef( const char *szMonsterName )
+{
+    CLink<CMonsterDef> *pLink = m_llMonsterDefs->GetHead();
+    CMonsterDef *pid;
+    if( pLink == NULL )
+        return NULL;
+    while( pLink != NULL )
+    {
+        pid = pLink->m_lpData;
+        if( Util::jstrcmp( pid->m_szName, szMonsterName ) == 0 )
+        {
+            return pid;
+        }
+        pLink = pLink->next;
+    }
+    return NULL;
+}
+
+CMonsterDef *CDungeon::GetMonsterDef( int which_monster )
+{
+    if( which_monster <= MON_IDX_INVALID || which_monster >= m_llMonsterDefs->length() - 1 )
+    {
+        JLog( LOG_LEVEL_WARN, true, "got an invalid monster: %d\n", which_monster );
+        return NULL;
+    }
+    return m_llMonsterDefs->GetLink( which_monster )->m_lpData;
+}
+
+bool CDungeon::SpawnMonster( int which_monster )
+{
+    CMonsterDef *chosen_monster = GetMonsterDef( which_monster );
+    if( chosen_monster == NULL )
+    {
+        return false;
+    }
+    JLog( LOG_LEVEL_NOISE, true, "Choosing monster %d, called %s...", which_monster,
+          chosen_monster->m_szName );
+
+    CMonster::CreateMonster( chosen_monster );
+    return true;
+}
+
+CItemDef *CDungeon::GetItemDef( const char *szItemName )
+{
+    CLink<CItemDef> *pLink = m_llItemDefs->GetHead();
+    CItemDef *pid;
+    if( pLink == NULL )
+        return NULL;
+    while( pLink != NULL )
+    {
+        pid = pLink->m_lpData;
+        if( Util::jstrcmp( pid->m_szName, szItemName ) == 0 )
+        {
+            return pid;
+        }
+        pLink = pLink->next;
+    }
+    return NULL;
+}
+
+CItemDef *CDungeon::GetItemDef( int which_item )
+{
+    if( which_item <= ITEM_IDX_INVALID || which_item >= m_llItemDefs->length() - 1 )
+    {
+        JLog( LOG_LEVEL_WARN, true, "got an invalid item: %d\n", which_item );
+        return NULL;
+    }
+    return m_llItemDefs->GetNthLink( which_item )->m_lpData;
+}
+
+int CDungeon::ChooseItemForDepth( const int depth )
 {
     int which_item = ITEM_IDX_INVALID;
     int count = 0;
     while( count < DUNG_CFG_MAX_SPAWN_TRIES )
     {
-        which_item = Util::GetRandom(0, m_llItemDefs->length()-1);
-        CItemDef *chosen_item = m_llItemDefs->GetLink(which_item)->m_lpData;
-        if( abs(depth - chosen_item->m_dwLevel) < 5 )
+        int try_item = Util::GetRandom( 0, m_llItemDefs->length() - 1 );
+        CItemDef *chosen_item = GetItemDef( try_item );
+        if( abs( depth - chosen_item->m_dwLevel ) < 5 )
         {
+            which_item = try_item;
             break;
         }
         count++;
+    }
+
+    if( which_item == ITEM_IDX_INVALID )
+    {
+        JLog( LOG_LEVEL_WARN, true, "Couldn't find a suitable item for this depth.\n" );
     }
 
     return which_item;
 }
 
-int CDungeon::ChooseMonsterForDepth(const int depth)
+int CDungeon::ChooseMonsterForDepth( const int depth )
 {
     int which_monster = MON_IDX_INVALID;
     int count = 0;
     while( count < DUNG_CFG_MAX_SPAWN_TRIES )
     {
-        which_monster = Util::GetRandom(0, m_llMonsterDefs->length()-1);
-        CMonsterDef *chosen_monster = m_llMonsterDefs->GetLink(which_monster)->m_lpData;
-        if( abs(depth - chosen_monster->m_dwLevel) < 5 )
+        int try_monster = Util::GetRandom( 0, m_llMonsterDefs->length() - 1 );
+        CMonsterDef *chosen_monster = GetMonsterDef( try_monster );
+        if( abs( depth - chosen_monster->m_dwLevel ) < 5 )
         {
+            which_monster = try_monster;
             break;
         }
         count++;
     }
 
+    if( which_monster == MON_IDX_INVALID )
+    {
+        JLog( LOG_LEVEL_WARN, true, "Couldn't find a suitable monster for this depth.\n" );
+    }
+
     return which_monster;
 }
 
-JResult CDungeon::OnChangeLevel(const int delta)
+JResult CDungeon::OnChangeLevel( const int delta )
 {
-    printf("Changing level...");
+    JLog( LOG_LEVEL_INFO, false, "Changing level...\n" );
     // Clean up old level, then
     TerminateLevel();
 
     // Create new level
-    CreateNewLevel(delta);
+    CreateNewLevel( delta );
     g_pGame->GetPlayer()->m_bHasSpawned = false;
     g_pGame->GetPlayer()->SpawnPlayer();
-    printf("done.\n");
-    printf("You pass through a one-way door, to arrive on level %d.\n", depth);
-    g_pGame->GetMsgs()->Printf("You pass through a one-way door, to arrive on level %d.\n", depth);
+    JLog( LOG_LEVEL_INFO, false, "done.\n" );
+    JLog( LOG_LEVEL_INFO, false, "You pass through a one-way door, to arrive on level %d.\n",
+          depth );
+    g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
+                                depth );
 
     return JSUCCESS;
 }
@@ -380,28 +485,146 @@ bool CDungeon::Tick( const int dwClock )
     {
         m_bDraw = true;
     }/**/
-    
+
     bool bWorking = m_dmCurLevel->CreateOneStep();
-    if(bWorking == false)
+    if( bWorking == false )
     {
         counter++;
-        if(counter == 10)
+        if( counter == 10 )
         {
             counter = 0;
-            OnChangeLevel(1);
+            OnChangeLevel( 1 );
         }
     }
-    
+
     InitDungeonTiles();
     return true;
 }
 
-bool CDungeon::Update(float fCurTime)
+bool CDungeon::Update( float fCurTime )
 {
-	return true;
+    CLink<CItem> *pLink = m_llItems->GetHead();
+    CItem *pItem;
+
+    while( pLink != NULL )
+    {
+        pItem = pLink->m_lpData;
+        pItem->Update( fCurTime );
+        pLink = m_llItems->GetNext( pLink );
+    }
+
+    UpdateSeen();
+    return true;
 }
 
-bool CDungeon::IsOnScreen(JVector vPos)
+JResult CDungeon::UpdateSeen()
+{
+    JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+    JRect rcSeen = Util::Nearby( vPlayer, 1 );
+
+    JLog( LOG_LEVEL_NOISE, false, "player: <%d %d> seen: <%d %d %d %d>\n", VEC_EXPAND( vPlayer ),
+          RECT_EXPAND( rcSeen ) );
+
+    JIVector vTile;
+    CRoom *pRoom;
+    for( vTile.y = rcSeen.top; vTile.y <= rcSeen.bottom; vTile.y++ )
+    {
+        for( vTile.x = rcSeen.left; vTile.x <= rcSeen.right; vTile.x++ )
+        {
+            GetITile( vTile )->SetFlags( DUNG_FLAG_SEEN );
+            pRoom = m_dmCurLevel->InRoom( vTile );
+            if( pRoom != NULL &&
+                ( g_pGame->GetPlayer()->IsWizard() ||
+                  ( pRoom->HasFlags( DUNG_FLAG_LIT ) && !pRoom->HasFlags( DUNG_FLAG_SEEN ) ) ) )
+            {
+                LightRoom( pRoom );
+            }
+        }
+    }
+
+    return JSUCCESS;
+}
+
+void CDungeon::LightRoom( CRoom *pRoom )
+{
+    JVector vCurPos;
+    JRect rcRoom = pRoom->GetEdges();
+    for( vCurPos.y = rcRoom.top; vCurPos.y <= rcRoom.bottom; vCurPos.y++ )
+    {
+        for( vCurPos.x = rcRoom.left; vCurPos.x <= rcRoom.right; vCurPos.x++ )
+        {
+            GetTile( vCurPos )->SetFlags( DUNG_FLAG_SEEN );
+        }
+    }
+    pRoom->SetFlags( DUNG_FLAG_SEEN );
+}
+
+bool CollisionTest( JVector &vTest )
+{
+    return g_pGame->GetDungeon()->IsWalkableFor( vTest ) == DUNG_COLL_NO_COLLISION;
+}
+
+bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFlags )
+{
+    // can see things in the same room, if the room is LIT
+    CRoom *prTarget = m_dmCurLevel->InRoom( vTarget );
+    CRoom *prSource = m_dmCurLevel->InRoom( vSource );
+    if( prTarget && prTarget->HasFlags( DUNG_FLAG_SEEN ) && prTarget == prSource )
+        return true;
+
+    // check for "see through walls" effects
+
+    // check for ESP and not EMPTY_MIND
+    uint32 esp = EFFECT_FLAG_ESP;
+    uint32 empty_mind = MON_FLAG_EMPTY_MIND;
+    if( dwFlags >= esp )
+        JLog( LOG_LEVEL_NOISE, true, "performing esp check\n" );
+    if( ( ( dwFlags & esp ) == esp ) && ( ( dwFlags & empty_mind ) == 0 ) )
+    {
+        JLog( LOG_LEVEL_DEBUG, true, "detected a thinking mind at <%d %d>\n",
+              VEC_EXPAND( vTarget ) );
+        if( Util::Nearby( vSource, SIGHT_DISTANCE_ESP ).Contains( vTarget ) )
+            return true;
+    }
+
+    // check for both infravision and warm body
+    uint32 heat_sense = ( EFFECT_FLAG_INFRA | MON_FLAG_WARM );
+    if( dwFlags >= heat_sense )
+        JLog( LOG_LEVEL_NOISE, true, "performing infra check\n" );
+    if( ( dwFlags & heat_sense ) == heat_sense )
+    {
+        JLog( LOG_LEVEL_DEBUG, true, "sensed a heat source at <%d %d>\n", VEC_EXPAND( vTarget ) );
+        if( Util::Nearby( vSource, SIGHT_DISTANCE_INFRA ).Contains( vTarget ) )
+            return true;
+    }
+
+    // check for "in visible range" before doing the
+    // more expensive line-of-sight test
+    if( !Util::Nearby( vSource, SIGHT_DISTANCE_PLAYER ).Contains( vTarget ) )
+        return false;
+
+    // No "see through walls" effects are active
+    // Check for obstacles along the line between
+    // the player and the position
+    //
+    return Util::Bresenham( vSource, vTarget, SIGHT_DISTANCE_PLAYER, CollisionTest );
+}
+
+bool CDungeon::PlayerCanSee( JVector vCheck, uint32 dwFlags )
+{
+    if( g_pGame->GetPlayer()->IsWizard() )
+        return true;
+
+    // Check for sight distance first
+    JIVector viCheck( VEC_EXPAND( vCheck ) );
+    JIVector viPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+
+    dwFlags |= g_pGame->GetPlayer()->GetIntrinsic( EFFECT_FLAG_ESP | EFFECT_FLAG_INFRA );
+
+    return CanSeeEachOther( viPlayer, viCheck, dwFlags );
+}
+
+bool CDungeon::IsOnScreen( JVector vPos )
 {
     // 12.7.2017 - the below code is totally broken and
     // was causing monsters/items not to display if they were "too far"
@@ -410,20 +633,20 @@ bool CDungeon::IsOnScreen(JVector vPos)
     // 1) trying to do sight-distance, or
     // 2) trying to speed things up by not drawing off-screen stuff,
     //    once big dungeons are happening.
-//    if( g_pGame->GetPlayer() == NULL )
-//    {
-//        return false;
-//    }
-//
-//    JVector vPlayer = g_pGame->GetPlayer()->m_vPos;
-//    if( vPos.x < vPlayer.x - SCREEN_MIN_XOFF ||
-//        vPos.x > vPlayer.x + SCREEN_MAX_XOFF ||
-//        vPos.y < vPlayer.y - SCREEN_MIN_YOFF ||
-//        vPos.y > vPlayer.y + SCREEN_MAX_YOFF )
-//    {
-//        return false;
-//    }
-	return true;
+    //    if( g_pGame->GetPlayer() == NULL )
+    //    {
+    //        return false;
+    //    }
+    //
+    //    JVector vPlayer = g_pGame->GetPlayer()->m_vPos;
+    //    if( vPos.x < vPlayer.x - SCREEN_MIN_XOFF ||
+    //        vPos.x > vPlayer.x + SCREEN_MAX_XOFF ||
+    //        vPos.y < vPlayer.y - SCREEN_MIN_YOFF ||
+    //        vPos.y > vPlayer.y + SCREEN_MAX_YOFF )
+    //    {
+    //        return false;
+    //    }
+    return true;
 }
 
 void CDungeon::Draw()
@@ -432,8 +655,8 @@ void CDungeon::Draw()
     {
         return;
     }
-    
-	PreDraw();
+
+    PreDraw();
 
     // Select Our Texture
     DrawDungeon();
@@ -442,7 +665,16 @@ void CDungeon::Draw()
 
     DrawMonsters();
 
-	PostDraw();
+    PostDraw();
+}
+
+bool CDungeon::IsLit( JVector vPos )
+{
+    if( !g_pGame->GetPlayer()->LightSource() )
+        return false;
+    JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+    JIVector vTarget( VEC_EXPAND( vPos ) );
+    return Util::WithinRadius( vPlayer, vTarget );
 }
 
 void CDungeon::DrawDungeon()
@@ -450,115 +682,158 @@ void CDungeon::DrawDungeon()
     // Brute force method; optimize this later
     JVector vScreen;
     JVector DUNG_ASPECT;
-    JVector vPlayer = g_pGame->GetPlayer()->m_vPos;
+    JVector vLook =
+        ( g_pGame->GetGameStateIndex() == STATE_LOOK ) ? m_vLookPos : g_pGame->GetPlayer()->m_vPos;
+    JVector vProjectile = ( g_pGame->GetGameStateIndex() == STATE_RANGED )
+                              ? m_vProjectilePos
+                              : g_pGame->GetPlayer()->m_vPos;
+    JColor color;
 
     for( vScreen.x = 0; vScreen.x < DUNG_WIDTH; vScreen.x++ )
     {
         for( vScreen.y = 0; vScreen.y < DUNG_HEIGHT; vScreen.y++ )
-        {/* */
+        { /* */
 
-            /*for( vScreen.x = vPlayer.x - SCREEN_MIN_XOFF; vScreen.x < vPlayer.x + SCREEN_MAX_XOFF; vScreen.x++ )
+            /*for( vScreen.x = vPlayer.x - SCREEN_MIN_XOFF; vScreen.x < vPlayer.x + SCREEN_MAX_XOFF;
+             vScreen.x++ )
              {
-             for( vScreen.y = vPlayer.y - SCREEN_MIN_YOFF; vScreen.y < vPlayer.y + SCREEN_MAX_YOFF; vScreen.y++ )
+             for( vScreen.y = vPlayer.y - SCREEN_MIN_YOFF; vScreen.y < vPlayer.y + SCREEN_MAX_YOFF;
+             vScreen.y++ )
              {/* */
-            CDungeonTile *curTile = GetTile(vScreen);
+            CDungeonTile *curTile = GetTile( vScreen );
 
-            // this tile doesn't exist, or it's not lit
+            if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
+            {
+                ; // need to display this tile
+                // color = JColor( 100, 0, 100, 255 );
+            }
+
+            // this tile doesn't exist, or it's not been seen
             // or something else is standing there
-            if( curTile == NULL ||
-               ( (curTile->m_dwFlags & DUNG_FLAG_LIT) == 0 ) ||
-               vScreen == vPlayer ||
-               curTile->m_pCurItem != NULL ||
-               curTile->m_pCurMonster != NULL )
+            else if( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_SEEN ) == 0 ) ||
+                     ( g_pGame->GetPlayer()->IsWizard() &&
+                       ( curTile->m_dwFlags & ( DUNG_FLAG_SEEN | DUNG_FLAG_LIT ) ) == 0 ) ||
+                     vScreen == g_pGame->GetPlayer()->m_vPos ||
+                     ( curTile->m_pCurMonster != NULL &&
+                       PlayerCanSee( vScreen, curTile->m_pCurMonster->m_md->m_dwFlags &
+                                                  ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) ) ||
+                     ( curTile->m_pCurItem != NULL &&
+                       PlayerCanSee( vScreen, MON_FLAG_EMPTY_MIND ) ) )
             {
                 continue;
             }
-            m_TileSet->SetTileColor( curTile->m_dtd->m_Color );
+
+            if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
+            {
+                color = JColor( 100, 0, 100, 255 );
+            }
+            else if( g_pGame->GetGameStateIndex() == STATE_RANGED && vScreen == vProjectile )
+            {
+                color = JColor( 100, 100, 0, 255 );
+            }
+            else if( IsLit( vScreen ) )
+            {
+                color = JColor( 200, 200, 0, 255 );
+            }
+            else
+            {
+                color = curTile->m_dtd->m_Color;
+            }
+            m_TileSet->SetTileColor( color );
             m_TileSet->DrawTile( curTile->m_dtd->m_dwIndex, vScreen, vSize, true );
         }
     }
-
 }
+
+void CDungeon::DisturbPlayer() { g_pGame->GetPlayer()->m_bIsDisturbed = true; }
 
 void CDungeon::DrawItems()
 {
-    CLink <CItem> *pLink = m_llItems->GetHead();
+    CLink<CItem> *pLink = m_llItems->GetHead();
     CItem *pItem;
 
-    while(pLink != NULL)
+    while( pLink != NULL )
     {
         pItem = pLink->m_lpData;
-        if( pItem && IsOnScreen(pItem->m_vPos) )
+        if( pItem && IsOnScreen( pItem->m_vPos ) &&
+            PlayerCanSee( pItem->m_vPos, MON_FLAG_EMPTY_MIND ) )
         {
             pItem->Draw();
         }
-        pLink = m_llItems->GetNext(pLink);
+        pLink = m_llItems->GetNext( pLink );
     }
 }
 
 void CDungeon::DrawMonsters()
 {
-    CLink <CMonster> *pLink = m_llMonsters->GetHead();
+    CLink<CMonster> *pLink = m_llMonsters->GetHead();
     CMonster *pMon;
 
-    while(pLink != NULL)
+    while( pLink != NULL )
     {
         pMon = pLink->m_lpData;
-        if( pMon && IsOnScreen(pMon->GetPos()) )
+        uint32 dwFlags = pMon->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND );
+        if( pMon && IsOnScreen( pMon->GetPos() ) && PlayerCanSee( pMon->GetPos(), dwFlags ) )
         {
             pMon->Draw();
         }
-        pLink = m_llMonsters->GetNext(pLink);
+        pLink = m_llMonsters->GetNext( pLink );
     }
 }
 
 void CDungeon::PreDraw()
 {
-	if( g_pGame->GetPlayer() != NULL )
-	{
+    if( g_pGame->GetPlayer() != NULL )
+    {
 #ifdef CLOCKSTEP
         m_dwZoom = DUNG_WIDTH;
 #endif
         int xinitval = m_dwZoom;
-        //int xinitval = 16;
-		int yinitval = xinitval;
-
+        // int xinitval = 16;
+        int yinitval = xinitval;
 
 #define ORIGIN_PLAYER
 #ifdef ORIGIN_PLAYER
-		int xorigin = (int)g_pGame->GetPlayer()->m_vPos.x - DUNG_WIDTH/2;
-		int yorigin = (int)g_pGame->GetPlayer()->m_vPos.y - DUNG_HEIGHT/2;
+        int xorigin = (int)g_pGame->GetPlayer()->m_vPos.x - DUNG_WIDTH / 2;
+        int yorigin = (int)g_pGame->GetPlayer()->m_vPos.y - DUNG_HEIGHT / 2;
 #else
         int xorigin = 0; // + is left (?!)
         int yorigin = 0; // + is up
 #endif
-        m_Rect.Init( xorigin-xinitval,yorigin+yinitval,xorigin+xinitval,yorigin-yinitval);
-	}
-	g_pGame->GetRender()->PreDrawObjects( m_Rect, m_TileSet->Texture(), true, false, &m_vfTranslate );
+        m_Rect.Init( xorigin - xinitval, yorigin + yinitval, xorigin + xinitval,
+                     yorigin - yinitval );
+    }
+    g_pGame->GetRender()->PreDrawObjects( m_Rect, m_TileSet->Texture(), true, false,
+                                          &m_vfTranslate );
 
-	// Do any external setup that needs doing.
-	m_TileSet->PreDrawTile();
+    // Do any external setup that needs doing.
+    m_TileSet->PreDrawTile();
 }
 
 void CDungeon::PostDraw()
 {
-	// Do any external teardown that needs doing.
-	m_TileSet->PostDrawTile();
+    // Do any external teardown that needs doing.
+    m_TileSet->PostDrawTile();
 
-	g_pGame->GetRender()->PostDrawObjects();
+    g_pGame->GetRender()->PostDrawObjects();
 }
 
 void CDungeon::Term()
 {
-	if( m_Tiles )
-	{
-		delete [] m_Tiles;
-		m_Tiles = NULL;
+    if( m_Tiles )
+    {
+        delete[] m_Tiles;
+        m_Tiles = NULL;
+    }
+    if( m_TileSet )
+    {
+        delete m_TileSet;
+        m_TileSet = NULL;
     }
 
     if( m_dtdlist )
     {
-        delete [] m_dtdlist;
+        delete[] m_dtdlist;
         m_dtdlist = NULL;
     }
 
@@ -579,34 +854,34 @@ void CDungeon::Term()
 
 void CDungeon::RemoveMonster( CMonster *pMon )
 {
-	CLink <CMonster> *pLink;
-	pLink = pMon->m_pllLink;
+    CLink<CMonster> *pLink;
+    pLink = pMon->m_pllLink;
 
-	GetTile(pMon->GetPos())->m_pCurMonster = NULL;
-	m_llMonsters->Remove(pLink);
+    GetTile( pMon->GetPos() )->m_pCurMonster = NULL;
+    m_llMonsters->Remove( pLink );
 }
 
 int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
 {
-	// Check for someone else standing there first (handles things that can walk thru walls)
-	CDungeonTile *curTile = GetTile(vPos);
-	if( curTile == NULL )
-	{
-		printf("Hey! That's a bad tile.\n");
-		return false;
-	}
-	if( curTile->m_pCurMonster != NULL )
-	{
+    if( !vPos.IsWithinWorld() )
+        return false;
+    // Check for someone else standing there first (handles things that can walk thru walls)
+    CDungeonTile *curTile = GetTile( vPos );
+    if( curTile == NULL )
+    {
+        JLog( LOG_LEVEL_ERROR, true, "Hey! That's a bad tile.\n" );
+        return false;
+    }
+    if( curTile->m_pCurMonster != NULL )
+    {
         // Monsters can collide with other monsters
-		return DUNG_COLL_MONSTER;
-	}
-    else if( !isPlayer
-            && g_pGame->GetPlayer()
-            && g_pGame->GetPlayer()->m_bHasSpawned
-            && g_pGame->GetPlayer()->m_vPos == vPos )
+        JLog( LOG_LEVEL_DEBUG, true, "Monster attacking other monsters is not implemented yet.\n" );
+        return DUNG_COLL_MONSTER;
+    }
+    else if( !isPlayer && g_pGame->GetPlayer() && g_pGame->GetPlayer()->m_bHasSpawned &&
+             g_pGame->GetPlayer()->m_vPos == vPos )
     {
         // Monsters colliding with the player can be hazardous to your health.
-        printf("Monster attacking not implemented yet.\n");
         return DUNG_COLL_PLAYER;
     }
     else if( isPlayer && curTile->m_pCurItem != NULL )
@@ -614,56 +889,68 @@ int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
         return DUNG_COLL_ITEM;
     }
 
-	// If you get here, the square was unoccupied. Now check for running into inanimates...
-	int type = curTile->m_dtd->m_dwType;
-	switch( type )
-	{
-	case DUNG_IDX_WALL:
-	case DUNG_IDX_DOOR:
-	case DUNG_IDX_RUBBLE:
-		return type;
-		break;
-	default:
-		return DUNG_COLL_NO_COLLISION;
-		break;
-	}
-}
-
-int CDungeon::CanPlaceStairsAt(JVector &vPos)
-{
-    CDungeonTile *curTile = GetTile(vPos);
-    if( curTile == NULL )
-    {
-        printf("Hey! That's a bad tile.\n");
-        return false;
-    }
-    
     // If you get here, the square was unoccupied. Now check for running into inanimates...
     int type = curTile->m_dtd->m_dwType;
     switch( type )
     {
-        case DUNG_IDX_WALL:
-        case DUNG_IDX_DOOR:
-        case DUNG_IDX_OPEN_DOOR:
-        case DUNG_IDX_RUBBLE:
-        case DUNG_IDX_UPSTAIRS:
-        case DUNG_IDX_LONG_UPSTAIRS:
-        case DUNG_IDX_DOWNSTAIRS:
-        case DUNG_IDX_LONG_DOWNSTAIRS:
-            return type;
-            break;
-        default:
+    case DUNG_IDX_WALL:
+    case DUNG_IDX_DOOR:
+    case DUNG_IDX_SECRET_DOOR:
+    case DUNG_IDX_RUBBLE:
+        return type;
+        break;
+    case DUNG_IDX_UPSTAIRS:
+    case DUNG_IDX_LONG_UPSTAIRS:
+    case DUNG_IDX_DOWNSTAIRS:
+    case DUNG_IDX_LONG_DOWNSTAIRS:
+        if( g_pGame->GetPlayer()->m_bHasSpawned )
+        {
             return DUNG_COLL_NO_COLLISION;
-            break;
+        }
+        JLog( LOG_LEVEL_WARN, true, "Player can't spawn on stairs\n" );
+        return type;
+        break;
+    default:
+        return DUNG_COLL_NO_COLLISION;
+        break;
     }
 }
 
-int CDungeon::CanPlaceItemAt(JVector &vPos)
+int CDungeon::CanPlaceStairsAt( JVector &vPos )
 {
-    CDungeonTile *curTile = GetTile(vPos);
+    CDungeonTile *curTile = GetTile( vPos );
     if( curTile == NULL )
     {
-        printf("Hey! That's a bad tile.\n");
+        JLog( LOG_LEVEL_ERROR, true, "Hey! That's a bad tile.\n" );
+        return false;
+    }
+
+    // If you get here, the square was unoccupied. Now check for running into inanimates...
+    int type = curTile->m_dtd->m_dwType;
+    switch( type )
+    {
+    case DUNG_IDX_WALL:
+    case DUNG_IDX_DOOR:
+    case DUNG_IDX_OPEN_DOOR:
+    case DUNG_IDX_RUBBLE:
+    case DUNG_IDX_UPSTAIRS:
+    case DUNG_IDX_LONG_UPSTAIRS:
+    case DUNG_IDX_DOWNSTAIRS:
+    case DUNG_IDX_LONG_DOWNSTAIRS:
+        return type;
+        break;
+    default:
+        return DUNG_COLL_NO_COLLISION;
+        break;
+    }
+}
+
+int CDungeon::CanPlaceItemAt( JVector &vPos )
+{
+    CDungeonTile *curTile = GetTile( vPos );
+    if( curTile == NULL )
+    {
+        JLog( LOG_LEVEL_DEBUG, true, "Hey! That's a bad tile.\n" );
         return false;
     }
     if( curTile->m_pCurItem != NULL )
@@ -676,92 +963,102 @@ int CDungeon::CanPlaceItemAt(JVector &vPos)
     int type = curTile->m_dtd->m_dwType;
     switch( type )
     {
-        case DUNG_IDX_WALL:
-        case DUNG_IDX_DOOR:
-        case DUNG_IDX_OPEN_DOOR:
-        case DUNG_IDX_RUBBLE:
-        case DUNG_IDX_UPSTAIRS:
-        case DUNG_IDX_LONG_UPSTAIRS:
-        case DUNG_IDX_DOWNSTAIRS:
-        case DUNG_IDX_LONG_DOWNSTAIRS:
-            return type;
-            break;
-        default:
-            return DUNG_COLL_NO_COLLISION;
-            break;
+    case DUNG_IDX_WALL:
+    case DUNG_IDX_DOOR:
+    case DUNG_IDX_OPEN_DOOR:
+    case DUNG_IDX_RUBBLE:
+    case DUNG_IDX_UPSTAIRS:
+    case DUNG_IDX_LONG_UPSTAIRS:
+    case DUNG_IDX_DOWNSTAIRS:
+    case DUNG_IDX_LONG_DOWNSTAIRS:
+        return type;
+        break;
+    default:
+        return DUNG_COLL_NO_COLLISION;
+        break;
     }
 }
 
 bool CDungeon::IsOpenable( JVector &vPos )
 {
-	// trivial check; is this a modifiable tile at all?
-	CDungeonTile *curTile = GetTile(vPos);
-	if( curTile == NULL || curTile->m_dtd->m_dwModifiedType == DUNG_IDX_INVALID )
-	{
-		return false;
-	}
-	// Check for someone else standing there first (handles things that can walk thru walls)
+    // trivial check; is this a modifiable tile at all?
+    CDungeonTile *curTile = GetTile( vPos );
+    if( curTile == NULL || curTile->m_dtd->m_dwModifiedType == DUNG_IDX_INVALID )
+    {
+        return false;
+    }
+    // Check for someone else standing there first (handles things that can walk thru walls)
 
-	if( curTile->m_pCurItem )
-	{
-		return( curTile->m_pCurItem->IsOpenable() );
-	}
+    if( curTile->m_pCurItem )
+    {
+        return ( curTile->m_pCurItem->IsOpenable() );
+    }
 
-	// If you get here, the square was unoccupied. Now check for running into inanimates...
-	return( curTile->m_dtd->m_dwType == DUNG_IDX_DOOR);
+    // If you get here, the square was unoccupied. Now check for running into inanimates...
+    if( curTile->m_dtd->m_dwType == DUNG_IDX_SECRET_DOOR )
+    {
+        if( Util::GetRandom( 1, 100 ) > 25 )
+        {
+            g_pGame->GetMsgs()->Printf( "You have found a secret door!\n" );
+            g_pGame->GetDungeon()->Modify( curTile->m_vPos );
+            return true;
+        }
+        return false;
+    }
+    return ( curTile->m_dtd->m_dwType == DUNG_IDX_DOOR );
 }
 
 bool CDungeon::IsTunnelable( JVector &vPos )
 {
-	// trivial check; is this a modifiable tile at all?
-	CDungeonTile *curTile = GetTile(vPos);
-	if( curTile == NULL || curTile->m_dtd->m_dwModifiedType == DUNG_IDX_INVALID )
-	{
-		return false;
-	}
-	// Check for someone else standing there first (handles things that can walk thru walls)
+    // trivial check; is this a modifiable tile at all?
+    CDungeonTile *curTile = GetTile( vPos );
+    if( curTile == NULL || curTile->m_dtd->m_dwModifiedType == DUNG_IDX_INVALID )
+    {
+        return false;
+    }
+    // Check for someone else standing there first (handles things that can walk thru walls)
 
-	if( curTile->m_pCurItem )
-	{
-		return( curTile->m_pCurItem->IsTunnelable() );
-	}
+    if( curTile->m_pCurItem )
+    {
+        return ( curTile->m_pCurItem->IsTunnelable() );
+    }
 
-	// If you get here, the square was unoccupied. Now check for running into inanimates...
-	return( curTile->m_dtd->m_dwType == DUNG_IDX_RUBBLE);
+    // If you get here, the square was unoccupied. Now check for running into inanimates...
+    return ( curTile->m_dtd->m_dwType == DUNG_IDX_RUBBLE );
 }
 
 bool CDungeon::IsCloseable( JVector &vPos )
 {
-	// trivial check; is this a modifiable tile at all?
-	CDungeonTile *curTile = GetTile(vPos);
-	if( curTile == NULL || curTile->m_dtd->m_dwModifiedType == DUNG_IDX_INVALID )
-	{
-		return false;
-	}
-	// Check for someone else standing there first (handles things that can walk thru walls)
+    // trivial check; is this a modifiable tile at all?
+    CDungeonTile *curTile = GetTile( vPos );
+    if( curTile == NULL || curTile->m_dtd->m_dwModifiedType == DUNG_IDX_INVALID )
+    {
+        return false;
+    }
+    // Check for someone else standing there first (handles things that can walk thru walls)
 
-	if( curTile->m_pCurItem )
-	{
-		return( curTile->m_pCurItem->IsCloseable() );
-	}
+    if( curTile->m_pCurItem )
+    {
+        return ( curTile->m_pCurItem->IsCloseable() );
+    }
 
-	// If you get here, the square was unoccupied. Now check for running into inanimates...
-	return( curTile->m_dtd->m_dwType == DUNG_IDX_OPEN_DOOR);
+    // If you get here, the square was unoccupied. Now check for running into inanimates...
+    return ( curTile->m_dtd->m_dwType == DUNG_IDX_OPEN_DOOR );
 }
 
 int CDungeon::IsStairs( JVector &vPos )
 {
     // trivial check; is this a modifiable tile at all?
-    CDungeonTile *curTile = GetTile(vPos);
+    CDungeonTile *curTile = GetTile( vPos );
     if( curTile == NULL )
     {
         return DUNG_IDX_INVALID;
     }
 
     if( curTile->m_dtd->m_dwType == DUNG_IDX_UPSTAIRS ||
-       curTile->m_dtd->m_dwType == DUNG_IDX_LONG_UPSTAIRS ||
-       curTile->m_dtd->m_dwType == DUNG_IDX_DOWNSTAIRS ||
-       curTile->m_dtd->m_dwType == DUNG_IDX_LONG_DOWNSTAIRS )
+        curTile->m_dtd->m_dwType == DUNG_IDX_LONG_UPSTAIRS ||
+        curTile->m_dtd->m_dwType == DUNG_IDX_DOWNSTAIRS ||
+        curTile->m_dtd->m_dwType == DUNG_IDX_LONG_DOWNSTAIRS )
     {
         return curTile->m_dtd->m_dwType;
     }
@@ -770,29 +1067,38 @@ int CDungeon::IsStairs( JVector &vPos )
     return DUNG_IDX_INVALID;
 }
 
+CRoom *CDungeon::InRoom( JVector &vPos )
+{
+    JIVector viPos( VEC_EXPAND( vPos ) );
+    return m_dmCurLevel->InRoom( viPos );
+}
+
 JResult CDungeon::Modify( JVector &vPos )
 {
-	if( GetTile(vPos)->m_dtd->m_dwModifiedType == DUNG_IDX_INVALID )
-	{
-		// hey! you can't modify that tile! How did you get here?!
-		return JERROR();
-	}
+    if( GetTile( vPos )->m_dtd->m_dwModifiedType == DUNG_IDX_INVALID )
+    {
+        // hey! you can't modify that tile! How did you get here?!
+        JLog( LOG_LEVEL_ERROR, true, "Modify error: Can't modify type %d at <%f %f>\n",
+              GetTile( vPos )->m_dtd->m_dwType, VEC_EXPAND( vPos ) );
+        return JERROR();
+    }
 
-	GetTile( vPos )->m_dtd = &m_dtdlist[GetTile(vPos)->m_dtd->m_dwModifiedType];
+    GetTile( vPos )->m_dtd = &m_dtdlist[GetTile( vPos )->m_dtd->m_dwModifiedType];
 
-	return JSUCCESS;
+    return JSUCCESS;
 }
 
 CItem *CDungeon::PickUp( JVector &vPickupPos )
 {
-    CItem *pItem = GetTile(vPickupPos)->m_pCurItem;
-    m_llItems->Remove(pItem->m_pllLink, false);
+    CItem *pItem = GetTile( vPickupPos )->m_pCurItem;
+    if( pItem )
+        m_llItems->Remove( pItem->m_pllLink, false );
     return pItem;
 }
 
 void CDungeon::Drop( CItem *pItem, JVector &vDropPos )
 {
-    GetTile(vDropPos)->m_pCurItem = pItem;
+    GetTile( vDropPos )->m_pCurItem = pItem;
     pItem->m_vPos = vDropPos;
-    pItem->m_pllLink = m_llItems->Add(pItem, pItem->m_id->m_dwIndex);
+    pItem->m_pllLink = m_llItems->Add( pItem, pItem->m_id->m_dwIndex );
 }

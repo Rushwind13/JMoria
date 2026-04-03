@@ -10,22 +10,31 @@
 #include "Dungeon.h"
 #include "Player.h"
 
-JResult CItem::CreateItem( CItemDef *pid )
+// Simple instance id generator for items
+static uint32 s_nextItemInstanceId = 1;
+
+JResult CItem::CreateItem( CItemDef *pid, JVector vSpawnPoint, bool bNear )
 {
-//    int desired = Util::Roll(pid->m_szAppear);
-//    for( int count=0; count < desired; count++ )
+    //    int desired = Util::Roll(pid->m_szAppear);
+    //    for( int count=0; count < desired; count++ )
     {
         CItem *pItem;
         pItem = new CItem;
 
         // Initialize the Item from the ItemDef
-        pItem->Init(pid);
+        pItem->Init( pid );
 
-        // Put the item in the world
-        pItem->SpawnItem();
+        // Apply cursed flag
+        pItem->SetCursed( 5 );
 
-        // Now that the item is set up, add it to the global list of items
-        pItem->m_pllLink = g_pGame->GetDungeon()->m_llItems->Add(pItem);
+        if( g_pGame )
+        {
+            // Put the item in the world
+            pItem->SpawnItem( /*bNear? Util::Near(vSpawnPoint): /**/ vSpawnPoint );
+
+            // Now that the item is set up, add it to the global list of items
+            pItem->m_pllLink = g_pGame->GetDungeon()->m_llItems->Add( pItem );
+        }
     }
 
     return JSUCCESS;
@@ -34,79 +43,189 @@ JResult CItem::CreateItem( CItemDef *pid )
 void CItem::Init( CItemDef *pid )
 {
     m_id = pid;
-    m_Color.SetColor(m_id->m_Color);
-    if( Util::GetRandom(1,100) < 5 )
+    // assign a unique instance id when initializing the item
+    if( m_dwInstanceId == 0 )
     {
-        m_dwFlags |= ITEM_FLAG_CURSED;
-        m_Color.SetColor(255,0,0,255);
+        m_dwInstanceId = s_nextItemInstanceId++;
+    }
+    m_Color.SetColor( m_id->m_Color );
+    switch( m_id->m_dwIndex )
+    {
+    case ITEM_IDX_POTION:
+    case ITEM_IDX_SCROLL:
+    case ITEM_IDX_TORCH:
+        m_fRemainingDuration = Util::GetRandom( 0.0f, m_id->m_fDuration );
+        break;
+    case ITEM_IDX_STAFF:
+    case ITEM_IDX_WAND:
+        m_dwCharges = Util::Roll( "1d20" );
+        break;
     }
 }
 
-JResult CItem::SpawnItem()
+void CItem::SetCursed( bool bCursed )
+{
+    if( bCursed )
+    {
+        m_dwFlags &= ~ITEM_FLAG_CURSED;
+        m_dwFlags |= ITEM_FLAG_CURSED;
+        m_Color.SetColor( 255, 0, 0, 255 );
+    }
+    else
+    {
+        m_dwFlags &= ~ITEM_FLAG_CURSED;
+        m_Color.SetColor( m_id->m_Color );
+    }
+}
+
+void CItem::SetCursed( int likelihood )
+{
+    int rolled = (int)Util::GetRandom( 1.0f, 100.0f );
+    SetCursed( rolled < likelihood );
+}
+
+JResult CItem::SpawnItem( JVector vSpawnPoint )
 {
     bool bItemSpawned = false;
-    printf("Trying to spawn item type: %s...", m_id->m_szName);
-    JVector vTryPos;
-    while( !bItemSpawned )
+    JLog( LOG_LEVEL_INFO, false, "Trying to spawn item type: %s...", m_id->m_szName );
+
+    if( vSpawnPoint.IsWithinWorld() )
     {
-        vTryPos.Init( (float)(Util::GetRandom(0, DUNG_WIDTH-1)), (float)(Util::GetRandom(0, DUNG_HEIGHT-1)) );
-
-        //printf("Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
-        //g_pGame->GetMsgs()->Printf( "Trying to spawn item type: %d at <%.2f %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
-
-        if( g_pGame->GetDungeon()->CanPlaceItemAt(vTryPos) == DUNG_COLL_NO_COLLISION )
-        {
-            m_vPos = vTryPos;
-            g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurItem = this;
-            bItemSpawned = true;
-            printf( "Success!\n" );
-            //g_pGame->GetMsgs()->Printf( "Success!\n" );
-        }
+        return SpawnAt( vSpawnPoint );
     }
 
+    JVector vTryPos;
+    JIVector *vOpen;
+    while( !bItemSpawned )
+    {
+        JLog( LOG_LEVEL_INFO, false, "." );
+        vOpen = g_pGame->GetDungeon()->AnyOpenTile();
+        vTryPos.Init( VEC_EXPAND( *vOpen ) );
+
+        // JLog( LOG_LEVEL_NOISE, false, "Trying to spawn item type: %d at <%.2f %.2f>...\n",
+        // m_md->m_dwType, vTryPos.x, vTryPos.y ); g_pGame->GetMsgs()->Printf( "Trying to spawn item
+        // type: %d at <%.2f
+        // %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
+
+        if( SpawnAt( vTryPos ) == JSUCCESS )
+        {
+            bItemSpawned = true;
+        }
+    }
     return JSUCCESS;
+}
+
+JResult CItem::SpawnAt( JVector vSpawnPoint )
+{
+    if( g_pGame && g_pGame->GetDungeon()->CanPlaceItemAt( vSpawnPoint ) == DUNG_COLL_NO_COLLISION )
+    {
+        m_vPos = vSpawnPoint;
+        g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurItem = this;
+
+        JLog( LOG_LEVEL_INFO, false, "Success! Spawned at <%.2f %.2f>\n", VEC_EXPAND( m_vPos ) );
+        // g_pGame->GetMsgs()->Printf( "Success!\n" );
+
+        return JSUCCESS;
+    }
+    return JBOGUSKEY;
+}
+
+bool CItem::Update( float fCurTime )
+{
+    if( ( m_id->m_dwFlags & ITEM_COLOR_MULTI ) == ITEM_COLOR_MULTI )
+    {
+        m_fColorChangeInterval += fCurTime;
+    }
+
+    if( !g_pGame->GetPlayer()->m_bIsDisturbed )
+    {
+        JIVector vItem( VEC_EXPAND( m_vPos ) );
+        JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+        if( Util::Nearby( vItem, 1 ).Contains( vPlayer ) )
+        {
+            g_pGame->GetDungeon()->DisturbPlayer();
+        }
+    }
+    return true;
 }
 
 // draw routines
 void CItem::SetColor()
 {
-    if( m_fColorChangeInterval < COLOR_CHANGE_TIMEOUT ) return;
+    if( m_fColorChangeInterval < COLOR_CHANGE_TIMEOUT )
+        return;
 
-    if( (m_id->m_dwFlags & ITEM_COLOR_MULTI) == ITEM_COLOR_MULTI )
+    if( ( m_id->m_dwFlags & ITEM_COLOR_MULTI ) == ITEM_COLOR_MULTI )
     {
-        int which_color = Util::GetRandom(0,m_id->m_Colors->length()-1);
-        m_Color.SetColor(*(m_id->m_Colors->GetLink(which_color)->m_lpData));
+        int which_color = Util::GetRandom( 0, m_id->m_Colors->length() - 1 );
+        m_Color.SetColor( *( m_id->m_Colors->GetNthLink( which_color )->m_lpData ) );
     }
     m_fColorChangeInterval = 0.0f;
 }
 
+unsigned char ItemIDs[ITEM_IDX_MAX + 1] = "|)[](]]\"=~{}{}&?!-_?$~//\\/|/|]!";
+const int EquipTypes[ITEM_IDX_MAX + 1] = {
+    EQUIP_IDX_MAIN_HAND, EQUIP_IDX_OFF_HAND,  EQUIP_IDX_ARMOR,     EQUIP_IDX_HELMET,
+    EQUIP_IDX_CLOAK,     EQUIP_IDX_GLOVES,    EQUIP_IDX_BOOTS,     EQUIP_IDX_AMULET,
+    EQUIP_IDX_RING,      EQUIP_IDX_TORCH,     EQUIP_IDX_MAIN_HAND, EQUIP_IDX_AMMO,
+    EQUIP_IDX_MAIN_HAND, EQUIP_IDX_AMMO,      EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,
+    EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,
+    EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,   EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND,
+    EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND,
+    EQUIP_IDX_MAIN_HAND, EQUIP_IDX_BELT,      EQUIP_IDX_INVALID };
 
-unsigned char ItemIDs[ITEM_IDX_MAX+1] = "|)[](]]\"=~{}{}&?!-_?$~/\\/";
+int CItem::EquipType()
+{
+    int item_type = m_id->m_dwIndex;
+    if( item_type <= ITEM_IDX_INVALID || item_type >= ITEM_IDX_MAX )
+        return EQUIP_IDX_INVALID;
+    return EquipTypes[item_type];
+}
+
+const char *CItem::GetName()
+{
+    if( false ) // IsIdentified() ) // TODO: MIKE: ID goes here
+    {
+        return const_cast<const char*>(m_id->m_szName);
+    }
+    else
+    {
+        return m_id->m_szUnidentifiedName;
+    }
+}
+
+const char *CItem::GetPlural()
+{
+    if( false ) // IsIdentified() )// TODO: MIKE: ID goes here
+    {
+        return const_cast<const char*>(m_id->m_szPlural);
+    }
+    else
+    {
+        return m_id->m_szUnidentifiedPlural;
+    }
+}
+
 void CItem::Draw()
 {
     // Don't draw if something else is there.
-    if( g_pGame->GetDungeon()->GetTile(m_vPos)->m_pCurMonster != NULL ||
-       g_pGame->GetPlayer()->m_vPos == m_vPos )
+    if( g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurMonster != NULL ||
+        g_pGame->GetPlayer()->m_vPos == m_vPos )
     {
         return;
     }
+
     Uint8 item_tile = ItemIDs[m_id->m_dwIndex] - ' ' - 1;
     JVector DUNG_ASPECT;
 
     SetColor();
 
-    //PreDraw();
+    // PreDraw();
     g_pGame->GetDungeon()->m_TileSet->SetTileColor( m_Color );
     g_pGame->GetDungeon()->m_TileSet->DrawTile( item_tile, m_vPos, vSize, false );
-    //PostDraw();
+    // PostDraw();
 }
 
-void CItem::PreDraw()
-{
-    g_pGame->GetDungeon()->PreDraw();
-}
+void CItem::PreDraw() { g_pGame->GetDungeon()->PreDraw(); }
 
-void CItem::PostDraw()
-{
-    g_pGame->GetDungeon()->PostDraw();
-}
+void CItem::PostDraw() { g_pGame->GetDungeon()->PostDraw(); }

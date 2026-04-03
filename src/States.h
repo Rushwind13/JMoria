@@ -10,58 +10,58 @@
 
 class CUseState : public CStateBase
 {
-	// Member Variables
-	public:
-	protected:
-	private:
+    // Member Variables
+public:
+protected:
+private:
+    // Member Functions
+public:
+protected:
+    virtual int OnHandleKey( SDL_keysym *keysym );
 
-	// Member Functions
-	public:
-	protected:
-	virtual int OnHandleKey( SDL_keysym *keysym );
-	private:
+private:
 };
 
 class CHelpState : public CStateBase
 {
-	// Member Variables
-	public:
-	protected:
-	private:
+    // Member Variables
+public:
+protected:
+private:
+    // Member Functions
+public:
+protected:
+    virtual int OnHandleKey( SDL_keysym *keysym );
 
-	// Member Functions
-	public:
-	protected:
-	virtual int OnHandleKey( SDL_keysym *keysym );
-	private:
+private:
 };
 
 class CSpellState : public CStateBase
 {
-	// Member Variables
-	public:
-	protected:
-	private:
+    // Member Variables
+public:
+protected:
+private:
+    // Member Functions
+public:
+protected:
+    virtual int OnHandleKey( SDL_keysym *keysym );
 
-	// Member Functions
-	public:
-	protected:
-	virtual int OnHandleKey( SDL_keysym *keysym );
-	private:
+private:
 };
 
 class CRestState : public CStateBase
 {
-	// Member Variables
-	public:
-	protected:
-	private:
+    // Member Variables
+public:
+protected:
+private:
+    // Member Functions
+public:
+protected:
+    virtual int OnHandleKey( SDL_keysym *keysym );
 
-	// Member Functions
-	public:
-	protected:
-	virtual int OnHandleKey( SDL_keysym *keysym );
-	private:
+private:
 };
 
 #endif // __STATES_H__

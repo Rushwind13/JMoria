@@ -8,40 +8,36 @@
 
 #include "ClockStepState.h"
 
-#include "DungeonTile.h"
 #include "DisplayText.h"
+#include "DungeonTile.h"
 #include "Game.h"
 
 #include "FileParse.h"
 
 extern CGame *g_pGame;
 
-CClockStepState::CClockStepState()
-: m_dwClock(0),
-m_dwStep(1)
+CClockStepState::CClockStepState() : m_dwClock( 0 ), m_dwStep( 1 )
 {
-    m_pKeyHandlers[CLOCKSTEP_INIT]    = &CClockStepState::OnHandleInit;
-    m_pKeyHandlers[CLOCKSTEP_TICK]    = &CClockStepState::OnHandleTick;
+    m_pKeyHandlers[CLOCKSTEP_INIT] = &CClockStepState::OnHandleInit;
+    m_pKeyHandlers[CLOCKSTEP_TICK] = &CClockStepState::OnHandleTick;
 
     m_eCurModifier = CLOCKSTEP_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }
 
-CClockStepState::~CClockStepState()
-{
-}
+CClockStepState::~CClockStepState() {}
 
-int CClockStepState::OnHandleKey(SDL_Keysym *keysym)
+int CClockStepState::OnHandleKey( SDL_Keysym *keysym )
 {
     int retval;
-    retval = ((*this).*(m_pCurKeyHandler))(keysym);
+    retval = ( ( *this ).*( m_pCurKeyHandler ) )( keysym );
     return retval;
 }
 
 int CClockStepState::OnHandleTick( SDL_Keysym *keysym )
 {
     int retval;
-    printf( "Handling TICK modifier\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Handling TICK modifier\n" );
     retval = OnBaseHandleKey( keysym );
 
     if( retval == JRESETSTATE )
@@ -51,7 +47,7 @@ int CClockStepState::OnHandleTick( SDL_Keysym *keysym )
 
     if( retval == JCOMPLETESTATE )
     {
-        printf( "TICK modifier complete, CLOCKSTEP state to next TICK\n");
+        JLog( LOG_LEVEL_DEBUG, true, "TICK modifier complete, CLOCKSTEP state to next TICK\n" );
         DoTick();
         m_eCurModifier = CLOCKSTEP_TICK;
         m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -59,12 +55,12 @@ int CClockStepState::OnHandleTick( SDL_Keysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        printf( "CLOCK still waiting for a valid key.\n" );
+        JLog( LOG_LEVEL_DEBUG, true, "CLOCK still waiting for a valid key.\n" );
         return 0;
     }
 
     // We got a valid key
-    printf( "TICK modifier got a valid key\n" );
+    JLog( LOG_LEVEL_NOISE, true, "TICK modifier got a valid key\n" );
     g_pGame->GetEnd()->Clear();
     DoTick();
 
@@ -73,7 +69,7 @@ int CClockStepState::OnHandleTick( SDL_Keysym *keysym )
 
 int CClockStepState::OnHandleInit( SDL_Keysym *keysym )
 {
-    printf( "Initializing CLOCKSTEP state...\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "Initializing CLOCKSTEP state...\n" );
 
     g_pGame->GetStats()->Clear();
     DoTick();
@@ -94,12 +90,11 @@ int CClockStepState::OnBaseHandleKey( SDL_Keysym *keysym )
 
 void CClockStepState::ResetToState( int newstate )
 {
-    g_pGame->SetState(newstate);
+    g_pGame->SetState( newstate );
     m_cCommand = NULL;
     m_eCurModifier = CLOCKSTEP_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }
-
 
 //////////////////////////////////////
 /// command-specific fcns go below
@@ -108,8 +103,8 @@ void CClockStepState::ResetToState( int newstate )
 bool CClockStepState::DoTick()
 {
     m_dwClock += m_dwStep;
-    g_pGame->GetStats()->Printf("Tick! %d\n", m_dwClock);
-    g_pGame->SetReadyForUpdate(true);
-     g_pGame->GetDungeon()->Tick(m_dwClock);
+    g_pGame->GetStats()->Printf( "Tick! %d\n", m_dwClock );
+    g_pGame->SetReadyForUpdate( true );
+    g_pGame->GetDungeon()->Tick( m_dwClock );
     return true;
 }

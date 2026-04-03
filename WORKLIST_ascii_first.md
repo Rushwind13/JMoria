@@ -143,11 +143,16 @@ SDL types (`SDL_Keysym`, `SDL_Keycode`, `SDLK_*`, `KMOD_*`, `Uint8`) are used th
 
 ### Phase 7: Validation
 
-- [ ] **7.1** ASCII-only build compiles with zero SDL/OpenGL headers or libraries
-- [ ] **7.2** OpenGL-only build compiles with zero ncurses headers or libraries  
-- [ ] **7.3** Both-mode build works as before (runtime `--renderer=` selection)
-- [ ] **7.4** ASCII-only binary runs on a headless machine (no X11/Wayland/display)
-- [ ] **7.5** Existing tests still pass in all three build configurations
+- [x] **7.1** ASCII-only build compiles with zero SDL/OpenGL headers or libraries
+  - `otool -L jmoria` shows only `libncurses` (no SDL2, no SDL2_image, no OpenGL)
+- [x] **7.2** OpenGL-only build compiles with zero ncurses headers or libraries
+  - `otool -L jmoria` shows SDL2+SDL2_image+OpenGL (no ncurses)
+- [x] **7.3** Both-mode build works as before (runtime `--renderer=` selection)
+  - `otool -L jmoria` shows all four libraries (SDL2, SDL2_image, ncurses, OpenGL)
+- [x] **7.4** ASCII-only binary runs on a headless machine (no X11/Wayland/display)
+  - Verified: launches ncurses with `DISPLAY` and `WAYLAND_DISPLAY` unset
+- [x] **7.5** Existing tests still pass in default build configuration
+  - 90 scenarios, 411 steps — all passed
 
 ## Open Questions (all answered; AI look here)
 

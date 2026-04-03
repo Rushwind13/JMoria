@@ -564,6 +564,42 @@ bool CollisionTest( JVector &vTest )
     return g_pGame->GetDungeon()->IsWalkableFor( vTest ) == DUNG_COLL_NO_COLLISION;
 }
 
+// Sight line collision test - only open doors are transparent to visibility
+// Closed doors, secret doors, walls, and rubble block line-of-sight
+bool SightCollisionTest( JVector &vTest )
+{
+    if( !vTest.IsWithinWorld() )
+        return false;
+
+    CDungeonTile *curTile = g_pGame->GetDungeon()->GetTile( vTest );
+    if( curTile == NULL )
+        return false;
+
+    int type = curTile->m_dtd->m_dwType;
+    int modifiedType = curTile->m_dtd->m_dwModifiedType;
+    
+    // Explicitly block sight-blocking obstacles
+    // Walls and rubble always block sight
+    if( type == DUNG_IDX_WALL || type == DUNG_IDX_RUBBLE )
+        return false;  // Blocked
+    
+    // Check if this is a door by base type
+    if( type == DUNG_IDX_DOOR || type == DUNG_IDX_SECRET_DOOR )
+    {
+        // Check the modified type to see if it's actually open
+        // modifiedType will be DUNG_IDX_OPEN_DOOR if door is open
+        if( modifiedType == DUNG_IDX_OPEN_DOOR )
+            return true;  // Open door allows sight through
+        else
+            return false; // Closed door blocks sight
+    }
+    
+    // Everything else allows sight (floors, stairs, etc.)
+    // This is more permissive than using IsWalkableFor, which is intentional -
+    // you can see through/over things you can't walk through (like stairs)
+    return true;  // Allow sight
+}
+
 bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFlags )
 {
     // can see things in the same room, if the room is LIT
@@ -606,13 +642,22 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
     // No "see through walls" effects are active
     // Check for obstacles along the line between
     // the player and the position
+    // Use SightCollisionTest to allow vision through doors
     //
-    return Util::Bresenham( vSource, vTarget, SIGHT_DISTANCE_PLAYER, CollisionTest );
+    return Util::Bresenham( vSource, vTarget, SIGHT_DISTANCE_PLAYER, SightCollisionTest );
 }
 
 bool CDungeon::PlayerCanSee( JVector vCheck, uint32 dwFlags )
 {
     if( g_pGame->GetPlayer()->IsWizard() )
+        return true;
+
+    // Adjacent tiles (3x3 grid around player) are always visible
+    // This includes all 8 surrounding tiles plus the tile the player is on
+    JVector playerPos = g_pGame->GetPlayer()->m_vPos;
+    int dx = abs( (int)vCheck.x - (int)playerPos.x );
+    int dy = abs( (int)vCheck.y - (int)playerPos.y );
+    if( dx <= 1 && dy <= 1 )
         return true;
 
     // Check for sight distance first

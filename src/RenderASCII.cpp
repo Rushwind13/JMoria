@@ -253,9 +253,17 @@ int CRenderASCII::MapX( float worldX )
     else
     {
         // World space (Dungeon): 1:1 tile-to-char mapping.
-        // Tile positions are integers; use integer math to avoid rounding errors.
-        int tileX = (int)roundf( x );
-        int centerX = ( m_currentBounds.left + m_currentBounds.right ) / 2;
+        // Convert world float coordinates to integer screen positions.
+        // Use direct cast (truncation) rather than any rounding to avoid
+        // items being placed outside viewport bounds due to rounding artifacts.
+        int tileX = (int)x;
+        // Stable center calculation: use floor division for consistent rounding
+        // This prevents discontinuities when player crosses integer boundaries
+        int boundSum = m_currentBounds.left + m_currentBounds.right;
+        int centerX = boundSum / 2;
+        if( boundSum < 0 && (boundSum & 1) )
+            centerX--;  // Floor rounding for negative odd sums
+        
         int viewCenter = m_layout.dungeon.left + m_layout.dungeon.Width() / 2;
         return viewCenter + ( tileX - centerX );
     }
@@ -278,8 +286,16 @@ int CRenderASCII::MapY( float worldY )
     {
         // World space (Dungeon): 1:1 tile-to-char mapping.
         // Higher world Y → higher terminal row (matching OpenGL convention).
-        int tileY = (int)roundf( y );
-        int centerY = ( m_currentBounds.top + m_currentBounds.bottom ) / 2;
+        // Use direct cast (truncation) rather than any rounding to avoid
+        // items being placed outside viewport bounds due to rounding artifacts.
+        int tileY = (int)y;
+        // Stable center calculation: use floor division for consistent rounding
+        // This prevents discontinuities when player crosses integer boundaries
+        int boundSum = m_currentBounds.top + m_currentBounds.bottom;
+        int centerY = boundSum / 2;
+        if( boundSum < 0 && (boundSum & 1) )
+            centerY--;  // Floor rounding for negative odd sums
+        
         int viewCenter = m_layout.dungeon.top + m_layout.dungeon.Height() / 2;
         return viewCenter + ( tileY - centerY );
     }
@@ -330,11 +346,13 @@ bool CRenderASCII::DrawTile( const JFVector &vPos, JVector &vSize, JIVector &vTi
     int screenY = MapY( vPos.y );
 
     // Clip to the dungeon region when drawing world-space tiles
+    // Add 3-unit safety margin to prevent edge clipping artifacts
+    // when viewport center shifts with player movement
     bool isPixelSpace = ( m_currentBounds.left >= 0 && m_currentBounds.right > 500 );
     if( !isPixelSpace )
     {
-        if( screenX < m_layout.dungeon.left || screenX >= m_layout.dungeon.right ||
-            screenY < m_layout.dungeon.top  || screenY >= m_layout.dungeon.bottom )
+        if( screenX < m_layout.dungeon.left - 3 || screenX >= m_layout.dungeon.right + 3 ||
+            screenY < m_layout.dungeon.top - 3  || screenY >= m_layout.dungeon.bottom + 3 )
             return false;
     }
     else

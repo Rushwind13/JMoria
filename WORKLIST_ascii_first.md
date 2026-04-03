@@ -94,10 +94,14 @@ SDL types (`SDL_Keysym`, `SDL_Keycode`, `SDLK_*`, `KMOD_*`, `Uint8`) are used th
 
 ### Phase 4: Frame Timing Without SDL
 
-- [ ] **4.1** Abstract frame timing in `main.cpp`
-  - ASCII-only: use `<chrono>` for `GetTicks` equivalent, `std::this_thread::sleep_for` for delay
-  - OpenGL: continue using `SDL_GetTicks`/`SDL_Delay`
-- [ ] **4.2** Remove `SDL_Init(SDL_INIT_TIMER)` from ASCII mode in `main.cpp`
+- [x] **4.1** Abstract frame timing in `main.cpp`
+  - Replaced `#include "SDL2/SDL.h"` with `<chrono>` + `<thread>`
+  - Added `GetTicks()` (steady_clock) and `Delay()` (sleep_for) static helpers
+  - All `SDL_GetTicks()` → `GetTicks()`, `SDL_Delay()` → `Delay()`
+  - Works for both renderers — no more SDL dependency in main.cpp
+- [x] **4.2** Remove `SDL_Init(SDL_INIT_TIMER)` from ASCII mode in `main.cpp`
+  - Entire block removed (was only needed for SDL timer functions)
+  - OpenGL mode: `CRender::InitSDL()` still handles full SDL initialization
 
 ### Phase 5: Compile Flag Infrastructure
 

@@ -1,7 +1,8 @@
 #include "JMDefs.h"
 #include <time.h>
 #include <cstring>
-#include "SDL2/SDL.h"
+#include <chrono>
+#include <thread>
 #include "RenderMode.h"
 
 // Frame rate limiting configuration
@@ -13,6 +14,21 @@
 // The global game pointer
 CGame *g_pGame = NULL;
 eLogLevel g_eLogLevel = LOG_LEVEL_INFO;
+
+// Platform-independent timing (replaces SDL_GetTicks / SDL_Delay)
+static auto g_startTime = std::chrono::steady_clock::now();
+
+static unsigned int GetTicks()
+{
+    auto now = std::chrono::steady_clock::now();
+    return (unsigned int)std::chrono::duration_cast<std::chrono::milliseconds>( now - g_startTime )
+        .count();
+}
+
+static void Delay( unsigned int ms )
+{
+    std::this_thread::sleep_for( std::chrono::milliseconds( ms ) );
+}
 
 JIVector g_vDirDelta[] = { JIVector( 0, -1 ), JIVector( 0, 1 ), JIVector( -1, 0 ),
                            JIVector( 1, 0 ) };
@@ -36,17 +52,6 @@ int main( int argc, char **argv )
             renderMode = RenderMode::ASCII;
         else if( strcmp( argv[i], "--renderer=opengl" ) == 0 )
             renderMode = RenderMode::OpenGL;
-    }
-
-    // ASCII mode: need SDL timer subsystem for SDL_GetTicks / SDL_Delay
-    // OpenGL mode: CRender::InitSDL handles full SDL initialization
-    if( renderMode == RenderMode::ASCII )
-    {
-        if( SDL_Init( SDL_INIT_TIMER ) < 0 )
-        {
-            fprintf( stderr, "SDL timer init failed: %s\n", SDL_GetError() );
-            exit( 1 );
-        }
     }
 
     JResult result;
@@ -79,7 +84,7 @@ int main( int argc, char **argv )
 #ifdef TURN_BASED
         {
 #ifdef LIMIT_FRAMERATE
-            frameStartTime = SDL_GetTicks();
+            frameStartTime = GetTicks();
 #endif
             // handle the events in the queue
             g_pGame->HandleEvents( isActive, done );
@@ -96,17 +101,17 @@ int main( int argc, char **argv )
              * second - 30 FPS is more than sufficient for responsive input
              * handling while keeping CPU usage reasonable.
              */
-            frameElapsedTime = SDL_GetTicks() - frameStartTime;
+            frameElapsedTime = GetTicks() - frameStartTime;
             if( frameElapsedTime < TARGET_FRAME_TIME )
             {
-                SDL_Delay( TARGET_FRAME_TIME - frameElapsedTime );
+                Delay( TARGET_FRAME_TIME - frameElapsedTime );
             }
 #endif // LIMIT_FRAMERATE
         }
 #else
         {
 #ifdef LIMIT_FRAMERATE
-            frameStartTime = SDL_GetTicks();
+            frameStartTime = GetTicks();
 #endif
             curTime = Util::GetTickCount();
             if( curTime > nextTime )
@@ -141,10 +146,10 @@ int main( int argc, char **argv )
              * the deltaTime passed to Update(), which may impact game speed if
              * physics/movement calculations rely on consistent timing.
              */
-            frameElapsedTime = SDL_GetTicks() - frameStartTime;
+            frameElapsedTime = GetTicks() - frameStartTime;
             if( frameElapsedTime < TARGET_FRAME_TIME )
             {
-                SDL_Delay( TARGET_FRAME_TIME - frameElapsedTime );
+                Delay( TARGET_FRAME_TIME - frameElapsedTime );
             }
 #endif // LIMIT_FRAMERATE
         }

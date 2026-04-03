@@ -50,7 +50,10 @@ CGame::CGame()
       m_pUseState( NULL ),
       m_eCurState( STATE_INVALID ),
       m_fGameTime( 0.0f ),
-      m_eRenderMode( RenderMode::OpenGL )
+      m_eRenderMode( RenderMode::OpenGL ),
+      m_bShowStats( false ),
+      m_bShowInv( false ),
+      m_bShowEquip( false )
 {
     m_pClockStepState = new CClockStepState;
     m_pCmdState = new CCmdState;
@@ -554,9 +557,20 @@ void CGame::Draw()
         GetPlayer()->Draw();
 
         GetMsgs()->Draw();
-        GetStats()->Draw();
-        GetInv()->Draw();
-        GetEquip()->Draw();
+
+        // In ASCII mode, stats/inv/equip are fly-out panels toggled by c/i/e
+        if( !bASCII )
+        {
+            GetStats()->Draw();
+            GetInv()->Draw();
+            GetEquip()->Draw();
+        }
+        else
+        {
+            if( m_bShowStats ) GetStats()->Draw();
+            if( m_bShowInv ) GetInv()->Draw();
+            if( m_bShowEquip ) GetEquip()->Draw();
+        }
     }
 
     if( m_eCurState == STATE_USE )
@@ -739,6 +753,27 @@ void CGame::HandleEventsASCII( int &isActive, int &done )
             return;
         }
         keysym.mod = KMOD_NONE;
+    }
+
+    // ASCII fly-out panel toggles: i=inventory, e=equipment, C=character stats
+    // These are display-only and don't consume a game turn.
+    if( m_eCurState == STATE_COMMAND )
+    {
+        if( keysym.sym == SDLK_i && keysym.mod == KMOD_NONE )
+        {
+            ToggleInv();
+            return;
+        }
+        if( keysym.sym == SDLK_e && keysym.mod == KMOD_NONE )
+        {
+            ToggleEquip();
+            return;
+        }
+        if( keysym.sym == SDLK_c && ( keysym.mod & KMOD_SHIFT ) )
+        {
+            ToggleStats();
+            return;
+        }
     }
 
     JResult retval = m_pCurState->HandleKey( &keysym );

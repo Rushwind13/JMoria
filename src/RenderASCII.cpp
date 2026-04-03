@@ -20,12 +20,13 @@ ASCIILayout ASCIILayout::Create80x24()
     l.termWidth = 80;
     l.termHeight = 24;
 
-    l.messages  = { 0, 0, 80, 2 };
-    l.stats     = { 0, 2, 12, 22 };
-    l.dungeon   = { 12, 2, 62, 22 };
-    l.inventory = { 62, 2, 80, 12 };
-    l.equipment = { 62, 12, 80, 22 };
-    l.use       = { 20, 3, 60, 22 };
+    l.messages  = { 0, 0, 80, 5 };
+    l.dungeon   = { 0, 5, 80, 24 };
+    // Fly-out panels: drawn over the dungeon when toggled
+    l.stats     = { 0, 5, 25, 24 };
+    l.inventory = { 55, 5, 80, 15 };
+    l.equipment = { 55, 15, 80, 24 };
+    l.use       = { 20, 5, 60, 24 };
     l.endgame   = { 0, 0, 80, 24 };
 
     return l;
@@ -310,10 +311,20 @@ bool CRenderASCII::DrawTile( const JFVector &vPos, JVector &vSize, JIVector &vTi
     int screenX = MapX( vPos.x );
     int screenY = MapY( vPos.y );
 
-    // Bounds check
-    if( screenX < 0 || screenX >= m_layout.termWidth ||
-        screenY < 0 || screenY >= m_layout.termHeight )
-        return false;
+    // Clip to the dungeon region when drawing world-space tiles
+    bool isPixelSpace = ( m_currentBounds.left >= 0 && m_currentBounds.right > 500 );
+    if( !isPixelSpace )
+    {
+        if( screenX < m_layout.dungeon.left || screenX >= m_layout.dungeon.right ||
+            screenY < m_layout.dungeon.top  || screenY >= m_layout.dungeon.bottom )
+            return false;
+    }
+    else
+    {
+        if( screenX < 0 || screenX >= m_layout.termWidth ||
+            screenY < 0 || screenY >= m_layout.termHeight )
+            return false;
+    }
 
     int pair = GetColorPair( m_currentColor );
     if( m_bHasColor )
@@ -333,9 +344,19 @@ bool CRenderASCII::DrawTile( const JFVector &vPos, JVector &vSize, JIVector &vTi
     int screenX = MapX( vPos.x );
     int screenY = MapY( vPos.y );
 
-    if( screenX < 0 || screenX >= m_layout.termWidth ||
-        screenY < 0 || screenY >= m_layout.termHeight )
-        return false;
+    bool isPixelSpace = ( m_currentBounds.left >= 0 && m_currentBounds.right > 500 );
+    if( !isPixelSpace )
+    {
+        if( screenX < m_layout.dungeon.left || screenX >= m_layout.dungeon.right ||
+            screenY < m_layout.dungeon.top  || screenY >= m_layout.dungeon.bottom )
+            return false;
+    }
+    else
+    {
+        if( screenX < 0 || screenX >= m_layout.termWidth ||
+            screenY < 0 || screenY >= m_layout.termHeight )
+            return false;
+    }
 
     int pair = GetColorPair( m_currentColor );
     if( m_bHasColor )

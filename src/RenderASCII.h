@@ -64,6 +64,8 @@ public:
                    JFVector &vTexels ) override;
     bool DrawTile( const JFVector &vPos, JVector &vSize, JIVector &vTile ) override;
 
+    bool DrawChar( const JFVector &vPos, JVector &vSize, char ch ) override;
+
     void PreDrawObjects( JRect rcBounds, uint32 Texture, bool bTranslate = false,
                          bool bInverse = false, JFVector *vTranslate = 0 ) override;
     void PostDrawObjects() override;

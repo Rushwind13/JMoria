@@ -331,3 +331,21 @@ JResult CRender::PostLoadTexture( uint32 &texture, void *data, int dwColorsPerPi
     return JSUCCESS;
 }
 #endif // postload needed
+
+void CRender::SetTileMetrics( int tilesPerRow, JFVector vTexels )
+{
+    m_dwTileMetricsTilesPerRow = tilesPerRow;
+    m_vTileMetricsTexels = vTexels;
+}
+
+bool CRender::DrawChar( const JFVector &vPos, JVector &vSize, char ch )
+{
+    // Convert printable ASCII character to tile grid coordinates
+    // using stored tileset metrics, then draw as a textured quad.
+    int dwIndex = ch - ' ' - 1;
+    JIVector vTile;
+    vTile.x = dwIndex % m_dwTileMetricsTilesPerRow;
+    vTile.y = dwIndex / m_dwTileMetricsTilesPerRow;
+
+    return DrawTile( vPos, vSize, vTile, m_vTileMetricsTexels );
+}

@@ -78,7 +78,17 @@ bool CTileset::DrawTile( int dwIndex, const JFVector &vPos, JVector &vSize, bool
     return true;
 }
 
-void CTileset::PreDrawTile() { g_pGame->GetRender()->PreDrawTile(); }
+bool CTileset::DrawChar( char ch, const JFVector &vPos, JVector &vSize )
+{
+    g_pGame->GetRender()->DrawChar( vPos, vSize, ch );
+    return true;
+}
+
+void CTileset::PreDrawTile()
+{
+    g_pGame->GetRender()->SetTileMetrics( m_dwTilesPerRow, m_vTexels );
+    g_pGame->GetRender()->PreDrawTile();
+}
 
 void CTileset::PostDrawTile() { g_pGame->GetRender()->PostDrawTile(); }
 

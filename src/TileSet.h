@@ -43,6 +43,7 @@ public:
     void PostDrawTile();
     void SetTileColor( JColor color );
     bool DrawTile( int dwIndex, const JFVector &vPos, JVector &vSize, bool bIsTextured );
+    bool DrawChar( char ch, const JFVector &vPos, JVector &vSize );
 
 protected:
 private:

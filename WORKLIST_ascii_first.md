@@ -35,16 +35,22 @@ This is a successor to PR#155 (ASCII renderer implementation) and represents a d
 
 The draw pipeline should pass characters, not tile grid coordinates.
 
-- [ ] **1.1** Add a character-based draw path to `IRenderBackend`
-  - New virtual: `DrawChar(const JFVector &vPos, JVector &vSize, char ch)` 
-  - Default implementation can route through existing `DrawTile` for backward compat
-- [ ] **1.2** Update `CTileset::DrawTile()` to recover the character and call `DrawChar`
-  - Or: have callers pass the character value through alongside/instead of tile index
-- [ ] **1.3** Update `CRenderASCII::DrawChar()` — just `mvaddch` with the character directly
-  - Eliminate `TileIndexToChar()` reverse-engineering
-- [ ] **1.4** Update `CRender::DrawChar()` — convert char to tile grid coords and draw textured quad
-  - This is where `charValue - ' ' - 1` → grid lookup belongs
-- [ ] **1.5** Audit all callers of `CTileset::DrawTile()` / renderer `DrawTile()` to ensure character values flow through cleanly
+- [x] **1.1** Add a character-based draw path to `IRenderBackend`
+  - New virtual: `DrawChar(const JFVector &vPos, JVector &vSize, char ch)`
+  - New virtual: `SetTileMetrics(int tilesPerRow, JFVector vTexels)` — stores tileset metrics for OpenGL
+- [x] **1.2** Update `CTileset` to expose `DrawChar(char ch, vPos, vSize)` which calls `renderer->DrawChar` directly
+  - `CTileset::PreDrawTile()` now calls `SetTileMetrics()` on the renderer
+- [x] **1.3** Update `CRenderASCII::DrawChar()` — just `mvaddch` with the character directly
+  - Existing `DrawTile` overloads now delegate to `DrawChar`
+  - `TileIndexToChar()` retained only as legacy fallback in `DrawTile`
+- [x] **1.4** Update `CRender::DrawChar()` — convert char to tile grid coords and draw textured quad
+  - Uses stored metrics from `SetTileMetrics()` to compute texture coordinates
+- [x] **1.5** Audit all callers of `CTileset::DrawTile()` — all converted to `DrawChar`
+  - `DisplayText::DrawStr()` — passes `*ptr` directly instead of `*ptr - ' ' - 1`
+  - `CDungeon::Draw()` — `m_dwIndex` renamed to `m_chTile`, stores char directly
+  - `CPlayer::Draw()` — passes `'@'` directly
+  - `CMonster::Draw()` — passes `MonIDs[m_md->m_dwIndex]` directly
+  - `CItem::Draw()` — passes `ItemIDs[m_id->m_dwIndex]` directly
 
 ### Phase 2: SDL Type Abstraction
 

@@ -129,7 +129,6 @@ void CDisplayText::DrawStr( int x, int y, bool bBoundsCheck, int dwYMax, const c
     JVector vScreen( (float)x, (float)y );
     JVector vSize( (float)FONT_DRAW_W, (float)FONT_DRAW_H );
     const char *ptr = szString;
-    int index;
 
     m_TileSet->PreDrawTile();
     m_TileSet->SetTileColor( m_Color );
@@ -143,9 +142,7 @@ void CDisplayText::DrawStr( int x, int y, bool bBoundsCheck, int dwYMax, const c
         }
         else if( *ptr > ' ' && *ptr <= '~' )
         {
-            index = *ptr - ' ' - 1;
-
-            m_TileSet->DrawTile( index, vScreen, vSize, true );
+            m_TileSet->DrawChar( *ptr, vScreen, vSize );
 
             vScreen.x += FONT_DRAW_W;
         }

@@ -28,7 +28,8 @@ public:
           m_dwScreenHeight( 0 ),
           m_dwScreenBPP( 0 ),
           m_dwWindowFlags( 0 ),
-          m_hWindow( NULL ) {};
+          m_hWindow( NULL ),
+          m_dwTileMetricsTilesPerRow( 0 ) {};
     virtual ~CRender() { Term(); }
 
     virtual JResult Init( int width, int height, int bpp );
@@ -67,6 +68,9 @@ public:
     virtual void PostDrawTile();
     virtual void SetTileColor( JColor color );
 
+    virtual bool DrawChar( const JFVector &vPos, JVector &vSize, char ch );
+    virtual void SetTileMetrics( int tilesPerRow, JFVector vTexels );
+
     // Declare this if you need to do more than just "load" the texture.
     virtual JResult PostLoadTexture( uint32 &texture, void *data, int dwColorsPerPixel, bool bIsBMP,
                                      int dwImageWidth, int dwImageHeight, int dwCellWidth,
@@ -86,6 +90,10 @@ protected:
 private:
     bool m_bHasBeenInitted;
     SDL_Window *m_hWindow;
+
+    // Tileset metrics for DrawChar: stored by SetTileMetrics(), used to convert chars to quads
+    int m_dwTileMetricsTilesPerRow;
+    JFVector m_vTileMetricsTexels;
 
 #ifdef DISPLAY_FRAMERATE
     int m_dwFrames;

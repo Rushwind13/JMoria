@@ -1,13 +1,23 @@
 # JMoria
 My from-scratch implementation of a Roguelike game that will be an homage to IMoria
 
-Requires SDL2, SDL2_image, OpenGL
+## Build Modes
 
-To compile it, run _"make"_
+JMoria supports three build configurations:
 
-To run it, run _"jmoria"_
+| Command | Renderer | Dependencies |
+|---|---|---|
+| `make` | Both (runtime selection) | SDL2, SDL2_image, OpenGL, ncurses |
+| `make ascii` | ASCII only | ncurses |
+| `make opengl` | OpenGL only | SDL2, SDL2_image, OpenGL |
 
-Keyboard commands recognized:
+## Running
+
+* **ASCII-only build:** `./jmoria` (renders in the current terminal)
+* **OpenGL-only build:** `./jmoria` (opens an OpenGL window)
+* **Both build:** `./jmoria --renderer=ascii` or `./jmoria --renderer=opengl` (required)
+
+## Keyboard commands
 * *Ctrl-C* - Exit
 * *Arrow keys (or numberpad)* - movement
 * *hjklyubn* - movement
@@ -38,4 +48,4 @@ Keyboard commands recognized:
 Monster definitions are in _Resources/Monsters.txt_
 Item definitions are in _Resources/Items.txt_
 
-Graphics tileset is _Resources/Courier.png_
+Graphics tileset is _Resources/Courier.png_ (OpenGL mode only)

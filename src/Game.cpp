@@ -92,10 +92,15 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
         m_pRender = new CRenderASCII;
         result = m_pRender->Init( 80, 24, 0 );
     }
-    else
+    else if( m_eRenderMode == RenderMode::OpenGL )
     {
         m_pRender = new CRender;
         result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
+    }
+    else
+    {
+        JLog( LOG_LEVEL_ERROR, true, "No render mode specified.\n" );
+        return 1;
     }
 #elif defined( RENDER_ASCII )
     m_pRender = new CRenderASCII;

@@ -15,19 +15,25 @@ else
   RENDER_DEFINES =
 endif
 
-TEST_CC_FLAGS_COMMON = -I../JMoria/src -std=c++17 -Wno-comment -Wno-delete-non-virtual-dtor -DGTEST_HAS_PTHREAD=1
+COMMON_CC_FLAGS = -I../JMoria/src -std=c++17 -Wno-comment -Wno-delete-non-virtual-dtor
+TEST_CC_FLAGS_EXTRA = -DGTEST_HAS_PTHREAD=1
 LD_FLAGS_LINUX = -L/lib/x86_64-linux-gnu -lGL -lSDL2 -lSDL2_image -lncurses
 TEST_LD_FLAGS_LINUX = -L/usr/local/lib -lcucumber-cpp -lboost_program_options -lboost_regex -lboost_filesystem -lgtest -lgtest_main
 
 OS := $(shell uname -s)
 
 ifeq ($(OS),Darwin)
-# Standard Homebrew search paths for headers (MODIFIED: Removed /opt/homebrew)
+# Standard Homebrew search paths for headers
 LOCAL_INCLUDE_PATHS = -I/usr/local/include -I /opt/homebrew/include -I/opt/homebrew/Cellar/googletest/1.17.0/include
-# Standard Homebrew search paths for libraries (MODIFIED: Removed /opt/homebrew)
+# Standard Homebrew search paths for libraries
 LOCAL_LIB_PATHS = -L/usr/local/lib -L /opt/homebrew/lib -L/opt/homebrew/opt/boost/lib -L/opt/homebrew/Cellar/googletest/1.17.0/lib
-# macOS specific flags (Frameworks and libc++)
-TEST_CC_FLAGS = $(TEST_CC_FLAGS_COMMON) -framework OpenGL $(LOCAL_INCLUDE_PATHS)
+# Game compile flags (no OpenGL framework for ASCII-only)
+ifeq ($(RENDER_MODE),ascii)
+  GAME_CC_FLAGS = $(COMMON_CC_FLAGS) $(LOCAL_INCLUDE_PATHS)
+else
+  GAME_CC_FLAGS = $(COMMON_CC_FLAGS) -framework OpenGL $(LOCAL_INCLUDE_PATHS)
+endif
+TEST_CC_FLAGS = $(TEST_CC_FLAGS_EXTRA)
 # Linker flags per build mode
 ifeq ($(RENDER_MODE),ascii)
   LD_FLAGS = $(LOCAL_LIB_PATHS) -lncurses
@@ -40,7 +46,8 @@ endif
 TEST_LD_FLAGS = $(LOCAL_LIB_PATHS) -lcucumber-cpp -lboost_program_options -lboost_regex -lboost_filesystem /opt/homebrew/Cellar/googletest/1.17.0/lib/libgtest.a /opt/homebrew/Cellar/googletest/1.17.0/lib/libgtest_main.a
 else
 # Linux/Other specific flags
-TEST_CC_FLAGS = $(TEST_CC_FLAGS_COMMON)
+GAME_CC_FLAGS = $(COMMON_CC_FLAGS)
+TEST_CC_FLAGS = $(TEST_CC_FLAGS_EXTRA)
 ifeq ($(RENDER_MODE),ascii)
   LD_FLAGS = -lncurses
 else ifeq ($(RENDER_MODE),opengl)
@@ -81,8 +88,11 @@ $(TEST_DIR):
 
 test: $(TEST_EXEC)
 
-%.o: %.cpp
-	$(CC) -c $(CC_FLAGS) $(RENDER_DEFINES) $(TEST_CC_FLAGS) $< -o $@
+src/%.o: src/%.cpp
+	$(CC) -c $(CC_FLAGS) $(RENDER_DEFINES) $(GAME_CC_FLAGS) $< -o $@
+
+test/%.o: test/%.cpp
+	$(CC) -c $(CC_FLAGS) $(RENDER_DEFINES) $(GAME_CC_FLAGS) $(TEST_CC_FLAGS) $< -o $@
 
 clean:
 	rm -f $(EXEC) $(OBJECTS) $(TEST_DIR)/$(TEST_EXEC) $(TEST_OBJECTS)

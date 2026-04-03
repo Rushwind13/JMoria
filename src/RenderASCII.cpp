@@ -147,10 +147,10 @@ int CRenderASCII::GetColorPair( JColor color )
         return 5;               // blue
     }
 
-    // Gray/white
-    if( r > 128 )
-        return 1; // white
-    return 8;     // dark
+    // Gray/white — anything not already caught as "very dark" above
+    // should be visible.  Dark grays (e.g. walls at 64,64,64) need to
+    // map to white since the terminal background is black.
+    return 1; // white
 }
 
 char CRenderASCII::TileIndexToChar( int tileIndex )

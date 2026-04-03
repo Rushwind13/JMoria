@@ -82,12 +82,15 @@ SDL types (`SDL_Keysym`, `SDL_Keycode`, `SDLK_*`, `KMOD_*`, `Uint8`) are used th
 
 ### Phase 3: Decouple Tileset from SDL_image
 
-- [ ] **3.1** Guard `CTileset::Load()` image-loading code with `#ifdef RENDER_OPENGL`
-  - ASCII-only: `Load()` only needs to store the character grid dimensions (hardcoded or from a simple config)
-  - OpenGL: loads the PNG as before
-- [ ] **3.2** Guard `#include "SDL2/SDL_image.h"` in `Tileset.cpp`
-- [ ] **3.3** Guard `RENDER_TILESET_POSTLOAD_NEEDED` — only define when `RENDER_OPENGL`
-- [ ] **3.4** ASCII-only tileset: store `m_dwTilesPerRow` and `m_vTexels` as compile-time constants or skip entirely if Phase 1 eliminates the need
+- [x] **3.1** Guard `CTileset::Load()` image-loading code with `#ifdef RENDER_TILESET_POSTLOAD_NEEDED`
+  - OpenGL path: loads PNG, creates GL texture, computes grid metrics from image dimensions (unchanged)
+  - ASCII-only `#else` path: sets best-effort defaults for `m_dwTilesPerRow`/`m_vTexels`, returns `JSUCCESS`
+- [x] **3.2** Guard `#include "SDL2/SDL.h"` and `#include "SDL2/SDL_image.h"` in `Tileset.cpp`
+  - Both includes now inside `#ifdef RENDER_TILESET_POSTLOAD_NEEDED`
+  - Verified: `Tileset.cpp` compiles with `-URENDER_TILESET_POSTLOAD_NEEDED` (no SDL dependency)
+- [ ] **3.3** Guard `RENDER_TILESET_POSTLOAD_NEEDED` — only define when `RENDER_OPENGL` (deferred to Phase 5)
+- [x] **3.4** ASCII-only tileset: `m_dwTilesPerRow = 95`, `m_vTexels = (1/95, 1.0)` as defaults
+  - These are only used for DrawChar→DrawTile conversion in the OpenGL renderer; the ASCII renderer bypasses tile coords entirely
 
 ### Phase 4: Frame Timing Without SDL
 

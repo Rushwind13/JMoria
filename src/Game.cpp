@@ -540,16 +540,25 @@ void CGame::Draw()
 {
     GetRender()->PreDraw();
 
-    // Draw the dungeon
-    GetDungeon()->Draw();
+    bool bASCII = ( m_eRenderMode == RenderMode::ASCII );
+    bool bOverlayState = ( m_eCurState == STATE_INTRO || m_eCurState == STATE_ENDGAME );
 
-    // Draw the player
-    GetPlayer()->Draw();
+    // In ASCII mode, overlay states (intro/endgame) take the full screen
+    // and shouldn't show dungeon/player/stats underneath
+    if( !bASCII || !bOverlayState )
+    {
+        // Draw the dungeon
+        GetDungeon()->Draw();
 
-    GetMsgs()->Draw();
-    GetStats()->Draw();
-    GetInv()->Draw();
-    GetEquip()->Draw();
+        // Draw the player
+        GetPlayer()->Draw();
+
+        GetMsgs()->Draw();
+        GetStats()->Draw();
+        GetInv()->Draw();
+        GetEquip()->Draw();
+    }
+
     if( m_eCurState == STATE_USE )
     {
         GetUse()->Draw();

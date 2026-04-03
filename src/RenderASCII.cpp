@@ -224,26 +224,17 @@ int CRenderASCII::MapX( float worldX )
 
     if( isPixelSpace )
     {
-        // Pixel space (DisplayText): map 0..640 to appropriate text region
-        // Determine which text region based on the original JRect passed to DisplayText
-        // The DisplayText viewport is always (0, 480, 640, 0), but the actual
-        // draw positions are in the text area's pixel rect.
-        // Map pixel X to terminal char X: x / FONT_DRAW_W
-        // where FONT_DRAW_W = 6
+        // Pixel space (DisplayText): map 0..640 to terminal char X
         return (int)( x / 6.0f );
     }
     else
     {
-        // World space (Dungeon): map world tile X to dungeon viewport region
+        // World space (Dungeon): 1:1 tile-to-char mapping centered in viewport
         float boundsLeft = (float)m_currentBounds.left;
         float boundsRight = (float)m_currentBounds.right;
-        float boundsWidth = boundsRight - boundsLeft;
-        if( boundsWidth < 1.0f )
-            boundsWidth = 1.0f;
-
-        float normalized = ( x - boundsLeft ) / boundsWidth;
-        return m_layout.dungeon.left +
-               (int)( normalized * (float)m_layout.dungeon.Width() );
+        float boundsCenter = ( boundsLeft + boundsRight ) / 2.0f;
+        int viewCenter = m_layout.dungeon.left + m_layout.dungeon.Width() / 2;
+        return viewCenter + (int)( x - boundsCenter + 0.5f );
     }
 }
 
@@ -258,34 +249,20 @@ int CRenderASCII::MapY( float worldY )
     if( isPixelSpace )
     {
         // Pixel space: map 0..480 to terminal row
-        // Y in DisplayText viewport: top=480, bottom=0 (OpenGL convention),
-        // but draw positions go top-down in pixel coords (0 = top of screen).
-        // Map pixel Y to terminal char Y: y / FONT_DRAW_H
-        // where FONT_DRAW_H = 8
         return (int)( y / 8.0f );
     }
     else
     {
-        // World space (Dungeon): note OpenGL ortho has top > bottom (Y inverted)
-        // m_currentBounds for dungeon: top = yorigin+zoom, bottom = yorigin-zoom
-        // but VIEWRECT_EXPAND gives left, right, top, bottom
-        // The ortho is glOrtho(left, right, top, bottom, ...) which means
-        // top value maps to Y=0 on screen, bottom maps to Y=screenHeight.
-        // Actually JRect for dungeon: Init(xorigin-zoom, yorigin+zoom, xorigin+zoom, yorigin-zoom)
-        // So left=xo-z, top=yo+z, right=xo+z, bottom=yo-z
-        // VIEWRECT_EXPAND = left, right, top, bottom
-        // glOrtho(left, right, top, bottom) where top > bottom means Y is inverted
+        // World space (Dungeon): 1:1 tile-to-char mapping centered in viewport.
+        // JRect: Init(xo-zoom, yo+zoom, xo+zoom, yo-zoom)
+        //   top=yo+zoom, bottom=yo-zoom → center = (top+bottom)/2 = yo
+        // OpenGL: glOrtho(VIEWRECT_EXPAND) feeds top as "bottom" param,
+        //   so higher world Y → bottom of screen → higher terminal row.
         float boundsTop = (float)m_currentBounds.top;
         float boundsBottom = (float)m_currentBounds.bottom;
-        // top > bottom in dungeon rect, so range goes from top(high) to bottom(low)
-        // Y increases downward on terminal, but decreases in world coords here.
-        float boundsHeight = boundsTop - boundsBottom;
-        if( boundsHeight < 1.0f )
-            boundsHeight = 1.0f;
-
-        float normalized = ( boundsTop - y ) / boundsHeight;
-        return m_layout.dungeon.top +
-               (int)( normalized * (float)m_layout.dungeon.Height() );
+        float boundsCenter = ( boundsTop + boundsBottom ) / 2.0f;
+        int viewCenter = m_layout.dungeon.top + m_layout.dungeon.Height() / 2;
+        return viewCenter + (int)( y - boundsCenter + 0.5f );
     }
 }
 

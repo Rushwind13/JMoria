@@ -7,9 +7,9 @@
 
 enum class RenderMode
 {
-	None,
-	OpenGL,
-	ASCII
+    None,
+    OpenGL,
+    ASCII
 };
 
 #endif // __RENDERMODE_H__

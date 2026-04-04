@@ -114,9 +114,8 @@ void CDisplayText::Draw()
     int drawBottom = m_Rect.Bottom() - insetY;
     if( drawBottom > maxH - insetY )
         drawBottom = maxH - insetY;
-    DrawStr( m_Rect.Left() + insetX + m_dwMarginLeft,
-             m_Rect.Top() + insetY + m_dwMarginTop,
-             true, drawBottom, m_szDrawPtr );
+    DrawStr( m_Rect.Left() + insetX + m_dwMarginLeft, m_Rect.Top() + insetY + m_dwMarginTop, true,
+             drawBottom, m_szDrawPtr );
     PostDraw();
 }
 
@@ -196,7 +195,8 @@ void CDisplayText::Paginate()
     if( usedLines > maxLines )
         usedLines = maxLines;
     usedLines -= ( 2 * inset );
-    if( usedLines < 1 ) usedLines = 1;
+    if( usedLines < 1 )
+        usedLines = 1;
 
     dwAddLinesMax = usedLines + m_dwFreeLines;
 
@@ -339,7 +339,8 @@ void CDisplayText::DrawFormattedStr( const char *szString )
         {
             // Can't free enough room — truncate szBuffer to fit
             int avail = TEXT_MAXCHARS - Util::jstrlen( m_szText ) - 1;
-            if( avail < 0 ) avail = 0;
+            if( avail < 0 )
+                avail = 0;
             szBuffer[avail] = nul;
             ptr = m_szText;
             break;

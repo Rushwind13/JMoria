@@ -186,7 +186,7 @@ const char *CItem::GetName()
 {
     if( false ) // IsIdentified() ) // TODO: MIKE: ID goes here
     {
-        return const_cast<const char*>(m_id->m_szName);
+        return const_cast<const char *>( m_id->m_szName );
     }
     else
     {
@@ -198,7 +198,7 @@ const char *CItem::GetPlural()
 {
     if( false ) // IsIdentified() )// TODO: MIKE: ID goes here
     {
-        return const_cast<const char*>(m_id->m_szPlural);
+        return const_cast<const char *>( m_id->m_szPlural );
     }
     else
     {

@@ -11,9 +11,9 @@
 
 // Frame rate limiting configuration
 // #define DISPLAY_FRAMERATE  // Enable FPS counter display
-#define LIMIT_FRAMERATE       // Lock rendering to 30 FPS
+#define LIMIT_FRAMERATE // Lock rendering to 30 FPS
 #define TARGET_FPS 30
-#define TARGET_FRAME_TIME (1000 / TARGET_FPS)  // milliseconds per frame
+#define TARGET_FRAME_TIME ( 1000 / TARGET_FPS ) // milliseconds per frame
 
 namespace JTimer
 {

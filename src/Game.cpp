@@ -501,8 +501,24 @@ bool CGame::Update( float fCurTime )
 #endif // TURN_BASED
 
 #ifdef CLOCKSTEP
-    GetDungeon()->Update( fCurTime );
-    GetStats()->Update( fCurTime );
+    // During CLOCKSTEP generation, only update dungeon and stats.
+    // After ESC transitions to CmdState, use the normal gameplay update path.
+    if( m_eCurState == STATE_CLOCKSTEP )
+    {
+        GetDungeon()->Update( fCurTime );
+        GetStats()->Update( fCurTime );
+    }
+    else
+    {
+        // Normal gameplay update path (post-CLOCKSTEP)
+        GetPlayer()->Update( fCurTime );
+        GetDungeon()->Update( fCurTime );
+        GetMsgs()->Update( fCurTime );
+        GetStats()->Update( fCurTime );
+        GetInv()->Update( fCurTime );
+        GetEquip()->Update( fCurTime );
+        m_pCurState->Update( fCurTime );
+    }
 #else
     // Update the player
     GetPlayer()->Update( fCurTime );
@@ -569,9 +585,8 @@ void CGame::UpdateASCIILayout()
     CRenderASCII *pASCII = static_cast<CRenderASCII *>( m_pRender );
     const ASCIILayout &l = pASCII->GetLayout();
 
-    auto toPixelRect = []( const ASCIILayoutRegion &r ) {
-        return JRect( r.left * 6, r.top * 8, r.right * 6, r.bottom * 8 );
-    };
+    auto toPixelRect = []( const ASCIILayoutRegion &r )
+    { return JRect( r.left * 6, r.top * 8, r.right * 6, r.bottom * 8 ); };
 
     m_pMsgsDT->SetRect( toPixelRect( l.messages ) );
     m_pStatsDT->SetRect( toPixelRect( l.stats ) );
@@ -622,9 +637,12 @@ void CGame::Draw()
         }
         else
         {
-            if( m_bShowStats ) GetStats()->Draw();
-            if( m_bShowInv ) GetInv()->Draw();
-            if( m_bShowEquip ) GetEquip()->Draw();
+            if( m_bShowStats )
+                GetStats()->Draw();
+            if( m_bShowInv )
+                GetInv()->Draw();
+            if( m_bShowEquip )
+                GetEquip()->Draw();
         }
     }
 
@@ -686,7 +704,8 @@ void CGame::HandleEvents( int &isActive, int &done )
                 break;
             case SDL_WINDOWEVENT_RESIZED:
                 // used to be SDL_VIDEORESIZE:
-                retval = static_cast<CRender*>(GetRender())->ResizeWindow( event.window.data1, event.window.data2 );
+                retval = static_cast<CRender *>( GetRender() )
+                             ->ResizeWindow( event.window.data1, event.window.data2 );
                 if( retval != JSUCCESS )
                 {
                     Quit( retval );
@@ -822,7 +841,7 @@ void CGame::HandleEventsASCII( int &isActive, int &done )
         case KEY_DC: // ncurses Delete key
             keysym.sym = JKEY_DELETE;
             break;
-        case KEY_F(1):
+        case KEY_F( 1 ):
             keysym.sym = JKEY_F1;
             break;
         default:

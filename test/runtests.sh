@@ -20,11 +20,11 @@ if [[ -n "$pid" ]]; then
   kill "$pid"
 fi
 
-# Start the executable in the background
-"$EXE_UNDER_TEST" &
+# Start the executable in the background with dummy video driver for headless operation
+SDL_VIDEODRIVER=dummy "$EXE_UNDER_TEST" &
 
 # Sleep to allow the executable to start
-sleep 1
+sleep 2
 
 # Set the test to run based on the first argument
 TEST_TO_RUN="*"
@@ -33,4 +33,5 @@ if [[ -n "$1" ]]; then
 fi
 
 # Run the Cucumber tests (using bundle exec for cucumber 2.x compatibility)
+# Note: --publish-quiet not available in cucumber 2.x
 bundle exec cucumber --tags ~@skip features/$TEST_TO_RUN.feature

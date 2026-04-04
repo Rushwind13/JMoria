@@ -19,6 +19,9 @@
 #include <TextEntry.h>
 #include <TileSet.h>
 
+#include <vector>
+#include <string>
+
 // main game pointer
 CGame *g_pGame = NULL;
 eLogLevel g_eLogLevel = LOG_LEVEL_DEBUG;
@@ -28,6 +31,13 @@ eLogLevel g_eLogLevel = LOG_LEVEL_DEBUG;
 ## CONTEXT
 ##
 #######*/
+struct DungeonSnapshot
+{
+    int rooms;
+    int hallways;
+    int stack_depth;
+};
+
 struct TestCtx
 {
     JVector vec;
@@ -52,6 +62,18 @@ struct TestCtx
     CDungeonMap map;
     CDungeonCreationStep *pStep;
     CRoom *pRoom;
+    
+    // Fixture / Regression testing
+    std::string fixture_filename;
+    CDungeonMap imported_map;
+    
+    // Stress testing
+    std::vector<DungeonSnapshot> dungeon_history;
+    
+    // Connectivity validation
+    bool connectivity_result = false;
+    int reachable_tiles = 0;
+    int total_walkable_tiles = 0;
 
     // AI Brain
     CAIBrain *brain;

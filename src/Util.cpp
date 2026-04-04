@@ -11,12 +11,25 @@
 #ifndef TURN_BASED
 #include <sys/time.h>
 #endif
+#include <sys/time.h>
 
 #include "JMDefs.h"
 #include "Util.h"
 
 namespace Util
 {
+// RNG seed management for deterministic generation
+static unsigned int g_RandomSeed = 0;
+
+void SeedRandom( unsigned int seed )
+{
+    g_RandomSeed = seed;
+    srand( seed );
+    JLog( LOG_LEVEL_DEBUG, true, "RNG seeded with: %u\n", seed );
+}
+
+unsigned int GetRandomSeed() { return g_RandomSeed; }
+
 // The RNG in all its glory
 float GetRandom( float lo, float hi )
 {
@@ -284,23 +297,23 @@ bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 dist
             vNextPos.x += vStep.x; // Increment x if error is negative
             error += 2 * vDelta.y;
         }
-        
+
         // Check for diagonal movement - if both X and Y changed, check the diagonal gap
         if( vNextPos.x != vCurrent.x && vNextPos.y != vCurrent.y )
         {
             // Moving diagonally - check both intermediate positions
-            JIVector vDiag1( vNextPos.x, vCurrent.y );  // Step along X first
-            JIVector vDiag2( vCurrent.x, vNextPos.y );  // Step along Y first
-            
+            JIVector vDiag1( vNextPos.x, vCurrent.y ); // Step along X first
+            JIVector vDiag2( vCurrent.x, vNextPos.y ); // Step along Y first
+
             vTest.Init( VEC_EXPAND( vDiag1 ) );
             if( !isWalkable( vTest ) )
                 return false;
-            
+
             vTest.Init( VEC_EXPAND( vDiag2 ) );
             if( !isWalkable( vTest ) )
                 return false;
         }
-        
+
         vCurrent = vNextPos;
         alreadyAdded = false;
     }
@@ -409,6 +422,15 @@ int jstrncmp( const char *s1, const char *s2, const uint32 count )
         p2++;
     }
     return 0;
+}
+
+// High-resolution timing for performance measurement
+// Returns current time in milliseconds with microsecond precision
+double GetTimeInMillis()
+{
+    struct timeval tv;
+    gettimeofday( &tv, NULL );
+    return ( tv.tv_sec * 1000.0 ) + ( tv.tv_usec / 1000.0 );
 }
 
 } // namespace Util

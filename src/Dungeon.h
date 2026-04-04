@@ -71,6 +71,7 @@ public:
           m_llMonsterDefs( NULL ),
           m_dmCurLevel( NULL ) {};
     ~CDungeon() { Term(); }
+    void DumpMap();
     void PreDraw();
     void Draw();
     void DrawDungeon();
@@ -147,6 +148,7 @@ public:
     bool IsCloseable( JVector &vPos );
     int IsStairs( JVector &vPos );
     CRoom *InRoom( JVector &vPos );
+    CDungeonMap *GetCurLevel() { return m_dmCurLevel; }
     CMonsterDef *GetMonsterDef( const char *szMonsterName );
     CMonsterDef *GetMonsterDef( int which_monster );
     CItemDef *GetItemDef( const char *szItemName );
@@ -156,6 +158,8 @@ public:
     JResult Modify( JVector &vPos );
     CItem *PickUp( JVector &vPickupPos );
     void Drop( CItem *pItem, JVector &vDropPos );
+    void PopulateLevel( const int depth ); // Place scenery, items, and monsters
+    void SetDrawFlag( bool bDraw ) { m_bDraw = bDraw; }
 
 protected:
     JRect m_Rect;

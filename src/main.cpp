@@ -1,8 +1,8 @@
 #include "JMDefs.h"
 #include "JTimer.h"
 #include "RenderMode.h"
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 #include <ctime>
 
 // The global game pointer
@@ -21,7 +21,7 @@ int main( int argc, char **argv )
     // whether or not the window is active
     int isActive = true;
 
-    srand( (unsigned)time( NULL ) );
+    Util::SeedRandom( (unsigned)time( NULL ) );
 
     // Parse command-line arguments
     RenderMode renderMode = RenderMode::None;

@@ -173,8 +173,10 @@ bool CIntroState::DoSplash()
     int screenH = g_pGame->GetRender()->GetScreenHeight();
     int marginX = ( screenW * 6 - 44 * 6 ) / 2;
     int marginY = ( screenH * 8 - 24 * 8 ) / 2;
-    if( marginX < 0 ) marginX = 0;
-    if( marginY < 0 ) marginY = 0;
+    if( marginX < 0 )
+        marginX = 0;
+    if( marginY < 0 )
+        marginY = 0;
     g_pGame->GetEnd()->SetContentMargin( marginX, marginY );
     g_pGame->GetEnd()->Printf( m_szSplash, VERSION, COPYRIGHT, AUTHOR );
     return true;

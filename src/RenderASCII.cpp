@@ -21,7 +21,8 @@ ASCIILayout ASCIILayout::CreateForSize( int w, int h )
     l.termHeight = h;
 
     int msgH = MSG_HEIGHT;
-    if( h < 12 ) msgH = 2; // very small terminal
+    if( h < 12 )
+        msgH = 2; // very small terminal
     int bodyTop = msgH;
     int bodyBottom = h;
 
@@ -30,7 +31,8 @@ ASCIILayout ASCIILayout::CreateForSize( int w, int h )
 
     // Stats panel (always on left)
     int statsRight = STATS_WIDTH;
-    if( statsRight > w / 3 ) statsRight = w / 3; // don't take more than 1/3
+    if( statsRight > w / 3 )
+        statsRight = w / 3; // don't take more than 1/3
     l.stats = { 0, bodyTop, statsRight, bodyBottom };
 
     // Inventory/equipment panel (right side, only when wide enough)
@@ -47,7 +49,8 @@ ASCIILayout ASCIILayout::CreateForSize( int w, int h )
         // Fly-out positions (drawn over dungeon when toggled)
         int flyRight = w;
         int flyLeft = w - INV_WIDTH;
-        if( flyLeft < w / 2 ) flyLeft = w / 2;
+        if( flyLeft < w / 2 )
+            flyLeft = w / 2;
         int flyMid = bodyTop + ( bodyBottom - bodyTop ) / 2;
         l.inventory = { flyLeft, bodyTop, flyRight, flyMid };
         l.equipment = { flyLeft, flyMid, flyRight, bodyBottom };
@@ -66,10 +69,7 @@ ASCIILayout ASCIILayout::CreateForSize( int w, int h )
 
 // ---- CRenderASCII ----
 
-CRenderASCII::CRenderASCII()
-    : m_bInitted( false ),
-      m_bHasColor( false ),
-      m_bTranslating( false )
+CRenderASCII::CRenderASCII() : m_bInitted( false ), m_bHasColor( false ), m_bTranslating( false )
 {
     m_currentColor.SetColor( 255, 255, 255, 255 );
     memset( &m_currentBounds, 0, sizeof( m_currentBounds ) );
@@ -83,7 +83,7 @@ JResult CRenderASCII::Init( int width, int height, int bpp )
     raw();
     keypad( stdscr, TRUE );
     noecho();
-    curs_set( 0 ); // hide cursor
+    curs_set( 0 );           // hide cursor
     nodelay( stdscr, TRUE ); // non-blocking getch
     timeout( 0 );
 
@@ -157,19 +157,23 @@ int CRenderASCII::GetColorPair( JColor color )
     // Find the dominant channel
     if( r > g && r > b )
     {
-        if( g > 128 ) return 4; // yellow (red + green)
-        if( b > 128 ) return 6; // magenta (red + blue)
-        return 2;               // red
+        if( g > 128 )
+            return 4; // yellow (red + green)
+        if( b > 128 )
+            return 6; // magenta (red + blue)
+        return 2;     // red
     }
     if( g > r && g > b )
     {
-        if( b > 128 ) return 7; // cyan (green + blue)
-        return 3;               // green
+        if( b > 128 )
+            return 7; // cyan (green + blue)
+        return 3;     // green
     }
     if( b > r && b > g )
     {
-        if( r > 128 ) return 6; // magenta
-        return 5;               // blue
+        if( r > 128 )
+            return 6; // magenta
+        return 5;     // blue
     }
 
     // Gray/white — anything not already caught as "very dark" above
@@ -195,10 +199,7 @@ void CRenderASCII::PreDraw()
     erase(); // clear the virtual screen
 }
 
-void CRenderASCII::PostDraw()
-{
-    SwapBuffers();
-}
+void CRenderASCII::PostDraw() { SwapBuffers(); }
 
 void CRenderASCII::SwapBuffers()
 {
@@ -210,8 +211,8 @@ void CRenderASCII::SwapBuffers()
 // PreDrawObjects sets up the coordinate mapping context.
 // In OpenGL, this pushes a projection matrix. For ASCII, we just
 // record the bounds so MapX/MapY can convert positions.
-void CRenderASCII::PreDrawObjects( JRect rcBounds, uint32 Texture, bool bTranslate,
-                                   bool bInverse, JFVector *vTranslate )
+void CRenderASCII::PreDrawObjects( JRect rcBounds, uint32 Texture, bool bTranslate, bool bInverse,
+                                   JFVector *vTranslate )
 {
     m_currentBounds = rcBounds;
     m_bTranslating = bTranslate;
@@ -263,9 +264,9 @@ int CRenderASCII::MapX( float worldX )
         // This prevents discontinuities when player crosses integer boundaries
         int boundSum = m_currentBounds.left + m_currentBounds.right;
         int centerX = boundSum / 2;
-        if( boundSum < 0 && (boundSum & 1) )
-            centerX--;  // Floor rounding for negative odd sums
-        
+        if( boundSum < 0 && ( boundSum & 1 ) )
+            centerX--; // Floor rounding for negative odd sums
+
         int viewCenter = m_layout.dungeon.left + m_layout.dungeon.Width() / 2;
         return viewCenter + ( tileX - centerX );
     }
@@ -295,9 +296,9 @@ int CRenderASCII::MapY( float worldY )
         // This prevents discontinuities when player crosses integer boundaries
         int boundSum = m_currentBounds.top + m_currentBounds.bottom;
         int centerY = boundSum / 2;
-        if( boundSum < 0 && (boundSum & 1) )
-            centerY--;  // Floor rounding for negative odd sums
-        
+        if( boundSum < 0 && ( boundSum & 1 ) )
+            centerY--; // Floor rounding for negative odd sums
+
         int viewCenter = m_layout.dungeon.top + m_layout.dungeon.Height() / 2;
         return viewCenter + ( tileY - centerY );
     }
@@ -354,13 +355,13 @@ bool CRenderASCII::DrawChar( const JFVector &vPos, JVector &vSize, char ch )
     if( !isPixelSpace )
     {
         if( screenX < m_layout.dungeon.left - 3 || screenX >= m_layout.dungeon.right + 3 ||
-            screenY < m_layout.dungeon.top - 3  || screenY >= m_layout.dungeon.bottom + 3 )
+            screenY < m_layout.dungeon.top - 3 || screenY >= m_layout.dungeon.bottom + 3 )
             return false;
     }
     else
     {
-        if( screenX < 0 || screenX >= m_layout.termWidth ||
-            screenY < 0 || screenY >= m_layout.termHeight )
+        if( screenX < 0 || screenX >= m_layout.termWidth || screenY < 0 ||
+            screenY >= m_layout.termHeight )
             return false;
     }
 
@@ -387,11 +388,16 @@ void CRenderASCII::DrawTextBoundingBox( JRect rect, JColor color )
     int bottom = ( rect.bottom / 8 ) - 1;
 
     // Clamp to screen
-    if( left < 0 ) left = 0;
-    if( top < 0 ) top = 0;
-    if( right >= m_layout.termWidth ) right = m_layout.termWidth - 1;
-    if( bottom >= m_layout.termHeight ) bottom = m_layout.termHeight - 1;
-    if( right <= left || bottom <= top ) return;
+    if( left < 0 )
+        left = 0;
+    if( top < 0 )
+        top = 0;
+    if( right >= m_layout.termWidth )
+        right = m_layout.termWidth - 1;
+    if( bottom >= m_layout.termHeight )
+        bottom = m_layout.termHeight - 1;
+    if( right <= left || bottom <= top )
+        return;
 
     int pair = GetColorPair( color );
     if( m_bHasColor )

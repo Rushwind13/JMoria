@@ -24,6 +24,9 @@ class GameState:
     # Player position in map grid coordinates (row, col)
     player_pos: Optional[tuple] = None
 
+    # Player absolute world position in dungeon coordinates (x, y), if available
+    player_world_pos: Optional[tuple] = None
+
     # Visible monsters: list of (row, col, char)
     monsters: list = field(default_factory=list)
 

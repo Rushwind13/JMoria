@@ -67,7 +67,7 @@ def _parse_stats(lines: list[str]) -> dict:
         _strip_box(line[:STATS_WIDTH]) for line in lines[MSG_HEIGHT:]
     )
 
-    hp, max_hp, ac, level = 0, 0, 0, 0
+    hp, max_hp, ac, level, depth_ft, world_pos = 0, 0, 0, 0, None, None
 
     m = re.search(r"HP:\s*(\d+)\s*/\s*(\d+)", stats_text)
     if m:
@@ -81,7 +81,22 @@ def _parse_stats(lines: list[str]) -> dict:
     if m:
         level = int(m.group(1))
 
-    return {"hp": hp, "max_hp": max_hp, "ac": ac, "level": level}
+    m = re.search(r"Depth:\s*(\d+)'", stats_text)
+    if m:
+        depth_ft = int(m.group(1))
+
+    m = re.search(r"Pos:\s*<\s*(-?\d+)\s+(-?\d+)\s*>", stats_text)
+    if m:
+        world_pos = (int(m.group(1)), int(m.group(2)))
+
+    return {
+        "hp": hp,
+        "max_hp": max_hp,
+        "ac": ac,
+        "level": level,
+        "depth_ft": depth_ft,
+        "world_pos": world_pos,
+    }
 
 
 def _parse_dungeon(lines: list[str]) -> tuple:
@@ -134,14 +149,19 @@ def read(state=None, dungeon_depth: int = 1) -> GameState:
     map_grid, player_pos, monsters, items = _parse_dungeon(lines)
     last_message = _parse_messages(lines)
 
+    parsed_depth = dungeon_depth
+    if stats["depth_ft"] is not None and stats["depth_ft"] > 0:
+        parsed_depth = max(1, stats["depth_ft"] // 50)
+
     return GameState(
         player_hp=stats["hp"],
         player_max_hp=stats["max_hp"],
         player_ac=stats["ac"],
         player_level=stats["level"],
-        dungeon_depth=dungeon_depth,
+        dungeon_depth=parsed_depth,
         map=map_grid,
         player_pos=player_pos,
+        player_world_pos=stats["world_pos"],
         monsters=monsters,
         items=items,
         last_message=last_message,

@@ -11,6 +11,7 @@ class DecisionEngine:
         self.jiggle_idx = 0
         self.last_action = "."
         self.pending_keys = []
+        self.spiral_radius = 1
 
     def decide(self, state):
         if not state.player_pos:
@@ -97,7 +98,13 @@ class DecisionEngine:
                 self.last_action = k
                 return k
 
-        # 6) If stuck too long, jiggle with directional fallback.
+        # 6) Spiral-search fallback to find a farther reachable unvisited tile.
+        spiral_key = self._spiral_search_key(state)
+        if spiral_key:
+            self.last_action = spiral_key
+            return spiral_key
+
+        # 7) If still stuck, jiggle with directional fallback.
         if self.stuck_turns >= 4:
             key = "hjklyubn"[self.jiggle_idx % 8]
             self.jiggle_idx += 1
@@ -110,6 +117,82 @@ class DecisionEngine:
     def _key_toward(self, grid, start, goal):
         path = pf.path_to(grid, start, goal)
         return pf.first_step_key(path)
+
+    def _spiral_search_key(self, state):
+        """Find a target by scanning outward in a spiral from current position."""
+        if not state.player_pos or not state.map:
+            return None
+
+        rows = len(state.map)
+        cols = len(state.map[0]) if rows else 0
+        if rows == 0 or cols == 0:
+            return None
+
+        center = state.player_pos
+        max_radius = max(rows, cols)
+
+        # Start search radius from prior attempts to avoid local oscillation.
+        start_radius = max(1, self.spiral_radius)
+
+        for radius in range(start_radius, max_radius):
+            for r, c in self._spiral_ring(center, radius, rows, cols):
+                ch = state.map[r][c]
+                if not pf.is_walkable(ch):
+                    continue
+                if (state.dungeon_depth, r, c) in self.visited:
+                    continue
+                key = self._key_toward(state.map, center, (r, c))
+                if key:
+                    # Next time, begin a bit farther out for continued expansion.
+                    self.spiral_radius = min(max_radius - 1, radius + 1)
+                    return key
+
+        # If no unvisited target exists, allow revisiting walkable spiral points.
+        for radius in range(1, max_radius):
+            for r, c in self._spiral_ring(center, radius, rows, cols):
+                if not pf.is_walkable(state.map[r][c]):
+                    continue
+                key = self._key_toward(state.map, center, (r, c))
+                if key:
+                    return key
+
+        return None
+
+    @staticmethod
+    def _spiral_ring(center, radius, rows, cols):
+        """Yield points on a square spiral ring at distance radius from center."""
+        cr, cc = center
+        if radius <= 0:
+            return
+
+        top = cr - radius
+        bottom = cr + radius
+        left = cc - radius
+        right = cc + radius
+
+        # Top edge (left -> right)
+        for c in range(left, right + 1):
+            r = top
+            if 0 <= r < rows and 0 <= c < cols:
+                yield (r, c)
+
+        # Right edge (top+1 -> bottom)
+        for r in range(top + 1, bottom + 1):
+            c = right
+            if 0 <= r < rows and 0 <= c < cols:
+                yield (r, c)
+
+        # Bottom edge (right-1 -> left)
+        for c in range(right - 1, left - 1, -1):
+            r = bottom
+            if 0 <= r < rows and 0 <= c < cols:
+                yield (r, c)
+
+        # Left edge (bottom-1 -> top+1)
+        for r in range(bottom - 1, top, -1):
+            c = left
+            if 0 <= r < rows and 0 <= c < cols:
+                yield (r, c)
 
     @staticmethod
     def _adjacent_monster(pos, monsters):

@@ -108,6 +108,8 @@ def run_loop(verbose: bool = False) -> None:
     prev_msg = ""
     turn = 0
     engine = DecisionEngine()
+    lost_player_turns = 0
+    zero_hp_turns = 0
 
     while True:
         state = screen.read(dungeon_depth=depth)
@@ -124,17 +126,33 @@ def run_loop(verbose: bool = False) -> None:
                 state.dungeon_depth = depth
             prev_msg = msg
 
-        # Detect death
-        if "tombstone" in "\n".join(state.raw_lines).lower() or (
-            state.player_max_hp > 0 and state.player_hp == 0
+        # Detect death. Keep this broad because the UI can change after death,
+        # causing the stats parser to return 0/0 and '@' to disappear.
+        raw_lower = "\n".join(state.raw_lines).lower()
+        if state.player_hp == 0:
+            zero_hp_turns += 1
+        else:
+            zero_hp_turns = 0
+
+        if (
+            "tombstone" in raw_lower
+            or "you die" in raw_lower
+            or ( state.player_max_hp > 0 and state.player_hp == 0 )
+            or ( state.player_hp == 0 and state.player_max_hp == 0 and zero_hp_turns >= 3 )
         ):
             log(f"[crawler] Death detected at turn {turn}, depth {depth}. Stopping.")
             break
 
         if not state.is_in_game:
+            lost_player_turns += 1
             log(f"[crawler] Lost player '@' at turn {turn} — may be in a menu, skipping")
+            if lost_player_turns >= 15:
+                log("[crawler] Player missing too long; stopping run.")
+                break
             time.sleep(POLL_DELAY)
             continue
+
+        lost_player_turns = 0
 
         action = engine.decide(state)
 

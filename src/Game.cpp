@@ -501,8 +501,24 @@ bool CGame::Update( float fCurTime )
 #endif // TURN_BASED
 
 #ifdef CLOCKSTEP
-    GetDungeon()->Update( fCurTime );
-    GetStats()->Update( fCurTime );
+    // During CLOCKSTEP generation, only update dungeon and stats.
+    // After ESC transitions to CmdState, use the normal gameplay update path.
+    if( m_eCurState == STATE_CLOCKSTEP )
+    {
+        GetDungeon()->Update( fCurTime );
+        GetStats()->Update( fCurTime );
+    }
+    else
+    {
+        // Normal gameplay update path (post-CLOCKSTEP)
+        GetPlayer()->Update( fCurTime );
+        GetDungeon()->Update( fCurTime );
+        GetMsgs()->Update( fCurTime );
+        GetStats()->Update( fCurTime );
+        GetInv()->Update( fCurTime );
+        GetEquip()->Update( fCurTime );
+        m_pCurState->Update( fCurTime );
+    }
 #else
     // Update the player
     GetPlayer()->Update( fCurTime );

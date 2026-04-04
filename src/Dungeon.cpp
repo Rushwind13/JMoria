@@ -888,7 +888,11 @@ void CDungeon::PreDraw()
     if( g_pGame->GetPlayer() != NULL )
     {
 #ifdef CLOCKSTEP
-        m_dwZoom = DUNG_WIDTH / 2;
+        // Wide zoom during generation to see full dungeon; normal zoom during gameplay
+        if( g_pGame->GetGameStateIndex() == STATE_CLOCKSTEP )
+            m_dwZoom = DUNG_WIDTH / 2;
+        else
+            m_dwZoom = DUNG_ZOOM_NORMAL;
 #endif
         int xinitval = m_dwZoom;
         // int xinitval = 16;
@@ -897,9 +901,19 @@ void CDungeon::PreDraw()
 #define ORIGIN_PLAYER
 #ifdef ORIGIN_PLAYER
 #ifdef CLOCKSTEP
-        // In CLOCKSTEP mode, center on the entire dungeon
-        int xorigin = 0;
-        int yorigin = 0;
+        // In CLOCKSTEP state, center on the entire dungeon.
+        // After transitioning to gameplay, center on the player.
+        int xorigin, yorigin;
+        if( g_pGame->GetGameStateIndex() == STATE_CLOCKSTEP )
+        {
+            xorigin = 0;
+            yorigin = 0;
+        }
+        else
+        {
+            xorigin = (int)g_pGame->GetPlayer()->m_vPos.x - DUNG_WIDTH / 2;
+            yorigin = (int)g_pGame->GetPlayer()->m_vPos.y - DUNG_HEIGHT / 2;
+        }
 #else
         int xorigin = (int)g_pGame->GetPlayer()->m_vPos.x - DUNG_WIDTH / 2;
         int yorigin = (int)g_pGame->GetPlayer()->m_vPos.y - DUNG_HEIGHT / 2;

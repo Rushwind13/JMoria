@@ -116,10 +116,18 @@ int CClockStepState::OnBaseHandleKey( JKeysym *keysym )
         // Exit CLOCKSTEP mode and spawn player
         g_pGame->GetPlayer()->m_bHasSpawned = false;
         g_pGame->GetPlayer()->SpawnPlayer();
+
+        // Set tile visibility around spawn point before first render frame,
+        // otherwise DrawDungeon() skips all tiles (DUNG_FLAG_SEEN not set yet)
+        g_pGame->GetDungeon()->UpdateSeen();
+
+        // Clear stale CLOCKSTEP diagnostics from stats panel
+        g_pGame->GetStats()->Clear();
+
         g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
                                     g_pGame->GetDungeon()->depth );
         ResetToState( STATE_COMMAND );
-        return JSUCCESS;
+        return JRESETSTATE;
     }
 
     return -1;

@@ -1,5 +1,7 @@
 """decision.py - Priority decision engine for the JMoria bot (Phase 2)."""
 
+from collections import deque
+
 from . import pathfinding as pf
 
 
@@ -12,6 +14,11 @@ class DecisionEngine:
         self.last_action = "."
         self.pending_keys = []
         self.spiral_radius = 1
+        self.action_history = deque(maxlen=12)
+        self.last_world_pos = None
+        self.last_map_sig = None
+        self.no_progress_turns = 0
+        self.escape_idx = 0
 
     def decide(self, state):
         if not state.player_pos:
@@ -26,6 +33,8 @@ class DecisionEngine:
         pos = state.player_pos
         self.visited.add((state.dungeon_depth, pos[0], pos[1]))
 
+        self._update_progress(state)
+
         # Detect stuck behavior to break local loops.
         if self.last_pos == pos:
             self.stuck_turns += 1
@@ -38,19 +47,16 @@ class DecisionEngine:
         if "bumped into a door" in state.last_message.lower():
             direction = self.last_action if self.last_action in "hjklyubn" else "h"
             self.pending_keys = [direction]
-            self.last_action = "o"
-            return "o"
+            return self._record_action("o")
 
         # 1) Survival first: rest when low HP and no adjacent threat.
         if state.player_max_hp > 0 and state.hp_pct < 0.30:
             adjacent = self._adjacent_monster(pos, state.monsters)
             if adjacent is None:
-                self.last_action = "R"
-                return "R"
+                return self._record_action("R")
             flee = pf.key_away_from(pos, adjacent, state.map)
             if flee:
-                self.last_action = flee
-                return flee
+                return self._record_action(flee)
 
         # 2) Immediate combat: bump-attack adjacent monster.
         adjacent = self._adjacent_monster(pos, state.monsters)
@@ -58,8 +64,7 @@ class DecisionEngine:
             dr = adjacent[0] - pos[0]
             dc = adjacent[1] - pos[1]
             action = pf.DIR_TO_KEY.get((dr, dc), ".")
-            self.last_action = action
-            return action
+            return self._record_action(action)
 
         # 3) Pick up visible nearby items.
         item_goal = pf.find_nearest_target(
@@ -70,8 +75,7 @@ class DecisionEngine:
         if item_goal:
             k = self._key_toward(state.map, pos, item_goal)
             if k:
-                self.last_action = k
-                return k
+                return self._record_action(k)
 
         # 4) Descend if downstairs visible.
         stair_goal = pf.find_nearest_target(
@@ -82,8 +86,7 @@ class DecisionEngine:
         if stair_goal:
             k = self._key_toward(state.map, pos, stair_goal)
             if k:
-                self.last_action = k
-                return k
+                return self._record_action(k)
 
         # 5) Explore frontier: nearest unvisited walkable tile in viewport.
         frontier = pf.find_nearest_target(
@@ -95,28 +98,91 @@ class DecisionEngine:
         if frontier:
             k = self._key_toward(state.map, pos, frontier)
             if k:
-                self.last_action = k
-                return k
+                return self._record_action(k)
 
         # 6) Spiral-search fallback to find a farther reachable unvisited tile.
         spiral_key = self._spiral_search_key(state)
         if spiral_key:
-            self.last_action = spiral_key
-            return spiral_key
+            return self._record_action(spiral_key)
 
-        # 7) If still stuck, jiggle with directional fallback.
+        # 7) If no visible progress for a while, force an escape pattern.
+        if self.no_progress_turns >= 10:
+            escape = self._escape_key()
+            if escape:
+                return self._record_action(escape)
+
+        # 8) If still stuck, jiggle with directional fallback.
         if self.stuck_turns >= 4:
             key = "hjklyubn"[self.jiggle_idx % 8]
             self.jiggle_idx += 1
-            self.last_action = key
-            return key
+            return self._record_action(key)
 
-        self.last_action = "."
-        return "."
+        return self._record_action(".")
 
     def _key_toward(self, grid, start, goal):
         path = pf.path_to(grid, start, goal)
-        return pf.first_step_key(path)
+        key = pf.first_step_key(path)
+        return self._sanitize_move(key)
+
+    def _record_action(self, action):
+        self.last_action = action
+        self.action_history.append(action)
+        return action
+
+    def _sanitize_move(self, key):
+        if key is None:
+            return None
+        if key not in "hjklyubn":
+            return key
+        if not self.action_history:
+            return key
+
+        # Avoid immediate backtracking oscillation unless we are in clear trouble.
+        prev = self.action_history[-1]
+        if self.no_progress_turns < 8 and self._is_opposite(prev, key):
+            for alt in "hjklyubn":
+                if alt != key and not self._is_opposite(prev, alt):
+                    return alt
+        return key
+
+    def _update_progress(self, state):
+        world = state.player_world_pos
+        if world is not None:
+            progressed = (world != self.last_world_pos)
+            self.last_world_pos = world
+        else:
+            map_sig = self._map_signature(state)
+            progressed = (map_sig != self.last_map_sig)
+            self.last_map_sig = map_sig
+
+        if progressed:
+            self.no_progress_turns = 0
+        else:
+            self.no_progress_turns += 1
+
+    @staticmethod
+    def _map_signature(state):
+        # Lightweight view signature to detect screen changes when world pos is unavailable.
+        if not state.map:
+            return ""
+        rows = ["".join(r) for r in state.map]
+        return "|".join(rows)
+
+    def _escape_key(self):
+        pattern = "hjklyubnlykhbnju"
+        key = pattern[self.escape_idx % len(pattern)]
+        self.escape_idx += 1
+        return self._sanitize_move(key)
+
+    @staticmethod
+    def _is_opposite(a, b):
+        opposites = {
+            "h": "l", "l": "h",
+            "j": "k", "k": "j",
+            "y": "n", "n": "y",
+            "u": "b", "b": "u",
+        }
+        return opposites.get(a) == b
 
     def _spiral_search_key(self, state):
         """Find a target by scanning outward in a spiral from current position."""

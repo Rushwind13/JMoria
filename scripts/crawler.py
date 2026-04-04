@@ -49,6 +49,8 @@ def launch(session: str, term_w: int, term_h: int, jmoria_path: str) -> None:
             "-s", session,
             "-x", str(term_w),
             "-y", str(term_h),
+            "env",
+            "JMORIA_SHOW_PLAYER_POS=1",
             jmoria_path,
         ],
         check=True,
@@ -159,7 +161,7 @@ def run_loop(verbose: bool = False) -> None:
         if verbose:
             log(
                 f"[turn {turn:5d}] HP={state.player_hp}/{state.player_max_hp} "
-                f"depth={depth} pos={state.player_pos} "
+                f"depth={depth} pos={state.player_pos} wpos={state.player_world_pos} "
                 f"monsters={len(state.monsters)} items={len(state.items)} "
                 f"msg={msg!r:40s} -> {action!r}"
             )

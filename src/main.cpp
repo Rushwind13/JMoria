@@ -1,8 +1,8 @@
 #include "JMDefs.h"
 #include "JTimer.h"
 #include "RenderMode.h"
-#include <cstring>
 #include <cstdlib>
+#include <cstring>
 #include <ctime>
 
 // The global game pointer

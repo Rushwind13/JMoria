@@ -13,6 +13,9 @@
 #define DUNG_HALL_MINLENGTH 2
 #define DUNG_HALL_MAXLENGTH 8
 
+#define DUNG_MIN_ROOMS_REQUIRED 3
+#define DUNG_MAX_GENERATION_RETRIES 5
+
 // Maximum consecutive failures before abandoning a creation step to prevent "tails out"
 #define MAX_STEP_FAILURES 3
 class CDungeonCreationStep
@@ -41,7 +44,7 @@ public:
     int m_dwIndex;
     int m_dwDirection;
     int m_dwRecurDepth;
-    int m_dwFailureCount;  // Track consecutive failed attempts
+    int m_dwFailureCount; // Track consecutive failed attempts
     JIVector m_vPos;
     JRect m_rcArea;
     bool *m_pdwVisited;
@@ -123,21 +126,32 @@ private:
 // Dungeon generation diagnostics structure
 struct DungeonGenDiagnostics
 {
-    int steps_created;        // Total creation steps processed
-    int rooms_created;        // Successful room steps
-    int hallways_created;     // Successful hallway steps
-    int steps_skipped;        // Steps that failed creation (recursion depth, conflicts)
-    int fill_operations;      // Total FillArea calls
-    int conflicts_detected;   // Conflicts found during CheckArea
-    int repeated_failures;    // Steps abandoned due to repeated failures (tails out prevention)
-    double start_time_ms;     // Generation start time in milliseconds
-    double end_time_ms;       // Generation end time in milliseconds
-    double total_time_ms;     // Total generation time in milliseconds
-    
-    DungeonGenDiagnostics() : steps_created(0), rooms_created(0), hallways_created(0), 
-                              steps_skipped(0), fill_operations(0), conflicts_detected(0),
-                              repeated_failures(0), start_time_ms(0.0), end_time_ms(0.0),
-                              total_time_ms(0.0) {}
+    int steps_created;      // Total creation steps processed
+    int rooms_created;      // Successful room steps
+    int hallways_created;   // Successful hallway steps
+    int steps_skipped;      // Steps that failed creation (recursion depth, conflicts)
+    int fill_operations;    // Total FillArea calls
+    int conflicts_detected; // Conflicts found during CheckArea
+    int repeated_failures;  // Steps abandoned due to repeated failures (tails out prevention)
+    int hallways_truncated; // Hallways shortened to connect to existing structure
+    double start_time_ms;   // Generation start time in milliseconds
+    double end_time_ms;     // Generation end time in milliseconds
+    double total_time_ms;   // Total generation time in milliseconds
+
+    DungeonGenDiagnostics()
+        : steps_created( 0 ),
+          rooms_created( 0 ),
+          hallways_created( 0 ),
+          steps_skipped( 0 ),
+          fill_operations( 0 ),
+          conflicts_detected( 0 ),
+          repeated_failures( 0 ),
+          hallways_truncated( 0 ),
+          start_time_ms( 0.0 ),
+          end_time_ms( 0.0 ),
+          total_time_ms( 0.0 )
+    {
+    }
 };
 
 // CDungeonMap:
@@ -196,45 +210,49 @@ private:
 public:
     void CreateDungeon( const int depth );
     void CreateDungeon( const int depth, const unsigned int seed );
-    
+
     // Diagnostic accessors
-    int GetStackSize() const { return m_stkDungeonMapCreation ? m_stkDungeonMapCreation->length() : 0; }
+    int GetStackSize() const
+    {
+        return m_stkDungeonMapCreation ? m_stkDungeonMapCreation->length() : 0;
+    }
     int GetRoomCount() const { return m_llRooms ? m_llRooms->length() : 0; }
     int GetHallwayCount() const { return m_llHallways ? m_llHallways->length() : 0; }
     unsigned int GetSeed() const { return m_dwSeed; }
-    const DungeonGenDiagnostics& GetDiagnostics() const { return m_diagnostics; }
-    
+    const DungeonGenDiagnostics &GetDiagnostics() const { return m_diagnostics; }
+
     // Fixture management for regression testing
     bool ExportDungeon( const char *pszFilename ) const;
     bool ImportDungeon( const char *pszFilename );
     bool CompareDungeon( const CDungeonMap &other ) const;
-    
+
     // Generation control flow
     void InitDungeonCreate( JIVector &vOrigin );
     bool ProcessStep();
     void ProcessRoom( CDungeonCreationStep *pCurStep );
     void ProcessHallway( CDungeonCreationStep *pCurStep );
-    
+
     // Step creation and validation
     int Opposite( int direction );
     void GetAdjacentDirections( int primary_dir, int &adj1, int &adj2 ) const;
-    
+
     // Public API for creating steps
     CDungeonCreationStep *CreateRoom( const JIVector &vPos, const int direction,
                                       const int recurdepth );
     CDungeonCreationStep *CreateHallway( const JIVector &vPos, const int direction,
                                          const int recurdepth );
-    
+
     // Private helpers for unified step creation
-    CDungeonCreationStep *CreateStep( int step_type, const JIVector &vPos, 
-                                     const int direction, const int recurdepth );
-    void ExpandInRandomDirections( CDungeonCreationStep *pParent, int num_children, 
+    CDungeonCreationStep *CreateStep( int step_type, const JIVector &vPos, const int direction,
+                                      const int recurdepth );
+    void ExpandInRandomDirections( CDungeonCreationStep *pParent, int num_children,
                                    int child_step_type, bool allow_backtracking,
                                    int *out_created = NULL, int *out_failed = NULL );
     bool TryCreateRoomWithFallback( CDungeonCreationStep *pCurStep );
-    
+
     JResult GetRoomRect( JRect &rcRoom, const int direction );
     JResult GetHallRect( JRect &rcHall, const int direction );
+    JResult TruncateHallway( CDungeonCreationStep *pStep );
     JIVector &GetWallOrigin( CDungeonCreationStep *pStep, const int direction );
     JIVector &GetHallOrigin( CDungeonCreationStep *pStep,
                              int step_type = DUNG_CREATE_STEP_MAKE_ROOM );
@@ -297,6 +315,19 @@ public:
             return 0;
     };
 
+    void LogRoomCoordinates()
+    {
+        if( !m_llRooms )
+            return;
+        CLink<CRoom> *pLink = m_llRooms->GetHead();
+        if( pLink == NULL )
+            return;
+        JRect rc = pLink->m_lpData->GetArea();
+        JLog( LOG_LEVEL_INFO, true,
+              "[DUNGEN] Origin room: <%d %d, %d %d> (w=%d h=%d), total rooms: %d\n",
+              RECT_EXPAND( rc ), rc.Width(), rc.Height(), m_llRooms->length() );
+    };
+
 #ifdef UNIT_TEST
 public:
 #else
@@ -314,7 +345,7 @@ protected:
     void FillArea( const CDungeonCreationStep *pStep );
     void AddDoor( JIVector vHall, int direction );
     bool IsDoor( const int type );
-    
+
     // Connectivity validation
     bool ValidateConnectivity( int &reachable_tiles, int &total_walkable_tiles ) const;
     bool ValidateAllRoomsReachable() const;

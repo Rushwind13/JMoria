@@ -19,7 +19,11 @@
 
 extern CGame *g_pGame;
 
-CClockStepState::CClockStepState() : m_dwClock( 0 ), m_dwStep( 1 ), m_bShowDiagnostics( true ), m_bLevelPopulated( false )
+CClockStepState::CClockStepState()
+    : m_dwClock( 0 ),
+      m_dwStep( 1 ),
+      m_bShowDiagnostics( true ),
+      m_bLevelPopulated( false )
 {
     // m_bLevelPopulated: Tracks whether scenery/items/monsters have been placed.
     // Prevents re-spawning on every tick after generation completes.
@@ -92,7 +96,7 @@ int CClockStepState::OnHandleInit( JKeysym *keysym )
         g_pGame->GetStats()->Printf( "Press SPACE to step through generation\n" );
         g_pGame->GetStats()->Printf( "Press ESC when done to spawn player\n" );
     }
-    
+
     m_eCurModifier = CLOCKSTEP_TICK;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
     return 0;
@@ -110,7 +114,7 @@ int CClockStepState::OnBaseHandleKey( JKeysym *keysym )
         else
             return -1; // Ignore SPACE after generation complete
     }
-    
+
     if( keysym->sym == JKEY_ESCAPE )
     {
         // Exit CLOCKSTEP mode and spawn player
@@ -148,7 +152,7 @@ void CClockStepState::ResetToState( int newstate )
 bool CClockStepState::DoTick()
 {
     m_dwClock += m_dwStep;
-    
+
     // Safety check for dungeon and level
     if( !g_pGame || !g_pGame->GetDungeon() || !g_pGame->GetDungeon()->GetCurLevel() )
     {
@@ -156,13 +160,13 @@ bool CClockStepState::DoTick()
         g_pGame->GetStats()->Printf( "ERROR: Dungeon not initialized\n" );
         return false;
     }
-    
+
     if( m_bShowDiagnostics )
     {
         CDungeonMap *pMap = g_pGame->GetDungeon()->GetCurLevel();
-        const DungeonGenDiagnostics& diag = pMap->GetDiagnostics();
+        const DungeonGenDiagnostics &diag = pMap->GetDiagnostics();
         double elapsed_ms = Util::GetTimeInMillis() - diag.start_time_ms;
-        
+
         g_pGame->GetStats()->Printf( "Tick! %d\n", m_dwClock );
         g_pGame->GetStats()->Printf( "Seed: %u\n", pMap->GetSeed() );
         g_pGame->GetStats()->Printf( "Stack: %d\n", pMap->GetStackSize() );
@@ -174,41 +178,41 @@ bool CClockStepState::DoTick()
     {
         g_pGame->GetStats()->Printf( "Tick! %d\n", m_dwClock );
     }
-    
+
     g_pGame->SetReadyForUpdate( true );
     bool bStillGenerating = g_pGame->GetDungeon()->Tick( m_dwClock );
-    
+
     // Force dungeon to redraw after each generation step
     g_pGame->GetDungeon()->SetDrawFlag( true );
-    
+
     if( !bStillGenerating && !m_bLevelPopulated )
     {
         CDungeonMap *pMap = g_pGame->GetDungeon()->GetCurLevel();
-        const DungeonGenDiagnostics& diag = pMap->GetDiagnostics();
+        const DungeonGenDiagnostics &diag = pMap->GetDiagnostics();
         double total_ms = Util::GetTimeInMillis() - diag.start_time_ms;
-        
+
         g_pGame->GetStats()->Printf( "\nGeneration complete!\n" );
         g_pGame->GetStats()->Printf( "Time: %.2f ms (%.3f sec)\n", total_ms, total_ms / 1000.0 );
-        g_pGame->GetStats()->Printf( "Rooms: %d, Halls: %d\n", 
-                                    pMap->GetRoomCount(), pMap->GetHallwayCount() );
+        g_pGame->GetStats()->Printf( "Rooms: %d, Halls: %d\n", pMap->GetRoomCount(),
+                                     pMap->GetHallwayCount() );
         if( total_ms > 0.0 )
         {
             double steps_per_sec = ( diag.steps_created * 1000.0 ) / total_ms;
             g_pGame->GetStats()->Printf( "Rate: %.1f steps/sec\n", steps_per_sec );
         }
         g_pGame->GetStats()->Printf( "Placing scenery, items, and monsters...\n" );
-        
+
         // PopulateLevel() called exactly once after generation completes.
         // m_bLevelPopulated flag prevents duplicate spawns on subsequent ticks.
         g_pGame->GetDungeon()->PopulateLevel( g_pGame->GetDungeon()->depth );
         m_bLevelPopulated = true;
-        
+
         g_pGame->GetStats()->Printf( "Press ESC to spawn player.\n" );
     }
-    
+
     // Optional: Add small delay to prevent CPU spike during stepped generation
     // Yields to system and keeps UI responsive. Can be disabled for faster generation.
     // SDL_Delay( 1 ); // Uncomment to add 1ms delay per step
-    
+
     return true;
 }

@@ -14,8 +14,8 @@
 #include <GL/gl.h>
 #endif
 #include "SDL2/SDL.h"
-#include <cstring> // for strcmp
 #include <cstdlib> // for getenv
+#include <cstring> // for strcmp
 
 #ifdef DISPLAY_FRAMERATE
 #include "DisplayText.h"
@@ -26,8 +26,8 @@ JResult CRender::Init( int width, int height, int bpp )
     JResult retval;
 
     // Check if we're in headless mode (for testing)
-    const char* videoDriver = getenv("SDL_VIDEODRIVER");
-    bool isHeadless = (videoDriver != NULL && strcmp(videoDriver, "dummy") == 0);
+    const char *videoDriver = getenv( "SDL_VIDEODRIVER" );
+    bool isHeadless = ( videoDriver != NULL && strcmp( videoDriver, "dummy" ) == 0 );
 
     // Set our member variables
     m_dwScreenWidth = width;
@@ -35,9 +35,11 @@ JResult CRender::Init( int width, int height, int bpp )
     m_dwScreenBPP = bpp;
 
     // In headless mode, skip SDL/OpenGL initialization
-    if (isHeadless)
+    if( isHeadless )
     {
-        JLog( LOG_LEVEL_INFO, true, "Running in headless mode (SDL_VIDEODRIVER=dummy), skipping graphics initialization" );
+        JLog(
+            LOG_LEVEL_INFO, true,
+            "Running in headless mode (SDL_VIDEODRIVER=dummy), skipping graphics initialization" );
         m_hWindow = NULL;
         return JSUCCESS;
     }
@@ -141,8 +143,9 @@ JResult CRender::InitGL()
 JResult CRender::ResizeWindow( int width, int height )
 {
     // Skip in headless mode
-    if (m_hWindow == NULL) return JSUCCESS;
-    
+    if( m_hWindow == NULL )
+        return JSUCCESS;
+
     // Setup our viewport.
     glViewport( 0, 0, (GLint)m_dwScreenWidth, (GLint)m_dwScreenHeight );
 
@@ -167,8 +170,9 @@ JResult CRender::ResizeWindow( int width, int height )
 void CRender::PreDraw()
 {
     // Skip in headless mode
-    if (m_hWindow == NULL) return;
-    
+    if( m_hWindow == NULL )
+        return;
+
     // Clear The Screen And The Depth Buffer
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 }
@@ -176,8 +180,9 @@ void CRender::PreDraw()
 void CRender::PostDraw()
 {
     // Skip in headless mode
-    if (m_hWindow == NULL) return;
-    
+    if( m_hWindow == NULL )
+        return;
+
 #ifdef DISPLAY_FRAMERATE
     m_fps->Draw();
     // Gather our frames per second
@@ -202,8 +207,9 @@ void CRender::PostDraw()
 void CRender::SwapBuffers()
 {
     // Skip in headless mode
-    if (m_hWindow == NULL) return;
-    
+    if( m_hWindow == NULL )
+        return;
+
     // pageflip
     SDL_GL_SwapWindow( m_hWindow );
 }
@@ -211,24 +217,31 @@ void CRender::SwapBuffers()
 void CRender::PreDrawTile()
 {
     // Skip in headless mode
-    if (m_hWindow == NULL) return;
-    
+    if( m_hWindow == NULL )
+        return;
+
     glBegin( GL_QUADS );
 }
 
 void CRender::PostDrawTile()
 {
     // Skip in headless mode
-    if (m_hWindow == NULL) return;
-    
+    if( m_hWindow == NULL )
+        return;
+
     glEnd();
 }
 
-void CRender::SetTileColor( JColor color ) { if (m_hWindow != NULL) glColor4ub( COLOR_EXPAND( color ) ); }
+void CRender::SetTileColor( JColor color )
+{
+    if( m_hWindow != NULL )
+        glColor4ub( COLOR_EXPAND( color ) );
+}
 
 void CRender::DrawTextBoundingBox( JRect rect, JColor color )
 {
-    if (m_hWindow == NULL) return;
+    if( m_hWindow == NULL )
+        return;
     glColor4ub( COLOR_EXPAND( color ) );
     glDisable( GL_TEXTURE_2D );
     glRecti( RECT_EXPAND( rect ) );
@@ -279,8 +292,9 @@ bool CRender::DrawTile( const JFVector &vPos, JVector &vSize, JIVector &vTile )
 void CRender::PreDrawObjects( JRect rcBounds, uint32 Texture, bool bTranslate, bool bInverse,
                               JFVector *vTranslate )
 {
-    if (m_hWindow == NULL) return;
-    
+    if( m_hWindow == NULL )
+        return;
+
     // Push the neccessary Matrices on the stack
     glMatrixMode( GL_PROJECTION );
     glPushMatrix();
@@ -327,8 +341,9 @@ void CRender::PreDrawObjects( JRect rcBounds, uint32 Texture, bool bTranslate, b
 
 void CRender::PostDrawObjects()
 {
-    if (m_hWindow == NULL) return;
-    
+    if( m_hWindow == NULL )
+        return;
+
     // Return to previous Matrix and Attribute states. Easy cleanup!
     glMatrixMode( GL_PROJECTION );
     glPopMatrix();

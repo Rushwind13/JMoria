@@ -89,7 +89,7 @@ private:
 
     // Current drawing state
     JColor m_currentColor;
-    JRect m_currentBounds;     // Current PreDrawObjects bounds (pixel coords from OpenGL world)
+    JRect m_currentBounds; // Current PreDrawObjects bounds (pixel coords from OpenGL world)
     JFVector m_currentTranslate;
     bool m_bTranslating;
 

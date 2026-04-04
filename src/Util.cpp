@@ -28,10 +28,7 @@ void SeedRandom( unsigned int seed )
     JLog( LOG_LEVEL_DEBUG, true, "RNG seeded with: %u\n", seed );
 }
 
-unsigned int GetRandomSeed()
-{
-    return g_RandomSeed;
-}
+unsigned int GetRandomSeed() { return g_RandomSeed; }
 
 // The RNG in all its glory
 float GetRandom( float lo, float hi )
@@ -300,23 +297,23 @@ bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 dist
             vNextPos.x += vStep.x; // Increment x if error is negative
             error += 2 * vDelta.y;
         }
-        
+
         // Check for diagonal movement - if both X and Y changed, check the diagonal gap
         if( vNextPos.x != vCurrent.x && vNextPos.y != vCurrent.y )
         {
             // Moving diagonally - check both intermediate positions
-            JIVector vDiag1( vNextPos.x, vCurrent.y );  // Step along X first
-            JIVector vDiag2( vCurrent.x, vNextPos.y );  // Step along Y first
-            
+            JIVector vDiag1( vNextPos.x, vCurrent.y ); // Step along X first
+            JIVector vDiag2( vCurrent.x, vNextPos.y ); // Step along Y first
+
             vTest.Init( VEC_EXPAND( vDiag1 ) );
             if( !isWalkable( vTest ) )
                 return false;
-            
+
             vTest.Init( VEC_EXPAND( vDiag2 ) );
             if( !isWalkable( vTest ) )
                 return false;
         }
-        
+
         vCurrent = vNextPos;
         alreadyAdded = false;
     }

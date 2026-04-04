@@ -175,7 +175,8 @@ JResult CDungeon::CreateNewLevel( const int delta )
     SpawnMonsters( depth );
 #else
     // In CLOCKSTEP mode, these will be placed after dungeon generation completes
-    JLog( LOG_LEVEL_INFO, false, "CLOCKSTEP: Scenery/items/monsters will be placed after generation.\n" );
+    JLog( LOG_LEVEL_INFO, false,
+          "CLOCKSTEP: Scenery/items/monsters will be placed after generation.\n" );
 #endif
 
     m_bDraw = true;
@@ -196,22 +197,45 @@ JResult CDungeon::CreateMap()
     m_dmCurLevel = new CDungeonMap;
     m_dmCurLevel->CreateDungeon( depth );
 #ifndef CLOCKSTEP
-    // In normal mode, complete the dungeon immediately
-    while( m_dmCurLevel->ProcessStep() )
-        ;
-    
+    // In normal mode, complete the dungeon immediately, retrying if too small
+    int generation_attempt = 0;
+    while( generation_attempt < DUNG_MAX_GENERATION_RETRIES )
+    {
+        while( m_dmCurLevel->ProcessStep() )
+            ;
+
+        int rooms = m_dmCurLevel->HowManyRooms();
+        if( rooms >= DUNG_MIN_ROOMS_REQUIRED )
+            break;
+
+        generation_attempt++;
+        JLog( LOG_LEVEL_WARN, true,
+              "[DUNGEN] Generation produced only %d rooms (need %d), retrying (%d/%d)\n", rooms,
+              DUNG_MIN_ROOMS_REQUIRED, generation_attempt, DUNG_MAX_GENERATION_RETRIES );
+
+        // Reset dungeon tiles so InitDungeonTiles doesn't see stale data
+        delete m_dmCurLevel;
+        m_dmCurLevel = new CDungeonMap;
+        m_dmCurLevel->CreateDungeon( depth );
+    }
+
     // Retrieve diagnostics with finalized timing from dungeon generation
-    const DungeonGenDiagnostics& diag = m_dmCurLevel->GetDiagnostics();
-        
+    const DungeonGenDiagnostics &diag = m_dmCurLevel->GetDiagnostics();
+
     JLog( LOG_LEVEL_INFO, true, "Rooms in current level: %d\n", m_dmCurLevel->HowManyRooms() );
     JLog( LOG_LEVEL_INFO, true, "Hallways in current level: %d\n",
           m_dmCurLevel->HowManyHallways() );
-    JLog( LOG_LEVEL_INFO, true, "Generation time: %.2f ms (%.3f seconds)\n", 
-          diag.total_time_ms, diag.total_time_ms / 1000.0 );
+    m_dmCurLevel->LogRoomCoordinates();
+    if( generation_attempt > 0 )
+        JLog( LOG_LEVEL_INFO, true, "[DUNGEN] Generation required %d retries\n",
+              generation_attempt );
+    JLog( LOG_LEVEL_INFO, true, "Generation time: %.2f ms (%.3f seconds)\n", diag.total_time_ms,
+          diag.total_time_ms / 1000.0 );
     JLog( LOG_LEVEL_INFO, true, "[DUNGEN] Generation complete in %.2f ms\n", diag.total_time_ms );
     JLog( LOG_LEVEL_INFO, true, "[DUNGEN]   Steps: %d created, %d rooms, %d halls, %d skipped\n",
           diag.steps_created, diag.rooms_created, diag.hallways_created, diag.steps_skipped );
-    JLog( LOG_LEVEL_INFO, true, "[DUNGEN]   Fill operations: %d, Conflicts: %d, Repeated failures: %d\n",
+    JLog( LOG_LEVEL_INFO, true,
+          "[DUNGEN]   Fill operations: %d, Conflicts: %d, Repeated failures: %d\n",
           diag.fill_operations, diag.conflicts_detected, diag.repeated_failures );
     if( diag.total_time_ms > 0.0 )
     {
@@ -494,7 +518,7 @@ JResult CDungeon::OnChangeLevel( const int delta )
 
     // Create new level
     CreateNewLevel( delta );
-    
+
 #ifndef CLOCKSTEP
     // In normal mode, spawn player immediately after level creation
     g_pGame->GetPlayer()->m_bHasSpawned = false;
@@ -546,7 +570,7 @@ bool CDungeon::Tick( const int dwClock )
 bool CDungeon::Update( float fCurTime )
 {
     if( m_llItems )
-    {   
+    {
         CLink<CItem> *pLink = m_llItems->GetHead();
         CItem *pItem;
 
@@ -567,7 +591,7 @@ JResult CDungeon::UpdateSeen()
     // In CLOCKSTEP mode, player may not be spawned yet
     if( !g_pGame->GetPlayer() || !g_pGame->GetPlayer()->m_bHasSpawned )
         return JSUCCESS;
-        
+
     JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
     JRect rcSeen = Util::Nearby( vPlayer, 1 );
 
@@ -625,22 +649,22 @@ bool SightCollisionTest( JVector &vTest )
         return false;
 
     int type = curTile->m_dtd->m_dwType;
-    
+
     // Explicitly block sight-blocking obstacles
     // Walls and rubble always block sight
     if( type == DUNG_IDX_WALL || type == DUNG_IDX_RUBBLE )
-        return false;  // Blocked
-    
+        return false; // Blocked
+
     // Closed/secret doors block sight - check CURRENT type, not modified type
     if( type == DUNG_IDX_DOOR || type == DUNG_IDX_SECRET_DOOR )
-        return false;  // Closed door blocks sight
-    
+        return false; // Closed door blocks sight
+
     // Open doors allow sight through
     if( type == DUNG_IDX_OPEN_DOOR )
-        return true;  // Open door allows sight through
-    
+        return true; // Open door allows sight through
+
     // Everything else allows sight (floors, stairs, etc.)
-    return true;  // Allow sight
+    return true; // Allow sight
 }
 
 bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFlags )
@@ -695,7 +719,7 @@ bool CDungeon::PlayerCanSee( JVector vCheck, uint32 dwFlags )
     // In CLOCKSTEP mode, player may not exist yet
     if( !g_pGame->GetPlayer() || !g_pGame->GetPlayer()->m_bHasSpawned )
         return true; // Show everything when no player
-        
+
     if( g_pGame->GetPlayer()->IsWizard() )
         return true;
 
@@ -762,7 +786,7 @@ bool CDungeon::IsLit( JVector vPos )
     // In CLOCKSTEP mode, player may not exist yet - consider everything lit
     if( !g_pGame->GetPlayer() || !g_pGame->GetPlayer()->m_bHasSpawned )
         return true;
-        
+
     if( !g_pGame->GetPlayer()->LightSource() )
         return false;
     JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
@@ -779,17 +803,16 @@ void CDungeon::DrawDungeon()
 #else
     JVector vSize( 0.75f, 1.0f );
 #endif
-    
+
     // In CLOCKSTEP mode, player may not be spawned yet
     JVector vDefaultPos( DUNG_WIDTH / 2, DUNG_HEIGHT / 2 );
-    JVector vPlayerPos = ( g_pGame->GetPlayer() && g_pGame->GetPlayer()->m_bHasSpawned ) 
-                         ? g_pGame->GetPlayer()->m_vPos 
-                         : vDefaultPos;
-    
+    JVector vPlayerPos = ( g_pGame->GetPlayer() && g_pGame->GetPlayer()->m_bHasSpawned )
+                             ? g_pGame->GetPlayer()->m_vPos
+                             : vDefaultPos;
+
     JVector vLook = ( g_pGame->GetGameStateIndex() == STATE_LOOK ) ? m_vLookPos : vPlayerPos;
-    JVector vProjectile = ( g_pGame->GetGameStateIndex() == STATE_RANGED )
-                              ? m_vProjectilePos
-                              : vPlayerPos;
+    JVector vProjectile =
+        ( g_pGame->GetGameStateIndex() == STATE_RANGED ) ? m_vProjectilePos : vPlayerPos;
     JColor color;
 
     for( vScreen.x = 0; vScreen.x < DUNG_WIDTH; vScreen.x++ )
@@ -803,8 +826,8 @@ void CDungeon::DrawDungeon()
                 ; // need to display this tile
             }
 
-            // In CLOCKSTEP mode, show all tiles regardless of visibility (bypasses DUNG_FLAG_SEEN check)
-            // In normal gameplay, only show tiles that have been explored or are occupied
+            // In CLOCKSTEP mode, show all tiles regardless of visibility (bypasses DUNG_FLAG_SEEN
+            // check) In normal gameplay, only show tiles that have been explored or are occupied
             else if( g_pGame->GetGameStateIndex() != STATE_CLOCKSTEP &&
                      ( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_SEEN ) == 0 ) ||
                        ( g_pGame->GetPlayer()->IsWizard() &&
@@ -929,8 +952,7 @@ void CDungeon::PreDraw()
     g_pGame->GetRender()->PreDrawObjects( m_Rect, m_TileSet->Texture(), true, false,
                                           &m_vfTranslate );
 #else
-    g_pGame->GetRender()->PreDrawObjects( m_Rect, 0, true, false,
-                                          &m_vfTranslate );
+    g_pGame->GetRender()->PreDrawObjects( m_Rect, 0, true, false, &m_vfTranslate );
 #endif
 
     // Do any external setup that needs doing.

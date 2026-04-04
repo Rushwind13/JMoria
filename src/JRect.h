@@ -142,14 +142,14 @@ public:
     {
         if( IsWithinWorld() )
         {
-            return false;  // No clamping needed
+            return false; // No clamping needed
         }
 
         if( bLogWarning )
         {
-            JLog( LOG_LEVEL_NOISIER, true, 
-                  "[DUNGEN] Warning: Rect <%d %d, %d %d> exceeds world bounds, clamping\n",
-                  left, top, right, bottom );
+            JLog( LOG_LEVEL_NOISIER, true,
+                  "[DUNGEN] Warning: Rect <%d %d, %d %d> exceeds world bounds, clamping\n", left,
+                  top, right, bottom );
         }
 
         // Clamp to valid world bounds (leaving 1 tile border for walls)
@@ -158,7 +158,7 @@ public:
         right = CLAMP( right, 1, DUNG_WIDTH - 2 );
         bottom = CLAMP( bottom, 1, DUNG_HEIGHT - 2 );
 
-        return true;  // Clamping was performed
+        return true; // Clamping was performed
     }
 };
 

@@ -145,7 +145,7 @@ public:
     int m_dwCount; // how many of this item are being carried?
     int m_dwFlags; // item cursed, or other specific to this instance, rather than in the general
                    // CItemDef
-    uint32 m_dwCharges; // for wands and staves and other items that have an "ammo count"
+    uint32 m_dwCharges;    // for wands and staves and other items that have an "ammo count"
     uint32 m_dwInstanceId; // unique instance id for this item
 protected:
     float m_fColorChangeInterval;
@@ -160,13 +160,13 @@ public:
         : m_vPos( 0, 0 ),
           m_dwFlags( 0 ),
           m_dwCharges( 0 ),
-                    m_dwInstanceId( 0 ),
+          m_dwInstanceId( 0 ),
           m_dwCount( 1 ),
           m_pllLink( NULL ),
           m_id( NULL ),
           m_fRemainingDuration( 0.0f ) {};
-    
-        uint32 GetInstanceId() { return m_dwInstanceId; }
+
+    uint32 GetInstanceId() { return m_dwInstanceId; }
     void Init( CItemDef *pid );
     void SetCursed( int likelihood );
     void SetCursed( bool bCursed );

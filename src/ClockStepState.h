@@ -6,14 +6,14 @@
 //  Copyright © 2017 Jimbo S. Harris. All rights reserved.
 //
 //  CLOCKSTEP Mode: Visual step-through dungeon generation for debugging
-//  
+//
 //  Enable by adding -DCLOCKSTEP to CFLAGS in Makefile.
-//  
+//
 //  Flow: INTRO → CLOCKSTEP → COMMAND (on ESC)
 //  Controls:
 //    SPACE - Advance dungeon generation by one tick
 //    ESC   - Complete generation, spawn player, start gameplay
-//  
+//
 //  Key implementation details:
 //  - Player spawn deferred until ESC pressed (prevents NULL crashes during generation)
 //  - m_bLevelPopulated flag ensures scenery/items/monsters placed only once after generation

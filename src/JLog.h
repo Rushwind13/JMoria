@@ -40,7 +40,7 @@ static JResult JLog( eLogLevel eLogLevel, bool verbose, const char *format, ... 
     {
         va_list args;
         va_start( args, format );
-        vprintf( mod_format, args );
+        vfprintf( stderr, mod_format, args );
         va_end( args );
     }
     if( eLogLevel >= LOG_LEVEL_WARN )

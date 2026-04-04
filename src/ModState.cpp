@@ -21,14 +21,14 @@ CModState::CModState() : m_cCommand( 0 ), m_vNewPos( 0, 0 )
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }
 
-int CModState::OnHandleKey( SDL_Keysym *keysym )
+int CModState::OnHandleKey( JKeysym *keysym )
 {
     int retval;
     retval = ( ( *this ).*( m_pCurKeyHandler ) )( keysym );
     return retval;
 }
 
-int CModState::OnHandleOpen( SDL_Keysym *keysym )
+int CModState::OnHandleOpen( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling OPEN modifier\n" );
@@ -73,7 +73,7 @@ int CModState::OnHandleOpen( SDL_Keysym *keysym )
     return 0;
 }
 
-int CModState::OnHandleClose( SDL_Keysym *keysym )
+int CModState::OnHandleClose( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling CLOSE modifier\n" );
@@ -118,7 +118,7 @@ int CModState::OnHandleClose( SDL_Keysym *keysym )
     return 0;
 }
 
-int CModState::OnHandleTunnel( SDL_Keysym *keysym )
+int CModState::OnHandleTunnel( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling TUNNEL modifier\n" );
@@ -163,7 +163,7 @@ int CModState::OnHandleTunnel( SDL_Keysym *keysym )
     return 0;
 }
 
-int CModState::OnHandleInit( SDL_Keysym *keysym )
+int CModState::OnHandleInit( JKeysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing modify state...\n" );
     if( !m_cCommand )
@@ -173,14 +173,14 @@ int CModState::OnHandleInit( SDL_Keysym *keysym )
         eModModifier mod = MOD_INIT;
         switch( m_cCommand )
         {
-        case SDLK_o:
+        case JKEY_o:
             mod = MOD_OPEN;
             break;
-        case SDLK_c:
+        case JKEY_c:
             mod = MOD_CLOSE;
             break;
-        case SDLK_t:
-            if( keysym->mod & KMOD_SHIFT )
+        case JKEY_t:
+            if( keysym->mod & JMOD_SHIFT )
             {
                 mod = MOD_TUNNEL;
             }
@@ -211,7 +211,7 @@ int CModState::OnHandleInit( SDL_Keysym *keysym )
     return JRESETSTATE;
 }
 
-int CModState::OnBaseHandleKey( SDL_Keysym *keysym )
+int CModState::OnBaseHandleKey( JKeysym *keysym )
 {
     if( IsDirectional( keysym ) )
     {
@@ -221,7 +221,7 @@ int CModState::OnBaseHandleKey( SDL_Keysym *keysym )
 
         return JSUCCESS;
     }
-    else if( keysym->sym == SDLK_ESCAPE )
+    else if( keysym->sym == JKEY_ESCAPE )
     {
         // ESC key gets us out of modify mode
         ResetToState( STATE_COMMAND );

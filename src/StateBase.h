@@ -1,10 +1,6 @@
 #ifndef __STATEBASE_H__
 #define __STATEBASE_H__
-#ifdef __WIN32__
-#include "sdl.h"
-#else
-#include "SDL2/SDL.h"
-#endif // __WIN32__
+#include "JKeys.h"
 
 class CStateBase
 {
@@ -17,27 +13,27 @@ public:
     CStateBase() {}
     ~CStateBase() {}
 
-    int HandleKey( SDL_Keysym *keysym )
+    int HandleKey( JKeysym *keysym )
     {
         switch( keysym->sym )
         {
-        case SDLK_c:
-            if( keysym->mod & KMOD_CTRL )
+        case JKEY_c:
+            if( keysym->mod & JMOD_CTRL )
             {
                 // ^C was pressed; bye bye.
                 return ( JQUITREQUEST );
             }
             break;
-        case SDLK_F1:
+        case JKEY_F1:
             // F1 key was pressed
             // this toggles fullscreen mode
 
             // SDL_WM_ToggleFullScreen( surface );
             break;
-        case SDLK_LSHIFT:
-        case SDLK_RSHIFT:
-        case SDLK_LCTRL:
-        case SDLK_RCTRL:
+        case JKEY_LSHIFT:
+        case JKEY_RSHIFT:
+        case JKEY_LCTRL:
+        case JKEY_RCTRL:
             // Just a modifier key, nothing to see here.
             return ( JSUCCESS );
             break;
@@ -50,56 +46,56 @@ public:
     void Update( float fCurTime ) { OnUpdate( fCurTime ); }
 
 protected:
-    virtual int OnHandleKey( SDL_Keysym *keysym ) = 0;
+    virtual int OnHandleKey( JKeysym *keysym ) = 0;
     virtual void OnUpdate( float fCurTime ) = 0;
     virtual void ResetToState( int newstate ) = 0;
 
-    char GetAlpha( SDL_Keysym *keysym )
+    char GetAlpha( JKeysym *keysym )
     {
         char cBase = 'a';
-        if( keysym->mod & KMOD_SHIFT )
+        if( keysym->mod & JMOD_SHIFT )
         {
             cBase = 'A';
         }
         // All the alphabet keys
-        // have sequential SDLK_ symbols,
+        // have sequential JKEY_ symbols,
         // so we can handle them with this check
-        if( keysym->sym >= SDLK_a && keysym->sym <= SDLK_z )
+        if( keysym->sym >= JKEY_a && keysym->sym <= JKEY_z )
         {
-            return cBase + keysym->sym - SDLK_a;
+            return cBase + keysym->sym - JKEY_a;
         }
 
         return nul;
     }
 
-    char GetNumeric( SDL_Keysym *keysym )
+    char GetNumeric( JKeysym *keysym )
     {
         char cBase = '0';
         // All the alphabet keys
-        // have sequential SDLK_ symbols,
+        // have sequential JKEY_ symbols,
         // so we can handle them with this check
-        if( keysym->sym >= SDLK_KP_1 && keysym->sym <= SDLK_KP_0 )
+        if( keysym->sym >= JKEY_KP_1 && keysym->sym <= JKEY_KP_0 )
         {
             // keypad codes are 1,2,...,9,0
-            if( keysym->sym == SDLK_KP_0 )
+            if( keysym->sym == JKEY_KP_0 )
                 return cBase;
             else
-                return cBase + keysym->sym + SDLK_KP_1 + 1;
+                return cBase + keysym->sym + JKEY_KP_1 + 1;
         }
-        else if( keysym->sym >= SDLK_0 && keysym->sym <= SDLK_9 )
+        else if( keysym->sym >= JKEY_0 && keysym->sym <= JKEY_9 )
         {
-            return cBase + keysym->sym - SDLK_0;
+            return cBase + keysym->sym - JKEY_0;
         }
 
         return nul;
     }
 
-    char GetAlphaNumeric( SDL_Keysym *keysym )
+    char GetAlphaNumeric( JKeysym *keysym )
     {
-        if( keysym->sym == SDLK_SPACE )
+        if( keysym->sym == JKEY_SPACE )
             return ' ';
 
-        if( keysym->sym == SDLK_MINUS && keysym->mod & KMOD_SHIFT )
+        if( keysym->sym == JKEY_MINUS && keysym->mod & JMOD_SHIFT )
             return '_';
 
         char retval = GetAlpha( keysym );
@@ -111,14 +107,14 @@ protected:
         return retval;
     }
 
-    bool IsDirectional( SDL_Keysym *keysym )
+    bool IsDirectional( JKeysym *keysym )
     {
         // All the movement keys
         // (arrows and numberpad keys)
-        // have sequential SDLK_ symbols,
+        // have sequential JKEY_ symbols,
         // so we can handle them with this check
-        if( ( keysym->sym >= SDLK_KP_1 && keysym->sym <= SDLK_KP_0 ) ||
-            ( keysym->sym >= SDLK_RIGHT && keysym->sym <= SDLK_UP ) )
+        if( ( keysym->sym >= JKEY_KP_1 && keysym->sym <= JKEY_KP_0 ) ||
+            ( keysym->sym >= JKEY_RIGHT && keysym->sym <= JKEY_UP ) )
         {
             return true;
         }
@@ -136,62 +132,62 @@ protected:
         return false;
     }
 
-    void GetDir( SDL_Keysym *keysym, JVector &vDir )
+    void GetDir( JKeysym *keysym, JVector &vDir )
     {
         switch( keysym->sym )
         {
-        case SDLK_UP:
-        case SDLK_KP_8:
-        case SDLK_k:
+        case JKEY_UP:
+        case JKEY_KP_8:
+        case JKEY_k:
             // up
             vDir.y = -1;
             break;
-        case SDLK_DOWN:
-        case SDLK_KP_2:
-        case SDLK_j:
+        case JKEY_DOWN:
+        case JKEY_KP_2:
+        case JKEY_j:
             // down
             vDir.y = 1;
             break;
-        case SDLK_LEFT:
-        case SDLK_KP_4:
-        case SDLK_h:
+        case JKEY_LEFT:
+        case JKEY_KP_4:
+        case JKEY_h:
             // left
             vDir.x = -1;
             break;
-        case SDLK_RIGHT:
-        case SDLK_KP_6:
-        case SDLK_l:
+        case JKEY_RIGHT:
+        case JKEY_KP_6:
+        case JKEY_l:
             vDir.x = 1;
             // right
             break;
-        case SDLK_KP_7:
-        case SDLK_y:
+        case JKEY_KP_7:
+        case JKEY_y:
             // up + left
             vDir.x = -1;
             vDir.y = -1;
             break;
-        case SDLK_KP_9:
-        case SDLK_u:
+        case JKEY_KP_9:
+        case JKEY_u:
             // up + right
             vDir.x = 1;
             vDir.y = -1;
             break;
-        case SDLK_KP_1:
-        case SDLK_b:
+        case JKEY_KP_1:
+        case JKEY_b:
             // down + left
             vDir.x = -1;
             vDir.y = 1;
             break;
-        case SDLK_KP_3:
-        case SDLK_n:
+        case JKEY_KP_3:
+        case JKEY_n:
             // down + right
             vDir.x = 1;
             vDir.y = 1;
             break;
-        case SDLK_KP_5:
+        case JKEY_KP_5:
             // rest
             break;
-        case SDLK_KP_0:
+        case JKEY_KP_0:
         default:
             // nothing
             break;

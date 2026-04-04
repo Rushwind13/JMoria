@@ -2,11 +2,11 @@
 
 #include "JMDefs.h"
 
-int CNewLevelState::OnHandleKey( SDL_Keysym *keysym )
+int CNewLevelState::OnHandleKey( JKeysym *keysym )
 {
     int retval = JSUCCESS;
 
-    if( keysym->sym == SDLK_SPACE )
+    if( keysym->sym == JKEY_SPACE )
     {
         // run one step of dungeon creation
         if( retval == JRESETSTATE )

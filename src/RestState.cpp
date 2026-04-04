@@ -24,14 +24,14 @@ CRestState::CRestState() : m_dwClock( 0 )
 
 CRestState::~CRestState() {}
 
-int CRestState::OnHandleKey( SDL_Keysym *keysym )
+int CRestState::OnHandleKey( JKeysym *keysym )
 {
     int retval;
     retval = ( ( *this ).*( m_pCurKeyHandler ) )( keysym );
     return retval;
 }
 
-int CRestState::OnHandleTick( SDL_Keysym *keysym )
+int CRestState::OnHandleTick( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling TICK modifier\n" );
@@ -64,7 +64,7 @@ int CRestState::OnHandleTick( SDL_Keysym *keysym )
     return 0;
 }
 
-int CRestState::OnHandleInit( SDL_Keysym *keysym )
+int CRestState::OnHandleInit( JKeysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing REST state...\n" );
 
@@ -76,9 +76,9 @@ int CRestState::OnHandleInit( SDL_Keysym *keysym )
     return 0;
 }
 
-int CRestState::OnBaseHandleKey( SDL_Keysym *keysym )
+int CRestState::OnBaseHandleKey( JKeysym *keysym )
 {
-    if( keysym->sym == SDLK_RETURN || keysym->sym == SDLK_SPACE )
+    if( keysym->sym == JKEY_RETURN || keysym->sym == JKEY_SPACE )
     {
         return JCOMPLETESTATE;
     }

@@ -16,7 +16,7 @@ GIVEN( "^I have a Player$" )
     }
     g_pGame = NULL;
     g_pGame = new CGame;
-    context->result = g_pGame->Init( "../../JMoria/" );
+    context->result = g_pGame->Init( "../../JMoria/", RenderMode::ASCII );
     EXPECT_EQ( context->result, JSUCCESS );
 }
 

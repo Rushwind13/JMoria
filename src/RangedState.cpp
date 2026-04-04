@@ -42,14 +42,14 @@ CRangedState::~CRangedState()
     }
 }
 
-int CRangedState::OnHandleKey( SDL_Keysym *keysym )
+int CRangedState::OnHandleKey( JKeysym *keysym )
 {
     int retval;
     retval = ( ( *this ).*( m_pCurKeyHandler ) )( keysym );
     return retval;
 }
 
-int CRangedState::OnHandleInit( SDL_Keysym *keysym )
+int CRangedState::OnHandleInit( JKeysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing RANGED state...\n" );
     if( !m_cCommand )
@@ -68,11 +68,11 @@ int CRangedState::OnHandleInit( SDL_Keysym *keysym )
         eRangedModifier mod = RANGED_INIT;
         switch( m_cCommand )
         {
-        case SDLK_f:
+        case JKEY_f:
             mod = RANGED_FIRE;
             g_pGame->GetMsgs()->Printf( "Fire which weapon? [a-z]\n" );
             break;
-        case SDLK_z:
+        case JKEY_z:
             mod = RANGED_ZAP;
             g_pGame->GetMsgs()->Printf( "Zap which wand? [a-z]\n" );
             break;
@@ -103,10 +103,10 @@ int CRangedState::OnHandleInit( SDL_Keysym *keysym )
 
         switch( m_cCommand )
         {
-        case SDLK_f:
+        case JKEY_f:
             m_eCurModifier = RANGED_FIRE;
             break;
-        case SDLK_z:
+        case JKEY_z:
             m_eCurModifier = RANGED_ZAP;
             break;
         default:
@@ -129,7 +129,7 @@ int CRangedState::OnHandleInit( SDL_Keysym *keysym )
 }
 
 // f)ire a projectile e.g. arrow
-int CRangedState::OnHandleFire( SDL_Keysym *keysym )
+int CRangedState::OnHandleFire( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling FIRE\n" );
@@ -188,7 +188,7 @@ int CRangedState::OnHandleFire( SDL_Keysym *keysym )
 }
 
 // z)ap a wand
-int CRangedState::OnHandleZap( SDL_Keysym *keysym )
+int CRangedState::OnHandleZap( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling ZAP\n" );
@@ -254,7 +254,7 @@ int CRangedState::OnHandleZap( SDL_Keysym *keysym )
 }
 
 // choose a target either * or direction
-int CRangedState::OnHandleTarget( SDL_Keysym *keysym )
+int CRangedState::OnHandleTarget( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling TARGET modifier\n" );
@@ -279,10 +279,10 @@ int CRangedState::OnHandleTarget( SDL_Keysym *keysym )
     eRangedModifier mod = RANGED_INIT;
     switch( m_cCommand )
     {
-    case SDLK_f:
+    case JKEY_f:
         mod = RANGED_FIRE;
         break;
-    case SDLK_z:
+    case JKEY_z:
         mod = RANGED_ZAP;
         break;
     default:
@@ -335,7 +335,7 @@ int CRangedState::BuildTrajectory()
     return JSUCCESS;
 }
 
-int CRangedState::OnHandleTrajectory( SDL_Keysym *keysym )
+int CRangedState::OnHandleTrajectory( JKeysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "TRAJECTORY modifier following projectile\n" );
 
@@ -343,9 +343,9 @@ int CRangedState::OnHandleTrajectory( SDL_Keysym *keysym )
     return 0;
 }
 
-int CRangedState::OnBaseHandleKey( SDL_Keysym *keysym )
+int CRangedState::OnBaseHandleKey( JKeysym *keysym )
 {
-    if( keysym->sym == SDLK_ESCAPE )
+    if( keysym->sym == JKEY_ESCAPE )
     {
         // ESC key gets us out of modify mode
         ResetToState( STATE_COMMAND );
@@ -404,7 +404,7 @@ int CRangedState::OnBaseHandleKey( SDL_Keysym *keysym )
 
             return JSUCCESS;
         }
-        else if( keysym->sym == SDLK_8 && keysym->mod & KMOD_SHIFT )
+        else if( keysym->sym == JKEY_8 && keysym->mod & JMOD_SHIFT )
         {
             GosubState( STATE_TARGET );
             return JRESETSTATE;
@@ -423,11 +423,10 @@ void CRangedState::GosubState( int newstate )
     g_pGame->SetState( newstate );
     // target state will bounce back to here
     // do not overwrite m_cCommand nor m_pSelected
-    SDL_Keysym *newkey = new SDL_Keysym();
-    newkey->sym = SDLK_f;
-    newkey->mod = 0;
-    g_pGame->GetGameState()->HandleKey( newkey );
-    delete newkey;
+    JKeysym newkey;
+    newkey.sym = JKEY_f;
+    newkey.mod = 0;
+    g_pGame->GetGameState()->HandleKey( &newkey );
     m_eCurModifier = RANGED_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }
@@ -505,10 +504,10 @@ bool CRangedState::DoTrajectory()
         g_pGame->GetPlayer()->SetRangedHitPosition( vTest );
         switch( m_cCommand )
         {
-        case SDLK_f:
+        case JKEY_f:
             DoFire();
             break;
-        case SDLK_z:
+        case JKEY_z:
             DoZap();
             break;
         default:

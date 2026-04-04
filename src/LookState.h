@@ -4,7 +4,7 @@
 #include "StateBase.h"
 
 class CLookState;
-typedef int ( CLookState::*LookKeyHandler )( SDL_Keysym *keysym );
+typedef int ( CLookState::*LookKeyHandler )( JKeysym *keysym );
 enum eLookModifier
 {
     LOOK_INVALID = -1,
@@ -28,8 +28,8 @@ public:
     ~CLookState() {}
 
     virtual void OnUpdate( float fCurTime ) {}
-    virtual int OnBaseHandleKey( SDL_Keysym *keysym );
-    virtual int OnHandleKey( SDL_Keysym *keysym );
+    virtual int OnBaseHandleKey( JKeysym *keysym );
+    virtual int OnHandleKey( JKeysym *keysym );
 
 protected:
 private:
@@ -38,8 +38,8 @@ private:
 
     eLookModifier m_eCurModifier;
 
-    int OnHandleLook( SDL_Keysym *keysym );
-    int OnHandleInit( SDL_Keysym *keysym );
+    int OnHandleLook( JKeysym *keysym );
+    int OnHandleInit( JKeysym *keysym );
 
     bool TestLook();
     bool DoLook();

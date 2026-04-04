@@ -259,9 +259,6 @@ int gcd( const int a, const int b )
 bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 distance,
                 bool ( *isWalkable )( JVector & ), JLinkList<JIVector> *llLine )
 {
-    if( distance == 8 )
-        JLog( LOG_LEVEL_INFO, true, "bres from <%d %d> to  <%d %d> both should be in output\n",
-              VEC_EXPAND( vSource ), VEC_EXPAND( vTarget ) );
     // Bresenham Line Algorithm
     JIVector vDelta( abs( vTarget.x - vSource.x ), abs( vTarget.y - vSource.y ) );
     JIVector vStep( vSource.x < vTarget.x ? 1 : -1, vSource.y < vTarget.y ? 1 : -1 );
@@ -274,49 +271,54 @@ bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 dist
     // while( vCurrent.x != vTarget.x || vCurrent.y != vTarget.y )
     while( steps_remaining > 0 )
     {
-        if( distance == 8 && vCurrent.x == vTarget.x && vCurrent.y == vTarget.y )
-        {
-            JLog( LOG_LEVEL_INFO, true, "Bres reached target point with remaining steps: %d\n",
-                  steps_remaining );
-        }
         if( !alreadyAdded )
         {
-            JLog( LOG_LEVEL_NOISE, true, "bres added <%d %d> error: %d\n", VEC_EXPAND( vCurrent ),
-                  error );
             if( llLine )
                 llLine->Add( new JIVector( vCurrent ) );
             alreadyAdded = true;
             steps_remaining--;
-            JLog( LOG_LEVEL_NOISE, true, "bres remaining: %d\n", steps_remaining );
             if( steps_remaining == 0 )
-            {
-                JLog( LOG_LEVEL_DEBUG, true, "bres finished\n" );
                 break;
-            }
         }
         if( vCurrent != vSource )
         {
             vTest.Init( VEC_EXPAND( vCurrent ) );
             if( !isWalkable( vTest ) )
             {
-                JLog( LOG_LEVEL_DEBUG, true, "bres not walkable\n" );
                 return false;
             }
         }
 
+        JIVector vNextPos = vCurrent;
         if( error > 0 )
         {
-            vCurrent.y += vStep.y; // Increment y if error is positive
+            vNextPos.y += vStep.y; // Increment y if error is positive
             error -= 2 * vDelta.x;
-            alreadyAdded = false;
         }
         else
         {
-            vCurrent.x += vStep.x; // Increment x if error is negative
+            vNextPos.x += vStep.x; // Increment x if error is negative
             error += 2 * vDelta.y;
-            alreadyAdded = false;
         }
-        JLog( LOG_LEVEL_NOISE, true, "bres still going\n" );
+        
+        // Check for diagonal movement - if both X and Y changed, check the diagonal gap
+        if( vNextPos.x != vCurrent.x && vNextPos.y != vCurrent.y )
+        {
+            // Moving diagonally - check both intermediate positions
+            JIVector vDiag1( vNextPos.x, vCurrent.y );  // Step along X first
+            JIVector vDiag2( vCurrent.x, vNextPos.y );  // Step along Y first
+            
+            vTest.Init( VEC_EXPAND( vDiag1 ) );
+            if( !isWalkable( vTest ) )
+                return false;
+            
+            vTest.Init( VEC_EXPAND( vDiag2 ) );
+            if( !isWalkable( vTest ) )
+                return false;
+        }
+        
+        vCurrent = vNextPos;
+        alreadyAdded = false;
     }
     return true;
 }

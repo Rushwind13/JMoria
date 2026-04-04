@@ -1,11 +1,8 @@
 #ifndef __JCOLOR_H__
 #define __JCOLOR_H__
 #include "JMDefs.h"
-#ifdef __WIN32__
-#include "sdl.h"
-#else
-#include "SDL2/SDL.h"
-#endif // __WIN32__
+#include <cstdlib>
+#include <cstring>
 #define COLOR_EXPAND( color )                                                                      \
     ( color ).m_vRG.x, ( color ).m_vRG.y, ( color ).m_vBA.x, ( color ).m_vBA.y
 class JColor

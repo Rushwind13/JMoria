@@ -17,7 +17,7 @@ public:
     void OnUpdate( float fCurTime ) {}
 
 protected:
-    virtual int OnHandleKey( SDL_Keysym *keysym );
+    virtual int OnHandleKey( JKeysym *keysym );
 
 private:
 };

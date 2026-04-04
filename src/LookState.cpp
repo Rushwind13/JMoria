@@ -19,14 +19,14 @@ CLookState::CLookState() : m_cCommand( 0 ), m_vDelta( 0, 0 )
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }
 
-int CLookState::OnHandleKey( SDL_Keysym *keysym )
+int CLookState::OnHandleKey( JKeysym *keysym )
 {
     int retval;
     retval = ( ( *this ).*( m_pCurKeyHandler ) )( keysym );
     return retval;
 }
 
-int CLookState::OnHandleLook( SDL_Keysym *keysym )
+int CLookState::OnHandleLook( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling LOOK modifier\n" );
@@ -70,7 +70,7 @@ int CLookState::OnHandleLook( SDL_Keysym *keysym )
     return 0;
 }
 
-int CLookState::OnHandleInit( SDL_Keysym *keysym )
+int CLookState::OnHandleInit( JKeysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing look state...\n" );
     if( !m_cCommand )
@@ -80,8 +80,8 @@ int CLookState::OnHandleInit( SDL_Keysym *keysym )
         eLookModifier mod = LOOK_INIT;
         switch( m_cCommand )
         {
-        case SDLK_SEMICOLON:
-            if( keysym->mod & KMOD_SHIFT )
+        case JKEY_SEMICOLON:
+            if( keysym->mod & JMOD_SHIFT )
             {
                 mod = LOOK_LOOK;
                 m_vDelta.Init();
@@ -108,7 +108,7 @@ int CLookState::OnHandleInit( SDL_Keysym *keysym )
     return JRESETSTATE;
 }
 
-int CLookState::OnBaseHandleKey( SDL_Keysym *keysym )
+int CLookState::OnBaseHandleKey( JKeysym *keysym )
 {
     if( IsDirectional( keysym ) )
     {
@@ -117,7 +117,7 @@ int CLookState::OnBaseHandleKey( SDL_Keysym *keysym )
 
         return JSUCCESS;
     }
-    else if( keysym->sym == SDLK_PERIOD )
+    else if( keysym->sym == JKEY_PERIOD )
     {
         // * key chooses look target, then gets us out of look mode
         CDungeonTile *pTile =
@@ -181,7 +181,7 @@ int CLookState::OnBaseHandleKey( SDL_Keysym *keysym )
         ResetToState( STATE_COMMAND );
         return JRESETSTATE;
     }
-    else if( keysym->sym == SDLK_ESCAPE )
+    else if( keysym->sym == JKEY_ESCAPE )
     {
         // ESC key gets us out of look mode
         ResetToState( STATE_COMMAND );

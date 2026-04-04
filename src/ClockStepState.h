@@ -30,7 +30,7 @@
 #include "Dungeon.h"
 
 class CClockStepState;
-typedef int ( CClockStepState::*ClockStepKeyHandler )( SDL_Keysym *keysym );
+typedef int ( CClockStepState::*ClockStepKeyHandler )( JKeysym *keysym );
 enum eClockStepModifier
 {
     CLOCKSTEP_INVALID = -1,
@@ -61,13 +61,13 @@ public:
     ~CClockStepState();
 
     virtual void OnUpdate( float fCurTime ) {}
-    virtual int OnBaseHandleKey( SDL_Keysym *keysym );
-    virtual int OnHandleKey( SDL_Keysym *keysym );
+    virtual int OnBaseHandleKey( JKeysym *keysym );
+    virtual int OnHandleKey( JKeysym *keysym );
 
 protected:
 private:
-    int OnHandleTick( SDL_Keysym *keysym );
-    int OnHandleInit( SDL_Keysym *keysym );
+    int OnHandleTick( JKeysym *keysym );
+    int OnHandleInit( JKeysym *keysym );
 
     void ResetToState( int newstate );
 

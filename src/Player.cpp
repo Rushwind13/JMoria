@@ -139,13 +139,13 @@ void CPlayer::Draw()
     if( !m_bHasSpawned )
         return;
         
-    Uint8 player_tile = '@' - ' ' - 1; // TileIDs[TILE_IDX_PLAYER] - ' ' - 1;
+    char player_char = '@';
     JVector DUNG_ASPECT;
     JColor player_color( 255, 255, 255, 255 );
 
     PreDraw();
     m_TileSet->SetTileColor( player_color );
-    m_TileSet->DrawTile( player_tile, m_vPos, vSize, true );
+    m_TileSet->DrawChar( player_char, m_vPos, vSize );
     PostDraw();
 }
 

@@ -340,7 +340,7 @@ void CMonster::SetColor()
 unsigned char MonIDs[MON_IDX_MAX + 1] = "abcddefghhikllmnoprsuwxyzABCDFFFGGHIJKLOPRSTUVWWXY&.,$t";
 void CMonster::Draw()
 {
-    Uint8 monster_tile = MonIDs[m_md->m_dwIndex] - ' ' - 1;
+    char monster_char = MonIDs[m_md->m_dwIndex];
     JVector DUNG_ASPECT;
 
     SetColor();
@@ -355,7 +355,7 @@ void CMonster::Draw()
 
     // PreDraw();
     g_pGame->GetDungeon()->m_TileSet->SetTileColor( color );
-    g_pGame->GetDungeon()->m_TileSet->DrawTile( monster_tile, GetPos(), vSize, false );
+    g_pGame->GetDungeon()->m_TileSet->DrawChar( monster_char, GetPos(), vSize );
     // PostDraw();
 }
 

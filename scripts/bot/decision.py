@@ -49,6 +49,12 @@ class DecisionEngine:
             self.pending_keys = [direction]
             return self._record_action("o")
 
+        # If we bumped into a wall, pivot immediately instead of repeating the same move.
+        if "bumped into a wall" in state.last_message.lower():
+            pivot = self._pivot_from(self.last_action)
+            if pivot:
+                return self._record_action(pivot)
+
         # 1) Survival first: rest when low HP and no adjacent threat.
         if state.player_max_hp > 0 and state.hp_pct < 0.30:
             adjacent = self._adjacent_monster(pos, state.monsters)
@@ -173,6 +179,25 @@ class DecisionEngine:
         key = pattern[self.escape_idx % len(pattern)]
         self.escape_idx += 1
         return self._sanitize_move(key)
+
+    def _pivot_from(self, last_move):
+        """Choose a deterministic alternate move when a wall collision occurs."""
+        if last_move not in "hjklyubn":
+            return "j"
+        pivot_order = {
+            "h": "jukbnly",
+            "l": "jykbnuh",
+            "k": "hlyubnj",
+            "j": "hlyubnk",
+            "y": "hkjulbn",
+            "u": "lkjhnb y".replace(" ", ""),
+            "b": "jlhknyu",
+            "n": "jlhkuyb",
+        }
+        for cand in pivot_order.get(last_move, "hjklyubn"):
+            if cand != last_move and not self._is_opposite(last_move, cand):
+                return self._sanitize_move(cand)
+        return self._sanitize_move("j")
 
     @staticmethod
     def _is_opposite(a, b):

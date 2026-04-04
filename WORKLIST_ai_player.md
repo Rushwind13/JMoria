@@ -2,146 +2,96 @@
 
 ## Overview
 
-This work list defines the enhancements needed to enable automated gameplay in JMoria. The foundation is **PR#157** (AI Observability Logging System), which provides JSON Lines logging of game state. This document outlines the next steps to create an autonomous AI player that can read logs, make decisions, and send commands to reach level 100 in the dungeon.
+This work list defines the implementation of an autonomous dungeon crawler bot for JMoria. See also **Issue #182** for the design rationale.
 
-**Goal:** Create an AI agent that can play JMoria autonomously by parsing AI logs and sending keystroke commands, gaining experience, collecting items, and reaching dungeon level 100 (5000 ft depth).
+**Foundation:** The ASCII renderer (`src/RenderASCII.cpp`, merged in PR#155) renders the game as plain text via ncurses. Running the game inside a `tmux` session lets an external script read screen state with `tmux capture-pane` and send commands with `tmux send-keys`. No changes to the game executable are required.
 
----
-
-## Foundation: PR#157 - AI Observability Logging
-
-### Status: Open (ready for merge)
-**Branch:** `Rushwind13/feat/ai-observability`
-
-### What PR#157 Provides:
-- ✅ JSON Lines logging to `ai-logs/session-NNN-TIMESTAMP.jsonl`
-- ✅ Complete dungeon state every turn (map, monsters, items, player)
-- ✅ Player movement logging (position, result)
-- ✅ Monster movement logging (position, AI state)
-- ✅ Combat logging (attacker, defender, damage, HP)
-- ✅ Item interaction logging (pickup, drop events)
-- ✅ Size optimizations (RLE compression, viewport clipping, ~2.2 KB/turn)
-- ✅ Session management (sequential numbering, auto-archiving)
-- ✅ Analysis shell scripts (`monitor-live.sh`, `summarize-session.sh`, etc.)
-- ✅ Comprehensive documentation (`thoughts/ai-logging.md`)
-
-### Key Event Types:
-| Event Type | Information Provided |
-|-----------|---------------------|
-| `session_start` | Game launched |
-| `session_end` | Game terminated |
-| `turn` | Turn counter increment |
-| `dungeon` | Complete game state (21x21 viewport, RLE-encoded map) |
-| `player_move` | Player position change, collision result |
-| `monster_move` | Monster position change, AI state |
-| `combat` | Attack details (hit/miss, damage, HP) |
-| `item` | Item pickup/drop with position |
-
-### Known Issues from PR#157:
-- ⚠️ **Bug #156:** Combat `killed` flag reports `false` when monster HP = 0
-  - Workaround: Check `defender_hp == 0` instead of `killed` flag
+**Goal:** Create a Python/Bash bot script in `scripts/` that plays JMoria autonomously — navigating, fighting, looting, and descending toward level 100 (5000 ft depth). Primary use: soak testing, balance data collection, crash detection, and regression coverage.
 
 ---
 
-## Architecture Options
+## Foundation: ASCII Renderer + tmux
 
-### Option A: External Script Player (Recommended First)
-An external Python/Bash script that:
-1. Launches `jmoria` as a subprocess
-2. Tails the AI log file (`ai-logs/session-*.jsonl`)
-3. Parses dungeon state on each turn
-4. Makes decisions using rule-based or LLM logic
-5. Sends keystrokes to the game via stdin or automation tools
+### What We Already Have:
+- ✅ ASCII renderer (`src/RenderASCII.cpp`) renders dungeon, monsters, items, stats, and messages as plain text
+- ✅ ncurses-based 80x24 (or larger) terminal layout with all game regions visible
+- ✅ `tmux new-session` launches the game headlessly inside a terminal session
+- ✅ `tmux capture-pane -p` captures current screen contents as plain text
+- ✅ `tmux send-keys` injects single keystrokes into the game
+- ✅ `SDL_VIDEODRIVER=dummy` suppresses graphics window (only ncurses output needed)
 
-**Pros:**
-- No changes to game code
-- Easy to iterate and test
-- Can use any language/framework
-- Can integrate with LLMs easily
+### Running the Game for Bot Use:
+```bash
+tmux new-session -d -s crawler -x 125 -y 40 'SDL_VIDEODRIVER=dummy ./jmoria --ascii 2>/tmp/crawler.log'
+tmux capture-pane -t crawler -p   # read screen
+tmux send-keys -t crawler 'h'     # send keystroke (no Enter needed for single-char commands)
+```
 
-**Cons:**
-- Requires keystroke injection (tmux, xdotool, etc.)
-- Slight delay between log output and command input
+### Screen Layout (from `ASCIILayout::CreateForSize`):
+| Region | Content | Parse Strategy |
+|--------|---------|----------------|
+| Top 5 rows | Messages | Last game message text |
+| Left ~25 cols | Stats (HP, AC, XP, level, depth) | Regex on labeled values |
+| Center (remaining) | Dungeon map | 2D char grid; `@`=player, letters=monsters, symbols=items |
+| Right ~25 cols | Inventory / Equipment | Item list with slot letters |
+| Center overlay | Use menu (when active) | Detect and respond to prompts |
 
-### Option B: LLM Chat Function
-A structured function/tool that LLMs (Claude, GPT-4, etc.) can call:
-1. Function provides current game state from log
-2. LLM analyzes state and returns command
-3. Function sends command to game
-4. Repeat
-
-**Pros:**
-- Leverages LLM reasoning capabilities
-- Natural language decision-making
-- Can explain decisions
-
-**Cons:**
-- Slower (API latency)
-- Requires API integration
-- Token costs for long games
-
-### Option C: Embedded AI Player Mode
-Add a new game mode that runs AI logic inside the game loop:
-1. Add `--ai-player` command-line flag
-2. AI decision function called each turn in `CmdState`
-3. Generates keystroke events internally
-4. Still logs to AI logs for observability
-
-**Pros:**
-- Fastest execution
-- No external coordination needed
-- Full access to game internals
-
-**Cons:**
-- Requires C++ changes to game
-- Harder to iterate on AI logic
-- Couples AI to game codebase
+### No Dependency on PR#157:
+PR#157 adds structured JSON logging and is valuable but is not required here. The ASCII screen is sufficient for a bot: all visible game state (map, HP, messages, monsters) is present in the terminal output captured by `tmux capture-pane`.
 
 ---
 
-## Phase 1: Command Injection Infrastructure
+## Architecture: External Script Bot (tmux-based)
 
-**Goal:** Enable external scripts to send commands to a running `jmoria` instance.
+A Python script that:
+1. Launches `jmoria` in a tmux session with the ASCII renderer
+2. Reads screen state by capturing the tmux pane
+3. Parses the ASCII dungeon, stats, and messages from the captured text
+4. Decides the next action via rule-based logic (and optionally LLM)
+5. Sends the command as a keystroke via `tmux send-keys`
+6. Repeats until death or goal reached
+
+**Pros:**
+- No game code changes needed
+- Easy to iterate
+- Platform-independent (works on macOS, Linux, Pi)
+- Compatible with how Copilot already interacts with the game (user memory)
+
+---
+
+## Phase 1: Bot Infrastructure (tmux-based)
+
+**Goal:** Wire up the harness that launches the game and drives it via tmux.
 
 ### Tasks:
 
-#### 1.1 Research Command Input Methods
-- [ ] **Document current keyboard input handling**
-  - Location: `src/CmdState.cpp`, `src/Game.cpp`
-  - Input path: SDL events → `CGame::HandleEvents()` → `CStateBase::HandleKey()`
-- [ ] **Evaluate command injection approaches:**
-  - [ ] Option 1: Named pipe (FIFO) for command input
-  - [ ] Option 2: Stdin command mode (read from cin if not a TTY)
-  - [ ] Option 3: Socket/network interface (TCP or Unix domain socket)
-  - [ ] Option 4: Shared memory + signal
-  - [ ] Option 5: External automation (xdotool, tmux send-keys)
+#### 1.1 Launcher Script
+- [ ] **Create `scripts/crawler.py` (or `scripts/crawler.sh`)** — entry point
+  - Launch: `tmux new-session -d -s crawler -x 125 -y 40 'SDL_VIDEODRIVER=dummy ./jmoria --ascii 2>/tmp/crawler.log'`
+  - Wait for the game to reach the intro screen before sending any keys
+  - Tear down: `tmux kill-session -t crawler` on exit/death
 
-#### 1.2 Implement Command Input Channel (Choose One)
-**Recommended: Named Pipe (FIFO)**
-- [ ] Create `ai-commands/commands.fifo` at startup
-- [ ] Add non-blocking read from FIFO in `CGame::HandleEvents()`
-- [ ] Parse single-character commands from pipe
-- [ ] Convert to SDL key events internally
-- [ ] Add `--ai-mode` flag to enable this behavior
-- [ ] Test: `echo "hjkl" > ai-commands/commands.fifo` moves player
+#### 1.2 Screen Reader
+- [ ] **Create `scripts/bot/screen.py`** — reads and parses the tmux pane
+  - `tmux capture-pane -t crawler -p` → raw 125×40 string
+  - Parse message region (top 5 rows) → `last_message: str`
+  - Parse stats region (left ~25 cols) → `hp`, `max_hp`, `ac`, `level`, `depth`
+  - Parse dungeon region (center) → `map: list[list[str]]` (2D char grid)
+  - Find `@` in map → `player_pos: tuple[int,int]`
+  - Find monster chars (letters a-z, A-Z per `MonIDs`) → `monsters: list[MonsterSighting]`
+  - Find item chars (symbols per `ItemIDs`) → `items: list[ItemSighting]`
 
-**Files to modify:**
-- `src/main.cpp` - Initialize FIFO, parse `--ai-mode` flag
-- `src/Game.cpp` - Add FIFO reading to `HandleEvents()`
-- `src/Game.h` - Add FIFO file handle member
-
-#### 1.3 Command Format Specification
-- [ ] **Define command protocol:**
-  - Single-character commands (matches keyboard: `h`, `j`, `k`, `l`, etc.)
-  - Optional JSON format for complex commands: `{"cmd": "move", "dir": "north"}`
-- [ ] **Document all valid commands in AI mode:**
-  - Movement: `hjklyubn` (vi-keys), `HJKLYUBN` (run)
-  - Actions: `o` (open), `c` (close), `T` (tunnel), `<>` (stairs)
-  - Items: `w` (wield), `t` (take off), `d` (drop), `q` (quaff), `r` (read), `z` (zap)
-  - Targeting: `*` (target), `:` (look)
-  - Rest: `.` (rest one turn), `R` (rest until full HP)
-  - Wizard: `^t` (teleport), `^i` (create item), `^s` (summon monster)
-- [ ] **Add command validation and error logging**
+#### 1.3 Command Sender
+- [ ] **Create `scripts/bot/cmd.py`** — sends keystrokes
+  - `send(key: str)` → `tmux send-keys -t crawler '<key>'`  (no Enter for single-char game commands)
+  - `send_ctrl(key: str)` → `tmux send-keys -t crawler 'C-<key>'`
+  - Rate limiting: short sleep between commands to avoid flooding SDL event queue
+  - Command reference (from `doc/Player Docs.txt`):
+    - Movement: `hjklyubn` (vi-keys), `HJKLYUBN` (run)
+    - Actions: `o` (open), `c` (close), `T` (tunnel), `<` / `>` (stairs)
+    - Items: `w` (wield), `t` (take off), `d` (drop), `q` (quaff), `r` (read), `z` (zap)
+    - Rest: `.` (rest one turn), `R` (rest until healed)
+    - Wizard (debug): `^t` teleport, `^i` create item, `^s` summon monster
 
 ---
 
@@ -151,76 +101,47 @@ Add a new game mode that runs AI logic inside the game loop:
 
 ### Tasks:
 
-#### 2.1 AI Log Parser
-- [ ] **Create Python module `ai_player/log_parser.py`**
-  - [ ] Parse JSON Lines format
-  - [ ] Tail log file in real-time
-  - [ ] Maintain current game state (player HP, position, level)
-  - [ ] Track visible monsters (name, position, HP)
-  - [ ] Track visible items (name, position)
-  - [ ] Decode RLE-encoded map to 2D array
-- [ ] **Create state representation class:**
+#### 2.1 Game State Representation
+- [ ] **Create `scripts/bot/state.py`** — data classes for parsed game state
   ```python
+  @dataclass
   class GameState:
       turn: int
-      level: int
+      depth: int          # e.g. 50 ft = level 1
       player_pos: tuple[int, int]
       player_hp: int
       player_max_hp: int
-      map: list[list[str]]  # 21x21 decoded map
-      monsters: list[Monster]
-      items: list[Item]
-      last_action_result: str
+      player_ac: int
+      player_level: int
+      map: list[list[str]]    # 2D char grid from dungeon region
+      monsters: list[tuple[int,int,str]]   # (row, col, char)
+      items: list[tuple[int,int,str]]      # (row, col, char)
+      last_message: str
   ```
 
 #### 2.2 Pathfinding Module
-- [ ] **Implement A\* pathfinding on decoded map**
-  - [ ] Walkable terrain detection (`.`, `'`, `<`, `>`)
-  - [ ] Obstacle avoidance (`#`, `+`, `:`)
-  - [ ] Monster-aware pathing (avoid or target)
-- [ ] **Utility functions:**
-  - [ ] `find_nearest_item(state) -> Item | None`
-  - [ ] `find_nearest_stairs(state, direction='down') -> tuple[int,int] | None`
-  - [ ] `find_safe_position(state) -> tuple[int,int]` (away from monsters)
-  - [ ] `is_path_clear(state, from_pos, to_pos) -> bool`
+- [ ] **Create `scripts/bot/pathfinding.py`** — A* on the parsed map
+  - Walkable chars: `.`, `'`, `<`, `>`, `+` (door - open it)
+  - Obstacle chars: `#`, `:`, ` ` (void)
+  - Utility functions:
+    - `find_nearest(map, from_pos, target_chars) -> tuple[int,int] | None`
+    - `path_to(map, from_pos, to_pos) -> list[tuple[int,int]]`
+    - `direction_key(from_pos, to_pos) -> str`  (returns `h`/`j`/`k`/`l`/`y`/`u`/`b`/`n`)
 
 #### 2.3 Basic Decision Logic
-- [ ] **Create decision tree for survival:**
+- [ ] **Create `scripts/bot/decision.py`** — priority-based action selection
   ```python
-  def decide_action(state: GameState) -> str:
-      # Priority 1: Survive
+  def decide(state: GameState) -> str:
       if state.player_hp < state.player_max_hp * 0.3:
-          return rest_or_flee(state)
-      
-      # Priority 2: Combat if necessary
-      if nearby_monsters(state):
-          return engage_or_flee(state)
-      
-      # Priority 3: Explore
-      if unexplored_areas(state):
-          return explore(state)
-      
-      # Priority 4: Descend
-      if can_find_stairs(state):
-          return go_to_stairs(state)
-      
-      # Default: Rest
-      return '.'
+          return 'R'              # rest until healed
+      if monsters_adjacent(state):
+          return attack_dir(state)  # bump-attack nearest monster
+      if visible_items(state):
+          return move_toward(state, nearest_item(state))
+      if can_see_stairs_down(state):
+          return move_toward(state, stairs_pos(state))
+      return explore(state)       # move toward unexplored edge
   ```
-
-- [ ] **Implement sub-decision functions:**
-  - [ ] `rest_or_flee(state)` - Heal when low HP
-  - [ ] `engage_or_flee(state)` - Fight or run based on monster strength
-  - [ ] `explore(state)` - Move toward unexplored areas
-  - [ ] `go_to_stairs(state)` - Navigate to stairs down
-  - [ ] `pickup_items(state)` - Collect nearby valuable items
-
-#### 2.4 Command Sender
-- [ ] **Create Python module `ai_player/command_sender.py`**
-  - [ ] Open FIFO for writing: `ai-commands/commands.fifo`
-  - [ ] Send single-character commands
-  - [ ] Handle FIFO errors gracefully
-  - [ ] Add command rate limiting (max 10/second)
 
 ---
 
@@ -428,76 +349,64 @@ Add a new game mode that runs AI logic inside the game loop:
 ### Recommended Directory Layout:
 ```
 JMoria/
-├── ai-commands/
-│   └── commands.fifo           # Named pipe for AI commands
-├── ai-logs/                     # JSON game state logs (from PR#157)
-│   └── session-*.jsonl
-├── ai-player/
-│   ├── __init__.py
-│   ├── log_parser.py           # Parse AI logs
-│   ├── command_sender.py       # Send commands via FIFO
-│   ├── pathfinding.py          # A* pathfinding
-│   ├── decision_engine.py      # Rule-based AI logic
-│   ├── llm_player.py           # LLM-based decision making
-│   ├── game_state.py           # State representation
-│   ├── metrics.py              # Performance tracking
-│   └── config.py               # AI configuration
-├── ai-scripts/                  # Analysis scripts (from PR#157)
-│   ├── monitor-live.sh
-│   ├── summarize-session.sh
-│   └── show-state.sh
-└── src/                         # Game source code
-    ├── main.cpp                 # Add --ai-mode flag
-    ├── Game.cpp                 # Add FIFO reading
-    ├── CmdState.cpp             # Command handling
-    └── AILog.cpp                # Logging (from PR#157)
+├── scripts/
+│   ├── crawler.py              # Entry point: launch game + run bot loop
+│   └── bot/
+│       ├── __init__.py
+│       ├── screen.py           # tmux capture-pane parser
+│       ├── cmd.py              # tmux send-keys wrapper
+│       ├── state.py            # GameState dataclasses
+│       ├── pathfinding.py      # A* on ASCII map
+│       ├── decision.py         # Rule-based AI logic
+│       ├── llm_player.py       # (Phase 4) LLM-based decision making
+│       └── metrics.py          # (Phase 5) Performance tracking
+└── src/                        # Game source (no changes needed for Phase 1-2)
+    ├── RenderASCII.cpp         # ASCII renderer (already merged)
+    └── ...
 ```
 
-### Entry Point Scripts:
-- `scripts/run_ai_player.py` - Launch game + AI player loop
-- `scripts/run_llm_player.py` - Launch game + LLM decision loop
-- `scripts/benchmark_ai.py` - Run automated testing
+### Entry Points:
+- `python3 scripts/crawler.py` — launch and run the rule-based bot
+- `python3 scripts/crawler.py --llm` — (Phase 4) use LLM for decisions
+- `python3 scripts/crawler.py --runs 100` — (Phase 5) batch soak testing
 
 ---
 
 ## Implementation Priorities
 
-### Milestone 1: Basic Automation (Weeks 1-2)
-- ✅ Merge PR#157 (AI logging)
-- [ ] Implement FIFO command input (Phase 1)
-- [ ] Create basic AI log parser (Phase 2.1)
-- [ ] Implement simple movement AI (Phase 2.3 - exploration only)
-- [ ] **Success criteria:** AI can navigate level 1 dungeon without dying
+### Milestone 1: Basic Automation
+- ✅ ASCII renderer merged (PR#155)
+- ✅ tmux interaction pattern established (see user memory / Issue #182)
+- [ ] Bot harness: launcher, screen reader, command sender (Phase 1)
+- [ ] Simple exploration AI: move toward unexplored tiles (Phase 2)
+- [ ] **Success criteria:** Bot can navigate level 1 dungeon without dying
 
-### Milestone 2: Survival AI (Weeks 3-4)
-- [ ] Add pathfinding (Phase 2.2)
-- [ ] Implement combat logic (Phase 2.3 - engage/flee)
-- [ ] Add HP management (rest when low)
-- [ ] **Success criteria:** AI can survive to level 3
+### Milestone 2: Survival AI
+- [ ] A* pathfinding (Phase 2.2)
+- [ ] Combat logic: bump-attack adjacent monsters, flee if low HP (Phase 2.3)
+- [ ] HP management: rest when below 30% max HP
+- [ ] **Success criteria:** Bot survives to level 3
 
-### Milestone 3: Strategic Play (Weeks 5-6)
-- [ ] Implement inventory management (Phase 3.3)
-- [ ] Add multi-level strategy (Phase 3.4)
-- [ ] Track explored areas (Phase 3.1)
-- [ ] **Success criteria:** AI can reach level 10
+### Milestone 3: Strategic Play
+- [ ] Inventory management: auto-wield/equip (Phase 3.3)
+- [ ] Multi-level strategy: when to descend (Phase 3.4)
+- [ ] Exploration memory: track visited tiles per level (Phase 3.1)
+- [ ] **Success criteria:** Bot reaches level 10
 
-### Milestone 4: LLM Integration (Weeks 7-8)
-- [ ] Create LLM prompt template (Phase 4.1)
-- [ ] Integrate Claude/GPT-4 API (Phase 4.1)
-- [ ] Test LLM decision quality
-- [ ] **Success criteria:** LLM AI reaches level 5
+### Milestone 4: LLM Integration (Optional)
+- [ ] LLM prompt template with ASCII map + stats context (Phase 4.1)
+- [ ] Claude/GPT-4 API integration
+- [ ] **Success criteria:** LLM bot reaches level 5
 
-### Milestone 5: Optimization (Weeks 9-10)
-- [ ] Add monitoring dashboard (Phase 5.2)
-- [ ] Run batch testing (Phase 5.3)
-- [ ] Tune AI parameters
-- [ ] **Success criteria:** AI reaches level 20+ consistently
+### Milestone 5: Batch / Soak Testing
+- [ ] `--runs N` flag for repeated games with statistics
+- [ ] Collect: deepest level, monsters killed, cause of death, turns survived
+- [ ] **Success criteria:** 100 consecutive runs without hang or crash
 
-### Stretch Goal: Level 100 (Weeks 11+)
-- [ ] Advanced combat tactics
+### Stretch Goal: Level 100 (5000 ft)
+- [ ] Advanced tactics: doorway fighting, kiting, item usage
 - [ ] Perfect resource management
-- [ ] Adaptive learning from failures
-- [ ] **Success criteria:** AI reaches level 100 (5000 ft depth)
+- [ ] **Success criteria:** Bot reaches dungeon level 100
 
 ---
 

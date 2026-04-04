@@ -70,14 +70,14 @@ A Python script that:
 ### Tasks:
 
 #### 1.1 Launcher Script
-- [ ] **Create `scripts/crawler.py` (or `scripts/crawler.sh`)** — entry point
+- [x] **Create `scripts/crawler.py` (or `scripts/crawler.sh`)** — entry point
   - Build ASCII executable first: `make ascii`
   - Launch: `tmux new-session -d -s crawler -x 125 -y 40 './jmoria 2>/tmp/crawler.log'`
   - Wait for the game to reach the intro screen before sending any keys
   - Tear down: `tmux kill-session -t crawler` on exit/death
 
 #### 1.2 Screen Reader
-- [ ] **Create `scripts/bot/screen.py`** — reads and parses the tmux pane
+- [x] **Create `scripts/bot/screen.py`** — reads and parses the tmux pane
   - `tmux capture-pane -t crawler -p` → raw 125×40 string
   - Parse message region (top 5 rows) → `last_message: str`
   - Parse stats region (left ~25 cols) → `hp`, `max_hp`, `ac`, `level`, `depth`
@@ -87,7 +87,7 @@ A Python script that:
   - Find item chars (symbols per `ItemIDs`) → `items: list[ItemSighting]`
 
 #### 1.3 Command Sender
-- [ ] **Create `scripts/bot/cmd.py`** — sends keystrokes
+- [x] **Create `scripts/bot/cmd.py`** — sends keystrokes
   - `send(key: str)` → `tmux send-keys -t crawler '<key>'`  (no Enter for single-char game commands)
   - `send_ctrl(key: str)` → `tmux send-keys -t crawler 'C-<key>'`
   - Rate limiting: short sleep between commands to avoid flooding SDL event queue
@@ -107,7 +107,7 @@ A Python script that:
 ### Tasks:
 
 #### 2.1 Game State Representation
-- [ ] **Create `scripts/bot/state.py`** — data classes for parsed game state
+- [x] **Create `scripts/bot/state.py`** — data classes for parsed game state
   ```python
   @dataclass
   class GameState:
@@ -125,7 +125,7 @@ A Python script that:
   ```
 
 #### 2.2 Pathfinding Module
-- [ ] **Create `scripts/bot/pathfinding.py`** — A* on the parsed map
+- [x] **Create `scripts/bot/pathfinding.py`** — A* on the parsed map
   - Walkable chars: `.`, `'`, `<`, `>`, `+` (door - open it)
   - Obstacle chars: `#`, `:`, ` ` (void)
   - Utility functions:
@@ -134,7 +134,7 @@ A Python script that:
     - `direction_key(from_pos, to_pos) -> str`  (returns `h`/`j`/`k`/`l`/`y`/`u`/`b`/`n`)
 
 #### 2.3 Basic Decision Logic
-- [ ] **Create `scripts/bot/decision.py`** — priority-based action selection
+- [x] **Create `scripts/bot/decision.py`** — priority-based action selection
   ```python
   def decide(state: GameState) -> str:
       if state.player_hp < state.player_max_hp * 0.3:

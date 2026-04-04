@@ -14,7 +14,7 @@ JMoria is a from-scratch C++ roguelike implementation (homage to IMoria) using S
 - `CRender` - SDL2/OpenGL rendering
 - `CDisplayText` - UI text regions (Msgs, Stats, Inv, Equip, Use, EndGame)
 
-**Dungeon Architecture**: 100x100 grid starting as solid rock (`DUNG_IDX_WALL`). Rooms/hallways carved out via `DungeonMap::FillArea`. Visibility controlled by `DUNG_FLAG_LIT` flag. Complex generation logic in [src/DungeonMap.cpp](src/DungeonMap.cpp) - see [_JMoria Developer's Guide.md](_JMoria%20Developer's%20Guide.md) for generation architecture notes.
+**Dungeon Architecture**: 100x100 grid starting as solid rock (`DUNG_IDX_WALL`). Rooms/hallways carved out via `DungeonMap::FillArea`. In normal gameplay, visibility is primarily seen/lit driven; CLOCKSTEP and wizard mode include visibility bypass behavior for debugging. Complex generation logic in [src/DungeonMap.cpp](src/DungeonMap.cpp) - see [_JMoria Developer's Guide.md](_JMoria%20Developer's%20Guide.md) for generation architecture notes.
 
 ## Data Files & Resource System
 
@@ -54,7 +54,7 @@ JMoria is a from-scratch C++ roguelike implementation (homage to IMoria) using S
 - Detect platform using `uname` and set platform-specific flags
 - macOS: `-lc++` for stdlib, `-framework OpenGL` for OpenGL
 - Linux: `-lstdc++` for stdlib, `-lGL` for OpenGL
-- Use C++14 standard minimum (required by GoogleTest)
+- Use C++17 standard (current Makefile setting)
 - Test changes don't break other platforms before committing
 
 ## Development Patterns

@@ -123,17 +123,17 @@ To give flavor for the problem space:
 
 ### DungeonMap::FillArea has a complicated job.
 
-The dungeon is just a 100x100 grid of solid rock (`DUNG_IDX_WALL`), which I carve rooms and hallways out of. The things you can see (floor, doors, walls) are visible because they are lighted (`DUNG_FLAG_LIT`); all unlighted stuff is blank on-screen.
+The dungeon is just a 100x100 grid of solid rock (`DUNG_IDX_WALL`), which I carve rooms and hallways out of. In normal gameplay, visibility is mostly driven by seen/lit state; in debug modes (CLOCKSTEP and wizard mode), tiles can be shown even when normal seen/lit rules are bypassed.
 
 So, to carve out a *5x5 room*, you want to turn a *5x5* area from `DUNG_IDX_WALL` into `DUNG_IDX_FLOOR`, but then you want to flag a *7x7* area (the entire room, plus the wall surrounding it) as `DUNG_FLAG_LIT`.
 
-Note that *positions in-world are zero-based (0-99)*, but *sizes of rectangles are one-based* (you would want a 1xN hallway, not a "zero-width" hallway). But *rectangles have l,t,r, and b corners defined in world coords*.
+Note that *positions in-world are zero-based (0-99)*, but *rectangles have l,t,r, and b corners defined in world coords*. Also note: generation hallways are intentionally represented as thin rects (one axis has zero span) and expanded by direction logic.
 
 #### To create a room
 So a size 5,5 room in the upper-left corner of the map would have world coords 1,1,5,5 (floor in positions 12345 on second-through-sixth rows) and impose DUNG_FLAG_LIT on world coords 0,0 to 6,6 (lit in positions 0123456 on the first 7 rows).
 
 #### To create a hallway
-A 5-unit-long east-west hallway in the upper-left corner of the world would have coords 1,1,5,1 (floor in positions 12345 on second row) and impose DUNG_FLAG_LIT on world coords 0,0 to 6,2 (lit in positions 0123456 on first 3 rows)
+A 5-unit-long east-west hallway in the upper-left corner of the world would have coords 1,1,5,1 (floor in positions 12345 on second row). Hallways are not automatically lit by `LightArea()` during generation; room lighting and visibility rules differ between gameplay and debug modes.
 
 #### Boundary checking is key to this problem
 The boundary checking has a boatload of little off-by-one errors, as you can imagine.
@@ -145,9 +145,9 @@ CLOCKSTEP mode enables step-by-step visualization of dungeon generation for debu
 
 ### Enabling CLOCKSTEP
 
-Add the `-DCLOCKSTEP` flag to `CFLAGS` in the Makefile:
+Enable CLOCKSTEP by passing `-DCLOCKSTEP` through `CC_FLAGS` when building:
 ```makefile
-CFLAGS = -c -w -I../JMoria/src -std=c++14 -Wno-comment -Wno-delete-non-virtual-dtor -DCLOCKSTEP
+make ascii CC_FLAGS="-w -DCLOCKSTEP"
 ```
 
 Rebuild with `make clean && make`.
@@ -155,7 +155,7 @@ Rebuild with `make clean && make`.
 ### Controls
 
 - **SPACE** - Advance dungeon generation by one tick (calls `CreateOneStep()`)
-- **ESC** - Complete generation, spawn player, and transition to normal gameplay
+- **ESC** - Exit CLOCKSTEP, spawn player at a valid location, and transition to normal gameplay
 
 ### How It Works
 
@@ -230,93 +230,40 @@ When CLOCKSTEP mode is active:
 
 ---
 
-## DUNGEN_DEBUG: Runtime Diagnostics and Invariants
+## Dungeon Generation Diagnostics and Invariants
 
-DUNGEN_DEBUG enables detailed logging of dungeon generation steps, conflicts, and validation checks. This logging is essential for understanding and debugging the room/hallway placement algorithm.
+The most useful generation diagnostics are emitted under the `[DUNGEN]` prefix and should be treated as the primary debug surface for dungeon creation issues.
 
-### Enabling DUNGEN_DEBUG
+### What to Watch
 
-**Compile-time option:**
-```bash
-# Build with diagnostics enabled
-make DUNGEN_DEBUG=1
+- Generation summary: steps created, rooms, hallways, skipped steps, fill operations
+- Failure counters: repeated failures and hallway truncation/connection behavior
+- Timing: total generation time and approximate steps/second
+- Origin-room logging: first room coordinates + total room count
 
-# Or for tests
-make test DUNGEN_DEBUG=1
+### Core Invariants (Useful for Debugging)
 
-# Clean rebuild with diagnostics
-make clean && make DUNGEN_DEBUG=1
-```
+- `GetRoomRect()` / `GetHallRect()` reject clamped or degenerate geometry
+- Fill precondition: non-wall fills should only occur where interior was previously wall
+- Retry policy: level generation retries when room count is too low
+- Connectivity helpers:
+   - hallway truncation to connect on collision
+   - adjacent-structure connection for sidling room walls
 
-The flag can also be enabled by uncommenting the `#define DUNGEN_DEBUG` line in [src/DungeonMap.cpp](src/DungeonMap.cpp) line 6.
+### Repro and Inspection Workflow
 
-### Diagnostic Output Categories
+1. Build deterministic/diagnostic run variant as needed.
+2. Generate via fixed seed path (`CreateDungeon(depth, seed)`) when reproducing bugs.
+3. Use CLOCKSTEP for stepwise flow, then check `[DUNGEN]` summary output.
+4. Use full-map dump output to inspect macro layout and entity placement.
 
-When DUNGEN_DEBUG is enabled, the following information is logged:
+### Current Key Tuning Knobs
 
-**Generation Summary** (`[DUNGEN]` prefix):
-- Total steps processed, rooms created, hallways created
-- Steps skipped (conflicts, depth limit rejections)
-- Total FillArea operations performed
-- Logged at generation completion (INFO level)
-
-**Step Processing** (per CreateOneStep):
-- Step number, type (room/hallway), location, recursion depth
-- Reason for step failure (depth limit, conflict)
-- Logged at NOISE level for each creation attempt
-
-**Room/Hallway Creation Details** (MakeRoomStep, MakeHallStep):
-- Recursion depth validation (rejected if depth > MAX_RECURDEPTH=10)
-- Conflict attempts during area placement (MAX_TRIES=2)
-- Final failure reason (conflicts after all attempts)
-- Logged at NOISE level with location coordinates
-
-**Fill Operations** (FillDungeonArea):
-- Pre-fill invariant check: verifies all interior tiles were walls before fill
-- Logs invariant violations (should not occur in normal operation)
-- Tracks total fill operation count
-- Logged at NOISE level per operation
-
-### Example Diagnostic Output
-
-```
-[DUNGEN] Step 1: creating room at <40 45, 45 50> (depth=0)
-[DUNGEN] Room attempt 1 conflict at <35 42, 50 55>
-[DUNGEN] Hallway created, pushed to stack
-[DUNGEN] Step 2: creating hall at <45 38, 48 42> (depth=1)
-[DUNGEN] Room created from hallway, pushed to stack
-...
-[DUNGEN] Generation complete: 47 steps, 12 rooms, 35 halls, 8 skipped, 94 fill ops
-```
-
-### Integration with Test Suite
-
-DUNGEN_DEBUG diagnostics can be captured in BDD tests using [test/features/step_definitions/DungeonMapSteps.cpp](test/features/step_definitions/DungeonMapSteps.cpp). Test scenarios validate:
-- Stress test: 100 consecutive dungeons with same seed produce identical layouts
-- Out-of-world boundary validation: tiles outside map bounds remain walls
-- FillArea invariant maintenance throughout generation
-
-Example test invocation:
-```bash
-cd test
-DUNGEN_DEBUG=1 ../runtests.sh 2>&1 | grep DUNGEN
-```
-
-### Performance Note
-
-DUNGEN_DEBUG logging adds approximately 10-20% overhead due to:
-- Per-step logging of diagnostics
-- Pre-fill invariant checking on each FillArea call
-- String formatting for diagnostic messages
-
-For production builds or performance-critical testing, disable DUNGEN_DEBUG (default).
-
-### Code Locations
-
-- Diagnostics structure: [src/DungeonMap.h](src/DungeonMap.h) lines 115-127
-- Generation tracking: [src/DungeonMap.cpp](src/DungeonMap.cpp) CreateOneStep, MakeRoomStep, MakeHallStep
-- Fill invariants: [src/DungeonMap.cpp](src/DungeonMap.cpp) FillDungeonArea (lines 241-278)
-- Build configuration: [Makefile](Makefile) lines 12-16
+- Room size: `DUNG_ROOM_MINWIDTH/HEIGHT`, `DUNG_ROOM_MAXWIDTH/HEIGHT`
+- Hall length: `DUNG_HALL_MINLENGTH`, `DUNG_HALL_MAXLENGTH`
+- Branching: `MAX_RECURDEPTH`, `MAX_TRIES`, `MAX_STEP_FAILURES`
+- Placement spacing: `DOOR_OFFSET`, `WALL_OFFSET`
+- Generation quality floor: `DUNG_MIN_ROOMS_REQUIRED`, `DUNG_MAX_GENERATION_RETRIES`
 
 ### Debugging Tips
 

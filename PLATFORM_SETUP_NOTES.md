@@ -90,12 +90,14 @@ Both executables built successfully without errors.
 
 ## Test Results
 
-**Status**: 91 out of 92 scenarios passing (99% pass rate)
+**Status (historical snapshot, 2025-12-26)**: 91 out of 92 scenarios passing (99% pass rate)
 
-The single failing test is a game logic issue:
+At the time this note was written, the single failing test was a game logic issue:
 - `features/equipment.feature:85` - "Cursed Equipment can be uncursed with scroll of remove curse"
-- Issue: Scroll of Remove Curse is not properly uncursing equipped items
-- This is a pre-existing game logic bug, not a platform or test infrastructure issue
+- Issue: Scroll of Remove Curse was not properly uncursing equipped items
+- This was tracked as gameplay logic, not platform/test infrastructure
+
+For current scenario counts and pass/fail status, use `./test/runtests.sh` (or CI) rather than this historical setup note.
 
 ## Open Work Items (from WORKLIST.txt)
 

@@ -153,7 +153,7 @@ PRIORITIZED DUNGEON GENERATION WORKLIST (updated 2025-12-28):
   - ✅ Removed 20+ lines of commented-out debug code from DrawDungeon()
   - ✅ Removed old player-centered loop comments
   - ✅ Added comprehensive header documentation to ClockStepState.h explaining:
-    * How to enable: Add -DCLOCKSTEP to Makefile CFLAGS
+    * How to enable: Build with CC_FLAGS, e.g. `make ascii CC_FLAGS="-w -DCLOCKSTEP"`
     * State flow: INTRO → CLOCKSTEP → COMMAND (on ESC)
     * Key controls: SPACE advances one tick, ESC spawns player and starts game
     * Rendering adjustments: viewport centering, visibility bypass, lighting override
@@ -181,14 +181,14 @@ PRIORITIZED DUNGEON GENERATION WORKLIST (updated 2025-12-28):
   - Add optional `DUNGEN_DEBUG` logging for steps taken, skipped steps, and why `MakeRoomStep`/`MakeHallStep` returned NULL.
 - [P1] ✅ COMPLETED (2025-12-28) - Add runtime diagnostics and invariants
   - ✅ Added DungeonGenDiagnostics struct to track generation metrics
-  - ✅ Implemented DUNGEN_DEBUG preprocessor flag for optional detailed logging
+  - ✅ Implemented detailed generation diagnostics/logging
   - ✅ Added tracking: steps_created, rooms_created, hallways_created, steps_skipped, fill_operations
   - ✅ Added FillArea pre-condition invariant: verifies all interior tiles were walls before fill
   - ✅ Added logging to CreateOneStep, MakeRoomStep, MakeHallStep (recursion, conflicts, failures)
   - ✅ Logs step attempts, failure reasons, and generation summary at completion
-  - ✅ Updated Makefile: `make DUNGEN_DEBUG=1` enables diagnostics with ~10-20% overhead
+  - ✅ Updated build and logging guidance for diagnostics usage
   - ✅ Added comprehensive DUNGEN_DEBUG documentation to Developer's Guide
-  - ✅ All 96 BDD tests pass with diagnostics enabled and disabled
+  - ✅ BDD suite passes with diagnostics instrumentation in place
   - STATUS: Runtime diagnostics infrastructure complete, ready for analyzing generation behavior
 
 - [P2] Detect and prevent "tails out" (dead-end) behavior (2025-10-17)
@@ -219,7 +219,7 @@ PRIORITIZED DUNGEON GENERATION WORKLIST (updated 2025-12-28):
         - ✅ When a room is detected as a dead end (all hallway attempts failed), attempt one hallway in the opposite direction of entry
         - ✅ Creates an alternate growth path to reduce tails-out behavior after 1–2 rooms
         - ✅ Implementation in `CDungeonMap::CreateOneStep()` (room case) using `Opposite()`, `GetWallOrigin()`, `MakeHallStep()`, and `AddDoor()`
-        - ✅ Diagnostics updated: `hallways_created` and `steps_skipped` reflect mitigation outcomes under `DUNGEN_DEBUG`
+        - ✅ Diagnostics updated: `hallways_created` and `steps_skipped` reflect mitigation outcomes
         - ✅ Full build and BDD suite pass (100 scenarios, 447 steps)
 
     - Alternate direction fallback feature is already validated by 96 existing BDD tests
@@ -264,15 +264,16 @@ PRIORITIZED DUNGEON GENERATION WORKLIST (updated 2025-12-28):
   - STATUS: Frame rate cap active, generation timing tracked, memory verified leak-free
 
 Notes:
+- Historical dungeon scratch analysis retired: guidance moved into Developer's Guide + WORKLIST.
 - P0+P1 work completed 2025-12-28: Deterministic generation, visual stepper (PR#143), edge case testing, and runtime diagnostics
 - P2 Phase 1-4 completed 2025-12-28: Tails-out detection, alternate direction fallback, visual regression fixtures
 - P3 Performance completed 2025-12-28: Frame rate cap (30fps), generation timing, memory audit, CLOCKSTEP yield
-- All P0-P2 dungeon generation priorities completed: deterministic seeding, visual CLOCKSTEP stepper, BDD tests, DUNGEN_DEBUG logging
+- All P0-P2 dungeon generation priorities completed: deterministic seeding, visual CLOCKSTEP stepper, BDD tests, diagnostics/logging
 - `test/features/dungeonmap.feature` has 96 passing scenarios (442 steps) with stress test and boundary validation
 - Visual stepper fully functional with real-time diagnostics overlay and room/hallway/depth tracking
-- DUNGEN_DEBUG enables detailed logging of steps, conflicts, and generation summary (10-20% overhead)
+- Detailed logging and generation diagnostics are available for steps, conflicts, and summary reporting
 - Stress test confirms deterministic generation: 100 consecutive dungeons with same seed produce identical layouts
-- CLOCKSTEP and DUNGEN_DEBUG implementations clean, documented, production-ready
+- CLOCKSTEP and dungeon diagnostics implementations clean, documented, production-ready
 - Alternate direction fallback successfully reduces dead-end (tails-out) branches via adjacent direction attempts
 - Fixture infrastructure complete: 10 baseline fixtures (depths 1-10) for CI regression detection
 - Performance optimizations complete: 30fps frame rate cap reduces CPU from 90%+ to 3-5%, generation timing tracks 500-5000 steps/sec

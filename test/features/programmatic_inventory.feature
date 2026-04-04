@@ -45,6 +45,7 @@ Feature: Programmatic inventory API
   Scenario: Programmatic wielding two-handed weapon should unequip shield
     Given I have a Player
     Given I spawn a Small Wooden Shield:29
+    Given the Small Wooden Shield:29 is not cursed
     When I programmatically wield the spawned item
     Given I spawn a Battle Axe:42
     When I programmatically wield the spawned item

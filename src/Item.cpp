@@ -186,7 +186,7 @@ const char *CItem::GetName()
 {
     if( false ) // IsIdentified() ) // TODO: MIKE: ID goes here
     {
-        return const_cast<const char*>(m_id->m_szName);
+        return const_cast<const char *>( m_id->m_szName );
     }
     else
     {
@@ -198,7 +198,7 @@ const char *CItem::GetPlural()
 {
     if( false ) // IsIdentified() )// TODO: MIKE: ID goes here
     {
-        return const_cast<const char*>(m_id->m_szPlural);
+        return const_cast<const char *>( m_id->m_szPlural );
     }
     else
     {
@@ -215,14 +215,14 @@ void CItem::Draw()
         return;
     }
 
-    Uint8 item_tile = ItemIDs[m_id->m_dwIndex] - ' ' - 1;
+    char item_char = ItemIDs[m_id->m_dwIndex];
     JVector DUNG_ASPECT;
 
     SetColor();
 
     // PreDraw();
     g_pGame->GetDungeon()->m_TileSet->SetTileColor( m_Color );
-    g_pGame->GetDungeon()->m_TileSet->DrawTile( item_tile, m_vPos, vSize, false );
+    g_pGame->GetDungeon()->m_TileSet->DrawChar( item_char, m_vPos, vSize );
     // PostDraw();
 }
 

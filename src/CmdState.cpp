@@ -9,7 +9,7 @@
 
 extern CGame *g_pGame;
 
-int CCmdState::OnHandleKey( SDL_Keysym *keysym )
+int CCmdState::OnHandleKey( JKeysym *keysym )
 {
     // If you haven't handled the key by the end of this function,
     // it's an invalid key, so return an error.
@@ -22,7 +22,7 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
         GetDir( keysym, vTestDir );
 
         // handle "run" movement
-        if( keysym->mod & KMOD_SHIFT )
+        if( keysym->mod & JMOD_SHIFT )
         {
             g_pGame->GetPlayer()->m_vVel = vTestDir;
             g_pGame->SetState( STATE_RUN );
@@ -94,12 +94,12 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
     {
         switch( keysym->sym )
         {
-        case SDLK_r:
+        case JKEY_r:
             JLog( LOG_LEVEL_WARN, true, "R)est not implemented yet.\n" );
             g_pGame->SetState( STATE_REST );
             g_pGame->GetGameState()->HandleKey( keysym );
             break;
-        case SDLK_PERIOD:
+        case JKEY_PERIOD:
             // Do nothing; rest one turn
             break;
         default:
@@ -200,17 +200,17 @@ int CCmdState::OnHandleKey( SDL_Keysym *keysym )
     return retval;
 }
 
-bool CCmdState::IsModifierNeeded( SDL_Keysym *keysym )
+bool CCmdState::IsModifierNeeded( JKeysym *keysym )
 {
     switch( keysym->sym )
     {
-    case SDLK_c:
-    case SDLK_o:
+    case JKEY_c:
+    case JKEY_o:
         return true;
         break;
         // T ( but not t  or ^t)
-    case SDLK_t:
-        if( keysym->mod & KMOD_SHIFT && !( keysym->mod & KMOD_CTRL ) )
+    case JKEY_t:
+        if( keysym->mod & JMOD_SHIFT && !( keysym->mod & JMOD_CTRL ) )
         {
             return true;
         }
@@ -223,18 +223,18 @@ bool CCmdState::IsModifierNeeded( SDL_Keysym *keysym )
     return false;
 }
 
-bool CCmdState::IsUseCommand( SDL_Keysym *keysym )
+bool CCmdState::IsUseCommand( JKeysym *keysym )
 {
     switch( keysym->sym )
     {
         // t (but not T or ^t)
-    case SDLK_d:
-    case SDLK_t:
-    case SDLK_q:
-    case SDLK_r:
-    case SDLK_w:
+    case JKEY_d:
+    case JKEY_t:
+    case JKEY_q:
+    case JKEY_r:
+    case JKEY_w:
     {
-        if( !( keysym->mod & KMOD_SHIFT ) && !( keysym->mod & KMOD_CTRL ) )
+        if( !( keysym->mod & JMOD_SHIFT ) && !( keysym->mod & JMOD_CTRL ) )
         {
             return true;
         }
@@ -248,17 +248,17 @@ bool CCmdState::IsUseCommand( SDL_Keysym *keysym )
     return false;
 }
 
-bool CCmdState::IsStringInputCommand( SDL_Keysym *keysym )
+bool CCmdState::IsStringInputCommand( JKeysym *keysym )
 {
     switch( keysym->sym )
     {
-    case SDLK_n: // name your character
-        if( keysym->mod & KMOD_SHIFT )
+    case JKEY_n: // name your character
+        if( keysym->mod & JMOD_SHIFT )
         {
             return true;
         }
         break;
-    case SDLK_p: // purchase something in a store
+    case JKEY_p: // purchase something in a store
         return true;
         break;
     default:
@@ -269,12 +269,12 @@ bool CCmdState::IsStringInputCommand( SDL_Keysym *keysym )
     return false;
 }
 
-bool CCmdState::IsLookCommand( SDL_Keysym *keysym )
+bool CCmdState::IsLookCommand( JKeysym *keysym )
 {
     switch( keysym->sym )
     {
-    case SDLK_SEMICOLON:
-        if( keysym->mod & KMOD_SHIFT )
+    case JKEY_SEMICOLON:
+        if( keysym->mod & JMOD_SHIFT )
         {
             return true;
         }
@@ -282,12 +282,12 @@ bool CCmdState::IsLookCommand( SDL_Keysym *keysym )
     return false;
 }
 
-bool CCmdState::IsTargetCommand( SDL_Keysym *keysym )
+bool CCmdState::IsTargetCommand( JKeysym *keysym )
 {
     switch( keysym->sym )
     {
-    case SDLK_8:
-        if( keysym->mod & KMOD_SHIFT )
+    case JKEY_8:
+        if( keysym->mod & JMOD_SHIFT )
         {
             return true;
         }
@@ -295,13 +295,13 @@ bool CCmdState::IsTargetCommand( SDL_Keysym *keysym )
     return false;
 }
 
-bool CCmdState::IsStairsCommand( SDL_Keysym *keysym )
+bool CCmdState::IsStairsCommand( JKeysym *keysym )
 {
     switch( keysym->sym )
     {
-    case SDLK_COMMA:
-    case SDLK_PERIOD:
-        if( keysym->mod & KMOD_SHIFT )
+    case JKEY_COMMA:
+    case JKEY_PERIOD:
+        if( keysym->mod & JMOD_SHIFT )
         {
             return true;
         }
@@ -312,17 +312,17 @@ bool CCmdState::IsStairsCommand( SDL_Keysym *keysym )
     return false;
 }
 
-bool CCmdState::IsRestCommand( SDL_Keysym *keysym )
+bool CCmdState::IsRestCommand( JKeysym *keysym )
 {
     switch( keysym->sym )
     {
-    case SDLK_PERIOD:
+    case JKEY_PERIOD:
         // want . not >
-        return ( keysym->mod & KMOD_SHIFT ) ? false : true;
+        return ( keysym->mod & JMOD_SHIFT ) ? false : true;
         break;
-    case SDLK_r:
+    case JKEY_r:
         // want R not r
-        return ( keysym->mod & KMOD_SHIFT ) ? true : false;
+        return ( keysym->mod & JMOD_SHIFT ) ? true : false;
         break;
     default:
         return false;
@@ -332,13 +332,13 @@ bool CCmdState::IsRestCommand( SDL_Keysym *keysym )
     return false;
 }
 
-bool CCmdState::IsTeleportCommand( SDL_Keysym *keysym )
+bool CCmdState::IsTeleportCommand( JKeysym *keysym )
 {
     switch( keysym->sym )
     {
-    case SDLK_t:
+    case JKEY_t:
         // want ^t not t
-        return ( keysym->mod & KMOD_CTRL ) ? true : false;
+        return ( keysym->mod & JMOD_CTRL ) ? true : false;
         break;
     default:
         return false;
@@ -348,13 +348,13 @@ bool CCmdState::IsTeleportCommand( SDL_Keysym *keysym )
     return false;
 }
 
-bool CCmdState::IsSetIntrinsicCommand( SDL_Keysym *keysym )
+bool CCmdState::IsSetIntrinsicCommand( JKeysym *keysym )
 {
     switch( keysym->sym )
     {
-    case SDLK_f:
+    case JKEY_f:
         // want ^f not f
-        return ( keysym->mod & KMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
+        return ( keysym->mod & JMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
         break;
     default:
         return false;
@@ -364,11 +364,11 @@ bool CCmdState::IsSetIntrinsicCommand( SDL_Keysym *keysym )
     return false;
 }
 
-bool CCmdState::IsZapCommand( SDL_Keysym *keysym )
+bool CCmdState::IsZapCommand( JKeysym *keysym )
 {
     switch( keysym->sym )
     {
-    case SDLK_z:
+    case JKEY_z:
         if( keysym->mod == 0 )
         {
             return true;
@@ -377,13 +377,13 @@ bool CCmdState::IsZapCommand( SDL_Keysym *keysym )
     return false;
 }
 
-bool CCmdState::IsCreateItemCommand( SDL_Keysym *keysym )
+bool CCmdState::IsCreateItemCommand( JKeysym *keysym )
 {
     switch( keysym->sym )
     {
-    case SDLK_i:
+    case JKEY_i:
         // want ^t not t
-        return ( keysym->mod & KMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
+        return ( keysym->mod & JMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
         break;
     default:
         return false;
@@ -393,13 +393,13 @@ bool CCmdState::IsCreateItemCommand( SDL_Keysym *keysym )
     return false;
 }
 
-bool CCmdState::IsSummonMonsterCommand( SDL_Keysym *keysym )
+bool CCmdState::IsSummonMonsterCommand( JKeysym *keysym )
 {
     switch( keysym->sym )
     {
-    case SDLK_s:
+    case JKEY_s:
         // want ^t not t
-        return ( keysym->mod & KMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
+        return ( keysym->mod & JMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
         break;
     default:
         return false;
@@ -413,7 +413,7 @@ bool CCmdState::IsSummonMonsterCommand( SDL_Keysym *keysym )
 #define DIR_UP 4
 #define DIR_DOWN 5
 
-int CCmdState::OnHandleStairs( SDL_Keysym *keysym )
+int CCmdState::OnHandleStairs( JKeysym *keysym )
 {
     int stair_dir = TestStairs();
     if( stair_dir == DUNG_IDX_INVALID )
@@ -423,7 +423,7 @@ int CCmdState::OnHandleStairs( SDL_Keysym *keysym )
     }
 
     // if on <, go up stairs
-    if( keysym->sym == SDLK_COMMA && stair_dir == DUNG_IDX_UPSTAIRS )
+    if( keysym->sym == JKEY_COMMA && stair_dir == DUNG_IDX_UPSTAIRS )
     {
         g_pGame->GetMsgs()->Printf( "You enter a maze of up staircases.\n" );
         // dungeon_level--, make sure not to go less than 0
@@ -431,7 +431,7 @@ int CCmdState::OnHandleStairs( SDL_Keysym *keysym )
         g_pGame->GetDungeon()->OnChangeLevel( -Util::Roll( 1, 5 ) );
         return JSUCCESS;
     }
-    else if( keysym->sym == SDLK_COMMA && stair_dir == DUNG_IDX_LONG_UPSTAIRS )
+    else if( keysym->sym == JKEY_COMMA && stair_dir == DUNG_IDX_LONG_UPSTAIRS )
     {
         g_pGame->GetMsgs()->Printf( "You enter a long maze of up staircases.\n" );
         // dungeon_level-- (a bunch), make sure not to go less than 0
@@ -440,7 +440,7 @@ int CCmdState::OnHandleStairs( SDL_Keysym *keysym )
         return JSUCCESS;
     }
     // if on >, go down stairs
-    else if( keysym->sym == SDLK_PERIOD && stair_dir == DUNG_IDX_DOWNSTAIRS )
+    else if( keysym->sym == JKEY_PERIOD && stair_dir == DUNG_IDX_DOWNSTAIRS )
     {
         g_pGame->GetMsgs()->Printf( "You enter a maze of down staircases.\n" );
         // dungeon_level++
@@ -448,7 +448,7 @@ int CCmdState::OnHandleStairs( SDL_Keysym *keysym )
         g_pGame->GetDungeon()->OnChangeLevel( 1 );
         return JSUCCESS;
     }
-    else if( keysym->sym == SDLK_PERIOD && stair_dir == DUNG_IDX_LONG_DOWNSTAIRS )
+    else if( keysym->sym == JKEY_PERIOD && stair_dir == DUNG_IDX_LONG_DOWNSTAIRS )
     {
         g_pGame->GetMsgs()->Printf( "You enter a long maze of down staircases.\n" );
         // dungeon_level++ (a bunch)

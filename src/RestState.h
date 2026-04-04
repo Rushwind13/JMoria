@@ -14,7 +14,7 @@
 #include "Dungeon.h"
 
 class CRestState;
-typedef int ( CRestState::*RestKeyHandler )( SDL_Keysym *keysym );
+typedef int ( CRestState::*RestKeyHandler )( JKeysym *keysym );
 enum eRestModifier
 {
     REST_INVALID = -1,
@@ -51,13 +51,13 @@ public:
             m_fStateTicks -= 1.0f;
         }
     };
-    virtual int OnBaseHandleKey( SDL_Keysym *keysym );
-    virtual int OnHandleKey( SDL_Keysym *keysym );
+    virtual int OnBaseHandleKey( JKeysym *keysym );
+    virtual int OnHandleKey( JKeysym *keysym );
 
 protected:
 private:
-    int OnHandleTick( SDL_Keysym *keysym );
-    int OnHandleInit( SDL_Keysym *keysym );
+    int OnHandleTick( JKeysym *keysym );
+    int OnHandleInit( JKeysym *keysym );
 
     void ResetToState( int newstate );
 

@@ -6,7 +6,7 @@
 #include "StateBase.h"
 
 class CUseState;
-typedef int ( CUseState::*UseKeyHandler )( SDL_Keysym *keysym );
+typedef int ( CUseState::*UseKeyHandler )( JKeysym *keysym );
 enum eUseModifier
 {
     USE_INVALID = -1,
@@ -35,8 +35,8 @@ public:
     ~CUseState() {}
 
     virtual void OnUpdate( float fCurTime ) {}
-    virtual int OnBaseHandleKey( SDL_Keysym *keysym, eUseModifier whichUse );
-    virtual int OnHandleKey( SDL_Keysym *keysym );
+    virtual int OnBaseHandleKey( JKeysym *keysym, eUseModifier whichUse );
+    virtual int OnHandleKey( JKeysym *keysym );
 
     eUseModifier GetModifier() { return m_eCurModifier; }
 
@@ -49,12 +49,12 @@ private:
 
     eUseModifier m_eCurModifier;
 
-    int OnHandleWield( SDL_Keysym *keysym );
-    int OnHandleRemove( SDL_Keysym *keysym );
-    int OnHandleInit( SDL_Keysym *keysym );
-    int OnHandleDrop( SDL_Keysym *keysym );
-    int OnHandleQuaff( SDL_Keysym *keysym );
-    int OnHandleRead( SDL_Keysym *keysym );
+    int OnHandleWield( JKeysym *keysym );
+    int OnHandleRemove( JKeysym *keysym );
+    int OnHandleInit( JKeysym *keysym );
+    int OnHandleDrop( JKeysym *keysym );
+    int OnHandleQuaff( JKeysym *keysym );
+    int OnHandleRead( JKeysym *keysym );
 
     bool TestWield();
     bool DoWield();

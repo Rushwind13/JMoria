@@ -33,14 +33,14 @@ CTargetState::~CTargetState()
     }
 }
 
-int CTargetState::OnHandleKey( SDL_Keysym *keysym )
+int CTargetState::OnHandleKey( JKeysym *keysym )
 {
     int retval;
     retval = ( ( *this ).*( m_pCurKeyHandler ) )( keysym );
     return retval;
 }
 
-int CTargetState::OnHandleTarget( SDL_Keysym *keysym )
+int CTargetState::OnHandleTarget( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling TARGET modifier\n" );
@@ -150,7 +150,7 @@ int CTargetState::DoInit()
 
     return JSUCCESS;
 }
-int CTargetState::OnHandleInit( SDL_Keysym *keysym )
+int CTargetState::OnHandleInit( JKeysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing look state...\n" );
     if( !m_cCommand )
@@ -160,12 +160,12 @@ int CTargetState::OnHandleInit( SDL_Keysym *keysym )
         eTargetModifier mod = TARGET_INIT;
         switch( m_cCommand )
         {
-        case SDLK_8:
-            if( keysym->mod & KMOD_SHIFT )
+        case JKEY_8:
+            if( keysym->mod & JMOD_SHIFT )
                 DoInit();
             break;
-        case SDLK_f:
-        case SDLK_z:
+        case JKEY_f:
+        case JKEY_z:
             if( keysym->mod == 0 )
             {
                 m_dwPreviousState = STATE_RANGED;
@@ -190,9 +190,9 @@ int CTargetState::OnHandleInit( SDL_Keysym *keysym )
     return JRESETSTATE;
 }
 
-int CTargetState::OnBaseHandleKey( SDL_Keysym *keysym )
+int CTargetState::OnBaseHandleKey( JKeysym *keysym )
 {
-    if( keysym->sym == SDLK_8 && keysym->mod & KMOD_SHIFT )
+    if( keysym->sym == JKEY_8 && keysym->mod & JMOD_SHIFT )
     {
         m_dwCurrentSelection++;
         JLog( LOG_LEVEL_NOISE, true, "Choosing next target... %d/%d\n", m_dwCurrentSelection,
@@ -211,14 +211,14 @@ int CTargetState::OnBaseHandleKey( SDL_Keysym *keysym )
         g_pGame->GetPlayer()->SetTarget( pMon );
         return JSUCCESS;
     }
-    else if( keysym->sym == SDLK_PERIOD )
+    else if( keysym->sym == JKEY_PERIOD )
     {
         g_pGame->GetMsgs()->Printf( "Target selected.\n" );
         // now reset
         ResetToState( m_dwPreviousState );
         return JRESETSTATE;
     }
-    else if( keysym->sym == SDLK_ESCAPE )
+    else if( keysym->sym == JKEY_ESCAPE )
     {
         // ESC key gets us out of target mode
         ResetToState( m_dwPreviousState );

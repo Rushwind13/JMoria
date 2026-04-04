@@ -7,6 +7,8 @@ static const char *Level( eLogLevel log_level )
 {
     switch( log_level )
     {
+    case LOG_LEVEL_NOISIER:
+        return "NOISIER";
     case LOG_LEVEL_NOISE:
         return "NOISE";
     case LOG_LEVEL_DEBUG:
@@ -38,7 +40,7 @@ static JResult JLog( eLogLevel eLogLevel, bool verbose, const char *format, ... 
     {
         va_list args;
         va_start( args, format );
-        vprintf( mod_format, args );
+        vfprintf( stderr, mod_format, args );
         va_end( args );
     }
     if( eLogLevel >= LOG_LEVEL_WARN )

@@ -8,10 +8,10 @@
 #define DUNG_CREATE_STEP_MAKE_HALLWAY 1
 #define DUNG_CREATE_STEP_MAX 2
 
-#define MAX_RECURDEPTH 10
+#define MAX_RECURDEPTH 8
 
-#define DUNG_HALL_MINLENGTH 2
-#define DUNG_HALL_MAXLENGTH 8
+#define DUNG_HALL_MINLENGTH 5
+#define DUNG_HALL_MAXLENGTH 15
 
 #define DUNG_MIN_ROOMS_REQUIRED 3
 #define DUNG_MAX_GENERATION_RETRIES 5
@@ -345,6 +345,7 @@ protected:
     void FillArea( const CDungeonCreationStep *pStep );
     void AddDoor( JIVector vHall, int direction );
     bool IsDoor( const int type );
+    void ConnectAdjacentStructures( const JRect &area );
 
     // Connectivity validation
     bool ValidateConnectivity( int &reachable_tiles, int &total_walkable_tiles ) const;

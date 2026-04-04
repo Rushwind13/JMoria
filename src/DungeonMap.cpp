@@ -103,9 +103,9 @@ void CDungeonMap::CreateDungeon( const int depth )
     }
 #else
 
-    // Next, carve out a room in the middle
-    JIVector vPos( Util::GetRandom( DUNG_ROOM_MAXWIDTH, DUNG_WIDTH - DUNG_ROOM_MAXWIDTH - 1 ),
-                   Util::GetRandom( DUNG_ROOM_MAXHEIGHT, DUNG_HEIGHT - DUNG_ROOM_MAXHEIGHT - 1 ) );
+    // Next, carve out a room in the center area of the dungeon
+    JIVector vPos( Util::GetRandom( DUNG_WIDTH / 4, DUNG_WIDTH * 3 / 4 ),
+                   Util::GetRandom( DUNG_HEIGHT / 4, DUNG_HEIGHT * 3 / 4 ) );
     InitDungeonCreate( vPos );
 #endif
 }
@@ -305,6 +305,11 @@ void CDungeonMap::FillArea( const CDungeonCreationStep *pStep )
     }
 
     FillArea( DUNG_IDX_FLOOR, pRoom );
+
+    if( pStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM )
+    {
+        ConnectAdjacentStructures( pStep->m_rcArea );
+    }
 }
 void CDungeonMap::FillArea( const Uint8 type, CRoom *pRoom )
 {
@@ -336,6 +341,68 @@ int CDungeonMap::LitChance()
     float chance =
         maxChance - ( ( (float)( m_dwDepth - 1 ) * maxChance ) / (float)( deepestLit - 1 ) );
     return (int)( chance * 100.0f );
+}
+
+void CDungeonMap::ConnectAdjacentStructures( const JRect &area )
+{
+    // After placing a room, check each edge for sidling rooms/hallways.
+    // Pattern: room_floor | wall | wall | other_floor (double wall)
+    // Fix:     room_floor | floor | door | other_floor (shared wall)
+
+    struct
+    {
+        int dx, dy;
+    } dirs[] = { { 0, -1 }, { 0, 1 }, { 1, 0 }, { -1, 0 } }; // N, S, E, W
+
+    for( int d = 0; d < 4; d++ )
+    {
+        int dx = dirs[d].dx;
+        int dy = dirs[d].dy;
+        bool walkX = ( dy != 0 ); // N/S: walk along x; E/W: walk along y
+        int walkStart = walkX ? area.left : area.top;
+        int walkEnd = walkX ? area.right : area.bottom;
+        int fixedCoord =
+            walkX ? ( dy < 0 ? area.top : area.bottom ) : ( dx < 0 ? area.left : area.right );
+
+        int count = 0;
+        JIVector vDoorCandidate;
+
+        for( int i = walkStart; i <= walkEnd; i++ )
+        {
+            int x = walkX ? i : fixedCoord;
+            int y = walkX ? fixedCoord : i;
+
+            JIVector vWall1( x + dx, y + dy );         // inner wall (room's border)
+            JIVector vWall2( x + dx * 2, y + dy * 2 ); // outer wall (other room's border)
+            JIVector vFloor( x + dx * 3, y + dy * 3 ); // other room's floor
+
+            if( !vWall1.IsInWorld() || !vWall2.IsInWorld() || !vFloor.IsInWorld() )
+                continue;
+
+            if( GetTile( vWall1 )->GetType() == DUNG_IDX_WALL &&
+                GetTile( vWall2 )->GetType() == DUNG_IDX_WALL &&
+                GetTile( vFloor )->GetType() == DUNG_IDX_FLOOR )
+            {
+                // Extend room: convert inner wall to floor
+                GetTile( vWall1 )->SetType( DUNG_IDX_FLOOR );
+                count++;
+
+                // Reservoir sampling: pick a uniform random door position
+                if( Util::GetRandom( 1, count ) == 1 )
+                {
+                    vDoorCandidate = vWall2;
+                }
+            }
+        }
+
+        if( count > 0 )
+        {
+            GetTile( vDoorCandidate )->SetType( DUNG_IDX_DOOR );
+            JLog( LOG_LEVEL_DEBUG, true,
+                  "[DUNGEN] Connected sidling rooms: extended %d tiles, door at <%d %d>\n", count,
+                  vDoorCandidate.x, vDoorCandidate.y );
+        }
+    }
 }
 
 int CDungeonMap::Opposite( int direction )

@@ -392,10 +392,11 @@ void CDungeonMap::GetAdjacentDirections( int primary_dir, int &adj1, int &adj2 )
 
 void RandomDirections( int r[] )
 {
-    // initial range of numbers
+    // Cardinal directions only: NORTH=0, EAST=2, SOUTH=4, WEST=6
+    static const int cardinals[4] = { DIR_NORTH, DIR_EAST, DIR_SOUTH, DIR_WEST };
     for( int i = 0; i < 4; ++i )
     {
-        r[i] = i;
+        r[i] = cardinals[i];
     }
 
     for( int i = 3; i >= 0; --i )

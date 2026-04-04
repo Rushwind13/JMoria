@@ -71,6 +71,7 @@ public:
           m_llMonsterDefs( NULL ),
           m_dmCurLevel( NULL ) {};
     ~CDungeon() { Term(); }
+    void DumpMap();
     void PreDraw();
     void Draw();
     void DrawDungeon();

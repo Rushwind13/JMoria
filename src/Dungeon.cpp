@@ -179,6 +179,8 @@ JResult CDungeon::CreateNewLevel( const int delta )
           "CLOCKSTEP: Scenery/items/monsters will be placed after generation.\n" );
 #endif
 
+    DumpMap();
+
     m_bDraw = true;
     return JSUCCESS;
 }
@@ -250,6 +252,53 @@ JResult CDungeon::CreateMap()
     InitDungeonTiles();
 
     return JSUCCESS;
+}
+
+void CDungeon::DumpMap()
+{
+    extern unsigned char TileIDs[];
+    extern unsigned char MonIDs[];
+    extern unsigned char ItemIDs[];
+    JLog( LOG_LEVEL_WARN, false, "[MAP] Dungeon map (%d rooms, %d halls):\n",
+          m_dmCurLevel->HowManyRooms(), m_dmCurLevel->HowManyHallways() );
+    for( int y = 0; y < DUNG_HEIGHT; y++ )
+    {
+        char row[DUNG_WIDTH + 1];
+        for( int x = 0; x < DUNG_WIDTH; x++ )
+        {
+            JIVector v( x, y );
+            CDungeonTile *pTile = GetITile( v );
+            int type = pTile && pTile->m_dtd ? pTile->m_dtd->m_dwType : DUNG_IDX_WALL;
+
+            // Overlay monsters and items on the base map
+            if( pTile && pTile->m_pCurMonster )
+                row[x] = (char)MonIDs[pTile->m_pCurMonster->m_md->m_dwIndex];
+            else if( pTile && pTile->m_pCurItem )
+                row[x] = (char)ItemIDs[pTile->m_pCurItem->m_id->m_dwIndex];
+            else if( type == DUNG_IDX_WALL )
+            {
+                // Show wall only if adjacent to a non-wall tile
+                bool show = false;
+                for( int dy = -1; dy <= 1 && !show; dy++ )
+                {
+                    for( int dx = -1; dx <= 1 && !show; dx++ )
+                    {
+                        if( dx == 0 && dy == 0 )
+                            continue;
+                        JIVector vN( x + dx, y + dy );
+                        CDungeonTile *pN = GetITile( vN );
+                        if( pN && pN->m_dtd && pN->m_dtd->m_dwType != DUNG_IDX_WALL )
+                            show = true;
+                    }
+                }
+                row[x] = show ? '#' : ' ';
+            }
+            else
+                row[x] = ( type >= 0 && type < DUNG_IDX_MAX ) ? (char)TileIDs[type] : '?';
+        }
+        row[DUNG_WIDTH] = '\0';
+        JLog( LOG_LEVEL_WARN, false, "%s\n", row );
+    }
 }
 
 JResult CDungeon::InitDungeonTiles()

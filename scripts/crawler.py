@@ -20,6 +20,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 import bot.cmd as cmd
 import bot.screen as screen
+from bot.decision import DecisionEngine
 from bot.state import GameState
 
 # Seconds to wait for the game to draw a frame after a command
@@ -99,50 +100,6 @@ def run_startup() -> bool:
 
 
 # ---------------------------------------------------------------------------
-# Decision logic (Phase 2 placeholder — random walk for now)
-# ---------------------------------------------------------------------------
-
-MOVE_KEYS = list("hjklyubn")
-
-_move_idx = 0
-
-def decide(state: GameState) -> str:
-    """
-    Minimal decision engine (Phase 1 stub).
-    Priority:
-      1. Rest if HP < 30%
-      2. Bump-attack if monster adjacent
-      3. Move toward nearest unexplored edge (crude: cycle through directions)
-    """
-    global _move_idx
-
-    if state.player_max_hp > 0 and state.hp_pct < 0.3:
-        return "R"  # rest until healed
-
-    if state.player_pos and state.monsters:
-        pr, pc = state.player_pos
-        for mr, mc, _ in state.monsters:
-            dr, dc = mr - pr, mc - pc
-            if abs(dr) <= 1 and abs(dc) <= 1 and (dr, dc) != (0, 0):
-                # adjacent — direction key to bump-attack
-                return _dir_key(dr, dc)
-
-    # Cycle movement directions to explore
-    key = MOVE_KEYS[_move_idx % len(MOVE_KEYS)]
-    _move_idx += 1
-    return key
-
-
-def _dir_key(dr: int, dc: int) -> str:
-    table = {
-        (-1, -1): "y", (-1, 0): "k", (-1, 1): "u",
-        (0,  -1): "h",               (0,  1): "l",
-        (1,  -1): "b", (1,  0): "j", (1,  1): "n",
-    }
-    return table.get((dr, dc), "j")
-
-
-# ---------------------------------------------------------------------------
 # Main loop
 # ---------------------------------------------------------------------------
 
@@ -150,6 +107,7 @@ def run_loop(verbose: bool = False) -> None:
     depth = 1
     prev_msg = ""
     turn = 0
+    engine = DecisionEngine()
 
     while True:
         state = screen.read(dungeon_depth=depth)
@@ -178,7 +136,7 @@ def run_loop(verbose: bool = False) -> None:
             time.sleep(POLL_DELAY)
             continue
 
-        action = decide(state)
+        action = engine.decide(state)
 
         if verbose:
             log(

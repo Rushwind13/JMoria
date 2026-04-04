@@ -30,7 +30,10 @@ JMoria is a from-scratch C++ roguelike implementation (homage to IMoria) using S
 
 ## Build & Test Workflow
 
-**Build**: `make` (creates `jmoria` executable)
+**Build**: `make` (creates `jmoria` executable with both OpenGL and ASCII renderer support)
+- `make ascii` — builds ASCII-only executable (ncurses, no SDL/OpenGL required at runtime). Use this for headless/bot use.
+- `make opengl` — builds OpenGL-only executable
+- `make` — builds with both renderers (default)
 
 **Dependencies**:
 - macOS: `brew install sdl2 sdl2_image` (OpenGL framework included)

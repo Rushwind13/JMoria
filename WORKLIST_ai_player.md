@@ -22,7 +22,11 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 
 ### Running the Game for Bot Use:
 ```bash
-tmux new-session -d -s crawler -x 125 -y 40 'SDL_VIDEODRIVER=dummy ./jmoria --ascii 2>/tmp/crawler.log'
+# Build ASCII-only executable (no SDL/OpenGL required at runtime):
+make ascii
+
+# Launch in tmux:
+tmux new-session -d -s crawler -x 125 -y 40 './jmoria 2>/tmp/crawler.log'
 tmux capture-pane -t crawler -p   # read screen
 tmux send-keys -t crawler 'h'     # send keystroke (no Enter needed for single-char commands)
 ```
@@ -67,7 +71,8 @@ A Python script that:
 
 #### 1.1 Launcher Script
 - [ ] **Create `scripts/crawler.py` (or `scripts/crawler.sh`)** — entry point
-  - Launch: `tmux new-session -d -s crawler -x 125 -y 40 'SDL_VIDEODRIVER=dummy ./jmoria --ascii 2>/tmp/crawler.log'`
+  - Build ASCII executable first: `make ascii`
+  - Launch: `tmux new-session -d -s crawler -x 125 -y 40 './jmoria 2>/tmp/crawler.log'`
   - Wait for the game to reach the intro screen before sending any keys
   - Tear down: `tmux kill-session -t crawler` on exit/death
 

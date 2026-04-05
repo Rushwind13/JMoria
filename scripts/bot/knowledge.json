@@ -1,7 +1,30 @@
 {
+  "consumable_knowledge": {
+    "unknown:scroll labeled duis aute ir": {
+      "count": 1,
+      "hp_delta_total": 0,
+      "observations": [
+        "You have a Torch."
+      ]
+    },
+    "unknown:scroll labeled ris nisi ut": {
+      "count": 1,
+      "hp_delta_total": 0,
+      "observations": [
+        "You have a Cloak."
+      ]
+    },
+    "unknown:scroll labeled veniam quis": {
+      "count": 1,
+      "hp_delta_total": 0,
+      "observations": [
+        "You have picked the lock."
+      ]
+    }
+  },
   "door_knowledge": {
-    "lock_fail": 39,
-    "lock_success": 361
+    "lock_fail": 57,
+    "lock_success": 922
   },
   "item_knowledge": {
     "best_by_slot": {
@@ -19,7 +42,7 @@
       },
       "hands": {
         "name": "Set of Gauntlets",
-        "score": 23.1
+        "score": 29.5
       },
       "light": {
         "name": "Brass Lantern",
@@ -30,8 +53,8 @@
         "score": 28.25
       },
       "weapon": {
-        "name": "Long Sword",
-        "score": 10.2
+        "name": "Bastard sword",
+        "score": 14.3
       }
     },
     "equip_compat": {},
@@ -39,9 +62,11 @@
       "bastard sword": {
         "observed_ac_avg": 0.0,
         "observed_ac_best": 0,
-        "observed_ac_count": 1,
+        "observed_ac_count": 2,
         "observed_ac_total": 0,
-        "successes": 3
+        "observed_damage": "2d8",
+        "observed_damage_avg": 9.0,
+        "successes": 17
       },
       "brass lantern": {
         "observed_ac_avg": 0.0,
@@ -51,11 +76,13 @@
         "successes": 12
       },
       "cloak": {
-        "observed_ac_avg": 1.0,
+        "observed_ac_avg": 0.5,
         "observed_ac_best": 1,
-        "observed_ac_count": 1,
+        "observed_ac_count": 2,
         "observed_ac_total": 1,
-        "successes": 17
+        "observed_damage": "1d2",
+        "observed_damage_avg": 1.5,
+        "successes": 27
       },
       "dagger": {
         "observed_ac_avg": 0.0,
@@ -69,15 +96,15 @@
       "large steel shield": {
         "combat_misses": 11,
         "combat_turns": 11,
-        "observed_ac_avg": 6.0,
+        "observed_ac_avg": 2.0,
         "observed_ac_best": 6,
-        "observed_ac_count": 1,
+        "observed_ac_count": 3,
         "observed_ac_total": 6,
         "observed_damage": "1d2",
         "observed_damage_avg": 1.5,
         "observed_to_dam": 0,
         "observed_to_hit": 0,
-        "successes": 16
+        "successes": 22
       },
       "leather armor": {
         "observed_ac_avg": 4.0,
@@ -103,11 +130,11 @@
       "pair of leather boots": {
         "observed_ac_avg": 2.0,
         "observed_ac_best": 2,
-        "observed_ac_count": 4,
-        "observed_ac_total": 8,
-        "observed_damage": "1d4",
-        "observed_damage_avg": 2.5,
-        "successes": 14
+        "observed_ac_count": 5,
+        "observed_ac_total": 10,
+        "observed_damage": "1d2",
+        "observed_damage_avg": 1.5,
+        "successes": 17
       },
       "pair of leather gloves": {
         "observed_ac_avg": 2.0,
@@ -138,13 +165,13 @@
         "successes": 5
       },
       "set of gauntlets": {
-        "observed_ac_avg": 4.0,
+        "observed_ac_avg": 2.6666666666666665,
         "observed_ac_best": 4,
-        "observed_ac_count": 2,
+        "observed_ac_count": 3,
         "observed_ac_total": 8,
-        "observed_damage": "1d2",
-        "observed_damage_avg": 1.5,
-        "successes": 11
+        "observed_damage": "2d8",
+        "observed_damage_avg": 9.0,
+        "successes": 14
       },
       "shovel": {
         "observed_ac_avg": 0.0,
@@ -161,20 +188,22 @@
         "successes": 30
       },
       "steel shield": {
-        "observed_ac_avg": 3.0,
+        "observed_ac_avg": 1.25,
         "observed_ac_best": 5,
-        "observed_ac_count": 2,
-        "observed_ac_total": 6,
+        "observed_ac_count": 4,
+        "observed_ac_total": 5,
         "observed_damage": "1d2",
         "observed_damage_avg": 1.5,
-        "successes": 3
+        "successes": 9
       },
       "torch": {
         "observed_ac_avg": 0.0,
         "observed_ac_best": 0,
-        "observed_ac_count": 2,
+        "observed_ac_count": 3,
         "observed_ac_total": 0,
-        "successes": 15
+        "observed_damage": "1d2",
+        "observed_damage_avg": 1.5,
+        "successes": 16
       }
     },
     "light_sources": {},
@@ -265,11 +294,30 @@
       "misses": 1
     }
   },
-  "schema_version": 3,
-  "scroll_knowledge": {},
   "non_wieldable_categories": [
     "potion",
     "scroll",
     "wand"
-  ]
+  ],
+  "schema_version": 4,
+  "scroll_knowledge": {
+    "duis aute ir": {
+      "count": 1,
+      "effects": [
+        "Wield which item? [a-z]"
+      ]
+    },
+    "ris nisi ut": {
+      "count": 1,
+      "effects": [
+        "Wield which item? [a-z]"
+      ]
+    },
+    "veniam quis": {
+      "count": 1,
+      "effects": [
+        "You failed to pick the lock."
+      ]
+    }
+  }
 }

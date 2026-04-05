@@ -21,9 +21,12 @@ from .state import GameState
 
 SESSION = "crawler"
 
-# Terminal dimensions we launch with (must match crawler.py)
+# Terminal dimensions we launch with (fallbacks; actual size read from tmux)
 TERM_W = 125
 TERM_H = 40
+
+# Tracks last-detected pane width so helpers can use it without extra args
+_last_term_w = 0
 
 # Layout constants mirroring ASCIILayout::CreateForSize
 MSG_HEIGHT = 5
@@ -85,8 +88,21 @@ def _is_text_adjacent(row: list[str], col: int) -> bool:
     return left_alnum or right_alnum
 
 
-def _get_lines() -> list[str]:
-    """Capture the tmux pane and return lines padded to TERM_W."""
+def _get_pane_size() -> tuple[int, int]:
+    """Query the actual tmux pane dimensions (width, height)."""
+    result = subprocess.run(
+        ["tmux", "display-message", "-t", SESSION, "-p", "#{pane_width}x#{pane_height}"],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    w, h = result.stdout.strip().split("x")
+    return int(w), int(h)
+
+
+def _get_lines() -> tuple[list[str], int, int]:
+    """Capture the tmux pane and return (lines, actual_width, actual_height)."""
+    pane_w, pane_h = _get_pane_size()
     result = subprocess.run(
         ["tmux", "capture-pane", "-t", SESSION, "-p"],
         check=True,
@@ -94,12 +110,12 @@ def _get_lines() -> list[str]:
         text=True,
     )
     lines = result.stdout.splitlines()
-    # Pad to TERM_H rows, each padded to TERM_W cols
-    while len(lines) < TERM_H:
+    # Pad to actual pane height, each padded to actual pane width
+    while len(lines) < pane_h:
         lines.append("")
-    lines = lines[:TERM_H]
-    lines = [line.ljust(TERM_W) for line in lines]
-    return lines
+    lines = lines[:pane_h]
+    lines = [line.ljust(pane_w) for line in lines]
+    return lines, pane_w, pane_h
 
 
 def _strip_box(text: str) -> str:
@@ -107,7 +123,7 @@ def _strip_box(text: str) -> str:
     return text.lstrip("lmxqtuvwj+|").rstrip("lmxqktuvwj+|")
 
 
-def _parse_stats(lines: list[str]) -> dict:
+def _parse_stats(lines: list[str], term_w: int) -> dict:
     """Parse values from the left stats panel (cols 0–STATS_WIDTH, rows MSG_HEIGHT+)."""
     # Strip the leading 'x' border char and trailing border chars from each row
     stats_text = "\n".join(
@@ -164,15 +180,16 @@ def _parse_stats(lines: list[str]) -> dict:
     }
 
 
-def get_panel_visibility(lines: list[str]) -> dict:
+def get_panel_visibility(lines: list[str], term_w: int = 0) -> dict:
     """Detect whether key UI panels are currently visible in the ASCII layout."""
+    tw = term_w or _last_term_w or TERM_W
     body_rows = lines[MSG_HEIGHT:]
     left_text = "\n".join(_strip_box(r[:STATS_WIDTH]) for r in body_rows)
 
     right_text = ""
-    if TERM_W >= INV_AUTO_WIDTH:
-        inv_left = TERM_W - INV_WIDTH
-        right_text = "\n".join(_strip_box(r[inv_left:TERM_W]) for r in body_rows)
+    if tw >= INV_AUTO_WIDTH:
+        inv_left = tw - INV_WIDTH
+        right_text = "\n".join(_strip_box(r[inv_left:tw]) for r in body_rows)
 
     return {
         "stats": ("HP:" in left_text) or ("Name:" in left_text),
@@ -181,12 +198,13 @@ def get_panel_visibility(lines: list[str]) -> dict:
     }
 
 
-def _parse_dungeon(lines: list[str]) -> tuple:
+def _parse_dungeon(lines: list[str], term_w: int = 0) -> tuple:
     """
-    Extract the dungeon map region (cols STATS_WIDTH–(TERM_W-INV_WIDTH), rows MSG_HEIGHT+).
+    Extract the dungeon map region (cols STATS_WIDTH–(term_w-INV_WIDTH), rows MSG_HEIGHT+).
     Returns (map_grid, player_pos, monsters, items).
     """
-    inv_left = TERM_W - INV_WIDTH if TERM_W >= INV_AUTO_WIDTH else TERM_W
+    tw = term_w or TERM_W
+    inv_left = tw - INV_WIDTH if tw >= INV_AUTO_WIDTH else tw
     dungeon_rows = lines[MSG_HEIGHT:]
     map_grid = []
     player_pos = None
@@ -241,12 +259,13 @@ def _parse_messages(lines: list[str]) -> str:
     return non_empty[-1] if non_empty else ""
 
 
-def _parse_right_panels(lines: list[str]) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
+def _parse_right_panels(lines: list[str], term_w: int = 0) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
     """Parse inventory/equipment entries from right sidebar when visible."""
-    if TERM_W < INV_AUTO_WIDTH:
+    tw = term_w or TERM_W
+    if tw < INV_AUTO_WIDTH:
         return [], []
 
-    inv_left = TERM_W - INV_WIDTH
+    inv_left = tw - INV_WIDTH
     body_rows = lines[MSG_HEIGHT:]
     split = len(body_rows) // 2
 
@@ -258,7 +277,7 @@ def _parse_right_panels(lines: list[str]) -> tuple[list[tuple[str, str]], list[t
     def parse_rows(rows: list[str]) -> list[tuple[str, str]]:
         out = []
         for row in rows:
-            text = _strip_box(row[inv_left:TERM_W]).strip()
+            text = _strip_box(row[inv_left:tw]).strip()
             m = entry_re.match(text)
             if not m:
                 continue
@@ -273,12 +292,14 @@ def read(state=None, dungeon_depth: int = 1) -> GameState:
     Capture the screen and return a fully populated GameState.
     Pass the previous state's dungeon_depth since it isn't shown in the stats panel.
     """
-    lines = _get_lines()
+    global _last_term_w
+    lines, term_w, term_h = _get_lines()
+    _last_term_w = term_w
 
-    stats = _parse_stats(lines)
-    map_grid, player_pos, monsters, items = _parse_dungeon(lines)
+    stats = _parse_stats(lines, term_w)
+    map_grid, player_pos, monsters, items = _parse_dungeon(lines, term_w)
     last_message = _parse_messages(lines)
-    inventory, equipment = _parse_right_panels(lines)
+    inventory, equipment = _parse_right_panels(lines, term_w)
 
     parsed_depth = dungeon_depth
     if stats["depth_ft"] is not None and stats["depth_ft"] > 0:
@@ -318,7 +339,8 @@ def is_char_creation(lines: list[str]) -> bool:
 
 
 def get_raw_lines() -> list[str]:
-    return _get_lines()
+    lines, _w, _h = _get_lines()
+    return lines
 
 
 def get_last_parse_debug() -> dict:

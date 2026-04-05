@@ -65,6 +65,7 @@ class DecisionEngine:
         self.last_equip_baseline_ac = None
         self.last_equip_baseline_damage = ""
         self.pending_pickup_equip_slot = None
+        self.pending_reequip_kind = None  # slot kind to swap back to best after testing
         self.last_inventory_entries = set()
         self.last_depth = 1
         self.last_open_dir = None
@@ -209,22 +210,44 @@ class DecisionEngine:
                 self.pending_use_cmd = None
                 self.await_use_prompt_turns = 0
 
-        # Hard rule: when inventory gains a slot/item, wield that slot immediately.
+        # Evaluate picked-up gear: learn unknowns first, then prefer upgrades.
         if self.pending_pickup_equip_slot and not self.pending_wield_slot:
-            self.mode = "equip"
             pickup_slot = self.pending_pickup_equip_slot
             self.pending_pickup_equip_slot = None
             item_name = self._inventory_name_for_slot(state.inventory, pickup_slot)
             if item_name is None:
                 item_name = f"slot_{pickup_slot}"
-            self.last_equip_item_name = item_name
-            self.last_equip_baseline_ac = state.player_ac
-            self.last_equip_baseline_damage = state.damage_dice
-            self.wield_cooldown = 1
-            self.wield_attempt_counts[item_name] = self.wield_attempt_counts.get(item_name, 0) + 1
-            self.pending_wield_slot = pickup_slot
-            self.await_wield_prompt_turns = 3
-            return self._record_decision("w", f"inventory_changed_wield_slot_{pickup_slot}")
+
+            should_wield = self._should_equip_item(item_name, state.equipment)
+
+            if should_wield:
+                self.mode = "equip"
+                self.last_equip_item_name = item_name
+                self.last_equip_baseline_ac = state.player_ac
+                self.last_equip_baseline_damage = state.damage_dice
+                self.wield_cooldown = 1
+                self.wield_attempt_counts[item_name] = self.wield_attempt_counts.get(item_name, 0) + 1
+                self.pending_wield_slot = pickup_slot
+                self.await_wield_prompt_turns = 3
+                return self._record_decision("w", f"inventory_changed_wield_slot_{pickup_slot}")
+
+        # After testing an item, swap back to the known-best for that slot.
+        if self.pending_reequip_kind and not self.pending_wield_slot:
+            kind = self.pending_reequip_kind
+            self.pending_reequip_kind = None
+            best = self.item_knowledge.get("best_by_slot", {}).get(kind)
+            if isinstance(best, dict):
+                best_name = best.get("name", "")
+                for slot, name in state.inventory or []:
+                    if name.lower() == best_name.lower():
+                        self.mode = "equip"
+                        self.last_equip_item_name = name
+                        self.last_equip_baseline_ac = state.player_ac
+                        self.last_equip_baseline_damage = state.damage_dice
+                        self.wield_cooldown = 1
+                        self.pending_wield_slot = slot
+                        self.await_wield_prompt_turns = 3
+                        return self._record_decision("w", f"reequip_best_{kind}_slot_{slot}")
 
         # If we queued a multi-key action (e.g., open + direction), send it next.
         if self.pending_keys:
@@ -1170,10 +1193,6 @@ class DecisionEngine:
 
             # Small credit for reliability (successfully equipped).
             score += min(0.8, float(learned.get("successes", 0)) * 0.1)
-        else:
-            # No real observations yet — give a modest starting score
-            # so the bot is willing to try it at least once.
-            score = 3.0
 
         return score
 
@@ -1183,6 +1202,53 @@ class DecisionEngine:
             if s == slot:
                 return name
         return None
+
+    def _equipped_name_for_kind(self, equipment, kind):
+        """Return the name of the currently equipped item in a given slot kind."""
+        for _slot, name in equipment or []:
+            if self._gear_slot_kind(name) == kind:
+                return name
+        return None
+
+    def _is_gear_tested(self, item_name):
+        """True if we have real observations for this item from a prior wield."""
+        n = item_name.lower()
+        gear_strength = self.item_knowledge.get("gear_strength", {})
+        learned = gear_strength.get(n, {}) if isinstance(gear_strength, dict) else {}
+        if not isinstance(learned, dict):
+            return False
+        return (
+            float(learned.get("observed_damage_avg", 0)) > 0
+            or float(learned.get("observed_ac_best", 0)) > 0
+            or int(learned.get("successes", 0)) > 0
+        )
+
+    def _should_equip_item(self, item_name, equipment):
+        """Decide whether to wield a picked-up item.
+
+        Priority: learn unknowns first, then maximize score.
+        - Untested gear item → always try it (knowledge is permanent).
+        - Tested and strictly better than equipped → upgrade.
+        - Otherwise → keep current gear.
+        """
+        kind = self._gear_slot_kind(item_name)
+        if not kind:
+            # Not recognizable gear — try it once to find out.
+            return self.wield_attempt_counts.get(item_name, 0) == 0
+
+        # If we've never tested this item, wield it to learn its stats.
+        if not self._is_gear_tested(item_name):
+            return True
+
+        # Both items are known — compare scores.
+        equipped_name = self._equipped_name_for_kind(equipment, kind)
+        if not equipped_name:
+            # Nothing equipped in this slot — wield it.
+            return True
+
+        new_score = self._gear_score(item_name)
+        equipped_score = self._gear_score(equipped_name)
+        return new_score > equipped_score
 
     def _is_known_best_for_slot(self, kind, item_name):
         best_by_slot = self.item_knowledge.get("best_by_slot", {})
@@ -1223,6 +1289,12 @@ class DecisionEngine:
             item = m.group(1).strip()
             if item:
                 self._learn_successful_equip(item, state.player_ac, state.damage_dice, state.to_hit_bonus, state.to_dam_bonus)
+                # After learning, check if a better item for this slot is in inventory.
+                kind = self._gear_slot_kind(item)
+                if kind:
+                    best = self.item_knowledge.get("best_by_slot", {}).get(kind)
+                    if isinstance(best, dict) and best.get("name", "").lower() != item.lower():
+                        self.pending_reequip_kind = kind
 
     @staticmethod
     def _dice_avg(dice_str):

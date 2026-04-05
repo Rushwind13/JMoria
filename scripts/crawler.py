@@ -14,6 +14,7 @@ import sys
 import time
 import subprocess
 import os
+import shlex
 
 # Allow running from repo root: python3 scripts/crawler.py
 sys.path.insert(0, os.path.dirname(__file__))
@@ -39,8 +40,42 @@ def log(msg: str) -> None:
 # Launcher
 # ---------------------------------------------------------------------------
 
-def launch(session: str, term_w: int, term_h: int, jmoria_path: str) -> None:
-    """Kill any old session and start a fresh one."""
+def _tmux_session_exists(session: str) -> bool:
+    return subprocess.run(
+        ["tmux", "has-session", "-t", session],
+        capture_output=True,
+    ).returncode == 0
+
+
+def _tmux_pane_target(session: str) -> str:
+    return f"{session}:0.0"
+
+
+def launch(session: str, term_w: int, term_h: int, jmoria_path: str, persistent_session: bool = False) -> None:
+    """Launch jmoria in tmux, optionally reusing a persistent session."""
+    if persistent_session:
+        pane_target = _tmux_pane_target(session)
+        if not _tmux_session_exists(session):
+            shell = os.environ.get("SHELL", "/bin/zsh")
+            subprocess.run(
+                ["tmux", "new-session", "-d", "-s", session, "-x", str(term_w), "-y", str(term_h), shell],
+                check=True,
+            )
+            time.sleep(0.1)
+            if not _tmux_session_exists(session):
+                raise RuntimeError(f"Failed to create persistent tmux session '{session}'")
+        else:
+            subprocess.run(["tmux", "resize-window", "-t", session, "-x", str(term_w), "-y", str(term_h)], check=False)
+
+        subprocess.run(["tmux", "send-keys", "-t", pane_target, "C-c"], check=False)
+        time.sleep(0.1)
+        subprocess.run(["tmux", "send-keys", "-t", pane_target, "clear", "Enter"], check=True)
+
+        cmdline = f"env JMORIA_SHOW_PLAYER_POS=1 {shlex.quote(jmoria_path)} 2>/tmp/crawler.log"
+        subprocess.run(["tmux", "send-keys", "-t", pane_target, cmdline, "Enter"], check=True)
+        log(f"[crawler] Launched jmoria in persistent tmux session '{session}' ({term_w}x{term_h})")
+        return
+
     subprocess.run(["tmux", "kill-session", "-t", session], capture_output=True)
     time.sleep(0.2)
     subprocess.run(
@@ -210,6 +245,11 @@ def main() -> None:
         action="store_true",
         help="skip launching jmoria (attach to existing session)",
     )
+    parser.add_argument(
+        "--persistent-session",
+        action="store_true",
+        help="reuse and keep tmux session open across bot runs",
+    )
     args = parser.parse_args()
 
     # Propagate session name to submodules
@@ -219,7 +259,13 @@ def main() -> None:
     screen.TERM_H = args.term_h
 
     if not args.no_launch:
-        launch(args.session, args.term_w, args.term_h, args.jmoria)
+        launch(
+            args.session,
+            args.term_w,
+            args.term_h,
+            args.jmoria,
+            persistent_session=args.persistent_session,
+        )
 
     if not run_startup():
         log("[crawler] Failed to reach dungeon. Exiting.")
@@ -230,9 +276,11 @@ def main() -> None:
     except KeyboardInterrupt:
         log("\n[crawler] Interrupted.")
     finally:
-        if not args.no_launch:
+        if not args.no_launch and not args.persistent_session:
             subprocess.run(["tmux", "kill-session", "-t", args.session], capture_output=True)
             log(f"[crawler] tmux session '{args.session}' killed.")
+        elif args.persistent_session:
+            log(f"[crawler] tmux session '{args.session}' left running (persistent mode).")
 
 
 if __name__ == "__main__":

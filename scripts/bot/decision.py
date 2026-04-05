@@ -109,6 +109,10 @@ class DecisionEngine:
         self._learn_from_scroll_feedback(state.last_message)
         self._queue_pickup_equip_from_message(state)
 
+        adjacent = None
+        if self._monster_signal_reliable(state):
+            adjacent = self._adjacent_monster(pos, state.monsters)
+
         # If we initiated wield, send the slot only when the game prompts for it.
         if self.pending_wield_slot:
             if "wield which item" in msg_lower:
@@ -158,10 +162,15 @@ class DecisionEngine:
             self.has_wielded_weapon = False
 
         if "picked the lock" in msg_lower and isinstance(self.last_open_dir, str) and self.last_open_dir in "hjklyubn":
-            self.follow_open_dir_turns = max(self.follow_open_dir_turns, 2)
+            self.follow_open_dir_turns = max(self.follow_open_dir_turns, 6)
 
         if self.follow_open_dir_turns > 0 and self.last_open_dir in "hjklyubn":
-            return self._record_decision(self.last_open_dir, f"step_through_open_door_{self.last_open_dir}")
+            if adjacent is not None:
+                self.follow_open_dir_turns = 0
+            else:
+                if self._can_step(state.map, pos, self.last_open_dir):
+                    return self._record_decision(self.last_open_dir, f"step_through_open_door_{self.last_open_dir}")
+                self.follow_open_dir_turns = 0
 
         if "bumped into a door" in msg_lower:
             self.wall_bump_chain = 0
@@ -173,6 +182,13 @@ class DecisionEngine:
 
         # If we bumped into a wall, pivot immediately instead of repeating the same move.
         if "bumped into a wall" in msg_lower:
+            # Corner-breaker: if a monster is adjacent, attack through the stall instead of sidestepping.
+            if adjacent is not None:
+                dr = adjacent[0] - pos[0]
+                dc = adjacent[1] - pos[1]
+                action = pf.DIR_TO_KEY.get((dr, dc), ".")
+                if action in "hjklyubn":
+                    return self._record_decision(action, "corner_breakout_attack")
             if self.last_action in "hjklyubn":
                 self._mark_blocked_dir(self.last_action)
             self.wall_bump_chain += 1
@@ -198,11 +214,6 @@ class DecisionEngine:
             flee = pf.key_away_from(pos, adjacent, state.map)
             if flee:
                 return self._record_decision(flee, f"low_hp_flee_from_{adjacent}")
-
-        # Precompute adjacent threat for equip/combat ordering.
-        adjacent = None
-        if self._monster_signal_reliable(state):
-            adjacent = self._adjacent_monster(pos, state.monsters)
 
         # 2) No background wield-cycling: wield is pickup-driven to preserve movement.
 
@@ -237,6 +248,8 @@ class DecisionEngine:
         if self._should_prioritize_door_hunt(state, pos):
             door_dir = self._adjacent_door_direction(state.map, pos)
             if door_dir:
+                self.last_open_dir = door_dir
+                self.follow_open_dir_turns = 0
                 self.pending_keys = [door_dir]
                 return self._record_decision("o", f"lost_room_open_adjacent_door_{door_dir}")
 
@@ -260,6 +273,8 @@ class DecisionEngine:
         # 4) Doors are high-value exploration targets in larger rooms.
         door_dir = self._adjacent_door_direction(state.map, pos)
         if door_dir:
+            self.last_open_dir = door_dir
+            self.follow_open_dir_turns = 0
             self.pending_keys = [door_dir]
             return self._record_decision("o", f"open_adjacent_door_{door_dir}")
 
@@ -476,6 +491,17 @@ class DecisionEngine:
             return self._sanitize_move(cand)
 
         return self._pivot_from(last_move)
+
+    @staticmethod
+    def _can_step(grid, pos, key):
+        if not grid or pos is None or key not in KEY_TO_DIR:
+            return False
+        pr, pc = pos
+        dr, dc = KEY_TO_DIR[key]
+        nr, nc = pr + dr, pc + dc
+        if nr < 0 or nc < 0 or nr >= len(grid) or nc >= len(grid[0]):
+            return False
+        return pf.is_walkable(grid[nr][nc])
 
     @staticmethod
     def _adjacent_door_direction(grid, pos):

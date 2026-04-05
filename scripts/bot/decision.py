@@ -34,11 +34,25 @@ class DecisionEngine:
         self.monster_knowledge = {}
         self.scroll_knowledge = {}
         self.pending_scroll_label = None
+        self.item_knowledge = {
+            "equip_compat": {},
+            "light_sources": {},
+            "value_estimates": {},
+        }
+        self.door_knowledge = {
+            "lock_success": 0,
+            "lock_fail": 0,
+        }
+        self.map_knowledge = {
+            "depth_notes": {},
+        }
         self.knowledge_dirty = False
         self.last_equip_item_name = None
         self.last_depth = 1
         self.last_open_dir = None
         self.follow_open_dir_turns = 0
+        self.last_player_hp = None
+        self.recent_attacker_name = None
         self.last_thought = "idle"
 
     def decide(self, state):
@@ -61,6 +75,11 @@ class DecisionEngine:
         motion_pos = state.player_world_pos if state.player_world_pos is not None else pos
         self.visited.add((state.dungeon_depth, pos[0], pos[1]))
 
+        hp_loss = 0
+        if self.last_player_hp is not None:
+            hp_loss = max(0, self.last_player_hp - state.player_hp)
+        self.last_player_hp = state.player_hp
+
         if state.dungeon_depth != self.last_depth:
             self.equip_attempt_counts.clear()
             self.last_depth = state.dungeon_depth
@@ -78,8 +97,15 @@ class DecisionEngine:
         # 'o' enters open mode and next key is the direction.
         msg_lower = state.last_message.lower()
         self._learn_from_wield_feedback(state.last_message)
-        self._learn_from_monster_feedback(state.last_message)
+        self._learn_from_monster_feedback(state.last_message, hp_loss)
         self._learn_from_scroll_feedback(state.last_message)
+
+        if "you have picked the lock" in msg_lower:
+            self.door_knowledge["lock_success"] = int(self.door_knowledge.get("lock_success", 0)) + 1
+            self.knowledge_dirty = True
+        elif "you failed to pick the lock" in msg_lower:
+            self.door_knowledge["lock_fail"] = int(self.door_knowledge.get("lock_fail", 0)) + 1
+            self.knowledge_dirty = True
 
         if "you are now wielding the" in msg_lower:
             self.has_wielded_weapon = True
@@ -131,6 +157,13 @@ class DecisionEngine:
         if self._monster_signal_reliable(state):
             adjacent = self._adjacent_monster(pos, state.monsters)
         if adjacent is not None:
+            if self._should_flee_known_threat(state):
+                flee = pf.key_away_from(pos, adjacent, state.map)
+                if flee:
+                    return self._record_decision(
+                        flee,
+                        f"flee_known_threat_{self.recent_attacker_name}",
+                    )
             dr = adjacent[0] - pos[0]
             dc = adjacent[1] - pos[1]
             action = pf.DIR_TO_KEY.get((dr, dc), ".")
@@ -524,7 +557,6 @@ class DecisionEngine:
             "club": 4,
             "pickaxe": 3,
             "shovel": 2,
-            "torch": 1,
         }
 
         best = None
@@ -587,7 +619,7 @@ class DecisionEngine:
         ):
             self.knowledge_dirty = True
 
-    def _learn_from_monster_feedback(self, message):
+    def _learn_from_monster_feedback(self, message, hp_loss=0):
         if not message:
             return
 
@@ -620,8 +652,11 @@ class DecisionEngine:
         if m:
             monster = m.group(1)
             attack = m.group(2).lower()
+            self.recent_attacker_name = monster.strip().lower()
             self._monster_note(monster, "hits_taken", 1)
             self._monster_attack_note(monster, attack)
+            if hp_loss > 0:
+                self._monster_damage_note(monster, hp_loss)
 
     def _monster_note(self, monster_name, key, amount):
         name = monster_name.strip().lower()
@@ -629,7 +664,16 @@ class DecisionEngine:
             return
         entry = self.monster_knowledge.setdefault(
             name,
-            {"hits": 0, "misses": 0, "hits_taken": 0, "kills": 0, "attacks": {}},
+            {
+                "hits": 0,
+                "misses": 0,
+                "hits_taken": 0,
+                "kills": 0,
+                "attacks": {},
+                "damage_taken_total": 0,
+                "damage_instances": 0,
+                "max_observed_hit": 0,
+            },
         )
         before = entry.get(key, 0)
         entry[key] = before + amount
@@ -642,13 +686,68 @@ class DecisionEngine:
             return
         entry = self.monster_knowledge.setdefault(
             name,
-            {"hits": 0, "misses": 0, "hits_taken": 0, "kills": 0, "attacks": {}},
+            {
+                "hits": 0,
+                "misses": 0,
+                "hits_taken": 0,
+                "kills": 0,
+                "attacks": {},
+                "damage_taken_total": 0,
+                "damage_instances": 0,
+                "max_observed_hit": 0,
+            },
         )
         attacks = entry.setdefault("attacks", {})
         before = attacks.get(attack_type, 0)
         attacks[attack_type] = before + 1
         if attacks[attack_type] != before:
             self.knowledge_dirty = True
+
+    def _monster_damage_note(self, monster_name, hp_loss):
+        name = monster_name.strip().lower()
+        if not name or hp_loss <= 0:
+            return
+        entry = self.monster_knowledge.setdefault(
+            name,
+            {
+                "hits": 0,
+                "misses": 0,
+                "hits_taken": 0,
+                "kills": 0,
+                "attacks": {},
+                "damage_taken_total": 0,
+                "damage_instances": 0,
+                "max_observed_hit": 0,
+            },
+        )
+        entry["damage_taken_total"] = int(entry.get("damage_taken_total", 0)) + int(hp_loss)
+        entry["damage_instances"] = int(entry.get("damage_instances", 0)) + 1
+        entry["max_observed_hit"] = max(int(entry.get("max_observed_hit", 0)), int(hp_loss))
+        self.knowledge_dirty = True
+
+    def _monster_danger_score(self, monster_name):
+        if not monster_name:
+            return 0.0
+        entry = self.monster_knowledge.get(monster_name.lower(), {})
+        hits_taken = float(entry.get("hits_taken", 0))
+        instances = float(entry.get("damage_instances", 0))
+        dmg_total = float(entry.get("damage_taken_total", 0))
+        max_hit = float(entry.get("max_observed_hit", 0))
+        avg_dmg = (dmg_total / instances) if instances > 0 else 0.0
+        hit_pressure = (hits_taken / max(1.0, hits_taken + float(entry.get("misses", 0))))
+        attacks = entry.get("attacks", {}) or {}
+        breath_bonus = 1.0 if attacks.get("breathes", 0) else 0.0
+        return (avg_dmg * 1.4) + (max_hit * 0.6) + (hit_pressure * 2.0) + breath_bonus
+
+    def _should_flee_known_threat(self, state):
+        if state.hp_pct > 0.65 or not self.recent_attacker_name:
+            return False
+        danger = self._monster_danger_score(self.recent_attacker_name)
+        if state.hp_pct < 0.4 and danger >= 1.0:
+            return True
+        if state.hp_pct < 0.55 and danger >= 2.0:
+            return True
+        return False
 
     def _learn_from_scroll_feedback(self, message):
         if not message:
@@ -708,12 +807,21 @@ class DecisionEngine:
             tokens = data.get("non_wieldable_tokens", [])
             monsters = data.get("monster_knowledge", {})
             scrolls = data.get("scroll_knowledge", {})
+            item_k = data.get("item_knowledge", {})
+            door_k = data.get("door_knowledge", {})
+            map_k = data.get("map_knowledge", {})
             self.learned_non_wieldable_names.update(n.lower() for n in names if isinstance(n, str))
             self.learned_non_wieldable_tokens.update(t.lower() for t in tokens if isinstance(t, str))
             if isinstance(monsters, dict):
                 self.monster_knowledge = monsters
             if isinstance(scrolls, dict):
                 self.scroll_knowledge = scrolls
+            if isinstance(item_k, dict):
+                self.item_knowledge = item_k
+            if isinstance(door_k, dict):
+                self.door_knowledge = door_k
+            if isinstance(map_k, dict):
+                self.map_knowledge = map_k
             self.knowledge_dirty = False
             return True
         except FileNotFoundError:
@@ -723,10 +831,14 @@ class DecisionEngine:
 
     def save_knowledge(self, file_path):
         data = {
+            "schema_version": 2,
             "non_wieldable_names": sorted(self.learned_non_wieldable_names),
             "non_wieldable_tokens": sorted(self.learned_non_wieldable_tokens),
             "monster_knowledge": self.monster_knowledge,
             "scroll_knowledge": self.scroll_knowledge,
+            "item_knowledge": self.item_knowledge,
+            "door_knowledge": self.door_knowledge,
+            "map_knowledge": self.map_knowledge,
         }
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, sort_keys=True)

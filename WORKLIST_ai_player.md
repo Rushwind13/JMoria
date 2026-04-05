@@ -204,6 +204,17 @@ A Python script that:
   - [ ] Improve equipped-weapon detection via equipment panel parsing
   - [ ] Refine weapon ranking using real item damage metadata
 
+## Knowledge Roadmap (Persistent Learning)
+
+- [x] Monster empirical danger scoring from observed HP loss and attack pressure
+- [ ] Item slot semantics + equip compatibility memory (what can be worn/wielded where)
+- [ ] Light economy memory (torch/lantern uptime, low-light risk windows)
+- [x] Door/lock memory (pick success/failure stats and retry profile)
+- [ ] Time-to-kill and hit-difficulty memory by monster
+- [x] Scroll label confidence memory (label -> observed effect notes)
+- [ ] Equipment outcome memory from stat deltas (AC/To-hit/To-dam impact)
+- [ ] Per-depth map notes (chokes, dead-ends, stair positions, danger zones)
+
 #### 3.2 Combat Strategy
 - [ ] **Monster threat assessment:**
   - [ ] Calculate expected damage vs. player HP

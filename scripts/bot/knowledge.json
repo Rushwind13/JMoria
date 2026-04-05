@@ -1,14 +1,48 @@
 {
+  "door_knowledge": {
+    "lock_fail": 0,
+    "lock_success": 0
+  },
+  "item_knowledge": {
+    "equip_compat": {},
+    "light_sources": {},
+    "value_estimates": {}
+  },
+  "map_knowledge": {
+    "depth_notes": {}
+  },
+  "monster_knowledge": {},
+  "non_wieldable_names": [],
+  "non_wieldable_tokens": [],
+  "schema_version": 2,
+  "scroll_knowledge": {}
+}{
+  "door_knowledge": {
+    "lock_fail": 0,
+    "lock_success": 0
+  },
+  "item_knowledge": {
+    "equip_compat": {},
+    "light_sources": {},
+    "value_estimates": {}
+  },
+  "map_knowledge": {
+    "depth_notes": {}
+  },
   "monster_knowledge": {
     "opal icky thing": {
       "attacks": {},
+      "damage_instances": 0,
+      "damage_taken_total": 0,
       "hits": 3,
       "hits_taken": 0,
       "kills": 0,
+      "max_observed_hit": 0,
       "misses": 0
     }
   },
   "non_wieldable_names": [],
   "non_wieldable_tokens": [],
+  "schema_version": 2,
   "scroll_knowledge": {}
 }

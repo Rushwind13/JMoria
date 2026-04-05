@@ -26,3 +26,6 @@ test/vendor/
 test/.bundle/
 test/Gemfile.lock
 .goo.swp
+
+# Bot local learning state (optional per-user alternates)
+scripts/bot/knowledge.local.json

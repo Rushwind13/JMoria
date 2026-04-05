@@ -148,7 +148,11 @@ def run_loop(verbose: bool = False, knowledge_file: str = "") -> None:
     turn = 0
     engine = DecisionEngine()
     if knowledge_file:
-        engine.load_knowledge(knowledge_file)
+        loaded = engine.load_knowledge(knowledge_file)
+        kpath = Path(knowledge_file)
+        if not loaded and not kpath.exists():
+            kpath.parent.mkdir(parents=True, exist_ok=True)
+            engine.save_knowledge(knowledge_file)
     lost_player_turns = 0
     zero_hp_turns = 0
     panel_toggle_cooldown = 0
@@ -298,6 +302,12 @@ def main() -> None:
     screen.SESSION = args.session
     screen.TERM_W = args.term_w
     screen.TERM_H = args.term_h
+
+    if args.knowledge_file:
+        kpath = Path(args.knowledge_file)
+        if not kpath.exists():
+            kpath.parent.mkdir(parents=True, exist_ok=True)
+            DecisionEngine().save_knowledge(args.knowledge_file)
 
     if not args.no_launch:
         launch(

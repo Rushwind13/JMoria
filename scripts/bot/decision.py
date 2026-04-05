@@ -278,6 +278,11 @@ class DecisionEngine:
         # 3) Immediate combat: bump-attack adjacent monster.
         if adjacent is not None:
             self.mode = "combat"
+            if state.player_hp <= 1:
+                flee, flee_mode = self._brave_flee_key(state, pos, adjacent, allow_equal=True)
+                if flee and flee in "hjklyubn":
+                    self.mode = "recover"
+                    return self._record_decision(flee, f"fragile_hp_flee_{flee_mode}")
             threat_name = self.recent_attacker_name
             danger = self._monster_danger_score(threat_name) if threat_name else 0.0
             confidence = self._monster_confidence(threat_name) if threat_name else 0.0

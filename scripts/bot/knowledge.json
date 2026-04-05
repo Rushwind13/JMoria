@@ -1,28 +1,182 @@
 {
   "door_knowledge": {
-    "lock_fail": 0,
-    "lock_success": 0
+    "lock_fail": 39,
+    "lock_success": 361
   },
   "item_knowledge": {
+    "best_by_slot": {
+      "body": {
+        "name": "Leather Armor",
+        "score": 43.0
+      },
+      "boots": {
+        "name": "Pair of Steel Boots",
+        "score": 26.6
+      },
+      "cloak": {
+        "name": "Cloak",
+        "score": 11.0
+      },
+      "hands": {
+        "name": "Set of Gauntlets",
+        "score": 23.1
+      },
+      "light": {
+        "name": "Brass Lantern",
+        "score": 12.8
+      },
+      "shield": {
+        "name": "Large Steel Shield",
+        "score": 28.25
+      },
+      "weapon": {
+        "name": "Long Sword",
+        "score": 10.2
+      }
+    },
     "equip_compat": {},
-    "light_sources": {},
-    "value_estimates": {}
-  },
-  "map_knowledge": {
-    "depth_notes": {}
-  },
-  "monster_knowledge": {},
-  "non_wieldable_names": [],
-  "non_wieldable_tokens": [],
-  "schema_version": 2,
-  "scroll_knowledge": {}
-}{
-  "door_knowledge": {
-    "lock_fail": 0,
-    "lock_success": 0
-  },
-  "item_knowledge": {
-    "equip_compat": {},
+    "gear_strength": {
+      "bastard sword": {
+        "observed_ac_avg": 0.0,
+        "observed_ac_best": 0,
+        "observed_ac_count": 1,
+        "observed_ac_total": 0,
+        "successes": 3
+      },
+      "brass lantern": {
+        "observed_ac_avg": 0.0,
+        "observed_ac_best": 0,
+        "observed_ac_count": 1,
+        "observed_ac_total": 0,
+        "successes": 12
+      },
+      "cloak": {
+        "observed_ac_avg": 1.0,
+        "observed_ac_best": 1,
+        "observed_ac_count": 1,
+        "observed_ac_total": 1,
+        "successes": 17
+      },
+      "dagger": {
+        "observed_ac_avg": 0.0,
+        "observed_ac_best": 0,
+        "observed_ac_count": 7,
+        "observed_ac_total": 0,
+        "observed_damage": "1d4",
+        "observed_damage_avg": 2.5,
+        "successes": 16
+      },
+      "large steel shield": {
+        "combat_misses": 11,
+        "combat_turns": 11,
+        "observed_ac_avg": 6.0,
+        "observed_ac_best": 6,
+        "observed_ac_count": 1,
+        "observed_ac_total": 6,
+        "observed_damage": "1d2",
+        "observed_damage_avg": 1.5,
+        "observed_to_dam": 0,
+        "observed_to_hit": 0,
+        "successes": 16
+      },
+      "leather armor": {
+        "observed_ac_avg": 4.0,
+        "observed_ac_best": 8,
+        "observed_ac_count": 2,
+        "observed_ac_total": 8,
+        "successes": 5
+      },
+      "long bow": {
+        "observed_ac_avg": 0.0,
+        "observed_ac_best": 0,
+        "observed_ac_count": 6,
+        "observed_ac_total": 0,
+        "successes": 7
+      },
+      "long sword": {
+        "observed_ac_avg": 0.0,
+        "observed_ac_best": 0,
+        "observed_ac_count": 1,
+        "observed_ac_total": 0,
+        "successes": 2
+      },
+      "pair of leather boots": {
+        "observed_ac_avg": 2.0,
+        "observed_ac_best": 2,
+        "observed_ac_count": 4,
+        "observed_ac_total": 8,
+        "observed_damage": "1d4",
+        "observed_damage_avg": 2.5,
+        "successes": 14
+      },
+      "pair of leather gloves": {
+        "observed_ac_avg": 2.0,
+        "observed_ac_best": 2,
+        "observed_ac_count": 1,
+        "observed_ac_total": 2,
+        "successes": 2
+      },
+      "pair of steel boots": {
+        "observed_ac_avg": 4.0,
+        "observed_ac_best": 5,
+        "observed_ac_count": 2,
+        "observed_ac_total": 8,
+        "successes": 11
+      },
+      "pickaxe": {
+        "observed_ac_avg": 0.0,
+        "observed_ac_best": 0,
+        "observed_ac_count": 3,
+        "observed_ac_total": 0,
+        "successes": 9
+      },
+      "robe": {
+        "observed_ac_avg": 1.0,
+        "observed_ac_best": 1,
+        "observed_ac_count": 1,
+        "observed_ac_total": 1,
+        "successes": 5
+      },
+      "set of gauntlets": {
+        "observed_ac_avg": 4.0,
+        "observed_ac_best": 4,
+        "observed_ac_count": 2,
+        "observed_ac_total": 8,
+        "observed_damage": "1d2",
+        "observed_damage_avg": 1.5,
+        "successes": 11
+      },
+      "shovel": {
+        "observed_ac_avg": 0.0,
+        "observed_ac_best": 0,
+        "observed_ac_count": 3,
+        "observed_ac_total": 0,
+        "successes": 38
+      },
+      "small steel shield": {
+        "observed_ac_avg": 3.0,
+        "observed_ac_best": 4,
+        "observed_ac_count": 5,
+        "observed_ac_total": 15,
+        "successes": 30
+      },
+      "steel shield": {
+        "observed_ac_avg": 3.0,
+        "observed_ac_best": 5,
+        "observed_ac_count": 2,
+        "observed_ac_total": 6,
+        "observed_damage": "1d2",
+        "observed_damage_avg": 1.5,
+        "successes": 3
+      },
+      "torch": {
+        "observed_ac_avg": 0.0,
+        "observed_ac_best": 0,
+        "observed_ac_count": 2,
+        "observed_ac_total": 0,
+        "successes": 15
+      }
+    },
     "light_sources": {},
     "value_estimates": {}
   },
@@ -30,19 +184,92 @@
     "depth_notes": {}
   },
   "monster_knowledge": {
+    "blue icky thing": {
+      "attacks": {},
+      "damage_instances": 0,
+      "damage_taken_total": 0,
+      "hits": 1,
+      "hits_taken": 0,
+      "kills": 11,
+      "max_observed_hit": 0,
+      "misses": 10
+    },
+    "giant ant": {
+      "attacks": {},
+      "damage_instances": 0,
+      "damage_taken_total": 0,
+      "hits": 0,
+      "hits_taken": 0,
+      "kills": 0,
+      "max_observed_hit": 0,
+      "misses": 2
+    },
+    "giant snake": {
+      "attacks": {},
+      "damage_instances": 0,
+      "damage_taken_total": 0,
+      "hits": 0,
+      "hits_taken": 0,
+      "kills": 0,
+      "max_observed_hit": 0,
+      "misses": 11
+    },
+    "green icky thing": {
+      "attacks": {},
+      "damage_instances": 0,
+      "damage_taken_total": 0,
+      "hits": 0,
+      "hits_taken": 0,
+      "kills": 2,
+      "max_observed_hit": 0,
+      "misses": 7
+    },
+    "green jelly": {
+      "attacks": {},
+      "damage_instances": 0,
+      "damage_taken_total": 0,
+      "hits": 5,
+      "hits_taken": 0,
+      "kills": 10,
+      "max_observed_hit": 0,
+      "misses": 0
+    },
     "opal icky thing": {
       "attacks": {},
       "damage_instances": 0,
       "damage_taken_total": 0,
-      "hits": 3,
+      "hits": 8,
+      "hits_taken": 0,
+      "kills": 3,
+      "max_observed_hit": 0,
+      "misses": 4
+    },
+    "red icky thing": {
+      "attacks": {},
+      "damage_instances": 0,
+      "damage_taken_total": 0,
+      "hits": 2,
+      "hits_taken": 0,
+      "kills": 6,
+      "max_observed_hit": 0,
+      "misses": 6
+    },
+    "yellow icky thing": {
+      "attacks": {},
+      "damage_instances": 0,
+      "damage_taken_total": 0,
+      "hits": 6,
       "hits_taken": 0,
       "kills": 0,
       "max_observed_hit": 0,
-      "misses": 0
+      "misses": 1
     }
   },
-  "non_wieldable_names": [],
-  "non_wieldable_tokens": [],
-  "schema_version": 2,
-  "scroll_knowledge": {}
+  "schema_version": 3,
+  "scroll_knowledge": {},
+  "non_wieldable_categories": [
+    "potion",
+    "scroll",
+    "wand"
+  ]
 }

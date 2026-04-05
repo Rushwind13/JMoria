@@ -207,6 +207,7 @@ A Python script that:
 ## Knowledge Roadmap (Persistent Learning)
 
 - [x] Monster empirical danger scoring from observed HP loss and attack pressure
+- [x] Use learned monster danger + confidence directly in flee/engage decisions
 - [ ] Item slot semantics + equip compatibility memory (what can be worn/wielded where)
 - [ ] Light economy memory (torch/lantern uptime, low-light risk windows)
 - [x] Door/lock memory (pick success/failure stats and retry profile)

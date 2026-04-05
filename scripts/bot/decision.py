@@ -32,11 +32,19 @@ class DecisionEngine:
         self.wield_cooldown = 0
         self.equip_attempt_counts = {}
         self.wield_attempt_counts = {}
-        self.learned_non_wieldable_names = set()
-        self.learned_non_wieldable_tokens = set()
+        self.learned_non_wieldable_categories = set()
         self.monster_knowledge = {}
         self.scroll_knowledge = {}
         self.pending_scroll_label = None
+        self.consumable_knowledge = {}
+        self.flavor_map = {}  # per-run: flavor name -> true identity or observed effect
+        self.pending_use_cmd = None  # 'q', 'r', or 'z'
+        self.pending_use_slot = None
+        self.pending_use_item_name = None
+        self.await_use_prompt_turns = 0
+        self.pending_consumable_flavor = None  # flavor awaiting effect observation
+        self.pre_use_hp = None  # HP snapshot taken before a consumable use
+        self.use_cooldown = 0
         self.item_knowledge = {
             "equip_compat": {},
             "light_sources": {},
@@ -90,6 +98,8 @@ class DecisionEngine:
             self.cycle_break_cooldown -= 1
         if self.wield_cooldown > 0:
             self.wield_cooldown -= 1
+        if self.use_cooldown > 0:
+            self.use_cooldown -= 1
         if self.await_wield_prompt_turns > 0:
             self.await_wield_prompt_turns -= 1
         if self.follow_open_dir_turns > 0:
@@ -145,6 +155,7 @@ class DecisionEngine:
         self._learn_from_wield_feedback(state)
         self._learn_from_monster_feedback(state.last_message, hp_loss)
         self._learn_from_scroll_feedback(state.last_message)
+        self._learn_from_consumable_feedback(state)
         self._queue_pickup_equip_from_message(state)
         if "you have a " in msg_lower or "you have an " in msg_lower:
             self._queue_new_inventory_equips(state)
@@ -169,6 +180,34 @@ class DecisionEngine:
             ):
                 self.pending_wield_slot = None
                 self.await_wield_prompt_turns = 0
+
+        # If we initiated a consumable use (q/r), send the slot when prompted.
+        if self.pending_use_slot:
+            self.mode = "use"
+            prompt_match = (
+                ("quaff which item" in msg_lower and self.pending_use_cmd == "q")
+                or ("read which item" in msg_lower and self.pending_use_cmd == "r")
+            )
+            if prompt_match:
+                slot = self.pending_use_slot
+                cmd = self.pending_use_cmd
+                self.pending_use_slot = None
+                self.pending_use_cmd = None
+                self.await_use_prompt_turns = 0
+                return self._record_decision(slot, f"pending_use_{cmd}_slot_{slot}")
+            # Detect success/failure and clear state.
+            if (
+                "you drank the" in msg_lower
+                or "you read the" in msg_lower
+                or "you can't drink" in msg_lower
+                or "you can't read" in msg_lower
+                or "slips from your fingers" in msg_lower
+                or "please select a valid item" in msg_lower
+                or self.await_use_prompt_turns == 0
+            ):
+                self.pending_use_slot = None
+                self.pending_use_cmd = None
+                self.await_use_prompt_turns = 0
 
         # Hard rule: when inventory gains a slot/item, wield that slot immediately.
         if self.pending_pickup_equip_slot and not self.pending_wield_slot:
@@ -302,9 +341,14 @@ class DecisionEngine:
             if flee:
                 return self._record_decision(flee, f"low_hp_flee_{flee_mode}_from_{adjacent}")
 
-        # 2) No background wield-cycling: wield is pickup-driven to preserve movement.
+        # 2) Consumable usage: quaff healing when hurt, try unknowns when safe.
+        use_action = self._consider_consumable_use(state, adjacent)
+        if use_action:
+            return use_action
 
-        # 3) Immediate combat: bump-attack adjacent monster.
+        # 3) No background wield-cycling: wield is pickup-driven to preserve movement.
+
+        # 4) Immediate combat: bump-attack adjacent monster.
         if adjacent is not None:
             self.mode = "combat"
             if state.player_hp <= 1:
@@ -1022,11 +1066,9 @@ class DecisionEngine:
             n = name.lower()
             if n in equipped_names:
                 continue
-            if n in self.learned_non_wieldable_names:
+            if self._is_known_non_wieldable(name):
                 continue
-            if any(tok in n for tok in self.learned_non_wieldable_tokens):
-                continue
-            if self.wield_attempt_counts.get(name, 0) >= 6:
+            if self.wield_attempt_counts.get(name, 0) >= 3:
                 continue
 
             kind = self._gear_slot_kind(name)
@@ -1249,6 +1291,7 @@ class DecisionEngine:
         self.last_equip_baseline_damage = ""
 
     def _queue_pickup_equip_from_message(self, state):
+        """On pickup message, queue wield only if item isn't known non-wieldable."""
         msg = (state.last_message or "").strip()
         if not msg:
             return
@@ -1257,6 +1300,10 @@ class DecisionEngine:
             return
         picked = m.group(1).strip().lower()
         if not picked:
+            return
+
+        # Don't try to wield items we know can't be wielded.
+        if self._is_known_non_wieldable(picked):
             return
 
         # Prefer exact match to the picked-up item name.
@@ -1281,18 +1328,30 @@ class DecisionEngine:
             slot, _, name = entry.partition(":")
             if not slot or not name:
                 continue
+            # Don't try to wield items we know can't be wielded.
+            if self._is_known_non_wieldable(name):
+                continue
             self.pending_pickup_equip_slot = slot
             return
 
+    @staticmethod
+    def _item_category(item_name):
+        """Extract the general category from an item name.
+
+        'Blue Potion' -> 'potion', 'Scroll labeled foo' -> 'scroll',
+        'Yew Wand' -> 'wand', 'Dagger' -> 'dagger'.
+        """
+        n = item_name.strip().lower()
+        if n.startswith("scroll labeled") or n.startswith("scroll"):
+            return "scroll"
+        # For "<adjective> <noun>" items, the last word is the category.
+        parts = n.split()
+        return parts[-1] if parts else n
+
     def _learn_non_wieldable(self, item_name):
-        before_names = len(self.learned_non_wieldable_names)
-        before_tokens = len(self.learned_non_wieldable_tokens)
-        self.learned_non_wieldable_names.add(item_name.lower())
-        self._learn_item_token(item_name)
-        if (
-            len(self.learned_non_wieldable_names) != before_names
-            or len(self.learned_non_wieldable_tokens) != before_tokens
-        ):
+        cat = self._item_category(item_name)
+        if cat and cat not in self.learned_non_wieldable_categories:
+            self.learned_non_wieldable_categories.add(cat)
             self.knowledge_dirty = True
 
     def _learn_from_monster_feedback(self, message, hp_loss=0):
@@ -1515,27 +1574,243 @@ class DecisionEngine:
         self.knowledge_dirty = True
         self.pending_scroll_label = None
 
-    def _learn_item_token(self, item_name):
-        # Learn noun-like tokens (e.g., scroll, potion) to generalize future filtering.
-        stop = {"set", "pair", "of", "the", "a", "an", "labeled"}
-        tokens = [t for t in re.findall(r"[a-z]+", item_name.lower()) if t not in stop]
-        for t in tokens:
-            if len(t) >= 4:
-                self.learned_non_wieldable_tokens.add(t)
+    # -- Consumable observation system --
+    # Learns from screen messages and stat changes, not from source code.
+
+    def _learn_from_consumable_feedback(self, state):
+        """Track effects after quaffing or reading by observing screen messages and HP changes."""
+        msg = (state.last_message or "").strip()
+        if not msg:
+            return
+
+        lower = msg.lower()
+
+        # Detect quaff event: "You drank the <flavor name>."
+        m = re.search(r"you drank the\s+(.+?)\.?$", lower)
+        if m:
+            flavor = m.group(1).strip()
+            if flavor:
+                self.pending_consumable_flavor = flavor
+                self.pre_use_hp = self.last_player_hp
+                self.use_cooldown = 2
+            return
+
+        # Detect read event: "You read the <name>."
+        m = re.search(r"you read the\s+(.+?)\.?$", lower)
+        if m:
+            flavor = m.group(1).strip()
+            if flavor:
+                self.pending_consumable_flavor = flavor
+                self.pre_use_hp = self.last_player_hp
+                self.use_cooldown = 2
+            return
+
+        # Detect failure messages and clear state.
+        if "you can't drink" in lower or "you can't read" in lower:
+            self.pending_consumable_flavor = None
+            self.pre_use_hp = None
+            return
+
+        if not self.pending_consumable_flavor:
+            return
+
+        # Skip prompts that aren't effect messages.
+        if any(k in lower for k in ("choose an item", "quaff which", "read which", "wield which")):
+            return
+
+        # Identity reveal: "You have no more Orange Potions of Cure Light Wounds"
+        m = re.search(r"you have no more\s+(.+?)\s+of\s+(.+?)\.?$", lower)
+        if m:
+            flavor_part = m.group(1).strip()
+            true_identity = m.group(2).strip()
+            if true_identity:
+                self._learn_consumable_identity(self.pending_consumable_flavor, true_identity, state)
+            self.pending_consumable_flavor = None
+            self.pre_use_hp = None
+            return
+
+        # Tried but no effect: "You have no more Blue Potions {tried}"
+        if "{tried}" in lower:
+            self._learn_consumable_tried(self.pending_consumable_flavor)
+            self.pending_consumable_flavor = None
+            self.pre_use_hp = None
+            return
+
+        # Any other message after use is an observed effect — record the raw text
+        # and any HP change as evidence of what this flavor does.
+        hp_delta = 0
+        if self.pre_use_hp is not None and state.player_hp is not None:
+            hp_delta = state.player_hp - self.pre_use_hp
+
+        self._learn_consumable_observation(self.pending_consumable_flavor, msg, hp_delta)
+        self.pending_consumable_flavor = None
+        self.pre_use_hp = None
+
+    def _learn_consumable_identity(self, flavor_name, true_identity, state):
+        """The game revealed the true name of a consumable (e.g., 'Cure Light Wounds')."""
+        flavor = flavor_name.lower()
+        identity = true_identity.lower()
+        self.flavor_map[flavor] = identity
+
+        entry = self.consumable_knowledge.setdefault(identity, {
+            "count": 0, "hp_delta_total": 0, "observations": [],
+        })
+        entry["count"] = int(entry.get("count", 0)) + 1
+        entry["identified"] = True
+        if self.pre_use_hp is not None and state.player_hp is not None:
+            hp_delta = state.player_hp - self.pre_use_hp
+            entry["hp_delta_total"] = int(entry.get("hp_delta_total", 0)) + hp_delta
+            if hp_delta > 0:
+                entry["heals"] = True
+            elif hp_delta < 0:
+                entry["harms"] = True
+        self.knowledge_dirty = True
+
+    def _learn_consumable_tried(self, flavor_name):
+        """Consumable had no visible effect — mark as tried."""
+        flavor = flavor_name.lower()
+        if flavor not in self.flavor_map:
+            self.flavor_map[flavor] = "{tried}"
+        self.knowledge_dirty = True
+
+    def _learn_consumable_observation(self, flavor_name, raw_msg, hp_delta):
+        """Record a raw screen observation after consuming something."""
+        flavor = flavor_name.lower()
+
+        # Use HP delta as primary evidence.
+        effect_tag = "unknown"
+        if hp_delta > 0:
+            effect_tag = "healed"
+        elif hp_delta < 0:
+            effect_tag = "harmed"
+
+        self.flavor_map[flavor] = effect_tag
+
+        entry = self.consumable_knowledge.setdefault(effect_tag + ":" + flavor, {
+            "count": 0, "hp_delta_total": 0, "observations": [],
+        })
+        entry["count"] = int(entry.get("count", 0)) + 1
+        entry["hp_delta_total"] = int(entry.get("hp_delta_total", 0)) + hp_delta
+        if hp_delta > 0:
+            entry["heals"] = True
+        elif hp_delta < 0:
+            entry["harms"] = True
+        obs = entry.setdefault("observations", [])
+        if raw_msg and raw_msg not in obs and len(obs) < 5:
+            obs.append(raw_msg)
+        self.knowledge_dirty = True
+
+    def _is_known_healing_flavor(self, item_name):
+        """Check if we've observed this flavor healing us in the current run."""
+        effect = self.flavor_map.get(item_name.lower(), "")
+        if effect == "healed":
+            return True
+        # Also match if the revealed identity contains healing keywords.
+        if effect and effect not in ("{tried}", "harmed", "unknown"):
+            entry = self.consumable_knowledge.get(effect, {})
+            return entry.get("heals", False)
+        return False
+
+    def _is_known_bad_flavor(self, item_name):
+        """Check if we've observed this flavor harming us in the current run."""
+        effect = self.flavor_map.get(item_name.lower(), "")
+        if effect == "harmed":
+            return True
+        if effect and effect not in ("{tried}", "healed", "unknown"):
+            entry = self.consumable_knowledge.get(effect, {})
+            return entry.get("harms", False)
+        return False
+
+    def _is_consumable(self, item_name):
+        """Check if an item is a potion, scroll, or wand by category."""
+        cat = self._item_category(item_name)
+        return cat in ("potion", "scroll", "wand")
+
+    def _find_inventory_consumable(self, inventory, category=None, exclude_bad=True):
+        """Find a consumable in inventory, optionally filtering by category.
+
+        Returns (slot_letter, item_name) or (None, None).
+        """
+        for slot, name in (inventory or []):
+            cat = self._item_category(name)
+            if category and cat != category:
+                continue
+            if not category and cat not in ("potion", "scroll", "wand"):
+                continue
+            if exclude_bad and self._is_known_bad_flavor(name):
+                continue
+            return slot, name
+        return None, None
+
+    def _find_healing_potion(self, inventory):
+        """Find a potion known to be healing in the current run."""
+        for slot, name in (inventory or []):
+            if self._item_category(name) == "potion" and self._is_known_healing_flavor(name):
+                return slot, name
+        return None, None
+
+    def _consider_consumable_use(self, state, adjacent):
+        """Decide whether to use a consumable. Returns an action string or None."""
+        if self.pending_use_slot or self.use_cooldown > 0:
+            return None
+
+        # Emergency healing: quaff known healing potion when HP is low.
+        if state.player_max_hp > 0 and state.hp_pct < 0.50:
+            slot, name = self._find_healing_potion(state.inventory)
+            if slot:
+                return self._initiate_use("q", slot, name)
+
+        # Don't experiment with unknown consumables if a monster is adjacent.
+        if adjacent is not None:
+            return None
+
+        # When safe and HP is low-ish, try an unknown potion (might be healing).
+        if state.player_max_hp > 0 and state.hp_pct < 0.60:
+            slot, name = self._find_inventory_consumable(state.inventory, category="potion")
+            if slot and not self.flavor_map.get(name.lower()):
+                return self._initiate_use("q", slot, name)
+
+        # When safe at decent HP, try an unknown scroll to identify it.
+        if state.player_max_hp > 0 and state.hp_pct > 0.70:
+            slot, name = self._find_inventory_consumable(state.inventory, category="scroll")
+            if slot and not self.flavor_map.get(name.lower()):
+                return self._initiate_use("r", slot, name)
+
+        return None
+
+    def _initiate_use(self, cmd, slot, item_name):
+        """Start a consumable use sequence (q/r) for the given inventory slot."""
+        self.pending_use_cmd = cmd
+        self.pending_use_slot = slot
+        self.pending_use_item_name = item_name
+        self.await_use_prompt_turns = 3
+        self.use_cooldown = 3
+        self.mode = "use"
+        cmd_name = {"q": "quaff", "r": "read"}.get(cmd, cmd)
+        return self._record_decision(cmd, f"use_{cmd_name}_{item_name}")
+
+    def _is_known_non_wieldable(self, item_name):
+        """Check if this item's category has been learned as non-wieldable."""
+        cat = self._item_category(item_name)
+        return cat in self.learned_non_wieldable_categories
 
     def load_knowledge(self, file_path):
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 data = json.load(f)
-            names = data.get("non_wieldable_names", [])
-            tokens = data.get("non_wieldable_tokens", [])
+            cats = data.get("non_wieldable_categories", [])
+            # Migrate legacy per-name entries to categories.
+            legacy_names = data.get("non_wieldable_names", [])
             monsters = data.get("monster_knowledge", {})
             scrolls = data.get("scroll_knowledge", {})
             item_k = data.get("item_knowledge", {})
             door_k = data.get("door_knowledge", {})
             map_k = data.get("map_knowledge", {})
-            self.learned_non_wieldable_names.update(n.lower() for n in names if isinstance(n, str))
-            self.learned_non_wieldable_tokens.update(t.lower() for t in tokens if isinstance(t, str))
+            consumable_k = data.get("consumable_knowledge", {})
+            self.learned_non_wieldable_categories.update(c.lower() for c in cats if isinstance(c, str))
+            for n in legacy_names:
+                if isinstance(n, str):
+                    self.learned_non_wieldable_categories.add(self._item_category(n))
             if isinstance(monsters, dict):
                 self.monster_knowledge = monsters
             if isinstance(scrolls, dict):
@@ -1548,6 +1823,8 @@ class DecisionEngine:
                 self.door_knowledge = door_k
             if isinstance(map_k, dict):
                 self.map_knowledge = map_k
+            if isinstance(consumable_k, dict):
+                self.consumable_knowledge = consumable_k
             self.knowledge_dirty = False
             return True
         except FileNotFoundError:
@@ -1557,11 +1834,11 @@ class DecisionEngine:
 
     def save_knowledge(self, file_path):
         data = {
-            "schema_version": 3,
-            "non_wieldable_names": sorted(self.learned_non_wieldable_names),
-            "non_wieldable_tokens": sorted(self.learned_non_wieldable_tokens),
+            "schema_version": 4,
+            "non_wieldable_categories": sorted(self.learned_non_wieldable_categories),
             "monster_knowledge": self.monster_knowledge,
             "scroll_knowledge": self.scroll_knowledge,
+            "consumable_knowledge": self.consumable_knowledge,
             "item_knowledge": self.item_knowledge,
             "door_knowledge": self.door_knowledge,
             "map_knowledge": self.map_knowledge,

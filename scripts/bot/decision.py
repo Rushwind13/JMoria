@@ -17,6 +17,8 @@ class DecisionEngine:
         self.jiggle_idx = 0
         self.last_action = "."
         self.pending_keys = []
+        self.pending_wield_slot = None
+        self.await_wield_prompt_turns = 0
         self.spiral_radius = 1
         self.action_history = deque(maxlen=12)
         self.last_world_pos = None
@@ -29,6 +31,7 @@ class DecisionEngine:
         self.has_wielded_weapon = False
         self.wield_cooldown = 0
         self.equip_attempt_counts = {}
+        self.wield_attempt_counts = {}
         self.learned_non_wieldable_names = set()
         self.learned_non_wieldable_tokens = set()
         self.monster_knowledge = {}
@@ -38,6 +41,8 @@ class DecisionEngine:
             "equip_compat": {},
             "light_sources": {},
             "value_estimates": {},
+            "gear_strength": {},
+            "best_by_slot": {},
         }
         self.door_knowledge = {
             "lock_success": 0,
@@ -48,6 +53,9 @@ class DecisionEngine:
         }
         self.knowledge_dirty = False
         self.last_equip_item_name = None
+        self.last_equip_baseline_ac = None
+        self.pending_pickup_equip_slot = None
+        self.last_inventory_entries = set()
         self.last_depth = 1
         self.last_open_dir = None
         self.follow_open_dir_turns = 0
@@ -63,13 +71,10 @@ class DecisionEngine:
             self.cycle_break_cooldown -= 1
         if self.wield_cooldown > 0:
             self.wield_cooldown -= 1
+        if self.await_wield_prompt_turns > 0:
+            self.await_wield_prompt_turns -= 1
         if self.follow_open_dir_turns > 0:
             self.follow_open_dir_turns -= 1
-
-        # If we queued a multi-key action (e.g., open + direction), send it first.
-        if self.pending_keys:
-            action = self.pending_keys.pop(0)
-            return self._record_decision(action, "pending_open_direction")
 
         pos = state.player_pos
         motion_pos = state.player_world_pos if state.player_world_pos is not None else pos
@@ -96,9 +101,46 @@ class DecisionEngine:
         # If we just bumped into a door, issue open-command sequence.
         # 'o' enters open mode and next key is the direction.
         msg_lower = state.last_message.lower()
-        self._learn_from_wield_feedback(state.last_message)
+        self._learn_from_wield_feedback(state)
         self._learn_from_monster_feedback(state.last_message, hp_loss)
         self._learn_from_scroll_feedback(state.last_message)
+        self._queue_pickup_equip_from_message(state)
+
+        # If we initiated wield, send the slot only when the game prompts for it.
+        if self.pending_wield_slot:
+            if "wield which item" in msg_lower:
+                slot = self.pending_wield_slot
+                self.pending_wield_slot = None
+                self.await_wield_prompt_turns = 0
+                return self._record_decision(slot, f"pending_wield_slot_{slot}")
+            if (
+                "you are now wielding" in msg_lower
+                or "you can't wield" in msg_lower
+                or "returns to your pack" in msg_lower
+                or self.await_wield_prompt_turns == 0
+            ):
+                self.pending_wield_slot = None
+                self.await_wield_prompt_turns = 0
+
+        # Hard rule: when inventory gains a slot/item, wield that slot immediately.
+        if self.pending_pickup_equip_slot and not self.pending_wield_slot:
+            pickup_slot = self.pending_pickup_equip_slot
+            self.pending_pickup_equip_slot = None
+            item_name = self._inventory_name_for_slot(state.inventory, pickup_slot)
+            if item_name is None:
+                item_name = f"slot_{pickup_slot}"
+            self.last_equip_item_name = item_name
+            self.last_equip_baseline_ac = state.player_ac
+            self.wield_cooldown = 1
+            self.wield_attempt_counts[item_name] = self.wield_attempt_counts.get(item_name, 0) + 1
+            self.pending_wield_slot = pickup_slot
+            self.await_wield_prompt_turns = 3
+            return self._record_decision("w", f"inventory_changed_wield_slot_{pickup_slot}")
+
+        # If we queued a multi-key action (e.g., open + direction), send it next.
+        if self.pending_keys:
+            action = self.pending_keys.pop(0)
+            return self._record_decision(action, "pending_open_direction")
 
         if "you have picked the lock" in msg_lower:
             self.door_knowledge["lock_success"] = int(self.door_knowledge.get("lock_success", 0)) + 1
@@ -157,17 +199,7 @@ class DecisionEngine:
         if self._monster_signal_reliable(state):
             adjacent = self._adjacent_monster(pos, state.monsters)
 
-        # 2) Equip carried gear proactively (weapons, armor, torch/light).
-        # Higher priority now: try equipping before normal combat if not in immediate danger.
-        if self.wield_cooldown == 0 and (adjacent is None or state.hp_pct >= 0.70):
-            equip_choice = self._next_equip_candidate(state.inventory, state.equipment)
-            if equip_choice is not None:
-                slot, name, _score = equip_choice
-                self.pending_keys = [slot]
-                self.last_equip_item_name = name
-                self.wield_cooldown = 20
-                self.equip_attempt_counts[name] = self.equip_attempt_counts.get(name, 0) + 1
-                return self._record_decision("w", f"auto_equip_slot_{slot}")
+        # 2) No background wield-cycling: wield is pickup-driven to preserve movement.
 
         # 3) Immediate combat: bump-attack adjacent monster.
         if adjacent is not None:
@@ -566,8 +598,17 @@ class DecisionEngine:
         }
 
         best = None
-        best_score = 0
+        best_rank = None
         equipped_names = {name.lower() for _slot, name in (equipment or [])}
+        equipped_by_slot = {}
+        for _slot, name in (equipment or []):
+            kind = self._gear_slot_kind(name)
+            if not kind:
+                continue
+            cur = equipped_by_slot.get(kind)
+            score = self._gear_score(name)
+            if cur is None or score > cur[1]:
+                equipped_by_slot[kind] = (name, score)
 
         for slot, name in inventory:
             n = name.lower()
@@ -577,24 +618,146 @@ class DecisionEngine:
                 continue
             if any(tok in n for tok in self.learned_non_wieldable_tokens):
                 continue
-            if self.equip_attempt_counts.get(name, 0) >= 2:
+            if self.wield_attempt_counts.get(name, 0) >= 6:
                 continue
 
-            score = 0
+            kind = self._gear_slot_kind(name)
+
+            base = 0
             for key, val in score_table.items():
                 if key in n:
-                    score = max(score, val)
+                    base = max(base, val)
             if any(k in n for k in ("bow", "sling", "crossbow")):
-                score = max(score, 6)
-            if score == 0:
-                continue
-            if score > best_score:
-                best = (slot, name, score)
-                best_score = score
+                base = max(base, 6)
+
+            total_score = self._gear_score(name)
+            equipped_score = equipped_by_slot.get(kind, (None, 0))[1] if kind else 0
+            improvement = total_score - equipped_score if kind else 0.0
+            attempts = self.wield_attempt_counts.get(name, 0)
+            known = self.item_knowledge.get("gear_strength", {}).get(n, {})
+            successes = int(known.get("successes", 0)) if isinstance(known, dict) else 0
+            is_untested = attempts == 0 and successes == 0
+            known_best = 1 if (kind and self._is_known_best_for_slot(kind, name)) else 0
+            is_gear = 1 if kind else 0
+
+            # Rank tuple favors: untested items first, then known best gear and upgrades.
+            rank = (
+                1 if is_untested else 0,
+                known_best,
+                is_gear,
+                1 if improvement > 0.25 else 0,
+                float(improvement),
+                float(total_score),
+                float(base),
+                -float(attempts),
+            )
+
+            if best_rank is None or rank > best_rank:
+                best = (slot, name, total_score)
+                best_rank = rank
 
         return best
 
-    def _learn_from_wield_feedback(self, message):
+    def _gear_slot_kind(self, item_name):
+        n = item_name.lower()
+        if any(k in n for k in ("torch", "lantern")):
+            return "light"
+        if any(k in n for k in ("shield",)):
+            return "shield"
+        if any(k in n for k in ("boots",)):
+            return "boots"
+        if any(k in n for k in ("helm", "cap")):
+            return "head"
+        if any(k in n for k in ("cloak",)):
+            return "cloak"
+        if any(k in n for k in ("gauntlets", "gloves")):
+            return "hands"
+        if any(k in n for k in ("armor", "mail", "robe")):
+            return "body"
+        if any(
+            k in n
+            for k in (
+                "sword",
+                "axe",
+                "mace",
+                "hammer",
+                "morning star",
+                "spear",
+                "dagger",
+                "whip",
+                "club",
+                "pickaxe",
+                "shovel",
+                "bow",
+                "sling",
+                "crossbow",
+            )
+        ):
+            return "weapon"
+        return None
+
+    def _gear_score(self, item_name):
+        n = item_name.lower()
+        score = 0.0
+        score_table = {
+            "torch": 12,
+            "lantern": 12,
+            "great sword": 11,
+            "long sword": 10,
+            "broad sword": 10,
+            "battle axe": 9,
+            "leather armor": 9,
+            "chain mail": 9,
+            "plate armor": 10,
+            "shield": 8,
+            "helm": 7,
+            "cap": 6,
+            "cloak": 6,
+            "boots": 6,
+            "gauntlets": 6,
+            "gloves": 6,
+            "mace": 8,
+            "war hammer": 8,
+            "morning star": 8,
+            "spear": 7,
+            "dagger": 6,
+            "whip": 5,
+            "club": 4,
+            "pickaxe": 3,
+            "shovel": 2,
+        }
+        for key, val in score_table.items():
+            if key in n:
+                score = max(score, float(val))
+        if any(k in n for k in ("bow", "sling", "crossbow")):
+            score = max(score, 6.0)
+
+        gear_strength = self.item_knowledge.get("gear_strength", {})
+        learned = gear_strength.get(n, {}) if isinstance(gear_strength, dict) else {}
+        if isinstance(learned, dict):
+            score += float(learned.get("observed_ac_best", 0)) * 3.0
+            score += float(learned.get("observed_ac_avg", 0)) * 1.2
+            score += min(0.8, float(learned.get("successes", 0)) * 0.1)
+        return score
+
+    @staticmethod
+    def _inventory_name_for_slot(inventory, slot):
+        for s, name in inventory or []:
+            if s == slot:
+                return name
+        return None
+
+    def _is_known_best_for_slot(self, kind, item_name):
+        best_by_slot = self.item_knowledge.get("best_by_slot", {})
+        if not isinstance(best_by_slot, dict):
+            return False
+        entry = best_by_slot.get(kind)
+        if not isinstance(entry, dict):
+            return False
+        return str(entry.get("name", "")).lower() == item_name.lower()
+
+    def _learn_from_wield_feedback(self, state):
+        message = state.last_message
         if not message:
             return
 
@@ -612,6 +775,93 @@ class DecisionEngine:
         if "returns to your pack" in lower and self.last_equip_item_name:
             item = self.last_equip_item_name.lower()
             self._learn_non_wieldable(item)
+            self.wield_attempt_counts[item] = 99
+            self.last_equip_item_name = None
+            self.last_equip_baseline_ac = None
+            return
+
+        # Successful equip: learn AC impact and track best-known item per slot.
+        m = re.search(r"you are now wielding the\s+(.+?)\.?$", message, flags=re.IGNORECASE)
+        if m:
+            item = m.group(1).strip()
+            if item:
+                self._learn_successful_equip(item, state.player_ac)
+
+    def _learn_successful_equip(self, item_name, current_ac):
+        n = item_name.lower()
+        gear_strength = self.item_knowledge.setdefault("gear_strength", {})
+        if not isinstance(gear_strength, dict):
+            gear_strength = {}
+            self.item_knowledge["gear_strength"] = gear_strength
+
+        entry = gear_strength.setdefault(
+            n,
+            {
+                "successes": 0,
+                "observed_ac_total": 0,
+                "observed_ac_count": 0,
+                "observed_ac_avg": 0.0,
+                "observed_ac_best": 0,
+            },
+        )
+
+        entry["successes"] = int(entry.get("successes", 0)) + 1
+
+        if self.last_equip_baseline_ac is not None:
+            delta = int(current_ac) - int(self.last_equip_baseline_ac)
+            entry["observed_ac_total"] = int(entry.get("observed_ac_total", 0)) + delta
+            entry["observed_ac_count"] = int(entry.get("observed_ac_count", 0)) + 1
+            count = max(1, int(entry.get("observed_ac_count", 0)))
+            total = int(entry.get("observed_ac_total", 0))
+            entry["observed_ac_avg"] = total / count
+            entry["observed_ac_best"] = max(int(entry.get("observed_ac_best", 0)), delta)
+
+        kind = self._gear_slot_kind(item_name)
+        if kind:
+            best_by_slot = self.item_knowledge.setdefault("best_by_slot", {})
+            current_best = best_by_slot.get(kind)
+            new_score = self._gear_score(item_name)
+            if not isinstance(current_best, dict) or float(current_best.get("score", -1e9)) < new_score:
+                best_by_slot[kind] = {"name": item_name, "score": new_score}
+
+        self.knowledge_dirty = True
+        self.last_equip_item_name = None
+        self.last_equip_baseline_ac = None
+
+    def _queue_pickup_equip_from_message(self, state):
+        msg = (state.last_message or "").strip()
+        if not msg:
+            return
+        m = re.search(r"you have an?\s+(.+?)\.?$", msg, flags=re.IGNORECASE)
+        if not m:
+            return
+        picked = m.group(1).strip().lower()
+        if not picked:
+            return
+
+        # Prefer exact match to the picked-up item name.
+        for slot, name in state.inventory or []:
+            n = name.lower()
+            if n == picked:
+                self.pending_pickup_equip_slot = slot
+                return
+
+        # Fallback: parser may truncate/wrap names; choose first inventory slot.
+        if state.inventory:
+            self.pending_pickup_equip_slot = state.inventory[0][0]
+
+    def _queue_new_inventory_equips(self, state):
+        current_entries = {f"{slot}:{name}" for slot, name in (state.inventory or [])}
+        new_entries = current_entries - self.last_inventory_entries
+        self.last_inventory_entries = current_entries
+        if self.pending_pickup_equip_slot or not new_entries:
+            return
+
+        for entry in sorted(new_entries):
+            slot, _, name = entry.partition(":")
+            if not slot or not name:
+                continue
+            self.pending_pickup_equip_slot = slot
             return
 
     def _learn_non_wieldable(self, item_name):
@@ -835,6 +1085,8 @@ class DecisionEngine:
                 self.scroll_knowledge = scrolls
             if isinstance(item_k, dict):
                 self.item_knowledge = item_k
+                self.item_knowledge.setdefault("gear_strength", {})
+                self.item_knowledge.setdefault("best_by_slot", {})
             if isinstance(door_k, dict):
                 self.door_knowledge = door_k
             if isinstance(map_k, dict):
@@ -848,7 +1100,7 @@ class DecisionEngine:
 
     def save_knowledge(self, file_path):
         data = {
-            "schema_version": 2,
+            "schema_version": 3,
             "non_wieldable_names": sorted(self.learned_non_wieldable_names),
             "non_wieldable_tokens": sorted(self.learned_non_wieldable_tokens),
             "monster_knowledge": self.monster_knowledge,

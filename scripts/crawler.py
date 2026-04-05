@@ -155,7 +155,7 @@ def run_loop(verbose: bool = False, knowledge_file: str = "") -> None:
             engine.save_knowledge(knowledge_file)
     lost_player_turns = 0
     zero_hp_turns = 0
-    panel_toggle_cooldown = 0
+    panel_setup_done = False
 
     while True:
         state = screen.read(dungeon_depth=depth)
@@ -205,32 +205,15 @@ def run_loop(verbose: bool = False, knowledge_file: str = "") -> None:
 
         lost_player_turns = 0
 
-        if panel_toggle_cooldown > 0:
-            panel_toggle_cooldown -= 1
-
-        panels = screen.get_panel_visibility(state.raw_lines)
-        if panel_toggle_cooldown == 0:
-            if not panels.get("inventory", True):
-                if verbose:
-                    log(f"[turn {turn:5d}] ensure_panel inventory -> 'i'")
-                cmd.send("i")
-                panel_toggle_cooldown = 4
-                time.sleep(TICK_DELAY)
-                continue
+        # One-time panel setup only: inventory is on by default; enable equipment once.
+        if not panel_setup_done:
+            panels = screen.get_panel_visibility(state.raw_lines)
             if not panels.get("equipment", True):
                 if verbose:
-                    log(f"[turn {turn:5d}] ensure_panel equipment -> 'e'")
+                    log(f"[turn {turn:5d}] setup_panel equipment -> 'e'")
                 cmd.send("e")
-                panel_toggle_cooldown = 4
                 time.sleep(TICK_DELAY)
-                continue
-            if not panels.get("stats", True):
-                if verbose:
-                    log(f"[turn {turn:5d}] ensure_panel stats -> 'C'")
-                cmd.send("C")
-                panel_toggle_cooldown = 4
-                time.sleep(TICK_DELAY)
-                continue
+            panel_setup_done = True
 
         action = engine.decide(state)
 

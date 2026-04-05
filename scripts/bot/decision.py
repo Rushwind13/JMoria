@@ -23,6 +23,7 @@ class DecisionEngine:
         self.escape_idx = 0
         self.world_history = deque(maxlen=16)
         self.cycle_break_cooldown = 0
+        self.wall_bump_chain = 0
         self.last_thought = "idle"
 
     def decide(self, state):
@@ -52,16 +53,27 @@ class DecisionEngine:
 
         # If we just bumped into a door, issue open-command sequence.
         # 'o' enters open mode and next key is the direction.
-        if "bumped into a door" in state.last_message.lower():
+        msg_lower = state.last_message.lower()
+        if "bumped into a door" in msg_lower:
+            self.wall_bump_chain = 0
             direction = self.last_action if self.last_action in "hjklyubn" else "h"
             self.pending_keys = [direction]
             return self._record_decision("o", f"open_door_then_{direction}")
 
         # If we bumped into a wall, pivot immediately instead of repeating the same move.
-        if "bumped into a wall" in state.last_message.lower():
+        if "bumped into a wall" in msg_lower:
+            self.wall_bump_chain += 1
+            if self.wall_bump_chain >= 6:
+                self.wall_bump_chain = 0
+                self.cycle_break_cooldown = max(self.cycle_break_cooldown, 6)
+                escape = self._escape_key()
+                if escape:
+                    return self._record_decision(escape, "wall_bump_chain_escape")
             pivot = self._pivot_from_wall(state, self.last_action)
             if pivot:
                 return self._record_decision(pivot, "wall_bump_pivot")
+        else:
+            self.wall_bump_chain = 0
 
         # 1) Survival first: rest when low HP and no adjacent threat.
         if state.player_max_hp > 0 and state.hp_pct < 0.30:
@@ -177,7 +189,7 @@ class DecisionEngine:
         return (
             f"{self.last_thought} "
             f"np={self.no_progress_turns} stuck={self.stuck_turns} "
-            f"cooldown={self.cycle_break_cooldown}"
+            f"cooldown={self.cycle_break_cooldown} wb={self.wall_bump_chain}"
         )
 
     @staticmethod

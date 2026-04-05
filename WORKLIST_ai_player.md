@@ -191,7 +191,7 @@ A Python script that:
   - [ ] Validate reject counters across multiple long runs and tune thresholds
 - [~] Task 2: further reduce combat-zone patrol loops (#186)
   - [x] Prioritize door exploration (`path_to_door`, `open_adjacent_door`) before generic frontier roam
-  - [ ] Add long wall-bump-chain breaker (force broader escape after repeated `wall_bump_pivot`)
+  - [x] Add long wall-bump-chain breaker (force broader escape after repeated `wall_bump_pivot`)
 - [ ] Task 3: auto-wield/equip best available weapon
 
 #### 3.2 Combat Strategy

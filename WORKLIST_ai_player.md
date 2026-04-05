@@ -31,6 +31,14 @@ tmux capture-pane -t crawler -p   # read screen
 tmux send-keys -t crawler 'h'     # send keystroke (no Enter needed for single-char commands)
 ```
 
+### Watching The Bot Live (Visual):
+- [x] Attach to the running bot session: `tmux attach -t crawler`
+- [x] Detach without stopping it: `Ctrl-b` then `d`
+- [x] One-shot watch without attaching: `tmux capture-pane -t crawler -p | tail -40`
+- [x] Run with verbose telemetry in another terminal:
+  - `python3 scripts/crawler.py --verbose`
+  - shows bot reasoning (`think=...`) and message persistence (`<same for N turns>`)
+
 ### Screen Layout (from `ASCIILayout::CreateForSize`):
 | Region | Content | Parse Strategy |
 |--------|---------|----------------|
@@ -167,6 +175,24 @@ A Python script that:
 - [ ] **Item value database:**
   - [ ] Rank items by usefulness (weapons > armor > consumables)
   - [ ] Avoid picking up junk when inventory is full
+
+---
+
+## Current PR Focus (Active)
+
+- [x] Verbose logs now prioritize bot reasoning (`think=`) over raw message text
+- [x] Verbose logs no longer show viewport-local player position
+- [x] Repeated message text is marked as persistence (`<same for N turns>`) instead of event multiplicity
+- [x] Stuck detection switched to world position when available
+- [~] Task 1 parser hardening in progress:
+  - [x] Use canonical `MonIDs` / `ItemIDs` from source
+  - [x] Filter text-like/overlay-like glyphs in dungeon parsing
+  - [x] Add parser reject counters for debug telemetry
+  - [ ] Validate reject counters across multiple long runs and tune thresholds
+- [~] Task 2: further reduce combat-zone patrol loops (#186)
+  - [x] Prioritize door exploration (`path_to_door`, `open_adjacent_door`) before generic frontier roam
+  - [ ] Add long wall-bump-chain breaker (force broader escape after repeated `wall_bump_pivot`)
+- [ ] Task 3: auto-wield/equip best available weapon
 
 #### 3.2 Combat Strategy
 - [ ] **Monster threat assessment:**

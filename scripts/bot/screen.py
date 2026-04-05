@@ -59,6 +59,31 @@ _ITEM_CHARS = _load_id_chars("src/Item.cpp", "ItemIDs", _FALLBACK_ITEM_CHARS)
 # Keep only unambiguous symbols for tactical decisions.
 _MONSTER_CHARS_DISAMBIGUATED = {ch for ch in _MONSTER_CHARS if ch.isalpha() or ch == "&"}
 
+# Glyphs that are terrain or UI framing, not entity markers.
+_ENTITY_EXCLUDE_CHARS = set(" @#.:+'<>|lmxqtuvwj")
+
+# Last parser stats for debugging parser quality in verbose bot logs.
+_LAST_PARSE_DEBUG = {
+    "accepted_monsters": 0,
+    "accepted_items": 0,
+    "rejected_monsters": 0,
+    "rejected_items": 0,
+}
+
+
+def _is_word_like(row: list[str], col: int) -> bool:
+    """True when this position appears inside plain text rather than map glyphs."""
+    left_alpha = col > 0 and row[col - 1].isalpha()
+    right_alpha = col + 1 < len(row) and row[col + 1].isalpha()
+    return left_alpha or right_alpha
+
+
+def _is_text_adjacent(row: list[str], col: int) -> bool:
+    """Reject punctuation that appears adjacent to words in overlays/popups."""
+    left_alnum = col > 0 and row[col - 1].isalnum()
+    right_alnum = col + 1 < len(row) and row[col + 1].isalnum()
+    return left_alnum or right_alnum
+
 
 def _get_lines() -> list[str]:
     """Capture the tmux pane and return lines padded to TERM_W."""
@@ -132,6 +157,8 @@ def _parse_dungeon(lines: list[str]) -> tuple:
     player_pos = None
     monsters = []
     items = []
+    rejected_monsters = 0
+    rejected_items = 0
 
     for row_idx, line in enumerate(dungeon_rows):
         row = list(line[STATS_WIDTH:inv_left])
@@ -140,9 +167,28 @@ def _parse_dungeon(lines: list[str]) -> tuple:
             if ch == "@":
                 player_pos = (row_idx, col_idx)
             elif ch in _MONSTER_CHARS_DISAMBIGUATED:
+                if ch in _ENTITY_EXCLUDE_CHARS or _is_word_like(row, col_idx):
+                    rejected_monsters += 1
+                    continue
                 monsters.append((row_idx, col_idx, ch))
             elif ch in _ITEM_CHARS:
+                if (
+                    ch in _ENTITY_EXCLUDE_CHARS
+                    or _is_text_adjacent(row, col_idx)
+                    or ch.isalpha()
+                ):
+                    rejected_items += 1
+                    continue
                 items.append((row_idx, col_idx, ch))
+
+    _LAST_PARSE_DEBUG.update(
+        {
+            "accepted_monsters": len(monsters),
+            "accepted_items": len(items),
+            "rejected_monsters": rejected_monsters,
+            "rejected_items": rejected_items,
+        }
+    )
 
     return map_grid, player_pos, monsters, items
 
@@ -205,3 +251,7 @@ def is_char_creation(lines: list[str]) -> bool:
 
 def get_raw_lines() -> list[str]:
     return _get_lines()
+
+
+def get_last_parse_debug() -> dict:
+    return dict(_LAST_PARSE_DEBUG)

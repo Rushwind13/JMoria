@@ -169,11 +169,23 @@ def run_loop(verbose: bool = False) -> None:
             if msg_age_turns > 1:
                 msg_display = f"{msg} <same for {msg_age_turns} turns>"
             thought = engine.debug_thought()
+            parse_dbg = screen.get_last_parse_debug()
+            parse_note = ""
+            if (
+                len(state.monsters) > 20
+                or len(state.items) > 20
+                or parse_dbg.get("rejected_monsters", 0) > 0
+                or parse_dbg.get("rejected_items", 0) > 0
+            ):
+                parse_note = (
+                    f" parse(rejM={parse_dbg.get('rejected_monsters', 0)}"
+                    f",rejI={parse_dbg.get('rejected_items', 0)})"
+                )
             log(
                 f"[turn {turn:5d}] HP={state.player_hp}/{state.player_max_hp} "
                 f"depth={depth} wpos={state.player_world_pos} "
                 f"monsters={len(state.monsters)} items={len(state.items)} "
-                f"think={thought!r} msg={msg_display!r:40s} -> {action!r}"
+                f"think={thought!r}{parse_note} msg={msg_display!r:40s} -> {action!r}"
             )
 
         cmd.send(action)

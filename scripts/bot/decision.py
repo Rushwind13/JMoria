@@ -105,7 +105,19 @@ class DecisionEngine:
             if k:
                 return self._record_decision(k, self._goal_thought(state, "path_to_item", item_goal))
 
-        # 4) Descend if downstairs visible.
+        # 4) Doors are high-value exploration targets in larger rooms.
+        door_dir = self._adjacent_door_direction(state.map, pos)
+        if door_dir:
+            self.pending_keys = [door_dir]
+            return self._record_decision("o", f"open_adjacent_door_{door_dir}")
+
+        door_goal = self._nearest_door_approach(state.map, pos)
+        if door_goal:
+            k = self._key_toward(state.map, pos, door_goal)
+            if k:
+                return self._record_decision(k, self._goal_thought(state, "path_to_door", door_goal))
+
+        # 5) Descend if downstairs visible.
         stair_goal = pf.find_nearest_target(
             state.map,
             pos,
@@ -116,7 +128,7 @@ class DecisionEngine:
             if k:
                 return self._record_decision(k, self._goal_thought(state, "path_to_stairs", stair_goal))
 
-        # 5) Explore frontier: nearest unvisited walkable tile in viewport.
+        # 6) Explore frontier: nearest unvisited walkable tile in viewport.
         frontier = pf.find_nearest_target(
             state.map,
             pos,
@@ -128,18 +140,18 @@ class DecisionEngine:
             if k:
                 return self._record_decision(k, self._goal_thought(state, "path_to_frontier", frontier))
 
-        # 6) Spiral-search fallback to find a farther reachable unvisited tile.
+        # 7) Spiral-search fallback to find a farther reachable unvisited tile.
         spiral_key = self._spiral_search_key(state)
         if spiral_key:
             return self._record_decision(spiral_key, "spiral_search")
 
-        # 7) If no visible progress for a while, force an escape pattern.
+        # 8) If no visible progress for a while, force an escape pattern.
         if self.no_progress_turns >= 10:
             escape = self._escape_key()
             if escape:
                 return self._record_decision(escape, "no_progress_escape")
 
-        # 8) If still stuck, jiggle with directional fallback.
+        # 9) If still stuck, jiggle with directional fallback.
         if self.stuck_turns >= 4:
             key = "hjklyubn"[self.jiggle_idx % 8]
             self.jiggle_idx += 1
@@ -293,6 +305,27 @@ class DecisionEngine:
             return self._sanitize_move(cand)
 
         return self._pivot_from(last_move)
+
+    @staticmethod
+    def _adjacent_door_direction(grid, pos):
+        pr, pc = pos
+        for key in "hjklyubn":
+            dr, dc = KEY_TO_DIR[key]
+            nr, nc = pr + dr, pc + dc
+            if nr < 0 or nc < 0 or nr >= len(grid) or nc >= len(grid[0]):
+                continue
+            if grid[nr][nc] == "+":
+                return key
+        return None
+
+    def _nearest_door_approach(self, grid, pos):
+        return pf.find_nearest_target(
+            grid,
+            pos,
+            lambda ch, p: pf.is_walkable(ch)
+            and p != pos
+            and self._adjacent_door_direction(grid, p) is not None,
+        )
 
     @staticmethod
     def _is_opposite(a, b):

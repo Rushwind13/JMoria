@@ -74,6 +74,8 @@ class DecisionEngine:
         self.hallway_entry_world = None
         self.wall_follow_dir = None
         self.mode = "seek"
+        self.avoid_key = None
+        self.avoid_key_turns = 0
 
     def decide(self, state):
         self.mode = "seek"
@@ -91,6 +93,10 @@ class DecisionEngine:
             self.follow_open_dir_turns -= 1
         if self.wall_loop_escape_turns > 0:
             self.wall_loop_escape_turns -= 1
+        if self.avoid_key_turns > 0:
+            self.avoid_key_turns -= 1
+        else:
+            self.avoid_key = None
 
         pos = state.player_pos
         motion_pos = state.player_world_pos if state.player_world_pos is not None else pos
@@ -122,6 +128,13 @@ class DecisionEngine:
         else:
             self.stuck_turns = 0
         self.last_pos = motion_pos
+
+        # Detect 2-tile ABAB oscillation and suppress immediate backtrack key.
+        if self._in_two_tile_oscillation() and self.last_action in "hjklyubn":
+            avoid = self._opposite_key(self.last_action)
+            if avoid:
+                self.avoid_key = avoid
+                self.avoid_key_turns = 6
 
         # If we just bumped into a door, issue open-command sequence.
         # 'o' enters open mode and next key is the direction.
@@ -536,7 +549,8 @@ class DecisionEngine:
             f"{self.last_thought} "
             f"mode={self.mode} "
             f"np={self.no_progress_turns} stuck={self.stuck_turns} "
-            f"cooldown={self.cycle_break_cooldown} wb={self.wall_bump_chain}"
+            f"cooldown={self.cycle_break_cooldown} wb={self.wall_bump_chain} "
+            f"avoid={self.avoid_key}:{self.avoid_key_turns}"
         )
 
     @staticmethod
@@ -557,6 +571,14 @@ class DecisionEngine:
             return None
         if key not in "hjklyubn":
             return key
+
+        if self.avoid_key_turns > 0 and self.avoid_key in "hjklyubn" and key == self.avoid_key:
+            for alt in "hjklyubn":
+                if alt == key:
+                    continue
+                if self._is_blocked_dir(alt):
+                    continue
+                return alt
 
         if self._is_blocked_dir(key):
             for alt in "hjklyubn":
@@ -680,6 +702,12 @@ class DecisionEngine:
                 return True
 
         return False
+
+    def _in_two_tile_oscillation(self):
+        if len(self.world_history) < 4:
+            return False
+        tail = list(self.world_history)[-4:]
+        return tail[0] == tail[2] and tail[1] == tail[3] and tail[0] != tail[1]
 
     def _in_tight_wall_loop(self):
         if self.wall_bump_chain < 3:

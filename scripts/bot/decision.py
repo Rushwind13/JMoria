@@ -79,6 +79,8 @@ class DecisionEngine:
         self.current_motion_pos = None
         self.current_map = None
         self.current_pos = None
+        self.failed_item_goals = {}  # world_pos → failure count
+        self.current_item_goal_world = None  # world pos of current item target
         self.retreat_dir = None
         self.retreat_turns = 0
         self.wall_loop_escape_turns = 0
@@ -312,6 +314,10 @@ class DecisionEngine:
             if self.last_action in "hjklyubn":
                 self._mark_blocked_dir(self.last_action)
             self.wall_bump_chain += 1
+            # Track failures against the current item goal
+            if self.current_item_goal_world and "path_to_item" in self.last_thought:
+                g = self.current_item_goal_world
+                self.failed_item_goals[g] = self.failed_item_goals.get(g, 0) + 1
             if self.wall_bump_chain >= 6:
                 self.wall_bump_chain = 0
                 self.cycle_break_cooldown = max(self.cycle_break_cooldown, 6)
@@ -409,16 +415,20 @@ class DecisionEngine:
                 return self._record_decision(escape, "cycle_detected_escape")
 
         # 3) Clear room items first, then seek doors/hallways.
-        item_goal = pf.find_nearest_target(
-            state.map,
-            pos,
-            lambda ch, p: ch in self._item_chars() and p != pos,
-        )
-        if item_goal:
-            self.mode = "seek"
-            k = self._key_toward(state.map, pos, item_goal)
-            if k:
-                return self._record_decision(k, self._goal_thought(state, "path_to_item", item_goal))
+        if self.cycle_break_cooldown == 0:
+            item_goal = pf.find_nearest_target(
+                state.map,
+                pos,
+                lambda ch, p: ch in self._item_chars()
+                    and p != pos
+                    and not self._is_item_blacklisted(state, p),
+            )
+            if item_goal:
+                self.mode = "seek"
+                self.current_item_goal_world = self._local_to_world(state, item_goal)
+                k = self._key_toward(state.map, pos, item_goal)
+                if k:
+                    return self._record_decision(k, self._goal_thought(state, "path_to_item", item_goal))
 
         # 4) Lost-in-room bias: seek doors/hallways once room appears cleared.
         if self._should_prioritize_door_hunt(state, pos):
@@ -648,6 +658,21 @@ class DecisionEngine:
         wx, wy = state.player_world_pos
         world_goal = (wx + (gc - pc), wy + (gr - pr))
         return f"{prefix}_world~{world_goal}"
+
+    @staticmethod
+    def _local_to_world(state, local_pos):
+        if state.player_world_pos is None or state.player_pos is None:
+            return None
+        pr, pc = state.player_pos
+        lr, lc = local_pos
+        wx, wy = state.player_world_pos
+        return (wx + (lc - pc), wy + (lr - pr))
+
+    def _is_item_blacklisted(self, state, local_pos):
+        wp = self._local_to_world(state, local_pos)
+        if wp is None:
+            return False
+        return self.failed_item_goals.get(wp, 0) >= 3
 
     def _sanitize_move(self, key):
         if key is None:

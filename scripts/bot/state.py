@@ -13,6 +13,9 @@ class GameState:
     player_max_hp: int = 0
     player_ac: int = 0
     player_level: int = 0
+    damage_dice: str = ""       # e.g. "1d2" from stats panel
+    to_hit_bonus: int = 0       # +to Hit modifier
+    to_dam_bonus: int = 0       # +to Dam modifier
 
     # Dungeon depth (tracked from message text, not in stats panel)
     dungeon_depth: int = 1      # level 1 = 50 ft

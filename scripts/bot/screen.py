@@ -136,6 +136,21 @@ def _parse_stats(lines: list[str]) -> dict:
     if m:
         world_pos = (int(m.group(1)), int(m.group(2)))
 
+    damage_dice = ""
+    m = re.search(r"Damage:\s*(\d+d\d+)", stats_text)
+    if m:
+        damage_dice = m.group(1)
+
+    to_hit_bonus = 0
+    m = re.search(r"\+to Hit:\s*(-?\d+)", stats_text)
+    if m:
+        to_hit_bonus = int(m.group(1))
+
+    to_dam_bonus = 0
+    m = re.search(r"\+to Dam:\s*(-?\d+)", stats_text)
+    if m:
+        to_dam_bonus = int(m.group(1))
+
     return {
         "hp": hp,
         "max_hp": max_hp,
@@ -143,6 +158,9 @@ def _parse_stats(lines: list[str]) -> dict:
         "level": level,
         "depth_ft": depth_ft,
         "world_pos": world_pos,
+        "damage_dice": damage_dice,
+        "to_hit_bonus": to_hit_bonus,
+        "to_dam_bonus": to_dam_bonus,
     }
 
 
@@ -271,6 +289,9 @@ def read(state=None, dungeon_depth: int = 1) -> GameState:
         player_max_hp=stats["max_hp"],
         player_ac=stats["ac"],
         player_level=stats["level"],
+        damage_dice=stats["damage_dice"],
+        to_hit_bonus=stats["to_hit_bonus"],
+        to_dam_bonus=stats["to_dam_bonus"],
         dungeon_depth=parsed_depth,
         map=map_grid,
         player_pos=player_pos,

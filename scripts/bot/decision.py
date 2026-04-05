@@ -55,6 +55,7 @@ class DecisionEngine:
         self.failed_door_dirs_by_world = {}
         self.last_equip_item_name = None
         self.last_equip_baseline_ac = None
+        self.last_equip_baseline_damage = ""
         self.pending_pickup_equip_slot = None
         self.last_inventory_entries = set()
         self.last_depth = 1
@@ -64,6 +65,8 @@ class DecisionEngine:
         self.recent_attacker_name = None
         self.last_thought = "idle"
         self.blocked_dirs_by_world = {}
+        self.current_wielded_weapon = None
+        self.weapon_combat_turn = 0
         self.current_motion_pos = None
         self.current_map = None
         self.current_pos = None
@@ -177,6 +180,7 @@ class DecisionEngine:
                 item_name = f"slot_{pickup_slot}"
             self.last_equip_item_name = item_name
             self.last_equip_baseline_ac = state.player_ac
+            self.last_equip_baseline_damage = state.damage_dice
             self.wield_cooldown = 1
             self.wield_attempt_counts[item_name] = self.wield_attempt_counts.get(item_name, 0) + 1
             self.pending_wield_slot = pickup_slot
@@ -206,8 +210,20 @@ class DecisionEngine:
 
         if "you are now wielding the" in msg_lower:
             self.has_wielded_weapon = True
+            m_wield = re.search(r"you are now wielding the\s+(.+?)\.?$", msg_lower)
+            if m_wield:
+                self.current_wielded_weapon = m_wield.group(1).strip()
+                self.weapon_combat_turn = 0
         if "you were wielding the" in msg_lower:
             self.has_wielded_weapon = False
+            self.current_wielded_weapon = None
+
+        # Detect wielded weapon from equipment panel when not tracked via message.
+        if self.current_wielded_weapon is None and state.equipment:
+            for _slot, ename in state.equipment:
+                if self._gear_slot_kind(ename) == "weapon":
+                    self.current_wielded_weapon = ename.lower()
+                    break
 
         # Opened doors are treated as normal walkable floor tiles.
 
@@ -989,34 +1005,6 @@ class DecisionEngine:
         if not inventory:
             return None
 
-        score_table = {
-            "torch": 12,
-            "lantern": 12,
-            "great sword": 11,
-            "long sword": 10,
-            "broad sword": 10,
-            "battle axe": 9,
-            "leather armor": 9,
-            "chain mail": 9,
-            "plate armor": 10,
-            "shield": 8,
-            "helm": 7,
-            "cap": 6,
-            "cloak": 6,
-            "boots": 6,
-            "gauntlets": 6,
-            "gloves": 6,
-            "mace": 8,
-            "war hammer": 8,
-            "morning star": 8,
-            "spear": 7,
-            "dagger": 6,
-            "whip": 5,
-            "club": 4,
-            "pickaxe": 3,
-            "shovel": 2,
-        }
-
         best = None
         best_rank = None
         equipped_names = {name.lower() for _slot, name in (equipment or [])}
@@ -1043,13 +1031,6 @@ class DecisionEngine:
 
             kind = self._gear_slot_kind(name)
 
-            base = 0
-            for key, val in score_table.items():
-                if key in n:
-                    base = max(base, val)
-            if any(k in n for k in ("bow", "sling", "crossbow")):
-                base = max(base, 6)
-
             total_score = self._gear_score(name)
             equipped_score = equipped_by_slot.get(kind, (None, 0))[1] if kind else 0
             improvement = total_score - equipped_score if kind else 0.0
@@ -1068,7 +1049,6 @@ class DecisionEngine:
                 1 if improvement > 0.25 else 0,
                 float(improvement),
                 float(total_score),
-                float(base),
                 -float(attempts),
             )
 
@@ -1117,47 +1097,42 @@ class DecisionEngine:
         return None
 
     def _gear_score(self, item_name):
+        """Score an item by learned observations, with a small heuristic fallback."""
         n = item_name.lower()
-        score = 0.0
-        score_table = {
-            "torch": 12,
-            "lantern": 12,
-            "great sword": 11,
-            "long sword": 10,
-            "broad sword": 10,
-            "battle axe": 9,
-            "leather armor": 9,
-            "chain mail": 9,
-            "plate armor": 10,
-            "shield": 8,
-            "helm": 7,
-            "cap": 6,
-            "cloak": 6,
-            "boots": 6,
-            "gauntlets": 6,
-            "gloves": 6,
-            "mace": 8,
-            "war hammer": 8,
-            "morning star": 8,
-            "spear": 7,
-            "dagger": 6,
-            "whip": 5,
-            "club": 4,
-            "pickaxe": 3,
-            "shovel": 2,
-        }
-        for key, val in score_table.items():
-            if key in n:
-                score = max(score, float(val))
-        if any(k in n for k in ("bow", "sling", "crossbow")):
-            score = max(score, 6.0)
-
+        kind = self._gear_slot_kind(item_name)
         gear_strength = self.item_knowledge.get("gear_strength", {})
         learned = gear_strength.get(n, {}) if isinstance(gear_strength, dict) else {}
-        if isinstance(learned, dict):
-            score += float(learned.get("observed_ac_best", 0)) * 3.0
-            score += float(learned.get("observed_ac_avg", 0)) * 1.2
+
+        score = 0.0
+
+        # Light sources always get a fixed high score (not combat items).
+        if any(k in n for k in ("torch", "lantern")):
+            return 12.0
+
+        has_observations = isinstance(learned, dict) and (
+            float(learned.get("observed_damage_avg", 0)) > 0
+            or float(learned.get("observed_ac_best", 0)) > 0
+        )
+
+        if has_observations:
+            # Weapon score: average damage dice observed when wielding this item.
+            dmg_avg = float(learned.get("observed_damage_avg", 0))
+            to_dam = float(learned.get("observed_to_dam", 0))
+            score += (dmg_avg + to_dam) * 1.5
+
+            # Armor/shield score: AC contribution observed on equip.
+            ac_best = float(learned.get("observed_ac_best", 0))
+            ac_avg = float(learned.get("observed_ac_avg", 0))
+            score += ac_best * 3.0
+            score += ac_avg * 1.2
+
+            # Small credit for reliability (successfully equipped).
             score += min(0.8, float(learned.get("successes", 0)) * 0.1)
+        else:
+            # No real observations yet — give a modest starting score
+            # so the bot is willing to try it at least once.
+            score = 3.0
+
         return score
 
     @staticmethod
@@ -1200,14 +1175,25 @@ class DecisionEngine:
             self.last_equip_baseline_ac = None
             return
 
-        # Successful equip: learn AC impact and track best-known item per slot.
+        # Successful equip: learn AC and damage impact, track best-known item per slot.
         m = re.search(r"you are now wielding the\s+(.+?)\.?$", message, flags=re.IGNORECASE)
         if m:
             item = m.group(1).strip()
             if item:
-                self._learn_successful_equip(item, state.player_ac)
+                self._learn_successful_equip(item, state.player_ac, state.damage_dice, state.to_hit_bonus, state.to_dam_bonus)
 
-    def _learn_successful_equip(self, item_name, current_ac):
+    @staticmethod
+    def _dice_avg(dice_str):
+        """Compute the average roll for NdM notation, e.g. '2d8' -> 9.0."""
+        if not dice_str:
+            return 0.0
+        m = re.match(r"(\d+)d(\d+)", dice_str.strip())
+        if not m:
+            return 0.0
+        n, sides = int(m.group(1)), int(m.group(2))
+        return n * (sides + 1) / 2.0
+
+    def _learn_successful_equip(self, item_name, current_ac, current_damage="", to_hit=0, to_dam=0):
         n = item_name.lower()
         gear_strength = self.item_knowledge.setdefault("gear_strength", {})
         if not isinstance(gear_strength, dict):
@@ -1222,6 +1208,10 @@ class DecisionEngine:
                 "observed_ac_count": 0,
                 "observed_ac_avg": 0.0,
                 "observed_ac_best": 0,
+                "observed_damage": "",
+                "observed_damage_avg": 0.0,
+                "observed_to_hit": 0,
+                "observed_to_dam": 0,
             },
         )
 
@@ -1236,6 +1226,15 @@ class DecisionEngine:
             entry["observed_ac_avg"] = total / count
             entry["observed_ac_best"] = max(int(entry.get("observed_ac_best", 0)), delta)
 
+        # Record the damage dice the game reports while wielding this weapon.
+        if current_damage:
+            entry["observed_damage"] = current_damage
+            entry["observed_damage_avg"] = self._dice_avg(current_damage)
+        if to_hit:
+            entry["observed_to_hit"] = int(to_hit)
+        if to_dam:
+            entry["observed_to_dam"] = int(to_dam)
+
         kind = self._gear_slot_kind(item_name)
         if kind:
             best_by_slot = self.item_knowledge.setdefault("best_by_slot", {})
@@ -1247,6 +1246,7 @@ class DecisionEngine:
         self.knowledge_dirty = True
         self.last_equip_item_name = None
         self.last_equip_baseline_ac = None
+        self.last_equip_baseline_damage = ""
 
     def _queue_pickup_equip_from_message(self, state):
         msg = (state.last_message or "").strip()
@@ -1305,18 +1305,21 @@ class DecisionEngine:
         m = re.search(r"you hit the\s+(.+?)\.?$", msg, flags=re.IGNORECASE)
         if m:
             self._monster_note(m.group(1), "hits", 1)
+            self._weapon_combat_note("hits")
             return
 
         # You miss the Giant Ant.
         m = re.search(r"you miss the\s+(.+?)\.?$", msg, flags=re.IGNORECASE)
         if m:
             self._monster_note(m.group(1), "misses", 1)
+            self._weapon_combat_note("misses")
             return
 
         # You have slain the Giant Ant.
         m = re.search(r"you have slain the\s+(.+?)\.?$", msg, flags=re.IGNORECASE)
         if m:
             self._monster_note(m.group(1), "kills", 1)
+            self._weapon_combat_note("kills")
             return
 
         # The Giant Ant bites/touches/claws/breathes ...
@@ -1399,6 +1402,40 @@ class DecisionEngine:
         entry["damage_taken_total"] = int(entry.get("damage_taken_total", 0)) + int(hp_loss)
         entry["damage_instances"] = int(entry.get("damage_instances", 0)) + 1
         entry["max_observed_hit"] = max(int(entry.get("max_observed_hit", 0)), int(hp_loss))
+        self.knowledge_dirty = True
+
+    def _weapon_combat_note(self, event):
+        """Track combat events (hits/misses/kills) for the currently wielded weapon."""
+        weapon = self.current_wielded_weapon
+        if not weapon:
+            return
+        n = weapon.lower()
+        gear_strength = self.item_knowledge.setdefault("gear_strength", {})
+        entry = gear_strength.setdefault(
+            n,
+            {
+                "successes": 0,
+                "observed_ac_total": 0,
+                "observed_ac_count": 0,
+                "observed_ac_avg": 0.0,
+                "observed_ac_best": 0,
+                "observed_damage": "",
+                "observed_damage_avg": 0.0,
+                "observed_to_hit": 0,
+                "observed_to_dam": 0,
+                "combat_hits": 0,
+                "combat_misses": 0,
+                "combat_kills": 0,
+                "combat_turns": 0,
+            },
+        )
+        if event == "hits":
+            entry["combat_hits"] = int(entry.get("combat_hits", 0)) + 1
+        elif event == "misses":
+            entry["combat_misses"] = int(entry.get("combat_misses", 0)) + 1
+        elif event == "kills":
+            entry["combat_kills"] = int(entry.get("combat_kills", 0)) + 1
+        entry["combat_turns"] = int(entry.get("combat_turns", 0)) + 1
         self.knowledge_dirty = True
 
     def _monster_danger_score(self, monster_name):

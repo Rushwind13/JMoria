@@ -184,6 +184,7 @@ A Python script that:
 - [x] Verbose logs no longer show viewport-local player position
 - [x] Repeated message text is marked as persistence (`<same for N turns>`) instead of event multiplicity
 - [x] Stuck detection switched to world position when available
+- [x] Bot now auto-enforces panel visibility (`i`, `e`, `C`) when parsing detects missing panels
 - [~] Task 1 parser hardening in progress:
   - [x] Use canonical `MonIDs` / `ItemIDs` from source
   - [x] Filter text-like/overlay-like glyphs in dungeon parsing
@@ -193,6 +194,15 @@ A Python script that:
   - [x] Prioritize door exploration (`path_to_door`, `open_adjacent_door`) before generic frontier roam
   - [x] Add long wall-bump-chain breaker (force broader escape after repeated `wall_bump_pivot`)
 - [ ] Task 3: auto-wield/equip best available weapon
+  - [x] Parse inventory slot-letter entries from right panel
+  - [x] Auto-issue `w` + slot for all equip-candidate carried items (not just one weapon)
+  - [x] Treat torches/lanterns as high-priority utility equipment
+  - [x] Learn non-wieldable items from feedback (e.g., "You can't wield a ...") and avoid retries
+  - [x] Persist learned non-wieldable item knowledge to JSON config across runs
+  - [x] Persist monster observations (hit/miss/kill/attack-type) across runs
+  - [x] Persist scroll label -> observed effect notes across runs
+  - [ ] Improve equipped-weapon detection via equipment panel parsing
+  - [ ] Refine weapon ranking using real item damage metadata
 
 #### 3.2 Combat Strategy
 - [ ] **Monster threat assessment:**

@@ -146,6 +146,23 @@ def _parse_stats(lines: list[str]) -> dict:
     }
 
 
+def get_panel_visibility(lines: list[str]) -> dict:
+    """Detect whether key UI panels are currently visible in the ASCII layout."""
+    body_rows = lines[MSG_HEIGHT:]
+    left_text = "\n".join(_strip_box(r[:STATS_WIDTH]) for r in body_rows)
+
+    right_text = ""
+    if TERM_W >= INV_AUTO_WIDTH:
+        inv_left = TERM_W - INV_WIDTH
+        right_text = "\n".join(_strip_box(r[inv_left:TERM_W]) for r in body_rows)
+
+    return {
+        "stats": ("HP:" in left_text) or ("Name:" in left_text),
+        "inventory": "You are Carrying:" in right_text,
+        "equipment": "You are wearing:" in right_text,
+    }
+
+
 def _parse_dungeon(lines: list[str]) -> tuple:
     """
     Extract the dungeon map region (cols STATS_WIDTH–(TERM_W-INV_WIDTH), rows MSG_HEIGHT+).
@@ -206,6 +223,33 @@ def _parse_messages(lines: list[str]) -> str:
     return non_empty[-1] if non_empty else ""
 
 
+def _parse_right_panels(lines: list[str]) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
+    """Parse inventory/equipment entries from right sidebar when visible."""
+    if TERM_W < INV_AUTO_WIDTH:
+        return [], []
+
+    inv_left = TERM_W - INV_WIDTH
+    body_rows = lines[MSG_HEIGHT:]
+    split = len(body_rows) // 2
+
+    inv_rows = body_rows[:split]
+    equip_rows = body_rows[split:]
+
+    entry_re = re.compile(r"^\s*([a-z])\s*-\s*(.+?)\s*$")
+
+    def parse_rows(rows: list[str]) -> list[tuple[str, str]]:
+        out = []
+        for row in rows:
+            text = _strip_box(row[inv_left:TERM_W]).strip()
+            m = entry_re.match(text)
+            if not m:
+                continue
+            out.append((m.group(1), m.group(2)))
+        return out
+
+    return parse_rows(inv_rows), parse_rows(equip_rows)
+
+
 def read(state=None, dungeon_depth: int = 1) -> GameState:
     """
     Capture the screen and return a fully populated GameState.
@@ -216,6 +260,7 @@ def read(state=None, dungeon_depth: int = 1) -> GameState:
     stats = _parse_stats(lines)
     map_grid, player_pos, monsters, items = _parse_dungeon(lines)
     last_message = _parse_messages(lines)
+    inventory, equipment = _parse_right_panels(lines)
 
     parsed_depth = dungeon_depth
     if stats["depth_ft"] is not None and stats["depth_ft"] > 0:
@@ -232,6 +277,8 @@ def read(state=None, dungeon_depth: int = 1) -> GameState:
         player_world_pos=stats["world_pos"],
         monsters=monsters,
         items=items,
+        inventory=inventory,
+        equipment=equipment,
         last_message=last_message,
         raw_lines=lines,
     )

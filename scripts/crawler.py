@@ -15,6 +15,7 @@ import time
 import subprocess
 import os
 import shlex
+from pathlib import Path
 
 # Allow running from repo root: python3 scripts/crawler.py
 sys.path.insert(0, os.path.dirname(__file__))
@@ -140,14 +141,17 @@ def run_startup() -> bool:
 # Main loop
 # ---------------------------------------------------------------------------
 
-def run_loop(verbose: bool = False) -> None:
+def run_loop(verbose: bool = False, knowledge_file: str = "") -> None:
     depth = 1
     prev_msg = ""
     msg_age_turns = 0
     turn = 0
     engine = DecisionEngine()
+    if knowledge_file:
+        engine.load_knowledge(knowledge_file)
     lost_player_turns = 0
     zero_hp_turns = 0
+    panel_toggle_cooldown = 0
 
     while True:
         state = screen.read(dungeon_depth=depth)
@@ -197,6 +201,33 @@ def run_loop(verbose: bool = False) -> None:
 
         lost_player_turns = 0
 
+        if panel_toggle_cooldown > 0:
+            panel_toggle_cooldown -= 1
+
+        panels = screen.get_panel_visibility(state.raw_lines)
+        if panel_toggle_cooldown == 0:
+            if not panels.get("inventory", True):
+                if verbose:
+                    log(f"[turn {turn:5d}] ensure_panel inventory -> 'i'")
+                cmd.send("i")
+                panel_toggle_cooldown = 4
+                time.sleep(TICK_DELAY)
+                continue
+            if not panels.get("equipment", True):
+                if verbose:
+                    log(f"[turn {turn:5d}] ensure_panel equipment -> 'e'")
+                cmd.send("e")
+                panel_toggle_cooldown = 4
+                time.sleep(TICK_DELAY)
+                continue
+            if not panels.get("stats", True):
+                if verbose:
+                    log(f"[turn {turn:5d}] ensure_panel stats -> 'C'")
+                cmd.send("C")
+                panel_toggle_cooldown = 4
+                time.sleep(TICK_DELAY)
+                continue
+
         action = engine.decide(state)
 
         if verbose:
@@ -224,6 +255,11 @@ def run_loop(verbose: bool = False) -> None:
             )
 
         cmd.send(action)
+
+        if knowledge_file and engine.knowledge_dirty:
+            Path(knowledge_file).parent.mkdir(parents=True, exist_ok=True)
+            engine.save_knowledge(knowledge_file)
+
         time.sleep(TICK_DELAY)
 
 
@@ -250,6 +286,11 @@ def main() -> None:
         action="store_true",
         help="reuse and keep tmux session open across bot runs",
     )
+    parser.add_argument(
+        "--knowledge-file",
+        default="scripts/bot/knowledge.json",
+        help="path to persistent learned bot knowledge json",
+    )
     args = parser.parse_args()
 
     # Propagate session name to submodules
@@ -272,7 +313,7 @@ def main() -> None:
         sys.exit(1)
 
     try:
-        run_loop(verbose=args.verbose)
+        run_loop(verbose=args.verbose, knowledge_file=args.knowledge_file)
     except KeyboardInterrupt:
         log("\n[crawler] Interrupted.")
     finally:

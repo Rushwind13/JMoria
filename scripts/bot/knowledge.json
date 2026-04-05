@@ -1,0 +1,14 @@
+{
+  "monster_knowledge": {
+    "opal icky thing": {
+      "attacks": {},
+      "hits": 3,
+      "hits_taken": 0,
+      "kills": 0,
+      "misses": 0
+    }
+  },
+  "non_wieldable_names": [],
+  "non_wieldable_tokens": [],
+  "scroll_knowledge": {}
+}

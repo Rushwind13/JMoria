@@ -1,6 +1,8 @@
 """decision.py - Priority decision engine for the JMoria bot (Phase 2)."""
 
 from collections import deque
+import json
+import re
 
 from . import pathfinding as pf
 
@@ -24,6 +26,19 @@ class DecisionEngine:
         self.world_history = deque(maxlen=16)
         self.cycle_break_cooldown = 0
         self.wall_bump_chain = 0
+        self.has_wielded_weapon = False
+        self.wield_cooldown = 0
+        self.equip_attempt_counts = {}
+        self.learned_non_wieldable_names = set()
+        self.learned_non_wieldable_tokens = set()
+        self.monster_knowledge = {}
+        self.scroll_knowledge = {}
+        self.pending_scroll_label = None
+        self.knowledge_dirty = False
+        self.last_equip_item_name = None
+        self.last_depth = 1
+        self.last_open_dir = None
+        self.follow_open_dir_turns = 0
         self.last_thought = "idle"
 
     def decide(self, state):
@@ -32,6 +47,10 @@ class DecisionEngine:
 
         if self.cycle_break_cooldown > 0:
             self.cycle_break_cooldown -= 1
+        if self.wield_cooldown > 0:
+            self.wield_cooldown -= 1
+        if self.follow_open_dir_turns > 0:
+            self.follow_open_dir_turns -= 1
 
         # If we queued a multi-key action (e.g., open + direction), send it first.
         if self.pending_keys:
@@ -41,6 +60,10 @@ class DecisionEngine:
         pos = state.player_pos
         motion_pos = state.player_world_pos if state.player_world_pos is not None else pos
         self.visited.add((state.dungeon_depth, pos[0], pos[1]))
+
+        if state.dungeon_depth != self.last_depth:
+            self.equip_attempt_counts.clear()
+            self.last_depth = state.dungeon_depth
 
         self._update_progress(state)
 
@@ -54,9 +77,26 @@ class DecisionEngine:
         # If we just bumped into a door, issue open-command sequence.
         # 'o' enters open mode and next key is the direction.
         msg_lower = state.last_message.lower()
+        self._learn_from_wield_feedback(state.last_message)
+        self._learn_from_monster_feedback(state.last_message)
+        self._learn_from_scroll_feedback(state.last_message)
+
+        if "you are now wielding the" in msg_lower:
+            self.has_wielded_weapon = True
+        if "you were wielding the" in msg_lower:
+            self.has_wielded_weapon = False
+
+        if "picked the lock" in msg_lower and isinstance(self.last_open_dir, str) and self.last_open_dir in "hjklyubn":
+            self.follow_open_dir_turns = max(self.follow_open_dir_turns, 2)
+
+        if self.follow_open_dir_turns > 0 and self.last_open_dir in "hjklyubn":
+            return self._record_decision(self.last_open_dir, f"step_through_open_door_{self.last_open_dir}")
+
         if "bumped into a door" in msg_lower:
             self.wall_bump_chain = 0
             direction = self.last_action if self.last_action in "hjklyubn" else "h"
+            self.last_open_dir = direction
+            self.follow_open_dir_turns = 0
             self.pending_keys = [direction]
             return self._record_decision("o", f"open_door_then_{direction}")
 
@@ -98,6 +138,17 @@ class DecisionEngine:
                 action,
                 self._goal_thought(state, "adjacent_attack", adjacent),
             )
+
+        # 2b) Equip carried gear proactively (weapons, armor, torch/light).
+        if self.wield_cooldown == 0:
+            equip_choice = self._next_equip_candidate(state.inventory, state.equipment)
+            if equip_choice is not None:
+                slot, name, _score = equip_choice
+                self.pending_keys = [slot]
+                self.last_equip_item_name = name
+                self.wield_cooldown = 20
+                self.equip_attempt_counts[name] = self.equip_attempt_counts.get(name, 0) + 1
+                return self._record_decision("w", f"auto_equip_slot_{slot}")
 
         # Break tight patrol cycles (3-4 tile loops) before normal exploration.
         if self._in_patrol_cycle() and self.cycle_break_cooldown == 0:
@@ -442,3 +493,242 @@ class DecisionEngine:
     @staticmethod
     def _item_chars():
         return set(r'|)[](]"=~{}{}&?!-_$~/\\')
+
+    def _next_equip_candidate(self, inventory, equipment):
+        if not inventory:
+            return None
+
+        score_table = {
+            "torch": 12,
+            "lantern": 12,
+            "great sword": 11,
+            "long sword": 10,
+            "broad sword": 10,
+            "battle axe": 9,
+            "leather armor": 9,
+            "chain mail": 9,
+            "plate armor": 10,
+            "shield": 8,
+            "helm": 7,
+            "cap": 6,
+            "cloak": 6,
+            "boots": 6,
+            "gauntlets": 6,
+            "gloves": 6,
+            "mace": 8,
+            "war hammer": 8,
+            "morning star": 8,
+            "spear": 7,
+            "dagger": 6,
+            "whip": 5,
+            "club": 4,
+            "pickaxe": 3,
+            "shovel": 2,
+            "torch": 1,
+        }
+
+        best = None
+        best_score = 0
+        equipped_names = {name.lower() for _slot, name in (equipment or [])}
+
+        for slot, name in inventory:
+            n = name.lower()
+            if n in equipped_names:
+                continue
+            if n in self.learned_non_wieldable_names:
+                continue
+            if any(tok in n for tok in self.learned_non_wieldable_tokens):
+                continue
+            if self.equip_attempt_counts.get(name, 0) >= 2:
+                continue
+
+            score = 0
+            for key, val in score_table.items():
+                if key in n:
+                    score = max(score, val)
+            if any(k in n for k in ("bow", "sling", "crossbow")):
+                score = max(score, 6)
+            if score == 0:
+                continue
+            if score > best_score:
+                best = (slot, name, score)
+                best_score = score
+
+        return best
+
+    def _learn_from_wield_feedback(self, message):
+        if not message:
+            return
+
+        lower = message.lower()
+
+        # Explicit failure: "You can't wield a Scroll ...!"
+        m = re.search(r"you can't wield a\s+(.+?)!", lower)
+        if m:
+            item = m.group(1).strip()
+            if item:
+                self._learn_non_wieldable(item)
+            return
+
+        # Wield attempt bounced back to inventory.
+        if "returns to your pack" in lower and self.last_equip_item_name:
+            item = self.last_equip_item_name.lower()
+            self._learn_non_wieldable(item)
+            return
+
+    def _learn_non_wieldable(self, item_name):
+        before_names = len(self.learned_non_wieldable_names)
+        before_tokens = len(self.learned_non_wieldable_tokens)
+        self.learned_non_wieldable_names.add(item_name.lower())
+        self._learn_item_token(item_name)
+        if (
+            len(self.learned_non_wieldable_names) != before_names
+            or len(self.learned_non_wieldable_tokens) != before_tokens
+        ):
+            self.knowledge_dirty = True
+
+    def _learn_from_monster_feedback(self, message):
+        if not message:
+            return
+
+        msg = message.strip()
+
+        # You hit the Giant Ant.
+        m = re.search(r"you hit the\s+(.+?)\.?$", msg, flags=re.IGNORECASE)
+        if m:
+            self._monster_note(m.group(1), "hits", 1)
+            return
+
+        # You miss the Giant Ant.
+        m = re.search(r"you miss the\s+(.+?)\.?$", msg, flags=re.IGNORECASE)
+        if m:
+            self._monster_note(m.group(1), "misses", 1)
+            return
+
+        # You have slain the Giant Ant.
+        m = re.search(r"you have slain the\s+(.+?)\.?$", msg, flags=re.IGNORECASE)
+        if m:
+            self._monster_note(m.group(1), "kills", 1)
+            return
+
+        # The Giant Ant bites/touches/claws/breathes ...
+        m = re.search(
+            r"the\s+(.+?)\s+(bites|claws|touches|hits|breathes|stings|kicks|gazes|spits)\b",
+            msg,
+            flags=re.IGNORECASE,
+        )
+        if m:
+            monster = m.group(1)
+            attack = m.group(2).lower()
+            self._monster_note(monster, "hits_taken", 1)
+            self._monster_attack_note(monster, attack)
+
+    def _monster_note(self, monster_name, key, amount):
+        name = monster_name.strip().lower()
+        if not name:
+            return
+        entry = self.monster_knowledge.setdefault(
+            name,
+            {"hits": 0, "misses": 0, "hits_taken": 0, "kills": 0, "attacks": {}},
+        )
+        before = entry.get(key, 0)
+        entry[key] = before + amount
+        if entry[key] != before:
+            self.knowledge_dirty = True
+
+    def _monster_attack_note(self, monster_name, attack_type):
+        name = monster_name.strip().lower()
+        if not name:
+            return
+        entry = self.monster_knowledge.setdefault(
+            name,
+            {"hits": 0, "misses": 0, "hits_taken": 0, "kills": 0, "attacks": {}},
+        )
+        attacks = entry.setdefault("attacks", {})
+        before = attacks.get(attack_type, 0)
+        attacks[attack_type] = before + 1
+        if attacks[attack_type] != before:
+            self.knowledge_dirty = True
+
+    def _learn_from_scroll_feedback(self, message):
+        if not message:
+            return
+
+        msg = message.strip()
+
+        # Reading event with randomized label, e.g. "You read the Scroll labeled foo."
+        m = re.search(r"you read the\s+scroll labeled\s+(.+?)\.?$", msg, flags=re.IGNORECASE)
+        if m:
+            label = m.group(1).strip().lower()
+            if label:
+                self.pending_scroll_label = label
+            return
+
+        if not self.pending_scroll_label:
+            return
+
+        lower = msg.lower()
+        # Skip transitional/system lines.
+        if any(
+            k in lower
+            for k in (
+                "choose an item",
+                "you read the",
+                "you are now",
+                "you have",
+                "you miss",
+                "you hit",
+            )
+        ):
+            return
+
+        # Capture first meaningful post-read effect text as learned effect note.
+        label_entry = self.scroll_knowledge.setdefault(self.pending_scroll_label, {"effects": [], "count": 0})
+        effects = label_entry.setdefault("effects", [])
+        if msg not in effects:
+            effects.append(msg)
+            self.knowledge_dirty = True
+        label_entry["count"] = int(label_entry.get("count", 0)) + 1
+        self.knowledge_dirty = True
+        self.pending_scroll_label = None
+
+    def _learn_item_token(self, item_name):
+        # Learn noun-like tokens (e.g., scroll, potion) to generalize future filtering.
+        stop = {"set", "pair", "of", "the", "a", "an", "labeled"}
+        tokens = [t for t in re.findall(r"[a-z]+", item_name.lower()) if t not in stop]
+        for t in tokens:
+            if len(t) >= 4:
+                self.learned_non_wieldable_tokens.add(t)
+
+    def load_knowledge(self, file_path):
+        try:
+            with open(file_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            names = data.get("non_wieldable_names", [])
+            tokens = data.get("non_wieldable_tokens", [])
+            monsters = data.get("monster_knowledge", {})
+            scrolls = data.get("scroll_knowledge", {})
+            self.learned_non_wieldable_names.update(n.lower() for n in names if isinstance(n, str))
+            self.learned_non_wieldable_tokens.update(t.lower() for t in tokens if isinstance(t, str))
+            if isinstance(monsters, dict):
+                self.monster_knowledge = monsters
+            if isinstance(scrolls, dict):
+                self.scroll_knowledge = scrolls
+            self.knowledge_dirty = False
+            return True
+        except FileNotFoundError:
+            return False
+        except Exception:
+            return False
+
+    def save_knowledge(self, file_path):
+        data = {
+            "non_wieldable_names": sorted(self.learned_non_wieldable_names),
+            "non_wieldable_tokens": sorted(self.learned_non_wieldable_tokens),
+            "monster_knowledge": self.monster_knowledge,
+            "scroll_knowledge": self.scroll_knowledge,
+        }
+        with open(file_path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=2, sort_keys=True)
+            f.write("\n")
+        self.knowledge_dirty = False

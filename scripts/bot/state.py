@@ -33,6 +33,10 @@ class GameState:
     # Visible items: list of (row, col, char)
     items: list = field(default_factory=list)
 
+    # Parsed right-panel lists: (slot_letter, display_name)
+    inventory: list = field(default_factory=list)
+    equipment: list = field(default_factory=list)
+
     # Last message line from the message region (top of screen)
     last_message: str = ""
 

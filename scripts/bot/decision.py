@@ -152,28 +152,14 @@ class DecisionEngine:
             if flee:
                 return self._record_decision(flee, f"low_hp_flee_from_{adjacent}")
 
-        # 2) Immediate combat: bump-attack adjacent monster.
+        # Precompute adjacent threat for equip/combat ordering.
         adjacent = None
         if self._monster_signal_reliable(state):
             adjacent = self._adjacent_monster(pos, state.monsters)
-        if adjacent is not None:
-            if self._should_flee_known_threat(state):
-                flee = pf.key_away_from(pos, adjacent, state.map)
-                if flee:
-                    return self._record_decision(
-                        flee,
-                        f"flee_known_threat_{self.recent_attacker_name}",
-                    )
-            dr = adjacent[0] - pos[0]
-            dc = adjacent[1] - pos[1]
-            action = pf.DIR_TO_KEY.get((dr, dc), ".")
-            return self._record_decision(
-                action,
-                self._goal_thought(state, "adjacent_attack", adjacent),
-            )
 
-        # 2b) Equip carried gear proactively (weapons, armor, torch/light).
-        if self.wield_cooldown == 0:
+        # 2) Equip carried gear proactively (weapons, armor, torch/light).
+        # Higher priority now: try equipping before normal combat if not in immediate danger.
+        if self.wield_cooldown == 0 and (adjacent is None or state.hp_pct >= 0.70):
             equip_choice = self._next_equip_candidate(state.inventory, state.equipment)
             if equip_choice is not None:
                 slot, name, _score = equip_choice
@@ -182,6 +168,26 @@ class DecisionEngine:
                 self.wield_cooldown = 20
                 self.equip_attempt_counts[name] = self.equip_attempt_counts.get(name, 0) + 1
                 return self._record_decision("w", f"auto_equip_slot_{slot}")
+
+        # 3) Immediate combat: bump-attack adjacent monster.
+        if adjacent is not None:
+            threat_name = self.recent_attacker_name
+            danger = self._monster_danger_score(threat_name) if threat_name else 0.0
+            confidence = self._monster_confidence(threat_name) if threat_name else 0.0
+            if self._should_flee_known_threat(state, danger, confidence):
+                flee = pf.key_away_from(pos, adjacent, state.map)
+                if flee:
+                    return self._record_decision(
+                        flee,
+                        f"flee_known_threat_{threat_name}_d{danger:.2f}_c{confidence:.2f}",
+                    )
+            dr = adjacent[0] - pos[0]
+            dc = adjacent[1] - pos[1]
+            action = pf.DIR_TO_KEY.get((dr, dc), ".")
+            return self._record_decision(
+                action,
+                f"{self._goal_thought(state, 'adjacent_attack', adjacent)}_d{danger:.2f}_c{confidence:.2f}",
+            )
 
         # Break tight patrol cycles (3-4 tile loops) before normal exploration.
         if self._in_patrol_cycle() and self.cycle_break_cooldown == 0:
@@ -739,13 +745,24 @@ class DecisionEngine:
         breath_bonus = 1.0 if attacks.get("breathes", 0) else 0.0
         return (avg_dmg * 1.4) + (max_hit * 0.6) + (hit_pressure * 2.0) + breath_bonus
 
-    def _should_flee_known_threat(self, state):
+    def _monster_confidence(self, monster_name):
+        if not monster_name:
+            return 0.0
+        entry = self.monster_knowledge.get(monster_name.lower(), {})
+        samples = float(entry.get("damage_instances", 0)) + float(entry.get("hits_taken", 0))
+        # Saturates toward 1.0 with more observations.
+        return min(1.0, samples / 6.0)
+
+    def _should_flee_known_threat(self, state, danger, confidence):
         if state.hp_pct > 0.65 or not self.recent_attacker_name:
             return False
-        danger = self._monster_danger_score(self.recent_attacker_name)
-        if state.hp_pct < 0.4 and danger >= 1.0:
+
+        # Conservative with low confidence, more decisive as confidence rises.
+        if state.hp_pct < 0.35 and danger >= 0.8:
             return True
-        if state.hp_pct < 0.55 and danger >= 2.0:
+        if confidence >= 0.5 and state.hp_pct < 0.55 and danger >= 1.6:
+            return True
+        if confidence >= 0.8 and state.hp_pct < 0.65 and danger >= 2.4:
             return True
         return False
 

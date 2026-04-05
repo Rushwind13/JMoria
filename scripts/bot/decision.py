@@ -62,6 +62,8 @@ class DecisionEngine:
         self.last_player_hp = None
         self.recent_attacker_name = None
         self.last_thought = "idle"
+        self.blocked_dirs_by_world = {}
+        self.current_motion_pos = None
 
     def decide(self, state):
         if not state.player_pos:
@@ -78,6 +80,7 @@ class DecisionEngine:
 
         pos = state.player_pos
         motion_pos = state.player_world_pos if state.player_world_pos is not None else pos
+        self.current_motion_pos = motion_pos
         self.visited.add((state.dungeon_depth, pos[0], pos[1]))
 
         hp_loss = 0
@@ -170,6 +173,8 @@ class DecisionEngine:
 
         # If we bumped into a wall, pivot immediately instead of repeating the same move.
         if "bumped into a wall" in msg_lower:
+            if self.last_action in "hjklyubn":
+                self._mark_blocked_dir(self.last_action)
             self.wall_bump_chain += 1
             if self.wall_bump_chain >= 6:
                 self.wall_bump_chain = 0
@@ -332,6 +337,13 @@ class DecisionEngine:
             return None
         if key not in "hjklyubn":
             return key
+
+        if self._is_blocked_dir(key):
+            for alt in "hjklyubn":
+                if alt != key and not self._is_blocked_dir(alt):
+                    key = alt
+                    break
+
         if not self.action_history:
             return key
 
@@ -339,9 +351,21 @@ class DecisionEngine:
         prev = self.action_history[-1]
         if self.no_progress_turns < 8 and self._is_opposite(prev, key):
             for alt in "hjklyubn":
-                if alt != key and not self._is_opposite(prev, alt):
+                if alt != key and not self._is_opposite(prev, alt) and not self._is_blocked_dir(alt):
                     return alt
         return key
+
+    def _mark_blocked_dir(self, key):
+        if self.current_motion_pos is None or key not in "hjklyubn":
+            return
+        entry = self.blocked_dirs_by_world.setdefault(self.current_motion_pos, set())
+        entry.add(key)
+
+    def _is_blocked_dir(self, key):
+        if self.current_motion_pos is None or key not in "hjklyubn":
+            return False
+        entry = self.blocked_dirs_by_world.get(self.current_motion_pos)
+        return bool(entry and key in entry)
 
     def _update_progress(self, state):
         world = state.player_world_pos

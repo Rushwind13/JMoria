@@ -15,6 +15,7 @@ Stats sidebar text labels (from Player::DisplayStats):
 
 import re
 import subprocess
+from pathlib import Path
 
 from .state import GameState
 
@@ -30,12 +31,33 @@ STATS_WIDTH = 25
 INV_WIDTH = 25
 INV_AUTO_WIDTH = 100
 
-# Monster chars: MonIDs from Monster.cpp
-# "abcddefghhikllmnoprsuwxyzABCDFFFGGHIJKLOPRSTUVWWXY&.,$t"
-# We treat any letter (a-z, A-Z) in the dungeon region as a monster.
-# Items are non-letter, non-space, non-'@', non-'#', non-'.', non-'+',
-# non-"'", non-'<', non-'>', non-':' symbols.
-_ITEM_CHARS = set(r'|)[](]\"=~{}{}&?!-_$~/\\')
+# Fallback glyph sets, used if canonical source parsing fails.
+_FALLBACK_MONSTER_CHARS = set("abcddefghhikllmnoprsuwxyzABCDFFFGGHIJKLOPRSTUVWWXY&.,$t")
+_FALLBACK_ITEM_CHARS = set(r'|)[](]]"=~{}{}&?!-_?$~//\\/|/|]!')
+
+
+def _load_id_chars(cpp_file: str, symbol: str, fallback: set[str]) -> set[str]:
+    """Load canonical glyph mappings from C++ arrays (e.g., MonIDs/ItemIDs)."""
+    try:
+        root = Path(__file__).resolve().parents[2]
+        text = (root / cpp_file).read_text(encoding="utf-8")
+        pattern = rf'unsigned\s+char\s+{symbol}\[[^\]]+\]\s*=\s*"((?:[^"\\]|\\.)*)";'
+        m = re.search(pattern, text)
+        if not m:
+            return fallback
+        raw = m.group(1)
+        decoded = bytes(raw, "utf-8").decode("unicode_escape")
+        return set(decoded) if decoded else fallback
+    except Exception:
+        return fallback
+
+
+_MONSTER_CHARS = _load_id_chars("src/Monster.cpp", "MonIDs", _FALLBACK_MONSTER_CHARS)
+_ITEM_CHARS = _load_id_chars("src/Item.cpp", "ItemIDs", _FALLBACK_ITEM_CHARS)
+
+# In ASCII mode, some monster IDs overlap terrain glyphs (e.g., '.', ',').
+# Keep only unambiguous symbols for tactical decisions.
+_MONSTER_CHARS_DISAMBIGUATED = {ch for ch in _MONSTER_CHARS if ch.isalpha() or ch == "&"}
 
 
 def _get_lines() -> list[str]:
@@ -117,7 +139,7 @@ def _parse_dungeon(lines: list[str]) -> tuple:
         for col_idx, ch in enumerate(row):
             if ch == "@":
                 player_pos = (row_idx, col_idx)
-            elif ch.isalpha():
+            elif ch in _MONSTER_CHARS_DISAMBIGUATED:
                 monsters.append((row_idx, col_idx, ch))
             elif ch in _ITEM_CHARS:
                 items.append((row_idx, col_idx, ch))

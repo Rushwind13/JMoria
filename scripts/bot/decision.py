@@ -4,6 +4,8 @@ from collections import deque
 
 from . import pathfinding as pf
 
+KEY_TO_DIR = {v: k for k, v in pf.DIR_TO_KEY.items()}
+
 
 class DecisionEngine:
     def __init__(self):
@@ -19,10 +21,15 @@ class DecisionEngine:
         self.last_map_sig = None
         self.no_progress_turns = 0
         self.escape_idx = 0
+        self.world_history = deque(maxlen=16)
+        self.cycle_break_cooldown = 0
 
     def decide(self, state):
         if not state.player_pos:
             return "."
+
+        if self.cycle_break_cooldown > 0:
+            self.cycle_break_cooldown -= 1
 
         # If we queued a multi-key action (e.g., open + direction), send it first.
         if self.pending_keys:
@@ -51,13 +58,15 @@ class DecisionEngine:
 
         # If we bumped into a wall, pivot immediately instead of repeating the same move.
         if "bumped into a wall" in state.last_message.lower():
-            pivot = self._pivot_from(self.last_action)
+            pivot = self._pivot_from_wall(state, self.last_action)
             if pivot:
                 return self._record_action(pivot)
 
         # 1) Survival first: rest when low HP and no adjacent threat.
         if state.player_max_hp > 0 and state.hp_pct < 0.30:
-            adjacent = self._adjacent_monster(pos, state.monsters)
+            adjacent = None
+            if self._monster_signal_reliable(state):
+                adjacent = self._adjacent_monster(pos, state.monsters)
             if adjacent is None:
                 return self._record_action("R")
             flee = pf.key_away_from(pos, adjacent, state.map)
@@ -65,12 +74,21 @@ class DecisionEngine:
                 return self._record_action(flee)
 
         # 2) Immediate combat: bump-attack adjacent monster.
-        adjacent = self._adjacent_monster(pos, state.monsters)
+        adjacent = None
+        if self._monster_signal_reliable(state):
+            adjacent = self._adjacent_monster(pos, state.monsters)
         if adjacent is not None:
             dr = adjacent[0] - pos[0]
             dc = adjacent[1] - pos[1]
             action = pf.DIR_TO_KEY.get((dr, dc), ".")
             return self._record_action(action)
+
+        # Break tight patrol cycles (3-4 tile loops) before normal exploration.
+        if self._in_patrol_cycle() and self.cycle_break_cooldown == 0:
+            self.cycle_break_cooldown = 6
+            escape = self._escape_key()
+            if escape:
+                return self._record_action(escape)
 
         # 3) Pick up visible nearby items.
         item_goal = pf.find_nearest_target(
@@ -154,6 +172,7 @@ class DecisionEngine:
     def _update_progress(self, state):
         world = state.player_world_pos
         if world is not None:
+            self.world_history.append(world)
             progressed = (world != self.last_world_pos)
             self.last_world_pos = world
         else:
@@ -180,6 +199,23 @@ class DecisionEngine:
         self.escape_idx += 1
         return self._sanitize_move(key)
 
+    def _in_patrol_cycle(self):
+        # Detect repeated local loops in world position history.
+        if len(self.world_history) >= 8:
+            tail = list(self.world_history)[-8:]
+            if len(set(tail)) <= 4 and tail[-1] in tail[:-1]:
+                return True
+
+        # Detect short repeated action motifs (e.g., l-j-y cycling).
+        if len(self.action_history) >= 8:
+            tail = list(self.action_history)[-8:]
+            a = tail[:4]
+            b = tail[4:]
+            if a == b and all(k in "hjklyubn" for k in tail):
+                return True
+
+        return False
+
     def _pivot_from(self, last_move):
         """Choose a deterministic alternate move when a wall collision occurs."""
         if last_move not in "hjklyubn":
@@ -198,6 +234,37 @@ class DecisionEngine:
             if cand != last_move and not self._is_opposite(last_move, cand):
                 return self._sanitize_move(cand)
         return self._sanitize_move("j")
+
+    def _pivot_from_wall(self, state, last_move):
+        """Pick a wall-escape pivot that is walkable in the current local map."""
+        pos = state.player_pos
+        if not pos or not state.map:
+            return self._pivot_from(last_move)
+
+        if last_move not in "hjklyubn":
+            order = "jkhlyubn"
+        else:
+            # Start with deterministic pivots near the prior heading.
+            order = self._pivot_from(last_move) + "hjklyubn"
+
+        rows = len(state.map)
+        cols = len(state.map[0]) if rows else 0
+        pr, pc = pos
+
+        for cand in order:
+            if cand not in KEY_TO_DIR:
+                continue
+            dr, dc = KEY_TO_DIR[cand]
+            nr, nc = pr + dr, pc + dc
+            if nr < 0 or nc < 0 or nr >= rows or nc >= cols:
+                continue
+            if not pf.is_walkable(state.map[nr][nc]):
+                continue
+            if self.action_history and self._is_opposite(self.action_history[-1], cand):
+                continue
+            return self._sanitize_move(cand)
+
+        return self._pivot_from(last_move)
 
     @staticmethod
     def _is_opposite(a, b):
@@ -292,6 +359,12 @@ class DecisionEngine:
             if abs(mr - pr) <= 1 and abs(mc - pc) <= 1 and (mr, mc) != (pr, pc):
                 return (mr, mc)
         return None
+
+    @staticmethod
+    def _monster_signal_reliable(state):
+        # Screen parsing can overcount monster-like glyphs in some views.
+        # Treat very large counts as noisy and avoid tactical combat decisions from them.
+        return len(state.monsters) <= 12
 
     @staticmethod
     def _item_chars():

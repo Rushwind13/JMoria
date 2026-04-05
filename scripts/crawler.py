@@ -108,6 +108,7 @@ def run_startup() -> bool:
 def run_loop(verbose: bool = False) -> None:
     depth = 1
     prev_msg = ""
+    msg_age_turns = 0
     turn = 0
     engine = DecisionEngine()
     lost_player_turns = 0
@@ -119,6 +120,11 @@ def run_loop(verbose: bool = False) -> None:
 
         # Track dungeon depth from messages
         msg = state.last_message
+        if msg == prev_msg:
+            msg_age_turns += 1
+        else:
+            msg_age_turns = 1
+
         if msg != prev_msg:
             if "down staircase" in msg.lower() or "maze of down" in msg.lower():
                 depth += 1
@@ -159,11 +165,15 @@ def run_loop(verbose: bool = False) -> None:
         action = engine.decide(state)
 
         if verbose:
+            msg_display = msg
+            if msg_age_turns > 1:
+                msg_display = f"{msg} <same for {msg_age_turns} turns>"
+            thought = engine.debug_thought()
             log(
                 f"[turn {turn:5d}] HP={state.player_hp}/{state.player_max_hp} "
-                f"depth={depth} pos={state.player_pos} wpos={state.player_world_pos} "
+                f"depth={depth} wpos={state.player_world_pos} "
                 f"monsters={len(state.monsters)} items={len(state.items)} "
-                f"msg={msg!r:40s} -> {action!r}"
+                f"think={thought!r} msg={msg_display!r:40s} -> {action!r}"
             )
 
         cmd.send(action)

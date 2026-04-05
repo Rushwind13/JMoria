@@ -23,10 +23,11 @@ class DecisionEngine:
         self.escape_idx = 0
         self.world_history = deque(maxlen=16)
         self.cycle_break_cooldown = 0
+        self.last_thought = "idle"
 
     def decide(self, state):
         if not state.player_pos:
-            return "."
+            return self._record_decision(".", "no_player_visible")
 
         if self.cycle_break_cooldown > 0:
             self.cycle_break_cooldown -= 1
@@ -34,33 +35,33 @@ class DecisionEngine:
         # If we queued a multi-key action (e.g., open + direction), send it first.
         if self.pending_keys:
             action = self.pending_keys.pop(0)
-            self.last_action = action
-            return action
+            return self._record_decision(action, "pending_open_direction")
 
         pos = state.player_pos
+        motion_pos = state.player_world_pos if state.player_world_pos is not None else pos
         self.visited.add((state.dungeon_depth, pos[0], pos[1]))
 
         self._update_progress(state)
 
         # Detect stuck behavior to break local loops.
-        if self.last_pos == pos:
+        if self.last_pos == motion_pos:
             self.stuck_turns += 1
         else:
             self.stuck_turns = 0
-        self.last_pos = pos
+        self.last_pos = motion_pos
 
         # If we just bumped into a door, issue open-command sequence.
         # 'o' enters open mode and next key is the direction.
         if "bumped into a door" in state.last_message.lower():
             direction = self.last_action if self.last_action in "hjklyubn" else "h"
             self.pending_keys = [direction]
-            return self._record_action("o")
+            return self._record_decision("o", f"open_door_then_{direction}")
 
         # If we bumped into a wall, pivot immediately instead of repeating the same move.
         if "bumped into a wall" in state.last_message.lower():
             pivot = self._pivot_from_wall(state, self.last_action)
             if pivot:
-                return self._record_action(pivot)
+                return self._record_decision(pivot, "wall_bump_pivot")
 
         # 1) Survival first: rest when low HP and no adjacent threat.
         if state.player_max_hp > 0 and state.hp_pct < 0.30:
@@ -68,10 +69,10 @@ class DecisionEngine:
             if self._monster_signal_reliable(state):
                 adjacent = self._adjacent_monster(pos, state.monsters)
             if adjacent is None:
-                return self._record_action("R")
+                return self._record_decision("R", "low_hp_rest_no_adjacent_threat")
             flee = pf.key_away_from(pos, adjacent, state.map)
             if flee:
-                return self._record_action(flee)
+                return self._record_decision(flee, f"low_hp_flee_from_{adjacent}")
 
         # 2) Immediate combat: bump-attack adjacent monster.
         adjacent = None
@@ -81,14 +82,17 @@ class DecisionEngine:
             dr = adjacent[0] - pos[0]
             dc = adjacent[1] - pos[1]
             action = pf.DIR_TO_KEY.get((dr, dc), ".")
-            return self._record_action(action)
+            return self._record_decision(
+                action,
+                self._goal_thought(state, "adjacent_attack", adjacent),
+            )
 
         # Break tight patrol cycles (3-4 tile loops) before normal exploration.
         if self._in_patrol_cycle() and self.cycle_break_cooldown == 0:
             self.cycle_break_cooldown = 6
             escape = self._escape_key()
             if escape:
-                return self._record_action(escape)
+                return self._record_decision(escape, "cycle_detected_escape")
 
         # 3) Pick up visible nearby items.
         item_goal = pf.find_nearest_target(
@@ -99,7 +103,7 @@ class DecisionEngine:
         if item_goal:
             k = self._key_toward(state.map, pos, item_goal)
             if k:
-                return self._record_action(k)
+                return self._record_decision(k, self._goal_thought(state, "path_to_item", item_goal))
 
         # 4) Descend if downstairs visible.
         stair_goal = pf.find_nearest_target(
@@ -110,7 +114,7 @@ class DecisionEngine:
         if stair_goal:
             k = self._key_toward(state.map, pos, stair_goal)
             if k:
-                return self._record_action(k)
+                return self._record_decision(k, self._goal_thought(state, "path_to_stairs", stair_goal))
 
         # 5) Explore frontier: nearest unvisited walkable tile in viewport.
         frontier = pf.find_nearest_target(
@@ -122,26 +126,26 @@ class DecisionEngine:
         if frontier:
             k = self._key_toward(state.map, pos, frontier)
             if k:
-                return self._record_action(k)
+                return self._record_decision(k, self._goal_thought(state, "path_to_frontier", frontier))
 
         # 6) Spiral-search fallback to find a farther reachable unvisited tile.
         spiral_key = self._spiral_search_key(state)
         if spiral_key:
-            return self._record_action(spiral_key)
+            return self._record_decision(spiral_key, "spiral_search")
 
         # 7) If no visible progress for a while, force an escape pattern.
         if self.no_progress_turns >= 10:
             escape = self._escape_key()
             if escape:
-                return self._record_action(escape)
+                return self._record_decision(escape, "no_progress_escape")
 
         # 8) If still stuck, jiggle with directional fallback.
         if self.stuck_turns >= 4:
             key = "hjklyubn"[self.jiggle_idx % 8]
             self.jiggle_idx += 1
-            return self._record_action(key)
+            return self._record_decision(key, "stuck_jiggle")
 
-        return self._record_action(".")
+        return self._record_decision(".", "idle_wait")
 
     def _key_toward(self, grid, start, goal):
         path = pf.path_to(grid, start, goal)
@@ -152,6 +156,30 @@ class DecisionEngine:
         self.last_action = action
         self.action_history.append(action)
         return action
+
+    def _record_decision(self, action, thought):
+        self.last_thought = thought
+        return self._record_action(action)
+
+    def debug_thought(self):
+        return (
+            f"{self.last_thought} "
+            f"np={self.no_progress_turns} stuck={self.stuck_turns} "
+            f"cooldown={self.cycle_break_cooldown}"
+        )
+
+    @staticmethod
+    def _goal_thought(state, prefix, goal_local):
+        # Keep telemetry high-level: target is on-screen, optionally with world estimate.
+        thought = f"{prefix}_on_screen"
+        if state.player_world_pos is None or state.player_pos is None:
+            return thought
+
+        pr, pc = state.player_pos
+        gr, gc = goal_local
+        wx, wy = state.player_world_pos
+        world_goal = (wx + (gc - pc), wy + (gr - pr))
+        return f"{prefix}_world~{world_goal}"
 
     def _sanitize_move(self, key):
         if key is None:

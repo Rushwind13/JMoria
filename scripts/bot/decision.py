@@ -233,6 +233,19 @@ class DecisionEngine:
             if escape:
                 return self._record_decision(escape, "cycle_detected_escape")
 
+        # Lost-in-room bias: seek doors/hallways before looting when progress stalls in open space.
+        if self._should_prioritize_door_hunt(state, pos):
+            door_dir = self._adjacent_door_direction(state.map, pos)
+            if door_dir:
+                self.pending_keys = [door_dir]
+                return self._record_decision("o", f"lost_room_open_adjacent_door_{door_dir}")
+
+            door_goal = self._nearest_door_approach(state.map, pos)
+            if door_goal:
+                k = self._key_toward(state.map, pos, door_goal)
+                if k:
+                    return self._record_decision(k, self._goal_thought(state, "lost_room_path_to_door", door_goal))
+
         # 3) Pick up visible nearby items.
         item_goal = pf.find_nearest_target(
             state.map,
@@ -475,6 +488,32 @@ class DecisionEngine:
             if grid[nr][nc] == "+":
                 return key
         return None
+
+    def _should_prioritize_door_hunt(self, state, pos):
+        # Trigger when movement progress is poor in open room-like spaces.
+        if not state.map or pos is None:
+            return False
+        if self.no_progress_turns < 2 and self.stuck_turns < 2 and self.wall_bump_chain < 2:
+            return False
+        return self._is_open_roomish(state.map, pos)
+
+    @staticmethod
+    def _is_open_roomish(grid, pos):
+        rows = len(grid)
+        cols = len(grid[0]) if rows else 0
+        pr, pc = pos
+        walkable_neighbors = 0
+        for dr in (-1, 0, 1):
+            for dc in (-1, 0, 1):
+                if dr == 0 and dc == 0:
+                    continue
+                nr, nc = pr + dr, pc + dc
+                if nr < 0 or nc < 0 or nr >= rows or nc >= cols:
+                    continue
+                if pf.is_walkable(grid[nr][nc]):
+                    walkable_neighbors += 1
+        # Open-room proxy: many nearby walkable tiles.
+        return walkable_neighbors >= 6
 
     def _nearest_door_approach(self, grid, pos):
         return pf.find_nearest_target(

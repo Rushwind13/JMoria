@@ -178,7 +178,49 @@ A Python script that:
 
 ---
 
-## Current PR Focus (Active)
+## Current PR Focus (Active) — Milestone 1: Survive the Floor
+
+### Completed: Wall-Follow Exploration Rewrite (fc2b245)
+- [x] Remove all circular movement: BFS frontier, right-hand cardinal wall-follow, patrol cycle / oscillation detection, pivot/escape mechanisms, tile scoring, 15+ state variables
+- [x] New two-phase exploration: head east → clockwise left-hand-rule wall-follow (8 directions)
+- [x] Wall-follow opens doors on wall side, searches on lap completion
+- [x] Bot reliably explores dungeon perimeter/hallways, fights, picks up items, equips gear
+
+### Task 1: Deep Clean of Legacy Decision Code
+- [ ] Audit `decision.py` for dead code left over from old pathfinding (removed methods still referenced, unused state vars, orphan helpers)
+- [ ] Remove `_is_blocked_dir`, `_blocked_dirs_by_world`, `wall_bump_chain`, `follow_open_dir_turns`, `avoid_key`/`avoid_key_turns`, `cycle_escalation` if no longer used by wall-follow
+- [ ] Flatten decide() — remove cooldown tick logic for mechanisms that no longer exist
+- [ ] Verify all remaining helper methods are actually called; delete the rest
+
+### Task 2: Room-Loop-Then-Exit Strategy
+- [ ] When wall-follow enters a room (detected by >2 walkable neighbors on multiple sides), complete one full perimeter loop to see all walls
+- [ ] Track room entry point (first doorway/hallway tile entered)
+- [ ] On lap completion (return to entry point), take the first *unvisited* hallway/door exit
+- [ ] If all exits visited, continue wall-follow through the most recently opened exit
+
+### Task 3: Room Interior Fill ("Paint Stripes")
+- [ ] After room perimeter is mapped (Task 2 loop), switch to interior fill mode
+- [ ] Walk 3-row-wide horizontal stripes across the room (east→west, step 3 south, west→east, etc.)
+- [ ] Stripe walking reveals items, stairs, and monsters in the room center
+- [ ] Return to wall-follow after fill is complete
+- [ ] Track fill status per room so revisits skip already-filled rooms
+
+### Task 4: Restore Core Survival Behaviors
+- [ ] Pick up loot: walk to visible items on or near the wall-follow path
+- [ ] Wield/equip: auto-equip best weapon, armor, and light source from inventory (already partially working)
+- [ ] Avoid monsters: flee from unknown uppercase-glyph monsters when HP < 80%; engage known-weak monsters
+- [ ] Find staircases: when `>` is visible, pathfind to it after current room is explored
+- [ ] Descend: step on `>` and press `>` to go down when ready (HP > 70%, gear equipped)
+
+### Task 5: Level 2 Readiness (100' depth)
+- [ ] Track XP and player level from stats panel
+- [ ] Don't descend until player has reached character level 2 (enough XP from combat on level 1)
+- [ ] Reset wall-follow state on depth change (explore_phase → head_east, clear lap tracking)
+- [ ] Verify bot survives depth transition and resumes wall-follow on level 2
+
+---
+
+### Earlier PR Milestones (Completed)
 
 - [x] Verbose logs now prioritize bot reasoning (`think=`) over raw message text
 - [x] Verbose logs no longer show viewport-local player position

@@ -12,11 +12,11 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 **1. [#194] Refactor: Remove dead or redundant code in bot Python scripts (DONE)**
 - Deep clean completed: removed 311 lines of dead code from decision.py.
 
-**2. [#191] Bot gets stuck in CCW loop and can't traverse doors**
-- Critical bug: Bot loops in rooms, can't progress if turned around. Blocks milestone completion.
+**2. [#191] Bot gets stuck in CCW loop and can't traverse doors (DONE)**
+- Fixed: door priority in wall-follow scan + door_momentum flag prevents bounce-back after opening doors + lap-exit pathfinding to nearest door on lap completion.
 
-**3. [#192] AI bot should prioritize doors as exits to escape rooms**
-- Bot must treat doors as valid exits in all traversal modes to avoid getting stuck.
+**3. [#192] AI bot should prioritize doors as exits to escape rooms (DONE)**
+- Addressed by #191 fix: doors are now prioritized over normal tiles in wall-follow scan, and lap-exit actively pathfinds to nearest visible door.
 
 **4. [#193] AI bot should avoid re-entering doorways and tiles to ensure full dungeon exploration**
 - Prevents bot from looping and missing unexplored areas; ensures full coverage.
@@ -43,7 +43,7 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 ### Notes
 - This list is up to date with current code and open issues as of 2026-04-06.
 - See commit c2bcdc4 for the fix to #189.
-- #194 is the highest priority for immediate work.
+- #191 and #192 done in commit 941ec0b. Next priority: #193.
 
 
 **Foundation:** The ASCII renderer (`src/RenderASCII.cpp`, merged in PR#155) renders the game as plain text via ncurses. Running the game inside a `tmux` session lets an external script read screen state with `tmux capture-pane` and send commands with `tmux send-keys`. No changes to the game executable are required.

@@ -24,8 +24,8 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 **5. [#195] Bot should explore room interiors and return to wall-following (DONE)**
 - Interior item seeking: pathfinds to visible items not adjacent to walls, collects them, returns to wall. Wield prompt detection also fixed.
 
-**6. [#190] Combat and wield actions corrupt tmux/curses screen**
-- Screen corruption during combat/wielding breaks UI and playability, especially under tmux.
+**6. [#190] Combat and wield actions corrupt tmux/curses screen (DONE)**
+- Fixed: ASCII renderer DrawTextBoundingBox() now fills interiors with spaces so popup overlays occlude underlying content.
 
 **7. [#188] Bot parser likely overcounts visible monsters/items in ASCII viewport**
 - Bot logic is noisy due to incorrect entity counts; affects threat and decision heuristics.
@@ -46,7 +46,8 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 - #191 and #192 done in commit 941ec0b (closed).
 - #193 done in commit e84bf5d (closed). #194 closed.
 - #195 done in commit ce3d4c5 (closed).
-- Next priority: #190 (combat/wield screen corruption).
+- #190 done in commit 140d0c6 (closed).
+- Next priority: #188 (bot parser overcounts visible monsters/items).
 
 
 **Foundation:** The ASCII renderer (`src/RenderASCII.cpp`, merged in PR#155) renders the game as plain text via ncurses. Running the game inside a `tmux` session lets an external script read screen state with `tmux capture-pane` and send commands with `tmux send-keys`. No changes to the game executable are required.

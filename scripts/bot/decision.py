@@ -11,7 +11,7 @@ KEY_TO_DIR = {v: k for k, v in pf.DIR_TO_KEY.items()}
 
 class DecisionEngine:
     def __init__(self):
-        self.visited = set()
+        self.visited_world = set()  # (depth, world_row, world_col)
         self.last_pos = None
         self.stuck_turns = 0
         self.last_action = "."
@@ -80,6 +80,7 @@ class DecisionEngine:
         self.wall_follow_started = False         # True after first step away from start
         self.wall_follow_lap_count = 0           # laps completed at current start
         self.door_momentum = False                   # True after stepping onto a door tile
+        self._current_depth = 1
         self.failed_door_dirs_by_world = {}
         self.mode = "seek"
 
@@ -101,7 +102,9 @@ class DecisionEngine:
         self.current_motion_pos = motion_pos
         self.current_map = state.map
         self.current_pos = pos
-        self.visited.add((state.dungeon_depth, pos[0], pos[1]))
+        self._current_depth = state.dungeon_depth
+        if motion_pos is not None:
+            self.visited_world.add((state.dungeon_depth, motion_pos[0], motion_pos[1]))
 
         hp_loss = 0
         if self.last_player_hp is not None:
@@ -390,7 +393,13 @@ class DecisionEngine:
             self.wall_follow_lap_count += 1
             self.wall_follow_started = False
 
-            # After any lap, actively seek a door exit to escape the loop.
+            if self.wall_follow_lap_count <= 1:
+                # Lap 0 just finished — room perimeter mapped.
+                # Start lap 1 which will use door-seeking in _wall_follow_cw.
+                self.wall_follow_start_wpos = motion_pos
+                return self._record_decision(".", "wall_follow_lap_mapped")
+
+            # Lap 1+ finished — actively seek an unvisited door to exit.
             exit_key = self._find_door_exit_step(state.map, pos)
             if exit_key:
                 target = self._step_pos(pos, exit_key)
@@ -400,13 +409,12 @@ class DecisionEngine:
                     self.door_momentum = True
                     return self._record_decision("o", f"lap_exit_open_{exit_key}")
                 self.wall_follow_heading = exit_key
-                # Reset start to current pos so next lap tracks from here.
                 self.wall_follow_start_wpos = motion_pos
                 return self._record_decision(exit_key, f"lap_exit_{exit_key}")
 
             # No visible door — search for secret doors, then keep wall-following.
             self.wall_follow_start_wpos = motion_pos
-            return self._record_decision("s", "wall_follow_lap_search")
+            return self._record_decision(".", "wall_follow_lap_search")
 
         step = self._wall_follow_cw(state.map, pos)
         if step:
@@ -535,6 +543,24 @@ class DecisionEngine:
         rows = ["".join(r) for r in state.map]
         return "|".join(rows)
 
+    def _is_visited_local(self, depth, local_pos):
+        """Check if a local (screen) position has been visited, via world coords."""
+        wpos = self._local_to_world_pos(local_pos)
+        if wpos is None:
+            return False  # can't tell — assume unvisited
+        return (depth, wpos[0], wpos[1]) in self.visited_world
+
+    def _local_to_world_pos(self, local_pos):
+        """Convert local screen pos to world pos using current player offsets."""
+        mp = self.current_motion_pos
+        pp = self.current_pos
+        if mp is None or pp is None:
+            return None
+        lr, lc = local_pos
+        pr, pc = pp
+        wr, wc = mp
+        return (wr + (lr - pr), wc + (lc - pc))
+
     # Clockwise direction ordering for 8-way movement.
     _CW = ['k', 'u', 'l', 'n', 'j', 'b', 'h', 'y']
     _CW_IDX = {k: i for i, k in enumerate(_CW)}
@@ -547,14 +573,14 @@ class DecisionEngine:
         Only steps onto tiles adjacent to at least one wall.
         Treats closed doors as valid steps (caller handles opening).
 
-        Door momentum: when standing ON a door tile, continue in heading
-        direction (or closest walkable) to push through the doorway instead
-        of scanning left-first and bouncing back into the room.
+        Door momentum: when active, continue in heading direction to push
+        through a doorway instead of turning back into the previous room.
 
-        Door priority: any adjacent door tile (open or closed) is preferred
-        over a non-door tile, unless the door is directly behind us (likely
-        the one we just came through). This ensures the bot never walks
-        past doors regardless of CW/CCW traversal direction.
+        Lap-aware door seeking:
+        - Lap 0: pure left-hand-rule. Doors treated as normal tiles so the
+          bot completes a full room perimeter scan first.
+        - Lap 1+: prefer unvisited doors over visited ones so the bot exits
+          through unexplored corridors.
         """
         heading = self.wall_follow_heading
         if heading is None or heading not in self._CW_IDX:
@@ -580,7 +606,16 @@ class DecisionEngine:
         # Left-hand rule for clockwise traversal (wall on left):
         # 90° left, 45° left, straight, 45° right, 90° right, 135° right,
         # 135° left, 180° back.
+        #
+        # Lap 0: skip doors entirely so the bot completes a full room
+        #   perimeter before leaving.
+        # Lap 1+: prefer unvisited doors over visited ones so the bot
+        #   exits through unexplored corridors.
+        seek_doors = self.wall_follow_lap_count >= 1
         best_normal = None
+        best_unvisited_door = None
+        best_visited_door = None
+        depth = self._current_depth
         for offset in (-2, -1, 0, 1, 2, 3, -3, 4):
             cand = self._CW[((h_idx + offset) % 8)]
             if not self._can_step_or_door(grid, pos, cand):
@@ -589,13 +624,28 @@ class DecisionEngine:
             if not target or not self._adjacent_to_wall(grid, target):
                 continue
             ch = grid[target[0]][target[1]]
-            # Prioritize door tiles (open or closed) unless directly behind us.
-            if ch in ("'", "+") and cand != back_key:
-                self.wall_follow_heading = cand
-                return cand
+            is_door = ch in ("'", "+")
+            # Lap 0: ignore doors completely.
+            if not seek_doors and is_door:
+                continue
+            if seek_doors and is_door and cand != back_key:
+                if not self._is_visited_local(depth, target):
+                    if best_unvisited_door is None:
+                        best_unvisited_door = cand
+                else:
+                    if best_visited_door is None:
+                        best_visited_door = cand
+                continue
+            # Normal (non-door) tiles: strict left-hand-rule.
             if best_normal is None:
                 best_normal = cand
 
+        # After lap 0: unvisited door > visited door > normal tile.
+        if seek_doors:
+            chosen_door = best_unvisited_door or best_visited_door
+            if chosen_door is not None:
+                self.wall_follow_heading = chosen_door
+                return chosen_door
         if best_normal is not None:
             self.wall_follow_heading = best_normal
             return best_normal
@@ -625,8 +675,12 @@ class DecisionEngine:
         if not doors:
             return None
 
-        # Sort by distance so we try closest doors first.
-        doors.sort(key=lambda d: pf.heuristic(pos, (d[0], d[1])))
+        # Sort: unvisited doors first, then by distance.
+        depth = getattr(self, '_current_depth', 1)
+        doors.sort(key=lambda d: (
+            1 if self._is_visited_local(depth, (d[0], d[1])) else 0,
+            pf.heuristic(pos, (d[0], d[1]))
+        ))
 
         for dr, dc, ch in doors:
             if (dr, dc) == pos:

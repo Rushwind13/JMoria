@@ -53,8 +53,11 @@ def heuristic(a, b):
     return max(abs(a[0] - b[0]), abs(a[1] - b[1]))
 
 
-def path_to(grid, start, goal):
-    """Return path [start..goal] using A*. Empty list if unreachable."""
+def path_to(grid, start, goal, cost_fn=None):
+    """Return path [start..goal] using A*. Empty list if unreachable.
+
+    cost_fn: optional callable(pos) -> extra cost for stepping onto pos.
+    """
     if start == goal:
         return [start]
     if not in_bounds(grid, start) or not in_bounds(grid, goal):
@@ -71,7 +74,8 @@ def path_to(grid, start, goal):
             return _reconstruct_path(came_from, cur)
 
         for nxt in neighbors(grid, cur):
-            tentative = g_score[cur] + 1
+            step_cost = 1 + (cost_fn(nxt) if cost_fn else 0)
+            tentative = g_score[cur] + step_cost
             if tentative < g_score.get(nxt, 1_000_000_000):
                 came_from[nxt] = cur
                 g_score[nxt] = tentative
@@ -99,8 +103,29 @@ def first_step_key(path):
     return DIR_TO_KEY.get((dr, dc))
 
 
-def find_nearest_target(grid, start, predicate):
-    """BFS nearest tile matching predicate(ch, pos)."""
+def find_nearest_target(grid, start, predicate, cost_fn=None):
+    """BFS/Dijkstra nearest tile matching predicate(ch, pos).
+
+    cost_fn: optional callable(pos) -> extra cost for stepping onto pos.
+    When provided, uses Dijkstra instead of BFS to prefer low-cost paths.
+    """
+    if cost_fn:
+        from heapq import heappush, heappop
+        open_heap = [(0, start)]
+        g_score = {start: 0}
+        while open_heap:
+            cost, cur = heappop(open_heap)
+            r, c = cur
+            if predicate(grid[r][c], cur):
+                return cur
+            for nxt in neighbors(grid, cur):
+                step_cost = 1 + cost_fn(nxt)
+                tentative = g_score[cur] + step_cost
+                if tentative < g_score.get(nxt, 1_000_000_000):
+                    g_score[nxt] = tentative
+                    heappush(open_heap, (tentative, nxt))
+        return None
+
     from collections import deque
 
     q = deque([start])

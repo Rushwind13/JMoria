@@ -19,15 +19,11 @@ class DecisionEngine:
         self.pending_keys = []
         self.pending_wield_slot = None
         self.await_wield_prompt_turns = 0
-        self.spiral_radius = 4
         self.action_history = deque(maxlen=12)
         self.last_world_pos = None
         self.last_map_sig = None
         self.no_progress_turns = 0
-        self.escape_idx = 0
         self.world_history = deque(maxlen=16)
-        self.cycle_break_cooldown = 0
-        self.wall_bump_chain = 0
         self.has_wielded_weapon = False
         self.wield_cooldown = 0
         self.equip_attempt_counts = {}
@@ -60,7 +56,6 @@ class DecisionEngine:
             "depth_notes": {},
         }
         self.knowledge_dirty = False
-        self.failed_door_dirs_by_world = {}
         self.last_equip_item_name = None
         self.last_equip_baseline_ac = None
         self.last_equip_baseline_damage = ""
@@ -69,29 +64,30 @@ class DecisionEngine:
         self.last_inventory_entries = set()
         self.last_depth = 1
         self.last_open_dir = None
-        self.follow_open_dir_turns = 0
         self.last_player_hp = None
         self.recent_attacker_name = None
         self.last_thought = "idle"
-        self.blocked_dirs_by_world = {}
         self.current_wielded_weapon = None
         self.weapon_combat_turn = 0
+        self.turns_since_combat_feedback = 99  # high = no recent feedback
+        self.phantom_positions = set()  # world positions of suspected phantoms
         self.current_motion_pos = None
         self.current_map = None
         self.current_pos = None
-        self.failed_item_goals = {}  # world_pos → failure count
-        self.current_item_goal_world = None  # world pos of current item target
-        self.retreat_dir = None
-        self.retreat_turns = 0
-        self.wall_loop_escape_turns = 0
-        self.prev_in_hallway = False
-        self.hallway_entry_world = None
-        self.wall_follow_dir = None
-        self.wall_follow_turns = 0
-        self.cycle_escalation = 0
-        self.mode = "seek"
+        # Wall-follow: head east until wall, then clockwise wall hug.
+        self.explore_phase = "head_east"       # "head_east" or "wall_follow"
+        self.wall_follow_heading = None          # current heading key during wall follow
+        self.wall_follow_start_wpos = None       # world pos where wall follow began
+        self.wall_follow_started = False         # True after first step away from start
+        # Retained for door/lock feedback and helper method compatibility.
+        self.failed_door_dirs_by_world = {}
+        self.blocked_dirs_by_world = {}
+        self.wall_bump_chain = 0
+        self.follow_open_dir_turns = 0
         self.avoid_key = None
         self.avoid_key_turns = 0
+        self.cycle_escalation = 0
+        self.mode = "seek"
 
     def decide(self, state):
         self.mode = "seek"
@@ -99,36 +95,18 @@ class DecisionEngine:
             self.mode = "idle"
             return self._record_decision(".", "no_player_visible")
 
-        if self.cycle_break_cooldown > 0:
-            self.cycle_break_cooldown -= 1
         if self.wield_cooldown > 0:
             self.wield_cooldown -= 1
         if self.use_cooldown > 0:
             self.use_cooldown -= 1
         if self.await_wield_prompt_turns > 0:
             self.await_wield_prompt_turns -= 1
-        if self.follow_open_dir_turns > 0:
-            self.follow_open_dir_turns -= 1
-        if self.wall_loop_escape_turns > 0:
-            self.wall_loop_escape_turns -= 1
-        if self.wall_follow_turns > 0:
-            self.wall_follow_turns -= 1
-        if self.avoid_key_turns > 0:
-            self.avoid_key_turns -= 1
-        else:
-            self.avoid_key = None
 
         pos = state.player_pos
         motion_pos = state.player_world_pos if state.player_world_pos is not None else pos
         self.current_motion_pos = motion_pos
         self.current_map = state.map
         self.current_pos = pos
-        in_hallway_now = self._is_hallway_tile(state.map, pos)
-        if in_hallway_now and not self.prev_in_hallway and motion_pos is not None:
-            self.hallway_entry_world = motion_pos
-        if not in_hallway_now:
-            self.hallway_entry_world = None
-        self.prev_in_hallway = in_hallway_now
         self.visited.add((state.dungeon_depth, pos[0], pos[1]))
 
         hp_loss = 0
@@ -138,6 +116,7 @@ class DecisionEngine:
 
         if state.dungeon_depth != self.last_depth:
             self.equip_attempt_counts.clear()
+            self.phantom_positions.clear()
             self.last_depth = state.dungeon_depth
 
         self._update_progress(state)
@@ -148,13 +127,6 @@ class DecisionEngine:
         else:
             self.stuck_turns = 0
         self.last_pos = motion_pos
-
-        # Detect 2-tile ABAB oscillation and suppress immediate backtrack key.
-        if self._in_two_tile_oscillation() and self.last_action in "hjklyubn":
-            avoid = self._opposite_key(self.last_action)
-            if avoid:
-                self.avoid_key = avoid
-                self.avoid_key_turns = 6
 
         # If we just bumped into a door, issue open-command sequence.
         # 'o' enters open mode and next key is the direction.
@@ -169,7 +141,7 @@ class DecisionEngine:
 
         adjacent = None
         if self._monster_signal_reliable(state):
-            adjacent = self._adjacent_monster(pos, state.monsters)
+            adjacent = self._adjacent_monster_filtered(state, pos, state.monsters)
 
         # If we initiated wield, send the slot only when the game prompts for it.
         if self.pending_wield_slot:
@@ -305,9 +277,8 @@ class DecisionEngine:
             return self._record_decision("o", f"open_door_then_{direction}")
 
         # If we bumped into a wall, mark it, but don't preempt all higher-priority logic.
-        wall_pivot = None
+        # Wall bump: attack adjacent monsters; switch to wall-follow on first wall hit.
         if "bumped into a wall" in msg_lower:
-            # Corner-breaker: if a monster is adjacent, attack through the stall instead of sidestepping.
             if adjacent is not None:
                 self.mode = "combat"
                 dr = adjacent[0] - pos[0]
@@ -315,61 +286,12 @@ class DecisionEngine:
                 action = pf.DIR_TO_KEY.get((dr, dc), ".")
                 if action in "hjklyubn":
                     return self._record_decision(action, "corner_breakout_attack")
-            if self.last_action in "hjklyubn":
-                self._mark_blocked_dir(self.last_action)
-            self.wall_bump_chain += 1
-            # Track failures against the current item goal
-            if self.current_item_goal_world and "path_to_item" in self.last_thought:
-                g = self.current_item_goal_world
-                self.failed_item_goals[g] = self.failed_item_goals.get(g, 0) + 1
-            if self.wall_bump_chain >= 6:
-                self.wall_bump_chain = 0
-                self.cycle_break_cooldown = max(self.cycle_break_cooldown, 6)
-                escape = self._escape_key()
-                if escape:
-                    self.mode = "escape"
-                    return self._record_decision(escape, "wall_bump_chain_escape")
-            wall_pivot = self._pivot_from_wall(state, self.last_action)
-        else:
-            self.wall_bump_chain = 0
-
-        # Hard abort for tiny-area wall loops: force corridor/door escape for several turns.
-        if self._in_tight_wall_loop() and self.wall_loop_escape_turns < 8:
-            self.wall_loop_escape_turns = 8
-
-        if self.wall_loop_escape_turns > 0 and adjacent is None:
-            self.mode = "escape"
-
-            # If we're adjacent to a door right now, open it instead of pathing.
-            door_dir = self._adjacent_door_direction(state.map, pos)
-            if door_dir:
-                self.last_open_dir = door_dir
-                self.follow_open_dir_turns = 0
-                self.pending_keys = [door_dir]
-                return self._record_decision("o", f"wall_loop_open_door_{door_dir}")
-
-            door_goal = self._nearest_door_approach(state.map, pos)
-            if door_goal:
-                k = self._raw_key_toward(state.map, pos, door_goal)
-                if k and k != self.avoid_key:
-                    return self._record_decision(k, self._goal_thought(state, "wall_loop_abort_door", door_goal))
-
-            hallway_goal = self._nearest_hallway_target(state.map, pos)
-            if hallway_goal:
-                k = self._raw_key_toward(state.map, pos, hallway_goal)
-                if k and k != self.avoid_key:
-                    return self._record_decision(k, self._goal_thought(state, "wall_loop_abort_hallway", hallway_goal))
-
-            frontier = pf.find_nearest_target(
-                state.map,
-                pos,
-                lambda ch, p: pf.is_walkable(ch)
-                and (state.dungeon_depth, p[0], p[1]) not in self.visited,
-            )
-            if frontier:
-                k = self._raw_key_toward(state.map, pos, frontier)
-                if k and k != self.avoid_key:
-                    return self._record_decision(k, self._goal_thought(state, "wall_loop_abort_frontier", frontier))
+            if self.explore_phase == "head_east":
+                self.explore_phase = "wall_follow"
+                # Start heading south (clockwise turn from east).
+                self.wall_follow_heading = "j"
+                self.wall_follow_start_wpos = motion_pos
+                self.wall_follow_started = False
 
         # 1) Survival first: rest when HP below 50% and no visible threats.
         if state.player_max_hp > 0 and state.hp_pct < 0.50:
@@ -398,6 +320,13 @@ class DecisionEngine:
         # 3) No background wield-cycling: wield is pickup-driven to preserve movement.
 
         # 4) Immediate combat: bump-attack adjacent monster.
+        # Skip phantom monsters: if stuck attacking same spot with no combat feedback.
+        if adjacent is not None and self.stuck_turns >= 4 and self.turns_since_combat_feedback >= 4:
+            phantom_wp = self._local_to_world(state, adjacent)
+            if phantom_wp:
+                self.phantom_positions.add(phantom_wp)
+            adjacent = None  # treat as phantom, fall through to exploration
+
         if adjacent is not None:
             self.mode = "combat"
             if state.player_hp <= 1:
@@ -443,190 +372,50 @@ class DecisionEngine:
                 f"{self._goal_thought(state, 'adjacent_attack', adjacent)}_d{danger:.2f}_c{confidence:.2f}",
             )
 
-        # Break tight patrol cycles (3-4 tile loops) with persistent wall-following.
-        if self._in_patrol_cycle() and self.cycle_break_cooldown == 0:
-            self.cycle_escalation = min(self.cycle_escalation + 1, 5)
-            duration = 12 + 4 * self.cycle_escalation
-            self.wall_follow_turns = duration
-            self.cycle_break_cooldown = duration
-            self.wall_follow_dir = None  # pick fresh direction
-            self.mode = "escape"
-            follow = self._wall_follow_step(state.map, pos)
-            if follow:
-                return self._record_decision(follow, f"cycle_wall_follow_e{self.cycle_escalation}")
-            escape = self._escape_key()
-            if escape:
-                return self._record_decision(escape, "cycle_detected_escape")
-
         # Post-combat rest: recover to 70% HP before exploring further.
         if state.player_max_hp > 0 and state.hp_pct < 0.70 and self.recent_attacker_name and not state.monsters:
             self.mode = "recover"
             return self._record_decision("R", f"post_combat_rest_hp{state.hp_pct:.0%}")
 
-        # Persistent wall-follow during cycle escape.
-        if self.wall_follow_turns > 0:
-            # Abort if wall-follow is stuck in a tiny loop.
-            if len(self.world_history) >= 8:
-                recent = set(list(self.world_history)[-8:])
-                if len(recent) <= 4:
-                    self.wall_follow_turns = 0
-                    self.wall_follow_dir = None
-                    self.cycle_break_cooldown = max(self.cycle_break_cooldown, 20)
-            if self.wall_follow_turns > 0:
-                follow = self._wall_follow_step(state.map, pos)
-                if follow:
-                    self.mode = "escape"
-                    return self._record_decision(follow, f"extended_wall_follow_{self.wall_follow_turns}")
-            self.wall_follow_turns = 0  # wall-follow blocked, abort
+        # === EXPLORATION: Wall hug ===
+        self.mode = "seek"
 
-        # 3) Clear room items first, then seek doors/hallways.
-        item_goal = pf.find_nearest_target(
-            state.map,
-            pos,
-            lambda ch, p: ch in self._item_chars()
-                and p != pos
-                and not self._is_item_blacklisted(state, p),
-        )
-        if item_goal:
-            self.mode = "seek"
-            self.current_item_goal_world = self._local_to_world(state, item_goal)
-            k = self._key_toward(state.map, pos, item_goal)
-            if k:
-                return self._record_decision(k, self._goal_thought(state, "path_to_item", item_goal))
+        # Phase 1: head east until a wall bump switches us.
+        if self.explore_phase == "head_east":
+            if self._can_step(state.map, pos, "l"):
+                return self._record_decision("l", "head_east")
+            # Can't step east but no bump message yet — wait a tick.
+            return self._record_decision("l", "head_east_push")
 
-        # 4) Lost-in-room bias: seek doors/hallways once room appears cleared.
-        if self._should_prioritize_door_hunt(state, pos):
-            self.mode = "seek"
-            avoid_dirs = self.failed_door_dirs_by_world.get(self.current_motion_pos, set())
-            door_dir = self._adjacent_door_direction(state.map, pos, avoid_dirs=avoid_dirs)
-            if door_dir:
-                self.last_open_dir = door_dir
-                self.follow_open_dir_turns = 0
-                self.pending_keys = [door_dir]
-                return self._record_decision("o", f"lost_room_open_adjacent_door_{door_dir}")
+        # Phase 2: clockwise wall follow (right-hand rule, 8 directions).
+        # Lap check: if we loop back to start, search for secret doors then continue.
+        if (
+            self.wall_follow_started
+            and self.wall_follow_start_wpos is not None
+            and motion_pos == self.wall_follow_start_wpos
+        ):
+            # Reset for another lap — keep wall-following.
+            self.wall_follow_start_wpos = motion_pos
+            self.wall_follow_started = False
+            return self._record_decision("s", "wall_follow_lap_search")
 
-            door_goal = self._nearest_door_approach(state.map, pos)
-            if door_goal:
-                k = self._key_toward(state.map, pos, door_goal)
-                if k:
-                    return self._record_decision(k, self._goal_thought(state, "lost_room_path_to_door", door_goal))
+        step = self._wall_follow_cw(state.map, pos)
+        if step:
+            # If the step leads to a closed door, open it first.
+            target = self._step_pos(pos, step)
+            if target and state.map[target[0]][target[1]] == '+':
+                self.last_open_dir = step
+                self.pending_keys = [step]
+                return self._record_decision("o", f"wall_hug_open_{step}")
+            # Mark that we've moved away from start.
+            if not self.wall_follow_started and motion_pos != self.wall_follow_start_wpos:
+                self.wall_follow_started = True
+            return self._record_decision(step, f"wall_hug_{step}")
 
-        # 5) Doors are not blockers: open/path to them as soon as they are seen.
-        avoid_dirs = self.failed_door_dirs_by_world.get(self.current_motion_pos, set())
-        door_dir = self._adjacent_door_direction(state.map, pos, avoid_dirs=avoid_dirs)
-        if door_dir:
-            self.mode = "seek"
-            self.last_open_dir = door_dir
-            self.follow_open_dir_turns = 0
-            self.pending_keys = [door_dir]
-            return self._record_decision("o", f"open_adjacent_door_{door_dir}")
-
-        door_goal = self._nearest_door_approach(state.map, pos)
-        if door_goal:
-            self.mode = "seek"
-            k = self._key_toward(state.map, pos, door_goal)
-            if k:
-                return self._record_decision(k, self._goal_thought(state, "path_to_door", door_goal))
-
-        # 6) Head for hallways and continue down them.
-        if self._is_hallway_tile(state.map, pos) and self.last_action in "hjklyubn":
-            if self._can_step(state.map, pos, self.last_action):
-                self.mode = "seek"
-                return self._record_decision(self.last_action, f"hallway_follow_{self.last_action}")
-
-        # Dead-end hallway retreat: backtrack toward remembered hallway entry point.
-        if self.hallway_entry_world is not None and self.current_motion_pos != self.hallway_entry_world:
-            if self._is_dead_end_tile(state.map, pos) or self.no_progress_turns >= 2:
-                entry_local = self._world_to_local(state, self.hallway_entry_world)
-                if entry_local:
-                    k = self._key_toward(state.map, pos, entry_local)
-                    if k:
-                        self.mode = "seek"
-                        return self._record_decision(k, self._goal_thought(state, "hallway_backout_entry", entry_local))
-
-        # Dead-end hallway retreat: explicitly backtrack to the nearest junction.
-        if self.retreat_turns > 0 and self.retreat_dir in "hjklyubn":
-            self.retreat_turns -= 1
-            if self._can_step(state.map, pos, self.retreat_dir):
-                if not self._is_hallway_tile(state.map, pos):
-                    self.retreat_turns = 0
-                    self.retreat_dir = None
-                self.mode = "seek"
-                return self._record_decision(self.retreat_dir, f"dead_end_retreat_{self.retreat_dir}")
-            self.retreat_turns = 0
-            self.retreat_dir = None
-
-        if self._is_dead_end_tile(state.map, pos) and self.last_action in "hjklyubn":
-            back = self._opposite_key(self.last_action)
-            if back and self._can_step(state.map, pos, back):
-                self.retreat_dir = back
-                self.retreat_turns = 8
-                self.mode = "seek"
-                return self._record_decision(back, f"dead_end_reverse_{back}")
-
-        hallway_goal = self._nearest_hallway_target(state.map, pos)
-        if hallway_goal:
-            self.mode = "seek"
-            k = self._key_toward(state.map, pos, hallway_goal)
-            if k:
-                return self._record_decision(k, self._goal_thought(state, "path_to_hallway", hallway_goal))
-
-        # 7) Descend if downstairs visible.
-        stair_goal = pf.find_nearest_target(
-            state.map,
-            pos,
-            lambda ch, p: ch == ">",
-        )
-        if stair_goal:
-            self.mode = "seek"
-            k = self._key_toward(state.map, pos, stair_goal)
-            if k:
-                return self._record_decision(k, self._goal_thought(state, "path_to_stairs", stair_goal))
-
-        # 8) Explore frontier: nearest unvisited walkable tile in viewport.
-        frontier = pf.find_nearest_target(
-            state.map,
-            pos,
-            lambda ch, p: pf.is_walkable(ch)
-            and (state.dungeon_depth, p[0], p[1]) not in self.visited,
-        )
-        if frontier:
-            self.mode = "seek"
-            k = self._key_toward(state.map, pos, frontier)
-            if k:
-                return self._record_decision(k, self._goal_thought(state, "path_to_frontier", frontier))
-
-        # 9) Spiral-search fallback to find a farther reachable unvisited tile.
-        spiral_key = self._spiral_search_key(state)
-        if spiral_key:
-            self.mode = "seek"
-            return self._record_decision(spiral_key, "spiral_search")
-
-        # 10) If no visible progress for a while, force an escape pattern.
-        if self.no_progress_turns >= 10:
-            self.mode = "escape"
-            follow = self._wall_follow_step(state.map, pos)
-            if follow:
-                return self._record_decision(follow, "no_progress_wall_follow")
-            escape = self._escape_key()
-            if escape:
-                return self._record_decision(escape, "no_progress_escape")
-
-        # 11) If still stuck, jiggle with directional fallback.
-        if self.stuck_turns >= 4:
-            self.mode = "escape"
-            follow = self._wall_follow_step(state.map, pos)
-            if follow:
-                return self._record_decision(follow, "stuck_wall_follow")
-            if wall_pivot:
-                return self._record_decision(wall_pivot, "wall_bump_pivot")
-            key = "hjklyubn"[self.jiggle_idx % 8]
-            self.jiggle_idx += 1
-            return self._record_decision(key, "stuck_jiggle")
-
-        if wall_pivot and self.no_progress_turns >= 2:
-            self.mode = "escape"
-            return self._record_decision(wall_pivot, "wall_bump_pivot")
+        # Fallback: try any wall-adjacent direction.
+        for key in "ljkhyubn":
+            if self._can_step(state.map, pos, key):
+                return self._record_decision(key, f"stuck_fallback_{key}")
 
         self.mode = "idle"
         return self._record_decision(".", "idle_wait")
@@ -635,6 +424,18 @@ class DecisionEngine:
         path = pf.path_to(grid, start, goal)
         key = pf.first_step_key(path)
         return self._sanitize_move(key)
+
+    def _local_to_world_pos(self, local_pos):
+        """Convert a local grid position to world position using current state offsets."""
+        if (
+            self.current_motion_pos is None
+            or self.current_pos is None
+        ):
+            return None
+        wx, wy = self.current_motion_pos
+        pr, pc = self.current_pos
+        lr, lc = local_pos
+        return (wx + (lc - pc), wy + (lr - pr))
 
     @staticmethod
     def _world_to_local(state, world_pos):
@@ -705,10 +506,9 @@ class DecisionEngine:
         return (
             f"{self.last_thought} "
             f"mode={self.mode} "
-            f"np={self.no_progress_turns} stuck={self.stuck_turns} "
-            f"cooldown={self.cycle_break_cooldown} wb={self.wall_bump_chain} "
-            f"wf={self.wall_follow_turns} "
-            f"avoid={self.avoid_key}:{self.avoid_key_turns}"
+            f"phase={self.explore_phase} "
+            f"heading={self.wall_follow_heading} "
+            f"stuck={self.stuck_turns}"
         )
 
     @staticmethod
@@ -811,137 +611,54 @@ class DecisionEngine:
         rows = ["".join(r) for r in state.map]
         return "|".join(rows)
 
-    def _escape_key(self):
-        pattern = "hjklyubnlykhbnju"
-        key = pattern[self.escape_idx % len(pattern)]
-        self.escape_idx += 1
-        return self._sanitize_move(key)
+    # Clockwise direction ordering for 8-way movement.
+    _CW = ['k', 'u', 'l', 'n', 'j', 'b', 'h', 'y']
+    _CW_IDX = {k: i for i, k in enumerate(_CW)}
 
-    def _wall_follow_step(self, grid, pos):
-        if not grid or pos is None:
-            return None
+    def _wall_follow_cw(self, grid, pos):
+        """Clockwise wall-follow using left-hand rule with 8 directions.
 
-        heading = self.wall_follow_dir or self._to_cardinal(self.last_action)
-        right = self._right_of(heading)
-        left = self._left_of(heading)
-        back = self._opposite_key(heading)
+        Wall stays on the LEFT. Check left first so the bot turns into
+        hallways and doors on the wall side instead of walking past them.
+        Only steps onto tiles adjacent to at least one wall.
+        Treats closed doors as valid steps (caller handles opening).
+        """
+        heading = self.wall_follow_heading
+        if heading is None or heading not in self._CW_IDX:
+            heading = 'j'
+        h_idx = self._CW_IDX[heading]
 
-        # Right-hand wall-follow ordering.
-        for cand in (right, heading, left, back):
-            if cand not in "hjkl":
+        # Left-hand rule for clockwise traversal (wall on left):
+        # 90° left, 45° left, straight, 45° right, 90° right, 135° right,
+        # 135° left, 180° back.
+        for offset in (-2, -1, 0, 1, 2, 3, -3, 4):
+            cand = self._CW[((h_idx + offset) % 8)]
+            if not self._can_step_or_door(grid, pos, cand):
                 continue
-            if not self._can_step(grid, pos, cand):
-                continue
-            if self._is_blocked_dir(cand):
-                continue
-            self.wall_follow_dir = cand
-            return cand
+            target = self._step_pos(pos, cand)
+            if target and self._adjacent_to_wall(grid, target):
+                self.wall_follow_heading = cand
+                return cand
 
         return None
 
     @staticmethod
-    def _to_cardinal(key):
-        if key in "hjkl":
-            return key
-        # Collapse diagonals into a stable cardinal heading.
-        mapping = {
-            "y": "k",
-            "u": "k",
-            "b": "j",
-            "n": "j",
-        }
-        return mapping.get(key, "k")
-
-    @staticmethod
-    def _right_of(key):
-        mapping = {"k": "l", "l": "j", "j": "h", "h": "k"}
-        return mapping.get(key, "l")
-
-    @staticmethod
-    def _left_of(key):
-        mapping = {"k": "h", "h": "j", "j": "l", "l": "k"}
-        return mapping.get(key, "h")
-
-    def _in_patrol_cycle(self):
-        # Detect repeated local loops in world position history.
-        if len(self.world_history) >= 8:
-            tail = list(self.world_history)[-8:]
-            if len(set(tail)) <= 4 and tail[-1] in tail[:-1]:
-                return True
-
-        # Detect short repeated action motifs (e.g., l-j-y cycling).
-        if len(self.action_history) >= 8:
-            tail = list(self.action_history)[-8:]
-            a = tail[:4]
-            b = tail[4:]
-            if a == b and all(k in "hjklyubn" for k in tail):
-                return True
-
+    def _adjacent_to_wall(grid, pos):
+        """Return True if pos is next to at least one wall/solid tile."""
+        r, c = pos
+        rows = len(grid)
+        cols = len(grid[0]) if rows else 0
+        for dr in (-1, 0, 1):
+            for dc in (-1, 0, 1):
+                if dr == 0 and dc == 0:
+                    continue
+                nr, nc = r + dr, c + dc
+                if nr < 0 or nc < 0 or nr >= rows or nc >= cols:
+                    continue
+                ch = grid[nr][nc]
+                if ch in ('#', ':', '+', ' '):
+                    return True
         return False
-
-    def _in_two_tile_oscillation(self):
-        if len(self.world_history) < 4:
-            return False
-        tail = list(self.world_history)[-4:]
-        return tail[0] == tail[2] and tail[1] == tail[3] and tail[0] != tail[1]
-
-    def _in_tight_wall_loop(self):
-        if self.wall_bump_chain < 3:
-            return False
-        if len(self.world_history) < 6:
-            return False
-        tail = list(self.world_history)[-6:]
-        return len(set(tail)) <= 3
-
-    def _pivot_from(self, last_move):
-        """Choose a deterministic alternate move when a wall collision occurs."""
-        if last_move not in "hjklyubn":
-            return "j"
-        pivot_order = {
-            "h": "jukbnly",
-            "l": "jykbnuh",
-            "k": "hlyubnj",
-            "j": "hlyubnk",
-            "y": "hkjulbn",
-            "u": "lkjhnb y".replace(" ", ""),
-            "b": "jlhknyu",
-            "n": "jlhkuyb",
-        }
-        for cand in pivot_order.get(last_move, "hjklyubn"):
-            if cand != last_move and not self._is_opposite(last_move, cand):
-                return self._sanitize_move(cand)
-        return self._sanitize_move("j")
-
-    def _pivot_from_wall(self, state, last_move):
-        """Pick a wall-escape pivot that is walkable in the current local map."""
-        pos = state.player_pos
-        if not pos or not state.map:
-            return self._pivot_from(last_move)
-
-        if last_move not in "hjklyubn":
-            order = "jkhlyubn"
-        else:
-            # Start with deterministic pivots near the prior heading.
-            order = self._pivot_from(last_move) + "hjklyubn"
-
-        rows = len(state.map)
-        cols = len(state.map[0]) if rows else 0
-        pr, pc = pos
-
-        for cand in order:
-            if cand not in KEY_TO_DIR:
-                continue
-            dr, dc = KEY_TO_DIR[cand]
-            nr, nc = pr + dr, pc + dc
-            if nr < 0 or nc < 0 or nr >= rows or nc >= cols:
-                continue
-            if not pf.is_walkable(state.map[nr][nc]):
-                continue
-            if self.action_history and self._is_opposite(self.action_history[-1], cand):
-                continue
-            return self._sanitize_move(cand)
-
-        return self._pivot_from(last_move)
 
     @staticmethod
     def _can_step(grid, pos, key):
@@ -953,6 +670,28 @@ class DecisionEngine:
         if nr < 0 or nc < 0 or nr >= len(grid) or nc >= len(grid[0]):
             return False
         return pf.is_walkable(grid[nr][nc])
+
+    @staticmethod
+    def _can_step_or_door(grid, pos, key):
+        """Like _can_step but also returns True for closed doors."""
+        if not grid or pos is None or key not in KEY_TO_DIR:
+            return False
+        pr, pc = pos
+        dr, dc = KEY_TO_DIR[key]
+        nr, nc = pr + dr, pc + dc
+        if nr < 0 or nc < 0 or nr >= len(grid) or nc >= len(grid[0]):
+            return False
+        ch = grid[nr][nc]
+        return pf.is_walkable(ch) or ch == '+'
+
+    @staticmethod
+    def _step_pos(pos, key):
+        """Return the grid position one step in direction key from pos."""
+        if pos is None or key not in KEY_TO_DIR:
+            return None
+        pr, pc = pos
+        dr, dc = KEY_TO_DIR[key]
+        return (pr + dr, pc + dc)
 
     @staticmethod
     def _adjacent_door_direction(grid, pos, avoid_dirs=None):
@@ -1148,6 +887,17 @@ class DecisionEngine:
         pr, pc = pos
         for mr, mc, _ in monsters:
             if abs(mr - pr) <= 1 and abs(mc - pc) <= 1 and (mr, mc) != (pr, pc):
+                return (mr, mc)
+        return None
+
+    def _adjacent_monster_filtered(self, state, pos, monsters):
+        """Like _adjacent_monster but skips known phantom positions."""
+        pr, pc = pos
+        for mr, mc, _ in monsters:
+            if abs(mr - pr) <= 1 and abs(mc - pc) <= 1 and (mr, mc) != (pr, pc):
+                wp = self._local_to_world(state, (mr, mc))
+                if wp and wp in self.phantom_positions:
+                    continue
                 return (mr, mc)
         return None
 
@@ -1541,11 +1291,13 @@ class DecisionEngine:
         if not message:
             return
 
+        self.turns_since_combat_feedback += 1
         msg = message.strip()
 
         # You hit the Giant Ant.
         m = re.search(r"you hit the\s+(.+?)\.?$", msg, flags=re.IGNORECASE)
         if m:
+            self.turns_since_combat_feedback = 0
             self._monster_note(m.group(1), "hits", 1)
             self._weapon_combat_note("hits")
             return
@@ -1553,6 +1305,7 @@ class DecisionEngine:
         # You miss the Giant Ant.
         m = re.search(r"you miss the\s+(.+?)\.?$", msg, flags=re.IGNORECASE)
         if m:
+            self.turns_since_combat_feedback = 0
             self._monster_note(m.group(1), "misses", 1)
             self._weapon_combat_note("misses")
             return
@@ -1560,6 +1313,7 @@ class DecisionEngine:
         # You have slain the Giant Ant.
         m = re.search(r"you have slain the\s+(.+?)\.?$", msg, flags=re.IGNORECASE)
         if m:
+            self.turns_since_combat_feedback = 0
             self._monster_note(m.group(1), "kills", 1)
             self._weapon_combat_note("kills")
             return
@@ -1571,6 +1325,7 @@ class DecisionEngine:
             flags=re.IGNORECASE,
         )
         if m:
+            self.turns_since_combat_feedback = 0
             monster = m.group(1)
             attack = m.group(2).lower()
             self.recent_attacker_name = monster.strip().lower()

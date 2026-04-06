@@ -156,9 +156,10 @@ def run_loop(verbose: bool = False, knowledge_file: str = "") -> None:
     lost_player_turns = 0
     zero_hp_turns = 0
     panel_setup_done = False
+    prev_state = None
 
     while True:
-        state = screen.read(dungeon_depth=depth)
+        state = screen.read(state=prev_state, dungeon_depth=depth)
         turn += 1
 
         # Track dungeon depth from messages
@@ -196,14 +197,25 @@ def run_loop(verbose: bool = False, knowledge_file: str = "") -> None:
 
         if not state.is_in_game:
             lost_player_turns += 1
+            if lost_player_turns == 1 and verbose:
+                log("[crawler] === Screen dump when player lost ===")
+                for i, line in enumerate(state.raw_lines):
+                    log(f"  [{i:2d}] {line}")
+                log("[crawler] === End screen dump ===")
             log(f"[crawler] Lost player '@' at turn {turn} — may be in a menu, skipping")
             if lost_player_turns >= 15:
                 log("[crawler] Player missing too long; stopping run.")
                 break
+            # Dismiss potential --more-- prompts or menus with Space/Escape.
+            if lost_player_turns <= 5:
+                cmd.send(" ")
+            elif lost_player_turns <= 10:
+                cmd.send("\x1b")  # Escape key
             time.sleep(POLL_DELAY)
             continue
 
         lost_player_turns = 0
+        prev_state = state
 
         # One-time panel setup only: inventory is on by default; enable equipment once.
         if not panel_setup_done:
@@ -240,6 +252,9 @@ def run_loop(verbose: bool = False, knowledge_file: str = "") -> None:
                 f"monsters={len(state.monsters)} items={len(state.items)} "
                 f"think={thought!r}{parse_note} msg={msg_display!r:40s} -> {action!r}"
             )
+
+        if action is None:
+            action = "."  # fallback: wait in place
 
         cmd.send(action)
 

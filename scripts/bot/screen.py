@@ -301,6 +301,18 @@ def read(state=None, dungeon_depth: int = 1) -> GameState:
     last_message = _parse_messages(lines)
     inventory, equipment = _parse_right_panels(lines, term_w)
 
+    # Recover player_pos when '@' is hidden (e.g., monster on same tile).
+    # Use previous frame's local/world offset to compute current local pos.
+    if player_pos is None and stats["world_pos"] and stats["hp"] > 0:
+        if state and state.player_pos and state.player_world_pos:
+            wx, wy = stats["world_pos"]
+            pwx, pwy = state.player_world_pos
+            pr, pc = state.player_pos
+            lr = pr + (wy - pwy)
+            lc = pc + (wx - pwx)
+            if 0 <= lr < len(map_grid) and 0 <= lc < len(map_grid[0]):
+                player_pos = (lr, lc)
+
     parsed_depth = dungeon_depth
     if stats["depth_ft"] is not None and stats["depth_ft"] > 0:
         parsed_depth = max(1, stats["depth_ft"] // 50)

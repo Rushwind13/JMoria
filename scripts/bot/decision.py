@@ -143,7 +143,7 @@ class DecisionEngine:
         # If we initiated wield, send the slot only when the game prompts for it.
         if self.pending_wield_slot:
             self.mode = "equip"
-            if "wield which item" in msg_lower:
+            if "wield which item" in msg_lower or "choose an item from inventory" in msg_lower:
                 slot = self.pending_wield_slot
                 self.pending_wield_slot = None
                 self.await_wield_prompt_turns = 0
@@ -184,6 +184,11 @@ class DecisionEngine:
                 self.pending_use_slot = None
                 self.pending_use_cmd = None
                 self.await_use_prompt_turns = 0
+
+        # Escape lingering inventory/use prompts the bot didn't initiate.
+        if "choose an item from inventory" in msg_lower:
+            if not self.pending_wield_slot and not self.pending_use_slot:
+                return self._record_decision("\x1b", "escape_stale_prompt")
 
         # Evaluate picked-up gear: learn unknowns first, then prefer upgrades.
         if self.pending_pickup_equip_slot and not self.pending_wield_slot:
@@ -373,6 +378,21 @@ class DecisionEngine:
             self.mode = "recover"
             return self._record_decision("R", f"post_combat_rest_hp{state.hp_pct:.0%}")
 
+        # 5) Item collection: seek visible items in room interiors.
+        # Items adjacent to walls are collected naturally during wall-follow;
+        # interior items require an explicit detour.
+        if state.items and not state.monsters:
+            for ir, ic, ich in sorted(
+                state.items, key=lambda x: pf.heuristic(pos, (x[0], x[1]))
+            ):
+                if self._adjacent_to_wall(state.map, (ir, ic)):
+                    continue
+                path = pf.path_to(state.map, pos, (ir, ic))
+                key = pf.first_step_key(path)
+                if key:
+                    self.mode = "seek"
+                    return self._record_decision(key, f"seek_interior_item_{ich}")
+
         # === EXPLORATION: Wall hug ===
         self.mode = "seek"
 
@@ -415,6 +435,26 @@ class DecisionEngine:
             # No visible door — search for secret doors, then keep wall-following.
             self.wall_follow_start_wpos = motion_pos
             return self._record_decision(".", "wall_follow_lap_search")
+
+        # If not adjacent to any wall (e.g. after an interior-item detour),
+        # pathfind back to the nearest wall-adjacent tile first.
+        if not self._adjacent_to_wall(state.map, pos):
+            wall_tile = pf.find_nearest_target(
+                state.map, pos,
+                lambda ch, p: self._adjacent_to_wall(state.map, p) and pf.is_walkable(ch),
+            )
+            if wall_tile:
+                key = pf.first_step_key(pf.path_to(state.map, pos, wall_tile))
+                if key:
+                    # Invalidate start so lap detection resets once we reach wall.
+                    self.wall_follow_start_wpos = None
+                    return self._record_decision(key, "return_to_wall")
+
+        # Re-establish wall-follow anchor after returning from a detour.
+        if self.wall_follow_start_wpos is None:
+            self.wall_follow_start_wpos = motion_pos
+            self.wall_follow_started = False
+            self.wall_follow_lap_count = 1  # perimeter already mapped; go straight to door-seek
 
         step = self._wall_follow_cw(state.map, pos)
         if step:

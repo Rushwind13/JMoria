@@ -190,10 +190,11 @@ A Python script that:
   - [x] Filter text-like/overlay-like glyphs in dungeon parsing
   - [x] Add parser reject counters for debug telemetry
   - [ ] Validate reject counters across multiple long runs and tune thresholds
-- [~] Task 2: further reduce combat-zone patrol loops (#186)
+- [x] Task 2: further reduce combat-zone patrol loops (#186)
   - [x] Prioritize door exploration (`path_to_door`, `open_adjacent_door`) before generic frontier roam
   - [x] Add long wall-bump-chain breaker (force broader escape after repeated `wall_bump_pivot`)
-- [ ] Task 3: auto-wield/equip best available weapon
+  - [x] Blacklist unreachable item goals after 3 wall-bump failures (commit a2582a4)
+- [x] Task 3: auto-wield/equip best available weapon
   - [x] Parse inventory slot-letter entries from right panel
   - [x] Auto-issue `w` + slot for all equip-candidate carried items (not just one weapon)
   - [x] Treat torches/lanterns as high-priority utility equipment
@@ -201,7 +202,8 @@ A Python script that:
   - [x] Persist learned non-wieldable item knowledge to JSON config across runs
   - [x] Persist monster observations (hit/miss/kill/attack-type) across runs
   - [x] Persist scroll label -> observed effect notes across runs
-  - [ ] Improve equipped-weapon detection via equipment panel parsing
+  - [x] Category-based wieldability + consumable usage (commit e2c3fe9)
+  - [x] Gear comparison with swap-back mechanism (commit 925570d)
   - [ ] Refine weapon ranking using real item damage metadata
 
 ## Knowledge Roadmap (Persistent Learning)
@@ -430,18 +432,19 @@ JMoria/
 ### Milestone 1: Basic Automation
 - ✅ ASCII renderer merged (PR#155)
 - ✅ tmux interaction pattern established (see user memory / Issue #182)
-- [ ] Bot harness: launcher, screen reader, command sender (Phase 1)
-- [ ] Simple exploration AI: move toward unexplored tiles (Phase 2)
-- [ ] **Success criteria:** Bot can navigate level 1 dungeon without dying
+- ✅ Bot harness: launcher, screen reader, command sender (Phase 1)
+- ✅ Simple exploration AI: move toward unexplored tiles (Phase 2)
+- [~] **Success criteria:** Bot can navigate level 1 dungeon without dying
+  - Bot explores, picks up items, opens doors, and fights — but still dies to early monsters
 
 ### Milestone 2: Survival AI
-- [ ] A* pathfinding (Phase 2.2)
-- [ ] Combat logic: bump-attack adjacent monsters, flee if low HP (Phase 2.3)
-- [ ] HP management: rest when below 30% max HP
+- ✅ A* pathfinding (Phase 2.2)
+- ✅ Combat logic: bump-attack adjacent monsters, flee if low HP (Phase 2.3)
+- ✅ HP management: rest when below 30% max HP
 - [ ] **Success criteria:** Bot survives to level 3
 
 ### Milestone 3: Strategic Play
-- [ ] Inventory management: auto-wield/equip (Phase 3.3)
+- ✅ Inventory management: auto-wield/equip (Phase 3.3)
 - [ ] Multi-level strategy: when to descend (Phase 3.4)
 - [ ] Exploration memory: track visited tiles per level (Phase 3.1)
 - [ ] **Success criteria:** Bot reaches level 10

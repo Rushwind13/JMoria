@@ -87,6 +87,8 @@ class DecisionEngine:
         self.prev_in_hallway = False
         self.hallway_entry_world = None
         self.wall_follow_dir = None
+        self.wall_follow_turns = 0
+        self.cycle_escalation = 0
         self.mode = "seek"
         self.avoid_key = None
         self.avoid_key_turns = 0
@@ -109,6 +111,8 @@ class DecisionEngine:
             self.follow_open_dir_turns -= 1
         if self.wall_loop_escape_turns > 0:
             self.wall_loop_escape_turns -= 1
+        if self.wall_follow_turns > 0:
+            self.wall_follow_turns -= 1
         if self.avoid_key_turns > 0:
             self.avoid_key_turns -= 1
         else:
@@ -335,16 +339,25 @@ class DecisionEngine:
 
         if self.wall_loop_escape_turns > 0 and adjacent is None:
             self.mode = "escape"
+
+            # If we're adjacent to a door right now, open it instead of pathing.
+            door_dir = self._adjacent_door_direction(state.map, pos)
+            if door_dir:
+                self.last_open_dir = door_dir
+                self.follow_open_dir_turns = 0
+                self.pending_keys = [door_dir]
+                return self._record_decision("o", f"wall_loop_open_door_{door_dir}")
+
             door_goal = self._nearest_door_approach(state.map, pos)
             if door_goal:
                 k = self._raw_key_toward(state.map, pos, door_goal)
-                if k:
+                if k and k != self.avoid_key:
                     return self._record_decision(k, self._goal_thought(state, "wall_loop_abort_door", door_goal))
 
             hallway_goal = self._nearest_hallway_target(state.map, pos)
             if hallway_goal:
                 k = self._raw_key_toward(state.map, pos, hallway_goal)
-                if k:
+                if k and k != self.avoid_key:
                     return self._record_decision(k, self._goal_thought(state, "wall_loop_abort_hallway", hallway_goal))
 
             frontier = pf.find_nearest_target(
@@ -355,20 +368,27 @@ class DecisionEngine:
             )
             if frontier:
                 k = self._raw_key_toward(state.map, pos, frontier)
-                if k:
+                if k and k != self.avoid_key:
                     return self._record_decision(k, self._goal_thought(state, "wall_loop_abort_frontier", frontier))
 
-        # 1) Survival first: rest when low HP and no adjacent threat.
-        if state.player_max_hp > 0 and state.hp_pct < 0.30:
+        # 1) Survival first: rest when HP below 50% and no visible threats.
+        if state.player_max_hp > 0 and state.hp_pct < 0.50:
             self.mode = "recover"
             adjacent = None
             if self._monster_signal_reliable(state):
                 adjacent = self._adjacent_monster(pos, state.monsters)
-            if adjacent is None:
-                return self._record_decision("R", "low_hp_rest_no_adjacent_threat")
-            flee, flee_mode = self._brave_flee_key(state, pos, adjacent, allow_equal=False)
-            if flee:
-                return self._record_decision(flee, f"low_hp_flee_{flee_mode}_from_{adjacent}")
+            if adjacent is None and not state.monsters:
+                return self._record_decision("R", "low_hp_rest_no_visible_threat")
+            if adjacent is None and state.monsters:
+                # Monster visible but not adjacent — keep fleeing, don't rest.
+                flee_target = state.monsters[0][:2]
+                flee, flee_mode = self._brave_flee_key(state, pos, flee_target, allow_equal=False)
+                if flee:
+                    return self._record_decision(flee, f"low_hp_flee_visible_{flee_mode}")
+            if adjacent is not None:
+                flee, flee_mode = self._brave_flee_key(state, pos, adjacent, allow_equal=False)
+                if flee:
+                    return self._record_decision(flee, f"low_hp_flee_{flee_mode}_from_{adjacent}")
 
         # 2) Consumable usage: quaff healing when hurt, try unknowns when safe.
         use_action = self._consider_consumable_use(state, adjacent)
@@ -395,6 +415,26 @@ class DecisionEngine:
                         flee,
                         f"flee_known_threat_{flee_mode}_{threat_name}_d{danger:.2f}_c{confidence:.2f}",
                     )
+            # Flee from unknown monsters when not healthy enough to risk it.
+            glyph = self._adjacent_monster_glyph(pos, state.monsters)
+            threat_lvl = self._glyph_threat_level(glyph)
+            if confidence < 0.3:
+                # Major monster (uppercase glyph) — flee unless nearly full HP.
+                if threat_lvl >= 2 and state.hp_pct < 0.80:
+                    flee, flee_mode = self._brave_flee_key(state, pos, adjacent, allow_equal=True)
+                    if flee:
+                        return self._record_decision(
+                            flee,
+                            f"flee_unknown_major_{flee_mode}_glyph_{glyph}_hp{state.hp_pct:.0%}",
+                        )
+                # Any unknown monster — flee if HP is below 60%.
+                if state.hp_pct < 0.60:
+                    flee, flee_mode = self._brave_flee_key(state, pos, adjacent, allow_equal=True)
+                    if flee:
+                        return self._record_decision(
+                            flee,
+                            f"flee_unknown_{flee_mode}_glyph_{glyph}_hp{state.hp_pct:.0%}",
+                        )
             dr = adjacent[0] - pos[0]
             dc = adjacent[1] - pos[1]
             action = pf.DIR_TO_KEY.get((dr, dc), ".")
@@ -403,32 +443,56 @@ class DecisionEngine:
                 f"{self._goal_thought(state, 'adjacent_attack', adjacent)}_d{danger:.2f}_c{confidence:.2f}",
             )
 
-        # Break tight patrol cycles (3-4 tile loops) before normal exploration.
+        # Break tight patrol cycles (3-4 tile loops) with persistent wall-following.
         if self._in_patrol_cycle() and self.cycle_break_cooldown == 0:
-            self.cycle_break_cooldown = 6
+            self.cycle_escalation = min(self.cycle_escalation + 1, 5)
+            duration = 12 + 4 * self.cycle_escalation
+            self.wall_follow_turns = duration
+            self.cycle_break_cooldown = duration
+            self.wall_follow_dir = None  # pick fresh direction
             self.mode = "escape"
             follow = self._wall_follow_step(state.map, pos)
             if follow:
-                return self._record_decision(follow, "cycle_wall_follow")
+                return self._record_decision(follow, f"cycle_wall_follow_e{self.cycle_escalation}")
             escape = self._escape_key()
             if escape:
                 return self._record_decision(escape, "cycle_detected_escape")
 
+        # Post-combat rest: recover to 70% HP before exploring further.
+        if state.player_max_hp > 0 and state.hp_pct < 0.70 and self.recent_attacker_name and not state.monsters:
+            self.mode = "recover"
+            return self._record_decision("R", f"post_combat_rest_hp{state.hp_pct:.0%}")
+
+        # Persistent wall-follow during cycle escape.
+        if self.wall_follow_turns > 0:
+            # Abort if wall-follow is stuck in a tiny loop.
+            if len(self.world_history) >= 8:
+                recent = set(list(self.world_history)[-8:])
+                if len(recent) <= 4:
+                    self.wall_follow_turns = 0
+                    self.wall_follow_dir = None
+                    self.cycle_break_cooldown = max(self.cycle_break_cooldown, 20)
+            if self.wall_follow_turns > 0:
+                follow = self._wall_follow_step(state.map, pos)
+                if follow:
+                    self.mode = "escape"
+                    return self._record_decision(follow, f"extended_wall_follow_{self.wall_follow_turns}")
+            self.wall_follow_turns = 0  # wall-follow blocked, abort
+
         # 3) Clear room items first, then seek doors/hallways.
-        if self.cycle_break_cooldown == 0:
-            item_goal = pf.find_nearest_target(
-                state.map,
-                pos,
-                lambda ch, p: ch in self._item_chars()
-                    and p != pos
-                    and not self._is_item_blacklisted(state, p),
-            )
-            if item_goal:
-                self.mode = "seek"
-                self.current_item_goal_world = self._local_to_world(state, item_goal)
-                k = self._key_toward(state.map, pos, item_goal)
-                if k:
-                    return self._record_decision(k, self._goal_thought(state, "path_to_item", item_goal))
+        item_goal = pf.find_nearest_target(
+            state.map,
+            pos,
+            lambda ch, p: ch in self._item_chars()
+                and p != pos
+                and not self._is_item_blacklisted(state, p),
+        )
+        if item_goal:
+            self.mode = "seek"
+            self.current_item_goal_world = self._local_to_world(state, item_goal)
+            k = self._key_toward(state.map, pos, item_goal)
+            if k:
+                return self._record_decision(k, self._goal_thought(state, "path_to_item", item_goal))
 
         # 4) Lost-in-room bias: seek doors/hallways once room appears cleared.
         if self._should_prioritize_door_hunt(state, pos):
@@ -643,6 +707,7 @@ class DecisionEngine:
             f"mode={self.mode} "
             f"np={self.no_progress_turns} stuck={self.stuck_turns} "
             f"cooldown={self.cycle_break_cooldown} wb={self.wall_bump_chain} "
+            f"wf={self.wall_follow_turns} "
             f"avoid={self.avoid_key}:{self.avoid_key_turns}"
         )
 
@@ -725,6 +790,9 @@ class DecisionEngine:
             self.world_history.append(world)
             progressed = (world != self.last_world_pos)
             self.last_world_pos = world
+            # Reset cycle escalation when reaching genuinely new territory.
+            if progressed and world not in set(list(self.world_history)[:-1]):
+                self.cycle_escalation = 0
         else:
             map_sig = self._map_signature(state)
             progressed = (map_sig != self.last_map_sig)
@@ -1082,6 +1150,24 @@ class DecisionEngine:
             if abs(mr - pr) <= 1 and abs(mc - pc) <= 1 and (mr, mc) != (pr, pc):
                 return (mr, mc)
         return None
+
+    @staticmethod
+    def _adjacent_monster_glyph(pos, monsters):
+        """Return the glyph character of the nearest adjacent monster, or None."""
+        pr, pc = pos
+        for mr, mc, ch in monsters:
+            if abs(mr - pr) <= 1 and abs(mc - pc) <= 1 and (mr, mc) != (pr, pc):
+                return ch
+        return None
+
+    @staticmethod
+    def _glyph_threat_level(glyph):
+        """Estimate monster threat from glyph: uppercase = major (2), lowercase = minor (1), else 0."""
+        if glyph and glyph.isupper():
+            return 2
+        if glyph and glyph.islower():
+            return 1
+        return 0
 
     @staticmethod
     def _monster_signal_reliable(state):

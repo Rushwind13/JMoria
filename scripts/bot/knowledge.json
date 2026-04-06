@@ -1,10 +1,47 @@
 {
   "consumable_knowledge": {
+    "healed:olive potion": {
+      "count": 1,
+      "heals": true,
+      "hp_delta_total": 1,
+      "observations": [
+        "Ouch! You bumped into um, something?!"
+      ]
+    },
+    "unknown:scroll labeled aliquip ex": {
+      "count": 1,
+      "hp_delta_total": 0,
+      "observations": [
+        "You miss the Giant Snake."
+      ]
+    },
+    "unknown:scroll labeled comm sequat": {
+      "count": 1,
+      "hp_delta_total": 0,
+      "observations": [
+        "(It was an excellent hit! (x2 damage)"
+      ]
+    },
     "unknown:scroll labeled duis aute ir": {
       "count": 1,
       "hp_delta_total": 0,
       "observations": [
         "You have a Torch."
+      ]
+    },
+    "unknown:scroll labeled ecat pidatat": {
+      "count": 2,
+      "hp_delta_total": 0,
+      "observations": [
+        "You have a Small Steel Shield.",
+        "You have picked the lock."
+      ]
+    },
+    "unknown:scroll labeled incul pafic": {
+      "count": 1,
+      "hp_delta_total": 0,
+      "observations": [
+        "(It was an excellent hit! (x2 damage)"
       ]
     },
     "unknown:scroll labeled ris nisi ut": {
@@ -23,8 +60,8 @@
     }
   },
   "door_knowledge": {
-    "lock_fail": 57,
-    "lock_success": 922
+    "lock_fail": 68,
+    "lock_success": 1864
   },
   "item_knowledge": {
     "best_by_slot": {
@@ -85,13 +122,17 @@
         "successes": 27
       },
       "dagger": {
+        "combat_hits": 1,
+        "combat_kills": 11,
+        "combat_misses": 7,
+        "combat_turns": 19,
         "observed_ac_avg": 0.0,
         "observed_ac_best": 0,
-        "observed_ac_count": 7,
+        "observed_ac_count": 8,
         "observed_ac_total": 0,
         "observed_damage": "1d4",
         "observed_damage_avg": 2.5,
-        "successes": 16
+        "successes": 17
       },
       "large steel shield": {
         "combat_misses": 11,
@@ -123,9 +164,11 @@
       "long sword": {
         "observed_ac_avg": 0.0,
         "observed_ac_best": 0,
-        "observed_ac_count": 1,
+        "observed_ac_count": 3,
         "observed_ac_total": 0,
-        "successes": 2
+        "observed_damage": "1d10",
+        "observed_damage_avg": 5.5,
+        "successes": 8
       },
       "pair of leather boots": {
         "observed_ac_avg": 2.0,
@@ -137,11 +180,15 @@
         "successes": 17
       },
       "pair of leather gloves": {
+        "combat_misses": 10,
+        "combat_turns": 10,
         "observed_ac_avg": 2.0,
         "observed_ac_best": 2,
-        "observed_ac_count": 1,
-        "observed_ac_total": 2,
-        "successes": 2
+        "observed_ac_count": 4,
+        "observed_ac_total": 8,
+        "observed_damage": "1d2",
+        "observed_damage_avg": 1.5,
+        "successes": 14
       },
       "pair of steel boots": {
         "observed_ac_avg": 4.0,
@@ -153,9 +200,11 @@
       "pickaxe": {
         "observed_ac_avg": 0.0,
         "observed_ac_best": 0,
-        "observed_ac_count": 3,
+        "observed_ac_count": 4,
         "observed_ac_total": 0,
-        "successes": 9
+        "observed_damage": "1d2",
+        "observed_damage_avg": 1.5,
+        "successes": 13
       },
       "robe": {
         "observed_ac_avg": 1.0,
@@ -181,29 +230,45 @@
         "successes": 38
       },
       "small steel shield": {
-        "observed_ac_avg": 3.0,
+        "observed_ac_avg": 3.1666666666666665,
         "observed_ac_best": 4,
-        "observed_ac_count": 5,
-        "observed_ac_total": 15,
-        "successes": 30
-      },
-      "steel shield": {
-        "observed_ac_avg": 1.25,
-        "observed_ac_best": 5,
-        "observed_ac_count": 4,
-        "observed_ac_total": 5,
+        "observed_ac_count": 6,
+        "observed_ac_total": 19,
         "observed_damage": "1d2",
         "observed_damage_avg": 1.5,
-        "successes": 9
+        "successes": 41
+      },
+      "small wooden shield": {
+        "observed_ac_avg": -3.0,
+        "observed_ac_best": 0,
+        "observed_ac_count": 1,
+        "observed_ac_total": -3,
+        "observed_damage": "1d2",
+        "observed_damage_avg": 1.5,
+        "observed_to_dam": 0,
+        "observed_to_hit": 0,
+        "successes": 7
+      },
+      "steel shield": {
+        "observed_ac_avg": 1.8333333333333333,
+        "observed_ac_best": 5,
+        "observed_ac_count": 6,
+        "observed_ac_total": 11,
+        "observed_damage": "1d2",
+        "observed_damage_avg": 1.5,
+        "successes": 13
       },
       "torch": {
+        "combat_hits": 7,
+        "combat_misses": 1,
+        "combat_turns": 8,
         "observed_ac_avg": 0.0,
         "observed_ac_best": 0,
-        "observed_ac_count": 3,
+        "observed_ac_count": 6,
         "observed_ac_total": 0,
         "observed_damage": "1d2",
         "observed_damage_avg": 1.5,
-        "successes": 16
+        "successes": 31
       }
     },
     "light_sources": {},
@@ -223,7 +288,7 @@
       "max_observed_hit": 0,
       "misses": 10
     },
-    "giant ant": {
+    "clear icky thing": {
       "attacks": {},
       "damage_instances": 0,
       "damage_taken_total": 0,
@@ -231,17 +296,29 @@
       "hits_taken": 0,
       "kills": 0,
       "max_observed_hit": 0,
-      "misses": 2
+      "misses": 10
+    },
+    "giant ant": {
+      "attacks": {
+        "bites": 23
+      },
+      "damage_instances": 7,
+      "damage_taken_total": 12,
+      "hits": 0,
+      "hits_taken": 23,
+      "kills": 0,
+      "max_observed_hit": 2,
+      "misses": 4
     },
     "giant snake": {
       "attacks": {},
       "damage_instances": 0,
       "damage_taken_total": 0,
-      "hits": 0,
+      "hits": 4,
       "hits_taken": 0,
       "kills": 0,
       "max_observed_hit": 0,
-      "misses": 11
+      "misses": 12
     },
     "green icky thing": {
       "attacks": {},
@@ -267,7 +344,7 @@
       "attacks": {},
       "damage_instances": 0,
       "damage_taken_total": 0,
-      "hits": 8,
+      "hits": 15,
       "hits_taken": 0,
       "kills": 3,
       "max_observed_hit": 0,
@@ -283,6 +360,18 @@
       "max_observed_hit": 0,
       "misses": 6
     },
+    "white icky thing": {
+      "attacks": {
+        "touches": 1
+      },
+      "damage_instances": 1,
+      "damage_taken_total": 2,
+      "hits": 1,
+      "hits_taken": 1,
+      "kills": 11,
+      "max_observed_hit": 2,
+      "misses": 6
+    },
     "yellow icky thing": {
       "attacks": {},
       "damage_instances": 0,
@@ -295,16 +384,42 @@
     }
   },
   "non_wieldable_categories": [
+    "oil",
     "potion",
     "scroll",
     "wand"
   ],
   "schema_version": 4,
   "scroll_knowledge": {
+    "aliquip ex": {
+      "count": 1,
+      "effects": [
+        "k"
+      ]
+    },
+    "comm sequat": {
+      "count": 1,
+      "effects": [
+        "(It was an excellent hit! (x2 damage)"
+      ]
+    },
     "duis aute ir": {
       "count": 1,
       "effects": [
         "Wield which item? [a-z]"
+      ]
+    },
+    "ecat pidatat": {
+      "count": 2,
+      "effects": [
+        "Wield which item? [a-z]",
+        "You failed to pick the lock."
+      ]
+    },
+    "incul pafic": {
+      "count": 1,
+      "effects": [
+        "(It was an excellent hit! (x2 damage)"
       ]
     },
     "ris nisi ut": {

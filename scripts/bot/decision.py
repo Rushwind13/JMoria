@@ -78,6 +78,8 @@ class DecisionEngine:
         self.wall_follow_heading = None          # current heading key during wall follow
         self.wall_follow_start_wpos = None       # world pos where wall follow began
         self.wall_follow_started = False         # True after first step away from start
+        self.wall_follow_lap_count = 0           # laps completed at current start
+        self.door_momentum = False                   # True after stepping onto a door tile
         self.failed_door_dirs_by_world = {}
         self.mode = "seek"
 
@@ -282,6 +284,7 @@ class DecisionEngine:
                 self.wall_follow_heading = "j"
                 self.wall_follow_start_wpos = motion_pos
                 self.wall_follow_started = False
+                self.wall_follow_lap_count = 0
 
         # 1) Survival first: rest when HP below 50% and no visible threats.
         if state.player_max_hp > 0 and state.hp_pct < 0.50:
@@ -377,16 +380,32 @@ class DecisionEngine:
             # Can't step east but no bump message yet — wait a tick.
             return self._record_decision("l", "head_east_push")
 
-        # Phase 2: clockwise wall follow (right-hand rule, 8 directions).
-        # Lap check: if we loop back to start, search for secret doors then continue.
+        # Phase 2: clockwise wall follow (left-hand rule, 8 directions).
+        # Lap check: if we loop back to start, try to exit through a door.
         if (
             self.wall_follow_started
             and self.wall_follow_start_wpos is not None
             and motion_pos == self.wall_follow_start_wpos
         ):
-            # Reset for another lap — keep wall-following.
-            self.wall_follow_start_wpos = motion_pos
+            self.wall_follow_lap_count += 1
             self.wall_follow_started = False
+
+            # After any lap, actively seek a door exit to escape the loop.
+            exit_key = self._find_door_exit_step(state.map, pos)
+            if exit_key:
+                target = self._step_pos(pos, exit_key)
+                if target and state.map[target[0]][target[1]] == '+':
+                    self.last_open_dir = exit_key
+                    self.pending_keys = [exit_key]
+                    self.door_momentum = True
+                    return self._record_decision("o", f"lap_exit_open_{exit_key}")
+                self.wall_follow_heading = exit_key
+                # Reset start to current pos so next lap tracks from here.
+                self.wall_follow_start_wpos = motion_pos
+                return self._record_decision(exit_key, f"lap_exit_{exit_key}")
+
+            # No visible door — search for secret doors, then keep wall-following.
+            self.wall_follow_start_wpos = motion_pos
             return self._record_decision("s", "wall_follow_lap_search")
 
         step = self._wall_follow_cw(state.map, pos)
@@ -396,11 +415,14 @@ class DecisionEngine:
             if target and state.map[target[0]][target[1]] == '+':
                 self.last_open_dir = step
                 self.pending_keys = [step]
+                self.door_momentum = True
                 return self._record_decision("o", f"wall_hug_open_{step}")
             # Mark that we've moved away from start.
             if not self.wall_follow_started and motion_pos != self.wall_follow_start_wpos:
                 self.wall_follow_started = True
-            return self._record_decision(step, f"wall_hug_{step}")
+            tag = "door_thru" if self.door_momentum else "wall_hug"
+            self.door_momentum = False
+            return self._record_decision(step, f"{tag}_{step}")
 
         # Fallback: try any wall-adjacent direction.
         for key in "ljkhyubn":
@@ -463,6 +485,7 @@ class DecisionEngine:
             f"mode={self.mode} "
             f"phase={self.explore_phase} "
             f"heading={self.wall_follow_heading} "
+            f"laps={self.wall_follow_lap_count} "
             f"stuck={self.stuck_turns}"
         )
 
@@ -523,23 +546,115 @@ class DecisionEngine:
         hallways and doors on the wall side instead of walking past them.
         Only steps onto tiles adjacent to at least one wall.
         Treats closed doors as valid steps (caller handles opening).
+
+        Door momentum: when standing ON a door tile, continue in heading
+        direction (or closest walkable) to push through the doorway instead
+        of scanning left-first and bouncing back into the room.
+
+        Door priority: any adjacent door tile (open or closed) is preferred
+        over a non-door tile, unless the door is directly behind us (likely
+        the one we just came through). This ensures the bot never walks
+        past doors regardless of CW/CCW traversal direction.
         """
         heading = self.wall_follow_heading
         if heading is None or heading not in self._CW_IDX:
             heading = 'j'
         h_idx = self._CW_IDX[heading]
+        back_key = self._CW[((h_idx + 4) % 8)]  # 180° from heading
+
+        # Door momentum: after stepping through a door, push forward
+        # in the heading direction rather than doing the normal left-hand
+        # scan (which would turn us back into the room we just exited).
+        if self.door_momentum:
+            # Try heading, then ±45°, then ±90° — but never back.
+            for offset in (0, -1, 1, -2, 2):
+                cand = self._CW[((h_idx + offset) % 8)]
+                if cand == back_key:
+                    continue
+                if self._can_step_or_door(grid, pos, cand):
+                    target = self._step_pos(pos, cand)
+                    if target:
+                        self.wall_follow_heading = cand
+                        return cand
 
         # Left-hand rule for clockwise traversal (wall on left):
         # 90° left, 45° left, straight, 45° right, 90° right, 135° right,
         # 135° left, 180° back.
+        best_normal = None
         for offset in (-2, -1, 0, 1, 2, 3, -3, 4):
             cand = self._CW[((h_idx + offset) % 8)]
             if not self._can_step_or_door(grid, pos, cand):
                 continue
             target = self._step_pos(pos, cand)
-            if target and self._adjacent_to_wall(grid, target):
+            if not target or not self._adjacent_to_wall(grid, target):
+                continue
+            ch = grid[target[0]][target[1]]
+            # Prioritize door tiles (open or closed) unless directly behind us.
+            if ch in ("'", "+") and cand != back_key:
                 self.wall_follow_heading = cand
                 return cand
+            if best_normal is None:
+                best_normal = cand
+
+        if best_normal is not None:
+            self.wall_follow_heading = best_normal
+            return best_normal
+
+        return None
+
+    def _find_door_exit_step(self, grid, pos):
+        """Find the first step toward the nearest door on the visible map.
+
+        Used on lap completion to break out of room loops. Finds the nearest
+        open door ('') or closed door (+) reachable by A* and returns the
+        first movement key toward it. Skips doors at the bot's current
+        position or that have failed previously.
+        """
+        rows = len(grid)
+        cols = len(grid[0]) if rows else 0
+        if not rows or not cols:
+            return None
+
+        doors = []
+        for r in range(rows):
+            for c in range(cols):
+                ch = grid[r][c]
+                if ch in ("'", "+"):
+                    doors.append((r, c, ch))
+
+        if not doors:
+            return None
+
+        # Sort by distance so we try closest doors first.
+        doors.sort(key=lambda d: pf.heuristic(pos, (d[0], d[1])))
+
+        for dr, dc, ch in doors:
+            if (dr, dc) == pos:
+                continue  # already on this tile
+            if ch == "'":
+                # Open door — pathfind directly to it.
+                path = pf.path_to(grid, pos, (dr, dc))
+                key = pf.first_step_key(path)
+                if key:
+                    return key
+            else:
+                # Closed door — pathfind to a walkable tile adjacent to it.
+                # If we're already adjacent, return the direction to the door.
+                dist = pf.heuristic(pos, (dr, dc))
+                if dist == 1:
+                    key = pf.DIR_TO_KEY.get((dr - pos[0], dc - pos[1]))
+                    if key:
+                        return key
+                for ddr, ddc in pf.DIRS_8:
+                    nr, nc = dr + ddr, dc + ddc
+                    if not pf.in_bounds(grid, (nr, nc)):
+                        continue
+                    if not pf.is_walkable(grid[nr][nc]):
+                        continue
+                    path = pf.path_to(grid, pos, (nr, nc))
+                    key = pf.first_step_key(path)
+                    if key:
+                        return key
 
         return None
 

@@ -417,6 +417,9 @@ void CRenderASCII::DrawTextBoundingBox( JRect rect, JColor color )
     for( int y = top + 1; y < bottom; y++ )
     {
         mvaddch( y, left, ACS_VLINE );
+        // Fill interior with spaces so earlier draws (dungeon) don't bleed through
+        for( int x = left + 1; x < right; x++ )
+            mvaddch( y, x, ' ' );
         mvaddch( y, right, ACS_VLINE );
     }
 

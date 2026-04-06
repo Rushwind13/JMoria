@@ -14,7 +14,6 @@ class DecisionEngine:
         self.visited = set()
         self.last_pos = None
         self.stuck_turns = 0
-        self.jiggle_idx = 0
         self.last_action = "."
         self.pending_keys = []
         self.pending_wield_slot = None
@@ -79,14 +78,7 @@ class DecisionEngine:
         self.wall_follow_heading = None          # current heading key during wall follow
         self.wall_follow_start_wpos = None       # world pos where wall follow began
         self.wall_follow_started = False         # True after first step away from start
-        # Retained for door/lock feedback and helper method compatibility.
         self.failed_door_dirs_by_world = {}
-        self.blocked_dirs_by_world = {}
-        self.wall_bump_chain = 0
-        self.follow_open_dir_turns = 0
-        self.avoid_key = None
-        self.avoid_key_turns = 0
-        self.cycle_escalation = 0
         self.mode = "seek"
 
     def decide(self, state):
@@ -269,10 +261,8 @@ class DecisionEngine:
 
         if "bumped into a door" in msg_lower:
             self.mode = "seek"
-            self.wall_bump_chain = 0
             direction = self.last_action if self.last_action in "hjklyubn" else "h"
             self.last_open_dir = direction
-            self.follow_open_dir_turns = 0
             self.pending_keys = [direction]
             return self._record_decision("o", f"open_door_then_{direction}")
 
@@ -420,41 +410,6 @@ class DecisionEngine:
         self.mode = "idle"
         return self._record_decision(".", "idle_wait")
 
-    def _key_toward(self, grid, start, goal):
-        path = pf.path_to(grid, start, goal)
-        key = pf.first_step_key(path)
-        return self._sanitize_move(key)
-
-    def _local_to_world_pos(self, local_pos):
-        """Convert a local grid position to world position using current state offsets."""
-        if (
-            self.current_motion_pos is None
-            or self.current_pos is None
-        ):
-            return None
-        wx, wy = self.current_motion_pos
-        pr, pc = self.current_pos
-        lr, lc = local_pos
-        return (wx + (lc - pc), wy + (lr - pr))
-
-    @staticmethod
-    def _world_to_local(state, world_pos):
-        if (
-            world_pos is None
-            or state.player_world_pos is None
-            or state.player_pos is None
-            or not state.map
-        ):
-            return None
-        wx, wy = state.player_world_pos
-        tx, ty = world_pos
-        pr, pc = state.player_pos
-        lr = pr + (ty - wy)
-        lc = pc + (tx - wx)
-        if lr < 0 or lc < 0 or lr >= len(state.map) or lc >= len(state.map[0]):
-            return None
-        return (lr, lc)
-
     @staticmethod
     def _raw_key_toward(grid, start, goal):
         path = pf.path_to(grid, start, goal)
@@ -533,66 +488,12 @@ class DecisionEngine:
         wx, wy = state.player_world_pos
         return (wx + (lc - pc), wy + (lr - pr))
 
-    def _is_item_blacklisted(self, state, local_pos):
-        wp = self._local_to_world(state, local_pos)
-        if wp is None:
-            return False
-        return self.failed_item_goals.get(wp, 0) >= 3
-
-    def _sanitize_move(self, key):
-        if key is None:
-            return None
-        if key not in "hjklyubn":
-            return key
-
-        if self.avoid_key_turns > 0 and self.avoid_key in "hjklyubn" and key == self.avoid_key:
-            for alt in "hjklyubn":
-                if alt == key:
-                    continue
-                if self._is_blocked_dir(alt):
-                    continue
-                return alt
-
-        if self._is_blocked_dir(key):
-            for alt in "hjklyubn":
-                if alt != key and not self._is_blocked_dir(alt):
-                    key = alt
-                    break
-
-        if not self.action_history:
-            return key
-
-        # Avoid immediate backtracking oscillation unless we are in clear trouble.
-        prev = self.action_history[-1]
-        if self._is_dead_end_tile(self.current_map, self.current_pos):
-            return key
-        if self.no_progress_turns < 8 and self._is_opposite(prev, key):
-            for alt in "hjklyubn":
-                if alt != key and not self._is_opposite(prev, alt) and not self._is_blocked_dir(alt):
-                    return alt
-        return key
-
-    def _mark_blocked_dir(self, key):
-        if self.current_motion_pos is None or key not in "hjklyubn":
-            return
-        entry = self.blocked_dirs_by_world.setdefault(self.current_motion_pos, set())
-        entry.add(key)
-
-    def _is_blocked_dir(self, key):
-        if self.current_motion_pos is None or key not in "hjklyubn":
-            return False
-        entry = self.blocked_dirs_by_world.get(self.current_motion_pos)
-        return bool(entry and key in entry)
-
     def _update_progress(self, state):
         world = state.player_world_pos
         if world is not None:
             self.world_history.append(world)
             progressed = (world != self.last_world_pos)
             self.last_world_pos = world
-            # Reset cycle escalation when reaching genuinely new territory.
-            if progressed and world not in set(list(self.world_history)[:-1]):
-                self.cycle_escalation = 0
         else:
             map_sig = self._map_signature(state)
             progressed = (map_sig != self.last_map_sig)
@@ -708,59 +609,6 @@ class DecisionEngine:
                 return key
         return None
 
-    def _should_prioritize_door_hunt(self, state, pos):
-        # Trigger when movement progress is poor in open room-like spaces.
-        if not state.map or pos is None:
-            return False
-        if self.no_progress_turns < 2 and self.stuck_turns < 2 and self.wall_bump_chain < 2:
-            return False
-        return self._is_open_roomish(state.map, pos)
-
-    @staticmethod
-    def _is_open_roomish(grid, pos):
-        rows = len(grid)
-        cols = len(grid[0]) if rows else 0
-        pr, pc = pos
-        walkable_neighbors = 0
-        for dr in (-1, 0, 1):
-            for dc in (-1, 0, 1):
-                if dr == 0 and dc == 0:
-                    continue
-                nr, nc = pr + dr, pc + dc
-                if nr < 0 or nc < 0 or nr >= rows or nc >= cols:
-                    continue
-                if pf.is_walkable(grid[nr][nc]):
-                    walkable_neighbors += 1
-        # Open-room proxy: many nearby walkable tiles.
-        return walkable_neighbors >= 6
-
-    @staticmethod
-    def _is_dead_end_tile(grid, pos):
-        if not grid or pos is None:
-            return False
-        rows = len(grid)
-        cols = len(grid[0]) if rows else 0
-        pr, pc = pos
-        orth = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-        walkable_orth = 0
-        for dr, dc in orth:
-            nr, nc = pr + dr, pc + dc
-            if nr < 0 or nc < 0 or nr >= rows or nc >= cols:
-                continue
-            if pf.is_walkable(grid[nr][nc]):
-                walkable_orth += 1
-        return walkable_orth <= 1
-
-    @staticmethod
-    def _opposite_key(key):
-        opposites = {
-            "h": "l", "l": "h",
-            "j": "k", "k": "j",
-            "y": "n", "n": "y",
-            "u": "b", "b": "u",
-        }
-        return opposites.get(key)
-
     @staticmethod
     def _is_hallway_tile(grid, pos):
         if not grid or pos is None:
@@ -795,92 +643,6 @@ class DecisionEngine:
             and p != pos
             and self._is_hallway_tile(grid, p),
         )
-
-    @staticmethod
-    def _is_opposite(a, b):
-        opposites = {
-            "h": "l", "l": "h",
-            "j": "k", "k": "j",
-            "y": "n", "n": "y",
-            "u": "b", "b": "u",
-        }
-        return opposites.get(a) == b
-
-    def _spiral_search_key(self, state):
-        """Find a target by scanning outward in a spiral from current position."""
-        if not state.player_pos or not state.map:
-            return None
-
-        rows = len(state.map)
-        cols = len(state.map[0]) if rows else 0
-        if rows == 0 or cols == 0:
-            return None
-
-        center = state.player_pos
-        max_radius = max(rows, cols)
-
-        # Start search radius from prior attempts to avoid local oscillation.
-        start_radius = max(1, self.spiral_radius)
-
-        for radius in range(start_radius, max_radius):
-            for r, c in self._spiral_ring(center, radius, rows, cols):
-                ch = state.map[r][c]
-                if not pf.is_walkable(ch):
-                    continue
-                if (state.dungeon_depth, r, c) in self.visited:
-                    continue
-                key = self._key_toward(state.map, center, (r, c))
-                if key:
-                    # Next time, begin a bit farther out for continued expansion.
-                    self.spiral_radius = min(max_radius - 1, radius + 1)
-                    return key
-
-        # If no unvisited target exists, allow revisiting walkable spiral points.
-        for radius in range(1, max_radius):
-            for r, c in self._spiral_ring(center, radius, rows, cols):
-                if not pf.is_walkable(state.map[r][c]):
-                    continue
-                key = self._key_toward(state.map, center, (r, c))
-                if key:
-                    return key
-
-        return None
-
-    @staticmethod
-    def _spiral_ring(center, radius, rows, cols):
-        """Yield points on a square spiral ring at distance radius from center."""
-        cr, cc = center
-        if radius <= 0:
-            return
-
-        top = cr - radius
-        bottom = cr + radius
-        left = cc - radius
-        right = cc + radius
-
-        # Top edge (left -> right)
-        for c in range(left, right + 1):
-            r = top
-            if 0 <= r < rows and 0 <= c < cols:
-                yield (r, c)
-
-        # Right edge (top+1 -> bottom)
-        for r in range(top + 1, bottom + 1):
-            c = right
-            if 0 <= r < rows and 0 <= c < cols:
-                yield (r, c)
-
-        # Bottom edge (right-1 -> left)
-        for c in range(right - 1, left - 1, -1):
-            r = bottom
-            if 0 <= r < rows and 0 <= c < cols:
-                yield (r, c)
-
-        # Left edge (bottom-1 -> top+1)
-        for r in range(bottom - 1, top, -1):
-            c = left
-            if 0 <= r < rows and 0 <= c < cols:
-                yield (r, c)
 
     @staticmethod
     def _adjacent_monster(pos, monsters):
@@ -924,65 +686,6 @@ class DecisionEngine:
         # Screen parsing can overcount monster-like glyphs in some views.
         # Treat very large counts as noisy and avoid tactical combat decisions from them.
         return len(state.monsters) <= 12
-
-    @staticmethod
-    def _item_chars():
-        return set(r'|)[](]"=~{}{}&?!-_$~/\\')
-
-    def _next_equip_candidate(self, inventory, equipment):
-        if not inventory:
-            return None
-
-        best = None
-        best_rank = None
-        equipped_names = {name.lower() for _slot, name in (equipment or [])}
-        equipped_by_slot = {}
-        for _slot, name in (equipment or []):
-            kind = self._gear_slot_kind(name)
-            if not kind:
-                continue
-            cur = equipped_by_slot.get(kind)
-            score = self._gear_score(name)
-            if cur is None or score > cur[1]:
-                equipped_by_slot[kind] = (name, score)
-
-        for slot, name in inventory:
-            n = name.lower()
-            if n in equipped_names:
-                continue
-            if self._is_known_non_wieldable(name):
-                continue
-            if self.wield_attempt_counts.get(name, 0) >= 3:
-                continue
-
-            kind = self._gear_slot_kind(name)
-
-            total_score = self._gear_score(name)
-            equipped_score = equipped_by_slot.get(kind, (None, 0))[1] if kind else 0
-            improvement = total_score - equipped_score if kind else 0.0
-            attempts = self.wield_attempt_counts.get(name, 0)
-            known = self.item_knowledge.get("gear_strength", {}).get(n, {})
-            successes = int(known.get("successes", 0)) if isinstance(known, dict) else 0
-            is_untested = attempts == 0 and successes == 0
-            known_best = 1 if (kind and self._is_known_best_for_slot(kind, name)) else 0
-            is_gear = 1 if kind else 0
-
-            # Rank tuple favors: untested items first, then known best gear and upgrades.
-            rank = (
-                1 if is_untested else 0,
-                known_best,
-                is_gear,
-                1 if improvement > 0.25 else 0,
-                float(improvement),
-                float(total_score),
-                -float(attempts),
-            )
-
-            if best_rank is None or rank > best_rank:
-                best = (slot, name, total_score)
-                best_rank = rank
-
-        return best
 
     def _gear_slot_kind(self, item_name):
         n = item_name.lower()
@@ -1110,15 +813,6 @@ class DecisionEngine:
         new_score = self._gear_score(item_name)
         equipped_score = self._gear_score(equipped_name)
         return new_score > equipped_score
-
-    def _is_known_best_for_slot(self, kind, item_name):
-        best_by_slot = self.item_knowledge.get("best_by_slot", {})
-        if not isinstance(best_by_slot, dict):
-            return False
-        entry = best_by_slot.get(kind)
-        if not isinstance(entry, dict):
-            return False
-        return str(entry.get("name", "")).lower() == item_name.lower()
 
     def _learn_from_wield_feedback(self, state):
         message = state.last_message
@@ -1658,11 +1352,6 @@ class DecisionEngine:
             entry = self.consumable_knowledge.get(effect, {})
             return entry.get("harms", False)
         return False
-
-    def _is_consumable(self, item_name):
-        """Check if an item is a potion, scroll, or wand by category."""
-        cat = self._item_category(item_name)
-        return cat in ("potion", "scroll", "wand")
 
     def _find_inventory_consumable(self, inventory, category=None, exclude_bad=True):
         """Find a consumable in inventory, optionally filtering by category.

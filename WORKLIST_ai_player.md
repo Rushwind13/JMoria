@@ -4,6 +4,48 @@
 
 This work list defines the implementation of an autonomous dungeon crawler bot for JMoria. See also **Issue #182** for the design rationale.
 
+---
+## 2026-04-06: Current AI Player Issue Priorities
+
+### Top Priorities (Open Issues #183–195)
+
+**1. [#194] Refactor: Remove dead or redundant code in bot Python scripts (DONE)**
+- Deep clean completed: removed 311 lines of dead code from decision.py.
+
+**2. [#191] Bot gets stuck in CCW loop and can't traverse doors**
+- Critical bug: Bot loops in rooms, can't progress if turned around. Blocks milestone completion.
+
+**3. [#192] AI bot should prioritize doors as exits to escape rooms**
+- Bot must treat doors as valid exits in all traversal modes to avoid getting stuck.
+
+**4. [#193] AI bot should avoid re-entering doorways and tiles to ensure full dungeon exploration**
+- Prevents bot from looping and missing unexplored areas; ensures full coverage.
+
+**5. [#195] Bot should explore room interiors and return to wall-following**
+- Bot should not ignore items in room interiors; improves loot collection and exploration.
+
+**6. [#190] Combat and wield actions corrupt tmux/curses screen**
+- Screen corruption during combat/wielding breaks UI and playability, especially under tmux.
+
+**7. [#188] Bot parser likely overcounts visible monsters/items in ASCII viewport**
+- Bot logic is noisy due to incorrect entity counts; affects threat and decision heuristics.
+
+**8. [#186] Bot behavior: exploration oscillates in place (k/j loop)**
+- Bot can get stuck oscillating between two moves, making no progress.
+
+**9. [#185] Bot bug: death not reliably detected (loops after HP=0/0 and missing @)**
+- Bot fails to terminate after death, causing endless loops.
+
+**10. [#189] 1st level characters can start with 1 HP**
+- FIXED in commit c2bcdc4 (minimum starting HP is half the hit die). Can close #189.
+
+---
+### Notes
+- This list is up to date with current code and open issues as of 2026-04-06.
+- See commit c2bcdc4 for the fix to #189.
+- #194 is the highest priority for immediate work.
+
+
 **Foundation:** The ASCII renderer (`src/RenderASCII.cpp`, merged in PR#155) renders the game as plain text via ncurses. Running the game inside a `tmux` session lets an external script read screen state with `tmux capture-pane` and send commands with `tmux send-keys`. No changes to the game executable are required.
 
 **Goal:** Create a Python/Bash bot script in `scripts/` that plays JMoria autonomously — navigating, fighting, looting, and descending toward level 100 (5000 ft depth). Primary use: soak testing, balance data collection, crash detection, and regression coverage.
@@ -186,11 +228,12 @@ A Python script that:
 - [x] Wall-follow opens doors on wall side, searches on lap completion
 - [x] Bot reliably explores dungeon perimeter/hallways, fights, picks up items, equips gear
 
-### Task 1: Deep Clean of Legacy Decision Code
-- [ ] Audit `decision.py` for dead code left over from old pathfinding (removed methods still referenced, unused state vars, orphan helpers)
-- [ ] Remove `_is_blocked_dir`, `_blocked_dirs_by_world`, `wall_bump_chain`, `follow_open_dir_turns`, `avoid_key`/`avoid_key_turns`, `cycle_escalation` if no longer used by wall-follow
-- [ ] Flatten decide() — remove cooldown tick logic for mechanisms that no longer exist
-- [ ] Verify all remaining helper methods are actually called; delete the rest
+### Task 1: Deep Clean of Legacy Decision Code (DONE)
+- [x] Audit `decision.py` for dead code left over from old pathfinding (removed methods still referenced, unused state vars, orphan helpers)
+- [x] Remove `_is_blocked_dir`, `_blocked_dirs_by_world`, `wall_bump_chain`, `follow_open_dir_turns`, `avoid_key`/`avoid_key_turns`, `cycle_escalation` — no longer used by wall-follow
+- [x] Flatten decide() — removed dead variable assignments for removed mechanisms
+- [x] Verify all remaining helper methods are actually called; deleted the rest
+- Removed 18 dead methods/functions and 7 dead instance variables (311 lines net)
 
 ### Task 2: Room-Loop-Then-Exit Strategy
 - [ ] When wall-follow enters a room (detected by >2 walkable neighbors on multiple sides), complete one full perimeter loop to see all walls

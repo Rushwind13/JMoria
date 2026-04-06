@@ -21,8 +21,8 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 **4. [#193] AI bot should avoid re-entering doorways and tiles to ensure full dungeon exploration (DONE)**
 - Lap-aware exploration: lap 0 completes full room perimeter (doors skipped), lap 1+ prefers unvisited doors for exit pathfinding. World-coordinate visited tracking replaces unstable screen-local positions.
 
-**5. [#195] Bot should explore room interiors and return to wall-following**
-- Bot should not ignore items in room interiors; improves loot collection and exploration.
+**5. [#195] Bot should explore room interiors and return to wall-following (DONE)**
+- Interior item seeking: pathfinds to visible items not adjacent to walls, collects them, returns to wall. Wield prompt detection also fixed.
 
 **6. [#190] Combat and wield actions corrupt tmux/curses screen**
 - Screen corruption during combat/wielding breaks UI and playability, especially under tmux.
@@ -45,7 +45,8 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 - See commit c2bcdc4 for the fix to #189 (closed).
 - #191 and #192 done in commit 941ec0b (closed).
 - #193 done in commit e84bf5d (closed). #194 closed.
-- Next priority: #195 (room interior exploration).
+- #195 done in commit ce3d4c5 (closed).
+- Next priority: #190 (combat/wield screen corruption).
 
 
 **Foundation:** The ASCII renderer (`src/RenderASCII.cpp`, merged in PR#155) renders the game as plain text via ncurses. Running the game inside a `tmux` session lets an external script read screen state with `tmux capture-pane` and send commands with `tmux send-keys`. No changes to the game executable are required.

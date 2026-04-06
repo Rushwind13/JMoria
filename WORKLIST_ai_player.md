@@ -18,8 +18,8 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 **3. [#192] AI bot should prioritize doors as exits to escape rooms (DONE)**
 - Addressed by #191 fix: doors are now prioritized over normal tiles in wall-follow scan, and lap-exit actively pathfinds to nearest visible door.
 
-**4. [#193] AI bot should avoid re-entering doorways and tiles to ensure full dungeon exploration**
-- Prevents bot from looping and missing unexplored areas; ensures full coverage.
+**4. [#193] AI bot should avoid re-entering doorways and tiles to ensure full dungeon exploration (DONE)**
+- Lap-aware exploration: lap 0 completes full room perimeter (doors skipped), lap 1+ prefers unvisited doors for exit pathfinding. World-coordinate visited tracking replaces unstable screen-local positions.
 
 **5. [#195] Bot should explore room interiors and return to wall-following**
 - Bot should not ignore items in room interiors; improves loot collection and exploration.
@@ -36,14 +36,16 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 **9. [#185] Bot bug: death not reliably detected (loops after HP=0/0 and missing @)**
 - Bot fails to terminate after death, causing endless loops.
 
-**10. [#189] 1st level characters can start with 1 HP**
-- FIXED in commit c2bcdc4 (minimum starting HP is half the hit die). Can close #189.
+**10. [#189] 1st level characters can start with 1 HP (DONE)**
+- FIXED in commit c2bcdc4 (minimum starting HP is half the hit die). Closed.
 
 ---
 ### Notes
 - This list is up to date with current code and open issues as of 2026-04-06.
-- See commit c2bcdc4 for the fix to #189.
-- #191 and #192 done in commit 941ec0b. Next priority: #193.
+- See commit c2bcdc4 for the fix to #189 (closed).
+- #191 and #192 done in commit 941ec0b (closed).
+- #193 done in commit e84bf5d (closed). #194 closed.
+- Next priority: #195 (room interior exploration).
 
 
 **Foundation:** The ASCII renderer (`src/RenderASCII.cpp`, merged in PR#155) renders the game as plain text via ncurses. Running the game inside a `tmux` session lets an external script read screen state with `tmux capture-pane` and send commands with `tmux send-keys`. No changes to the game executable are required.

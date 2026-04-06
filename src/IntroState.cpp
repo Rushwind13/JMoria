@@ -3,7 +3,7 @@
 //  JMoria
 //
 //  Created by Jimbo S. Harris on 11/18/24.
-//  Copyright © 2024 Jimbo S. Harris. All rights reserved.
+//  Copyright © 2024-2026 Jimbo S. Harris. All rights reserved.
 //
 
 #include "IntroState.h"

@@ -3,7 +3,7 @@
 //  JMoria
 //
 //  Created by Jimbo S. Harris on 11/29/2024.
-//  Copyright © 2024 Jimbo S. Harris. All rights reserved.
+//  Copyright © 2024-2026 Jimbo S. Harris. All rights reserved.
 //
 
 #include "RangedState.h"

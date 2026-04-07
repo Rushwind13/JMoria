@@ -30,14 +30,75 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 **7. [#188] Bot parser likely overcounts visible monsters/items in ASCII viewport**
 - Bot logic is noisy due to incorrect entity counts; affects threat and decision heuristics.
 
-**8. [#186] Bot behavior: exploration oscillates in place (k/j loop)**
-- Bot can get stuck oscillating between two moves, making no progress.
+**8. [#186] Bot behavior: exploration redesign — goal-based pathfinding**
+- Old approach (left-hand-rule + lap counting + stale timers + breakout hacks) abandoned.
+- New approach: goal-based exploration with room-aware state machine. See design below.
 
 **9. [#185] Bot bug: death not reliably detected (loops after HP=0/0 and missing @)**
 - Bot fails to terminate after death, causing endless loops.
 
 **10. [#189] 1st level characters can start with 1 HP (DONE)**
 - FIXED in commit c2bcdc4 (minimum starting HP is half the hit die). Closed.
+
+**11. [#196] Dungeon gen: two hallways can "sidle" creating double-wide corridors**
+- Bug: two hallways placed adjacent share a wall, creating double-wide corridors with floating doorways. Rooms may sidle, room+hallway may sidle, but two hallways must not.
+
+---
+
+### #186 Exploration Redesign: Goal-Based Pathfinding
+
+**Goal hierarchy** (constant, every level):
+1. See the whole map (visit every reachable tile)
+2. Kill monsters (or flee if outmatched)
+3. Collect and evaluate items/equipment
+4. Find and take the down staircase
+
+**Room exploration** depends on lighting:
+
+**Dark room:**
+- Wall-follow the perimeter to reveal room boundaries, doors, and walls
+- Stripe the interior in rows/columns to reveal every floor tile
+- Now you can see monsters, items, and exits — handle them
+
+**Lit room:**
+- You already see everything. Skip perimeter/stripe entirely
+- Pathfind directly to monsters, items, and doors
+
+**After a room is fully revealed:**
+- Fight all visible monsters (pathfind to them)
+- Pick up all items (pathfind to them)
+- Evaluate gear: wield/wear upgrades, identify unknowns by use
+- Room is "cleared"
+
+**Choosing where to go next:**
+- Look at all known exits (doors, open doorways, hallway openings)
+- Prefer exits leading to unvisited territory
+- If multiple choices are equal, use a consistent tiebreaker (e.g. always pick left/clockwise)
+- Pathfind directly to the chosen exit — no wall-following in known territory
+
+**In a hallway:**
+- Follow it to the next room. Pathfind to the far end.
+
+**Overall map strategy:**
+- The bot desires to walk every tile on the map
+- `visited_world` tracks where it's been
+- Always pathfind toward the nearest unvisited tile when there's no higher-priority task (monster, item)
+- Wall-follow is a tool for dark-room perimeter revelation only, not the core navigation strategy
+- In a perfect game, the bot would never visit any square twice
+
+**Key principles:**
+- Pathfind in known/lit areas; wall-follow only in the dark
+- When choosing between equal paths, pick consistently (e.g. leftmost) to disambiguate
+- `_is_hallway()` helper: checks 3x3 around a tile; ≤2 open neighbours = corridor
+
+**Implementation tasks:**
+1. Revert current wall-follow patch complexity (lap counting, breakout, stale timers)
+2. Add `_is_hallway()` and room-vs-hallway detection
+3. Replace explore phases: `head_east` → `reveal_room` → `clear_room` → `choose_exit` → `navigate`
+4. `reveal_room`: if dark, wall-follow perimeter then stripe interior; if lit, skip
+5. `clear_room`: pathfind to monsters, then items, then evaluate gear
+6. `choose_exit`: scan for unvisited exits, pathfind to best one
+7. `navigate`: A* to target exit/tile, follow hallways to next room
 
 ---
 ### Notes
@@ -47,7 +108,8 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 - #193 done in commit e84bf5d (closed). #194 closed.
 - #195 done in commit ce3d4c5 (closed).
 - #190 done in commit 140d0c6 (closed).
-- Next priority: #188 (bot parser overcounts visible monsters/items).
+- #186 redesigned: old wall-follow patches reverted, replaced with goal-based exploration.
+- Next priority: #186 exploration redesign, then #188 (bot parser overcounts).
 
 
 **Foundation:** The ASCII renderer (`src/RenderASCII.cpp`, merged in PR#155) renders the game as plain text via ncurses. Running the game inside a `tmux` session lets an external script read screen state with `tmux capture-pane` and send commands with `tmux send-keys`. No changes to the game executable are required.

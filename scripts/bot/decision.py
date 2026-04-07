@@ -344,13 +344,7 @@ class DecisionEngine:
 
         if adjacent is not None:
             self.mode = "combat"
-            # If under-equipped and useful items are visible, detour to grab them.
-            # The monster follows and hits, but getting gear is worth the damage.
-            if self._needs_gear(state) and state.items:
-                gear_step = self._step_toward_useful_item(state, pos)
-                if gear_step:
-                    return gear_step
-            # Otherwise bump-attack — monsters match player speed,
+            # Always bump-attack — monsters match player speed,
             # so fleeing just means getting hit while running.
             dr = adjacent[0] - pos[0]
             dc = adjacent[1] - pos[1]
@@ -729,6 +723,20 @@ class DecisionEngine:
                     continue
                 if mpos == grc:
                     self.goal_stack.pop()
+                    # Commit to current direction: push next adjacent
+                    # unexplored tile, preferring the direction of travel.
+                    last_dir = KEY_TO_DIR.get(self.last_action)
+                    check_dirs = []
+                    if last_dir:
+                        check_dirs.append(last_dir)
+                    for d in pf.DIRS_8:
+                        if d != last_dir:
+                            check_dirs.append(d)
+                    for dr, dc in check_dirs:
+                        nr, nc = mpos[0] + dr, mpos[1] + dc
+                        if (nr, nc) in self.unexplored_tiles:
+                            self.goal_stack.append(("unexplored", (nr, nc)))
+                            break
                     continue
                 break
             elif gtype == "staircase":
@@ -758,6 +766,20 @@ class DecisionEngine:
 
         # Pathfind to top goal.
         gtype, grc = self.goal_stack[-1]
+
+        # Opportunistic: if an item goal is adjacent, step on it now
+        # rather than pathing around it to reach a further goal.
+        if gtype != "item":
+            for i in range(len(self.goal_stack) - 1, -1, -1):
+                if self.goal_stack[i][0] == "item":
+                    irc = self.goal_stack[i][1]
+                    if pf.heuristic(mpos, irc) == 1:
+                        # Promote: move item goal to top of stack.
+                        self.goal_stack.append(self.goal_stack.pop(i))
+                        gtype, grc = self.goal_stack[-1]
+                        self.cached_path = []
+                        self.cached_path_target = None
+                        break
 
         # Invalidate cached path if target changed.
         if self.cached_path_target != grc:
@@ -1360,6 +1382,23 @@ class DecisionEngine:
                     continue
                 return (mr, mc)
         return None
+
+    def _nearest_non_phantom_monster(self, state, pos):
+        """Return screen (row, col) of nearest visible non-phantom monster."""
+        pr, pc = pos
+        best = None
+        best_dist = 999
+        for mr, mc, _ in state.monsters:
+            if (mr, mc) == (pr, pc):
+                continue
+            wp = self._local_to_world(state, (mr, mc))
+            if wp and wp in self.phantom_positions:
+                continue
+            d = pf.heuristic(pos, (mr, mc))
+            if d < best_dist:
+                best_dist = d
+                best = (mr, mc)
+        return best
 
     @staticmethod
     def _adjacent_monster_glyph(pos, monsters):

@@ -73,15 +73,28 @@ class DecisionEngine:
         self.current_motion_pos = None
         self.current_map = None
         self.current_pos = None
-        # Wall-follow: head east until wall, then clockwise wall hug.
-        self.explore_phase = "head_east"       # "head_east" or "wall_follow"
-        self.wall_follow_heading = None          # current heading key during wall follow
-        self.wall_follow_start_wpos = None       # world pos where wall follow began
-        self.wall_follow_started = False         # True after first step away from start
-        self.wall_follow_lap_count = 0           # laps completed at current start
-        self.door_momentum = False                   # True after stepping onto a door tile
+        # Goal-based exploration state machine.
+        self.explore_phase = "head_east"       # head_east, seek_unvisited
+        self.wall_follow_heading = None          # current heading during perimeter walk
+        self.wall_follow_start_wpos = None       # world pos where perimeter walk began
+        self.wall_follow_started = False         # True after first step from perimeter start
+        self.door_momentum = False               # True after opening a door (push through next tick)
+        self.known_map = [[' '] * 100 for _ in range(100)]  # persistent 100x100 dungeon map
         self._current_depth = 1
         self.failed_door_dirs_by_world = {}
+        # Door graph: nodes = door world positions, edges = same-room connectivity.
+        self.door_graph = {}        # wpos -> set of connected door wpos
+        self.explored_doors = set() # doors the bot has stepped through
+        self.last_door_wpos = None  # last door we stepped through (for linking)
+        self.cached_path = []       # committed path (world coords) to follow
+        self.cached_path_target = None  # tile wpos we're pathing toward
+        # Tile-level exploration tracking.
+        self.unexplored_tiles = set()  # walkable (row,col) seen but not yet cleared
+        self.explored_tiles = set()    # walkable (row,col) we've cleared
+        # Goal stack: LIFO list of (goal_type, (row,col)).
+        # Types: "unexplored", "door", "item", "staircase"
+        self.goal_stack = []
+        self.pushed_goals = set()  # avoid duplicate pushes
         self.mode = "seek"
 
     def decide(self, state):
@@ -106,6 +119,10 @@ class DecisionEngine:
         if motion_pos is not None:
             self.visited_world.add((state.dungeon_depth, motion_pos[0], motion_pos[1]))
 
+        self._update_known_map(state)
+        self._update_door_graph(state)
+        self._update_exploration_sets(state)
+
         hp_loss = 0
         if self.last_player_hp is not None:
             hp_loss = max(0, self.last_player_hp - state.player_hp)
@@ -114,6 +131,16 @@ class DecisionEngine:
         if state.dungeon_depth != self.last_depth:
             self.equip_attempt_counts.clear()
             self.phantom_positions.clear()
+            self.known_map = [[' '] * 100 for _ in range(100)]
+            self.door_graph = {}
+            self.explored_doors = set()
+            self.last_door_wpos = None
+            self.cached_path = []
+            self.cached_path_target = None
+            self.unexplored_tiles = set()
+            self.explored_tiles = set()
+            self.goal_stack = []
+            self.pushed_goals = set()
             self.last_depth = state.dungeon_depth
 
         self._update_progress(state)
@@ -287,12 +314,7 @@ class DecisionEngine:
                 if action in "hjklyubn":
                     return self._record_decision(action, "corner_breakout_attack")
             if self.explore_phase == "head_east":
-                self.explore_phase = "wall_follow"
-                # Start heading south (clockwise turn from east).
-                self.wall_follow_heading = "j"
-                self.wall_follow_start_wpos = motion_pos
-                self.wall_follow_started = False
-                self.wall_follow_lap_count = 0
+                self._begin_room_explore(state.map, pos, motion_pos, heading="j")
 
         # 1) Survival first: rest when HP below 50% and no visible threats.
         if state.player_max_hp > 0 and state.hp_pct < 0.50:
@@ -302,16 +324,8 @@ class DecisionEngine:
                 adjacent = self._adjacent_monster(pos, state.monsters)
             if adjacent is None and not state.monsters:
                 return self._record_decision("R", "low_hp_rest_no_visible_threat")
-            if adjacent is None and state.monsters:
-                # Monster visible but not adjacent — keep fleeing, don't rest.
-                flee_target = state.monsters[0][:2]
-                flee, flee_mode = self._brave_flee_key(state, pos, flee_target, allow_equal=False)
-                if flee:
-                    return self._record_decision(flee, f"low_hp_flee_visible_{flee_mode}")
-            if adjacent is not None:
-                flee, flee_mode = self._brave_flee_key(state, pos, adjacent, allow_equal=False)
-                if flee:
-                    return self._record_decision(flee, f"low_hp_flee_{flee_mode}_from_{adjacent}")
+            # Adjacent monster at low HP: must fight — fleeing is pointless
+            # since monsters match player speed.  Fall through to combat.
 
         # 2) Consumable usage: quaff healing when hurt, try unknowns when safe.
         use_action = self._consider_consumable_use(state, adjacent)
@@ -330,44 +344,20 @@ class DecisionEngine:
 
         if adjacent is not None:
             self.mode = "combat"
-            if state.player_hp <= 1:
-                flee, flee_mode = self._brave_flee_key(state, pos, adjacent, allow_equal=True)
-                if flee and flee in "hjklyubn":
-                    self.mode = "recover"
-                    return self._record_decision(flee, f"fragile_hp_flee_{flee_mode}")
-            threat_name = self.recent_attacker_name
-            danger = self._monster_danger_score(threat_name) if threat_name else 0.0
-            confidence = self._monster_confidence(threat_name) if threat_name else 0.0
-            if self._should_flee_known_threat(state, danger, confidence):
-                flee, flee_mode = self._brave_flee_key(state, pos, adjacent, allow_equal=True)
-                if flee:
-                    return self._record_decision(
-                        flee,
-                        f"flee_known_threat_{flee_mode}_{threat_name}_d{danger:.2f}_c{confidence:.2f}",
-                    )
-            # Flee from unknown monsters when not healthy enough to risk it.
-            glyph = self._adjacent_monster_glyph(pos, state.monsters)
-            threat_lvl = self._glyph_threat_level(glyph)
-            if confidence < 0.3:
-                # Major monster (uppercase glyph) — flee unless nearly full HP.
-                if threat_lvl >= 2 and state.hp_pct < 0.80:
-                    flee, flee_mode = self._brave_flee_key(state, pos, adjacent, allow_equal=True)
-                    if flee:
-                        return self._record_decision(
-                            flee,
-                            f"flee_unknown_major_{flee_mode}_glyph_{glyph}_hp{state.hp_pct:.0%}",
-                        )
-                # Any unknown monster — flee if HP is below 60%.
-                if state.hp_pct < 0.60:
-                    flee, flee_mode = self._brave_flee_key(state, pos, adjacent, allow_equal=True)
-                    if flee:
-                        return self._record_decision(
-                            flee,
-                            f"flee_unknown_{flee_mode}_glyph_{glyph}_hp{state.hp_pct:.0%}",
-                        )
+            # If under-equipped and useful items are visible, detour to grab them.
+            # The monster follows and hits, but getting gear is worth the damage.
+            if self._needs_gear(state) and state.items:
+                gear_step = self._step_toward_useful_item(state, pos)
+                if gear_step:
+                    return gear_step
+            # Otherwise bump-attack — monsters match player speed,
+            # so fleeing just means getting hit while running.
             dr = adjacent[0] - pos[0]
             dc = adjacent[1] - pos[1]
             action = pf.DIR_TO_KEY.get((dr, dc), ".")
+            threat_name = self.recent_attacker_name
+            danger = self._monster_danger_score(threat_name) if threat_name else 0.0
+            confidence = self._monster_confidence(threat_name) if threat_name else 0.0
             return self._record_decision(
                 action,
                 f"{self._goal_thought(state, 'adjacent_attack', adjacent)}_d{danger:.2f}_c{confidence:.2f}",
@@ -378,107 +368,656 @@ class DecisionEngine:
             self.mode = "recover"
             return self._record_decision("R", f"post_combat_rest_hp{state.hp_pct:.0%}")
 
-        # 5) Item collection: seek visible items in room interiors.
-        # Items adjacent to walls are collected naturally during wall-follow;
-        # interior items require an explicit detour.
-        if state.items and not state.monsters:
-            for ir, ic, ich in sorted(
-                state.items, key=lambda x: pf.heuristic(pos, (x[0], x[1]))
-            ):
-                if self._adjacent_to_wall(state.map, (ir, ic)):
-                    continue
-                path = pf.path_to(state.map, pos, (ir, ic))
-                key = pf.first_step_key(path)
-                if key:
-                    self.mode = "seek"
-                    return self._record_decision(key, f"seek_interior_item_{ich}")
-
-        # === EXPLORATION: Wall hug ===
+        # === GOAL STACK: unified exploration + item collection ===
         self.mode = "seek"
+        return self._pursue_goals(state, pos)
 
-        # Phase 1: head east until a wall bump switches us.
-        if self.explore_phase == "head_east":
-            if self._can_step(state.map, pos, "l"):
-                return self._record_decision("l", "head_east")
-            # Can't step east but no bump message yet — wait a tick.
-            return self._record_decision("l", "head_east_push")
+    # ------------------------------------------------------------------
+    # Goal-based exploration state machine
+    # ------------------------------------------------------------------
 
-        # Phase 2: clockwise wall follow (left-hand rule, 8 directions).
-        # Lap check: if we loop back to start, try to exit through a door.
-        if (
-            self.wall_follow_started
-            and self.wall_follow_start_wpos is not None
-            and motion_pos == self.wall_follow_start_wpos
-        ):
-            self.wall_follow_lap_count += 1
-            self.wall_follow_started = False
+    def _explore(self, state, pos, motion_pos):
+        """Goal-based exploration: pathfind to nearest unexplored tile."""
+        grid = state.map
 
-            if self.wall_follow_lap_count <= 1:
-                # Lap 0 just finished — room perimeter mapped.
-                # Start lap 1 which will use door-seeking in _wall_follow_cw.
-                self.wall_follow_start_wpos = motion_pos
-                return self._record_decision(".", "wall_follow_lap_mapped")
-
-            # Lap 1+ finished — actively seek an unvisited door to exit.
-            exit_key = self._find_door_exit_step(state.map, pos)
-            if exit_key:
-                target = self._step_pos(pos, exit_key)
-                if target and state.map[target[0]][target[1]] == '+':
-                    self.last_open_dir = exit_key
-                    self.pending_keys = [exit_key]
-                    self.door_momentum = True
-                    return self._record_decision("o", f"lap_exit_open_{exit_key}")
-                self.wall_follow_heading = exit_key
-                self.wall_follow_start_wpos = motion_pos
-                return self._record_decision(exit_key, f"lap_exit_{exit_key}")
-
-            # No visible door — search for secret doors, then keep wall-following.
-            self.wall_follow_start_wpos = motion_pos
-            return self._record_decision(".", "wall_follow_lap_search")
-
-        # If not adjacent to any wall (e.g. after an interior-item detour),
-        # pathfind back to the nearest wall-adjacent tile first.
-        if not self._adjacent_to_wall(state.map, pos):
-            wall_tile = pf.find_nearest_target(
-                state.map, pos,
-                lambda ch, p: self._adjacent_to_wall(state.map, p) and pf.is_walkable(ch),
-            )
-            if wall_tile:
-                key = pf.first_step_key(pf.path_to(state.map, pos, wall_tile))
-                if key:
-                    # Invalidate start so lap detection resets once we reach wall.
-                    self.wall_follow_start_wpos = None
-                    return self._record_decision(key, "return_to_wall")
-
-        # Re-establish wall-follow anchor after returning from a detour.
-        if self.wall_follow_start_wpos is None:
-            self.wall_follow_start_wpos = motion_pos
-            self.wall_follow_started = False
-            self.wall_follow_lap_count = 1  # perimeter already mapped; go straight to door-seek
-
-        step = self._wall_follow_cw(state.map, pos)
-        if step:
-            # If the step leads to a closed door, open it first.
-            target = self._step_pos(pos, step)
-            if target and state.map[target[0]][target[1]] == '+':
-                self.last_open_dir = step
-                self.pending_keys = [step]
-                self.door_momentum = True
-                return self._record_decision("o", f"wall_hug_open_{step}")
-            # Mark that we've moved away from start.
-            if not self.wall_follow_started and motion_pos != self.wall_follow_start_wpos:
-                self.wall_follow_started = True
-            tag = "door_thru" if self.door_momentum else "wall_hug"
+        # After stepping through a door, push one step forward then
+        # switch to seek_unvisited on the following tick.
+        if self.door_momentum:
             self.door_momentum = False
-            return self._record_decision(step, f"{tag}_{step}")
+            heading = self.last_action if self.last_action in "hjklyubn" else "l"
+            self.explore_phase = "seek_unvisited"
+            if self._can_step(grid, pos, heading):
+                return self._record_decision(heading, "door_push_thru")
+            # Can't push forward — fall through to seek immediately.
 
-        # Fallback: try any wall-adjacent direction.
+        # head_east: initial walk east until blocked, then switch to seek.
+        if self.explore_phase == "head_east":
+            if self._can_step(grid, pos, "l"):
+                return self._record_decision("l", "head_east")
+            # Hit a wall or obstacle — switch to tile-based exploration.
+            self.explore_phase = "seek_unvisited"
+
+        # seek_unvisited: always pathfind to nearest unexplored tile.
+        if self.explore_phase in ("seek_unvisited", "navigate_exit", "enter_room", "reveal_perimeter"):
+            self.explore_phase = "seek_unvisited"
+            wpos = state.player_world_pos
+            if wpos:
+                mpos = self._wpos_to_rc(wpos)  # map coords (row, col)
+                # Follow cached path if still valid.
+                if self.cached_path and self.cached_path_target is not None:
+                    if self.cached_path_target not in self.unexplored_tiles:
+                        # Target was explored (stepped on or lit-room auto-clear).
+                        self.cached_path = []
+                        self.cached_path_target = None
+                    elif self.cached_path and self.cached_path[0] == mpos:
+                        self.cached_path.pop(0)
+                    elif mpos not in self.cached_path:
+                        # Off-path (combat detour etc). Recompute.
+                        self.cached_path = []
+                        self.cached_path_target = None
+                    else:
+                        # Skip steps we've already passed.
+                        while self.cached_path and self.cached_path[0] != mpos:
+                            self.cached_path.pop(0)
+                        if self.cached_path:
+                            self.cached_path.pop(0)  # remove current pos
+
+                # Follow cached path.
+                if self.cached_path:
+                    nxt = self.cached_path[0]
+                    dkey = pf.DIR_TO_KEY.get((nxt[0] - mpos[0], nxt[1] - mpos[1]))
+                    if dkey:
+                        # Check if next step is a closed door — open it.
+                        nxt_ch = self.known_map[nxt[0]][nxt[1]] if 0 <= nxt[0] < 100 and 0 <= nxt[1] < 100 else None
+                        if nxt_ch == '+':
+                            self.last_open_dir = dkey
+                            self.pending_keys = [dkey]
+                            self.door_momentum = True
+                            self.cached_path = []
+                            self.cached_path_target = None
+                            return self._record_decision("o", f"path_open_{dkey}")
+                        if self._can_step(grid, pos, dkey):
+                            dist = len(self.cached_path)
+                            nunex = len(self.unexplored_tiles)
+                            return self._record_decision(dkey, f"follow_path_d{dist}_u{nunex}")
+                    # Path step not walkable — recompute.
+                    self.cached_path = []
+                    self.cached_path_target = None
+
+                # Find nearest unexplored tile.
+                target = self._nearest_unexplored_tile(mpos)
+                if target:
+                    dist = pf.heuristic(mpos, target)
+                    if dist <= 1:
+                        dkey = pf.DIR_TO_KEY.get((target[0] - mpos[0], target[1] - mpos[1]))
+                        if dkey:
+                            # Closed door — open it.
+                            tch = self.known_map[target[0]][target[1]]
+                            if tch == '+':
+                                self.last_open_dir = dkey
+                                self.pending_keys = [dkey]
+                                self.door_momentum = True
+                                return self._record_decision("o", f"open_door_{dkey}")
+                            if self._can_step(grid, pos, dkey):
+                                nunex = len(self.unexplored_tiles)
+                                return self._record_decision(dkey, f"step_unexplored_u{nunex}")
+                        # Can't step — mark explored and let next tick retry.
+                        self.unexplored_tiles.discard(target)
+                        self.explored_tiles.add(target)
+                    else:
+                        # Pathfind to the target (or a walkable neighbor for doors).
+                        path = pf.path_to(self.known_map, mpos, target)
+                        if not path and self.known_map[target[0]][target[1]] == '+':
+                            adj = self._walkable_neighbor_of(target)
+                            if adj:
+                                path = pf.path_to(self.known_map, mpos, adj)
+                        if path and len(path) >= 2:
+                            self.cached_path = path[1:]
+                            self.cached_path_target = target
+                            nxt = self.cached_path[0]
+                            key = pf.DIR_TO_KEY.get((nxt[0] - mpos[0], nxt[1] - mpos[1]))
+                            if key:
+                                # First step might be a closed door.
+                                nxt_ch = self.known_map[nxt[0]][nxt[1]]
+                                if nxt_ch == '+':
+                                    self.last_open_dir = key
+                                    self.pending_keys = [key]
+                                    self.door_momentum = True
+                                    self.cached_path = []
+                                    self.cached_path_target = None
+                                    return self._record_decision("o", f"path_open_{key}")
+                                nunex = len(self.unexplored_tiles)
+                                return self._record_decision(key, f"seek_unexplored_d{dist}_u{nunex}")
+                        # Pathfind failed — mark unreachable.
+                        self.unexplored_tiles.discard(target)
+                        self.explored_tiles.add(target)
+
+        # Stuck fallback: try any walkable direction.
         for key in "ljkhyubn":
-            if self._can_step(state.map, pos, key):
+            if self._can_step(grid, pos, key):
                 return self._record_decision(key, f"stuck_fallback_{key}")
 
         self.mode = "idle"
         return self._record_decision(".", "idle_wait")
+
+    def _begin_room_explore(self, grid, pos, motion_pos, heading="j"):
+        """Initialize exploration of a new room or corridor."""
+        if self._is_hallway_tile(grid, pos):
+            # Hallway: no perimeter needed, pathfind along it.
+            self.explore_phase = "seek_unvisited"
+        elif self._room_is_visible(grid, pos):
+            # Lit room: all tiles already revealed, skip perimeter.
+            self.explore_phase = "seek_unvisited"
+        else:
+            # Dark room: wall-follow perimeter to reveal edges.
+            self.explore_phase = "reveal_perimeter"
+            self.wall_follow_heading = heading
+            self.wall_follow_start_wpos = motion_pos
+            self.wall_follow_started = False
+
+    @staticmethod
+    def _room_is_visible(grid, pos):
+        """Check if the room appears lit (floor tiles visible beyond 1 step)."""
+        r, c = pos
+        rows = len(grid)
+        cols = len(grid[0]) if rows else 0
+        far_floor = 0
+        for dr in range(-3, 4):
+            for dc in range(-3, 4):
+                if abs(dr) <= 1 and abs(dc) <= 1:
+                    continue  # skip adjacent tiles (always visible)
+                nr, nc = r + dr, c + dc
+                if 0 <= nr < rows and 0 <= nc < cols:
+                    ch = grid[nr][nc]
+                    if ch in (".", "'", "<", ">"):
+                        far_floor += 1
+        return far_floor >= 3
+
+    # ------------------------------------------------------------------
+    # Known-map management (persistent 100x100 dungeon grid)
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _wpos_to_rc(wpos):
+        """Convert world pos (X, Y) to map coords (row, col) = (Y, X)."""
+        return (wpos[1], wpos[0])
+
+    @staticmethod
+    def _rc_to_wpos(rc):
+        """Convert map coords (row, col) to world pos (X, Y) = (col, row)."""
+        return (rc[1], rc[0])
+
+    def _update_known_map(self, state):
+        """Blit visible screen tiles onto the persistent 100x100 known_map."""
+        if not state.map or state.player_pos is None or state.player_world_pos is None:
+            return
+        pr, pc = state.player_pos          # screen (row, col)
+        wx, wy = state.player_world_pos    # world (X=col, Y=row)
+        monster_set = {(mr, mc) for mr, mc, _ in state.monsters}
+        item_set = {(ir, ic) for ir, ic, _ in state.items}
+        for lr in range(len(state.map)):
+            for lc in range(len(state.map[lr])):
+                ch = state.map[lr][lc]
+                if ch == ' ':
+                    continue  # out of field-of-view, no info
+                gr = wy + (lr - pr)    # map row = world Y + screen row delta
+                gc = wx + (lc - pc)    # map col = world X + screen col delta
+                if 0 <= gr < 100 and 0 <= gc < 100:
+                    if (lr, lc) in monster_set or (lr, lc) in item_set or ch == '@':
+                        self.known_map[gr][gc] = '.'
+                    else:
+                        self.known_map[gr][gc] = ch
+
+        # Stamp unknown 8-neighbors of player's map position as wall.
+        # The player always sees adjacent tiles; anything still unknown is solid rock.
+        prow, pcol = wy, wx   # player's map coords
+        for dr in (-1, 0, 1):
+            for dc in (-1, 0, 1):
+                if dr == 0 and dc == 0:
+                    continue
+                nr, nc = prow + dr, pcol + dc
+                if 0 <= nr < 100 and 0 <= nc < 100:
+                    if self.known_map[nr][nc] == ' ':
+                        self.known_map[nr][nc] = '#'
+
+    def _update_exploration_sets(self, state):
+        """Update unexplored/explored tile sets based on current visibility.
+
+        Every visible walkable tile is added to unexplored (if new).
+        Current tile is always cleared (moved to explored).
+        In a lit room, floor tiles are auto-cleared; doors stay unexplored
+        until the bot steps through them.
+        """
+        if not state.map or state.player_pos is None or state.player_world_pos is None:
+            return
+        pr, pc = state.player_pos          # screen (row, col)
+        wx, wy = state.player_world_pos    # world (X=col, Y=row)
+        player_rc = (wy, wx)               # map coords (row, col)
+        monster_set = {(mr, mc) for mr, mc, _ in state.monsters}
+        item_set = {(ir, ic) for ir, ic, _ in state.items}
+        in_lit = self._room_is_visible(state.map, state.player_pos)
+
+        for lr in range(len(state.map)):
+            for lc in range(len(state.map[lr])):
+                ch = state.map[lr][lc]
+                if ch == ' ':
+                    continue
+                gr = wy + (lr - pr)    # map row
+                gc = wx + (lc - pc)    # map col
+                if not (0 <= gr < 100 and 0 <= gc < 100):
+                    continue
+                tw = (gr, gc)
+                if tw in self.explored_tiles:
+                    continue
+                # Monster/item/player overlays are walkable floor.
+                eff = ch
+                if (lr, lc) in monster_set or (lr, lc) in item_set or ch == '@':
+                    eff = '.'
+                if eff not in ('.', "'", '+', '<', '>'):
+                    continue  # wall / rock / non-walkable
+                # Add to unexplored if we haven't seen it before.
+                if tw not in self.unexplored_tiles:
+                    self.unexplored_tiles.add(tw)
+                # In lit rooms, auto-clear tiles not on the exploration
+                # frontier.  The frontier check (_has_unknown_neighbor)
+                # naturally keeps closed doors unexplored (their far side
+                # is always unknown) and keeps open doors that lead into
+                # dark areas.  Interior open doors get cleared so the bot
+                # doesn't bounce between them.
+                if in_lit and not self._has_unknown_neighbor(tw):
+                    self.unexplored_tiles.discard(tw)
+                    self.explored_tiles.add(tw)
+
+        # Always clear current position.
+        self.unexplored_tiles.discard(player_rc)
+        self.explored_tiles.add(player_rc)
+
+    # ------------------------------------------------------------------
+    # Goal stack
+    # ------------------------------------------------------------------
+
+    def _update_goal_stack(self, state):
+        """Push newly-visible doors and items onto the goal stack.
+
+        Doors go on first (lower priority), items on top (higher priority).
+        Duplicates are suppressed via pushed_goals.
+        """
+        if not state.map or state.player_pos is None or state.player_world_pos is None:
+            return
+        pr, pc = state.player_pos
+        wx, wy = state.player_world_pos
+
+        new_doors = []
+        new_items = []
+
+        # Scan visible doors that are still unexplored.
+        for lr in range(len(state.map)):
+            for lc in range(len(state.map[lr])):
+                ch = state.map[lr][lc]
+                if ch in ("'", "+"):
+                    grc = (wy + (lr - pr), wx + (lc - pc))
+                    if not (0 <= grc[0] < 100 and 0 <= grc[1] < 100):
+                        continue
+                    key = ("door", grc)
+                    if key not in self.pushed_goals and grc not in self.explored_tiles:
+                        self.pushed_goals.add(key)
+                        new_doors.append(key)
+
+        # Scan visible items.
+        for ir, ic, _ich in state.items:
+            grc = (wy + (ir - pr), wx + (ic - pc))
+            if not (0 <= grc[0] < 100 and 0 <= grc[1] < 100):
+                continue
+            key = ("item", grc)
+            if key not in self.pushed_goals:
+                self.pushed_goals.add(key)
+                new_items.append(key)
+
+        # Push doors (lower), then items (higher = processed first).
+        self.goal_stack.extend(new_doors)
+        self.goal_stack.extend(new_items)
+
+    def _pursue_goals(self, state, pos):
+        """Work through the goal stack: pathfind to the top goal."""
+        grid = state.map
+        wpos = state.player_world_pos
+        if not wpos:
+            return self._record_decision(".", "no_wpos")
+        mpos = self._wpos_to_rc(wpos)
+        pr, pc = state.player_pos
+        wx, wy = wpos
+
+        # After stepping through a door, push one step forward.
+        if self.door_momentum:
+            self.door_momentum = False
+            heading = self.last_action if self.last_action in "hjklyubn" else "l"
+            if self._can_step(grid, pos, heading):
+                return self._record_decision(heading, "door_push_thru")
+
+        # head_east: initial walk east until blocked.
+        if self.explore_phase == "head_east":
+            if self._can_step(grid, pos, "l"):
+                return self._record_decision("l", "head_east")
+            self.explore_phase = "goal_stack"
+
+        # Push new doors/items we can see.
+        self._update_goal_stack(state)
+
+        # Clean stale/completed goals from the top of the stack.
+        while self.goal_stack:
+            gtype, grc = self.goal_stack[-1]
+            if gtype == "item":
+                # Item reached (we're standing on it) -> pop.
+                if mpos == grc:
+                    self.goal_stack.pop()
+                    continue
+                # Item might have been picked up or disappeared.
+                # We can't cheaply verify, so trust and pathfind.
+                break
+            elif gtype == "door":
+                # Door explored (stepped through or auto-cleared) -> pop.
+                if grc in self.explored_tiles:
+                    self.goal_stack.pop()
+                    continue
+                if mpos == grc:
+                    self.goal_stack.pop()
+                    continue
+                break
+            elif gtype == "unexplored":
+                if grc not in self.unexplored_tiles:
+                    self.goal_stack.pop()
+                    continue
+                if mpos == grc:
+                    self.goal_stack.pop()
+                    continue
+                break
+            elif gtype == "staircase":
+                if mpos == grc:
+                    self.goal_stack.pop()
+                    return self._record_decision(">", "descend_stairs")
+                break
+            else:
+                self.goal_stack.pop()
+
+        # If stack empty, push nearest unexplored tile or staircase.
+        if not self.goal_stack:
+            target = self._nearest_unexplored_tile(mpos)
+            if target:
+                self.goal_stack.append(("unexplored", target))
+            else:
+                stair = self._find_staircase(mpos)
+                if stair:
+                    self.goal_stack.append(("staircase", stair))
+
+        if not self.goal_stack:
+            # Nothing to do — stuck fallback.
+            for key in "ljkhyubn":
+                if self._can_step(grid, pos, key):
+                    return self._record_decision(key, f"stuck_fallback_{key}")
+            return self._record_decision(".", "idle_wait")
+
+        # Pathfind to top goal.
+        gtype, grc = self.goal_stack[-1]
+
+        # Invalidate cached path if target changed.
+        if self.cached_path_target != grc:
+            self.cached_path = []
+            self.cached_path_target = None
+
+        # Maintain cached path.
+        if self.cached_path:
+            if self.cached_path[0] == mpos:
+                self.cached_path.pop(0)
+            elif mpos not in self.cached_path:
+                self.cached_path = []
+                self.cached_path_target = None
+            else:
+                while self.cached_path and self.cached_path[0] != mpos:
+                    self.cached_path.pop(0)
+                if self.cached_path:
+                    self.cached_path.pop(0)
+
+        # Follow cached path.
+        if self.cached_path:
+            nxt = self.cached_path[0]
+            dkey = pf.DIR_TO_KEY.get((nxt[0] - mpos[0], nxt[1] - mpos[1]))
+            if dkey:
+                nxt_ch = self.known_map[nxt[0]][nxt[1]] if 0 <= nxt[0] < 100 and 0 <= nxt[1] < 100 else None
+                if nxt_ch == '+':
+                    self.last_open_dir = dkey
+                    self.pending_keys = [dkey]
+                    self.door_momentum = True
+                    self.cached_path = []
+                    self.cached_path_target = None
+                    return self._record_decision("o", f"goal_open_{dkey}")
+                if self._can_step(grid, pos, dkey):
+                    return self._record_decision(dkey, f"goal_{gtype}_d{len(self.cached_path)}")
+            self.cached_path = []
+            self.cached_path_target = None
+
+        # Compute new path.
+        dist = pf.heuristic(mpos, grc)
+        if dist <= 1:
+            dkey = pf.DIR_TO_KEY.get((grc[0] - mpos[0], grc[1] - mpos[1]))
+            if dkey:
+                tch = self.known_map[grc[0]][grc[1]]
+                if tch == '+':
+                    self.last_open_dir = dkey
+                    self.pending_keys = [dkey]
+                    self.door_momentum = True
+                    return self._record_decision("o", f"goal_open_{dkey}")
+                if self._can_step(grid, pos, dkey):
+                    return self._record_decision(dkey, f"goal_{gtype}_step")
+            # Can't step to this target — pop it and retry.
+            self.goal_stack.pop()
+            return self._pursue_goals(state, pos)
+
+        path_target = grc
+        path = pf.path_to(self.known_map, mpos, path_target)
+        if not path and self.known_map[grc[0]][grc[1]] == '+':
+            adj = self._walkable_neighbor_of(grc)
+            if adj:
+                path = pf.path_to(self.known_map, mpos, adj)
+
+        if path and len(path) >= 2:
+            self.cached_path = path[1:]
+            self.cached_path_target = grc
+            nxt = self.cached_path[0]
+            dkey = pf.DIR_TO_KEY.get((nxt[0] - mpos[0], nxt[1] - mpos[1]))
+            if dkey:
+                nxt_ch = self.known_map[nxt[0]][nxt[1]]
+                if nxt_ch == '+':
+                    self.last_open_dir = dkey
+                    self.pending_keys = [dkey]
+                    self.door_momentum = True
+                    self.cached_path = []
+                    self.cached_path_target = None
+                    return self._record_decision("o", f"goal_open_{dkey}")
+                if self._can_step(grid, pos, dkey):
+                    return self._record_decision(dkey, f"goal_{gtype}_seek_d{dist}")
+
+        # Pathfind failed — pop this goal and try next.
+        self.goal_stack.pop()
+        if self.goal_stack:
+            self.cached_path = []
+            self.cached_path_target = None
+            return self._pursue_goals(state, pos)
+
+        # Truly stuck.
+        for key in "ljkhyubn":
+            if self._can_step(grid, pos, key):
+                return self._record_decision(key, f"stuck_fallback_{key}")
+        return self._record_decision(".", "idle_wait")
+
+    def _find_staircase(self, mpos):
+        """Find nearest '>' in known_map via BFS."""
+        return pf.find_nearest_target(
+            self.known_map, mpos,
+            lambda ch, p: ch == '>',
+        )
+
+    def _find_frontier_target(self, world_pos):
+        """Nearest walkable tile in known_map adjacent to unknown territory."""
+        return pf.find_nearest_target(
+            self.known_map, world_pos,
+            lambda ch, p: pf.is_walkable(ch) and self._has_unknown_neighbor(p),
+        )
+
+    def _has_unknown_neighbor(self, world_pos):
+        """True if any 8-neighbor in known_map is unknown (' ')."""
+        r, c = world_pos
+        for dr in (-1, 0, 1):
+            for dc in (-1, 0, 1):
+                if dr == 0 and dc == 0:
+                    continue
+                nr, nc = r + dr, c + dc
+                if 0 <= nr < 100 and 0 <= nc < 100:
+                    if self.known_map[nr][nc] == ' ':
+                        return True
+        return False
+
+    def _walkable_neighbor_of(self, world_pos):
+        """Return a walkable known_map neighbor of world_pos, or None."""
+        r, c = world_pos
+        for dr, dc in pf.DIRS_8:
+            nr, nc = r + dr, c + dc
+            if 0 <= nr < 100 and 0 <= nc < 100:
+                if pf.is_walkable(self.known_map[nr][nc]):
+                    return (nr, nc)
+        return None
+
+    def _nearest_unexplored_tile(self, wpos):
+        """BFS on known_map to find nearest unexplored tile by walk distance.
+
+        Walks through walkable tiles. At each tile, checks if it or any
+        8-neighbor is in unexplored_tiles (handles closed doors which are
+        SOLID and thus not directly walkable by BFS).
+        """
+        if not self.unexplored_tiles:
+            return None
+        visited = {wpos}
+        queue = deque([wpos])
+        while queue:
+            cur = queue.popleft()
+            # If current tile is unexplored and walkable, return it.
+            if cur in self.unexplored_tiles and pf.is_walkable(self.known_map[cur[0]][cur[1]]):
+                return cur
+            # Check 8-neighbors for unexplored closed doors (solid, not BFS-reachable).
+            for dr, dc in pf.DIRS_8:
+                nr, nc = cur[0] + dr, cur[1] + dc
+                if 0 <= nr < 100 and 0 <= nc < 100:
+                    npos = (nr, nc)
+                    if npos in self.unexplored_tiles and self.known_map[nr][nc] == '+':
+                        return npos
+            # Expand BFS through walkable tiles.
+            for dr, dc in pf.DIRS_8:
+                nr, nc = cur[0] + dr, cur[1] + dc
+                if 0 <= nr < 100 and 0 <= nc < 100:
+                    npos = (nr, nc)
+                    if npos not in visited and pf.is_walkable(self.known_map[nr][nc]):
+                        visited.add(npos)
+                        queue.append(npos)
+        return None
+
+    # ------------------------------------------------------------------
+    # Door graph management
+    # ------------------------------------------------------------------
+
+    def _update_door_graph(self, state):
+        """Scan visible tiles for doors, add to graph, connect same-room doors."""
+        if not state.map or state.player_pos is None or state.player_world_pos is None:
+            return
+        pr, pc = state.player_pos          # screen (row, col)
+        wx, wy = state.player_world_pos    # world (X=col, Y=row)
+
+        # Collect all doors visible on screen (as map coords row, col).
+        visible_doors = []
+        for lr in range(len(state.map)):
+            for lc in range(len(state.map[lr])):
+                ch = state.map[lr][lc]
+                if ch in ("'", "+"):
+                    drc = (wy + (lr - pr), wx + (lc - pc))  # map (row, col)
+                    if 0 <= drc[0] < 100 and 0 <= drc[1] < 100:
+                        visible_doors.append(drc)
+                        if drc not in self.door_graph:
+                            self.door_graph[drc] = set()
+
+        # If we're standing on a door, mark it explored.
+        player_rc = (wy, wx)  # map (row, col)
+        player_ch = state.map[pr][pc] if 0 <= pr < len(state.map) and 0 <= pc < len(state.map[0]) else None
+        if player_ch in ("'", "+"):
+            if player_rc not in self.door_graph:
+                self.door_graph[player_rc] = set()
+            self.explored_doors.add(player_rc)
+            # Link to the last door we came from (hallway connection).
+            if self.last_door_wpos and self.last_door_wpos != player_rc:
+                self.door_graph[player_rc].add(self.last_door_wpos)
+                self.door_graph.setdefault(self.last_door_wpos, set()).add(player_rc)
+            self.last_door_wpos = player_rc
+
+        # Connect all visible doors to each other (same-room edges).
+        if len(visible_doors) > 1:
+            for i in range(len(visible_doors)):
+                for j in range(i + 1, len(visible_doors)):
+                    self.door_graph[visible_doors[i]].add(visible_doors[j])
+                    self.door_graph[visible_doors[j]].add(visible_doors[i])
+
+    def _nearest_unexplored_door(self, wpos, skip_set=None):
+        """BFS on known_map to find nearest unexplored door by walk distance."""
+        exclude = (self.explored_doors | skip_set) if skip_set else self.explored_doors
+        best = None
+        best_dist = 1_000_000
+        for dpos in self.door_graph:
+            if dpos in exclude:
+                continue
+            path = pf.path_to(self.known_map, wpos, dpos)
+            if path:
+                d = len(path) - 1
+                if d < best_dist:
+                    best_dist = d
+                    best = dpos
+        door_tile = pf.find_nearest_target(
+            self.known_map, wpos,
+            lambda ch, p: ch in ("'", "+") and p not in exclude,
+        )
+        if door_tile:
+            path = pf.path_to(self.known_map, wpos, door_tile)
+            if path and len(path) - 1 < best_dist:
+                best = door_tile
+        return best
+
+    def _nearest_unexplored_door_via_graph(self, wpos, skip_set=None):
+        """BFS on the door graph to find nearest unexplored door by graph hops.
+
+        Returns the first door on the path that we should walk toward.
+        Falls back to _nearest_unexplored_door if graph BFS fails.
+        """
+        exclude = (self.explored_doors | skip_set) if skip_set else self.explored_doors
+        # If we're on or adjacent to a graph door, start BFS from there.
+        start_doors = []
+        for dpos in self.door_graph:
+            if pf.heuristic(wpos, dpos) <= 1:
+                start_doors.append(dpos)
+        if not start_doors:
+            return self._nearest_unexplored_door(wpos, skip_set)
+
+        # BFS on graph edges.
+        visited = set()
+        queue = deque()
+        for sd in start_doors:
+            queue.append(sd)
+            visited.add(sd)
+        while queue:
+            cur = queue.popleft()
+            if cur not in exclude:
+                return cur
+            for neighbor in self.door_graph.get(cur, ()):
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    queue.append(neighbor)
+
+        # Graph BFS found nothing — fall back to spatial search.
+        return self._nearest_unexplored_door(wpos, skip_set)
 
     @staticmethod
     def _raw_key_toward(grid, start, goal):
@@ -533,7 +1072,6 @@ class DecisionEngine:
             f"mode={self.mode} "
             f"phase={self.explore_phase} "
             f"heading={self.wall_follow_heading} "
-            f"laps={self.wall_follow_lap_count} "
             f"stuck={self.stuck_turns}"
         )
 
@@ -591,114 +1129,62 @@ class DecisionEngine:
         return (depth, wpos[0], wpos[1]) in self.visited_world
 
     def _local_to_world_pos(self, local_pos):
-        """Convert local screen pos to world pos using current player offsets."""
-        mp = self.current_motion_pos
-        pp = self.current_pos
+        """Convert local screen pos to world pos (X, Y) using current offsets."""
+        mp = self.current_motion_pos  # (X, Y)
+        pp = self.current_pos         # screen (row, col)
         if mp is None or pp is None:
             return None
         lr, lc = local_pos
         pr, pc = pp
-        wr, wc = mp
-        return (wr + (lr - pr), wc + (lc - pc))
+        wx, wy = mp
+        return (wx + (lc - pc), wy + (lr - pr))  # (X', Y')
+
+    def _world_to_local_pos(self, world_pos):
+        """Convert world pos (X, Y) to local screen pos using current offsets."""
+        mp = self.current_motion_pos  # (X, Y)
+        pp = self.current_pos         # screen (row, col)
+        if mp is None or pp is None:
+            return None
+        wx, wy = mp
+        pr, pc = pp
+        x, y = world_pos  # (X, Y)
+        return (pr + (y - wy), pc + (x - wx))  # screen (row, col)
 
     # Clockwise direction ordering for 8-way movement.
     _CW = ['k', 'u', 'l', 'n', 'j', 'b', 'h', 'y']
     _CW_IDX = {k: i for i, k in enumerate(_CW)}
 
     def _wall_follow_cw(self, grid, pos):
-        """Clockwise wall-follow using left-hand rule with 8 directions.
+        """Clockwise wall-follow (left-hand rule, 8 directions).
 
-        Wall stays on the LEFT. Check left first so the bot turns into
-        hallways and doors on the wall side instead of walking past them.
-        Only steps onto tiles adjacent to at least one wall.
-        Treats closed doors as valid steps (caller handles opening).
-
-        Door momentum: when active, continue in heading direction to push
-        through a doorway instead of turning back into the previous room.
-
-        Lap-aware door seeking:
-        - Lap 0: pure left-hand-rule. Doors treated as normal tiles so the
-          bot completes a full room perimeter scan first.
-        - Lap 1+: prefer unvisited doors over visited ones so the bot exits
-          through unexplored corridors.
+        Used for dark room perimeter scanning only.  Wall stays on the LEFT.
+        Skips doors so the bot stays inside the current room.
         """
         heading = self.wall_follow_heading
         if heading is None or heading not in self._CW_IDX:
             heading = 'j'
         h_idx = self._CW_IDX[heading]
-        back_key = self._CW[((h_idx + 4) % 8)]  # 180° from heading
 
-        # Door momentum: after stepping through a door, push forward
-        # in the heading direction rather than doing the normal left-hand
-        # scan (which would turn us back into the room we just exited).
-        if self.door_momentum:
-            # Try heading, then ±45°, then ±90° — but never back.
-            for offset in (0, -1, 1, -2, 2):
-                cand = self._CW[((h_idx + offset) % 8)]
-                if cand == back_key:
-                    continue
-                if self._can_step_or_door(grid, pos, cand):
-                    target = self._step_pos(pos, cand)
-                    if target:
-                        self.wall_follow_heading = cand
-                        return cand
-
-        # Left-hand rule for clockwise traversal (wall on left):
-        # 90° left, 45° left, straight, 45° right, 90° right, 135° right,
-        # 135° left, 180° back.
-        #
-        # Lap 0: skip doors entirely so the bot completes a full room
-        #   perimeter before leaving.
-        # Lap 1+: prefer unvisited doors over visited ones so the bot
-        #   exits through unexplored corridors.
-        seek_doors = self.wall_follow_lap_count >= 1
-        best_normal = None
-        best_unvisited_door = None
-        best_visited_door = None
-        depth = self._current_depth
         for offset in (-2, -1, 0, 1, 2, 3, -3, 4):
             cand = self._CW[((h_idx + offset) % 8)]
-            if not self._can_step_or_door(grid, pos, cand):
+            if not self._can_step(grid, pos, cand):
                 continue
             target = self._step_pos(pos, cand)
             if not target or not self._adjacent_to_wall(grid, target):
                 continue
             ch = grid[target[0]][target[1]]
-            is_door = ch in ("'", "+")
-            # Lap 0: ignore doors completely.
-            if not seek_doors and is_door:
-                continue
-            if seek_doors and is_door and cand != back_key:
-                if not self._is_visited_local(depth, target):
-                    if best_unvisited_door is None:
-                        best_unvisited_door = cand
-                else:
-                    if best_visited_door is None:
-                        best_visited_door = cand
-                continue
-            # Normal (non-door) tiles: strict left-hand-rule.
-            if best_normal is None:
-                best_normal = cand
-
-        # After lap 0: unvisited door > visited door > normal tile.
-        if seek_doors:
-            chosen_door = best_unvisited_door or best_visited_door
-            if chosen_door is not None:
-                self.wall_follow_heading = chosen_door
-                return chosen_door
-        if best_normal is not None:
-            self.wall_follow_heading = best_normal
-            return best_normal
+            if ch in ("'", "+"):
+                continue  # skip doors to stay in room
+            self.wall_follow_heading = cand
+            return cand
 
         return None
 
     def _find_door_exit_step(self, grid, pos):
-        """Find the first step toward the nearest door on the visible map.
+        """Find the first step toward the nearest door leading to unknown territory.
 
-        Used on lap completion to break out of room loops. Finds the nearest
-        open door ('') or closed door (+) reachable by A* and returns the
-        first movement key toward it. Skips doors at the bot's current
-        position or that have failed previously.
+        Only returns doors that have at least one unknown neighbour in
+        known_map, so the bot won't oscillate between fully-explored doors.
         """
         rows = len(grid)
         cols = len(grid[0]) if rows else 0
@@ -710,7 +1196,10 @@ class DecisionEngine:
             for c in range(cols):
                 ch = grid[r][c]
                 if ch in ("'", "+"):
-                    doors.append((r, c, ch))
+                    # Only consider doors adjacent to unknown territory.
+                    wpos = self._local_to_world_pos((r, c))
+                    if wpos and self._has_unknown_neighbor(self._wpos_to_rc(wpos)):
+                        doors.append((r, c, ch))
 
         if not doors:
             return None
@@ -895,6 +1384,35 @@ class DecisionEngine:
         # Screen parsing can overcount monster-like glyphs in some views.
         # Treat very large counts as noisy and avoid tactical combat decisions from them.
         return len(state.monsters) <= 12
+
+    # Screen chars that represent equippable gear vs consumables.
+    _GEAR_CHARS = frozenset('|/\\)[](')   # weapons and armor
+    _CONSUMABLE_CHARS = frozenset('!?-_')  # potions, scrolls, wands, staves
+
+    def _needs_gear(self, state):
+        """True if missing a weapon or body armor — worth detouring for loot."""
+        has_weapon = self.current_wielded_weapon is not None
+        has_body_armor = False
+        for _slot, name in state.equipment or []:
+            if self._gear_slot_kind(name) == "body":
+                has_body_armor = True
+                break
+        return not has_weapon or not has_body_armor
+
+    def _step_toward_useful_item(self, state, pos):
+        """Pathfind toward nearest useful ground item (gear or consumable)."""
+        candidates = []
+        for ir, ic, ich in state.items:
+            if ich in self._GEAR_CHARS or ich in self._CONSUMABLE_CHARS:
+                dist = pf.heuristic(pos, (ir, ic))
+                candidates.append((dist, ir, ic, ich))
+        candidates.sort()
+        for _d, ir, ic, ich in candidates:
+            path = pf.path_to(state.map, pos, (ir, ic))
+            key = pf.first_step_key(path)
+            if key:
+                return self._record_decision(key, f"combat_seek_{ich}")
+        return None
 
     def _gear_slot_kind(self, item_name):
         n = item_name.lower()

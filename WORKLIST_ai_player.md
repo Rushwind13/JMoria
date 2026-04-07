@@ -7,45 +7,70 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 ---
 ## 2026-04-06: Current AI Player Issue Priorities
 
-### Top Priorities (Open Issues #183–195)
+### Closed Issues
 
-**1. [#194] Refactor: Remove dead or redundant code in bot Python scripts (DONE)**
+**[#194] Refactor: Remove dead or redundant code in bot Python scripts (DONE)**
 - Deep clean completed: removed 311 lines of dead code from decision.py.
 
-**2. [#191] Bot gets stuck in CCW loop and can't traverse doors (DONE)**
-- Fixed: door priority in wall-follow scan + door_momentum flag prevents bounce-back after opening doors + lap-exit pathfinding to nearest door on lap completion.
+**[#191] Bot gets stuck in CCW loop and can't traverse doors (DONE)**
+- Fixed: door priority in wall-follow scan + door_momentum flag.
 
-**3. [#192] AI bot should prioritize doors as exits to escape rooms (DONE)**
-- Addressed by #191 fix: doors are now prioritized over normal tiles in wall-follow scan, and lap-exit actively pathfinds to nearest visible door.
+**[#192] AI bot should prioritize doors as exits to escape rooms (DONE)**
+- Addressed by #191 fix.
 
-**4. [#193] AI bot should avoid re-entering doorways and tiles to ensure full dungeon exploration (DONE)**
-- Lap-aware exploration: lap 0 completes full room perimeter (doors skipped), lap 1+ prefers unvisited doors for exit pathfinding. World-coordinate visited tracking replaces unstable screen-local positions.
+**[#193] AI bot should avoid re-entering doorways and tiles (DONE)**
+- Lap-aware exploration with world-coordinate visited tracking.
 
-**5. [#195] Bot should explore room interiors and return to wall-following (DONE)**
-- Interior item seeking: pathfinds to visible items not adjacent to walls, collects them, returns to wall. Wield prompt detection also fixed.
+**[#195] Bot should explore room interiors and return to wall-following (DONE)**
+- Interior item seeking + wield prompt detection.
 
-**6. [#190] Combat and wield actions corrupt tmux/curses screen (DONE)**
-- Fixed: ASCII renderer DrawTextBoundingBox() now fills interiors with spaces so popup overlays occlude underlying content.
+**[#190] Combat and wield actions corrupt tmux/curses screen (DONE)**
+- ASCII renderer DrawTextBoundingBox() fills interiors with spaces.
 
-**7. [#188] Bot parser likely overcounts visible monsters/items in ASCII viewport**
-- Bot logic is noisy due to incorrect entity counts; affects threat and decision heuristics.
+**[#189] 1st level characters can start with 1 HP (DONE)**
+- FIXED in commit c2bcdc4. Closed.
 
-**8. [#186] Bot behavior: exploration redesign — goal-based pathfinding**
-- Old approach (left-hand-rule + lap counting + stale timers + breakout hacks) abandoned.
-- New approach: goal-based exploration with room-aware state machine. See design below.
+**[#186] Bot behavior: exploration redesign — goal-based pathfinding (DONE)**
+- Old wall-follow + lap counting replaced with LIFO goal-stack + A* pathfinding.
+- Commits: `50e5661` (landmark), `54676d0` (direction-commit + item promotion + bravery).
+- Results: 1079 turns, 534 unique positions. No oscillation.
 
-**9. [#185] Bot bug: death not reliably detected (loops after HP=0/0 and missing @)**
-- Bot fails to terminate after death, causing endless loops.
+**[#185] Bot bug: death not reliably detected (DONE)**
+- Fixed: `lost_player_turns` counter, tombstone detection, HP=0 detection. Reliable in all tests.
 
-**10. [#189] 1st level characters can start with 1 HP (DONE)**
-- FIXED in commit c2bcdc4 (minimum starting HP is half the hit die). Closed.
+### Open Issues
 
-**11. [#196] Dungeon gen: two hallways can "sidle" creating double-wide corridors**
-- Bug: two hallways placed adjacent share a wall, creating double-wide corridors with floating doorways. Rooms may sidle, room+hallway may sidle, but two hallways must not.
+**[#199] Bot walks past items on the floor instead of picking them up**
+- Bot frequently ignores floor items. Item promotion only catches adjacent items already on goal stack.
+- Need better item detection and "pick up on walk-over" behavior.
+
+**[#200] Bot leaves parts of dark rooms unexplored**
+- Tile-by-tile discovery in dark rooms misses interior sections.
+- May need systematic sweep pattern or room-awareness to prioritize local unexplored tiles.
+
+**[#201] Bot goal stack ordering causes inefficient backtracking between hallways**
+- LIFO ordering means bot explores the most recently discovered goal first, causing long detours.
+- Need nearest-neighbor or distance-sorted selection for exploration goals.
+
+**[#202] Deep refactor knowledge.json — fix errors and clean stale data**
+- Many errors accumulated over conversational development.
+- Audit against Monsters.txt and Items.txt, remove stale entries, ensure consistency.
+
+**[#203] Refactor decision.py — remove dead and redundant code (post-goal-stack)**
+- `_explore()` never called, `_nearest_non_phantom_monster()` unused, old wall-follow remnants.
+- Pure cleanup refactor, no behavior changes.
+
+**[#188] Bot parser likely overcounts visible monsters/items in ASCII viewport**
+- Noisy entity counts affect threat scoring and decision heuristics.
+
+**[#196] Dungeon gen: two hallways can "sidle" creating double-wide corridors**
+- Two hallways placed adjacent share a wall, creating double-wide corridors with floating doorways.
 
 ---
 
-### #186 Exploration Redesign: Goal-Based Pathfinding
+### #186 Exploration Redesign: Goal-Based Pathfinding (COMPLETED)
+
+**Implementation**: LIFO goal stack with A* pathfinding. Commits `50e5661` + `54676d0`.
 
 **Goal hierarchy** (constant, every level):
 1. See the whole map (visit every reachable tile)
@@ -108,8 +133,10 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 - #193 done in commit e84bf5d (closed). #194 closed.
 - #195 done in commit ce3d4c5 (closed).
 - #190 done in commit 140d0c6 (closed).
-- #186 redesigned: old wall-follow patches reverted, replaced with goal-based exploration.
-- Next priority: #186 exploration redesign, then #188 (bot parser overcounts).
+- #186 done in commits 50e5661 + 54676d0 (closed). Goal-stack exploration with A* pathfinding.
+- #185 done: death detection reliable via lost_player_turns + tombstone + HP=0 (closed).
+- Best test result: 1079 turns, 534 unique positions, depth 1.
+- Next priorities: #199 (item pickup), #200 (dark rooms), #201 (stack ordering), #202 (knowledge.json), #203 (decision.py refactor), #188 (parser overcounts).
 
 
 **Foundation:** The ASCII renderer (`src/RenderASCII.cpp`, merged in PR#155) renders the game as plain text via ncurses. Running the game inside a `tmux` session lets an external script read screen state with `tmux capture-pane` and send commands with `tmux send-keys`. No changes to the game executable are required.

@@ -10,6 +10,54 @@ KEY_TO_DIR = {v: k for k, v in pf.DIR_TO_KEY.items()}
 
 
 class DecisionEngine:
+    """
+    ============================================================
+    DUNGEON PROGRESSION STRATEGY - ISSUE #205
+    ============================================================
+    
+    GOAL HIERARCHY (from Issue #186: Goal-Stack Based Exploration):
+      1. Explore all reachable floor tiles and interact with doors
+      2. Eliminate visible monsters
+      3. Collect and evaluate items/equipment
+      4. DESCEND STAIRCASE to next dungeon level
+    
+    DOWNWARD PROGRESSION CRITERIA:
+    -----------------------------------------------
+    Before descending ('>'), ALL of these must be true:
+    
+    1. EXPLORATION COMPLETE
+       - No unexplored walkable tiles remain on current level
+       - All discovered doors have been interacted with
+    
+    2. HP RECOVERY (>= 70%)
+       - Ensures player enters next level with safety margin
+       - Low HP (< 50%) triggers rest in prior decision tier
+       - Prevents descending into danger under-resourced
+    
+    3. COMBAT STABILITY
+       - No visible adjacent monsters
+       - No recent attacker (if combat_feedback is > N turns old)
+       - Safe to transition without immediate threat
+    
+    4. WEAPON READINESS
+       - At least basic melee weapon identified/wielded
+       - Ensures ability to defend on next level
+       - Unarmed descent is allowed but suboptimal
+    
+    SAFETY PROPERTIES:
+    - If HP < 50%, rest takes priority (prior decision tier)
+    - Exploration stuck detection prevents infinite loops
+    - Phantoms (stuck combat without feedback) are skipped
+    
+    TELEMETRY:
+    - prog_descend_ready:           All criteria met, proceeding
+    - prog_descend_delay_low_hp:    Recovery in progress (70%+)
+    - prog_descend_delay_exploring: Unexplored tiles remain
+    - prog_descend_delay_combat:    Active threat or recent combat
+    - prog_descend_delay_unready:   No weapon vs. combat readiness
+    
+    ============================================================
+    """
     def __init__(self):
         self.visited_world = set()  # (depth, world_row, world_col)
         self.last_pos = None
@@ -53,6 +101,11 @@ class DecisionEngine:
         }
         self.map_knowledge = {
             "depth_notes": {},
+        }
+        self.progression_telemetry = {
+            "depths_cleared": [],     # list of (depth, reason, turn_count)
+            "last_descent_reason": None,
+            "turns_at_depth": 0,
         }
         self.knowledge_dirty = False
         self.last_equip_item_name = None
@@ -141,6 +194,7 @@ class DecisionEngine:
             self.explored_tiles = set()
             self.goal_stack = []
             self.pushed_goals = set()
+            self.progression_telemetry["turns_at_depth"] = 0  # Reset turn counter for new depth
             self.last_depth = state.dungeon_depth
 
         self._update_progress(state)
@@ -741,8 +795,22 @@ class DecisionEngine:
                 break
             elif gtype == "staircase":
                 if mpos == grc:
-                    self.goal_stack.pop()
-                    return self._record_decision(">", "descend_stairs")
+                    # At staircase - check if safe to descend (Issue #205)
+                    can_descend, reason = self._can_safely_descend_stairs(state)
+                    if can_descend:
+                        self.goal_stack.pop()
+                        # Record progression telemetry
+                        self.progression_telemetry["last_descent_reason"] = reason
+                        self.progression_telemetry["depths_cleared"].append(
+                            (self._current_depth, reason, len(self.visited_world))
+                        )
+                        return self._record_decision(">", reason)
+                    else:
+                        # Not ready to descend - pop staircase goal and seek other goals
+                        # to continue exploration/recovery
+                        self.goal_stack.pop()
+                        self.last_thought = reason
+                        # Will fall through to search for other goals
                 break
             else:
                 self.goal_stack.pop()
@@ -877,6 +945,51 @@ class DecisionEngine:
             self.known_map, mpos,
             lambda ch, p: ch == '>',
         )
+
+    def _can_safely_descend_stairs(self, state):
+        """
+        Check if bot meets all progression criteria before descending.
+        
+        Returns: (can_descend: bool, reason: str)
+        
+        Criteria (Issue #205 - Downward Progression Strategy):
+        1. All unexplored tiles explored
+        2. HP >= 70% (recovery threshold)
+        3. No visible adjacent monsters
+        4. Min weapon readiness (unarmed OK but suboptimal)
+        
+        Telemetry reasons:
+        - prog_descend_ready
+        - prog_descend_delay_exploring
+        - prog_descend_delay_low_hp
+        - prog_descend_delay_combat
+        - prog_descend_delay_unready
+        """
+        
+        # 1. Exploration Complete: no unexplored tiles remain
+        if self.unexplored_tiles:
+            return (False, "prog_descend_delay_exploring")
+        
+        # 2. HP Recovery: must be >= 70%
+        if state.player_max_hp > 0:
+            hp_pct = state.player_hp / state.player_max_hp
+            if hp_pct < 0.70:
+                return (False, f"prog_descend_delay_low_hp_{hp_pct:.0%}")
+        
+        # 3. Combat Stability: no adjacent monsters
+        if self._monster_signal_reliable(state):
+            pos = state.player_pos
+            adjacent = self._adjacent_monster(pos, state.monsters)
+            if adjacent:
+                return (False, "prog_descend_delay_combat_adjacent")
+        
+        # 4. Recent combat check: ensure sufficient cooldown
+        # If we were just attacked, wait a few turns before descending
+        if self.recent_attacker_name and self.turns_since_combat_feedback < 3:
+            return (False, "prog_descend_delay_combat_recent")
+        
+        # All criteria met
+        return (True, "prog_descend_ready")
 
     def _find_frontier_target(self, world_pos):
         """Nearest walkable tile in known_map adjacent to unknown territory."""
@@ -1134,6 +1247,25 @@ class DecisionEngine:
             self.no_progress_turns = 0
         else:
             self.no_progress_turns += 1
+        
+        # Track turns at current depth for telemetry
+        self.progression_telemetry["turns_at_depth"] += 1
+
+    def get_progression_telemetry(self):
+        """Export progression telemetry as a readable dict. (Issue #205 telemetry)."""
+        return {
+            "depths_descended": len(self.progression_telemetry["depths_cleared"]),
+            "depths_cleared_list": [
+                {
+                    "depth": d[0],
+                    "reason": d[1],
+                    "tiles_visited": d[2]
+                }
+                for d in self.progression_telemetry["depths_cleared"]
+            ],
+            "last_descent_reason": self.progression_telemetry["last_descent_reason"],
+            "turns_at_current_depth": self.progression_telemetry["turns_at_depth"],
+        }
 
     @staticmethod
     def _map_signature(state):

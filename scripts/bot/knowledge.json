@@ -8,7 +8,7 @@
       "count": 1
     },
     "scroll:changes_ac+changes_equipment+changes_position": {
-      "count": 4
+      "count": 7
     },
     "scroll:changes_position": {
       "count": 7
@@ -18,15 +18,15 @@
       "hp_delta_total": -4
     },
     "scroll:no_visible_effect": {
-      "count": 14
+      "count": 18
     },
     "scroll:prompts_choose": {
-      "count": 43
+      "count": 78
     }
   },
   "door_knowledge": {
-    "lock_fail": 233,
-    "lock_success": 7337
+    "lock_fail": 258,
+    "lock_success": 8181
   },
   "item_knowledge": {
     "best_by_slot": {
@@ -76,26 +76,26 @@
         "successes": 2
       },
       "brass lantern": {
-        "combat_hits": 7,
-        "combat_kills": 11,
-        "combat_misses": 179,
-        "combat_turns": 197,
+        "combat_hits": 13,
+        "combat_kills": 36,
+        "combat_misses": 183,
+        "combat_turns": 232,
         "observed_ac_avg": 0.0,
         "observed_ac_best": 0,
-        "observed_ac_count": 7,
+        "observed_ac_count": 9,
         "observed_ac_total": 0,
-        "successes": 27
+        "successes": 31
       },
       "cloak": {
         "combat_hits": 7,
         "combat_kills": 485,
-        "combat_misses": 18,
-        "combat_turns": 510,
+        "combat_misses": 19,
+        "combat_turns": 511,
         "observed_ac_avg": 1.0,
         "observed_ac_best": 1,
-        "observed_ac_count": 7,
-        "observed_ac_total": 7,
-        "successes": 55
+        "observed_ac_count": 8,
+        "observed_ac_total": 8,
+        "successes": 70
       },
       "dagger": {
         "combat_hits": 2,
@@ -113,15 +113,15 @@
         "successes": 2
       },
       "large steel shield": {
-        "combat_hits": 7,
+        "combat_hits": 9,
         "combat_kills": 6,
-        "combat_misses": 10,
-        "combat_turns": 23,
-        "observed_ac_avg": 4.166666666666667,
+        "combat_misses": 12,
+        "combat_turns": 27,
+        "observed_ac_avg": 4.222222222222222,
         "observed_ac_best": 6,
-        "observed_ac_count": 6,
-        "observed_ac_total": 25,
-        "successes": 68
+        "observed_ac_count": 9,
+        "observed_ac_total": 38,
+        "successes": 86
       },
       "leather armor": {
         "combat_hits": 5,
@@ -135,19 +135,19 @@
         "successes": 93
       },
       "long bow": {
-        "combat_hits": 31,
-        "combat_kills": 438,
-        "combat_misses": 149,
-        "combat_turns": 618,
-        "observed_ac_avg": -0.7142857142857143,
+        "combat_hits": 53,
+        "combat_kills": 453,
+        "combat_misses": 155,
+        "combat_turns": 661,
+        "observed_ac_avg": -0.625,
         "observed_ac_best": 0,
-        "observed_ac_count": 7,
+        "observed_ac_count": 8,
         "observed_ac_total": -5,
         "observed_damage": "1d8",
         "observed_damage_avg": 4.5,
         "observed_to_dam": 0,
         "observed_to_hit": 0,
-        "successes": 41
+        "successes": 48
       },
       "long sword": {
         "observed_ac_avg": 0.0,
@@ -161,65 +161,72 @@
         "successes": 151
       },
       "pair of leather boots": {
-        "combat_hits": 4,
-        "combat_kills": 10,
-        "combat_misses": 8,
-        "combat_turns": 22,
-        "observed_ac_avg": 0.0,
+        "combat_hits": 6,
+        "combat_kills": 17,
+        "combat_misses": 10,
+        "combat_turns": 33,
+        "observed_ac_avg": 0.5714285714285714,
         "observed_ac_best": 2,
-        "observed_ac_count": 5,
-        "observed_ac_total": 0,
-        "successes": 11
+        "observed_ac_count": 7,
+        "observed_ac_total": 4,
+        "successes": 18
       },
       "pair of leather gloves": {
+        "combat_kills": 4,
+        "combat_turns": 4,
         "observed_ac_avg": 2.0,
         "observed_ac_best": 2,
-        "observed_ac_count": 4,
-        "observed_ac_total": 8,
-        "successes": 62
+        "observed_ac_count": 5,
+        "observed_ac_total": 10,
+        "successes": 67
       },
       "pair of steel boots": {
         "combat_hits": 5,
         "combat_kills": 47,
         "combat_misses": 13,
         "combat_turns": 65,
-        "observed_ac_avg": 4.4,
+        "observed_ac_avg": 4.333333333333333,
         "observed_ac_best": 5,
-        "observed_ac_count": 10,
-        "observed_ac_total": 44,
-        "successes": 100
+        "observed_ac_count": 12,
+        "observed_ac_total": 52,
+        "successes": 111
       },
       "pickaxe": {
+        "combat_hits": 8,
+        "combat_kills": 22,
+        "combat_misses": 59,
+        "combat_turns": 89,
         "observed_ac_avg": 0.0,
         "observed_ac_best": 0,
-        "observed_ac_count": 2,
+        "observed_ac_count": 3,
         "observed_ac_total": 0,
         "observed_damage": "1d2",
         "observed_damage_avg": 1.5,
         "observed_to_dam": 0,
         "observed_to_hit": 0,
-        "successes": 17
+        "successes": 23
       },
       "robe": {
-        "combat_hits": 1,
-        "combat_misses": 1,
-        "combat_turns": 2,
+        "combat_hits": 98,
+        "combat_kills": 1,
+        "combat_misses": 13,
+        "combat_turns": 112,
         "observed_ac_avg": 1.0,
         "observed_ac_best": 1,
-        "observed_ac_count": 6,
-        "observed_ac_total": 6,
-        "successes": 59
+        "observed_ac_count": 9,
+        "observed_ac_total": 9,
+        "successes": 89
       },
       "set of gauntlets": {
-        "combat_hits": 4,
-        "combat_kills": 77,
-        "combat_misses": 21,
-        "combat_turns": 102,
-        "observed_ac_avg": 3.6666666666666665,
+        "combat_hits": 19,
+        "combat_kills": 80,
+        "combat_misses": 29,
+        "combat_turns": 128,
+        "observed_ac_avg": 3.8,
         "observed_ac_best": 4,
-        "observed_ac_count": 6,
-        "observed_ac_total": 22,
-        "successes": 28
+        "observed_ac_count": 10,
+        "observed_ac_total": 38,
+        "successes": 59
       },
       "shovel": {
         "observed_ac_avg": 0.0,
@@ -239,9 +246,9 @@
         "combat_turns": 56,
         "observed_ac_avg": 4.0,
         "observed_ac_best": 4,
-        "observed_ac_count": 5,
-        "observed_ac_total": 20,
-        "successes": 69
+        "observed_ac_count": 6,
+        "observed_ac_total": 24,
+        "successes": 75
       },
       "small wooden shield": {
         "observed_ac_avg": 2.0,
@@ -255,18 +262,21 @@
         "combat_kills": 14,
         "combat_misses": 9,
         "combat_turns": 24,
-        "observed_ac_avg": 5.0,
+        "observed_ac_avg": 4.333333333333333,
         "observed_ac_best": 5,
-        "observed_ac_count": 4,
-        "observed_ac_total": 20,
-        "successes": 78
+        "observed_ac_count": 6,
+        "observed_ac_total": 26,
+        "successes": 87
       },
       "torch": {
+        "combat_hits": 5,
+        "combat_misses": 8,
+        "combat_turns": 13,
         "observed_ac_avg": 0.0,
         "observed_ac_best": 0,
-        "observed_ac_count": 6,
+        "observed_ac_count": 8,
         "observed_ac_total": 0,
-        "successes": 40
+        "successes": 54
       }
     },
     "light_sources": {},
@@ -278,51 +288,51 @@
   "monster_knowledge": {
     "blue icky thing": {
       "attacks": {
-        "touches": 5
+        "touches": 10
       },
-      "damage_instances": 4,
-      "damage_taken_total": 7,
-      "hits": 22,
-      "hits_taken": 5,
-      "kills": 57,
+      "damage_instances": 9,
+      "damage_taken_total": 16,
+      "hits": 428,
+      "hits_taken": 10,
+      "kills": 66,
       "max_observed_hit": 2,
-      "misses": 93
+      "misses": 114
     },
     "clear icky thing": {
       "attacks": {
-        "touches": 7
+        "touches": 10
       },
-      "damage_instances": 7,
-      "damage_taken_total": 10,
-      "hits": 11,
-      "hits_taken": 7,
+      "damage_instances": 10,
+      "damage_taken_total": 14,
+      "hits": 113,
+      "hits_taken": 10,
       "kills": 113,
       "max_observed_hit": 2,
-      "misses": 43
+      "misses": 55
     },
     "giant ant": {
       "attacks": {
-        "bites": 17
+        "bites": 22
       },
-      "damage_instances": 14,
-      "damage_taken_total": 30,
+      "damage_instances": 19,
+      "damage_taken_total": 39,
       "hits": 0,
-      "hits_taken": 17,
+      "hits_taken": 22,
       "kills": 1,
       "max_observed_hit": 3,
-      "misses": 17
+      "misses": 23
     },
     "giant snake": {
       "attacks": {
-        "bites": 5
+        "bites": 7
       },
-      "damage_instances": 5,
-      "damage_taken_total": 13,
-      "hits": 160,
-      "hits_taken": 5,
-      "kills": 229,
+      "damage_instances": 6,
+      "damage_taken_total": 16,
+      "hits": 205,
+      "hits_taken": 7,
+      "kills": 232,
       "max_observed_hit": 3,
-      "misses": 369
+      "misses": 380
     },
     "green icky thing": {
       "attacks": {
@@ -332,7 +342,7 @@
       "damage_taken_total": 25,
       "hits": 320,
       "hits_taken": 15,
-      "kills": 1566,
+      "kills": 1570,
       "max_observed_hit": 2,
       "misses": 201
     },
@@ -340,9 +350,9 @@
       "attacks": {},
       "damage_instances": 0,
       "damage_taken_total": 0,
-      "hits": 12,
+      "hits": 13,
       "hits_taken": 0,
-      "kills": 79,
+      "kills": 88,
       "max_observed_hit": 0,
       "misses": 1
     },
@@ -352,45 +362,45 @@
       },
       "damage_instances": 2,
       "damage_taken_total": 4,
-      "hits": 17,
+      "hits": 19,
       "hits_taken": 2,
-      "kills": 30,
+      "kills": 31,
       "max_observed_hit": 2,
       "misses": 6
     },
     "red icky thing": {
       "attacks": {
-        "touches": 6
+        "touches": 9
       },
-      "damage_instances": 6,
-      "damage_taken_total": 9,
-      "hits": 47,
-      "hits_taken": 6,
-      "kills": 526,
+      "damage_instances": 9,
+      "damage_taken_total": 14,
+      "hits": 53,
+      "hits_taken": 9,
+      "kills": 585,
       "max_observed_hit": 2,
-      "misses": 218
+      "misses": 244
     },
     "red jelly": {
       "attacks": {},
       "damage_instances": 0,
       "damage_taken_total": 0,
-      "hits": 19,
+      "hits": 21,
       "hits_taken": 0,
-      "kills": 1803,
+      "kills": 1816,
       "max_observed_hit": 0,
       "misses": 7
     },
     "white icky thing": {
       "attacks": {
-        "touches": 4
+        "touches": 7
       },
-      "damage_instances": 4,
-      "damage_taken_total": 8,
-      "hits": 36,
-      "hits_taken": 4,
-      "kills": 172,
+      "damage_instances": 7,
+      "damage_taken_total": 12,
+      "hits": 40,
+      "hits_taken": 7,
+      "kills": 194,
       "max_observed_hit": 2,
-      "misses": 359
+      "misses": 360
     },
     "yellow icky thing": {
       "attacks": {
@@ -398,21 +408,21 @@
       },
       "damage_instances": 3,
       "damage_taken_total": 5,
-      "hits": 14,
+      "hits": 23,
       "hits_taken": 3,
-      "kills": 122,
+      "kills": 129,
       "max_observed_hit": 2,
-      "misses": 174
+      "misses": 234
     },
     "yellow mushroom patch": {
       "attacks": {
-        "claws": 13
+        "claws": 14
       },
-      "damage_instances": 2,
-      "damage_taken_total": 5,
+      "damage_instances": 3,
+      "damage_taken_total": 6,
       "hits": 4,
-      "hits_taken": 13,
-      "kills": 126,
+      "hits_taken": 14,
+      "kills": 140,
       "max_observed_hit": 4,
       "misses": 16
     }

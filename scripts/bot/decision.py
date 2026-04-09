@@ -679,10 +679,18 @@ class DecisionEngine:
                     continue
                 if tw not in self.unexplored_tiles:
                     self.unexplored_tiles.add(tw)
-                # In lit rooms, auto-clear interior tiles.
-                if in_lit and not self._has_unknown_neighbor(tw):
-                    self.unexplored_tiles.discard(tw)
-                    self.explored_tiles.add(tw)
+                if in_lit:
+                    # Lit room: all floor tiles are visible from anywhere —
+                    # only exits (doors, stairs) remain as goals.
+                    if eff == ".":
+                        self.unexplored_tiles.discard(tw)
+                        self.explored_tiles.add(tw)
+                else:
+                    # Dark room: discard interior floor tiles that are fully
+                    # surrounded by known tiles. Keep exits until stepped on.
+                    if eff == "." and not self._has_unknown_neighbor(tw):
+                        self.unexplored_tiles.discard(tw)
+                        self.explored_tiles.add(tw)
 
         self.unexplored_tiles.discard(player_rc)
         self.explored_tiles.add(player_rc)

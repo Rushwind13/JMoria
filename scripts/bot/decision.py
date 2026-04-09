@@ -598,7 +598,8 @@ class DecisionEngine:
         Check descent criteria before going down (see PROGRESSION_STRATEGY.md).
         Returns: (can_descend: bool, reason: str)
         """
-        if self.unexplored_tiles:
+        reachable = self.unexplored_tiles - self.failed_goals
+        if reachable:
             return (False, "prog_descend_delay_exploring")
 
         if state.player_max_hp > 0:

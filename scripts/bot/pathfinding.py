@@ -15,12 +15,12 @@ DIR_TO_KEY = {
 }
 
 WALKABLE = {".", "'", "<", ">", "@"}
-SOLID = {"#", ":", "+"}
+SOLID = {"#", ":"}
 
-# Unknown tiles (" ") are neither WALKABLE nor SOLID — they are
-# traversable but expensive, representing unseen territory that
-# *might* be floor.
+# Unknown tiles (" ") and closed doors ("+") are neither WALKABLE
+# nor SOLID — they are traversable but expensive for A*.
 UNKNOWN_COST = 5
+DOOR_COST = 3  # ~3 actions to open a door (command + direction + step)
 
 
 def in_bounds(grid, pos):
@@ -39,8 +39,8 @@ def is_walkable(ch):
         return True
     if ch in SOLID:
         return False
-    # Non-empty, non-solid chars can still be passable floor overlays.
-    return ch != " "
+    # Doors and unknown tiles are passable (for A*) but not freely walkable.
+    return ch not in (" ", "+")
 
 
 def is_passable(ch):
@@ -97,6 +97,8 @@ def path_to(grid, start, goal, cost_fn=None):
             step_cost = 1
             if ch == " ":
                 step_cost += UNKNOWN_COST
+            elif ch == "+":
+                step_cost += DOOR_COST
             if cost_fn:
                 step_cost += cost_fn(nxt)
             tentative = g_score[cur] + step_cost

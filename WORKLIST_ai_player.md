@@ -5,7 +5,7 @@
 This work list defines the implementation of an autonomous dungeon crawler bot for JMoria. See also **Issue #182** for the design rationale.
 
 ---
-## 2026-04-08: Current AI Player Issue Priorities
+## 2026-04-09: Current AI Player Issue Priorities
 
 ### Closed Issues
 
@@ -43,7 +43,33 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 **[#185] Bot bug: death not reliably detected (DONE)**
 - Fixed: `lost_player_turns` counter, tombstone detection, HP=0 detection. Reliable in all tests.
 
+**[#209] Bot: recalculate exploration frontier when Scroll of Light is read (DONE)**
+- Stale unexplored goals pruned in `_update_exploration_sets()` when frontier rebuilds.
+- Commit: `6c8dff6`.
+
+**[#210] Bot: hallway item pickup causes unnecessary backtracking (DONE)**
+- Stale unexplored goal under item now chains forward in travel direction instead of silently discarding.
+- Commit: `6c8dff6`.
+
+**[#211] Bot: lower priority of opening closed doors until ready to path through (DONE)**
+- Removed first-class "door" goals. Closed doors remain in exploration frontier as targets.
+- Path-following code opens doors en route. `+` moved from SOLID to passable-but-expensive (DOOR_COST=3).
+- Commit: `6c8dff6`.
+
+**[#212] Bot: goal stack should never be empty (DONE)**
+- Staircase always pushed when no unexplored tiles remain (safety gate at arrival only).
+- Falls back to wander toward center, then stuck_fallback.
+- Commit: `6c8dff6`.
+
+**[#201] Bot goal stack ordering causes inefficient backtracking (CLOSED)**
+- Superseded by #213.
+
 ### Open Issues
+
+**[#213] Bot: goal stack needs better ordering — "happy wanderer" exploration**
+- BFS target selection causes breadth-first wandering instead of depth-first committed exploration.
+- Bot ping-pongs between frontiers, partially explores areas, skips doors at hallway ends.
+- Possible fixes: DFS-style directional bias, frontier clustering, door proximity boost.
 
 **[#199] Bot walks past items on the floor instead of picking them up**
 - Bot frequently ignores floor items. Item promotion only catches adjacent items already on goal stack.
@@ -52,10 +78,6 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 **[#200] Bot leaves parts of dark rooms unexplored**
 - Tile-by-tile discovery in dark rooms misses interior sections.
 - May need systematic sweep pattern or room-awareness to prioritize local unexplored tiles.
-
-**[#201] Bot goal stack ordering causes inefficient backtracking between hallways**
-- LIFO ordering means bot explores the most recently discovered goal first, causing long detours.
-- Need nearest-neighbor or distance-sorted selection for exploration goals.
 
 **[#202] Deep refactor knowledge.json — fix errors and clean stale data**
 - Many errors accumulated over conversational development.
@@ -66,6 +88,9 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 
 **[#196] Dungeon gen: two hallways can "sidle" creating double-wide corridors**
 - Two hallways placed adjacent share a wall, creating double-wide corridors with floating doorways.
+
+**[#167] Monsters don't draw / draw as invisible / draw as holes**
+- `DrawDungeon()` skips base tile when monster present; ASCII mode creates holes if `DrawMonsters()` also fails.
 
 ---
 
@@ -128,7 +153,7 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 
 ---
 ### Notes
-- This list is up to date with current code and open issues as of 2026-04-06.
+- This list is up to date with current code and open issues as of 2026-04-09.
 - See commit c2bcdc4 for the fix to #189 (closed).
 - #191 and #192 done in commit 941ec0b (closed).
 - #193 done in commit e84bf5d (closed). #194 closed.
@@ -137,9 +162,11 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 - #186 done in commits 50e5661 + 54676d0 (closed). Goal-stack exploration with A* pathfinding.
 - #185 done: death detection reliable via lost_player_turns + tombstone + HP=0 (closed).
 - #203 done in commit 5be993e (closed). decision.py stripped to active behavior only; BOT_ARCHITECTURE.md added.
+- #209, #210, #211, #212 done in commit 6c8dff6 (closed). Exploration model fixes: stale goals, door lifecycle, empty stack.
+- #201 superseded by #213 (closed).
 - Best test result: 1079 turns, 534 unique positions, depth 1.
-- Next priorities: #199 (item pickup), #200 (dark rooms), #201 (stack ordering), #202 (knowledge.json), #188 (parser overcounts).
-- Last updated: 2026-04-08.
+- Next priorities: #213 (goal ordering), #199 (item pickup), #200 (dark rooms), #202 (knowledge.json), #188 (parser overcounts).
+- Last updated: 2026-04-09.
 
 
 **Foundation:** The ASCII renderer (`src/RenderASCII.cpp`, merged in PR#155) renders the game as plain text via ncurses. Running the game inside a `tmux` session lets an external script read screen state with `tmux capture-pane` and send commands with `tmux send-keys`. No changes to the game executable are required.

@@ -84,6 +84,7 @@ class DecisionEngine:
         # Goal stack: LIFO list of (goal_type, (row, col)).
         self.goal_stack = []
         self.pushed_goals = set()
+        self.failed_goals = set()
         self.last_staircase_attempt = None
         self.staircase_attempt_cooldown = 0
         self.mode = "seek"
@@ -134,6 +135,7 @@ class DecisionEngine:
             self.explored_tiles = set()
             self.goal_stack = []
             self.pushed_goals = set()
+            self.failed_goals = set()
             self.last_staircase_attempt = None
             self.staircase_attempt_cooldown = 0
             self.last_depth = state.dungeon_depth
@@ -257,6 +259,7 @@ class DecisionEngine:
         if "you have picked the lock" in msg_lower:
             self.door_knowledge["lock_success"] = int(self.door_knowledge.get("lock_success", 0)) + 1
             self.knowledge_dirty = True
+            self.failed_goals.clear()
             if self.current_motion_pos is not None and self.last_open_dir in "hjklyubn":
                 failed = self.failed_door_dirs_by_world.get(self.current_motion_pos)
                 if failed and self.last_open_dir in failed:
@@ -289,6 +292,7 @@ class DecisionEngine:
 
         if "bumped into a door" in msg_lower:
             self.mode = "seek"
+            self.failed_goals.clear()
             direction = self.last_action if self.last_action in "hjklyubn" else "h"
             self.last_open_dir = direction
             self.pending_keys = [direction]
@@ -396,6 +400,9 @@ class DecisionEngine:
                 break
             elif gtype == "door":
                 if grc in self.explored_tiles or mpos == grc:
+                    self.goal_stack.pop()
+                    continue
+                if not self._has_unknown_neighbor(grc):
                     self.goal_stack.pop()
                     continue
                 break
@@ -542,6 +549,7 @@ class DecisionEngine:
                     return self._record_decision(dkey, f"goal_{gtype}_seek_d{dist}")
 
         # Pathfind failed — pop goal and retry (limited iterations).
+        self.failed_goals.add(grc)
         self.goal_stack.pop()
         retry_count = 0
         while self.goal_stack and retry_count < 10:
@@ -650,49 +658,27 @@ class DecisionEngine:
                         self.known_map[nr][nc] = "#"
 
     def _update_exploration_sets(self, state):
-        """Update unexplored/explored tile sets based on current visibility."""
+        """Rebuild the unexplored frontier from known_map.
+
+        A tile is 'unexplored' only if it's a passable tile in known_map
+        that has at least one unknown (' ') neighbor — an exit at the
+        boundary between mapped and unmapped territory.
+        """
         if not state.map or state.player_pos is None or state.player_world_pos is None:
             return
-        pr, pc = state.player_pos
         wx, wy = state.player_world_pos
         player_rc = (wy, wx)
-        monster_set = {(mr, mc) for mr, mc, _ in state.monsters}
-        item_set = {(ir, ic) for ir, ic, _ in state.items}
-        in_lit = self._room_is_visible(state.map, state.player_pos)
 
-        for lr in range(len(state.map)):
-            for lc in range(len(state.map[lr])):
-                ch = state.map[lr][lc]
-                if ch == " ":
-                    continue
-                gr = wy + (lr - pr)
-                gc = wx + (lc - pc)
-                if not (0 <= gr < 100 and 0 <= gc < 100):
-                    continue
-                tw = (gr, gc)
-                if tw in self.explored_tiles:
-                    continue
-                eff = ch
-                if (lr, lc) in monster_set or (lr, lc) in item_set or ch == "@":
-                    eff = "."
-                if eff not in (".", "'", "+", "<", ">"):
-                    continue
-                if tw not in self.unexplored_tiles:
-                    self.unexplored_tiles.add(tw)
-                if in_lit:
-                    # Lit room: all floor tiles are visible from anywhere —
-                    # only exits (doors, stairs) remain as goals.
-                    if eff == ".":
-                        self.unexplored_tiles.discard(tw)
-                        self.explored_tiles.add(tw)
-                else:
-                    # Dark room: discard interior floor tiles that are fully
-                    # surrounded by known tiles. Keep exits until stepped on.
-                    if eff == "." and not self._has_unknown_neighbor(tw):
-                        self.unexplored_tiles.discard(tw)
-                        self.explored_tiles.add(tw)
+        new_frontier = set()
+        for r in range(100):
+            for c in range(100):
+                ch = self.known_map[r][c]
+                if ch in (".", "'", "+", "<", ">"):
+                    if self._has_unknown_neighbor((r, c)):
+                        new_frontier.add((r, c))
 
-        self.unexplored_tiles.discard(player_rc)
+        new_frontier.discard(player_rc)
+        self.unexplored_tiles = new_frontier
         self.explored_tiles.add(player_rc)
 
     # ------------------------------------------------------------------
@@ -761,18 +747,21 @@ class DecisionEngine:
         """BFS on known_map to find nearest unexplored tile by walk distance."""
         if not self.unexplored_tiles:
             return None
+        candidates = self.unexplored_tiles - self.failed_goals
+        if not candidates:
+            return None
         visited = {wpos}
         queue = deque([wpos])
         while queue:
             cur = queue.popleft()
-            if cur in self.unexplored_tiles and pf.is_walkable(self.known_map[cur[0]][cur[1]]):
+            if cur in candidates and pf.is_walkable(self.known_map[cur[0]][cur[1]]):
                 return cur
             # Check for unexplored closed doors adjacent to BFS frontier.
             for dr, dc in pf.DIRS_8:
                 nr, nc = cur[0] + dr, cur[1] + dc
                 if 0 <= nr < 100 and 0 <= nc < 100:
                     npos = (nr, nc)
-                    if npos in self.unexplored_tiles and self.known_map[nr][nc] == "+":
+                    if npos in candidates and self.known_map[nr][nc] == "+":
                         return npos
             # Expand BFS through walkable tiles.
             for dr, dc in pf.DIRS_8:

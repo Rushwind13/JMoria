@@ -59,11 +59,13 @@ _MONSTER_CHARS = _load_id_chars("src/Monster.cpp", "MonIDs", _FALLBACK_MONSTER_C
 _ITEM_CHARS = _load_id_chars("src/Item.cpp", "ItemIDs", _FALLBACK_ITEM_CHARS)
 
 # In ASCII mode, some monster IDs overlap terrain glyphs (e.g., '.', ',').
-# Keep only unambiguous symbols for tactical decisions.
-_MONSTER_CHARS_DISAMBIGUATED = {ch for ch in _MONSTER_CHARS if ch.isalpha() or ch == "&"}
+# Include alphabetic chars, &, and unambiguous non-terrain monsters like comma.
+# , is a slime/jelly type; . and $ can be terrain so keep them excluded.
+_MONSTER_CHARS_DISAMBIGUATED = {ch for ch in _MONSTER_CHARS if ch.isalpha() or ch in "&,t"}
 
 # Glyphs that are terrain or UI framing, not entity markers.
-_ENTITY_EXCLUDE_CHARS = set(" @#.:+'<>|lmxqtuvwj")
+# Only exclude actual dungeon terrain features.
+_ENTITY_EXCLUDE_CHARS = set(" @#.:+'<>")
 
 # Last parser stats for debugging parser quality in verbose bot logs.
 _LAST_PARSE_DEBUG = {

@@ -4,6 +4,8 @@
 #*.png
 clockstep_log*.txt
 #*.txt
+scripts/*.txt
+**/knowledge.json
 Scores.txt
 
 # XCode

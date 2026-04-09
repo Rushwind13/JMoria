@@ -148,6 +148,8 @@ class DecisionEngine:
         # Types: "unexplored", "door", "item", "staircase"
         self.goal_stack = []
         self.pushed_goals = set()  # avoid duplicate pushes
+        self.last_staircase_attempt = None  # (wpos, turn) of last failed staircase descent
+        self.staircase_attempt_cooldown = 0  # turns before trying another staircase
         self.mode = "seek"
 
     def decide(self, state):
@@ -162,6 +164,8 @@ class DecisionEngine:
             self.use_cooldown -= 1
         if self.await_wield_prompt_turns > 0:
             self.await_wield_prompt_turns -= 1
+        if self.staircase_attempt_cooldown > 0:
+            self.staircase_attempt_cooldown -= 1
 
         pos = state.player_pos
         motion_pos = state.player_world_pos if state.player_world_pos is not None else pos
@@ -194,6 +198,8 @@ class DecisionEngine:
             self.explored_tiles = set()
             self.goal_stack = []
             self.pushed_goals = set()
+            self.last_staircase_attempt = None
+            self.staircase_attempt_cooldown = 0
             self.progression_telemetry["turns_at_depth"] = 0  # Reset turn counter for new depth
             self.last_depth = state.dungeon_depth
 
@@ -267,9 +273,17 @@ class DecisionEngine:
                 self.await_use_prompt_turns = 0
 
         # Escape lingering inventory/use prompts the bot didn't initiate.
-        if "choose an item from inventory" in msg_lower:
-            if not self.pending_wield_slot and not self.pending_use_slot:
-                return self._record_decision("\x1b", "escape_stale_prompt")
+        # Only send escape if we're NOT in the middle of our own command sequence.
+        # Be strict about detecting actual prompts vs. text that contains these phrases.
+        prompt_detected = (
+            ("choose an item from inventory" in msg_lower and "[" in state.last_message)
+            or ("which item" in msg_lower and "[" in state.last_message)
+        )
+        if prompt_detected:
+            if not self.pending_wield_slot and not self.pending_use_slot and not self.pending_keys:
+                # Safety: only escape if last action wasn't already an escape
+                if self.last_action != "\x1b":
+                    return self._record_decision("\x1b", "escape_stale_prompt")
 
         # Evaluate picked-up gear: learn unknowns first, then prefer upgrades.
         if self.pending_pickup_equip_slot and not self.pending_wield_slot:
@@ -688,7 +702,8 @@ class DecisionEngine:
         """Push newly-visible doors and items onto the goal stack.
 
         Doors go on first (lower priority), items on top (higher priority).
-        Duplicates are suppressed via pushed_goals.
+        Duplicates are suppressed via pushed_goals, but items can be re-pushed
+        if they left FOV and return (different map position after falling out of FOV).
         """
         if not state.map or state.player_pos is None or state.player_world_pos is None:
             return
@@ -712,13 +727,17 @@ class DecisionEngine:
                         new_doors.append(key)
 
         # Scan visible items.
+        # Items can be re-pushed if they're not currently on the goal stack
+        # (e.g., they fell out of FOV and returned, or were cleared from stack).
+        current_item_goals = {(t, rc) for t, rc in self.goal_stack if t == "item"}
         for ir, ic, _ich in state.items:
             grc = (wy + (ir - pr), wx + (ic - pc))
             if not (0 <= grc[0] < 100 and 0 <= grc[1] < 100):
                 continue
             key = ("item", grc)
-            if key not in self.pushed_goals:
-                self.pushed_goals.add(key)
+            # Push if not already on the goal stack, even if it was pushed before.
+            # This allows re-pushing items that were cleared from the stack.
+            if key not in current_item_goals:
                 new_items.append(key)
 
         # Push doors (lower), then items (higher = processed first).
@@ -734,6 +753,18 @@ class DecisionEngine:
         mpos = self._wpos_to_rc(wpos)
         pr, pc = state.player_pos
         wx, wy = wpos
+
+        # Check if standing on an item we haven't scheduled yet.
+        # This catches items the bot walks past without them being a planned goal.
+        for ir, ic, _ich in state.items:
+            item_rc = (wy + (ir - pr), wx + (ic - pc))
+            if mpos == item_rc:
+                # Standing on an item. Add to goal stack if not already there.
+                key = ("item", item_rc)
+                if key not in self.pushed_goals:
+                    self.pushed_goals.add(key)
+                    self.goal_stack.append(key)
+                    break
 
         # After stepping through a door, push one step forward.
         if self.door_momentum:
@@ -806,11 +837,13 @@ class DecisionEngine:
                         )
                         return self._record_decision(">", reason)
                     else:
-                        # Not ready to descend - pop staircase goal and seek other goals
-                        # to continue exploration/recovery
+                        # Not ready to descend - set cooldown to avoid oscillation
+                        # between multiple nearby staircases
                         self.goal_stack.pop()
+                        self.last_staircase_attempt = grc
+                        self.staircase_attempt_cooldown = 8  # wait 8 turns before trying stairs again
                         self.last_thought = reason
-                        # Will fall through to search for other goals
+                        # Will fall through to explore and return later
                 break
             else:
                 self.goal_stack.pop()
@@ -821,9 +854,14 @@ class DecisionEngine:
             if target:
                 self.goal_stack.append(("unexplored", target))
             else:
-                stair = self._find_staircase(mpos)
-                if stair:
-                    self.goal_stack.append(("staircase", stair))
+                # Only push staircase if not in cooldown from a recent failed attempt
+                if self.staircase_attempt_cooldown <= 0:
+                    stair = self._find_staircase(mpos)
+                    if stair:
+                        self.goal_stack.append(("staircase", stair))
+                else:
+                    # In cooldown - decrement counter
+                    self.staircase_attempt_cooldown -= 1
 
         if not self.goal_stack:
             # Nothing to do — stuck fallback.
@@ -928,10 +966,44 @@ class DecisionEngine:
 
         # Pathfind failed — pop this goal and try next.
         self.goal_stack.pop()
+        
+        # Retry with the next goal (if any) without deep recursion.
+        # Limit iterations to prevent infinite loops.
+        retry_count = 0
+        while self.goal_stack and retry_count < 10:
+            retry_count += 1
+            gtype, grc = self.goal_stack[-1]
+            
+            # Quick reachability check for next goal
+            dist = pf.heuristic(mpos, grc)
+            if dist <= 1:
+                dkey = pf.DIR_TO_KEY.get((grc[0] - mpos[0], grc[1] - mpos[1]))
+                if dkey and self._can_step(grid, pos, dkey):
+                    return self._record_decision(dkey, f"goal_{gtype}_step_retry")
+            elif dist < 50:  # Goal seems reachable, don't skip it
+                break
+            
+            # Goal unreachable, pop and continue
+            self.goal_stack.pop()
+        
         if self.goal_stack:
             self.cached_path = []
             self.cached_path_target = None
-            return self._pursue_goals(state, pos)
+            # Tail-call the main logic by jumping back to fresh pathfinding
+            # (not a true tail call, but avoids deep recursion)
+            gtype, grc = self.goal_stack[-1]
+            dist = pf.heuristic(mpos, grc)
+            if dist <= 1:
+                dkey = pf.DIR_TO_KEY.get((grc[0] - mpos[0], grc[1] - mpos[1]))
+                if dkey:
+                    tch = self.known_map[grc[0]][grc[1]]
+                    if tch == '+':
+                        self.last_open_dir = dkey
+                        self.pending_keys = [dkey]
+                        self.door_momentum = True
+                        return self._record_decision("o", f"goal_open_{dkey}")
+                    if self._can_step(grid, pos, dkey):
+                        return self._record_decision(dkey, f"goal_{gtype}_step")
 
         # Truly stuck.
         for key in "ljkhyubn":

@@ -5,12 +5,17 @@
 This work list defines the implementation of an autonomous dungeon crawler bot for JMoria. See also **Issue #182** for the design rationale.
 
 ---
-## 2026-04-06: Current AI Player Issue Priorities
+## 2026-04-08: Current AI Player Issue Priorities
 
 ### Closed Issues
 
 **[#194] Refactor: Remove dead or redundant code in bot Python scripts (DONE)**
 - Deep clean completed: removed 311 lines of dead code from decision.py.
+
+**[#203] Refactor decision.py — remove dead and redundant code (post-goal-stack) (DONE)**
+- Full cleanup pass: removed 755 net lines (all unused wall-follow remnants, dead helpers, duplicate logic).
+- Added `scripts/bot/BOT_ARCHITECTURE.md` documenting the full decision flow.
+- Commit: `5be993e`.
 
 **[#191] Bot gets stuck in CCW loop and can't traverse doors (DONE)**
 - Fixed: door priority in wall-follow scan + door_momentum flag.
@@ -55,10 +60,6 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 **[#202] Deep refactor knowledge.json — fix errors and clean stale data**
 - Many errors accumulated over conversational development.
 - Audit against Monsters.txt and Items.txt, remove stale entries, ensure consistency.
-
-**[#203] Refactor decision.py — remove dead and redundant code (post-goal-stack)**
-- `_explore()` never called, `_nearest_non_phantom_monster()` unused, old wall-follow remnants.
-- Pure cleanup refactor, no behavior changes.
 
 **[#188] Bot parser likely overcounts visible monsters/items in ASCII viewport**
 - Noisy entity counts affect threat scoring and decision heuristics.
@@ -135,8 +136,10 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 - #190 done in commit 140d0c6 (closed).
 - #186 done in commits 50e5661 + 54676d0 (closed). Goal-stack exploration with A* pathfinding.
 - #185 done: death detection reliable via lost_player_turns + tombstone + HP=0 (closed).
+- #203 done in commit 5be993e (closed). decision.py stripped to active behavior only; BOT_ARCHITECTURE.md added.
 - Best test result: 1079 turns, 534 unique positions, depth 1.
-- Next priorities: #199 (item pickup), #200 (dark rooms), #201 (stack ordering), #202 (knowledge.json), #203 (decision.py refactor), #188 (parser overcounts).
+- Next priorities: #199 (item pickup), #200 (dark rooms), #201 (stack ordering), #202 (knowledge.json), #188 (parser overcounts).
+- Last updated: 2026-04-08.
 
 
 **Foundation:** The ASCII renderer (`src/RenderASCII.cpp`, merged in PR#155) renders the game as plain text via ncurses. Running the game inside a `tmux` session lets an external script read screen state with `tmux capture-pane` and send commands with `tmux send-keys`. No changes to the game executable are required.

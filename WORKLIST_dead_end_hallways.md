@@ -28,11 +28,11 @@ When `TryCreateRoomWithFallback()` fails, branch 2-3 child hallways instead of d
 
 ## Remaining Work
 
-### Task 4: Dead-end pruning pass (P1) — NOT STARTED
-Post-generation scan: find hallway tiles with only one open neighbor (dead ends), erase them back to wall, walking back until hitting a junction or door.
+### Task 4: Dead-end pruning pass (P1) ✅
+Post-generation `PruneDeadEndHallways()` iteratively removes hallway floor tiles with only 1 walkable cardinal neighbor. Skips room tiles. First run pruned 91 tiles.
 
-### Task 5: Anti-sidle hallway placement check (P2) — NOT STARTED
-In `CheckBorder()`, reject hallway placement if border scan finds FLOOR tiles (not just WALL/DOOR). Prevents parallel hallways from being placed.
+### Task 5: Anti-sidle hallway placement check (P2) ✅
+`CheckBorder()` now takes `bIsHallway` flag and scans 2 tiles perpendicular to proposed hallways, rejecting placement next to existing parallel corridors.
 
-### Task 6: Force terminal rooms (P2) — NOT STARTED
-At `MAX_RECURDEPTH`, try placing a small (2×2 or 3×3) room instead of giving up entirely.
+### Task 6: Force terminal rooms (P2) ✅
+`GetSmallRoomRect()` (3×5 max) used as fallback in `CreateStep()` when normal `GetRoomRect()` fails, reducing dead ends at deep recursion.

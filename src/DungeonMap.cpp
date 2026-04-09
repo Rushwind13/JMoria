@@ -306,10 +306,9 @@ void CDungeonMap::FillArea( const CDungeonCreationStep *pStep )
 
     FillArea( DUNG_IDX_FLOOR, pRoom );
 
-    if( pStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM )
-    {
-        ConnectAdjacentStructures( pStep->m_rcArea );
-    }
+    // Connect to any adjacent structures (rooms or hallways) separated by a double wall.
+    // This fixes sidling (#196): both rooms AND hallways get connecting doors.
+    ConnectAdjacentStructures( pStep->m_rcArea );
 }
 void CDungeonMap::FillArea( const Uint8 type, CRoom *pRoom )
 {
@@ -591,7 +590,23 @@ void CDungeonMap::ProcessHallway( CDungeonCreationStep *pCurStep )
     if( pick_next <= HALLWAY_LEADS_TO_ROOM_PERCENT )
     {
         // Make a (single) room, with alternate direction fallback if needed
-        TryCreateRoomWithFallback( pCurStep );
+        bool room_created = TryCreateRoomWithFallback( pCurStep );
+
+        // If room creation failed in all directions, try branching hallways
+        // instead of leaving a dead end
+        if( !room_created )
+        {
+            int num_halls = Util::GetRandom( 2, 3 );
+            int halls_created = 0;
+            ExpandInRandomDirections( pCurStep, num_halls, DUNG_CREATE_STEP_MAKE_HALLWAY, false,
+                                     &halls_created, NULL );
+            if( halls_created > 0 )
+            {
+                JLog( LOG_LEVEL_NOISIER, true,
+                      "[DUNGEN] Room failed, branched %d hallways as fallback\n",
+                      halls_created );
+            }
+        }
     }
     else if( pick_next <= 100 )
     {

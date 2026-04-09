@@ -25,7 +25,7 @@
 #define DUNG_ROOM_MAXHEIGHT 20
 
 // Dungeon generation algorithm constants
-#define MAX_TRIES 2 // Maximum placement attempts for rooms/hallways before giving up
+#define MAX_TRIES 10 // Maximum placement attempts for rooms/hallways before giving up
 #define HALLWAY_LEADS_TO_ROOM_PERCENT 80 // 80% chance hallway leads to room, 20% to more hallways
 
 // Tile placement offsets

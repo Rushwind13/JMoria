@@ -61,6 +61,12 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 - Falls back to wander toward center, then stuck_fallback.
 - Commit: `6c8dff6`.
 
+**[#199] Bot walks past items on the floor instead of picking them up (DONE)**
+- Closed by owner.
+
+**[#202] Deep refactor knowledge.json — fix errors and clean stale data (DONE)**
+- Closed by owner.
+
 **[#201] Bot goal stack ordering causes inefficient backtracking (CLOSED)**
 - Superseded by #213.
 
@@ -71,26 +77,62 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 - Bot ping-pongs between frontiers, partially explores areas, skips doors at hallway ends.
 - Possible fixes: DFS-style directional bias, frontier clustering, door proximity boost.
 
-**[#199] Bot walks past items on the floor instead of picking them up**
-- Bot frequently ignores floor items. Item promotion only catches adjacent items already on goal stack.
-- Need better item detection and "pick up on walk-over" behavior.
+**[#215] Items visible through walls and closed doors**
+- Items render on tiles the player has no LOS to, giving the bot (and player) information they shouldn't have.
+- Bot paths toward items through expensive unknown territory or walls it can't reach.
+
+**[#214] Dungeon gen: isolated hallway segments with no exits**
+- Player can spawn in a sealed 1x6 hallway surrounded entirely by walls with no doors.
+- Level is unplayable — no way to explore, fight, or descend.
 
 **[#200] Bot leaves parts of dark rooms unexplored**
 - Tile-by-tile discovery in dark rooms misses interior sections.
 - May need systematic sweep pattern or room-awareness to prioritize local unexplored tiles.
 
-**[#202] Deep refactor knowledge.json — fix errors and clean stale data**
-- Many errors accumulated over conversational development.
-- Audit against Monsters.txt and Items.txt, remove stale entries, ensure consistency.
+**[#207] Reveal bot agent's thinking with low-noise visualization**
+- Add visual overlay or log mode showing bot decision state without cluttering gameplay view.
+
+**[#206] Bot crawler log depth parameter is incorrect**
+- Depth reporting in bot logs doesn't match actual dungeon depth.
+
+**[#204] Do not use wizard mode in the AI player bot**
+- Bot should play without wizard-mode commands for realistic soak testing.
 
 **[#188] Bot parser likely overcounts visible monsters/items in ASCII viewport**
 - Noisy entity counts affect threat scoring and decision heuristics.
 
 **[#196] Dungeon gen: two hallways can "sidle" creating double-wide corridors**
 - Two hallways placed adjacent share a wall, creating double-wide corridors with floating doorways.
+- Related to #214 — both are dungeon generation connectivity issues.
 
 **[#167] Monsters don't draw / draw as invisible / draw as holes**
 - `DrawDungeon()` skips base tile when monster present; ASCII mode creates holes if `DrawMonsters()` also fails.
+
+**[#198] Yellow Icky Thing rendered in green**
+- Color mismatch in monster rendering.
+
+**[#173] Items disappear at wrong view distance during gameplay**
+- Item visibility drops off at incorrect distance.
+
+### Non-bot open issues (game engine)
+
+- **[#197]** Player stats
+- **[#181]** Reduce dead-end hallways in dungeon generation
+- **[#180]** Dump full dungeon map to screen after tombstone
+- **[#177]** Conditionalize test linker flags by RENDER_MODE
+- **[#176]** Move srand/time seed from main.cpp into Game::Init()
+- **[#175]** Replace strcmp with jstrcmp in main.cpp CLI parsing
+- **[#172]** Death screen tombstone: long monster names overflow the border
+- **[#171]** No in-game hint when bumping into closed doors
+- **[#170]** Wield command accepts non-weapon items without restriction
+- **[#166]** Wand of Light does not light tiles
+- **[#165]** Telepathy lasts forever
+- **[#156]** AI log combat 'killed' flag incorrect when monster HP reaches 0
+- **[#128]** Magic Weapons — normal, cursed, magic, ego, unique
+- **[#121]** Fuel for lanterns, charges for wands
+- **[#117]** Search command and search ability
+- **[#114]** Identify spell
+- **[#112]** Add races
 
 ---
 
@@ -165,7 +207,8 @@ This work list defines the implementation of an autonomous dungeon crawler bot f
 - #209, #210, #211, #212 done in commit 6c8dff6 (closed). Exploration model fixes: stale goals, door lifecycle, empty stack.
 - #201 superseded by #213 (closed).
 - Best test result: 1079 turns, 534 unique positions, depth 1.
-- Next priorities: #213 (goal ordering), #199 (item pickup), #200 (dark rooms), #202 (knowledge.json), #188 (parser overcounts).
+- #199 closed by owner. #202 closed by owner.
+- Next priorities: #213 (goal ordering), #215 (items through walls), #214 (isolated hallways), #200 (dark rooms), #188 (parser overcounts).
 - Last updated: 2026-04-09.
 
 

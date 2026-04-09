@@ -16,6 +16,7 @@ DerivedData
 # G++
 *.o
 jmoria
+jmoria.log
 
 # Cucumber
 bin/

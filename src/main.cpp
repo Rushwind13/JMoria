@@ -50,6 +50,13 @@ int main( int argc, char **argv )
     renderMode = RenderMode::OpenGL;
 #endif
 
+    // Redirect stderr to a log file in ASCII mode so JLog output
+    // doesn't corrupt the ncurses display.
+    if( renderMode == RenderMode::ASCII )
+    {
+        freopen( "jmoria.log", "w", stderr );
+    }
+
     JResult result;
     g_pGame = new CGame;
 

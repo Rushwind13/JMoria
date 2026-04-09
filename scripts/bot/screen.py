@@ -246,8 +246,8 @@ def _parse_dungeon(lines: list[str], term_w: int = 0) -> tuple:
     return map_grid, player_pos, monsters, items
 
 
-def _parse_messages(lines: list[str]) -> str:
-    """Return the last non-empty message from the message region.
+def _parse_messages(lines: list[str]) -> tuple[str, list[str]]:
+    """Return (last_message, all_messages) from the message region.
 
     The top message box has borders at rows 0 and (MSG_HEIGHT-1); content
     is in rows 1 through MSG_HEIGHT-2. Each content line has a leading 'x'
@@ -256,7 +256,8 @@ def _parse_messages(lines: list[str]) -> str:
     content_rows = range(1, MSG_HEIGHT - 1)
     msg_lines = [_strip_box(lines[r]).strip() for r in content_rows]
     non_empty = [l for l in msg_lines if l]
-    return non_empty[-1] if non_empty else ""
+    last = non_empty[-1] if non_empty else ""
+    return last, non_empty
 
 
 def _parse_right_panels(lines: list[str], term_w: int = 0) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
@@ -298,7 +299,7 @@ def read(state=None, dungeon_depth: int = 1) -> GameState:
 
     stats = _parse_stats(lines, term_w)
     map_grid, player_pos, monsters, items = _parse_dungeon(lines, term_w)
-    last_message = _parse_messages(lines)
+    last_message, all_messages = _parse_messages(lines)
     inventory, equipment = _parse_right_panels(lines, term_w)
 
     # Recover player_pos when '@' is hidden (e.g., monster on same tile).
@@ -334,6 +335,7 @@ def read(state=None, dungeon_depth: int = 1) -> GameState:
         inventory=inventory,
         equipment=equipment,
         last_message=last_message,
+        messages=all_messages,
         raw_lines=lines,
     )
 

@@ -38,7 +38,7 @@ class DecisionEngine:
         self.pending_use_item_name = None
         self.await_use_prompt_turns = 0
         self.pending_consumable_flavor = None  # flavor awaiting effect observation
-        self.pre_use_hp = None  # HP snapshot taken before a consumable use
+        self.pre_use_snapshot = None  # full state snapshot before consumable use
         self.use_cooldown = 0
         self.item_knowledge = {
             "equip_compat": {},
@@ -1595,10 +1595,10 @@ class DecisionEngine:
                 self._learn_non_wieldable(item)
             return
 
-        # Wield attempt bounced back to inventory.
+        # Wield attempt bounced back to inventory — transient failure
+        # (e.g. cursed item blocking removal), NOT proof the type is unwieldable.
         if "returns to your pack" in lower and self.last_equip_item_name:
             item = self.last_equip_item_name.lower()
-            self._learn_non_wieldable(item)
             self.wield_attempt_counts[item] = 99
             self.last_equip_item_name = None
             self.last_equip_baseline_ac = None
@@ -1661,16 +1661,17 @@ class DecisionEngine:
             entry["observed_ac_avg"] = total / count
             entry["observed_ac_best"] = max(int(entry.get("observed_ac_best", 0)), delta)
 
-        # Record the damage dice the game reports while wielding this weapon.
-        if current_damage:
-            entry["observed_damage"] = current_damage
-            entry["observed_damage_avg"] = self._dice_avg(current_damage)
-        if to_hit:
-            entry["observed_to_hit"] = int(to_hit)
-        if to_dam:
-            entry["observed_to_dam"] = int(to_dam)
-
+        # Only record damage/to-hit/to-dam for weapons — the stats sidebar
+        # shows the *current weapon's* damage, not the item being equipped.
         kind = self._gear_slot_kind(item_name)
+        if kind == "weapon":
+            if current_damage:
+                entry["observed_damage"] = current_damage
+                entry["observed_damage_avg"] = self._dice_avg(current_damage)
+            if to_hit:
+                entry["observed_to_hit"] = int(to_hit)
+            if to_dam:
+                entry["observed_to_dam"] = int(to_dam)
         if kind:
             best_by_slot = self.item_knowledge.setdefault("best_by_slot", {})
             current_best = best_by_slot.get(kind)
@@ -1952,172 +1953,224 @@ class DecisionEngine:
         if any(
             k in lower
             for k in (
-                "choose an item",
                 "you read the",
                 "you are now",
-                "you have",
                 "you miss",
                 "you hit",
             )
         ):
             return
 
+        # "choose an item" or "which item" is itself a meaningful effect: this
+        # scroll prompts for a target (identify, enchant, etc.).
+        if any(k in lower for k in ("choose an item", "which item")):
+            self._learn_consumable_effect("scroll", {"prompts_choose": True}, lower)
+            self.pending_scroll_label = None
+            return
+
         # Capture first meaningful post-read effect text as learned effect note.
-        label_entry = self.scroll_knowledge.setdefault(self.pending_scroll_label, {"effects": [], "count": 0})
-        effects = label_entry.setdefault("effects", [])
-        if msg not in effects:
-            effects.append(msg)
-            self.knowledge_dirty = True
-        label_entry["count"] = int(label_entry.get("count", 0)) + 1
-        self.knowledge_dirty = True
         self.pending_scroll_label = None
 
     # -- Consumable observation system --
-    # Learns from screen messages and stat changes, not from source code.
+    # Learns from screen messages and full state diffs, not from source code.
+
+    @staticmethod
+    def _take_state_snapshot(state):
+        """Capture a snapshot of all observable game state for before/after diffing."""
+        return {
+            "hp": state.player_hp,
+            "max_hp": state.player_max_hp,
+            "ac": state.player_ac,
+            "damage_dice": state.damage_dice,
+            "to_hit": state.to_hit_bonus,
+            "to_dam": state.to_dam_bonus,
+            "world_pos": state.player_world_pos,
+            "depth": state.dungeon_depth,
+            "equipment": [(s, n) for s, n in (state.equipment or [])],
+            "inventory": [(s, n) for s, n in (state.inventory or [])],
+        }
+
+    @staticmethod
+    def _diff_state(before, after):
+        """Compare two state snapshots. Returns a dict of observed changes."""
+        changes = {}
+        if before["hp"] != after["hp"]:
+            changes["hp_delta"] = after["hp"] - before["hp"]
+        if before["ac"] != after["ac"]:
+            changes["ac_delta"] = after["ac"] - before["ac"]
+        if before["damage_dice"] != after["damage_dice"]:
+            changes["damage_changed"] = True
+            changes["damage_before"] = before["damage_dice"]
+            changes["damage_after"] = after["damage_dice"]
+        if before["to_hit"] != after["to_hit"]:
+            changes["to_hit_delta"] = after["to_hit"] - before["to_hit"]
+        if before["to_dam"] != after["to_dam"]:
+            changes["to_dam_delta"] = after["to_dam"] - before["to_dam"]
+        if before["world_pos"] != after["world_pos"]:
+            changes["position_changed"] = True
+        if before["depth"] != after["depth"]:
+            changes["depth_changed"] = True
+        # Equipment changes (something appeared/disappeared from equip list).
+        before_equip = set(n for _, n in before["equipment"])
+        after_equip = set(n for _, n in after["equipment"])
+        if before_equip != after_equip:
+            changes["equipment_changed"] = True
+        return changes
 
     def _learn_from_consumable_feedback(self, state):
-        """Track effects after quaffing or reading by observing screen messages and HP changes."""
+        """Track effects after quaffing or reading by observing full state changes and messages."""
+        messages = getattr(state, "messages", [])
         msg = (state.last_message or "").strip()
-        if not msg:
+        if not msg and not messages:
             return
 
         lower = msg.lower()
+        all_lower = " ".join(m.lower() for m in messages)
 
         # Detect quaff event: "You drank the <flavor name>."
         m = re.search(r"you drank the\s+(.+?)\.?$", lower)
+        if not m:
+            # Check all message lines in case the event scrolled.
+            for line in messages:
+                m = re.search(r"you drank the\s+(.+?)\.?$", line.strip(), flags=re.IGNORECASE)
+                if m:
+                    break
         if m:
-            flavor = m.group(1).strip()
+            flavor = m.group(1).strip().lower()
             if flavor:
                 self.pending_consumable_flavor = flavor
-                self.pre_use_hp = self.last_player_hp
+                self.pre_use_snapshot = self._take_state_snapshot(state)
                 self.use_cooldown = 2
             return
 
         # Detect read event: "You read the <name>."
         m = re.search(r"you read the\s+(.+?)\.?$", lower)
+        if not m:
+            for line in messages:
+                m = re.search(r"you read the\s+(.+?)\.?$", line.strip(), flags=re.IGNORECASE)
+                if m:
+                    break
         if m:
-            flavor = m.group(1).strip()
+            flavor = m.group(1).strip().lower()
             if flavor:
                 self.pending_consumable_flavor = flavor
-                self.pre_use_hp = self.last_player_hp
+                self.pre_use_snapshot = self._take_state_snapshot(state)
                 self.use_cooldown = 2
             return
 
         # Detect failure messages and clear state.
         if "you can't drink" in lower or "you can't read" in lower:
             self.pending_consumable_flavor = None
-            self.pre_use_hp = None
+            self.pre_use_snapshot = None
             return
 
         if not self.pending_consumable_flavor:
             return
 
-        # Skip prompts that aren't effect messages.
-        if any(k in lower for k in ("choose an item", "quaff which", "read which", "wield which")):
+        # "choose an item" or "which item" — this consumable prompts for a target.
+        if any(k in all_lower for k in ("choose an item", "which item")):
+            cat = self._item_category(self.pending_consumable_flavor)
+            self._learn_consumable_effect(cat, {"prompts_choose": True}, all_lower)
+            # Don't clear pending — the effect message may come on the next turn.
             return
+
+        # Skip prompts that aren't effect messages.
+        if any(k in lower for k in ("quaff which", "read which", "wield which")):
+            return
+
+        # Compute full state diff.
+        after_snapshot = self._take_state_snapshot(state)
+        changes = {}
+        if self.pre_use_snapshot:
+            changes = self._diff_state(self.pre_use_snapshot, after_snapshot)
+
+        # Classify the consumable type.
+        cat = self._item_category(self.pending_consumable_flavor)
 
         # Identity reveal: "You have no more Orange Potions of Cure Light Wounds"
-        m = re.search(r"you have no more\s+(.+?)\s+of\s+(.+?)\.?$", lower)
+        m = re.search(r"you have no more\s+(.+?)\s+of\s+(.+?)\.?$", all_lower)
         if m:
-            flavor_part = m.group(1).strip()
             true_identity = m.group(2).strip()
             if true_identity:
-                self._learn_consumable_identity(self.pending_consumable_flavor, true_identity, state)
+                self.flavor_map[self.pending_consumable_flavor] = true_identity
+                self._learn_consumable_effect(cat, changes, all_lower, identity=true_identity)
             self.pending_consumable_flavor = None
-            self.pre_use_hp = None
+            self.pre_use_snapshot = None
             return
 
-        # Tried but no effect: "You have no more Blue Potions {tried}"
-        if "{tried}" in lower:
-            self._learn_consumable_tried(self.pending_consumable_flavor)
-            self.pending_consumable_flavor = None
-            self.pre_use_hp = None
-            return
+        # Classify by observed state changes.
+        self._learn_consumable_effect(cat, changes, all_lower)
 
-        # Any other message after use is an observed effect — record the raw text
-        # and any HP change as evidence of what this flavor does.
-        hp_delta = 0
-        if self.pre_use_hp is not None and state.player_hp is not None:
-            hp_delta = state.player_hp - self.pre_use_hp
+        # Update per-run flavor map with effect summary.
+        if changes.get("hp_delta", 0) > 0:
+            self.flavor_map[self.pending_consumable_flavor] = "healed"
+        elif changes.get("hp_delta", 0) < 0:
+            self.flavor_map[self.pending_consumable_flavor] = "harmed"
+        elif changes.get("position_changed") or changes.get("depth_changed"):
+            self.flavor_map[self.pending_consumable_flavor] = "teleport"
+        elif changes.get("ac_delta"):
+            self.flavor_map[self.pending_consumable_flavor] = "stat_change"
+        elif not changes:
+            self.flavor_map.setdefault(self.pending_consumable_flavor, "{tried}")
 
-        self._learn_consumable_observation(self.pending_consumable_flavor, msg, hp_delta)
         self.pending_consumable_flavor = None
-        self.pre_use_hp = None
+        self.pre_use_snapshot = None
 
-    def _learn_consumable_identity(self, flavor_name, true_identity, state):
-        """The game revealed the true name of a consumable (e.g., 'Cure Light Wounds')."""
-        flavor = flavor_name.lower()
-        identity = true_identity.lower()
-        self.flavor_map[flavor] = identity
+    def _learn_consumable_effect(self, category, changes, raw_messages, identity=None):
+        """Record an observed consumable effect type in persistent knowledge.
 
-        entry = self.consumable_knowledge.setdefault(identity, {
-            "count": 0, "hp_delta_total": 0, "observations": [],
+        Effects are keyed by a signature describing *what happened*, not the
+        per-run flavor name.  E.g. 'potion:heals_hp', 'scroll:prompts_choose'.
+        """
+        tags = []
+        if changes.get("hp_delta", 0) > 0:
+            tags.append("heals_hp")
+        if changes.get("hp_delta", 0) < 0:
+            tags.append("harms_hp")
+        if changes.get("ac_delta", 0) != 0:
+            tags.append("changes_ac")
+        if changes.get("damage_changed"):
+            tags.append("changes_damage")
+        if changes.get("to_hit_delta", 0) != 0:
+            tags.append("changes_to_hit")
+        if changes.get("to_dam_delta", 0) != 0:
+            tags.append("changes_to_dam")
+        if changes.get("position_changed") or changes.get("depth_changed"):
+            tags.append("changes_position")
+        if changes.get("equipment_changed"):
+            tags.append("changes_equipment")
+        if changes.get("prompts_choose"):
+            tags.append("prompts_choose")
+        if not tags:
+            tags.append("no_visible_effect")
+
+        effect_key = (category or "unknown") + ":" + "+".join(sorted(tags))
+
+        entry = self.consumable_knowledge.setdefault(effect_key, {
+            "count": 0,
         })
         entry["count"] = int(entry.get("count", 0)) + 1
-        entry["identified"] = True
-        if self.pre_use_hp is not None and state.player_hp is not None:
-            hp_delta = state.player_hp - self.pre_use_hp
-            entry["hp_delta_total"] = int(entry.get("hp_delta_total", 0)) + hp_delta
-            if hp_delta > 0:
-                entry["heals"] = True
-            elif hp_delta < 0:
-                entry["harms"] = True
-        self.knowledge_dirty = True
 
-    def _learn_consumable_tried(self, flavor_name):
-        """Consumable had no visible effect — mark as tried."""
-        flavor = flavor_name.lower()
-        if flavor not in self.flavor_map:
-            self.flavor_map[flavor] = "{tried}"
-        self.knowledge_dirty = True
+        # Store identity if revealed (e.g. "minor healing").
+        if identity:
+            entry["identity"] = identity
 
-    def _learn_consumable_observation(self, flavor_name, raw_msg, hp_delta):
-        """Record a raw screen observation after consuming something."""
-        flavor = flavor_name.lower()
+        # Store representative stat deltas for reference.
+        hp_d = changes.get("hp_delta", 0)
+        if hp_d:
+            entry["hp_delta_total"] = int(entry.get("hp_delta_total", 0)) + hp_d
 
-        # Use HP delta as primary evidence.
-        effect_tag = "unknown"
-        if hp_delta > 0:
-            effect_tag = "healed"
-        elif hp_delta < 0:
-            effect_tag = "harmed"
-
-        self.flavor_map[flavor] = effect_tag
-
-        entry = self.consumable_knowledge.setdefault(effect_tag + ":" + flavor, {
-            "count": 0, "hp_delta_total": 0, "observations": [],
-        })
-        entry["count"] = int(entry.get("count", 0)) + 1
-        entry["hp_delta_total"] = int(entry.get("hp_delta_total", 0)) + hp_delta
-        if hp_delta > 0:
-            entry["heals"] = True
-        elif hp_delta < 0:
-            entry["harms"] = True
-        obs = entry.setdefault("observations", [])
-        if raw_msg and raw_msg not in obs and len(obs) < 5:
-            obs.append(raw_msg)
         self.knowledge_dirty = True
 
     def _is_known_healing_flavor(self, item_name):
         """Check if we've observed this flavor healing us in the current run."""
         effect = self.flavor_map.get(item_name.lower(), "")
-        if effect == "healed":
-            return True
-        # Also match if the revealed identity contains healing keywords.
-        if effect and effect not in ("{tried}", "harmed", "unknown"):
-            entry = self.consumable_knowledge.get(effect, {})
-            return entry.get("heals", False)
-        return False
+        return effect == "healed"
 
     def _is_known_bad_flavor(self, item_name):
         """Check if we've observed this flavor harming us in the current run."""
         effect = self.flavor_map.get(item_name.lower(), "")
-        if effect == "harmed":
-            return True
-        if effect and effect not in ("{tried}", "healed", "unknown"):
-            entry = self.consumable_knowledge.get(effect, {})
-            return entry.get("harms", False)
-        return False
+        return effect == "harmed"
 
     def _find_inventory_consumable(self, inventory, category=None, exclude_bad=True):
         """Find a consumable in inventory, optionally filtering by category.
@@ -2195,7 +2248,6 @@ class DecisionEngine:
             # Migrate legacy per-name entries to categories.
             legacy_names = data.get("non_wieldable_names", [])
             monsters = data.get("monster_knowledge", {})
-            scrolls = data.get("scroll_knowledge", {})
             item_k = data.get("item_knowledge", {})
             door_k = data.get("door_knowledge", {})
             map_k = data.get("map_knowledge", {})
@@ -2204,20 +2256,29 @@ class DecisionEngine:
             for n in legacy_names:
                 if isinstance(n, str):
                     self.learned_non_wieldable_categories.add(self._item_category(n))
+            # Migration: remove categories that are actually wieldable equipment.
+            for bad_cat in ("shield", "dagger"):
+                self.learned_non_wieldable_categories.discard(bad_cat)
             if isinstance(monsters, dict):
                 self.monster_knowledge = monsters
-            if isinstance(scrolls, dict):
-                self.scroll_knowledge = scrolls
             if isinstance(item_k, dict):
                 self.item_knowledge = item_k
                 self.item_knowledge.setdefault("gear_strength", {})
                 self.item_knowledge.setdefault("best_by_slot", {})
+                # Migration: strip damage fields from non-weapon gear entries.
+                for gname, gentry in self.item_knowledge.get("gear_strength", {}).items():
+                    if self._gear_slot_kind(gname) != "weapon":
+                        for dkey in ("observed_damage", "observed_damage_avg", "observed_to_hit", "observed_to_dam"):
+                            gentry.pop(dkey, None)
             if isinstance(door_k, dict):
                 self.door_knowledge = door_k
             if isinstance(map_k, dict):
                 self.map_knowledge = map_k
             if isinstance(consumable_k, dict):
                 self.consumable_knowledge = consumable_k
+            # Legacy: scroll_knowledge is no longer persisted separately;
+            # scroll effects are recorded in consumable_knowledge.
+            self.scroll_knowledge = {}
             self.knowledge_dirty = False
             return True
         except FileNotFoundError:
@@ -2227,10 +2288,9 @@ class DecisionEngine:
 
     def save_knowledge(self, file_path):
         data = {
-            "schema_version": 4,
+            "schema_version": 5,
             "non_wieldable_categories": sorted(self.learned_non_wieldable_categories),
             "monster_knowledge": self.monster_knowledge,
-            "scroll_knowledge": self.scroll_knowledge,
             "consumable_knowledge": self.consumable_knowledge,
             "item_knowledge": self.item_knowledge,
             "door_knowledge": self.door_knowledge,

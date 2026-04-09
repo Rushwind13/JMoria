@@ -43,6 +43,9 @@ class GameState:
     # Last message line from the message region (top of screen)
     last_message: str = ""
 
+    # All non-empty message lines from the message region (oldest first)
+    messages: list = field(default_factory=list)
+
     # Raw lines of the last capture (for debugging)
     raw_lines: list = field(default_factory=list)
 

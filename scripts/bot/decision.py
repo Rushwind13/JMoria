@@ -390,28 +390,44 @@ class DecisionEngine:
         # Push new doors/items we can see.
         self._update_goal_stack(state)
 
+        # Prioritize: collect all visible items before exploring unknown.
+        # If there are item goals on the stack, promote the nearest one
+        # to the top so the bot clears the room before leaving.
+        item_indices = [i for i, (t, _) in enumerate(self.goal_stack) if t == "item"]
+        if item_indices:
+            # Find the nearest item goal.
+            best_i = min(item_indices, key=lambda i: pf.heuristic(mpos, self.goal_stack[i][1]))
+            if self.goal_stack[-1][0] != "item":
+                self.goal_stack.append(self.goal_stack.pop(best_i))
+                self.cached_path = []
+                self.cached_path_target = None
+
         # Clean stale/completed goals from the top of the stack.
         while self.goal_stack:
             gtype, grc = self.goal_stack[-1]
             if gtype == "item":
                 if mpos == grc:
                     self.goal_stack.pop()
+                    # #210: after picking up item, continue forward if
+                    # there is unexplored territory in travel direction.
+                    last_dir = KEY_TO_DIR.get(self.last_action)
+                    if last_dir:
+                        nr, nc = mpos[0] + last_dir[0], mpos[1] + last_dir[1]
+                        if (nr, nc) in self.unexplored_tiles:
+                            self.goal_stack.append(("unexplored", (nr, nc)))
                     continue
                 break
             elif gtype == "door":
-                if grc in self.explored_tiles or mpos == grc:
-                    self.goal_stack.pop()
-                    continue
-                if not self._has_unknown_neighbor(grc):
-                    self.goal_stack.pop()
-                    continue
-                break
+                # Doors are no longer first-class goals (#211).
+                # Pop any remaining door goals — doors are opened by
+                # path-following when encountered en route.
+                self.goal_stack.pop()
+                continue
             elif gtype == "unexplored":
-                if grc not in self.unexplored_tiles:
+                if grc not in self.unexplored_tiles or mpos == grc:
                     self.goal_stack.pop()
-                    continue
-                if mpos == grc:
-                    self.goal_stack.pop()
+                    # Chain forward: find nearest unexplored neighbor,
+                    # preferring the current travel direction.
                     last_dir = KEY_TO_DIR.get(self.last_action)
                     check_dirs = []
                     if last_dir:
@@ -430,13 +446,15 @@ class DecisionEngine:
                 if mpos == grc:
                     can_descend, reason = self._can_safely_descend_stairs(state)
                     if can_descend:
+                        tile_ch = self.known_map[grc[0]][grc[1]]
+                        stair_cmd = "<" if tile_ch == "<" else ">"
                         self.goal_stack.pop()
-                        return self._record_decision(">", reason)
+                        return self._record_decision(stair_cmd, f"prog_descend_{tile_ch}")
                     else:
+                        # Not safe to descend yet — wait near stairs.
                         self.goal_stack.pop()
-                        self.last_staircase_attempt = grc
-                        self.staircase_attempt_cooldown = 8
                         self.last_thought = reason
+                        continue
                 break
             else:
                 self.goal_stack.pop()
@@ -446,14 +464,25 @@ class DecisionEngine:
             target = self._nearest_unexplored_tile(mpos)
             if target:
                 self.goal_stack.append(("unexplored", target))
-            elif self.staircase_attempt_cooldown <= 0:
-                stair = self._find_staircase(mpos)
-                if stair:
-                    self.goal_stack.append(("staircase", stair))
-            else:
-                self.staircase_attempt_cooldown -= 1
 
+        # #212: If still empty, always path toward staircase (don't
+        # gate on descent safety — we check that on arrival). This
+        # prevents the bot from idling in corners.
         if not self.goal_stack:
+            stair = self._find_staircase(mpos)
+            if stair:
+                self.goal_stack.append(("staircase", stair))
+
+        # #212: Last resort — wander toward map center rather than
+        # oscillating in a corner via stuck_fallback.
+        if not self.goal_stack:
+            center = (50, 50)
+            path = pf.path_to(self.known_map, mpos, center)
+            if path and len(path) >= 2:
+                nxt = path[1]
+                dkey = pf.DIR_TO_KEY.get((nxt[0] - mpos[0], nxt[1] - mpos[1]))
+                if dkey and self._can_step(grid, pos, dkey):
+                    return self._record_decision(dkey, "wander_center")
             for key in "ljkhyubn":
                 if self._can_step(grid, pos, key):
                     return self._record_decision(key, f"stuck_fallback_{key}")
@@ -511,6 +540,7 @@ class DecisionEngine:
 
         # Compute new path to goal.
         dist = pf.heuristic(mpos, grc)
+
         if dist <= 1:
             dkey = pf.DIR_TO_KEY.get((grc[0] - mpos[0], grc[1] - mpos[1]))
             if dkey:
@@ -597,11 +627,11 @@ class DecisionEngine:
         """
         Check descent criteria before going down (see PROGRESSION_STRATEGY.md).
         Returns: (can_descend: bool, reason: str)
-        """
-        reachable = self.unexplored_tiles - self.failed_goals
-        if reachable:
-            return (False, "prog_descend_delay_exploring")
 
+        Note: unexplored_tiles is NOT checked here — the staircase goal is
+        only pushed when _nearest_unexplored_tile() finds nothing reachable,
+        so any remaining unexplored tiles are behind walls / unreachable.
+        """
         if state.player_max_hp > 0:
             hp_pct = state.player_hp / state.player_max_hp
             if hp_pct < 0.70:
@@ -646,6 +676,7 @@ class DecisionEngine:
                         self.known_map[gr][gc] = "."
                     else:
                         self.known_map[gr][gc] = ch
+                    self.explored_tiles.add((gr, gc))
 
         # Stamp unknown 8-neighbors of player map position as wall.
         prow, pcol = wy, wx
@@ -661,64 +692,75 @@ class DecisionEngine:
     def _update_exploration_sets(self, state):
         """Rebuild the unexplored frontier from known_map.
 
-        A tile is 'unexplored' only if it's a passable tile in known_map
-        that has at least one unknown (' ') neighbor — an exit at the
-        boundary between mapped and unmapped territory.
+        Frontier tiles are walkable tiles that border the unknown:
+        1. Open doors ("'") with at least one unknown neighbor — passage
+           into unseen territory.
+        2. Floor tiles ('.') with an unknown neighbor — dark room
+           edges or corridor tips leading into new territory.
+
+        Closed doors are NOT on the frontier — they are handled as
+        obstacles during path-following (opened when encountered en
+        route to an actual exploration target).
         """
         if not state.map or state.player_pos is None or state.player_world_pos is None:
             return
-        wx, wy = state.player_world_pos
-        player_rc = (wy, wx)
 
         new_frontier = set()
         for r in range(100):
             for c in range(100):
                 ch = self.known_map[r][c]
-                if ch in (".", "'", "+", "<", ">"):
+                if ch == "+":
+                    # Closed door with unknown beyond — exploration target.
+                    # Not a standalone "door" goal; path-following opens it.
+                    if self._has_unknown_neighbor((r, c)):
+                        new_frontier.add((r, c))
+                elif ch == "'":
+                    # Open door is interesting only if it borders unknown.
+                    if self._has_unknown_neighbor((r, c)):
+                        new_frontier.add((r, c))
+                elif ch == ".":
+                    # Floor tile bordering unknown — could be a dark room
+                    # edge or a corridor tip leading into new territory.
                     if self._has_unknown_neighbor((r, c)):
                         new_frontier.add((r, c))
 
-        new_frontier.discard(player_rc)
         self.unexplored_tiles = new_frontier
-        self.explored_tiles.add(player_rc)
+
+        # Prune stale unexplored goals from anywhere in the stack (#209).
+        # This handles scroll-of-light or other visibility changes that
+        # make previously-unknown tiles visible mid-exploration.
+        self.goal_stack = [
+            (t, rc) for t, rc in self.goal_stack
+            if t != "unexplored" or rc in new_frontier
+        ]
 
     # ------------------------------------------------------------------
     # Goal stack
     # ------------------------------------------------------------------
 
     def _update_goal_stack(self, state):
-        """Push newly-visible doors and items onto the goal stack."""
+        """Push newly-visible items onto the goal stack."""
         if not state.map or state.player_pos is None or state.player_world_pos is None:
             return
         pr, pc = state.player_pos
         wx, wy = state.player_world_pos
 
-        new_doors = []
         new_items = []
-
-        for lr in range(len(state.map)):
-            for lc in range(len(state.map[lr])):
-                ch = state.map[lr][lc]
-                if ch in ("'", "+"):
-                    grc = (wy + (lr - pr), wx + (lc - pc))
-                    if not (0 <= grc[0] < 100 and 0 <= grc[1] < 100):
-                        continue
-                    key = ("door", grc)
-                    if key not in self.pushed_goals and grc not in self.explored_tiles:
-                        self.pushed_goals.add(key)
-                        new_doors.append(key)
 
         current_item_goals = {(t, rc) for t, rc in self.goal_stack if t == "item"}
         for ir, ic, _ich in state.items:
             grc = (wy + (ir - pr), wx + (ic - pc))
             if not (0 <= grc[0] < 100 and 0 <= grc[1] < 100):
                 continue
+            if grc in self.failed_goals:
+                continue
             key = ("item", grc)
             if key not in current_item_goals:
                 new_items.append(key)
 
-        # Doors are lower priority (pushed first), items higher (pushed last).
-        self.goal_stack.extend(new_doors)
+        # #211: Don't push door goals — doors are handled by
+        # path-following when encountered en route to exploration targets.
+        # Only push item goals.
         self.goal_stack.extend(new_items)
 
     def _has_unknown_neighbor(self, world_pos):
@@ -745,34 +787,58 @@ class DecisionEngine:
         return None
 
     def _nearest_unexplored_tile(self, wpos):
-        """BFS on known_map to find nearest unexplored tile by walk distance."""
+        """BFS on known_map to find nearest frontier tile by walk distance.
+
+        Frontier tiles are already-seen walkable tiles that border the
+        unknown.  Among equally-close candidates we prefer hallway edges
+        (tiles with few walkable neighbors — likely corridors leading
+        into new territory) over open room edges.
+        """
         if not self.unexplored_tiles:
             return None
         candidates = self.unexplored_tiles - self.failed_goals
         if not candidates:
             return None
         visited = {wpos}
-        queue = deque([wpos])
+        queue = deque([(wpos, 0)])
+        best = None
+        best_dist = None
+        best_score = 999
         while queue:
-            cur = queue.popleft()
-            if cur in candidates and pf.is_walkable(self.known_map[cur[0]][cur[1]]):
-                return cur
-            # Check for unexplored closed doors adjacent to BFS frontier.
+            cur, dist = queue.popleft()
+            if best_dist is not None and dist > best_dist:
+                break
+            if cur in candidates:
+                # Score: fewer walkable neighbors = more corridor-like = better
+                score = sum(
+                    1 for dr, dc in pf.DIRS_8
+                    if 0 <= cur[0]+dr < 100 and 0 <= cur[1]+dc < 100
+                    and self.known_map[cur[0]+dr][cur[1]+dc] in (".", "'", "<", ">")
+                )
+                if best is None or score < best_score:
+                    best = cur
+                    best_dist = dist
+                    best_score = score
+                continue
+            # Also check for closed doors adjacent to BFS frontier.
             for dr, dc in pf.DIRS_8:
                 nr, nc = cur[0] + dr, cur[1] + dc
                 if 0 <= nr < 100 and 0 <= nc < 100:
                     npos = (nr, nc)
-                    if npos in candidates and self.known_map[nr][nc] == "+":
-                        return npos
-            # Expand BFS through walkable tiles.
+                    if self.known_map[nr][nc] == "+" and self._has_unknown_neighbor(npos):
+                        if best is None:
+                            best = npos
+                            best_dist = dist + 1
+                            best_score = 0  # doors always top priority
+            # Expand BFS through walkable AND unknown tiles.
             for dr, dc in pf.DIRS_8:
                 nr, nc = cur[0] + dr, cur[1] + dc
                 if 0 <= nr < 100 and 0 <= nc < 100:
                     npos = (nr, nc)
-                    if npos not in visited and pf.is_walkable(self.known_map[nr][nc]):
+                    if npos not in visited and pf.is_passable(self.known_map[nr][nc]):
                         visited.add(npos)
-                        queue.append(npos)
-        return None
+                        queue.append((npos, dist + 1))
+        return best
 
     # ------------------------------------------------------------------
     # Door graph management

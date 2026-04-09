@@ -15,7 +15,12 @@ DIR_TO_KEY = {
 }
 
 WALKABLE = {".", "'", "<", ">", "@"}
-SOLID = {"#", ":", " ", "+"}
+SOLID = {"#", ":", "+"}
+
+# Unknown tiles (" ") are neither WALKABLE nor SOLID — they are
+# traversable but expensive, representing unseen territory that
+# *might* be floor.
+UNKNOWN_COST = 5
 
 
 def in_bounds(grid, pos):
@@ -38,13 +43,24 @@ def is_walkable(ch):
     return ch != " "
 
 
-def neighbors(grid, pos):
+def is_passable(ch):
+    """True if A* may route through this tile (walkable or unknown)."""
+    return ch not in SOLID
+
+
+def neighbors(grid, pos, allow_unknown=False):
     r, c = pos
     out = []
     for dr, dc in DIRS_8:
         nr, nc = r + dr, c + dc
-        if in_bounds(grid, (nr, nc)) and is_walkable(grid[nr][nc]):
-            out.append((nr, nc))
+        if in_bounds(grid, (nr, nc)):
+            ch = grid[nr][nc]
+            if allow_unknown:
+                if is_passable(ch):
+                    out.append((nr, nc))
+            else:
+                if is_walkable(ch):
+                    out.append((nr, nc))
     return out
 
 
@@ -55,6 +71,9 @@ def heuristic(a, b):
 
 def path_to(grid, start, goal, cost_fn=None):
     """Return path [start..goal] using A*. Empty list if unreachable.
+
+    Routes through unknown (' ') tiles with a high cost penalty so the
+    bot prefers known paths but can traverse dark rooms to reach exits.
 
     cost_fn: optional callable(pos) -> extra cost for stepping onto pos.
     """
@@ -73,8 +92,13 @@ def path_to(grid, start, goal, cost_fn=None):
         if cur == goal:
             return _reconstruct_path(came_from, cur)
 
-        for nxt in neighbors(grid, cur):
-            step_cost = 1 + (cost_fn(nxt) if cost_fn else 0)
+        for nxt in neighbors(grid, cur, allow_unknown=True):
+            ch = grid[nxt[0]][nxt[1]]
+            step_cost = 1
+            if ch == " ":
+                step_cost += UNKNOWN_COST
+            if cost_fn:
+                step_cost += cost_fn(nxt)
             tentative = g_score[cur] + step_cost
             if tentative < g_score.get(nxt, 1_000_000_000):
                 came_from[nxt] = cur

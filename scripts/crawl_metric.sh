@@ -9,7 +9,7 @@ OUT="$SCRIPT_DIR/bot_test_latest.txt"
 
 # Ensure persistent crawler session exists and is ready
 if ! tmux has-session -t crawler 2>/dev/null; then
-    tmux new-session -d -s crawler -x 200 -y 50 "cd '$PROJ_ROOT' && exec zsh"
+    tmux new-session -d -s crawler -x 200 -y 54 "cd '$PROJ_ROOT' && exec zsh"
     sleep 1
 fi
 

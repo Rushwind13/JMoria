@@ -12,6 +12,15 @@
 
 extern CGame *g_pGame;
 
+static bool ShowPlayerPosInStats()
+{
+    const char *flag = getenv( "JMORIA_SHOW_PLAYER_POS" );
+    if( flag == NULL )
+        return false;
+    return ( Util::jstrcmp( flag, "1" ) == 0 || Util::jstrcmp( flag, "true" ) == 0 ||
+             Util::jstrcmp( flag, "yes" ) == 0 || Util::jstrcmp( flag, "on" ) == 0 );
+}
+
 // Helper: find an inventory link by item instance id
 static CLink<CItem> *FindInventoryLinkByInstance( JLinkList<CItem> *pList, uint32 dwInstanceId )
 {
@@ -200,6 +209,9 @@ void CPlayer::DisplayStats()
     g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "Level: %d\n", (int)m_fLevel );
+    g_pGame->GetStats()->Printf( "Depth: %d'\n", g_pGame->GetDungeon()->depth * 50 );
+    if( IsWizard() || ShowPlayerPosInStats() )
+        g_pGame->GetStats()->Printf( "Pos: <%.0f %.0f>\n", VEC_EXPAND( m_vPos ) );
     g_pGame->GetStats()->Printf( "Exp: %d\n", (int)m_fExperience );
     g_pGame->GetStats()->Printf(
         "Exp to Next: %d\n", (int)( m_pClass->m_fExpNeeded[(int)m_fLevel - 1] - m_fExperience ) );

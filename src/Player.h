@@ -121,6 +121,12 @@ public:
         sprintf( m_szDamage, PLAYER_BASE_DAMAGE );
 
         m_fHitPoints = Util::Roll( m_pClass->m_szHD );
+        {
+            const char *d = strchr( m_pClass->m_szHD, 'd' );
+            float fMinHP = d ? atoi( d + 1 ) / 2.0f : 1.0f;
+            if( m_fHitPoints < fMinHP )
+                m_fHitPoints = fMinHP;
+        }
         m_fCurHitPoints = m_fHitPoints;
     };
     ~CPlayer() { Term(); }

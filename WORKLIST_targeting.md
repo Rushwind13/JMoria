@@ -83,6 +83,8 @@ Standard implementation with error-term tracking and diagonal gap checking. Supp
 ### [P1] Skip OpenGL tests — get targeting working in ASCII Renderer (#225)
 - ✅ **FIXED**: `HandleEventsASCII` now maps `'*'` (Shift+8) to `JKEY_8 + JMOD_SHIFT`
 - ✅ **FIXED**: `IsDirectional`/`GetDir` now accept plain digit keys `1`-`9` as directional input (ASCII renderer has no numpad); shifted digits excluded to preserve `*` target command
+- ✅ **FIXED**: Enter key was mapping to `'j'` (move down) — excluded `\n`/`\r` from Ctrl+letter branch
+- ✅ **FIXED**: `StringInputState::OnHandleItem` NULL guard — `CreateItem(NULL, ...)` segfaulted on unknown item names
 - All targeting and ranged test development should use ASCII renderer (`make ascii`)
 - Skip or gate any OpenGL-dependent test paths
 - Ensure `CTargetState` and `CRangedState` work correctly with `CRenderASCII`
@@ -110,17 +112,20 @@ Standard implementation with error-term tracking and diagonal gap checking. Supp
 - Test cases: horizontal, vertical, diagonal, near-diagonal, obstacle blocking, max distance cap, diagonal gap checking
 - Verify against canonical Bresenham output
 
-### [P1] Cached visible-set
+### [P1] Cached visible-set + distance-sorted target list
+- ✅ **IMPLEMENTED**: Target list now sorted by taxicab distance (nearest first) using `JLinkList::Add(pData, dist)` sorted insert
+- ✅ **IMPLEMENTED**: Initial target set to nearest visible monster
 - Maintain a set of visible monsters, recomputed when player moves or world state changes (door open/close, monster move/die)
 - `CTargetState::DoInit()` reads from cache instead of re-scanning entire monster list
 - Consistent target lists; avoids redundant LOS computation
-- Required foundation for LOS line drawing (P1) — the line must be computed fresh on the turn it's needed
 
-### [P1] UI feedback — draw LOS line while targeting
-- Render computed Bresenham line on-screen while player is in `TARGET_TARGET` state
-- Show line in distinct color (green = clear, red = blocked)
-- Line must be computed on the turn it's needed, not cached from a prior state
-- Always re-validate on confirm regardless of visual feedback
+### [P1] ✅ IMPLEMENTED — UI feedback — draw LOS line while targeting
+- ✅ Bresenham LOS line from player to current target rendered in bright cyan (A_BOLD in ASCII)
+- ✅ Line updates when cycling targets with `*`
+- ✅ Line cleared on ESC or confirm (`.`)
+- ✅ Projectile tile color bumped to bright yellow (A_BOLD in ASCII)
+- ✅ `CDungeon::m_llLOSLine` with `SetLOSLine()`/`ClearLOSLine()`/`IsOnLOSLine()` API
+- Future: Show line in red when blocked vs green when clear
 
 ### [P2] Split Bresenham responsibilities
 - Make LOS computation pure: separate line-generation from collision checks

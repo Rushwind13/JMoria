@@ -129,7 +129,7 @@ bool CDungeonMap::CheckArea( CDungeonCreationStep *pStep )
 
     bInteriorOK = CheckInterior( pStep->m_rcArea );
     if( bInteriorOK )
-        bBorderOK = CheckBorder( pStep->m_rcArea, direction );
+        bBorderOK = CheckBorder( pStep->m_rcArea, direction, bIsHallway );
     return bInteriorOK && bBorderOK;
 }
 
@@ -183,7 +183,7 @@ void TweakBorders( JRect &rcIn, int direction )
 // - DUNG_IDX_WALL (solid rock): Indicates space for new construction
 // - Doors: Allows connecting to existing rooms/hallways through doorways
 // This enables natural dungeon connectivity while preventing room overlaps.
-bool CDungeonMap::CheckBorder( const JRect area, int direction )
+bool CDungeonMap::CheckBorder( const JRect area, int direction, bool bIsHallway )
 {
     JRect rcEdges( area.left - 1, area.top - 1, area.right + 1, area.bottom + 1 );
     if( !rcEdges.IsInWorld() )
@@ -209,6 +209,78 @@ bool CDungeonMap::CheckBorder( const JRect area, int direction )
                 // Reject if border contains non-wall, non-door tiles (floor, stairs, etc.)
                 // This prevents room overlaps while allowing door connections
                 return false;
+            }
+        }
+    }
+
+    // Anti-sidle check: for hallways, scan a wider perpendicular border (2 tiles out)
+    // to reject placement next to an existing parallel corridor
+    if( bIsHallway )
+    {
+        bool bVertical = ( direction == DIR_NORTH || direction == DIR_SOUTH );
+        JIVector vAnti;
+        if( bVertical )
+        {
+            // Check 2 tiles to the left and right of the hallway
+            for( int y = area.top; y <= area.bottom; y++ )
+            {
+                vAnti.y = y;
+                int xLeft = area.left - 2;
+                int xRight = area.right + 2;
+                if( xLeft >= 0 )
+                {
+                    vAnti.x = xLeft;
+                    if( GetTile( vAnti )->GetType() == DUNG_IDX_FLOOR )
+                    {
+                        JLog( LOG_LEVEL_NOISE, true,
+                              "anti-sidle rejected hallway <%d %d, %d %d> at <%d %d>\n",
+                              RECT_EXPAND( area ), VEC_EXPAND( vAnti ) );
+                        return false;
+                    }
+                }
+                if( xRight < DUNG_WIDTH )
+                {
+                    vAnti.x = xRight;
+                    if( GetTile( vAnti )->GetType() == DUNG_IDX_FLOOR )
+                    {
+                        JLog( LOG_LEVEL_NOISE, true,
+                              "anti-sidle rejected hallway <%d %d, %d %d> at <%d %d>\n",
+                              RECT_EXPAND( area ), VEC_EXPAND( vAnti ) );
+                        return false;
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Check 2 tiles above and below the hallway
+            for( int x = area.left; x <= area.right; x++ )
+            {
+                vAnti.x = x;
+                int yTop = area.top - 2;
+                int yBottom = area.bottom + 2;
+                if( yTop >= 0 )
+                {
+                    vAnti.y = yTop;
+                    if( GetTile( vAnti )->GetType() == DUNG_IDX_FLOOR )
+                    {
+                        JLog( LOG_LEVEL_NOISE, true,
+                              "anti-sidle rejected hallway <%d %d, %d %d> at <%d %d>\n",
+                              RECT_EXPAND( area ), VEC_EXPAND( vAnti ) );
+                        return false;
+                    }
+                }
+                if( yBottom < DUNG_HEIGHT )
+                {
+                    vAnti.y = yBottom;
+                    if( GetTile( vAnti )->GetType() == DUNG_IDX_FLOOR )
+                    {
+                        JLog( LOG_LEVEL_NOISE, true,
+                              "anti-sidle rejected hallway <%d %d, %d %d> at <%d %d>\n",
+                              RECT_EXPAND( area ), VEC_EXPAND( vAnti ) );
+                        return false;
+                    }
+                }
             }
         }
     }
@@ -306,10 +378,9 @@ void CDungeonMap::FillArea( const CDungeonCreationStep *pStep )
 
     FillArea( DUNG_IDX_FLOOR, pRoom );
 
-    if( pStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM )
-    {
-        ConnectAdjacentStructures( pStep->m_rcArea );
-    }
+    // Connect to any adjacent structures (rooms or hallways) separated by a double wall.
+    // This fixes sidling (#196): both rooms AND hallways get connecting doors.
+    ConnectAdjacentStructures( pStep->m_rcArea );
 }
 void CDungeonMap::FillArea( const Uint8 type, CRoom *pRoom )
 {
@@ -591,7 +662,22 @@ void CDungeonMap::ProcessHallway( CDungeonCreationStep *pCurStep )
     if( pick_next <= HALLWAY_LEADS_TO_ROOM_PERCENT )
     {
         // Make a (single) room, with alternate direction fallback if needed
-        TryCreateRoomWithFallback( pCurStep );
+        bool room_created = TryCreateRoomWithFallback( pCurStep );
+
+        // If room creation failed in all directions, try branching hallways
+        // instead of leaving a dead end
+        if( !room_created )
+        {
+            int num_halls = Util::GetRandom( 2, 3 );
+            int halls_created = 0;
+            ExpandInRandomDirections( pCurStep, num_halls, DUNG_CREATE_STEP_MAKE_HALLWAY, false,
+                                      &halls_created, NULL );
+            if( halls_created > 0 )
+            {
+                JLog( LOG_LEVEL_NOISIER, true,
+                      "[DUNGEN] Room failed, branched %d hallways as fallback\n", halls_created );
+            }
+        }
     }
     else if( pick_next <= 100 )
     {
@@ -836,6 +922,18 @@ CDungeonCreationStep *CDungeonMap::CreateStep( int step_type, const JIVector &vP
                                  ? GetRoomRect( pStep->m_rcArea, pStep->m_dwDirection )
                                  : GetHallRect( pStep->m_rcArea, pStep->m_dwDirection );
 
+        // If normal room sizing fails, try small room as fallback
+        if( rectResult != JSUCCESS && step_type == DUNG_CREATE_STEP_MAKE_ROOM )
+        {
+            pStep->m_rcArea.Init( rcTry );
+            rectResult = GetSmallRoomRect( pStep->m_rcArea, pStep->m_dwDirection );
+            if( rectResult == JSUCCESS )
+            {
+                JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Using small room fallback on attempt %d\n",
+                      attempt_count + 1 );
+            }
+        }
+
         if( rectResult != JSUCCESS )
         {
             // Geometry generation failed (clamping or degenerate rect)
@@ -959,6 +1057,61 @@ JResult CDungeonMap::GetRoomRect( JRect &rcRoom, const int direction )
     {
         JLog( LOG_LEVEL_WARN, true,
               "[DUNGEN] GetRoomRect required clamping - geometry may be corrupted\n" );
+        return -1;
+    }
+
+    return JSUCCESS;
+}
+
+// Small room variant for terminal hallways at deep recursion depth.
+// Uses smaller min/max dimensions to fit in tight spaces.
+JResult CDungeonMap::GetSmallRoomRect( JRect &rcRoom, const int direction )
+{
+    JIVector vSize( 0, 0 );
+    vSize.Init( Util::GetRandom( DUNG_SMALLROOM_MINWIDTH, DUNG_SMALLROOM_MAXWIDTH ),
+                Util::GetRandom( DUNG_SMALLROOM_MINHEIGHT, DUNG_SMALLROOM_MAXHEIGHT ) );
+    switch( direction )
+    {
+    case DIR_NORTH:
+        rcRoom.left -= Util::GetRandom( 1, vSize.x - 1 );
+        rcRoom.SetWidth( vSize.x );
+        rcRoom.SetHeight( vSize.y, false );
+        break;
+    case DIR_SOUTH:
+        rcRoom.left -= Util::GetRandom( 1, vSize.x - 1 );
+        rcRoom.SetWidth( vSize.x );
+        rcRoom.SetHeight( vSize.y );
+        break;
+    case DIR_WEST:
+        rcRoom.top -= Util::GetRandom( 1, vSize.y - 1 );
+        rcRoom.SetWidth( vSize.x, false );
+        rcRoom.SetHeight( vSize.y );
+        break;
+    case DIR_EAST:
+        rcRoom.top -= Util::GetRandom( 1, vSize.y - 1 );
+        rcRoom.SetWidth( vSize.x );
+        rcRoom.SetHeight( vSize.y );
+        break;
+    case DIR_NONE:
+        rcRoom.SetWidth( vSize.x );
+        rcRoom.SetHeight( vSize.y );
+        break;
+    }
+
+    bool bClamped = rcRoom.ClampToWorld( true );
+
+    if( rcRoom.Width() <= 0 || rcRoom.Height() <= 0 )
+    {
+        JLog( LOG_LEVEL_WARN, true,
+              "[DUNGEN] GetSmallRoomRect produced degenerate rect <%d %d, %d %d> (w=%d h=%d)\n",
+              RECT_EXPAND( rcRoom ), rcRoom.Width(), rcRoom.Height() );
+        return -1;
+    }
+
+    if( bClamped )
+    {
+        JLog( LOG_LEVEL_WARN, true,
+              "[DUNGEN] GetSmallRoomRect required clamping - geometry may be corrupted\n" );
         return -1;
     }
 
@@ -1517,4 +1670,106 @@ bool CDungeonMap::ValidateAllRoomsReachable() const
     int reachable = 0;
     int total = 0;
     return ValidateConnectivity( reachable, total );
+}
+
+bool CDungeonMap::IsWalkable( Uint8 type ) const
+{
+    return type == DUNG_IDX_FLOOR || type == DUNG_IDX_DOOR || type == DUNG_IDX_OPEN_DOOR ||
+           type == DUNG_IDX_SECRET_DOOR || type == DUNG_IDX_UPSTAIRS ||
+           type == DUNG_IDX_LONG_UPSTAIRS || type == DUNG_IDX_DOWNSTAIRS ||
+           type == DUNG_IDX_LONG_DOWNSTAIRS;
+}
+
+// Post-generation pass: find hallway floor tiles with only one walkable neighbor (dead ends)
+// and erase them back to wall, repeating until no more dead ends are found.
+// Skips tiles inside rooms (only prunes hallway dead ends).
+// Returns total tiles pruned.
+int CDungeonMap::PruneDeadEndHallways()
+{
+    if( !m_dmtTiles )
+        return 0;
+
+    static const int dx[] = { 0, 0, -1, 1 };
+    static const int dy[] = { -1, 1, 0, 0 };
+
+    int total_pruned = 0;
+    bool changed = true;
+
+    while( changed )
+    {
+        changed = false;
+        for( int y = 1; y < DUNG_HEIGHT - 1; y++ )
+        {
+            for( int x = 1; x < DUNG_WIDTH - 1; x++ )
+            {
+                JIVector vPos( x, y );
+                CDungeonMapTile *pTile = GetTile( vPos );
+                if( !pTile || pTile->GetType() != DUNG_IDX_FLOOR )
+                    continue;
+
+                // Skip tiles inside rooms — only prune hallway dead ends
+                if( InRoom( vPos ) != NULL )
+                    continue;
+
+                // Count walkable neighbors
+                int walkable_neighbors = 0;
+                for( int d = 0; d < 4; d++ )
+                {
+                    JIVector vNeighbor( x + dx[d], y + dy[d] );
+                    CDungeonMapTile *pNeighbor = GetTile( vNeighbor );
+                    if( pNeighbor && IsWalkable( pNeighbor->GetType() ) )
+                        walkable_neighbors++;
+                }
+
+                // Dead end: only one way in
+                if( walkable_neighbors <= 1 )
+                {
+                    pTile->SetType( DUNG_IDX_WALL );
+                    pTile->UnsetFlags( DUNG_FLAG_LIT | DUNG_FLAG_SEEN );
+                    total_pruned++;
+                    changed = true;
+                }
+            }
+        }
+    }
+
+    // Remove orphaned doors: doors that no longer connect two walkable areas
+    // (e.g. hallway behind the door was pruned away)
+    int doors_removed = 0;
+    for( int y = 1; y < DUNG_HEIGHT - 1; y++ )
+    {
+        for( int x = 1; x < DUNG_WIDTH - 1; x++ )
+        {
+            JIVector vPos( x, y );
+            CDungeonMapTile *pTile = GetTile( vPos );
+            if( !pTile || !IsDoor( pTile->GetType() ) )
+                continue;
+
+            int walkable_neighbors = 0;
+            for( int d = 0; d < 4; d++ )
+            {
+                JIVector vNeighbor( x + dx[d], y + dy[d] );
+                CDungeonMapTile *pNeighbor = GetTile( vNeighbor );
+                if( pNeighbor && IsWalkable( pNeighbor->GetType() ) )
+                    walkable_neighbors++;
+            }
+
+            // A door needs at least 2 walkable neighbors to be useful
+            if( walkable_neighbors < 2 )
+            {
+                pTile->SetType( DUNG_IDX_WALL );
+                pTile->UnsetFlags( DUNG_FLAG_LIT | DUNG_FLAG_SEEN );
+                doors_removed++;
+            }
+        }
+    }
+
+    if( total_pruned > 0 || doors_removed > 0 )
+    {
+        JLog( LOG_LEVEL_INFO, true,
+              "[DUNGEN] Pruned %d dead-end hallway tiles, %d orphaned doors\n", total_pruned,
+              doors_removed );
+    }
+
+    return total_pruned + doors_removed;
 }

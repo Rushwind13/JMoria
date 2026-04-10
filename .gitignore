@@ -27,3 +27,7 @@ test/vendor/
 test/.bundle/
 test/Gemfile.lock
 .goo.swp
+
+# Bot artifacts
+scripts/bot/knowledge.json
+scripts/bot_test_latest.txt

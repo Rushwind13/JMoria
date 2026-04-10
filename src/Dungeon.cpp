@@ -221,6 +221,9 @@ JResult CDungeon::CreateMap()
         m_dmCurLevel->CreateDungeon( depth );
     }
 
+    // Post-generation cleanup: prune dead-end hallway tiles
+    int pruned = m_dmCurLevel->PruneDeadEndHallways();
+
     // Retrieve diagnostics with finalized timing from dungeon generation
     const DungeonGenDiagnostics &diag = m_dmCurLevel->GetDiagnostics();
 

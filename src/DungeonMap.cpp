@@ -1733,10 +1733,43 @@ int CDungeonMap::PruneDeadEndHallways()
         }
     }
 
-    if( total_pruned > 0 )
+    // Remove orphaned doors: doors that no longer connect two walkable areas
+    // (e.g. hallway behind the door was pruned away)
+    int doors_removed = 0;
+    for( int y = 1; y < DUNG_HEIGHT - 1; y++ )
     {
-        JLog( LOG_LEVEL_INFO, true, "[DUNGEN] Pruned %d dead-end hallway tiles\n", total_pruned );
+        for( int x = 1; x < DUNG_WIDTH - 1; x++ )
+        {
+            JIVector vPos( x, y );
+            CDungeonMapTile *pTile = GetTile( vPos );
+            if( !pTile || !IsDoor( pTile->GetType() ) )
+                continue;
+
+            int walkable_neighbors = 0;
+            for( int d = 0; d < 4; d++ )
+            {
+                JIVector vNeighbor( x + dx[d], y + dy[d] );
+                CDungeonMapTile *pNeighbor = GetTile( vNeighbor );
+                if( pNeighbor && IsWalkable( pNeighbor->GetType() ) )
+                    walkable_neighbors++;
+            }
+
+            // A door needs at least 2 walkable neighbors to be useful
+            if( walkable_neighbors < 2 )
+            {
+                pTile->SetType( DUNG_IDX_WALL );
+                pTile->UnsetFlags( DUNG_FLAG_LIT | DUNG_FLAG_SEEN );
+                doors_removed++;
+            }
+        }
     }
 
-    return total_pruned;
+    if( total_pruned > 0 || doors_removed > 0 )
+    {
+        JLog( LOG_LEVEL_INFO, true,
+              "[DUNGEN] Pruned %d dead-end hallway tiles, %d orphaned doors\n", total_pruned,
+              doors_removed );
+    }
+
+    return total_pruned + doors_removed;
 }

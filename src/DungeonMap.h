@@ -210,6 +210,7 @@ private:
 public:
     void CreateDungeon( const int depth );
     void CreateDungeon( const int depth, const unsigned int seed );
+    int PruneDeadEndHallways();
 
     // Diagnostic accessors
     int GetStackSize() const
@@ -251,6 +252,7 @@ public:
     bool TryCreateRoomWithFallback( CDungeonCreationStep *pCurStep );
 
     JResult GetRoomRect( JRect &rcRoom, const int direction );
+    JResult GetSmallRoomRect( JRect &rcRoom, const int direction );
     JResult GetHallRect( JRect &rcHall, const int direction );
     JResult TruncateHallway( CDungeonCreationStep *pStep );
     JIVector &GetWallOrigin( CDungeonCreationStep *pStep, const int direction );
@@ -336,7 +338,7 @@ protected:
     int CheckArea( const JRect *rcCheck, const int direction, bool bIsHallway );
     bool CheckArea( CDungeonCreationStep *pStep );
     bool CheckInterior( const JRect rcCheck );
-    bool CheckBorder( const JRect rcCheck, int direction );
+    bool CheckBorder( const JRect rcCheck, int direction, bool bIsHallway = false );
 
     int LitChance();
     JResult LightArea( CRoom *pRoom );
@@ -346,6 +348,9 @@ protected:
     void AddDoor( JIVector vHall, int direction );
     bool IsDoor( const int type );
     void ConnectAdjacentStructures( const JRect &area );
+
+    // Post-generation cleanup helper
+    bool IsWalkable( Uint8 type ) const;
 
     // Connectivity validation
     bool ValidateConnectivity( int &reachable_tiles, int &total_walkable_tiles ) const;

@@ -32,3 +32,6 @@ test/Gemfile.lock
 
 # Bot local learning state (optional per-user alternates)
 scripts/bot/knowledge.local.json
+# Bot artifacts
+scripts/bot/knowledge.json
+scripts/bot_test_latest.txt

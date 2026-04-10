@@ -69,7 +69,11 @@ ASCIILayout ASCIILayout::CreateForSize( int w, int h )
 
 // ---- CRenderASCII ----
 
-CRenderASCII::CRenderASCII() : m_bInitted( false ), m_bHasColor( false ), m_bTranslating( false )
+CRenderASCII::CRenderASCII()
+    : m_bInitted( false ),
+      m_bHasColor( false ),
+      m_colorMode( COLOR_NONE ),
+      m_bTranslating( false )
 {
     m_currentColor.SetColor( 255, 255, 255, 255 );
     memset( &m_currentBounds, 0, sizeof( m_currentBounds ) );
@@ -123,63 +127,179 @@ void CRenderASCII::InitColors()
     if( !has_colors() )
     {
         m_bHasColor = false;
+        m_colorMode = COLOR_NONE;
         return;
     }
 
     start_color();
     m_bHasColor = true;
 
-    // Define color pairs: pair_id = foreground color index + 1
-    // Pair 0 is reserved by ncurses (white on black)
-    init_pair( 1, COLOR_WHITE, COLOR_BLACK );
-    init_pair( 2, COLOR_RED, COLOR_BLACK );
-    init_pair( 3, COLOR_GREEN, COLOR_BLACK );
-    init_pair( 4, COLOR_YELLOW, COLOR_BLACK );
-    init_pair( 5, COLOR_BLUE, COLOR_BLACK );
-    init_pair( 6, COLOR_MAGENTA, COLOR_BLACK );
-    init_pair( 7, COLOR_CYAN, COLOR_BLACK );
-    init_pair( 8, COLOR_BLACK, COLOR_BLACK ); // dark/invisible
+    if( COLORS >= 256 )
+    {
+        // 256-color mode: pair i maps xterm color i as foreground on black.
+        // Pair 0 is reserved by ncurses, so pair N = color N (skip pair 0).
+        m_colorMode = COLOR_256;
+        for( int i = 1; i < 256; i++ )
+            init_pair( i, i, COLOR_BLACK );
+    }
+    else
+    {
+        // 16-color mode (or 8-color mode with A_BOLD for bright variants).
+        // Pairs 1-8: normal colors on black.
+        m_colorMode = COLOR_16;
+        init_pair( 1, COLOR_BLACK, COLOR_BLACK );
+        init_pair( 2, COLOR_RED, COLOR_BLACK );
+        init_pair( 3, COLOR_GREEN, COLOR_BLACK );
+        init_pair( 4, COLOR_YELLOW, COLOR_BLACK );
+        init_pair( 5, COLOR_BLUE, COLOR_BLACK );
+        init_pair( 6, COLOR_MAGENTA, COLOR_BLACK );
+        init_pair( 7, COLOR_CYAN, COLOR_BLACK );
+        init_pair( 8, COLOR_WHITE, COLOR_BLACK );
+    }
 }
 
-int CRenderASCII::GetColorPair( JColor color )
+// ---- 256-color helpers ----
+
+// The xterm-256 palette:
+//   0-7     = standard colors (black, red, green, yellow, blue, magenta, cyan, white)
+//   8-15    = bright colors
+//   16-231  = 6x6x6 color cube: index = 16 + 36*r + 6*g + b  (r,g,b in 0..5)
+//   232-255 = grayscale ramp (dark to light, 24 shades)
+
+static int Nearest256( Uint8 r, Uint8 g, Uint8 b )
 {
+    // Check grayscale first: if r≈g≈b, use the grayscale ramp for better precision.
+    int maxC = r;
+    if( g > maxC )
+        maxC = g;
+    if( b > maxC )
+        maxC = b;
+    int minC = r;
+    if( g < minC )
+        minC = g;
+    if( b < minC )
+        minC = b;
+
+    if( maxC - minC < 20 )
+    {
+        // Grayscale: ramp is indices 232-255, mapping to luminances 8,18,28,...238
+        int avg = ( r + g + b ) / 3;
+        if( avg < 4 )
+            return 16; // black (from color cube)
+        if( avg > 243 )
+            return 231;                     // white (from color cube)
+        int grayIdx = ( avg - 8 + 5 ) / 10; // round to nearest step of 10
+        if( grayIdx < 0 )
+            grayIdx = 0;
+        if( grayIdx > 23 )
+            grayIdx = 23;
+        return 232 + grayIdx;
+    }
+
+    // Map to 6x6x6 color cube
+    // Cube levels: 0, 95, 135, 175, 215, 255  (indices 0-5)
+    static const int cubeLevels[6] = { 0, 95, 135, 175, 215, 255 };
+    auto nearest6 = []( int v ) -> int
+    {
+        int best = 0;
+        int bestDist = abs( v - cubeLevels[0] );
+        for( int i = 1; i < 6; i++ )
+        {
+            int d = abs( v - cubeLevels[i] );
+            if( d < bestDist )
+            {
+                bestDist = d;
+                best = i;
+            }
+        }
+        return best;
+    };
+
+    int ri = nearest6( r );
+    int gi = nearest6( g );
+    int bi = nearest6( b );
+    return 16 + 36 * ri + 6 * gi + bi;
+}
+
+// ---- 16-color helpers ----
+
+// The 16-color palette maps to 8 ncurses color pairs (1-8) plus A_BOLD
+// for bright variants.  We define a table of reference RGB values for
+// the 16 standard terminal colors and find the closest match.
+
+struct TermColor16
+{
+    int pair;  // ncurses color pair (1-8)
+    bool bold; // use A_BOLD?
+    Uint8 r, g, b;
+};
+
+// clang-format off
+static const TermColor16 kPalette16[16] = {
+    // Normal colors (pairs 1-8, no bold)
+    { 1, false,   0,   0,   0 },   // 0  black
+    { 2, false, 170,   0,   0 },   // 1  red
+    { 3, false,   0, 170,   0 },   // 2  green
+    { 4, false, 170, 170,   0 },   // 3  yellow/brown
+    { 5, false,   0,   0, 170 },   // 4  blue
+    { 6, false, 170,   0, 170 },   // 5  magenta
+    { 7, false,   0, 170, 170 },   // 6  cyan
+    { 8, false, 170, 170, 170 },   // 7  white (light gray)
+    // Bright colors (same pairs, with A_BOLD)
+    { 1, true,   85,  85,  85 },   // 8  bright black (dark gray)
+    { 2, true,  255,  85,  85 },   // 9  bright red
+    { 3, true,   85, 255,  85 },   // 10 bright green
+    { 4, true,  255, 255,  85 },   // 11 bright yellow
+    { 5, true,   85,  85, 255 },   // 12 bright blue
+    { 6, true,  255,  85, 255 },   // 13 bright magenta
+    { 7, true,   85, 255, 255 },   // 14 bright cyan
+    { 8, true,  255, 255, 255 },   // 15 bright white
+};
+// clang-format on
+
+static int Nearest16( Uint8 r, Uint8 g, Uint8 b, bool &outBold )
+{
+    int bestIdx = 0;
+    int bestDist = 999999;
+    for( int i = 0; i < 16; i++ )
+    {
+        int dr = (int)r - kPalette16[i].r;
+        int dg = (int)g - kPalette16[i].g;
+        int db = (int)b - kPalette16[i].b;
+        int dist = dr * dr + dg * dg + db * db;
+        if( dist < bestDist )
+        {
+            bestDist = dist;
+            bestIdx = i;
+        }
+    }
+    outBold = kPalette16[bestIdx].bold;
+    return kPalette16[bestIdx].pair;
+}
+
+int CRenderASCII::GetColorPair( JColor color, attr_t &outAttr )
+{
+    outAttr = 0;
     if( !m_bHasColor )
         return 0;
 
     Uint8 r, g, b, a;
     color.GetColor( r, g, b, a );
 
-    // Map RGBA to nearest ncurses color pair
-    // Very dark = pair 8 (black on black)
-    if( r < 40 && g < 40 && b < 40 )
-        return 8;
-
-    // Find the dominant channel
-    if( r > g && r > b )
+    if( m_colorMode == COLOR_256 )
     {
-        if( g > 128 )
-            return 4; // yellow (red + green)
-        if( b > 128 )
-            return 6; // magenta (red + blue)
-        return 2;     // red
-    }
-    if( g > r && g > b )
-    {
-        if( b > 128 )
-            return 7; // cyan (green + blue)
-        return 3;     // green
-    }
-    if( b > r && b > g )
-    {
-        if( r > 128 )
-            return 6; // magenta
-        return 5;     // blue
+        int idx = Nearest256( r, g, b );
+        if( idx < 1 )
+            idx = 1; // pair 0 is reserved
+        return idx;
     }
 
-    // Gray/white — anything not already caught as "very dark" above
-    // should be visible.  Dark grays (e.g. walls at 64,64,64) need to
-    // map to white since the terminal background is black.
-    return 1; // white
+    // 16-color mode: find nearest and set bold if needed
+    bool bold = false;
+    int pair = Nearest16( r, g, b, bold );
+    if( bold )
+        outAttr = A_BOLD;
+    return pair;
 }
 
 char CRenderASCII::TileIndexToChar( int tileIndex )
@@ -365,14 +485,15 @@ bool CRenderASCII::DrawChar( const JFVector &vPos, JVector &vSize, char ch )
             return false;
     }
 
-    int pair = GetColorPair( m_currentColor );
+    attr_t outAttr = 0;
+    int pair = GetColorPair( m_currentColor, outAttr );
     if( m_bHasColor )
-        attron( COLOR_PAIR( pair ) );
+        attron( COLOR_PAIR( pair ) | outAttr );
 
     mvaddch( screenY, screenX, ch );
 
     if( m_bHasColor )
-        attroff( COLOR_PAIR( pair ) );
+        attroff( COLOR_PAIR( pair ) | outAttr );
 
     return true;
 }
@@ -399,9 +520,10 @@ void CRenderASCII::DrawTextBoundingBox( JRect rect, JColor color )
     if( right <= left || bottom <= top )
         return;
 
-    int pair = GetColorPair( color );
+    attr_t boxAttr = 0;
+    int pair = GetColorPair( color, boxAttr );
     if( m_bHasColor )
-        attron( COLOR_PAIR( pair ) );
+        attron( COLOR_PAIR( pair ) | boxAttr );
 
     // Draw box using ACS characters
     mvaddch( top, left, ACS_ULCORNER );
@@ -424,6 +546,6 @@ void CRenderASCII::DrawTextBoundingBox( JRect rect, JColor color )
     }
 
     if( m_bHasColor )
-        attroff( COLOR_PAIR( pair ) );
+        attroff( COLOR_PAIR( pair ) | boxAttr );
 }
 #endif // RENDER_ASCII

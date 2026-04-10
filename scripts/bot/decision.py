@@ -97,6 +97,14 @@ class DecisionEngine:
         self.items_picked_up = 0
         self.deepest_depth = 1
         self.hp_history = []  # last 10 HP values for trend
+        # Exploration efficiency metrics (#213 P4).
+        self.frontier_switches = 0   # times we picked a new unexplored target
+        self.cluster_switches = 0    # times current_cluster changed
+        self.backtrack_steps = 0     # steps moving away from goal
+        self.explore_steps = 0       # steps moving toward or at goal
+        self.level_unique_tiles = set()  # unique world positions visited this level
+        self._prev_goal_target = None
+        self._prev_dist_to_goal = None
 
     def decide(self, state):
         self.mode = "seek"
@@ -158,6 +166,13 @@ class DecisionEngine:
             self.last_staircase_attempt = None
             self.staircase_attempt_cooldown = 0
             self.level_kills = 0
+            self.frontier_switches = 0
+            self.cluster_switches = 0
+            self.backtrack_steps = 0
+            self.explore_steps = 0
+            self.level_unique_tiles = set()
+            self._prev_goal_target = None
+            self._prev_dist_to_goal = None
             self.deepest_depth = max(self.deepest_depth, state.dungeon_depth)
             self.last_depth = state.dungeon_depth
 
@@ -881,6 +896,7 @@ class DecisionEngine:
                 )
                 self.current_cluster = best_cluster
                 active_cluster = best_cluster
+                self.cluster_switches += 1
 
         visited = {wpos}
         queue = deque([(wpos, 0)])
@@ -987,6 +1003,24 @@ class DecisionEngine:
 
     def _record_decision(self, action, thought):
         self.last_thought = thought
+        # Track exploration efficiency (#213 P4).
+        if self.current_motion_pos is not None:
+            self.level_unique_tiles.add(self.current_motion_pos)
+        if self.goal_stack:
+            gt, grc = self.goal_stack[-1]
+            if grc != self._prev_goal_target:
+                if self._prev_goal_target is not None and gt == "unexplored":
+                    self.frontier_switches += 1
+                self._prev_goal_target = grc
+                self._prev_dist_to_goal = None
+            if self.current_motion_pos is not None:
+                cur_dist = pf.heuristic(self.current_motion_pos, grc)
+                if self._prev_dist_to_goal is not None:
+                    if cur_dist < self._prev_dist_to_goal:
+                        self.explore_steps += 1
+                    elif cur_dist > self._prev_dist_to_goal:
+                        self.backtrack_steps += 1
+                self._prev_dist_to_goal = cur_dist
         return self._record_action(action)
 
     def debug_thought(self):
@@ -1134,6 +1168,9 @@ class DecisionEngine:
             f"Items={self.items_picked_up}\n"
             f"  Explored={pct:.0f}% ({explored}/{total})  "
             f"Goals={len(self.goal_stack)}\n"
+            f"  FrontierSw={self.frontier_switches}  ClusterSw={self.cluster_switches}  "
+            f"Backtrack={self.backtrack_steps}/{self.explore_steps + self.backtrack_steps}  "
+            f"UniqTiles={len(self.level_unique_tiles)}\n"
             f"========================="
         )
 
@@ -1197,6 +1234,8 @@ class DecisionEngine:
     def run_summary(self, turn):
         """Aggregate stats printed at end of run."""
         knowledge_entries = len(self.monster_knowledge) + len(self.consumable_knowledge)
+        total_steps = self.explore_steps + self.backtrack_steps
+        bt_pct = (self.backtrack_steps / total_steps * 100) if total_steps > 0 else 0
 
         return (
             f"=== Run Summary ===\n"
@@ -1204,6 +1243,9 @@ class DecisionEngine:
             f"Total kills={self.total_kills}\n"
             f"  Items collected={self.items_picked_up}  "
             f"Knowledge entries={knowledge_entries}\n"
+            f"  FrontierSw={self.frontier_switches}  ClusterSw={self.cluster_switches}  "
+            f"Backtrack={self.backtrack_steps}/{total_steps} ({bt_pct:.0f}%)\n"
+            f"  UniqTiles={len(self.level_unique_tiles)}\n"
             f"==================="
         )
 

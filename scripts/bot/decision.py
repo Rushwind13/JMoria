@@ -81,6 +81,8 @@ class DecisionEngine:
         # Tile-level exploration tracking.
         self.unexplored_tiles = set()
         self.explored_tiles = set()
+        # Frontier clustering (#213 P2): commit to clearing one area.
+        self.current_cluster = set()
         # Goal stack: LIFO list of (goal_type, (row, col)).
         self.goal_stack = []
         self.pushed_goals = set()
@@ -149,6 +151,7 @@ class DecisionEngine:
             self.cached_path_target = None
             self.unexplored_tiles = set()
             self.explored_tiles = set()
+            self.current_cluster = set()
             self.goal_stack = []
             self.pushed_goals = set()
             self.failed_goals = set()
@@ -735,6 +738,7 @@ class DecisionEngine:
                         new_frontier.add((r, c))
 
         self.unexplored_tiles = new_frontier
+        self._rebuild_current_cluster()
 
         # Prune stale unexplored goals from anywhere in the stack (#209).
         # This handles scroll-of-light or other visibility changes that
@@ -773,6 +777,46 @@ class DecisionEngine:
         # Only push item goals.
         self.goal_stack.extend(new_items)
 
+    def _rebuild_current_cluster(self):
+        """Prune current_cluster to only tiles still in the frontier.
+
+        When the cluster is fully exhausted, clear it so
+        _nearest_unexplored_tile will pick the next best cluster.
+        """
+        self.current_cluster &= self.unexplored_tiles
+
+    def _build_frontier_clusters(self):
+        """Compute connected components of unexplored frontier tiles (#213 P2).
+
+        Two frontier tiles are in the same cluster if they are connected
+        through walkable tiles (8-directional).  Returns a list of sets.
+        """
+        candidates = self.unexplored_tiles - self.failed_goals
+        if not candidates:
+            return []
+        remaining = set(candidates)
+        clusters = []
+        while remaining:
+            seed = next(iter(remaining))
+            cluster = set()
+            queue = deque([seed])
+            visited = {seed}
+            while queue:
+                cur = queue.popleft()
+                if cur in remaining:
+                    cluster.add(cur)
+                for dr, dc in pf.DIRS_8:
+                    nr, nc = cur[0] + dr, cur[1] + dc
+                    npos = (nr, nc)
+                    if npos not in visited and 0 <= nr < 100 and 0 <= nc < 100:
+                        ch = self.known_map[nr][nc]
+                        if pf.is_passable(ch) or npos in remaining:
+                            visited.add(npos)
+                            queue.append(npos)
+            remaining -= cluster
+            clusters.append(cluster)
+        return clusters
+
     def _has_unknown_neighbor(self, world_pos):
         """True if any cardinal neighbor in known_map is unseen (~).
 
@@ -804,21 +848,40 @@ class DecisionEngine:
         Frontier tiles are already-seen walkable tiles that border the
         unknown.  Candidates are scored by a composite of walk distance,
         corridor preference (fewer walkable neighbors), directional
-        alignment with *heading*, and door bonuses.
+        alignment with *heading*, door bonuses, and cluster commitment.
 
         When *heading* is provided the search looks up to
         DIRECTION_LOOKAHEAD steps beyond the nearest candidate so that
         a tile slightly farther away but in the forward direction can
         beat a closer tile behind the bot.  This prevents mid-hallway
         turnarounds and backtracking past doors.
+
+        Cluster commitment (#213 P2): if current_cluster has tiles
+        remaining, strongly prefer those tiles.  If exhausted, pick the
+        nearest cluster and commit to it.
         """
         DIRECTION_LOOKAHEAD = 4
+        CLUSTER_BONUS = -5  # strong preference for current cluster
 
         if not self.unexplored_tiles:
             return None
         candidates = self.unexplored_tiles - self.failed_goals
         if not candidates:
             return None
+
+        # If current cluster is empty, pick a new one.
+        active_cluster = self.current_cluster & candidates
+        if not active_cluster:
+            clusters = self._build_frontier_clusters()
+            if clusters:
+                # Pick cluster whose nearest tile (Chebyshev) is closest.
+                best_cluster = min(
+                    clusters,
+                    key=lambda c: min(pf.heuristic(wpos, t) for t in c)
+                )
+                self.current_cluster = best_cluster
+                active_cluster = best_cluster
+
         visited = {wpos}
         queue = deque([(wpos, 0)])
         best = None
@@ -858,6 +921,9 @@ class DecisionEngine:
                         elif dot <= -0.5:
                             dir_penalty = 3   # backward penalty
                 score = dist + neighbor_score + dir_penalty
+                # Cluster commitment (#213 P2).
+                if active_cluster and cur in active_cluster:
+                    score += CLUSTER_BONUS
                 if score < best_score:
                     best = cur
                     best_score = score

@@ -4,7 +4,7 @@
 #include "StateBase.h"
 
 class CModState;
-typedef int ( CModState::*ModKeyHandler )( SDL_Keysym *keysym );
+typedef int ( CModState::*ModKeyHandler )( JKeysym *keysym );
 enum eModModifier
 {
     MOD_INVALID = -1,
@@ -30,8 +30,8 @@ public:
     ~CModState() {}
 
     virtual void OnUpdate( float fCurTime ) {}
-    virtual int OnBaseHandleKey( SDL_Keysym *keysym );
-    virtual int OnHandleKey( SDL_Keysym *keysym );
+    virtual int OnBaseHandleKey( JKeysym *keysym );
+    virtual int OnHandleKey( JKeysym *keysym );
 
 protected:
 private:
@@ -40,10 +40,10 @@ private:
 
     eModModifier m_eCurModifier;
 
-    int OnHandleOpen( SDL_Keysym *keysym );
-    int OnHandleTunnel( SDL_Keysym *keysym );
-    int OnHandleClose( SDL_Keysym *keysym );
-    int OnHandleInit( SDL_Keysym *keysym );
+    int OnHandleOpen( JKeysym *keysym );
+    int OnHandleTunnel( JKeysym *keysym );
+    int OnHandleClose( JKeysym *keysym );
+    int OnHandleInit( JKeysym *keysym );
 
     bool TestOpen();
     bool DoOpen();

@@ -23,14 +23,14 @@ CUseState::CUseState() : m_cCommand( 0 )
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }
 
-int CUseState::OnHandleKey( SDL_Keysym *keysym )
+int CUseState::OnHandleKey( JKeysym *keysym )
 {
     int retval;
     retval = ( ( *this ).*( m_pCurKeyHandler ) )( keysym );
     return retval;
 }
 
-int CUseState::OnHandleWield( SDL_Keysym *keysym )
+int CUseState::OnHandleWield( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling WIELD \n" );
@@ -80,7 +80,7 @@ int CUseState::OnHandleWield( SDL_Keysym *keysym )
     return 0;
 }
 
-int CUseState::OnHandleRemove( SDL_Keysym *keysym )
+int CUseState::OnHandleRemove( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling REMOVE \n" );
@@ -126,7 +126,7 @@ int CUseState::OnHandleRemove( SDL_Keysym *keysym )
     return 0;
 }
 
-int CUseState::OnHandleDrop( SDL_Keysym *keysym )
+int CUseState::OnHandleDrop( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling DROP \n" );
@@ -173,7 +173,7 @@ int CUseState::OnHandleDrop( SDL_Keysym *keysym )
     return 0;
 }
 
-int CUseState::OnHandleRead( SDL_Keysym *keysym )
+int CUseState::OnHandleRead( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling READ\n" );
@@ -212,7 +212,7 @@ int CUseState::OnHandleRead( SDL_Keysym *keysym )
     return 0;
 }
 
-int CUseState::OnHandleQuaff( SDL_Keysym *keysym )
+int CUseState::OnHandleQuaff( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling QUAFF\n" );
@@ -258,7 +258,7 @@ int CUseState::OnHandleQuaff( SDL_Keysym *keysym )
     return 0;
 }
 
-int CUseState::OnHandleInit( SDL_Keysym *keysym )
+int CUseState::OnHandleInit( JKeysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing USE state...\n" );
     if( !m_cCommand )
@@ -268,23 +268,23 @@ int CUseState::OnHandleInit( SDL_Keysym *keysym )
         eUseModifier mod = USE_INIT;
         switch( m_cCommand )
         {
-        case SDLK_w:
+        case JKEY_w:
             mod = USE_WIELD;
             g_pGame->GetMsgs()->Printf( "Wield which item? [a-z]\n" );
             break;
-        case SDLK_t:
+        case JKEY_t:
             mod = USE_REMOVE;
             g_pGame->GetMsgs()->Printf( "Remove which item? [a-j]\n" );
             break;
-        case SDLK_d:
+        case JKEY_d:
             mod = USE_DROP;
             g_pGame->GetMsgs()->Printf( "Drop which item? [a-z]\n" );
             break;
-        case SDLK_r:
+        case JKEY_r:
             mod = USE_READ;
             g_pGame->GetMsgs()->Printf( "Read which item? [a-z]\n" );
             break;
-        case SDLK_q:
+        case JKEY_q:
             mod = USE_QUAFF;
             g_pGame->GetMsgs()->Printf( "Quaff which item? [a-z]\n" );
             break;
@@ -308,7 +308,7 @@ int CUseState::OnHandleInit( SDL_Keysym *keysym )
     return JRESETSTATE;
 }
 
-int CUseState::OnBaseHandleKey( SDL_Keysym *keysym, eUseModifier whichUse )
+int CUseState::OnBaseHandleKey( JKeysym *keysym, eUseModifier whichUse )
 {
     m_dwSelected = GetAlpha( keysym );
     if( m_dwSelected != nul )
@@ -326,7 +326,7 @@ int CUseState::OnBaseHandleKey( SDL_Keysym *keysym, eUseModifier whichUse )
 
         return JSUCCESS;
     }
-    else if( keysym->sym == SDLK_ESCAPE )
+    else if( keysym->sym == JKEY_ESCAPE )
     {
         // ESC key gets us out of  mode
         ResetToState( STATE_COMMAND );

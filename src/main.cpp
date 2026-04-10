@@ -1,5 +1,9 @@
 #include "JMDefs.h"
-#include <time.h>
+#include "JTimer.h"
+#include "RenderMode.h"
+#include <cstdlib>
+#include <cstring>
+#include <ctime>
 
 // The global game pointer
 CGame *g_pGame = NULL;
@@ -17,12 +21,46 @@ int main( int argc, char **argv )
     // whether or not the window is active
     int isActive = true;
 
-    srand( (unsigned)time( NULL ) );
+    Util::SeedRandom( (unsigned)time( NULL ) );
+
+    // Parse command-line arguments
+    RenderMode renderMode = RenderMode::None;
+    for( int i = 1; i < argc; i++ )
+    {
+        if( strcmp( argv[i], "--renderer=ascii" ) == 0 )
+            renderMode = RenderMode::ASCII;
+        else if( strcmp( argv[i], "--renderer=opengl" ) == 0 )
+            renderMode = RenderMode::OpenGL;
+    }
+
+    // Apply defaults / validate based on compiled renderer support
+#if defined( RENDER_ASCII ) && defined( RENDER_OPENGL )
+    if( renderMode == RenderMode::None )
+    {
+        printf( "Usage: %s --renderer=ascii|opengl\n", argv[0] );
+        exit( 1 );
+    }
+#elif defined( RENDER_ASCII )
+    if( renderMode == RenderMode::OpenGL )
+        printf( "Warning: OpenGL renderer not compiled in, using ASCII.\n" );
+    renderMode = RenderMode::ASCII;
+#elif defined( RENDER_OPENGL )
+    if( renderMode == RenderMode::ASCII )
+        printf( "Warning: ASCII renderer not compiled in, using OpenGL.\n" );
+    renderMode = RenderMode::OpenGL;
+#endif
+
+    // Redirect stderr to a log file in ASCII mode so JLog output
+    // doesn't corrupt the ncurses display.
+    if( renderMode == RenderMode::ASCII )
+    {
+        freopen( "jmoria.log", "w", stderr );
+    }
 
     JResult result;
     g_pGame = new CGame;
 
-    result = g_pGame->Init( "../JMoria/" );
+    result = g_pGame->Init( "../JMoria/", renderMode );
     if( result != JSUCCESS )
     {
         JLog( LOG_LEVEL_ERROR, true, "Error in game initialization. Terminating.\n" );
@@ -33,9 +71,13 @@ int main( int argc, char **argv )
 
     unsigned int curTime = 0;
 #ifndef TURN_BASED
-    unsigned int lastTick = Util::GetTickCount();
+    unsigned int lastTick = JTimer::GetTicks();
 #endif // TURN_BASED
     unsigned int nextTime = 0;
+#ifdef LIMIT_FRAMERATE
+    unsigned int frameStartTime = 0;
+    unsigned int frameElapsedTime = 0;
+#endif // LIMIT_FRAMERATE
 
     bool bRetVal;
     try
@@ -44,15 +86,37 @@ int main( int argc, char **argv )
         while( !done )
 #ifdef TURN_BASED
         {
+#ifdef LIMIT_FRAMERATE
+            frameStartTime = JTimer::GetTicks();
+#endif
             // handle the events in the queue
             g_pGame->HandleEvents( isActive, done );
             bRetVal = g_pGame->Update();
             // Draw the dungeon, player, text
             g_pGame->Draw();
+
+#ifdef LIMIT_FRAMERATE
+            /**
+             * Frame rate limiting for turn-based mode:
+             * Without this delay, the main loop runs as fast as possible,
+             * consuming 100% CPU while waiting for player input. Since this
+             * is a turn-based game, we don't need thousands of frames per
+             * second - 30 FPS is more than sufficient for responsive input
+             * handling while keeping CPU usage reasonable.
+             */
+            frameElapsedTime = JTimer::GetTicks() - frameStartTime;
+            if( frameElapsedTime < TARGET_FRAME_TIME )
+            {
+                JTimer::Delay( TARGET_FRAME_TIME - frameElapsedTime );
+            }
+#endif // LIMIT_FRAMERATE
         }
 #else
         {
-            curTime = Util::GetTickCount();
+#ifdef LIMIT_FRAMERATE
+            frameStartTime = JTimer::GetTicks();
+#endif
+            curTime = JTimer::GetTicks();
             if( curTime > nextTime )
             {
 // 			if( g_pGame->GetPlayer() != NULL )
@@ -78,6 +142,19 @@ int main( int argc, char **argv )
                 g_pGame->Draw();
             }
             lastTick = curTime;
+#ifdef LIMIT_FRAMERATE
+            /**
+             * Frame rate limiting for real-time mode:
+             * Cap rendering at 30 FPS to reduce CPU usage. Note: This affects
+             * the deltaTime passed to Update(), which may impact game speed if
+             * physics/movement calculations rely on consistent timing.
+             */
+            frameElapsedTime = JTimer::GetTicks() - frameStartTime;
+            if( frameElapsedTime < TARGET_FRAME_TIME )
+            {
+                JTimer::Delay( TARGET_FRAME_TIME - frameElapsedTime );
+            }
+#endif // LIMIT_FRAMERATE
         }
 #endif // TURN_BASED
     }

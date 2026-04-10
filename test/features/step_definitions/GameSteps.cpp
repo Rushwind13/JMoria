@@ -19,7 +19,7 @@ GIVEN( "^I have a game$" )
 GIVEN( "^I initialize the game$" )
 {
     ScenarioScope<TestCtx> context;
-    context->result = g_pGame->Init( "../../JMoria/" );
+    context->result = g_pGame->Init( "../../JMoria/", RenderMode::ASCII );
 }
 GIVEN( "^the game has a player$" )
 {

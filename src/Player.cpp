@@ -12,6 +12,15 @@
 
 extern CGame *g_pGame;
 
+static bool ShowPlayerPosInStats()
+{
+    const char *flag = getenv( "JMORIA_SHOW_PLAYER_POS" );
+    if( flag == NULL )
+        return false;
+    return ( Util::jstrcmp( flag, "1" ) == 0 || Util::jstrcmp( flag, "true" ) == 0 ||
+             Util::jstrcmp( flag, "yes" ) == 0 || Util::jstrcmp( flag, "on" ) == 0 );
+}
+
 // Helper: find an inventory link by item instance id
 static CLink<CItem> *FindInventoryLinkByInstance( JLinkList<CItem> *pList, uint32 dwInstanceId )
 {
@@ -135,13 +144,17 @@ void CPlayer::CheckDisturbance()
 
 void CPlayer::Draw()
 {
-    Uint8 player_tile = '@' - ' ' - 1; // TileIDs[TILE_IDX_PLAYER] - ' ' - 1;
+    // Don't draw if player hasn't been spawned yet (e.g., in CLOCKSTEP mode)
+    if( !m_bHasSpawned )
+        return;
+
+    char player_char = '@';
     JVector DUNG_ASPECT;
     JColor player_color( 255, 255, 255, 255 );
 
     PreDraw();
     m_TileSet->SetTileColor( player_color );
-    m_TileSet->DrawTile( player_tile, m_vPos, vSize, true );
+    m_TileSet->DrawChar( player_char, m_vPos, vSize );
     PostDraw();
 }
 
@@ -196,6 +209,9 @@ void CPlayer::DisplayStats()
     g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "Level: %d\n", (int)m_fLevel );
+    g_pGame->GetStats()->Printf( "Depth: %d'\n", g_pGame->GetDungeon()->depth * 50 );
+    if( IsWizard() || ShowPlayerPosInStats() )
+        g_pGame->GetStats()->Printf( "Pos: <%.0f %.0f>\n", VEC_EXPAND( m_vPos ) );
     g_pGame->GetStats()->Printf( "Exp: %d\n", (int)m_fExperience );
     g_pGame->GetStats()->Printf(
         "Exp to Next: %d\n", (int)( m_pClass->m_fExpNeeded[(int)m_fLevel - 1] - m_fExperience ) );
@@ -339,7 +355,8 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
             }
             else
             {
-                JLog( LOG_LEVEL_DEBUG, true, "Wield(): equipment slot %d = (empty)\n", pL->m_dwIndex );
+                JLog( LOG_LEVEL_DEBUG, true, "Wield(): equipment slot %d = (empty)\n",
+                      pL->m_dwIndex );
             }
             pL = m_llEquipment->GetNext( pL );
         }
@@ -358,10 +375,12 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
             {
                 CItem *pEquipped = pL->m_lpData;
                 bool isMain = ( pEquipped->EquipType() == EQUIP_IDX_MAIN_HAND );
-                bool isOffHandFlag = ( pEquipped->m_id && ( pEquipped->m_id->m_dwFlags & ITEM_FLAG_OFFHAND ) );
+                bool isOffHandFlag =
+                    ( pEquipped->m_id && ( pEquipped->m_id->m_dwFlags & ITEM_FLAG_OFFHAND ) );
                 if( isMain || isOffHandFlag )
                 {
-                    JLog( LOG_LEVEL_DEBUG, true, "Wield(): removing equipped %s (main=%d offflag=%d)\n",
+                    JLog( LOG_LEVEL_DEBUG, true,
+                          "Wield(): removing equipped %s (main=%d offflag=%d)\n",
                           pEquipped->GetName(), isMain, (int)isOffHandFlag );
                     bool removed = RemoveEquipment( pL );
                     if( !removed )
@@ -418,7 +437,7 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
         CLink<CItem> *pOffCheck = NULL;
         {
             CLink<CItem> *pL = m_llEquipment->GetHead();
-                while( pL )
+            while( pL )
             {
                 if( pL->m_lpData && pL->m_dwIndex == EQUIP_IDX_OFF_HAND )
                 {
@@ -430,7 +449,8 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
         }
         if( pOffCheck != NULL && pOffCheck->m_lpData != NULL )
         {
-            JLog( LOG_LEVEL_WARN, true, "Two-handed equip: off-hand still occupied by %s; removing now.\n",
+            JLog( LOG_LEVEL_WARN, true,
+                  "Two-handed equip: off-hand still occupied by %s; removing now.\n",
                   pOffCheck->m_lpData->GetName() );
             RemoveEquipment( pOffCheck );
         }
@@ -722,9 +742,9 @@ int CPlayer::TakeDamage( float fDamage, const char *szMon )
     {
         m_fCurHitPoints = 0;
         retval = STATUS_DEAD;
-    m_szKilledBy = new char[Util::jstrlen( szMon ) + 1];
-    memset( m_szKilledBy, 0, Util::jstrlen( szMon ) + 1 );
-    Util::jstrcpy( m_szKilledBy, szMon );
+        m_szKilledBy = new char[Util::jstrlen( szMon ) + 1];
+        memset( m_szKilledBy, 0, Util::jstrlen( szMon ) + 1 );
+        Util::jstrcpy( m_szKilledBy, szMon );
         // This is the end of the game; make the game end on next update.
         JLog( LOG_LEVEL_INFO, true,
               "\n\n%s died on dungeon level %d, while level %d, killed by a %s.\n\n", m_szName,

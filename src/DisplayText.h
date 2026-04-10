@@ -45,6 +45,8 @@ public:
     ~CDisplayText();
     bool Update( float fCurTime );
     void Draw();
+    void SetRect( JRect in );
+    void SetContentMargin( int left, int top );
     void DrawStr( int x, int y, const char *szString );
     void Printf( const char *fmt, ... );
     void DisplayFixedList( JLinkList<CItem> *pList, const CDisplayMeta *pMeta,
@@ -98,6 +100,8 @@ private:
     JColor m_Color;
     JColor m_BoundingBoxColor;
     int m_dwFlags;
+    int m_dwMarginLeft;
+    int m_dwMarginTop;
 
     // The font
     CTileset *m_TileSet;

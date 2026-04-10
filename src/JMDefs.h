@@ -5,6 +5,8 @@
 #endif // __WIN32__
 #include <stdio.h>
 
+#include "JTypes.h"
+
 typedef int JResult;
 typedef unsigned int uint32;
 typedef unsigned char uint8;
@@ -23,8 +25,9 @@ typedef unsigned char uint8;
 enum eLogLevel
 {
     LOG_LEVEL_INVALID = -1,
-    LOG_LEVEL_NOISE = 0,
-    LOG_LEVEL_DEBUG = 1,
+    LOG_LEVEL_NOISIER = 0,
+    LOG_LEVEL_NOISE = 1,
+    LOG_LEVEL_DEBUG = 2,
     LOG_LEVEL_INFO,
     LOG_LEVEL_WARN,
     LOG_LEVEL_ERROR,
@@ -64,11 +67,22 @@ extern Constants g_Constants;
 #define PLACEMENT_USE 3
 #define PLACEMENT_MAX 4
 
+// Build mode flags: define which renderers to include.
+// Both defined = runtime selection via --renderer= (default).
+// Define only one for a single-renderer build.
+// These can be overridden from the command line (-DRENDER_ASCII, -DRENDER_OPENGL).
+#if !defined( RENDER_ASCII ) && !defined( RENDER_OPENGL )
+#define RENDER_ASCII
+#define RENDER_OPENGL
+#endif
+
 // SDL sees the mouse wheel as buttons 4&5
 // but has no constants for them.
 #define MOUSE_WHEEL_UP 4
 #define MOUSE_WHEEL_DOWN 5
 
 // OpenGL needs this defined. vanilla SDL does not.
+#ifdef RENDER_OPENGL
 #define RENDER_TILESET_POSTLOAD_NEEDED
+#endif
 #endif // __JMDEFS_H__

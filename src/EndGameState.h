@@ -107,7 +107,7 @@ public:
 };
 
 class CEndGameState;
-typedef int ( CEndGameState::*EndGameKeyHandler )( SDL_Keysym *keysym );
+typedef int ( CEndGameState::*EndGameKeyHandler )( JKeysym *keysym );
 enum eEndGameModifier
 {
     ENDGAME_INVALID = -1,
@@ -138,14 +138,14 @@ public:
     ~CEndGameState();
 
     virtual void OnUpdate( float fCurTime ) {}
-    virtual int OnBaseHandleKey( SDL_Keysym *keysym );
-    virtual int OnHandleKey( SDL_Keysym *keysym );
+    virtual int OnBaseHandleKey( JKeysym *keysym );
+    virtual int OnHandleKey( JKeysym *keysym );
 
 protected:
 private:
-    int OnHandleTomb( SDL_Keysym *keysym );
-    int OnHandleScores( SDL_Keysym *keysym );
-    int OnHandleInit( SDL_Keysym *keysym );
+    int OnHandleTomb( JKeysym *keysym );
+    int OnHandleScores( JKeysym *keysym );
+    int OnHandleInit( JKeysym *keysym );
 
     void ResetToState( int newstate );
 

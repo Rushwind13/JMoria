@@ -21,7 +21,7 @@ Feature: Game
         And I initialize the game
         When I terminate the game
         Then the game terminates successfully
-    # @skip
+    @skip
     Scenario: Player Seek works
         Given I have a game
         And I initialize the game

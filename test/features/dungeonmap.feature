@@ -151,3 +151,44 @@ Feature: Dungeon Creation
         Given I have a E hallway create step
         When I create a S hallway create step
         Then the S hallway meets the E hallway
+
+    Scenario: Deterministic dungeon generation with seed
+        Given I create a dungeon at depth 1 with seed 12345
+        Then The dungeon has seed 12345
+
+    Scenario: Same seed produces same dungeon layout
+        Given I create a dungeon at depth 1 with seed 99999
+        Then The dungeon matches another dungeon with the same seed
+
+    Scenario: Stress test - 100 consecutive generations with same seed are identical
+        Given I create 100 consecutive dungeons at depth 1 with seed 11111
+        Then All 100 dungeons are identical
+        And All have the same room count
+        And All have the same hallway count
+
+    Scenario: Out-of-world tile attempts are rejected
+        Given I have a DungeonMap
+        Given I have a JRect 98,98,102,102 to fill
+        When I call FillArea for a room
+        Then The out-of-world portion remains as walls
+
+    Scenario: Dungeon can be exported to fixture file
+        Given I create a dungeon at depth 1 with seed 42
+        When I export the dungeon to a fixture file
+        Then The fixture file exists
+
+    Scenario: Dungeon fixture can be imported
+        Given I create a dungeon at depth 2 with seed 55
+        When I export the dungeon to a fixture file
+        And I import the fixture file into a new dungeon
+        Then The imported dungeon has the same structure
+
+    Scenario: GetRoomRect rejects degenerate rectangles
+        Given I create a dungeon at depth 1 with seed 777
+        When I call GetRoomRect with position at 50,50 direction north
+        Then The returned rect has positive width and height
+
+    Scenario: GetHallRect rejects out-of-bounds geometry
+        Given I create a dungeon at depth 1 with seed 888
+        When I call GetHallRect with position at 98,50 direction east
+        Then GetHallRect returns success or properly handles boundary

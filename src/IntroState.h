@@ -3,7 +3,7 @@
 //  JMoria
 //
 //  Created by Jimbo S. Harris on 11/18/24.
-//  Copyright © 2024 Jimbo S. Harris. All rights reserved.
+//  Copyright © 2024-2026 Jimbo S. Harris. All rights reserved.
 //
 
 #ifndef IntroState_h
@@ -18,7 +18,7 @@
 #include <time.h>
 
 class CIntroState;
-typedef int ( CIntroState::*IntroKeyHandler )( SDL_Keysym *keysym );
+typedef int ( CIntroState::*IntroKeyHandler )( JKeysym *keysym );
 enum eIntroModifier
 {
     INTRO_INVALID = -1,
@@ -45,14 +45,14 @@ public:
     ~CIntroState();
 
     virtual void OnUpdate( float fCurTime ) {}
-    virtual int OnBaseHandleKey( SDL_Keysym *keysym );
-    virtual int OnHandleKey( SDL_Keysym *keysym );
+    virtual int OnBaseHandleKey( JKeysym *keysym );
+    virtual int OnHandleKey( JKeysym *keysym );
 
 protected:
 private:
-    int OnHandleSplash( SDL_Keysym *keysym );
-    int OnHandleCharacterCreate( SDL_Keysym *keysym );
-    int OnHandleInit( SDL_Keysym *keysym );
+    int OnHandleSplash( JKeysym *keysym );
+    int OnHandleCharacterCreate( JKeysym *keysym );
+    int OnHandleInit( JKeysym *keysym );
 
     void ResetToState( int newstate );
 

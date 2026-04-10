@@ -3,7 +3,7 @@
 //  JMoria
 //
 //  Created by Jimbo S. Harris on 11/14/24.
-//  Copyright © 2024 Jimbo S. Harris. All rights reserved.
+//  Copyright © 2024-2026 Jimbo S. Harris. All rights reserved.
 //
 
 #include "RunState.h"
@@ -24,14 +24,14 @@ CRunState::CRunState() : m_dwClock( 0 )
 
 CRunState::~CRunState() {}
 
-int CRunState::OnHandleKey( SDL_Keysym *keysym )
+int CRunState::OnHandleKey( JKeysym *keysym )
 {
     int retval;
     retval = ( ( *this ).*( m_pCurKeyHandler ) )( keysym );
     return retval;
 }
 
-int CRunState::OnHandleTick( SDL_Keysym *keysym )
+int CRunState::OnHandleTick( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling TICK modifier\n" );
@@ -64,7 +64,7 @@ int CRunState::OnHandleTick( SDL_Keysym *keysym )
     return 0;
 }
 
-int CRunState::OnHandleInit( SDL_Keysym *keysym )
+int CRunState::OnHandleInit( JKeysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing RUN state...\n" );
 
@@ -75,7 +75,7 @@ int CRunState::OnHandleInit( SDL_Keysym *keysym )
     return 0;
 }
 
-int CRunState::OnBaseHandleKey( SDL_Keysym *keysym ) { return JSUCCESS; }
+int CRunState::OnBaseHandleKey( JKeysym *keysym ) { return JSUCCESS; }
 
 void CRunState::ResetToState( int newstate )
 {

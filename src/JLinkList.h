@@ -80,6 +80,8 @@ public:
         }
     };
 
+    int length() { return m_iNumElements; }
+
 protected:
     CLink<T> *m_lpHead;
     int m_iNumElements;

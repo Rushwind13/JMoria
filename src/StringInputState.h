@@ -12,7 +12,7 @@
 #include "StateBase.h"
 
 class CStringInputState;
-typedef int ( CStringInputState::*StringInputKeyHandler )( SDL_Keysym *keysym );
+typedef int ( CStringInputState::*StringInputKeyHandler )( JKeysym *keysym );
 enum eStringInputModifier
 {
     SI_INVALID = -1,
@@ -43,17 +43,17 @@ public:
     ~CStringInputState() {}
 
     virtual void OnUpdate( float fCurTime ) {}
-    virtual int OnBaseHandleKey( SDL_Keysym *keysym );
-    virtual int OnHandleKey( SDL_Keysym *keysym );
+    virtual int OnBaseHandleKey( JKeysym *keysym );
+    virtual int OnHandleKey( JKeysym *keysym );
 
 protected:
 private:
-    int OnHandleName( SDL_Keysym *keysym );
-    int OnHandleFlag( SDL_Keysym *keysym );
-    int OnHandleItem( SDL_Keysym *keysym );
-    int OnHandleMonster( SDL_Keysym *keysym );
-    int OnHandleHaggle( SDL_Keysym *keysym );
-    int OnHandleInit( SDL_Keysym *keysym );
+    int OnHandleName( JKeysym *keysym );
+    int OnHandleFlag( JKeysym *keysym );
+    int OnHandleItem( JKeysym *keysym );
+    int OnHandleMonster( JKeysym *keysym );
+    int OnHandleHaggle( JKeysym *keysym );
+    int OnHandleInit( JKeysym *keysym );
 
     bool TestName();
     bool DoName();

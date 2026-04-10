@@ -19,27 +19,27 @@ public:
     void OnUpdate( float fCurTime ) {}
 
 protected:
-    virtual int OnHandleKey( SDL_Keysym *keysym );
+    virtual int OnHandleKey( JKeysym *keysym );
 
 private:
-    bool IsModifierNeeded( SDL_Keysym *keysym );
-    bool IsUseCommand( SDL_Keysym *keysym );
-    bool IsStairsCommand( SDL_Keysym *keysym );
-    bool IsLookCommand( SDL_Keysym *keysym );
-    bool IsMagicCommand( SDL_Keysym *keysym ) { return false; }
-    bool IsMenuCommand( SDL_Keysym *keysym ) { return false; }
-    bool IsHelpCommand( SDL_Keysym *keysym ) { return false; }
-    bool IsRestCommand( SDL_Keysym *keysym );
-    bool IsTargetCommand( SDL_Keysym *keysym );
-    bool IsTeleportCommand( SDL_Keysym *keysym );
-    bool IsSetIntrinsicCommand( SDL_Keysym *keysym );
-    bool IsZapCommand( SDL_Keysym *keysym );
-    bool IsCreateItemCommand( SDL_Keysym *keysym );
-    bool IsSummonMonsterCommand( SDL_Keysym *keysym );
-    bool IsStringInputCommand( SDL_Keysym *keysym );
+    bool IsModifierNeeded( JKeysym *keysym );
+    bool IsUseCommand( JKeysym *keysym );
+    bool IsStairsCommand( JKeysym *keysym );
+    bool IsLookCommand( JKeysym *keysym );
+    bool IsMagicCommand( JKeysym *keysym ) { return false; }
+    bool IsMenuCommand( JKeysym *keysym ) { return false; }
+    bool IsHelpCommand( JKeysym *keysym ) { return false; }
+    bool IsRestCommand( JKeysym *keysym );
+    bool IsTargetCommand( JKeysym *keysym );
+    bool IsTeleportCommand( JKeysym *keysym );
+    bool IsSetIntrinsicCommand( JKeysym *keysym );
+    bool IsZapCommand( JKeysym *keysym );
+    bool IsCreateItemCommand( JKeysym *keysym );
+    bool IsSummonMonsterCommand( JKeysym *keysym );
+    bool IsStringInputCommand( JKeysym *keysym );
     void ResetToState( int newstate ) {}
 
-    int OnHandleStairs( SDL_Keysym *keysym );
+    int OnHandleStairs( JKeysym *keysym );
     int TestStairs();
 
     void DisplayInventory();

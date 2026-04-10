@@ -31,14 +31,14 @@ CStringInputState::CStringInputState() : m_cCommand( 0 )
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }
 
-int CStringInputState::OnHandleKey( SDL_Keysym *keysym )
+int CStringInputState::OnHandleKey( JKeysym *keysym )
 {
     int retval;
     retval = ( ( *this ).*( m_pCurKeyHandler ) )( keysym );
     return retval;
 }
 
-int CStringInputState::OnHandleName( SDL_Keysym *keysym )
+int CStringInputState::OnHandleName( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling NAME modifier\n" );
@@ -75,7 +75,7 @@ int CStringInputState::OnHandleName( SDL_Keysym *keysym )
     return 0;
 }
 
-int CStringInputState::OnHandleItem( SDL_Keysym *keysym )
+int CStringInputState::OnHandleItem( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling ITEM modifier\n" );
@@ -115,7 +115,7 @@ int CStringInputState::OnHandleItem( SDL_Keysym *keysym )
     return 0;
 }
 
-int CStringInputState::OnHandleFlag( SDL_Keysym *keysym )
+int CStringInputState::OnHandleFlag( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling FLAG modifier\n" );
@@ -158,7 +158,7 @@ int CStringInputState::OnHandleFlag( SDL_Keysym *keysym )
     return 0;
 }
 
-int CStringInputState::OnHandleMonster( SDL_Keysym *keysym )
+int CStringInputState::OnHandleMonster( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling MONSTER modifier\n" );
@@ -198,7 +198,7 @@ int CStringInputState::OnHandleMonster( SDL_Keysym *keysym )
     return 0;
 }
 
-int CStringInputState::OnHandleHaggle( SDL_Keysym *keysym )
+int CStringInputState::OnHandleHaggle( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling HAGGLE modifier\n" );
@@ -246,7 +246,7 @@ int CStringInputState::OnHandleHaggle( SDL_Keysym *keysym )
     return 0;
 }
 
-int CStringInputState::OnHandleInit( SDL_Keysym *keysym )
+int CStringInputState::OnHandleInit( JKeysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing modify state...\n" );
     if( !m_cCommand )
@@ -256,21 +256,21 @@ int CStringInputState::OnHandleInit( SDL_Keysym *keysym )
         eStringInputModifier mod = SI_INIT;
         switch( m_cCommand )
         {
-        case SDLK_n:
+        case JKEY_n:
             mod = SI_NAME;
             g_pGame->GetMsgs()->Clear();
             g_pGame->GetMsgs()->Printf( "Character Name: %s", m_szInput );
             break;
-        case SDLK_p:
+        case JKEY_p:
             mod = SI_HAGGLE;
             break;
-        case SDLK_f:
+        case JKEY_f:
             mod = SI_FLAG;
             break;
-        case SDLK_i:
+        case JKEY_i:
             mod = SI_ITEM;
             break;
-        case SDLK_s:
+        case JKEY_s:
             mod = SI_MONSTER;
             break;
         default:
@@ -293,7 +293,7 @@ int CStringInputState::OnHandleInit( SDL_Keysym *keysym )
     return JRESETSTATE;
 }
 
-int CStringInputState::OnBaseHandleKey( SDL_Keysym *keysym )
+int CStringInputState::OnBaseHandleKey( JKeysym *keysym )
 {
     char bInput = GetAlphaNumeric( keysym );
     if( bInput != nul )
@@ -304,18 +304,18 @@ int CStringInputState::OnBaseHandleKey( SDL_Keysym *keysym )
         }
         return JSUCCESS;
     }
-    else if( keysym->sym == SDLK_DELETE || keysym->sym == SDLK_BACKSPACE )
+    else if( keysym->sym == JKEY_DELETE || keysym->sym == JKEY_BACKSPACE )
     {
         m_szInput[Util::jstrlen( m_szInput ) - 1] = nul;
         return JSUCCESS;
     }
-    else if( keysym->sym == SDLK_RETURN )
+    else if( keysym->sym == JKEY_RETURN )
     {
         // actually set the string on the place
         JLog( LOG_LEVEL_DEBUG, true, "you entered: <%s>\n", m_szInput );
         return JCOMPLETESTATE;
     }
-    else if( keysym->sym == SDLK_ESCAPE )
+    else if( keysym->sym == JKEY_ESCAPE )
     {
         // ESC key gets us out of modify mode
         ResetToState( STATE_COMMAND );

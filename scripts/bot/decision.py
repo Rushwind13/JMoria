@@ -105,6 +105,8 @@ class DecisionEngine:
         self.level_unique_tiles = set()  # unique world positions visited this level
         self._prev_goal_target = None
         self._prev_dist_to_goal = None
+        # Anti-oscillation (#213 P5.2).
+        self._recent_positions = deque(maxlen=6)
 
     def decide(self, state):
         self.mode = "seek"
@@ -173,6 +175,7 @@ class DecisionEngine:
             self.level_unique_tiles = set()
             self._prev_goal_target = None
             self._prev_dist_to_goal = None
+            self._recent_positions.clear()
             self.deepest_depth = max(self.deepest_depth, state.dungeon_depth)
             self.last_depth = state.dungeon_depth
 
@@ -508,6 +511,13 @@ class DecisionEngine:
         if not self.goal_stack:
             heading = KEY_TO_DIR.get(self.last_action)
             target = self._nearest_unexplored_tile(mpos, heading=heading)
+            # #213 P5.3: If directional search failed, retry headingless.
+            if target is None and heading is not None:
+                target = self._nearest_unexplored_tile(mpos, heading=None)
+            # #213 P5.3: If still None but frontier exists, tiles are
+            # unreachable — mark them all as failed so we stop retrying.
+            if target is None and self.unexplored_tiles:
+                self.failed_goals |= self.unexplored_tiles
             if target:
                 self.goal_stack.append(("unexplored", target))
 
@@ -529,8 +539,22 @@ class DecisionEngine:
                 dkey = pf.DIR_TO_KEY.get((nxt[0] - mpos[0], nxt[1] - mpos[1]))
                 if dkey and self._can_step(grid, pos, dkey):
                     return self._record_decision(dkey, "wander_center")
+            # #213 P5.2: Anti-oscillation — avoid directions leading
+            # back to recently-visited positions.
+            recent = set(self._recent_positions)
+            # First pass: try directions that don't revisit recent tiles.
             for key in "ljkhyubn":
                 if self._can_step(grid, pos, key):
+                    d = KEY_TO_DIR.get(key)
+                    if d:
+                        npos = (mpos[0] + d[0], mpos[1] + d[1])
+                        if npos not in recent:
+                            self._recent_positions.append(mpos)
+                            return self._record_decision(key, f"stuck_fallback_{key}")
+            # Second pass: any walkable direction (all recent — just move).
+            for key in "ljkhyubn":
+                if self._can_step(grid, pos, key):
+                    self._recent_positions.append(mpos)
                     return self._record_decision(key, f"stuck_fallback_{key}")
             return self._record_decision(".", "idle_wait")
 

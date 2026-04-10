@@ -901,7 +901,11 @@ void CDungeon::DrawDungeon()
             }
             else if( g_pGame->GetGameStateIndex() == STATE_RANGED && vScreen == vProjectile )
             {
-                color = JColor( 100, 100, 0, 255 );
+                color = JColor( 255, 255, 85, 255 );
+            }
+            else if( IsOnLOSLine( vScreen ) )
+            {
+                color = JColor( 85, 255, 255, 255 );
             }
             else if( g_pGame->GetGameStateIndex() != STATE_CLOCKSTEP && IsLit( vScreen ) )
             {
@@ -918,6 +922,21 @@ void CDungeon::DrawDungeon()
 }
 
 void CDungeon::DisturbPlayer() { g_pGame->GetPlayer()->m_bIsDisturbed = true; }
+
+bool CDungeon::IsOnLOSLine( JVector vPos )
+{
+    if( !m_llLOSLine )
+        return false;
+    CLink<JIVector> *pLink = m_llLOSLine->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData && pLink->m_lpData->x == (int)vPos.x &&
+            pLink->m_lpData->y == (int)vPos.y )
+            return true;
+        pLink = pLink->next;
+    }
+    return false;
+}
 
 void CDungeon::DrawItems()
 {
@@ -1051,6 +1070,8 @@ void CDungeon::Term()
         delete m_llItemDefs;
         m_llItemDefs = NULL;
     }
+
+    ClearLOSLine();
 }
 
 void CDungeon::RemoveMonster( CMonster *pMon )

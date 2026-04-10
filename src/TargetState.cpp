@@ -7,8 +7,11 @@
 
 #include "Dungeon.h"
 #include "Player.h"
+#include "Util.h"
 
 extern CGame *g_pGame;
+
+static bool LOSNoCollision( JVector &vTest ) { return true; }
 
 CTargetState::CTargetState()
     : m_cCommand( 0 ),
@@ -128,11 +131,13 @@ int CTargetState::DoInit()
         if( /*!bTargeted && bSeen && /**/ bPlayerSees )
         {
             uint32 *dwTargetable = new uint32( count );
-            JLog( LOG_LEVEL_DEBUG, true, "Adding %s to targets mon %d at idx %d\n", pMon->GetName(),
-                  pMon->m_pllLink->m_dwIndex, *dwTargetable );
-            m_llTargets->Add( dwTargetable );
-            // if( !g_pGame->GetPlayer()->GetTarget() )
-            g_pGame->GetPlayer()->SetTarget( pMon );
+            JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
+            JVector vMonPos = pMon->GetPos();
+            int dist = abs( (int)vMonPos.x - (int)vPlayerPos.x ) +
+                       abs( (int)vMonPos.y - (int)vPlayerPos.y );
+            JLog( LOG_LEVEL_DEBUG, true, "Adding %s to targets mon %d at idx %d dist %d\n",
+                  pMon->GetName(), pMon->m_pllLink->m_dwIndex, *dwTargetable, dist );
+            m_llTargets->Add( dwTargetable, dist );
         }
         pLink = pLink->next;
         count++;
@@ -140,6 +145,12 @@ int CTargetState::DoInit()
     if( m_llTargets->length() )
     {
         JLog( LOG_LEVEL_INFO, true, "Total targetable monsters: %d\n", m_llTargets->length() );
+        // Set initial target to nearest monster (first in distance-sorted list)
+        uint32 *dwFirst = m_llTargets->GetHead()->m_lpData;
+        CLink<CMonster> *pFirst = g_pGame->GetDungeon()->m_llMonsters->GetNthLink( *dwFirst );
+        if( pFirst && pFirst->m_lpData )
+            g_pGame->GetPlayer()->SetTarget( pFirst->m_lpData );
+        UpdateLOSLine();
     }
     else
     {
@@ -226,6 +237,7 @@ int CTargetState::OnBaseHandleKey( JKeysym *keysym )
         JLog( LOG_LEVEL_INFO, true, "desired monster index: %d retrieved idx %d, monster: %s\n",
               *dwTarget, pMon->m_pllLink->m_dwIndex, pMon->GetName() );
         g_pGame->GetPlayer()->SetTarget( pMon );
+        UpdateLOSLine();
         return JSUCCESS;
     }
     else if( keysym->sym == JKEY_PERIOD )
@@ -259,6 +271,7 @@ int CTargetState::OnBaseHandleKey( JKeysym *keysym )
 
 void CTargetState::ResetToState( int newstate )
 {
+    g_pGame->GetDungeon()->ClearLOSLine();
     if( m_llTargets )
     {
         m_llTargets->Terminate();
@@ -284,3 +297,19 @@ void CTargetState::ResetToState( int newstate )
 // {
 //     return true;
 // }
+
+void CTargetState::UpdateLOSLine()
+{
+    CMonster *pTarget = g_pGame->GetPlayer()->GetTarget();
+    if( !pTarget )
+    {
+        g_pGame->GetDungeon()->ClearLOSLine();
+        return;
+    }
+
+    JIVector vSource( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+    JIVector vTarget( VEC_EXPAND( pTarget->GetPos() ) );
+    JLinkList<JIVector> *pLine = new JLinkList<JIVector>;
+    Util::Bresenham( vSource, vTarget, SIGHT_DISTANCE_PLAYER, LOSNoCollision, pLine );
+    g_pGame->GetDungeon()->SetLOSLine( pLine );
+}

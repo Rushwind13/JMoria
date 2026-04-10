@@ -48,7 +48,7 @@ _snap_file = "/tmp/jmoria_snap.txt"
 
 
 def _create_think_pane(session: str) -> bool:
-    """Create a 3-row bottom strip split left (think) / right (snapshot)."""
+    """Create a 5-row bottom strip split left (think) / right (snapshot)."""
     global _think_pane_id, _snap_pane_id
     # Seed files.
     with open(_think_file, "w") as f:
@@ -57,7 +57,7 @@ def _create_think_pane(session: str) -> bool:
         f.write("(awaiting first snapshot)\n")
     # Left pane: per-turn think status.
     result = subprocess.run(
-        ["tmux", "split-window", "-t", f"{session}:0.0", "-v", "-l", "3",
+        ["tmux", "split-window", "-t", f"{session}:0.0", "-v", "-l", "5",
          "-d", "-P", "-F", "#{pane_id}",
          "sh", "-c", f"while true; do clear; cat {_think_file}; sleep 0.3; done"],
         capture_output=True, text=True,
@@ -238,6 +238,9 @@ def run_loop(verbose: bool = False, knowledge_file: str = "", think: bool = Fals
 
     while True:
         state = screen.read(state=prev_state, dungeon_depth=depth)
+        # #206: Sync local depth from the stats-panel parse so the log
+        # reflects the actual depth even when staircase messages are missed.
+        depth = state.dungeon_depth
         turn += 1
 
         # Track dungeon depth from messages
@@ -329,6 +332,7 @@ def run_loop(verbose: bool = False, knowledge_file: str = "", think: bool = Fals
                 f"[turn {turn:5d}] HP={state.player_hp}/{state.player_max_hp} "
                 f"depth={depth} wpos={state.player_world_pos} "
                 f"monsters={len(state.monsters)} items={len(state.items)} "
+                f"unx={len(engine.unexplored_tiles)} "
                 f"think={thought!r}{parse_note} msg={msg_display!r:40s} -> {action!r}"
             )
 

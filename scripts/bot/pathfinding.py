@@ -16,9 +16,9 @@ DIR_TO_KEY = {
 
 WALKABLE = {".", "'", "<", ">", "@"}
 SOLID = {"#", ":"}
-UNSEEN = {" ", "~"}  # screen space or known_map unseen sentinel
+UNSEEN = {" ", "\x00"}  # screen space or known_map unseen sentinel
 
-# Unseen tiles (" " on screen, "~" in known_map) and closed doors ("+")
+# Unseen tiles (" " on screen, "\x00" in known_map) and closed doors ("+")
 # are neither WALKABLE nor SOLID — traversable but expensive for A*.
 UNKNOWN_COST = 5
 DOOR_COST = 3  # ~3 actions to open a door (command + direction + step)

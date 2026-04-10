@@ -69,7 +69,7 @@ class DecisionEngine:
         # Goal-based exploration state machine.
         self.explore_phase = "head_east"
         self.door_momentum = False
-        self.known_map = [["~"] * 100 for _ in range(100)]
+        self.known_map = [["\x00"] * 100 for _ in range(100)]
         self._current_depth = 1
         self.failed_door_dirs_by_world = {}
         # Door graph: nodes = door world positions, edges = same-room connectivity.
@@ -81,6 +81,8 @@ class DecisionEngine:
         # Tile-level exploration tracking.
         self.unexplored_tiles = set()
         self.explored_tiles = set()
+        # Frontier clustering (#213 P2): commit to clearing one area.
+        self.current_cluster = set()
         # Goal stack: LIFO list of (goal_type, (row, col)).
         self.goal_stack = []
         self.pushed_goals = set()
@@ -95,6 +97,16 @@ class DecisionEngine:
         self.items_picked_up = 0
         self.deepest_depth = 1
         self.hp_history = []  # last 10 HP values for trend
+        # Exploration efficiency metrics (#213 P4).
+        self.frontier_switches = 0   # times we picked a new unexplored target
+        self.cluster_switches = 0    # times current_cluster changed
+        self.backtrack_steps = 0     # steps moving away from goal
+        self.explore_steps = 0       # steps moving toward or at goal
+        self.level_unique_tiles = set()  # unique world positions visited this level
+        self._prev_goal_target = None
+        self._prev_dist_to_goal = None
+        # Anti-oscillation (#213 P5.2).
+        self._recent_positions = deque(maxlen=6)
 
     def decide(self, state):
         self.mode = "seek"
@@ -141,7 +153,7 @@ class DecisionEngine:
         if state.dungeon_depth != self.last_depth:
             self.equip_attempt_counts.clear()
             self.phantom_positions.clear()
-            self.known_map = [["~"] * 100 for _ in range(100)]
+            self.known_map = [["\x00"] * 100 for _ in range(100)]
             self.door_graph = {}
             self.explored_doors = set()
             self.last_door_wpos = None
@@ -149,12 +161,21 @@ class DecisionEngine:
             self.cached_path_target = None
             self.unexplored_tiles = set()
             self.explored_tiles = set()
+            self.current_cluster = set()
             self.goal_stack = []
             self.pushed_goals = set()
             self.failed_goals = set()
             self.last_staircase_attempt = None
             self.staircase_attempt_cooldown = 0
             self.level_kills = 0
+            self.frontier_switches = 0
+            self.cluster_switches = 0
+            self.backtrack_steps = 0
+            self.explore_steps = 0
+            self.level_unique_tiles = set()
+            self._prev_goal_target = None
+            self._prev_dist_to_goal = None
+            self._recent_positions.clear()
             self.deepest_depth = max(self.deepest_depth, state.dungeon_depth)
             self.last_depth = state.dungeon_depth
 
@@ -452,11 +473,21 @@ class DecisionEngine:
                     for d in pf.DIRS_8:
                         if d != last_dir:
                             check_dirs.append(d)
+                    chained = False
                     for dr, dc in check_dirs:
                         nr, nc = mpos[0] + dr, mpos[1] + dc
                         if (nr, nc) in self.unexplored_tiles:
                             self.goal_stack.append(("unexplored", (nr, nc)))
+                            chained = True
                             break
+                    # #213: No adjacent frontier — use directional
+                    # search to stay on course instead of falling
+                    # through to a headingless BFS.
+                    if not chained:
+                        target = self._nearest_unexplored_tile(
+                            mpos, heading=last_dir)
+                        if target:
+                            self.goal_stack.append(("unexplored", target))
                     continue
                 break
             elif gtype == "staircase":
@@ -478,7 +509,15 @@ class DecisionEngine:
 
         # If stack empty, push nearest unexplored tile or staircase.
         if not self.goal_stack:
-            target = self._nearest_unexplored_tile(mpos)
+            heading = KEY_TO_DIR.get(self.last_action)
+            target = self._nearest_unexplored_tile(mpos, heading=heading)
+            # #213 P5.3: If directional search failed, retry headingless.
+            if target is None and heading is not None:
+                target = self._nearest_unexplored_tile(mpos, heading=None)
+            # #213 P5.3: If still None but frontier exists, tiles are
+            # unreachable — mark them all as failed so we stop retrying.
+            if target is None and self.unexplored_tiles:
+                self.failed_goals |= self.unexplored_tiles
             if target:
                 self.goal_stack.append(("unexplored", target))
 
@@ -500,8 +539,22 @@ class DecisionEngine:
                 dkey = pf.DIR_TO_KEY.get((nxt[0] - mpos[0], nxt[1] - mpos[1]))
                 if dkey and self._can_step(grid, pos, dkey):
                     return self._record_decision(dkey, "wander_center")
+            # #213 P5.2: Anti-oscillation — avoid directions leading
+            # back to recently-visited positions.
+            recent = set(self._recent_positions)
+            # First pass: try directions that don't revisit recent tiles.
             for key in "ljkhyubn":
                 if self._can_step(grid, pos, key):
+                    d = KEY_TO_DIR.get(key)
+                    if d:
+                        npos = (mpos[0] + d[0], mpos[1] + d[1])
+                        if npos not in recent:
+                            self._recent_positions.append(mpos)
+                            return self._record_decision(key, f"stuck_fallback_{key}")
+            # Second pass: any walkable direction (all recent — just move).
+            for key in "ljkhyubn":
+                if self._can_step(grid, pos, key):
+                    self._recent_positions.append(mpos)
                     return self._record_decision(key, f"stuck_fallback_{key}")
             return self._record_decision(".", "idle_wait")
 
@@ -724,6 +777,7 @@ class DecisionEngine:
                         new_frontier.add((r, c))
 
         self.unexplored_tiles = new_frontier
+        self._rebuild_current_cluster()
 
         # Prune stale unexplored goals from anywhere in the stack (#209).
         # This handles scroll-of-light or other visibility changes that
@@ -762,6 +816,46 @@ class DecisionEngine:
         # Only push item goals.
         self.goal_stack.extend(new_items)
 
+    def _rebuild_current_cluster(self):
+        """Prune current_cluster to only tiles still in the frontier.
+
+        When the cluster is fully exhausted, clear it so
+        _nearest_unexplored_tile will pick the next best cluster.
+        """
+        self.current_cluster &= self.unexplored_tiles
+
+    def _build_frontier_clusters(self):
+        """Compute connected components of unexplored frontier tiles (#213 P2).
+
+        Two frontier tiles are in the same cluster if they are connected
+        through walkable tiles (8-directional).  Returns a list of sets.
+        """
+        candidates = self.unexplored_tiles - self.failed_goals
+        if not candidates:
+            return []
+        remaining = set(candidates)
+        clusters = []
+        while remaining:
+            seed = next(iter(remaining))
+            cluster = set()
+            queue = deque([seed])
+            visited = {seed}
+            while queue:
+                cur = queue.popleft()
+                if cur in remaining:
+                    cluster.add(cur)
+                for dr, dc in pf.DIRS_8:
+                    nr, nc = cur[0] + dr, cur[1] + dc
+                    npos = (nr, nc)
+                    if npos not in visited and 0 <= nr < 100 and 0 <= nc < 100:
+                        ch = self.known_map[nr][nc]
+                        if pf.is_passable(ch) or npos in remaining:
+                            visited.add(npos)
+                            queue.append(npos)
+            remaining -= cluster
+            clusters.append(cluster)
+        return clusters
+
     def _has_unknown_neighbor(self, world_pos):
         """True if any cardinal neighbor in known_map is unseen (~).
 
@@ -773,7 +867,7 @@ class DecisionEngine:
         for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1)):
             nr, nc = r + dr, c + dc
             if 0 <= nr < 100 and 0 <= nc < 100:
-                if self.known_map[nr][nc] == "~":
+                if self.known_map[nr][nc] == "\x00":
                     return True
         return False
 
@@ -787,50 +881,92 @@ class DecisionEngine:
                     return (nr, nc)
         return None
 
-    def _nearest_unexplored_tile(self, wpos):
-        """BFS on known_map to find nearest frontier tile by walk distance.
+    def _nearest_unexplored_tile(self, wpos, heading=None):
+        """BFS on known_map to find the best frontier tile (#213).
 
         Frontier tiles are already-seen walkable tiles that border the
-        unknown.  Among equally-close candidates we prefer hallway edges
-        (tiles with few walkable neighbors — likely corridors leading
-        into new territory) over open room edges.
+        unknown.  Candidates are scored by a composite of walk distance,
+        corridor preference (fewer walkable neighbors), directional
+        alignment with *heading*, door bonuses, and cluster commitment.
+
+        When *heading* is provided the search looks up to
+        DIRECTION_LOOKAHEAD steps beyond the nearest candidate so that
+        a tile slightly farther away but in the forward direction can
+        beat a closer tile behind the bot.  This prevents mid-hallway
+        turnarounds and backtracking past doors.
+
+        Cluster commitment (#213 P2): if current_cluster has tiles
+        remaining, strongly prefer those tiles.  If exhausted, pick the
+        nearest cluster and commit to it.
         """
+        DIRECTION_LOOKAHEAD = 4
+        CLUSTER_BONUS = -5  # strong preference for current cluster
+
         if not self.unexplored_tiles:
             return None
         candidates = self.unexplored_tiles - self.failed_goals
         if not candidates:
             return None
+
+        # If current cluster is empty, pick a new one.
+        active_cluster = self.current_cluster & candidates
+        if not active_cluster:
+            clusters = self._build_frontier_clusters()
+            if clusters:
+                # Pick cluster whose nearest tile (Chebyshev) is closest.
+                best_cluster = min(
+                    clusters,
+                    key=lambda c: min(pf.heuristic(wpos, t) for t in c)
+                )
+                self.current_cluster = best_cluster
+                active_cluster = best_cluster
+                self.cluster_switches += 1
+
         visited = {wpos}
         queue = deque([(wpos, 0)])
         best = None
-        best_dist = None
         best_score = 999
+        first_dist = None  # distance to first candidate found
         while queue:
             cur, dist = queue.popleft()
-            if best_dist is not None and dist > best_dist:
-                break
+            # Search window: exact match when no heading, otherwise
+            # allow DIRECTION_LOOKAHEAD extra steps.
+            if first_dist is not None:
+                limit = first_dist + (DIRECTION_LOOKAHEAD if heading else 0)
+                if dist > limit:
+                    break
             if cur in candidates:
-                # Score: fewer walkable neighbors = more corridor-like = better
-                score = sum(
+                if first_dist is None:
+                    first_dist = dist
+                # Corridor preference: fewer walkable neighbors = better.
+                neighbor_score = sum(
                     1 for dr, dc in pf.DIRS_8
                     if 0 <= cur[0]+dr < 100 and 0 <= cur[1]+dc < 100
                     and self.known_map[cur[0]+dr][cur[1]+dc] in (".", "'", "<", ">")
                 )
-                if best is None or score < best_score:
+                # Door bonus: closed doors with unknown territory behind
+                # them are high-value targets.
+                if self.known_map[cur[0]][cur[1]] == "+":
+                    neighbor_score = 0
+                # Direction penalty / bonus (#213).
+                dir_penalty = 0
+                if heading and (cur[0] != wpos[0] or cur[1] != wpos[1]):
+                    dr = cur[0] - wpos[0]
+                    dc = cur[1] - wpos[1]
+                    mag = max(abs(dr), abs(dc))
+                    if mag > 0:
+                        dot = (heading[0] * dr + heading[1] * dc) / mag
+                        if dot >= 0.5:
+                            dir_penalty = -2  # forward bonus
+                        elif dot <= -0.5:
+                            dir_penalty = 3   # backward penalty
+                score = dist + neighbor_score + dir_penalty
+                # Cluster commitment (#213 P2).
+                if active_cluster and cur in active_cluster:
+                    score += CLUSTER_BONUS
+                if score < best_score:
                     best = cur
-                    best_dist = dist
                     best_score = score
-                continue
-            # Also check for closed doors adjacent to BFS frontier.
-            for dr, dc in pf.DIRS_8:
-                nr, nc = cur[0] + dr, cur[1] + dc
-                if 0 <= nr < 100 and 0 <= nc < 100:
-                    npos = (nr, nc)
-                    if self.known_map[nr][nc] == "+" and self._has_unknown_neighbor(npos):
-                        if best is None:
-                            best = npos
-                            best_dist = dist + 1
-                            best_score = 0  # doors always top priority
             # Expand BFS through walkable AND unknown tiles.
             for dr, dc in pf.DIRS_8:
                 nr, nc = cur[0] + dr, cur[1] + dc
@@ -891,6 +1027,24 @@ class DecisionEngine:
 
     def _record_decision(self, action, thought):
         self.last_thought = thought
+        # Track exploration efficiency (#213 P4).
+        if self.current_motion_pos is not None:
+            self.level_unique_tiles.add(self.current_motion_pos)
+        if self.goal_stack:
+            gt, grc = self.goal_stack[-1]
+            if grc != self._prev_goal_target:
+                if self._prev_goal_target is not None and gt == "unexplored":
+                    self.frontier_switches += 1
+                self._prev_goal_target = grc
+                self._prev_dist_to_goal = None
+            if self.current_motion_pos is not None:
+                cur_dist = pf.heuristic(self.current_motion_pos, grc)
+                if self._prev_dist_to_goal is not None:
+                    if cur_dist < self._prev_dist_to_goal:
+                        self.explore_steps += 1
+                    elif cur_dist > self._prev_dist_to_goal:
+                        self.backtrack_steps += 1
+                self._prev_dist_to_goal = cur_dist
         return self._record_action(action)
 
     def debug_thought(self):
@@ -1038,6 +1192,9 @@ class DecisionEngine:
             f"Items={self.items_picked_up}\n"
             f"  Explored={pct:.0f}% ({explored}/{total})  "
             f"Goals={len(self.goal_stack)}\n"
+            f"  FrontierSw={self.frontier_switches}  ClusterSw={self.cluster_switches}  "
+            f"Backtrack={self.backtrack_steps}/{self.explore_steps + self.backtrack_steps}  "
+            f"UniqTiles={len(self.level_unique_tiles)}\n"
             f"========================="
         )
 
@@ -1101,6 +1258,8 @@ class DecisionEngine:
     def run_summary(self, turn):
         """Aggregate stats printed at end of run."""
         knowledge_entries = len(self.monster_knowledge) + len(self.consumable_knowledge)
+        total_steps = self.explore_steps + self.backtrack_steps
+        bt_pct = (self.backtrack_steps / total_steps * 100) if total_steps > 0 else 0
 
         return (
             f"=== Run Summary ===\n"
@@ -1108,6 +1267,9 @@ class DecisionEngine:
             f"Total kills={self.total_kills}\n"
             f"  Items collected={self.items_picked_up}  "
             f"Knowledge entries={knowledge_entries}\n"
+            f"  FrontierSw={self.frontier_switches}  ClusterSw={self.cluster_switches}  "
+            f"Backtrack={self.backtrack_steps}/{total_steps} ({bt_pct:.0f}%)\n"
+            f"  UniqTiles={len(self.level_unique_tiles)}\n"
             f"==================="
         )
 

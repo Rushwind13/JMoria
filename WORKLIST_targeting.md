@@ -57,24 +57,32 @@ Standard implementation with error-term tracking and diagonal gap checking. Supp
 
 ## Priority Worklist
 
-### [P0] AIMgr race condition during ranged trajectory
-- **Bug**: `CGame::Update()` calls `AIMgr::Update()` **before** state updates. During `RANGED_TRAJECTORY` animation, monsters move every tick while the projectile follows a pre-built path from the target's OLD position. The Bresenham line draws perfectly to where the monster was, but the monster has already moved.
-- **Sequence**: target position snapshot → `BuildTrajectory()` → `RANGED_TRAJECTORY` → AIMgr moves monster → `DoTrajectory()` walks stale path → miss.
-- **Evidence**: `m_vTarget` is captured once in `UsePlayerTarget()` (`RangedState.cpp:591`). `m_llTrajectory` is pre-computed and never updated. `Game.cpp:500` runs `GetAIMgr()->Update()` before `m_pCurState->Update()`.
-- **Fix**: Either freeze AIMgr during `RANGED_TRAJECTORY` state, or re-read target position and recompute trajectory each tick, or resolve hit at trajectory-build time and make animation purely cosmetic.
-- **Test**: Add BDD scenario — zap wand at monster, monster moves during trajectory, verify hit resolves against correct position.
+### [P0] ✅ IMPLEMENTED — Dangling target pointer — targeted monster dies
+- **Bug**: `CPlayer::m_pTarget` is a raw `CMonster*` pointer. If the targeted monster is killed by another monster (or despawns), the pointer dangles → use-after-free crash. `OnKillMonster()` clears `m_pTarget` only when the PLAYER kills it; no cleanup path exists for other death causes.
+- **Fix applied**: `CDungeon::RemoveMonster()` now checks if the removed monster is the player's current target, and calls `SetTarget(NULL)` to clear it before removing from the list.
+- **Test**: Add BDD scenario — target monster, another monster kills it, player tries to zap → verify no crash, graceful "target lost" message.
 
-### [P0] Target index staleness — store stable references
-- **Bug**: `DoInit()` stores monster list-position indices. If monsters die, spawn, or the list mutates before confirm, indices become invalid or point to wrong monster.
-- **Fix**: Store `CMonster*` or a stable unique ID in the target list. On confirm (`.`), re-validate `IsAlive()` and `PlayerCanSee()` before committing.
+### [P0] ✅ IMPLEMENTED — Target index staleness in CTargetState — bounds & NULL guards
+- **Bug**: `DoInit()` stores monster list-position indices (`uint32`) in `JLinkList<uint32>`. If monsters die, spawn, or the list mutates between `DoInit()` and confirm (`.`), the index can point to the wrong monster or go out of bounds.
+- **Evidence**: `OnBaseHandleKey()` retrieves `m_llMonsters->GetNthLink(*dwTarget)` without bounds checking or identity validation.
+- **Fix applied**: Added bounds checking on the index against current monster list length, and NULL guards on the retrieved link/monster pointer in `OnBaseHandleKey()` target cycling. Stale indices now skip gracefully instead of crashing.
+- **Future**: Consider storing `CMonster*` pointers directly instead of indices for full robustness.
 - **Test**: Add BDD scenario — select target, monster dies before confirm, verify graceful handling.
 
-### [P0] Re-validate LOS on confirm
+### [P0] ✅ IMPLEMENTED — Re-validate LOS on confirm
 - **Bug**: LOS depends on map state via `isWalkable` callback. Doors opening/closing or tunneling between selection and confirm silently change outcome.
-- **Fix**: Re-run `PlayerCanSee()` at confirm (`.`). If target is no longer visible, display message and refresh target list.
+- **Fix applied**: Confirm (`.`) in `CTargetState::OnBaseHandleKey()` now re-runs `PlayerCanSee()` before accepting the target. If the target is no longer visible, displays "You can no longer see that target." and clears the target.
 - **Test**: Add BDD scenario — select target, close door, confirm, verify rejection message.
 
+### [P0] AIMgr timing during ranged — fragile design
+- **Status**: Currently NOT a runtime bug in TURN_BASED mode. `DoLaunch()` calls `SetReadyForUpdate(false)`, which gates `AIMgr::Update()` for the entire trajectory animation. Monsters do not move during projectile flight.
+- **Risk**: This safety depends entirely on the `m_bReadyForUpdate` flag in the `TURN_BASED` code path. Removing TURN_BASED or restructuring `CGame::Update()` would immediately create a race where AIMgr moves monsters while the projectile follows a stale pre-built path.
+- **Position capture**: `UsePlayerTarget()` reads `GetTarget()->GetPos()` from the live `CMonster*` pointer, so the position IS current at capture time. The trajectory is pre-computed from this snapshot and never re-read.
+- **Recommendation**: Document this coupling. Consider resolving hit at trajectory-build time (make animation purely cosmetic) to decouple from update ordering. Add an assertion/guard in `DoTrajectory()` that `m_bReadyForUpdate == false`.
+
 ### [P1] Skip OpenGL tests — get targeting working in ASCII Renderer (#225)
+- ✅ **FIXED**: `HandleEventsASCII` now maps `'*'` (Shift+8) to `JKEY_8 + JMOD_SHIFT`
+- ✅ **FIXED**: `IsDirectional`/`GetDir` now accept plain digit keys `1`-`9` as directional input (ASCII renderer has no numpad); shifted digits excluded to preserve `*` target command
 - All targeting and ranged test development should use ASCII renderer (`make ascii`)
 - Skip or gate any OpenGL-dependent test paths
 - Ensure `CTargetState` and `CRangedState` work correctly with `CRenderASCII`

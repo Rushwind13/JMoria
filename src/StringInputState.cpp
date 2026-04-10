@@ -93,8 +93,15 @@ int CStringInputState::OnHandleItem( JKeysym *keysym )
         // One way or another, we're done with this state now.
 
         CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( m_szInput );
-        JVector vPos = g_pGame->GetPlayer()->m_vPos;
-        CItem::CreateItem( pid, vPos );
+        if( pid != NULL )
+        {
+            JVector vPos = g_pGame->GetPlayer()->m_vPos;
+            CItem::CreateItem( pid, vPos );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "Unknown item: %s\n", m_szInput );
+        }
 
         memset( m_szInput, 0, MAX_STRING_LENGTH );
         g_pGame->GetMsgs()->Clear();

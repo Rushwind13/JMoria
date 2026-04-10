@@ -1058,6 +1058,12 @@ void CDungeon::RemoveMonster( CMonster *pMon )
     CLink<CMonster> *pLink;
     pLink = pMon->m_pllLink;
 
+    // Clear player's target if it points to this monster (prevents dangling pointer)
+    if( g_pGame->GetPlayer()->GetTarget() == pMon )
+    {
+        g_pGame->GetPlayer()->SetTarget( NULL );
+    }
+
     GetTile( pMon->GetPos() )->m_pCurMonster = NULL;
     m_llMonsters->Remove( pLink );
 }

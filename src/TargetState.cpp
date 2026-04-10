@@ -205,7 +205,24 @@ int CTargetState::OnBaseHandleKey( JKeysym *keysym )
                   m_llTargets->length() );
         }
         uint32 *dwTarget = m_llTargets->GetNthLink( m_dwCurrentSelection )->m_lpData;
-        CMonster *pMon = g_pGame->GetDungeon()->m_llMonsters->GetNthLink( *dwTarget )->m_lpData;
+
+        // Bounds-check: index may be stale if monster list mutated since DoInit()
+        if( *dwTarget >= (uint32)g_pGame->GetDungeon()->m_llMonsters->length() )
+        {
+            JLog( LOG_LEVEL_WARN, true, "Target index %d out of bounds (list size %d), skipping\n",
+                  *dwTarget, g_pGame->GetDungeon()->m_llMonsters->length() );
+            return JSUCCESS;
+        }
+
+        CLink<CMonster> *pLink = g_pGame->GetDungeon()->m_llMonsters->GetNthLink( *dwTarget );
+        if( !pLink || !pLink->m_lpData )
+        {
+            JLog( LOG_LEVEL_WARN, true, "Target index %d returned NULL monster, skipping\n",
+                  *dwTarget );
+            return JSUCCESS;
+        }
+
+        CMonster *pMon = pLink->m_lpData;
         JLog( LOG_LEVEL_INFO, true, "desired monster index: %d retrieved idx %d, monster: %s\n",
               *dwTarget, pMon->m_pllLink->m_dwIndex, pMon->GetName() );
         g_pGame->GetPlayer()->SetTarget( pMon );
@@ -213,7 +230,19 @@ int CTargetState::OnBaseHandleKey( JKeysym *keysym )
     }
     else if( keysym->sym == JKEY_PERIOD )
     {
-        g_pGame->GetMsgs()->Printf( "Target selected.\n" );
+        // Re-validate LOS before confirming target
+        CMonster *pTarget = g_pGame->GetPlayer()->GetTarget();
+        if( pTarget && g_pGame->GetDungeon()->PlayerCanSee(
+                           pTarget->GetPos(),
+                           pTarget->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) )
+        {
+            g_pGame->GetMsgs()->Printf( "Target selected.\n" );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "You can no longer see that target.\n" );
+            g_pGame->GetPlayer()->SetTarget( NULL );
+        }
         // now reset
         ResetToState( m_dwPreviousState );
         return JRESETSTATE;

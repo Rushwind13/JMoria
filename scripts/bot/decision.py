@@ -668,6 +668,8 @@ class DecisionEngine:
         """Convert world pos (X, Y) to map coords (row, col) = (Y, X)."""
         return (wpos[1], wpos[0])
 
+    _TERRAIN_CHARS = frozenset(".#+'<>")
+
     def _update_known_map(self, state):
         """Blit visible screen tiles onto the persistent 100x100 known_map."""
         if not state.map or state.player_pos is None or state.player_world_pos is None:
@@ -686,9 +688,10 @@ class DecisionEngine:
                 if 0 <= gr < 100 and 0 <= gc < 100:
                     if (lr, lc) in monster_set or (lr, lc) in item_set or ch == "@":
                         self.known_map[gr][gc] = "."
-                    else:
+                        self.explored_tiles.add((gr, gc))
+                    elif ch in self._TERRAIN_CHARS:
                         self.known_map[gr][gc] = ch
-                    self.explored_tiles.add((gr, gc))
+                        self.explored_tiles.add((gr, gc))
 
         # Stamp unknown 8-neighbors of player map position as wall.
         prow, pcol = wy, wx
@@ -1044,7 +1047,7 @@ class DecisionEngine:
         )
 
     def compact_snapshot(self, turn, state):
-        """3-line snapshot for the tmux side pane."""
+        """3-line snapshot for the tmux side pane, with deltas from previous."""
         explored = len(self.explored_tiles)
         total = explored + len(self.unexplored_tiles)
         pct = (explored / total * 100) if total > 0 else 0
@@ -1056,14 +1059,31 @@ class DecisionEngine:
                 potions += 1
             elif "scroll" in nl:
                 scrolls += 1
+
+        cur = {
+            "turn": turn, "kills": self.total_kills,
+            "items": self.items_picked_up, "pct": pct,
+            "ac": state.player_ac,
+        }
+        prev = getattr(self, "_prev_snap", None)
+        self._prev_snap = cur
+
+        def d(key):
+            if prev is None:
+                return ""
+            diff = cur[key] - prev[key]
+            if isinstance(diff, float):
+                return f"(+{diff:.0f})" if diff > 0 else ""
+            return f"(+{diff})" if diff > 0 else ""
+
         return (
             f"T={turn} D={self._current_depth} "
             f"HP={state.player_hp}/{state.player_max_hp} "
-            f"AC={state.player_ac} Lv={state.player_level}\n"
+            f"AC={state.player_ac}{d('ac')} Lv={state.player_level}\n"
             f"Wpn={weapon} Pot={potions} Scr={scrolls} "
-            f"Items={self.items_picked_up}\n"
-            f"Kill={self.level_kills}/{self.total_kills} "
-            f"Expl={pct:.0f}% Goals={len(self.goal_stack)}"
+            f"Items={self.items_picked_up}{d('items')}\n"
+            f"Kill={self.level_kills}/{self.total_kills}{d('kills')} "
+            f"Expl={pct:.0f}%{d('pct')} Goals={len(self.goal_stack)}"
         )
 
     def death_summary(self, turn, state):

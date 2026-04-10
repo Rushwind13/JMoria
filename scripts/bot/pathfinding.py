@@ -16,9 +16,10 @@ DIR_TO_KEY = {
 
 WALKABLE = {".", "'", "<", ">", "@"}
 SOLID = {"#", ":"}
+UNSEEN = {" ", "~"}  # screen space or known_map unseen sentinel
 
-# Unknown tiles (" ") and closed doors ("+") are neither WALKABLE
-# nor SOLID — they are traversable but expensive for A*.
+# Unseen tiles (" " on screen, "~" in known_map) and closed doors ("+")
+# are neither WALKABLE nor SOLID — traversable but expensive for A*.
 UNKNOWN_COST = 5
 DOOR_COST = 3  # ~3 actions to open a door (command + direction + step)
 
@@ -39,8 +40,8 @@ def is_walkable(ch):
         return True
     if ch in SOLID:
         return False
-    # Doors and unknown tiles are passable (for A*) but not freely walkable.
-    return ch not in (" ", "+")
+    # Doors and unseen tiles are passable (for A*) but not freely walkable.
+    return ch not in UNSEEN and ch != "+"
 
 
 def is_passable(ch):
@@ -95,7 +96,7 @@ def path_to(grid, start, goal, cost_fn=None):
         for nxt in neighbors(grid, cur, allow_unknown=True):
             ch = grid[nxt[0]][nxt[1]]
             step_cost = 1
-            if ch == " ":
+            if ch in UNSEEN:
                 step_cost += UNKNOWN_COST
             elif ch == "+":
                 step_cost += DOOR_COST

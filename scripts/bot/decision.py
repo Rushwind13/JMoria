@@ -69,7 +69,7 @@ class DecisionEngine:
         # Goal-based exploration state machine.
         self.explore_phase = "head_east"
         self.door_momentum = False
-        self.known_map = [[" "] * 100 for _ in range(100)]
+        self.known_map = [["~"] * 100 for _ in range(100)]
         self._current_depth = 1
         self.failed_door_dirs_by_world = {}
         # Door graph: nodes = door world positions, edges = same-room connectivity.
@@ -120,9 +120,15 @@ class DecisionEngine:
         if motion_pos is not None:
             self.visited_world.add((state.dungeon_depth, motion_pos[0], motion_pos[1]))
 
-        self._update_known_map(state)
-        self._update_door_graph(state)
-        self._update_exploration_sets(state)
+        # Skip map updates when a menu overlay is covering the dungeon
+        # (e.g. "Wield which item?", "Read which item?", "Quaff which item?").
+        msg_lower = state.last_message.lower()
+        menu_up = "which item" in msg_lower
+
+        if not menu_up:
+            self._update_known_map(state)
+            self._update_door_graph(state)
+            self._update_exploration_sets(state)
 
         hp_loss = 0
         if self.last_player_hp is not None:
@@ -135,7 +141,7 @@ class DecisionEngine:
         if state.dungeon_depth != self.last_depth:
             self.equip_attempt_counts.clear()
             self.phantom_positions.clear()
-            self.known_map = [[" "] * 100 for _ in range(100)]
+            self.known_map = [["~"] * 100 for _ in range(100)]
             self.door_graph = {}
             self.explored_doors = set()
             self.last_door_wpos = None
@@ -159,7 +165,6 @@ class DecisionEngine:
             self.stuck_turns = 0
         self.last_pos = motion_pos
 
-        msg_lower = state.last_message.lower()
         self._learn_from_wield_feedback(state)
         self._learn_from_monster_feedback(state.last_message, hp_loss)
         self._learn_from_scroll_feedback(state.last_message)
@@ -565,7 +570,9 @@ class DecisionEngine:
                 if self._can_step(grid, pos, dkey):
                     return self._record_decision(dkey, f"goal_{gtype}_step")
             self.goal_stack.pop()
-            return self._pursue_goals(state, pos)
+            self.cached_path = []
+            self.cached_path_target = None
+            # Fall through to pathfind-failed retry logic below.
 
         path = pf.path_to(self.known_map, mpos, grc)
         if not path and self.known_map[grc[0]][grc[1]] == "+":
@@ -592,7 +599,8 @@ class DecisionEngine:
 
         # Pathfind failed — pop goal and retry (limited iterations).
         self.failed_goals.add(grc)
-        self.goal_stack.pop()
+        if self.goal_stack and self.goal_stack[-1] == (gtype, grc):
+            self.goal_stack.pop()
         retry_count = 0
         while self.goal_stack and retry_count < 10:
             retry_count += 1
@@ -668,7 +676,7 @@ class DecisionEngine:
         """Convert world pos (X, Y) to map coords (row, col) = (Y, X)."""
         return (wpos[1], wpos[0])
 
-    _TERRAIN_CHARS = frozenset(".#+'<>")
+    _TERRAIN_CHARS = frozenset(".#+'<>:")
 
     def _update_known_map(self, state):
         """Blit visible screen tiles onto the persistent 100x100 known_map."""
@@ -693,29 +701,16 @@ class DecisionEngine:
                         self.known_map[gr][gc] = ch
                         self.explored_tiles.add((gr, gc))
 
-        # Stamp unknown 8-neighbors of player map position as wall.
-        prow, pcol = wy, wx
-        for dr in (-1, 0, 1):
-            for dc in (-1, 0, 1):
-                if dr == 0 and dc == 0:
-                    continue
-                nr, nc = prow + dr, pcol + dc
-                if 0 <= nr < 100 and 0 <= nc < 100:
-                    if self.known_map[nr][nc] == " ":
-                        self.known_map[nr][nc] = "#"
-
     def _update_exploration_sets(self, state):
         """Rebuild the unexplored frontier from known_map.
 
-        Frontier tiles are walkable tiles that border the unknown:
-        1. Open doors ("'") with at least one unknown neighbor — passage
-           into unseen territory.
-        2. Floor tiles ('.') with an unknown neighbor — dark room
-           edges or corridor tips leading into new territory.
+        Frontier tiles are edges of explored territory (#221):
+        any seen walkable tile (., +, ', <, >) with an unseen (~)
+        cardinal neighbor.  The bot must walk there to reveal more.
 
-        Closed doors are NOT on the frontier — they are handled as
-        obstacles during path-following (opened when encountered en
-        route to an actual exploration target).
+        known_map is initialized to ~ (unseen).  Screen tiles overwrite
+        ~ with the actual character when seen, so interior room tiles
+        have walls (#) as neighbors, not ~.
         """
         if not state.map or state.player_pos is None or state.player_world_pos is None:
             return
@@ -724,18 +719,7 @@ class DecisionEngine:
         for r in range(100):
             for c in range(100):
                 ch = self.known_map[r][c]
-                if ch == "+":
-                    # Closed door with unknown beyond — exploration target.
-                    # Not a standalone "door" goal; path-following opens it.
-                    if self._has_unknown_neighbor((r, c)):
-                        new_frontier.add((r, c))
-                elif ch == "'":
-                    # Open door is interesting only if it borders unknown.
-                    if self._has_unknown_neighbor((r, c)):
-                        new_frontier.add((r, c))
-                elif ch == ".":
-                    # Floor tile bordering unknown — could be a dark room
-                    # edge or a corridor tip leading into new territory.
+                if ch in (".", "+", "'", "<", ">"):
                     if self._has_unknown_neighbor((r, c)):
                         new_frontier.add((r, c))
 
@@ -779,16 +763,18 @@ class DecisionEngine:
         self.goal_stack.extend(new_items)
 
     def _has_unknown_neighbor(self, world_pos):
-        """True if any 8-neighbor in known_map is unknown (" ")."""
+        """True if any cardinal neighbor in known_map is unseen (~).
+
+        Only checks 4 cardinal directions — diagonal unseen tiles
+        behind wall corners are not reachable and should not create
+        phantom frontier entries (#221).
+        """
         r, c = world_pos
-        for dr in (-1, 0, 1):
-            for dc in (-1, 0, 1):
-                if dr == 0 and dc == 0:
-                    continue
-                nr, nc = r + dr, c + dc
-                if 0 <= nr < 100 and 0 <= nc < 100:
-                    if self.known_map[nr][nc] == " ":
-                        return True
+        for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1)):
+            nr, nc = r + dr, c + dc
+            if 0 <= nr < 100 and 0 <= nc < 100:
+                if self.known_map[nr][nc] == "~":
+                    return True
         return False
 
     def _walkable_neighbor_of(self, world_pos):
@@ -1003,6 +989,15 @@ class DecisionEngine:
             f"Stuck={self.stuck_turns}  Unexplored={unexplored}"
         )
 
+        # Line 4: unexplored tile details (for debugging #221).
+        if self.unexplored_tiles:
+            tiles_sorted = sorted(self.unexplored_tiles)[:20]
+            tile_chars = [
+                f"{rc}={self.known_map[rc[0]][rc[1]]}" for rc in tiles_sorted
+            ]
+            suffix = f" (+{unexplored - 20} more)" if unexplored > 20 else ""
+            lines.append(f"Unx: {' '.join(tile_chars)}{suffix}")
+
         return "\n".join(lines)
 
     # ------------------------------------------------------------------
@@ -1135,24 +1130,6 @@ class DecisionEngine:
         lr, lc = local_pos
         wx, wy = state.player_world_pos
         return (wx + (lc - pc), wy + (lr - pr))
-
-    @staticmethod
-    def _room_is_visible(grid, pos):
-        """True when the room appears lit (floor tiles visible beyond 1 step)."""
-        r, c = pos
-        rows = len(grid)
-        cols = len(grid[0]) if rows else 0
-        far_floor = 0
-        for dr in range(-3, 4):
-            for dc in range(-3, 4):
-                if abs(dr) <= 1 and abs(dc) <= 1:
-                    continue
-                nr, nc = r + dr, c + dc
-                if 0 <= nr < rows and 0 <= nc < cols:
-                    ch = grid[nr][nc]
-                    if ch in (".", "'", "<", ">"):
-                        far_floor += 1
-        return far_floor >= 3
 
     @staticmethod
     def _can_step(grid, pos, key):

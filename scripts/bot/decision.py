@@ -69,7 +69,7 @@ class DecisionEngine:
         # Goal-based exploration state machine.
         self.explore_phase = "head_east"
         self.door_momentum = False
-        self.known_map = [["~"] * 100 for _ in range(100)]
+        self.known_map = [["\x00"] * 100 for _ in range(100)]
         self._current_depth = 1
         self.failed_door_dirs_by_world = {}
         # Door graph: nodes = door world positions, edges = same-room connectivity.
@@ -141,7 +141,7 @@ class DecisionEngine:
         if state.dungeon_depth != self.last_depth:
             self.equip_attempt_counts.clear()
             self.phantom_positions.clear()
-            self.known_map = [["~"] * 100 for _ in range(100)]
+            self.known_map = [["\x00"] * 100 for _ in range(100)]
             self.door_graph = {}
             self.explored_doors = set()
             self.last_door_wpos = None
@@ -452,11 +452,21 @@ class DecisionEngine:
                     for d in pf.DIRS_8:
                         if d != last_dir:
                             check_dirs.append(d)
+                    chained = False
                     for dr, dc in check_dirs:
                         nr, nc = mpos[0] + dr, mpos[1] + dc
                         if (nr, nc) in self.unexplored_tiles:
                             self.goal_stack.append(("unexplored", (nr, nc)))
+                            chained = True
                             break
+                    # #213: No adjacent frontier — use directional
+                    # search to stay on course instead of falling
+                    # through to a headingless BFS.
+                    if not chained:
+                        target = self._nearest_unexplored_tile(
+                            mpos, heading=last_dir)
+                        if target:
+                            self.goal_stack.append(("unexplored", target))
                     continue
                 break
             elif gtype == "staircase":
@@ -478,7 +488,8 @@ class DecisionEngine:
 
         # If stack empty, push nearest unexplored tile or staircase.
         if not self.goal_stack:
-            target = self._nearest_unexplored_tile(mpos)
+            heading = KEY_TO_DIR.get(self.last_action)
+            target = self._nearest_unexplored_tile(mpos, heading=heading)
             if target:
                 self.goal_stack.append(("unexplored", target))
 
@@ -773,7 +784,7 @@ class DecisionEngine:
         for dr, dc in ((-1, 0), (1, 0), (0, -1), (0, 1)):
             nr, nc = r + dr, c + dc
             if 0 <= nr < 100 and 0 <= nc < 100:
-                if self.known_map[nr][nc] == "~":
+                if self.known_map[nr][nc] == "\x00":
                     return True
         return False
 
@@ -787,14 +798,22 @@ class DecisionEngine:
                     return (nr, nc)
         return None
 
-    def _nearest_unexplored_tile(self, wpos):
-        """BFS on known_map to find nearest frontier tile by walk distance.
+    def _nearest_unexplored_tile(self, wpos, heading=None):
+        """BFS on known_map to find the best frontier tile (#213).
 
         Frontier tiles are already-seen walkable tiles that border the
-        unknown.  Among equally-close candidates we prefer hallway edges
-        (tiles with few walkable neighbors — likely corridors leading
-        into new territory) over open room edges.
+        unknown.  Candidates are scored by a composite of walk distance,
+        corridor preference (fewer walkable neighbors), directional
+        alignment with *heading*, and door bonuses.
+
+        When *heading* is provided the search looks up to
+        DIRECTION_LOOKAHEAD steps beyond the nearest candidate so that
+        a tile slightly farther away but in the forward direction can
+        beat a closer tile behind the bot.  This prevents mid-hallway
+        turnarounds and backtracking past doors.
         """
+        DIRECTION_LOOKAHEAD = 4
+
         if not self.unexplored_tiles:
             return None
         candidates = self.unexplored_tiles - self.failed_goals
@@ -803,34 +822,45 @@ class DecisionEngine:
         visited = {wpos}
         queue = deque([(wpos, 0)])
         best = None
-        best_dist = None
         best_score = 999
+        first_dist = None  # distance to first candidate found
         while queue:
             cur, dist = queue.popleft()
-            if best_dist is not None and dist > best_dist:
-                break
+            # Search window: exact match when no heading, otherwise
+            # allow DIRECTION_LOOKAHEAD extra steps.
+            if first_dist is not None:
+                limit = first_dist + (DIRECTION_LOOKAHEAD if heading else 0)
+                if dist > limit:
+                    break
             if cur in candidates:
-                # Score: fewer walkable neighbors = more corridor-like = better
-                score = sum(
+                if first_dist is None:
+                    first_dist = dist
+                # Corridor preference: fewer walkable neighbors = better.
+                neighbor_score = sum(
                     1 for dr, dc in pf.DIRS_8
                     if 0 <= cur[0]+dr < 100 and 0 <= cur[1]+dc < 100
                     and self.known_map[cur[0]+dr][cur[1]+dc] in (".", "'", "<", ">")
                 )
-                if best is None or score < best_score:
+                # Door bonus: closed doors with unknown territory behind
+                # them are high-value targets.
+                if self.known_map[cur[0]][cur[1]] == "+":
+                    neighbor_score = 0
+                # Direction penalty / bonus (#213).
+                dir_penalty = 0
+                if heading and (cur[0] != wpos[0] or cur[1] != wpos[1]):
+                    dr = cur[0] - wpos[0]
+                    dc = cur[1] - wpos[1]
+                    mag = max(abs(dr), abs(dc))
+                    if mag > 0:
+                        dot = (heading[0] * dr + heading[1] * dc) / mag
+                        if dot >= 0.5:
+                            dir_penalty = -2  # forward bonus
+                        elif dot <= -0.5:
+                            dir_penalty = 3   # backward penalty
+                score = dist + neighbor_score + dir_penalty
+                if score < best_score:
                     best = cur
-                    best_dist = dist
                     best_score = score
-                continue
-            # Also check for closed doors adjacent to BFS frontier.
-            for dr, dc in pf.DIRS_8:
-                nr, nc = cur[0] + dr, cur[1] + dc
-                if 0 <= nr < 100 and 0 <= nc < 100:
-                    npos = (nr, nc)
-                    if self.known_map[nr][nc] == "+" and self._has_unknown_neighbor(npos):
-                        if best is None:
-                            best = npos
-                            best_dist = dist + 1
-                            best_score = 0  # doors always top priority
             # Expand BFS through walkable AND unknown tiles.
             for dr, dc in pf.DIRS_8:
                 nr, nc = cur[0] + dr, cur[1] + dc

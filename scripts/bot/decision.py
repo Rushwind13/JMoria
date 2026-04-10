@@ -89,6 +89,13 @@ class DecisionEngine:
         self.staircase_attempt_cooldown = 0
         self.mode = "seek"
 
+        # Telemetry counters (Phase 4, #207).
+        self.total_kills = 0
+        self.level_kills = 0
+        self.items_picked_up = 0
+        self.deepest_depth = 1
+        self.hp_history = []  # last 10 HP values for trend
+
     def decide(self, state):
         self.mode = "seek"
         if not state.player_pos:
@@ -121,6 +128,9 @@ class DecisionEngine:
         if self.last_player_hp is not None:
             hp_loss = max(0, self.last_player_hp - state.player_hp)
         self.last_player_hp = state.player_hp
+        self.hp_history.append(state.player_hp)
+        if len(self.hp_history) > 10:
+            self.hp_history = self.hp_history[-10:]
 
         if state.dungeon_depth != self.last_depth:
             self.equip_attempt_counts.clear()
@@ -138,6 +148,8 @@ class DecisionEngine:
             self.failed_goals = set()
             self.last_staircase_attempt = None
             self.staircase_attempt_cooldown = 0
+            self.level_kills = 0
+            self.deepest_depth = max(self.deepest_depth, state.dungeon_depth)
             self.last_depth = state.dungeon_depth
 
         # Detect stuck behavior to break local loops.
@@ -656,6 +668,8 @@ class DecisionEngine:
         """Convert world pos (X, Y) to map coords (row, col) = (Y, X)."""
         return (wpos[1], wpos[0])
 
+    _TERRAIN_CHARS = frozenset(".#+'<>")
+
     def _update_known_map(self, state):
         """Blit visible screen tiles onto the persistent 100x100 known_map."""
         if not state.map or state.player_pos is None or state.player_world_pos is None:
@@ -674,9 +688,10 @@ class DecisionEngine:
                 if 0 <= gr < 100 and 0 <= gc < 100:
                     if (lr, lc) in monster_set or (lr, lc) in item_set or ch == "@":
                         self.known_map[gr][gc] = "."
-                    else:
+                        self.explored_tiles.add((gr, gc))
+                    elif ch in self._TERRAIN_CHARS:
                         self.known_map[gr][gc] = ch
-                    self.explored_tiles.add((gr, gc))
+                        self.explored_tiles.add((gr, gc))
 
         # Stamp unknown 8-neighbors of player map position as wall.
         prow, pcol = wy, wx
@@ -898,6 +913,207 @@ class DecisionEngine:
             f"mode={self.mode} "
             f"phase={self.explore_phase} "
             f"stuck={self.stuck_turns}"
+        )
+
+    # ------------------------------------------------------------------
+    # Human-readable thought bubble (Phase 1 visualization, #207)
+    # ------------------------------------------------------------------
+
+    # Maps internal thought prefixes → short human labels.
+    _THOUGHT_LABELS = {
+        "no_player_visible": "Waiting for player",
+        "idle_wait": "Idle — nowhere to go",
+        "no_wpos": "Waiting for position data",
+        "head_east": "Exploring east",
+        "door_push_thru": "Pushing through door",
+        "wander_center": "Wandering toward center",
+        "escape_stale_prompt": "Dismissing stale prompt",
+        "low_hp_rest_no_visible_threat": "Resting — low HP, safe",
+        "corner_breakout_attack": "Breaking out of corner",
+    }
+
+    def human_thought(self):
+        """Return a ≤60 char human-readable summary of current intent."""
+        t = self.last_thought
+
+        # Direct matches first.
+        label = self._THOUGHT_LABELS.get(t)
+        if label:
+            return label[:60]
+
+        # Pattern-based labels.
+        if t.startswith("adjacent_attack"):
+            name = self.recent_attacker_name or "monster"
+            return f"Fighting {name}"[:60]
+        if t.startswith("post_combat_rest"):
+            return f"Resting after combat ({self.mode})"[:60]
+        if t.startswith("goal_item"):
+            return "Picking up item"[:60]
+        if t.startswith("goal_unexplored"):
+            return "Exploring unknown area"[:60]
+        if t.startswith("goal_staircase") or t.startswith("prog_descend"):
+            return "Heading to staircase"[:60]
+        if t.startswith("goal_open"):
+            return "Opening door"[:60]
+        if t.startswith("pending_wield") or t.startswith("inventory_changed_wield"):
+            return "Equipping weapon"[:60]
+        if t.startswith("reequip_best"):
+            return "Re-equipping best gear"[:60]
+        if t.startswith("pending_use"):
+            return "Using consumable"[:60]
+        if t.startswith("use_"):
+            return f"Using {t[4:]}"[:60]
+        if t.startswith("stuck_fallback"):
+            return "Stuck — trying fallback move"[:60]
+        if t.startswith("pending_open"):
+            return "Opening nearby door"[:60]
+
+        # Fallback: clean up the raw thought.
+        return t.replace("_", " ").capitalize()[:60]
+
+    def think_status(self, state, turn=0):
+        """Return a multi-line status block for the thought-bubble pane.
+
+        Line 1: human-readable thought
+        Line 2: top-3 goal stack
+        Line 3: vitals summary
+        """
+        lines = []
+
+        # Line 1: thought bubble.
+        lines.append(f"Think: {self.human_thought()}")
+
+        # Line 2: top-3 goals from goal stack (top = rightmost).
+        goals = self.goal_stack[-3:] if self.goal_stack else []
+        if goals:
+            parts = []
+            for i, (gtype, grc) in enumerate(reversed(goals), 1):
+                parts.append(f"[{i}] {gtype} {grc}")
+            lines.append("Goals: " + "  ".join(parts))
+        else:
+            lines.append("Goals: (none)")
+
+        # Line 3: vitals.
+        hp = getattr(state, "player_hp", 0)
+        hp_max = getattr(state, "player_max_hp", 0)
+        depth = self._current_depth
+        unexplored = len(self.unexplored_tiles)
+        lines.append(
+            f"Turn={turn}  HP={hp}/{hp_max}  Depth={depth}  "
+            f"Stuck={self.stuck_turns}  Unexplored={unexplored}"
+        )
+
+        return "\n".join(lines)
+
+    # ------------------------------------------------------------------
+    # Periodic snapshot & summaries (Phase 4, #207)
+    # ------------------------------------------------------------------
+
+    def periodic_snapshot(self, turn, state):
+        """Multi-line summary printed every N turns."""
+        explored = len(self.explored_tiles)
+        unexplored = len(self.unexplored_tiles)
+        total = explored + unexplored
+        pct = (explored / total * 100) if total > 0 else 0
+
+        weapon = "bare hands"
+        armor_ac = state.player_ac
+        potions = 0
+        scrolls = 0
+        for _slot, name in (state.inventory or []):
+            nl = name.lower()
+            if "potion" in nl or "flask" in nl:
+                potions += 1
+            elif "scroll" in nl:
+                scrolls += 1
+        for _slot, name in (state.equipment or []):
+            if "weapon" not in name.lower():
+                continue
+        if state.damage_dice:
+            weapon = state.damage_dice
+            if state.to_hit_bonus or state.to_dam_bonus:
+                weapon += f" (+{state.to_hit_bonus},+{state.to_dam_bonus})"
+
+        return (
+            f"=== Snapshot turn {turn} ===\n"
+            f"  Depth={self._current_depth}  HP={state.player_hp}/{state.player_max_hp}  "
+            f"AC={armor_ac}  Level={state.player_level}\n"
+            f"  Weapon={weapon}  Potions={potions}  Scrolls={scrolls}\n"
+            f"  Kills(level)={self.level_kills}  Kills(total)={self.total_kills}  "
+            f"Items={self.items_picked_up}\n"
+            f"  Explored={pct:.0f}% ({explored}/{total})  "
+            f"Goals={len(self.goal_stack)}\n"
+            f"========================="
+        )
+
+    def compact_snapshot(self, turn, state):
+        """3-line snapshot for the tmux side pane, with deltas from previous."""
+        explored = len(self.explored_tiles)
+        total = explored + len(self.unexplored_tiles)
+        pct = (explored / total * 100) if total > 0 else 0
+        weapon = state.damage_dice or "fists"
+        potions = scrolls = 0
+        for _slot, name in (state.inventory or []):
+            nl = name.lower()
+            if "potion" in nl or "flask" in nl:
+                potions += 1
+            elif "scroll" in nl:
+                scrolls += 1
+
+        cur = {
+            "turn": turn, "kills": self.total_kills,
+            "items": self.items_picked_up, "pct": pct,
+            "ac": state.player_ac,
+        }
+        prev = getattr(self, "_prev_snap", None)
+        self._prev_snap = cur
+
+        def d(key):
+            if prev is None:
+                return ""
+            diff = cur[key] - prev[key]
+            if isinstance(diff, float):
+                return f"(+{diff:.0f})" if diff > 0 else ""
+            return f"(+{diff})" if diff > 0 else ""
+
+        return (
+            f"T={turn} D={self._current_depth} "
+            f"HP={state.player_hp}/{state.player_max_hp} "
+            f"AC={state.player_ac}{d('ac')} Lv={state.player_level}\n"
+            f"Wpn={weapon} Pot={potions} Scr={scrolls} "
+            f"Items={self.items_picked_up}{d('items')}\n"
+            f"Kill={self.level_kills}/{self.total_kills}{d('kills')} "
+            f"Expl={pct:.0f}%{d('pct')} Goals={len(self.goal_stack)}"
+        )
+
+    def death_summary(self, turn, state):
+        """Final snapshot on death with recent context."""
+        last_actions = list(self.action_history)[-5:]
+        hp_trend = self.hp_history[-5:] if self.hp_history else []
+        attacker = self.recent_attacker_name or "unknown"
+
+        return (
+            f"=== DEATH at turn {turn} ===\n"
+            f"  Depth={self._current_depth}  HP={state.player_hp}/{state.player_max_hp}  "
+            f"Level={state.player_level}\n"
+            f"  Killed by: {attacker}\n"
+            f"  HP trend: {hp_trend}\n"
+            f"  Last actions: {last_actions}\n"
+            f"  Think: {self.human_thought()}\n"
+            f"==========================="
+        )
+
+    def run_summary(self, turn):
+        """Aggregate stats printed at end of run."""
+        knowledge_entries = len(self.monster_knowledge) + len(self.consumable_knowledge)
+
+        return (
+            f"=== Run Summary ===\n"
+            f"  Turns={turn}  Deepest depth={self.deepest_depth}  "
+            f"Total kills={self.total_kills}\n"
+            f"  Items collected={self.items_picked_up}  "
+            f"Knowledge entries={knowledge_entries}\n"
+            f"==================="
         )
 
     @staticmethod
@@ -1182,6 +1398,7 @@ class DecisionEngine:
         m = re.search(r"you have an?\s+(.+?)\.?$", msg, flags=re.IGNORECASE)
         if not m:
             return
+        self.items_picked_up += 1
         picked = m.group(1).strip().lower()
         if not picked or self._is_known_non_wieldable(picked):
             return
@@ -1294,6 +1511,9 @@ class DecisionEngine:
         entry[key] = before + amount
         if entry[key] != before:
             self.knowledge_dirty = True
+        if key == "kills" and amount > 0:
+            self.total_kills += amount
+            self.level_kills += amount
 
     def _monster_attack_note(self, monster_name, attack_type):
         name = monster_name.strip().lower()

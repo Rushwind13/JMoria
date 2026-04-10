@@ -38,6 +38,84 @@ def log(msg: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Think pane (bot thought bubble, #207)
+# ---------------------------------------------------------------------------
+
+_think_pane_id = None
+_snap_pane_id = None
+_think_file = "/tmp/jmoria_think.txt"
+_snap_file = "/tmp/jmoria_snap.txt"
+
+
+def _create_think_pane(session: str) -> bool:
+    """Create a 3-row bottom strip split left (think) / right (snapshot)."""
+    global _think_pane_id, _snap_pane_id
+    # Seed files.
+    with open(_think_file, "w") as f:
+        f.write("Think: Starting up...\nGoals: (none)\n")
+    with open(_snap_file, "w") as f:
+        f.write("(awaiting first snapshot)\n")
+    # Left pane: per-turn think status.
+    result = subprocess.run(
+        ["tmux", "split-window", "-t", f"{session}:0.0", "-v", "-l", "3",
+         "-d", "-P", "-F", "#{pane_id}",
+         "sh", "-c", f"while true; do clear; cat {_think_file}; sleep 0.3; done"],
+        capture_output=True, text=True,
+    )
+    if result.returncode != 0:
+        log(f"[crawler] Failed to create think pane: {result.stderr.strip()}")
+        return False
+    _think_pane_id = result.stdout.strip()
+    log(f"[crawler] Think pane created: {_think_pane_id}")
+    # Right pane: periodic snapshot (split the think pane horizontally).
+    result2 = subprocess.run(
+        ["tmux", "split-window", "-t", _think_pane_id, "-h", "-l", "60",
+         "-d", "-P", "-F", "#{pane_id}",
+         "sh", "-c", f"while true; do clear; cat {_snap_file}; sleep 0.5; done"],
+        capture_output=True, text=True,
+    )
+    if result2.returncode == 0:
+        _snap_pane_id = result2.stdout.strip()
+        log(f"[crawler] Snap pane created: {_snap_pane_id}")
+    else:
+        log(f"[crawler] Snap pane failed: {result2.stderr.strip()}")
+    return True
+
+
+def _destroy_think_pane() -> None:
+    """Kill both think and snap panes if they exist."""
+    global _think_pane_id, _snap_pane_id
+    for label, pane_id in [("Snap", _snap_pane_id), ("Think", _think_pane_id)]:
+        if pane_id is not None:
+            subprocess.run(["tmux", "kill-pane", "-t", pane_id], capture_output=True)
+            log(f"[crawler] {label} pane {pane_id} destroyed.")
+    _think_pane_id = None
+    _snap_pane_id = None
+
+
+def _update_think_pane(text: str) -> None:
+    """Update the left think pane."""
+    if _think_pane_id is None:
+        return
+    try:
+        with open(_think_file, "w") as f:
+            f.write(text)
+    except OSError:
+        pass
+
+
+def _update_snap_pane(text: str) -> None:
+    """Update the right snapshot pane."""
+    if _snap_pane_id is None:
+        return
+    try:
+        with open(_snap_file, "w") as f:
+            f.write(text)
+    except OSError:
+        pass
+
+
+# ---------------------------------------------------------------------------
 # Launcher
 # ---------------------------------------------------------------------------
 
@@ -141,7 +219,7 @@ def run_startup() -> bool:
 # Main loop
 # ---------------------------------------------------------------------------
 
-def run_loop(verbose: bool = False, knowledge_file: str = "") -> None:
+def run_loop(verbose: bool = False, knowledge_file: str = "", think: bool = False) -> None:
     depth = 1
     prev_msg = ""
     msg_age_turns = 0
@@ -193,6 +271,7 @@ def run_loop(verbose: bool = False, knowledge_file: str = "") -> None:
             or ( state.player_hp == 0 and state.player_max_hp == 0 and zero_hp_turns >= 3 )
         ):
             log(f"[crawler] Death detected at turn {turn}, depth {depth}. Stopping.")
+            log(engine.death_summary(turn, state))
             break
 
         if not state.is_in_game:
@@ -253,16 +332,29 @@ def run_loop(verbose: bool = False, knowledge_file: str = "") -> None:
                 f"think={thought!r}{parse_note} msg={msg_display!r:40s} -> {action!r}"
             )
 
+        # Update thought-bubble pane if enabled.
+        if think:
+            _update_think_pane(engine.think_status(state, turn))
+
         if action is None:
             action = "."  # fallback: wait in place
 
         cmd.send(action)
+
+        # Periodic snapshot every 100 turns.
+        if turn > 0 and turn % 100 == 0:
+            log(engine.periodic_snapshot(turn, state))
+            if think:
+                _update_snap_pane(engine.compact_snapshot(turn, state))
 
         if knowledge_file and engine.knowledge_dirty:
             Path(knowledge_file).parent.mkdir(parents=True, exist_ok=True)
             engine.save_knowledge(knowledge_file)
 
         time.sleep(TICK_DELAY)
+
+    # Run summary on exit (death or interrupted).
+    log(engine.run_summary(turn))
 
 
 # ---------------------------------------------------------------------------
@@ -278,6 +370,11 @@ def main() -> None:
         "--jmoria", default="./jmoria", help="path to jmoria executable"
     )
     parser.add_argument("--verbose", "-v", action="store_true")
+    parser.add_argument(
+        "--think",
+        action="store_true",
+        help="show bot thought bubble in a tmux status pane",
+    )
     parser.add_argument(
         "--no-launch",
         action="store_true",
@@ -320,11 +417,19 @@ def main() -> None:
         log("[crawler] Failed to reach dungeon. Exiting.")
         sys.exit(1)
 
+    # Create think pane after startup so the game pane is already active.
+    think_enabled = args.think
+    if think_enabled:
+        if not _create_think_pane(args.session):
+            log("[crawler] Think pane unavailable; continuing without it.")
+            think_enabled = False
+
     try:
-        run_loop(verbose=args.verbose, knowledge_file=args.knowledge_file)
+        run_loop(verbose=args.verbose, knowledge_file=args.knowledge_file, think=think_enabled)
     except KeyboardInterrupt:
         log("\n[crawler] Interrupted.")
     finally:
+        _destroy_think_pane()
         if not args.no_launch and not args.persistent_session:
             subprocess.run(["tmux", "kill-session", "-t", args.session], capture_output=True)
             log(f"[crawler] tmux session '{args.session}' killed.")

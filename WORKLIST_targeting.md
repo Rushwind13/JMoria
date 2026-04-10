@@ -35,7 +35,7 @@ State-machine flow: `RANGED_INIT` → fire(`f`)/zap(`z`) → item selection → 
 - Trajectory built via `Util::Bresenham()` with `NoCollisionCheck` (projectiles fly full range)
 - Hardcoded `PROJECTILE_RANGE` = 8 tiles, animated at 10ms intervals
 - Auto-target: if player already has a target from `*`, ranged commands reuse it
-- `RANGED_LAUNCH` state defined but unimplemented (dead code)
+- `RANGED_LAUNCH` state wired in preparation for full ranged pipeline (thrown weapons, etc.)
 
 ### Bresenham (`Util::Bresenham`)
 Standard implementation with error-term tracking and diagonal gap checking. Supports distance limit and optional line collection for trajectory visualization. Mixed responsibilities: line generation, collision checking, logging, and list collection all in one function.
@@ -57,6 +57,13 @@ Standard implementation with error-term tracking and diagonal gap checking. Supp
 
 ## Priority Worklist
 
+### [P0] AIMgr race condition during ranged trajectory
+- **Bug**: `CGame::Update()` calls `AIMgr::Update()` **before** state updates. During `RANGED_TRAJECTORY` animation, monsters move every tick while the projectile follows a pre-built path from the target's OLD position. The Bresenham line draws perfectly to where the monster was, but the monster has already moved.
+- **Sequence**: target position snapshot → `BuildTrajectory()` → `RANGED_TRAJECTORY` → AIMgr moves monster → `DoTrajectory()` walks stale path → miss.
+- **Evidence**: `m_vTarget` is captured once in `UsePlayerTarget()` (`RangedState.cpp:591`). `m_llTrajectory` is pre-computed and never updated. `Game.cpp:500` runs `GetAIMgr()->Update()` before `m_pCurState->Update()`.
+- **Fix**: Either freeze AIMgr during `RANGED_TRAJECTORY` state, or re-read target position and recompute trajectory each tick, or resolve hit at trajectory-build time and make animation purely cosmetic.
+- **Test**: Add BDD scenario — zap wand at monster, monster moves during trajectory, verify hit resolves against correct position.
+
 ### [P0] Target index staleness — store stable references
 - **Bug**: `DoInit()` stores monster list-position indices. If monsters die, spawn, or the list mutates before confirm, indices become invalid or point to wrong monster.
 - **Fix**: Store `CMonster*` or a stable unique ID in the target list. On confirm (`.`), re-validate `IsAlive()` and `PlayerCanSee()` before committing.
@@ -66,6 +73,12 @@ Standard implementation with error-term tracking and diagonal gap checking. Supp
 - **Bug**: LOS depends on map state via `isWalkable` callback. Doors opening/closing or tunneling between selection and confirm silently change outcome.
 - **Fix**: Re-run `PlayerCanSee()` at confirm (`.`). If target is no longer visible, display message and refresh target list.
 - **Test**: Add BDD scenario — select target, close door, confirm, verify rejection message.
+
+### [P1] Skip OpenGL tests — get targeting working in ASCII Renderer (#225)
+- All targeting and ranged test development should use ASCII renderer (`make ascii`)
+- Skip or gate any OpenGL-dependent test paths
+- Ensure `CTargetState` and `CRangedState` work correctly with `CRenderASCII`
+- Validate trajectory rendering in terminal mode
 
 ### [P1] Add `test/features/targeting.feature`
 - Dedicated acceptance tests for CTargetState lifecycle:
@@ -89,30 +102,28 @@ Standard implementation with error-term tracking and diagonal gap checking. Supp
 - Test cases: horizontal, vertical, diagonal, near-diagonal, obstacle blocking, max distance cap, diagonal gap checking
 - Verify against canonical Bresenham output
 
+### [P1] Cached visible-set
+- Maintain a set of visible monsters, recomputed when player moves or world state changes (door open/close, monster move/die)
+- `CTargetState::DoInit()` reads from cache instead of re-scanning entire monster list
+- Consistent target lists; avoids redundant LOS computation
+- Required foundation for LOS line drawing (P1) — the line must be computed fresh on the turn it's needed
+
+### [P1] UI feedback — draw LOS line while targeting
+- Render computed Bresenham line on-screen while player is in `TARGET_TARGET` state
+- Show line in distinct color (green = clear, red = blocked)
+- Line must be computed on the turn it's needed, not cached from a prior state
+- Always re-validate on confirm regardless of visual feedback
+
 ### [P2] Split Bresenham responsibilities
 - Make LOS computation pure: separate line-generation from collision checks
 - New function: `Util::GenerateLine(start, end, distance)` → returns line as `JLinkList<JVector>`
 - Collision check becomes a separate pass over the generated line
 - Enables deterministic unit testing without callback mocking
 
-### [P2] Cached visible-set
-- Maintain a set of visible monsters, recomputed when player moves or world state changes (door open/close, monster move/die)
-- `CTargetState::DoInit()` reads from cache instead of re-scanning entire monster list
-- Consistent target lists; avoids redundant LOS computation
-
 ### [P3] Target mark / persistent tracking
 - Assign stable unique IDs to monsters (consider reusing `CItem`-style instance IDs)
 - Target "mark" persists across list reordering and state transitions
 - Enables "last target" recall for repeated attacks
-
-### [P3] UI feedback — draw LOS line while targeting
-- Render computed Bresenham line on-screen while player is in `TARGET_TARGET` state
-- Show line in distinct color (green = clear, red = blocked)
-- Always re-validate on confirm regardless of visual feedback
-
-### [P3] Clean up `RANGED_LAUNCH` dead code
-- `RANGED_LAUNCH` state modifier defined in `RangedState.h` but never wired to a handler
-- Remove or implement depending on design intent (thrown weapons?)
 
 ### [P3] Bot ranged combat support
 - Add targeting/fire/zap commands to `scripts/bot/decision.py`

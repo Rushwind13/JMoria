@@ -94,9 +94,20 @@ private:
     bool m_bTranslating;
 
     // Color support
+    enum ColorMode
+    {
+        COLOR_NONE, // no color support
+        COLOR_8,    // 8 basic colors
+        COLOR_16,   // 8 colors + A_BOLD for bright variants
+        COLOR_256   // xterm 256-color palette
+    };
+    ColorMode m_colorMode;
     bool m_bHasColor;
     void InitColors();
-    int GetColorPair( JColor color );
+
+    // Returns the ncurses color pair index. Sets outAttr to any extra
+    // attributes needed (e.g. A_BOLD for bright colors in 16-color mode).
+    int GetColorPair( JColor color, attr_t &outAttr );
 
     // Coordinate mapping: convert OpenGL pixel/world coords to terminal char coords
     int MapX( float worldX );

@@ -900,6 +900,96 @@ class DecisionEngine:
             f"stuck={self.stuck_turns}"
         )
 
+    # ------------------------------------------------------------------
+    # Human-readable thought bubble (Phase 1 visualization, #207)
+    # ------------------------------------------------------------------
+
+    # Maps internal thought prefixes → short human labels.
+    _THOUGHT_LABELS = {
+        "no_player_visible": "Waiting for player",
+        "idle_wait": "Idle — nowhere to go",
+        "no_wpos": "Waiting for position data",
+        "head_east": "Exploring east",
+        "door_push_thru": "Pushing through door",
+        "wander_center": "Wandering toward center",
+        "escape_stale_prompt": "Dismissing stale prompt",
+        "low_hp_rest_no_visible_threat": "Resting — low HP, safe",
+        "corner_breakout_attack": "Breaking out of corner",
+    }
+
+    def human_thought(self):
+        """Return a ≤60 char human-readable summary of current intent."""
+        t = self.last_thought
+
+        # Direct matches first.
+        label = self._THOUGHT_LABELS.get(t)
+        if label:
+            return label[:60]
+
+        # Pattern-based labels.
+        if t.startswith("adjacent_attack"):
+            name = self.recent_attacker_name or "monster"
+            return f"Fighting {name}"[:60]
+        if t.startswith("post_combat_rest"):
+            return f"Resting after combat ({self.mode})"[:60]
+        if t.startswith("goal_item"):
+            return "Picking up item"[:60]
+        if t.startswith("goal_unexplored"):
+            return "Exploring unknown area"[:60]
+        if t.startswith("goal_staircase") or t.startswith("prog_descend"):
+            return "Heading to staircase"[:60]
+        if t.startswith("goal_open"):
+            return "Opening door"[:60]
+        if t.startswith("pending_wield") or t.startswith("inventory_changed_wield"):
+            return "Equipping weapon"[:60]
+        if t.startswith("reequip_best"):
+            return "Re-equipping best gear"[:60]
+        if t.startswith("pending_use"):
+            return "Using consumable"[:60]
+        if t.startswith("use_"):
+            return f"Using {t[4:]}"[:60]
+        if t.startswith("stuck_fallback"):
+            return "Stuck — trying fallback move"[:60]
+        if t.startswith("pending_open"):
+            return "Opening nearby door"[:60]
+
+        # Fallback: clean up the raw thought.
+        return t.replace("_", " ").capitalize()[:60]
+
+    def think_status(self, state):
+        """Return a multi-line status block for the thought-bubble pane.
+
+        Line 1: human-readable thought
+        Line 2: top-3 goal stack
+        Line 3: vitals summary
+        """
+        lines = []
+
+        # Line 1: thought bubble.
+        lines.append(f"Think: {self.human_thought()}")
+
+        # Line 2: top-3 goals from goal stack (top = rightmost).
+        goals = self.goal_stack[-3:] if self.goal_stack else []
+        if goals:
+            parts = []
+            for i, (gtype, grc) in enumerate(reversed(goals), 1):
+                parts.append(f"[{i}] {gtype} {grc}")
+            lines.append("Goals: " + "  ".join(parts))
+        else:
+            lines.append("Goals: (none)")
+
+        # Line 3: vitals.
+        hp = getattr(state, "player_hp", 0)
+        hp_max = getattr(state, "player_max_hp", 0)
+        depth = self._current_depth
+        unexplored = len(self.unexplored_tiles)
+        lines.append(
+            f"HP={hp}/{hp_max}  Depth={depth}  "
+            f"Stuck={self.stuck_turns}  Unexplored={unexplored}"
+        )
+
+        return "\n".join(lines)
+
     @staticmethod
     def _goal_thought(state, prefix, goal_local):
         thought = f"{prefix}_on_screen"

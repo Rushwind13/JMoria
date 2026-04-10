@@ -13,7 +13,7 @@ if ! tmux has-session -t crawler 2>/dev/null; then
     sleep 1
 fi
 
-python3 -u "$SCRIPT_DIR/crawler.py" --verbose --persistent-session --jmoria "$PROJ_ROOT/jmoria" 2>&1 > "$OUT"
+python3 -u "$SCRIPT_DIR/crawler.py" --verbose --think --persistent-session --jmoria "$PROJ_ROOT/jmoria" 2>&1 > "$OUT"
 turns=$(grep -ac "\[turn" "$OUT" || echo 0)
 loops=$(grep -ac "loop_detect\|loop_break" "$OUT" || echo 0)
 breakouts=$(grep -ac "breakout" "$OUT" || echo 0)

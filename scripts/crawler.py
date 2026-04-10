@@ -38,6 +38,45 @@ def log(msg: str) -> None:
 
 
 # ---------------------------------------------------------------------------
+# Think pane (bot thought bubble, #207)
+# ---------------------------------------------------------------------------
+
+_think_pane_id = None
+_think_file = "/tmp/jmoria_think.txt"
+
+
+def _create_think_pane(session: str) -> bool:
+    """Split a 3-row pane at the bottom for the thought bubble."""
+    global _think_pane_id
+    # Seed the file so the pane has something to show immediately.
+    with open(_think_file, "w") as f:
+        f.write("Think: Starting up...\nGoals: (none)\n")
+    result = subprocess.run(
+        ["tmux", "split-window", "-t", f"{session}:0.0", "-v", "-l", "3",
+         "-d", "-P", "-F", "#{pane_id}",
+         "sh", "-c", f"while true; do clear; cat {_think_file}; sleep 0.3; done"],
+        capture_output=True, text=True,
+    )
+    if result.returncode == 0:
+        _think_pane_id = result.stdout.strip()
+        log(f"[crawler] Think pane created: {_think_pane_id}")
+        return True
+    log(f"[crawler] Failed to create think pane: {result.stderr.strip()}")
+    return False
+
+
+def _update_think_pane(text: str) -> None:
+    """Update the think pane by writing to the shared file."""
+    if _think_pane_id is None:
+        return
+    try:
+        with open(_think_file, "w") as f:
+            f.write(text)
+    except OSError:
+        pass
+
+
+# ---------------------------------------------------------------------------
 # Launcher
 # ---------------------------------------------------------------------------
 
@@ -141,7 +180,7 @@ def run_startup() -> bool:
 # Main loop
 # ---------------------------------------------------------------------------
 
-def run_loop(verbose: bool = False, knowledge_file: str = "") -> None:
+def run_loop(verbose: bool = False, knowledge_file: str = "", think: bool = False) -> None:
     depth = 1
     prev_msg = ""
     msg_age_turns = 0
@@ -253,6 +292,10 @@ def run_loop(verbose: bool = False, knowledge_file: str = "") -> None:
                 f"think={thought!r}{parse_note} msg={msg_display!r:40s} -> {action!r}"
             )
 
+        # Update thought-bubble pane if enabled.
+        if think:
+            _update_think_pane(engine.think_status(state))
+
         if action is None:
             action = "."  # fallback: wait in place
 
@@ -278,6 +321,11 @@ def main() -> None:
         "--jmoria", default="./jmoria", help="path to jmoria executable"
     )
     parser.add_argument("--verbose", "-v", action="store_true")
+    parser.add_argument(
+        "--think",
+        action="store_true",
+        help="show bot thought bubble in a tmux status pane",
+    )
     parser.add_argument(
         "--no-launch",
         action="store_true",
@@ -320,8 +368,15 @@ def main() -> None:
         log("[crawler] Failed to reach dungeon. Exiting.")
         sys.exit(1)
 
+    # Create think pane after startup so the game pane is already active.
+    think_enabled = args.think
+    if think_enabled:
+        if not _create_think_pane(args.session):
+            log("[crawler] Think pane unavailable; continuing without it.")
+            think_enabled = False
+
     try:
-        run_loop(verbose=args.verbose, knowledge_file=args.knowledge_file)
+        run_loop(verbose=args.verbose, knowledge_file=args.knowledge_file, think=think_enabled)
     except KeyboardInterrupt:
         log("\n[crawler] Interrupted.")
     finally:

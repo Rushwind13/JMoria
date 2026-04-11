@@ -10,6 +10,12 @@
 - [x] **Off-by-one in GetMonsterDef / GetItemDef boundary check** — Both used `>= length() - 1` which excluded the last valid entry. Fixed to `>= length()`.
 - [x] **GetItemDef(int) inconsistency** — Used `GetNthLink()` (position-based) while `GetMonsterDef(int)` used `GetLink()` (index-keyed). Standardized both to `GetLink()`.
 - [x] **Feature file equip/remove steps used wrong integer indices** — `the player equips the item 27` called `GetItemDef(27)` which returned a random item def unrelated to the spawned item. Tests passed only because `GetLink(bForceValid=true)` returns any available item on a single-item inventory. Fixed: steps now use name-based lookup (`the player equips the Dagger`). Monster spawn steps in GameSteps.cpp also converted from integer to name-based lookup.
+- [x] **Vestigial `:NN` params in feature files** — Removed numeric suffixes from all feature files and step definition regexes. Steps like `I spawn a Dagger:37` are now just `I spawn a Dagger`.
+- [x] **CRenderNull for headless tests** — Tests using `RenderMode::None` now get a no-op renderer instead of NULL, preventing ncurses terminal corruption and NULL pointer crashes.
+- [x] **Log level overhaul** — Systematic audit of DungeonMap, Dungeon, Player, Monster, and test step definitions. Normal retries downgraded from ERROR/WARN to DEBUG/NOISIER. Gameplay messages (cursed items, equip conflicts) WARN→INFO. Diagnostic test prints ERROR→DEBUG or removed. DumpMap() WARN→DEBUG. Test log level set to WARN for clean output.
+- [x] **DirName() and StairName() helpers** — Direction integers and stair type integers now print as human-readable names in log output instead of raw numbers.
+- [x] **JFAILED result code** — Added `#define JFAILED 4` for dungeon generation functions that fail normally (e.g. room placement retries). Distinct from JERROR() which logs at ERROR level.
+- [x] **Feature file ordering** — Renamed `dungeonmap.feature` → `_dungeonmap.feature` and `vectors.feature` → `_vectors.feature` so visual/tall tests run first and don't eat scrollback.
 
 ## Key Finding: Two Unrelated Index Spaces
 
@@ -28,6 +34,6 @@ These are independent. Multiple items share the same type index (6 swords all ha
 
 - [ ] **GetLink bForceValid masks real bugs** — `GetLink(N, bForceValid=true)` silently returns the last item when the requested index doesn't exist. This can mask incorrect lookups. Consider making bForceValid default to `false` and auditing callers.
 
-- [ ] **Vestigial `:NN` params in feature files** — Steps like `I spawn a Dagger:37` still carry a numeric suffix. The step regex extracts it but it's never used. These could be removed, but it's a cosmetic cleanup with regex changes across many steps. Low priority.
-
 - [ ] **`#else` dead code in SpawnMonsters** — `m_llMonsterDefs->length() - 1` in the `#else` branch was a debug hack. `RANDOM_MONSTER` is always defined, making it dead code. Remove it.
+
+- [ ] **Log level audit** — Most ERROR/WARN misuse has been fixed, but a full audit of remaining JLog calls (especially in game-time code paths) would catch any remaining cases where normal gameplay emits WARN/ERROR.

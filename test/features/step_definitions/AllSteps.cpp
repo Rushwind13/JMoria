@@ -12,6 +12,7 @@
 #include "MonsterSteps.cpp"
 #include "RectSteps.cpp"
 #include "StringTableSteps.cpp"
+#include "TargetSteps.cpp"
 #include "TextEntrySteps.cpp"
 #include "TilesetSteps.cpp"
 #include "UtilSteps.cpp"

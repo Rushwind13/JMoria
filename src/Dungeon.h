@@ -114,6 +114,8 @@ public:
         }
     }
     bool IsOnLOSLine( JVector vPos );
+    JLinkList<JIVector> *GetLOSLine() { return m_llLOSLine; }
+    CDungeonTileDef *GetTileDef( int idx ) { return &m_dtdlist[idx]; }
 
     JResult OnChangeLevel( const int delta );
 

@@ -28,6 +28,11 @@ GIVEN( "^the game has a player$" )
     int actual = context->result;
     EXPECT_EQ( actual, JSUCCESS );
 }
+GIVEN( "^the dungeon is seeded$" )
+{
+    ScenarioScope<TestCtx> context;
+    Util::SeedRandom( 42 );
+}
 GIVEN( "^I spawn a ([-A-Za-z ]+), a monster with SEEK, near the player$" )
 {
     REGEX_PARAM( std::string, monster );

@@ -90,14 +90,23 @@ Standard implementation with error-term tracking and diagonal gap checking. Supp
 - Ensure `CTargetState` and `CRangedState` work correctly with `CRenderASCII`
 - Validate trajectory rendering in terminal mode
 
-### [P1] Add `test/features/targeting.feature`
-- Dedicated acceptance tests for CTargetState lifecycle:
+### [P1] ✅ IMPLEMENTED — Add `test/features/targeting.feature`
+- 9 BDD scenarios covering CTargetState lifecycle, all passing
+- Deterministic via `Util::SeedRandom(42)` — same dungeon layout every run
+- Player spawns at (46,36) in large central room; seed-42 map saved to `test/map42.txt`
+- Scenarios:
   - Visible monster appears in target list
-  - Non-visible monster excluded from target list
+  - Non-visible monster (behind wall) excluded from target list
+  - Target list sorted by distance (nearest first)
   - Target cycling wraps around
-  - Confirm on valid target transitions to command/ranged
+  - Confirm selects target and returns to command state
   - Cancel (ESC) returns to command state
+  - LOS line drawn while targeting
+  - LOS line cleared after targeting exits
   - Target dies before confirm — handled gracefully
+- Step definitions in `test/features/step_definitions/TargetSteps.cpp`
+- Seeded dungeon step in `GameSteps.cpp`
+- Public accessors `GetLOSLine()` and `GetTileDef()` added to `Dungeon.h`
 
 ### [P1] Add `test/features/ranged.feature`
 - Acceptance tests for CRangedState:

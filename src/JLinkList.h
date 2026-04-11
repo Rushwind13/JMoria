@@ -248,8 +248,8 @@ public:
         return curr_link;
     }
 
-    // Retrieve the Nth entry in the list, or correct position to insert
-    CLink<T> *GetLink( int which_link, bool bForceValid = true )
+    // Retrieve the entry with the given index (m_dwIndex) from the list
+    CLink<T> *GetLink( int which_link )
     {
         int count = 0;
         CLink<T> *curr_link = GetHead();
@@ -266,14 +266,7 @@ public:
 
             if( curr_link->next == NULL )
             {
-                if( bForceValid )
-                {
-                    return curr_link;
-                }
-                else
-                {
-                    return NULL;
-                }
+                return NULL;
             }
             curr_link = GetNext( curr_link );
             count++;

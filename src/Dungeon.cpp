@@ -262,7 +262,7 @@ void CDungeon::DumpMap()
     extern unsigned char TileIDs[];
     extern unsigned char MonIDs[];
     extern unsigned char ItemIDs[];
-    JLog( LOG_LEVEL_WARN, false, "[MAP] Dungeon map (%d rooms, %d halls):\n",
+    JLog( LOG_LEVEL_DEBUG, false, "[MAP] Dungeon map (%d rooms, %d halls):\n",
           m_dmCurLevel->HowManyRooms(), m_dmCurLevel->HowManyHallways() );
     for( int y = 0; y < DUNG_HEIGHT; y++ )
     {
@@ -300,7 +300,7 @@ void CDungeon::DumpMap()
                 row[x] = ( type >= 0 && type < DUNG_IDX_MAX ) ? (char)TileIDs[type] : '?';
         }
         row[DUNG_WIDTH] = '\0';
-        JLog( LOG_LEVEL_WARN, false, "%s\n", row );
+        JLog( LOG_LEVEL_DEBUG, false, "%s\n", row );
     }
 }
 
@@ -361,6 +361,23 @@ JResult CDungeon::PlaceScenery( const int depth )
     return JSUCCESS;
 }
 
+static const char *StairName( int type )
+{
+    switch( type )
+    {
+    case DUNG_IDX_UPSTAIRS:
+        return "upstairs";
+    case DUNG_IDX_LONG_UPSTAIRS:
+        return "long upstairs";
+    case DUNG_IDX_DOWNSTAIRS:
+        return "downstairs";
+    case DUNG_IDX_LONG_DOWNSTAIRS:
+        return "long downstairs";
+    default:
+        return "???";
+    }
+}
+
 JResult CDungeon::PlaceStairs( const int desired, const int type )
 {
     int count = 0;
@@ -369,7 +386,7 @@ JResult CDungeon::PlaceStairs( const int desired, const int type )
     while( count < desired )
     {
         bStairsSpawned = false;
-        JLog( LOG_LEVEL_INFO, false, "Trying to spawn stairs type: %d...", type );
+        JLog( LOG_LEVEL_INFO, false, "Trying to spawn %s...", StairName( type ) );
         JVector vTryPos;
         while( !bStairsSpawned )
         {

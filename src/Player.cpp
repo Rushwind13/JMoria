@@ -312,7 +312,7 @@ void CPlayer::PickUp( JVector &vPickupPos )
     {
         if( pItem->IsStackable() )
         {
-            CLink<CItem> *pExists = m_llInventory->GetLink( pItem->m_id->m_dwIndex, false );
+            CLink<CItem> *pExists = m_llInventory->GetLink( pItem->m_id->m_dwIndex );
             while( pExists != NULL )
             {
                 // we have an item of that type in inventory -- is it the correct item?
@@ -385,7 +385,7 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
                     bool removed = RemoveEquipment( pL );
                     if( !removed )
                     {
-                        JLog( LOG_LEVEL_WARN, true, "Could not remove %s to equip two-handed %s\n",
+                        JLog( LOG_LEVEL_INFO, true, "Could not remove %s to equip two-handed %s\n",
                               pEquipped->GetName(), pItem->GetName() );
                         return JBOGUSKEY;
                     }
@@ -401,7 +401,7 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
     }
 
     // You can only wield one thing of a given type at a time
-    CLink<CItem> *pCurrEquip = m_llEquipment->GetLink( pItem->EquipType(), true );
+    CLink<CItem> *pCurrEquip = m_llEquipment->GetLink( pItem->EquipType() );
     if( pCurrEquip != NULL && pCurrEquip->m_lpData != NULL &&
         pCurrEquip->m_lpData->EquipType() == pItem->EquipType() )
     {
@@ -417,7 +417,7 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
         }
         else
         {
-            JLog( LOG_LEVEL_WARN, true, "could not remove the %s, got %d\n",
+            JLog( LOG_LEVEL_INFO, true, "could not remove the %s, got %d\n",
                   pCurrEquip->m_lpData->GetName(), removed );
             return JBOGUSKEY;
         }
@@ -480,7 +480,7 @@ bool CPlayer::RemoveEquipment( CLink<CItem> *pLink )
         g_pGame->GetMsgs()->Printf( "You can't remove the %s... it seems to be cursed.\n",
                                     pItem->GetName() );
 
-        JLog( LOG_LEVEL_WARN, true, "You can't remove the %s... it seems to be cursed.\n",
+        JLog( LOG_LEVEL_INFO, true, "You can't remove the %s... it seems to be cursed.\n",
               pItem->GetName() );
         return false;
     }
@@ -841,7 +841,7 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwIte
     while( plEffect != NULL )
     {
         pEffect = plEffect->m_lpData;
-        JLog( LOG_LEVEL_WARN, true, "Effect: %s Flag: %s Mod: %s\n",
+        JLog( LOG_LEVEL_DEBUG, true, "Effect: %s Flag: %s Mod: %s\n",
               g_Constants.IndexToString( EFFECT_TYPE, pEffect->m_dwEffect ),
               g_Constants.IndexToString( EFFECT_FLAG, pEffect->m_dwFlags ),
               g_Constants.IndexToString( EFFECT_MOD, pEffect->m_dwModifier ) );
@@ -857,11 +857,11 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwIte
             DoCreateEffects( pEffect );
             break;
         case EFFECT_TYPE_DESTROY:
-            JLog( LOG_LEVEL_ERROR, true, "Destroying\n" );
+            JLog( LOG_LEVEL_DEBUG, true, "Destroying\n" );
             DoDestroyEffects( pEffect, dwItemFlags );
             break;
         case EFFECT_TYPE_INTRINSIC:
-            JLog( LOG_LEVEL_ERROR, true, "Setting intrinsic\n" );
+            JLog( LOG_LEVEL_DEBUG, true, "Setting intrinsic\n" );
             DoIntrinsicEffects( pEffect, fDuration );
             break;
         case EFFECT_TYPE_RESTORE:

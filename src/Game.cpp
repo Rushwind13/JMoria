@@ -28,6 +28,7 @@
 #ifdef RENDER_ASCII
 #include "RenderASCII.h"
 #endif
+#include "RenderNull.h"
 
 #include "AIMgr.h"
 
@@ -78,7 +79,7 @@ CGame::CGame()
 
 JResult CGame::Init( const char *szBasedir, RenderMode mode )
 {
-    JResult result;
+    JResult result = JSUCCESS;
     // Initialize all the game stuff, baby.
 
     g_Constants.Init();
@@ -86,8 +87,12 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     m_eRenderMode = mode;
 
     // Init the Render
+    if( m_eRenderMode == RenderMode::None )
+    {
+        m_pRender = new CRenderNull;
+    }
 #if defined( RENDER_ASCII ) && defined( RENDER_OPENGL )
-    if( m_eRenderMode == RenderMode::ASCII )
+    else if( m_eRenderMode == RenderMode::ASCII )
     {
         m_pRender = new CRenderASCII;
         result = m_pRender->Init( 80, 24, 0 );
@@ -103,13 +108,19 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
         return 1;
     }
 #elif defined( RENDER_ASCII )
-    m_pRender = new CRenderASCII;
-    result = m_pRender->Init( 80, 24, 0 );
+    else
+    {
+        m_pRender = new CRenderASCII;
+        result = m_pRender->Init( 80, 24, 0 );
+    }
 #elif defined( RENDER_OPENGL )
-    m_pRender = new CRender;
-    result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
+    else
+    {
+        m_pRender = new CRender;
+        result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
+    }
 #endif
-    if( result != JSUCCESS )
+    if( m_pRender && result != JSUCCESS )
     {
         m_pRender->Term();
         return result;

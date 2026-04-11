@@ -53,7 +53,7 @@ int CRestState::OnHandleTick( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_WARN, true, "REST state still waiting for a valid key.\n" );
+        JLog( LOG_LEVEL_DEBUG, true, "REST state still waiting for a valid key.\n" );
         return 0;
     }
 

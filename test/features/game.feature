@@ -26,7 +26,7 @@ Feature: Game
         Given I have a game
         And I initialize the game
         And the game has a player
-        And I spawn a Red Dragon:20, a monster with SEEK
+        And I spawn a Red Dragon, a monster with SEEK
         And I update the monster's brain
         Then the game initalized successfully
         And the Red Dragon spawned successfully
@@ -36,7 +36,7 @@ Feature: Game
         Given I have a game
         And I initialize the game
         And the game has a player
-        And I spawn a Red Dragon:20, a monster with SEEK
+        And I spawn a Red Dragon, a monster with SEEK
         And I update the monster's brain
         When I update the monster's brain again
         And the Red Dragon moves toward the player

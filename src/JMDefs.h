@@ -17,6 +17,7 @@ typedef unsigned char uint8;
 #define JQUITREQUEST 1
 #define JRESETSTATE 2
 #define JCOMPLETESTATE 3
+#define JFAILED 4
 #define JBOGUSKEY -1
 
 #define INVALID_LENGTH -1

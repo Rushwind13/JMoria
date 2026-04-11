@@ -95,7 +95,7 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
         switch( keysym->sym )
         {
         case JKEY_r:
-            JLog( LOG_LEVEL_WARN, true, "R)est not implemented yet.\n" );
+            JLog( LOG_LEVEL_INFO, true, "R)est not implemented yet.\n" );
             g_pGame->SetState( STATE_REST );
             g_pGame->GetGameState()->HandleKey( keysym );
             break;

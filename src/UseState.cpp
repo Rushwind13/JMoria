@@ -43,7 +43,7 @@ int CUseState::OnHandleWield( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_DEBUG, true,
               "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
         return 0;
@@ -57,20 +57,20 @@ int CUseState::OnHandleWield( JKeysym *keysym )
         {
             g_pGame->GetMsgs()->Printf( "You are now wielding the %s.\n",
                                         m_pSelected->m_lpData->GetName() );
-            JLog( LOG_LEVEL_WARN, true, "Now wielding %s\n", m_pSelected->m_lpData->GetName() );
+            JLog( LOG_LEVEL_INFO, true, "Now wielding %s\n", m_pSelected->m_lpData->GetName() );
         }
         else
         {
             g_pGame->GetMsgs()->Printf(
                 "The %s slips from your fingers and returns to your pack!\n",
                 m_pSelected->m_lpData->GetName() );
-            JLog( LOG_LEVEL_WARN, true, "failed to wield %s\n", m_pSelected->m_lpData->GetName() );
+            JLog( LOG_LEVEL_INFO, true, "failed to wield %s\n", m_pSelected->m_lpData->GetName() );
         }
     }
     else
     {
         g_pGame->GetMsgs()->Printf( "You can't wield a %s!\n", m_pSelected->m_lpData->GetName() );
-        JLog( LOG_LEVEL_WARN, true, "can't wield %s\n", m_pSelected->m_lpData->GetName() );
+        JLog( LOG_LEVEL_INFO, true, "can't wield %s\n", m_pSelected->m_lpData->GetName() );
     }
     m_pSelected = NULL;
 
@@ -93,7 +93,7 @@ int CUseState::OnHandleRemove( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_DEBUG, true,
               "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Choose an item from equipment(a to z):\n" );
         return 0;
@@ -139,7 +139,7 @@ int CUseState::OnHandleDrop( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_DEBUG, true,
               "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
         return 0;
@@ -186,7 +186,7 @@ int CUseState::OnHandleRead( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_DEBUG, true,
               "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
         return 0;
@@ -225,7 +225,7 @@ int CUseState::OnHandleQuaff( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_DEBUG, true,
               "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
         return 0;

@@ -234,6 +234,7 @@ public:
     void ProcessHallway( CDungeonCreationStep *pCurStep );
 
     // Step creation and validation
+    const char *DirName( int direction );
     int Opposite( int direction );
     void GetAdjacentDirections( int primary_dir, int &adj1, int &adj2 ) const;
 
@@ -292,7 +293,7 @@ public:
         {
             if( pLink->m_lpData->GetArea().Contains( vCheck ) )
             {
-                JLog( LOG_LEVEL_DEBUG, true, "<%d %d> Inside room: <%d %d %d %d>\n",
+                JLog( LOG_LEVEL_NOISIER, true, "<%d %d> Inside room: <%d %d %d %d>\n",
                       VEC_EXPAND( vCheck ), RECT_EXPAND( pLink->m_lpData->GetArea() ) );
                 return pLink->m_lpData;
             }

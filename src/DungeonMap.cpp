@@ -337,7 +337,7 @@ JResult CDungeonMap::FillDungeonArea( Uint8 type, JRect rcFill, bool bBoundsChec
                 JIVector vPos( x, y );
                 if( vPos.IsInWorld() && GetTile( vPos )->GetType() != DUNG_IDX_WALL )
                 {
-                    JLog( LOG_LEVEL_WARN, true,
+                    JLog( LOG_LEVEL_NOISIER, true,
                           "[DUNGEN] Pre-fill invariant violation at <%d %d>: "
                           "expected wall, found type %d\n",
                           x, y, GetTile( vPos )->GetType() );
@@ -394,12 +394,12 @@ void CDungeonMap::FillArea( const Uint8 type, CRoom *pRoom )
         }
         else
         {
-            JLog( LOG_LEVEL_WARN, true, "Created unlit room\n" );
+            JLog( LOG_LEVEL_DEBUG, true, "Created unlit room\n" );
         }
     }
 
     // you still filled rcFill squares, just that one of them was a door.
-    JLog( LOG_LEVEL_DEBUG, true, "filled from <%d %d> to <%d %d>\n",
+    JLog( LOG_LEVEL_NOISE, true, "filled from <%d %d> to <%d %d>\n",
           RECT_EXPAND( pRoom->GetArea() ) );
 }
 
@@ -473,6 +473,33 @@ void CDungeonMap::ConnectAdjacentStructures( const JRect &area )
                   "[DUNGEN] Connected sidling rooms: extended %d tiles, door at <%d %d>\n", count,
                   vDoorCandidate.x, vDoorCandidate.y );
         }
+    }
+}
+
+const char *CDungeonMap::DirName( int direction )
+{
+    switch( direction )
+    {
+    case DIR_NORTH:
+        return "north";
+    case DIR_NE:
+        return "ne";
+    case DIR_EAST:
+        return "east";
+    case DIR_SE:
+        return "se";
+    case DIR_SOUTH:
+        return "south";
+    case DIR_SW:
+        return "sw";
+    case DIR_WEST:
+        return "west";
+    case DIR_NW:
+        return "nw";
+    case DIR_NONE:
+        return "none";
+    default:
+        return "???";
     }
 }
 
@@ -580,7 +607,8 @@ bool CDungeonMap::ProcessStep()
           pCurStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM ? "room" : "hallway",
           RECT_EXPAND( pCurStep->m_rcArea ), pCurStep->m_dwRecurDepth, pCurStep->m_dwFailureCount );
 
-    JLog( LOG_LEVEL_DEBUG, true, "creating %d %s at <%d %d, %d %d>\n", pCurStep->m_dwDirection,
+    JLog( LOG_LEVEL_DEBUG, true, "creating %s %s at <%d %d, %d %d>\n",
+          DirName( pCurStep->m_dwDirection ),
           pCurStep->m_dwIndex == DUNG_CREATE_STEP_MAKE_ROOM ? "room" : "hallway",
           RECT_EXPAND( pCurStep->m_rcArea ) );
     // create current entity
@@ -621,7 +649,7 @@ void CDungeonMap::ProcessRoom( CDungeonCreationStep *pCurStep )
     {
         pCurStep->m_dwFailureCount++;
         m_diagnostics.repeated_failures++;
-        JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Dead-end room: all %d hallway attempts failed\n",
+        JLog( LOG_LEVEL_DEBUG, true, "[DUNGEN] Dead-end room: all %d hallway attempts failed\n",
               halls_failed );
 
         // Mitigation: allow a single backtracking hallway in the opposite direction
@@ -639,13 +667,13 @@ void CDungeonMap::ProcessRoom( CDungeonCreationStep *pCurStep )
                     AddDoor( vHallBack, back_dir );
                     m_stkDungeonMapCreation->Push( pBackStep );
                     m_diagnostics.hallways_created++;
-                    JLog( LOG_LEVEL_NOISIER, true,
+                    JLog( LOG_LEVEL_NOISE, true,
                           "[DUNGEN] Backtracking hallway created to mitigate dead-end room\n" );
                 }
                 else
                 {
                     m_diagnostics.steps_skipped++;
-                    JLog( LOG_LEVEL_NOISIER, true,
+                    JLog( LOG_LEVEL_NOISE, true,
                           "[DUNGEN] Backtracking hallway creation failed\n" );
                 }
             }
@@ -804,7 +832,7 @@ bool CDungeonMap::TryCreateRoomWithFallback( CDungeonCreationStep *pCurStep )
         AddDoor( vRoom, dir );
         m_stkDungeonMapCreation->Push( pNewStep );
         m_diagnostics.rooms_created++;
-        JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Room created from hallway, pushed to stack\n" );
+        JLog( LOG_LEVEL_DEBUG, true, "[DUNGEN] Room created from hallway, pushed to stack\n" );
         return true;
     }
     else
@@ -865,7 +893,7 @@ void CDungeonMap::ExpandInRandomDirections( CDungeonCreationStep *pParent, int n
             else
                 m_diagnostics.hallways_created++;
 
-            JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] %s created, pushed to stack\n",
+            JLog( LOG_LEVEL_DEBUG, true, "[DUNGEN] %s created, pushed to stack\n",
                   child_type_name );
         }
         else
@@ -899,7 +927,7 @@ CDungeonCreationStep *CDungeonMap::CreateStep( int step_type, const JIVector &vP
         return NULL;
     }
 
-    JLog( LOG_LEVEL_DEBUG, true, "Creating a %s step\n",
+    JLog( LOG_LEVEL_NOISIER, true, "Creating a %s step\n",
           step_type == DUNG_CREATE_STEP_MAKE_ROOM ? "room" : "hall" );
 
     // Initialize step
@@ -937,7 +965,7 @@ CDungeonCreationStep *CDungeonMap::CreateStep( int step_type, const JIVector &vP
         if( rectResult != JSUCCESS )
         {
             // Geometry generation failed (clamping or degenerate rect)
-            JLog( LOG_LEVEL_WARN, true, "[DUNGEN] Create%s: Get%sRect failed on attempt %d\n",
+            JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] Create%s: Get%sRect failed on attempt %d\n",
                   type_name, type_name, attempt_count + 1 );
             pStep->m_rcArea.Init( rcTry );
             attempt_count++;
@@ -982,13 +1010,13 @@ CDungeonCreationStep *CDungeonMap::CreateStep( int step_type, const JIVector &vP
         g_pGame->GetStats()->Printf( "...%s <%d %d> conflicts. terminated.\n",
                                      step_type == DUNG_CREATE_STEP_MAKE_ROOM ? "room" : "hall",
                                      VEC_EXPAND( vPos ) );
-        JLog( LOG_LEVEL_DEBUG, true, "...%s <%d %d> conflicts. terminated.\n",
+        JLog( LOG_LEVEL_NOISIER, true, "...%s <%d %d> conflicts. terminated.\n",
               step_type == DUNG_CREATE_STEP_MAKE_ROOM ? "room" : "hall", VEC_EXPAND( vPos ) );
         delete pStep;
         return NULL;
     }
 
-    JLog( LOG_LEVEL_DEBUG, true, "success!\n" );
+    JLog( LOG_LEVEL_NOISIER, true, "success!\n" );
     return pStep;
 }
 
@@ -1046,18 +1074,18 @@ JResult CDungeonMap::GetRoomRect( JRect &rcRoom, const int direction )
     // Check for degenerate rectangles (0 or negative width/height)
     if( rcRoom.Width() <= 0 || rcRoom.Height() <= 0 )
     {
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_NOISIER, true,
               "[DUNGEN] GetRoomRect produced degenerate rect <%d %d, %d %d> (w=%d h=%d)\n",
               RECT_EXPAND( rcRoom ), rcRoom.Width(), rcRoom.Height() );
-        return -1;
+        return JFAILED;
     }
 
     // If clamping occurred, the geometry may be corrupted
     if( bClamped )
     {
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_NOISIER, true,
               "[DUNGEN] GetRoomRect required clamping - geometry may be corrupted\n" );
-        return -1;
+        return JFAILED;
     }
 
     return JSUCCESS;
@@ -1102,17 +1130,17 @@ JResult CDungeonMap::GetSmallRoomRect( JRect &rcRoom, const int direction )
 
     if( rcRoom.Width() <= 0 || rcRoom.Height() <= 0 )
     {
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_NOISIER, true,
               "[DUNGEN] GetSmallRoomRect produced degenerate rect <%d %d, %d %d> (w=%d h=%d)\n",
               RECT_EXPAND( rcRoom ), rcRoom.Width(), rcRoom.Height() );
-        return -1;
+        return JFAILED;
     }
 
     if( bClamped )
     {
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_NOISIER, true,
               "[DUNGEN] GetSmallRoomRect required clamping - geometry may be corrupted\n" );
-        return -1;
+        return JFAILED;
     }
 
     return JSUCCESS;
@@ -1148,18 +1176,18 @@ JResult CDungeonMap::GetHallRect( JRect &rcHall, const int direction )
     // But they shouldn't have negative dimensions
     if( rcHall.Width() < 0 || rcHall.Height() < 0 )
     {
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_NOISIER, true,
               "[DUNGEN] GetHallRect produced invalid rect <%d %d, %d %d> (w=%d h=%d)\n",
               RECT_EXPAND( rcHall ), rcHall.Width(), rcHall.Height() );
-        return -1;
+        return JFAILED;
     }
 
     // If clamping occurred, the geometry may be corrupted
     if( bClamped )
     {
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_NOISIER, true,
               "[DUNGEN] GetHallRect required clamping - geometry may be corrupted\n" );
-        return -1;
+        return JFAILED;
     }
 
     return JSUCCESS;
@@ -1178,7 +1206,7 @@ JResult CDungeonMap::GetHallRect( JRect &rcHall, const int direction )
 JResult CDungeonMap::TruncateHallway( CDungeonCreationStep *pStep )
 {
     if( pStep->m_dwIndex != DUNG_CREATE_STEP_MAKE_HALLWAY )
-        return JERROR();
+        return JFAILED;
 
     int dir = pStep->m_dwDirection;
     JRect &rc = pStep->m_rcArea;
@@ -1218,7 +1246,7 @@ JResult CDungeonMap::TruncateHallway( CDungeonCreationStep *pStep )
     if( !foundCollision )
     {
         // No interior collision — must be a border-only failure, can't truncate
-        return JERROR();
+        return JFAILED;
     }
 
     // The collision tile is existing structure (floor/door).
@@ -1234,7 +1262,7 @@ JResult CDungeonMap::TruncateHallway( CDungeonCreationStep *pStep )
         JLog( LOG_LEVEL_NOISIER, true,
               "[DUNGEN] TruncateHallway: length %d < min %d, cannot truncate\n", newLength,
               DUNG_HALL_MINLENGTH );
-        return JERROR();
+        return JFAILED;
     }
 
     // Verify the door position is a wall tile (the boundary we're connecting through)
@@ -1249,7 +1277,7 @@ JResult CDungeonMap::TruncateHallway( CDungeonCreationStep *pStep )
         JLog( LOG_LEVEL_NOISIER, true,
               "[DUNGEN] TruncateHallway: door position <%d %d> is not wall (type=%d)\n",
               VEC_EXPAND( vDoor ), vDoor.IsInWorld() ? GetTile( vDoor )->GetType() : -1 );
-        return JERROR();
+        return JFAILED;
     }
 
     // Truncate the rect
@@ -1268,7 +1296,7 @@ JResult CDungeonMap::TruncateHallway( CDungeonCreationStep *pStep )
         JLog( LOG_LEVEL_NOISIER, true,
               "[DUNGEN] TruncateHallway: truncated rect <%d %d, %d %d> still conflicts\n",
               RECT_EXPAND( rc ) );
-        return JERROR();
+        return JFAILED;
     }
 
     // Place the connecting door

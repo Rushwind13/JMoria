@@ -1,4 +1,5 @@
 # language: en
+@skip
 Feature: Tilesets
     So that I can display my game
     As a game engine

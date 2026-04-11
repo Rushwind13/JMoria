@@ -55,7 +55,7 @@ GIVEN( "^I spawn a ([-A-Za-z ]+):([0-9]+), a monster with SEEK, near the player$
     EXPECT_EQ( expected, actual );
     // End Dungeon Mangling
 
-    CMonsterDef *pmd = g_pGame->GetDungeon()->GetMonsterDef( monster_id );
+    CMonsterDef *pmd = g_pGame->GetDungeon()->GetMonsterDef( monster.c_str() );
 
     // Monster is correct monster
     int compare = Util::jstrcmp( monster.c_str(), pmd->m_szName );
@@ -98,7 +98,7 @@ GIVEN( "^I spawn a ([-A-Za-z ]+):([0-9]+), a monster with SEEK$" )
     EXPECT_EQ( expected, actual );
     // End Dungeon Mangling
 
-    CMonsterDef *pmd = g_pGame->GetDungeon()->GetMonsterDef( monster_id );
+    CMonsterDef *pmd = g_pGame->GetDungeon()->GetMonsterDef( monster.c_str() );
 
     // Monster is correct monster
     int compare = Util::jstrcmp( monster.c_str(), pmd->m_szName );

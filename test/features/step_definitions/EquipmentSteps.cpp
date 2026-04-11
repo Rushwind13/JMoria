@@ -152,11 +152,11 @@ GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in equipment at ([-0-9]+)$" )
     EXPECT_EQ( Util::jstrcmp( want, have ), 0 );
 }
 
-GIVEN( "^the player equips the item ([0-9]+)$" )
+GIVEN( "^the player equips the ([A-Za-z ]+)$" )
 {
-    REGEX_PARAM( int, item_id );
+    REGEX_PARAM( std::string, item );
     ScenarioScope<TestCtx> context;
-    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
+    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item.c_str() );
     context->result = g_pGame->GetPlayer()->Wield(
         g_pGame->GetPlayer()->m_llInventory->GetLink( pid->m_dwIndex ) );
     // EXPECT_EQ( context->result, JSUCCESS );
@@ -168,12 +168,11 @@ GIVEN( "^the player equips the item ([0-9]+)$" )
 ##
 #######*/
 
-WHEN( "^the player takes off the item ([0-9]+) at ([-0-9]+)$" )
+WHEN( "^the player takes off the ([A-Za-z ]+) at ([-0-9]+)$" )
 {
-    REGEX_PARAM( int, item_id );
+    REGEX_PARAM( std::string, item );
     REGEX_PARAM( int, equip_id );
     ScenarioScope<TestCtx> context;
-    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
     CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llEquipment->GetLink( equip_id );
     context->result = g_pGame->GetPlayer()->RemoveEquipment( pLink );
 }
@@ -391,20 +390,23 @@ WHEN( "^I programmatically drop the spawned item$" )
     uint32 dwInst = pItem->GetInstanceId();
     /* pick up the spawned item into inventory so programmatic APIs can find it */
     g_pGame->GetPlayer()->PickUp( context->vec_b );
-     context->result_int = (int)dwInst;
-     JLog( LOG_LEVEL_INFO, true, "[DROP STEP] before DropItem: dwInst=%u context->result_int=%d\n", dwInst, context->result_int );
-     bool ok = g_pGame->GetPlayer()->DropItem( dwInst );
-     EXPECT_TRUE( ok );
-     /* ensure tile at spawn location now contains the item */
-     CDungeonTile *pGround = g_pGame->GetDungeon()->GetTile( context->vec_b );
-     ASSERT_NE( pGround->m_pCurItem, (CItem *)NULL );
-     /* store the actual instance id from the ground tile to the scenario context
-         (some runs didn't preserve the previously-stored id reliably), then
-         assert equality. */
-     uint32 dwGroundInst = pGround->m_pCurItem->GetInstanceId();
-     context->result_int = (int)dwGroundInst;
-     JLog( LOG_LEVEL_INFO, true, "[DROP STEP] after DropItem: groundInst=%u context->result_int=%d\n", dwGroundInst, context->result_int );
-     EXPECT_EQ( dwGroundInst, dwInst );
+    context->result_int = (int)dwInst;
+    JLog( LOG_LEVEL_INFO, true, "[DROP STEP] before DropItem: dwInst=%u context->result_int=%d\n",
+          dwInst, context->result_int );
+    bool ok = g_pGame->GetPlayer()->DropItem( dwInst );
+    EXPECT_TRUE( ok );
+    /* ensure tile at spawn location now contains the item */
+    CDungeonTile *pGround = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    ASSERT_NE( pGround->m_pCurItem, (CItem *)NULL );
+    /* store the actual instance id from the ground tile to the scenario context
+        (some runs didn't preserve the previously-stored id reliably), then
+        assert equality. */
+    uint32 dwGroundInst = pGround->m_pCurItem->GetInstanceId();
+    context->result_int = (int)dwGroundInst;
+    JLog( LOG_LEVEL_INFO, true,
+          "[DROP STEP] after DropItem: groundInst=%u context->result_int=%d\n", dwGroundInst,
+          context->result_int );
+    EXPECT_EQ( dwGroundInst, dwInst );
 }
 
 WHEN( "^I programmatically read the spawned item$" )
@@ -444,7 +446,8 @@ THEN( "^the spawned item is on the ground at spawn location$" )
     ScenarioScope<TestCtx> context;
     CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
     ASSERT_NE( pTile->m_pCurItem, (CItem *)NULL );
-    JLog( LOG_LEVEL_INFO, true, "[THEN GROUND] pTile inst=%u context->result_int=%d\n", pTile->m_pCurItem->GetInstanceId(), context->result_int );
+    JLog( LOG_LEVEL_INFO, true, "[THEN GROUND] pTile inst=%u context->result_int=%d\n",
+          pTile->m_pCurItem->GetInstanceId(), context->result_int );
     EXPECT_EQ( pTile->m_pCurItem->GetInstanceId(), (uint32)context->result_int );
 }
 

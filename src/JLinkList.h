@@ -92,13 +92,8 @@ private:
 template <class T> class JLinkList
 {
 public:
-    inline JLinkList<T>() : m_lpHead( NULL ), m_iNumElements( 0 ) {}
+    inline JLinkList<T>() : m_lpHead( NULL ), m_lpTail( NULL ), m_iNumElements( 0 ) {}
     virtual inline ~JLinkList( void ) { Terminate(); };
-    // implemented as "addtail",
-    // but note that m_lpHead->prev == tail.
-    // in other fcns, this spot is checked for,
-    // and NULL is returned in a case where you're
-    // trying to go between m_lpHead and m_lpHead->prev.
     CLink<T> *Add( T *pData, int dwIndex = -1, bool bAscending = true )
     {
         CLink<T> *pLink = new CLink<T>( pData, dwIndex );
@@ -109,9 +104,10 @@ public:
             if( curr_link == NULL )
             {
                 pLink->prev = NULL;
-                pLink->next = m_lpHead;
+                pLink->next = NULL;
 
                 m_lpHead = pLink;
+                m_lpTail = pLink;
             }
             else
             {
@@ -137,9 +133,10 @@ public:
                     if( curr_link->next == NULL )
                     {
                         // incoming index > than all in list, insert at tail
-                        pLink->next = curr_link->next;
+                        pLink->next = NULL;
                         curr_link->next = pLink;
                         pLink->prev = curr_link;
+                        m_lpTail = pLink;
                         break;
                     }
                     curr_link = GetNext( curr_link );
@@ -148,16 +145,23 @@ public:
         }
         else
         {
-            pLink->prev = NULL;
-            pLink->next = m_lpHead;
-
-            if( m_lpHead != NULL )
-            {
-                m_lpHead->prev = pLink;
-            }
-
-            m_lpHead = pLink;
             pLink->m_dwIndex = m_iNumElements;
+
+            if( m_lpHead == NULL )
+            {
+                pLink->prev = NULL;
+                pLink->next = NULL;
+                m_lpHead = pLink;
+                m_lpTail = pLink;
+            }
+            else
+            {
+                // O(1) append to tail
+                m_lpTail->next = pLink;
+                pLink->prev = m_lpTail;
+                pLink->next = NULL;
+                m_lpTail = pLink;
+            }
         }
 
         m_iNumElements++;
@@ -182,11 +186,17 @@ public:
             if( m_iNumElements == 1 )
             {
                 m_lpHead = NULL;
+                m_lpTail = NULL;
             }
             else
             {
                 m_lpHead = pLink->next;
             }
+        }
+
+        if( pLink == m_lpTail )
+        {
+            m_lpTail = pLink->prev;
         }
 
         if( bDelete )
@@ -291,6 +301,7 @@ public:
 
 protected:
     CLink<T> *m_lpHead;
+    CLink<T> *m_lpTail;
     int m_iNumElements;
 
 private:

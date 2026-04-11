@@ -7,5 +7,5 @@ else
   TYPE="$1"
 fi
 
-# Use `nl`, `sort -nr`, and `cut -f2-` to reverse lines in a cross-platform way
-grep "^$TYPE" Resources/"${TYPE}s".txt | nl | sort -nr | cut -f2- | nl -v 0
+# List entries in file order (matches runtime list order)
+grep "^$TYPE" Resources/"${TYPE}s".txt | nl -v 0

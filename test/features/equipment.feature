@@ -9,7 +9,7 @@ Feature: Equipment
         Given I spawn a Dagger:37
         Given the Dagger:37 is not cursed
         Given the player has a Dagger:37 in inventory
-        Given the player equips the item 27
+        Given the player equips the Dagger
         Then The Dagger:37 is in equipment at 0
         Then The Dagger:37 is not in inventory at -1
         # And A dagger is in the primary weapon equipment slot
@@ -19,12 +19,12 @@ Feature: Equipment
         Given I spawn a Dagger:37
         Given the Dagger:37 is not cursed
         Given the player has a Dagger:37 in inventory
-        Given the player equips the item 27
+        Given the player equips the Dagger
         Given I spawn a Small Wooden Shield:29
         Given the Small Wooden Shield:29 is not cursed
         # Given I spawn a Battle Axe:42
         Given the player has a Small Wooden Shield:29 in inventory
-        Given the player equips the item 26
+        Given the player equips the Small Wooden Shield
         Then The Small Wooden Shield:29 is not in inventory at -1
         And The Dagger:37 is in equipment at 0
         And The Small Wooden Shield:29 is in equipment at 1
@@ -53,10 +53,10 @@ Feature: Equipment
         Given I spawn a Dagger:37
         Given the Dagger:37 is not cursed
         Given the player has a Dagger:37 in inventory
-        Given the player equips the item 27
+        Given the player equips the Dagger
         # Given A dagger is in the primary weapon equipment slot
         Given the player has a Dagger:37 in equipment at 0
-        When the player takes off the item 27 at 0
+        When the player takes off the Dagger at 0
         Then The Dagger:37 is not in equipment at 0
         Then The Dagger:37 is in inventory at -1
 
@@ -65,7 +65,7 @@ Feature: Equipment
         Given I spawn a Dagger:37
         Given the Dagger:37 is cursed
         Given the player has a Dagger:37 in inventory
-        Given the player equips the item 27
+        Given the player equips the Dagger
         Then The Dagger:37 is in equipment at 0
         Then The Dagger:37 is not in inventory at -1
         # And A dagger is in the primary weapon equipment slot
@@ -75,10 +75,10 @@ Feature: Equipment
         Given I spawn a Dagger:37
         Given the Dagger:37 is cursed
         Given the player has a Dagger:37 in inventory
-        Given the player equips the item 27
+        Given the player equips the Dagger
         # Given A dagger is in the primary weapon equipment slot
         Given the player has a Dagger:37 in equipment at 0
-        When the player takes off the item 27 at 0
+        When the player takes off the Dagger at 0
         Then The Dagger:37 is in equipment at 0
         Then The Dagger:37 is not in inventory at -1
 
@@ -88,7 +88,7 @@ Feature: Equipment
         Given I spawn a Dagger:37
         Given the Dagger:37 is cursed
         Given the player has a Dagger:37 in inventory
-        Given the player equips the item 27
+        Given the player equips the Dagger
         Given I spawn a Scroll of Remove Curse:26
         Given the player has a Scroll of Remove Curse:26 in inventory
         # Given A dagger is in the primary weapon equipment slot
@@ -100,14 +100,14 @@ Feature: Equipment
         Given I have a Player
         Given I spawn a Dagger:37
         Given the player has a Dagger:37 in inventory
-        Given the player equips the item 27
+        Given the player equips the Dagger
         Given I spawn a Scroll of Remove Curse:26
         Given the Scroll of Remove Curse:26 is cursed
         Given the player has a Scroll of Remove Curse:26 in inventory
         Given the player has a Dagger:37 in equipment at 0
         When the player reads the scroll in inventory at 0
         Then the equipped Dagger:37 at 0 is cursed
-        When the player takes off the item 27 at 0
+        When the player takes off the Dagger at 0
         Then the player has a Dagger:37 in equipment at 0
         Then the equipped Dagger:37 at 0 is cursed
 
@@ -116,10 +116,10 @@ Feature: Equipment
         Given I spawn a Dagger:37
         Given the Dagger:37 is not cursed
         Given the player has a Dagger:37 in inventory
-        Given the player equips the item 27
+        Given the player equips the Dagger
         Given I spawn a Long Sword:43
         Given the player has a Long Sword:43 in inventory
-        Given the player equips the item 28
+        Given the player equips the Long Sword
         Then The Long Sword:43 is not in inventory at -1
         Then The Dagger:37 is in inventory at -1
         And The Long Sword:43 is in equipment at 0
@@ -129,10 +129,10 @@ Feature: Equipment
         Given I spawn a Dagger:37
         Given the Dagger:37 is cursed
         Given the player has a Dagger:37 in inventory
-        Given the player equips the item 37
+        Given the player equips the Dagger
         Given I spawn a Long Sword:43
         Given the player has a Long Sword:43 in inventory
-        Given the player equips the item 43
+        Given the player equips the Long Sword
         Then The Long Sword:43 is in inventory at -1
         And The Dagger:37 is in equipment at 0
 

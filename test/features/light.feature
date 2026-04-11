@@ -9,7 +9,7 @@ Feature: Equipment
         Given I spawn a Torch:13
         Given the Torch:13 is not cursed
         Given the player has a Torch:13 in inventory
-        Given the player equips the item 20
+        Given the player equips the Torch
         Given the player has a Torch:13 in equipment at 11
         # And A torch is in the lighting equipment slot
 
@@ -18,7 +18,7 @@ Feature: Equipment
         Given I spawn a Torch:13
         Given the Torch:13 is not cursed
         Given the player has a Torch:13 in inventory
-        Given the player equips the item 20
+        Given the player equips the Torch
         Given the player has a Torch:13 in equipment at 11
         Then the area near the player is lit
         # And A torch is in the lighting equipment slot
@@ -28,7 +28,7 @@ Feature: Equipment
         Given I spawn a Torch:13
         Given the Torch:13 is not cursed
         Given the player has a Torch:13 in inventory
-        Given the player equips the item 20
+        Given the player equips the Torch
         Given the player has a Torch:13 in equipment at 11
         Given the player has a nonzero lightsource
         # And A torch is in the lighting equipment slot

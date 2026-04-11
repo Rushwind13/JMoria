@@ -464,7 +464,7 @@ CMonsterDef *CDungeon::GetMonsterDef( const char *szMonsterName )
 
 CMonsterDef *CDungeon::GetMonsterDef( int which_monster )
 {
-    if( which_monster <= MON_IDX_INVALID || which_monster >= m_llMonsterDefs->length() - 1 )
+    if( which_monster <= MON_IDX_INVALID || which_monster >= m_llMonsterDefs->length() )
     {
         JLog( LOG_LEVEL_WARN, true, "got an invalid monster: %d\n", which_monster );
         return NULL;
@@ -506,12 +506,12 @@ CItemDef *CDungeon::GetItemDef( const char *szItemName )
 
 CItemDef *CDungeon::GetItemDef( int which_item )
 {
-    if( which_item <= ITEM_IDX_INVALID || which_item >= m_llItemDefs->length() - 1 )
+    if( which_item <= ITEM_IDX_INVALID || which_item >= m_llItemDefs->length() )
     {
         JLog( LOG_LEVEL_WARN, true, "got an invalid item: %d\n", which_item );
         return NULL;
     }
-    return m_llItemDefs->GetNthLink( which_item )->m_lpData;
+    return m_llItemDefs->GetLink( which_item )->m_lpData;
 }
 
 int CDungeon::ChooseItemForDepth( const int depth )

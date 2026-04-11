@@ -19,7 +19,7 @@ GIVEN( "^I have a game$" )
 GIVEN( "^I initialize the game$" )
 {
     ScenarioScope<TestCtx> context;
-    context->result = g_pGame->Init( "../../JMoria/", RenderMode::ASCII );
+    context->result = g_pGame->Init( "../../JMoria/", RenderMode::None );
 }
 GIVEN( "^the game has a player$" )
 {
@@ -28,10 +28,9 @@ GIVEN( "^the game has a player$" )
     int actual = context->result;
     EXPECT_EQ( actual, JSUCCESS );
 }
-GIVEN( "^I spawn a ([-A-Za-z ]+):([0-9]+), a monster with SEEK, near the player$" )
+GIVEN( "^I spawn a ([-A-Za-z ]+), a monster with SEEK, near the player$" )
 {
     REGEX_PARAM( std::string, monster );
-    REGEX_PARAM( int, monster_id );
     ScenarioScope<TestCtx> context;
     context->vec_b.Init( -2, -2 );
     context->vec_b += context->vec;
@@ -55,7 +54,7 @@ GIVEN( "^I spawn a ([-A-Za-z ]+):([0-9]+), a monster with SEEK, near the player$
     EXPECT_EQ( expected, actual );
     // End Dungeon Mangling
 
-    CMonsterDef *pmd = g_pGame->GetDungeon()->GetMonsterDef( monster_id );
+    CMonsterDef *pmd = g_pGame->GetDungeon()->GetMonsterDef( monster.c_str() );
 
     // Monster is correct monster
     int compare = Util::jstrcmp( monster.c_str(), pmd->m_szName );
@@ -71,10 +70,9 @@ GIVEN( "^I spawn a ([-A-Za-z ]+):([0-9]+), a monster with SEEK, near the player$
     JLog( LOG_LEVEL_ERROR, true, "<%f %f> %s %d\n", VEC_EXPAND( context->vec_b ), pmd->m_szName,
           context->result );
 }
-GIVEN( "^I spawn a ([-A-Za-z ]+):([0-9]+), a monster with SEEK$" )
+GIVEN( "^I spawn a ([-A-Za-z ]+), a monster with SEEK$" )
 {
     REGEX_PARAM( std::string, monster );
-    REGEX_PARAM( int, monster_id );
     ScenarioScope<TestCtx> context;
     context->vec_b.Init( -2, -2 );
     context->vec_b += context->vec;
@@ -98,7 +96,7 @@ GIVEN( "^I spawn a ([-A-Za-z ]+):([0-9]+), a monster with SEEK$" )
     EXPECT_EQ( expected, actual );
     // End Dungeon Mangling
 
-    CMonsterDef *pmd = g_pGame->GetDungeon()->GetMonsterDef( monster_id );
+    CMonsterDef *pmd = g_pGame->GetDungeon()->GetMonsterDef( monster.c_str() );
 
     // Monster is correct monster
     int compare = Util::jstrcmp( monster.c_str(), pmd->m_szName );

@@ -11,6 +11,6 @@ else
     OBJECT="$2"
 fi
 
-# Use nl and sort -nr to reverse lines, which is cross-platform
-grep "^$TYPE" Resources/"${TYPE}s".txt | nl | sort -n | cut -f2- | \
+# List entries in file order (matches runtime list order)
+grep "^$TYPE" Resources/"${TYPE}s".txt | \
 awk -v obj="$OBJECT" 'tolower($0) ~ tolower("\\<"obj"\\>") {print NR-1, $0}'

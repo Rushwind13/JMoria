@@ -53,7 +53,7 @@ int CTargetState::OnHandleTarget( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_WARN, true, "TARGET cmd still waiting for a valid key.\n" );
+        JLog( LOG_LEVEL_DEBUG, true, "TARGET cmd still waiting for a valid key.\n" );
         g_pGame->GetMsgs()->Printf( "(* for target, . to choose, ESC to exit):\n" );
         return 0;
     }

@@ -144,7 +144,7 @@ int CRangedState::OnHandleFire( JKeysym *keysym )
 
         if( retval != JSUCCESS )
         {
-            JLog( LOG_LEVEL_WARN, true,
+            JLog( LOG_LEVEL_DEBUG, true,
                   "FIRE cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
             g_pGame->GetMsgs()->Printf( "Choose an item from equipment(a to z):\n" );
             return JSUCCESS;
@@ -203,7 +203,7 @@ int CRangedState::OnHandleZap( JKeysym *keysym )
 
         if( retval != JSUCCESS )
         {
-            JLog( LOG_LEVEL_WARN, true,
+            JLog( LOG_LEVEL_DEBUG, true,
                   "ZAP cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
             g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
             return JSUCCESS;
@@ -269,7 +269,7 @@ int CRangedState::OnHandleTarget( JKeysym *keysym )
 
         if( retval != JSUCCESS )
         {
-            JLog( LOG_LEVEL_WARN, true, "TARGET cmd still waiting for target.\n" );
+            JLog( LOG_LEVEL_DEBUG, true, "TARGET cmd still waiting for target.\n" );
             g_pGame->GetMsgs()->Printf( "Choose target: * or Direction (1 2 3 4 6 7 8 9)\n" );
             return JSUCCESS;
         }
@@ -537,7 +537,7 @@ bool CRangedState::DoTrajectory()
     // failsafe: don't lock up
     if( m_dwClock > 20 )
     {
-        JLog( LOG_LEVEL_ERROR, true, "failsafe in TRAJECTORY\n" );
+        JLog( LOG_LEVEL_WARN, true, "failsafe in TRAJECTORY\n" );
         ResetToState( STATE_COMMAND );
         return false;
     }

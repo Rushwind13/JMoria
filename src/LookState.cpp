@@ -39,7 +39,7 @@ int CLookState::OnHandleLook( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_DEBUG, true,
               "LOOK cmd still waiting for a directional key: Directional key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
         return 0;

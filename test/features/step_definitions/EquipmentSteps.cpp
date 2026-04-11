@@ -16,18 +16,16 @@ GIVEN( "^I have a Player$" )
     }
     g_pGame = NULL;
     g_pGame = new CGame;
-    context->result = g_pGame->Init( "../../JMoria/", RenderMode::ASCII );
+    context->result = g_pGame->Init( "../../JMoria/", RenderMode::None );
     EXPECT_EQ( context->result, JSUCCESS );
 }
 
-GIVEN( "^I spawn a ([A-Za-z ]+):([0-9]+)$" )
+GIVEN( "^I spawn a ([A-Za-z ]+)$" )
 {
     ScenarioScope<TestCtx> context;
     REGEX_PARAM( std::string, item );
-    REGEX_PARAM( int, index );
     Util::jstrcpy( context->szBuffer, item.c_str() );
     context->vec_b = g_pGame->GetPlayer()->m_vPos;
-    context->index = index;
 
     JLog( LOG_LEVEL_INFO, true, "<%.2f %.2f>\n", VEC_EXPAND( context->vec_b ) );
     g_pGame->GetPlayer()->PickUp( context->vec_b );
@@ -57,11 +55,10 @@ GIVEN( "^I spawn a ([A-Za-z ]+):([0-9]+)$" )
     }
 }
 
-GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in inventory$" )
+GIVEN( "^the player has a ([A-Za-z ]+) in inventory$" )
 {
     ScenarioScope<TestCtx> context;
     REGEX_PARAM( std::string, item );
-    REGEX_PARAM( int, item_id );
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item.c_str() );
     JLog( LOG_LEVEL_INFO, true, "Item is %s\n", pid->m_szName );
     int compare = Util::jstrcmp( item.c_str(), pid->m_szName );
@@ -82,11 +79,10 @@ GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in inventory$" )
     EXPECT_EQ( inv_index, item_index );
 }
 
-GIVEN( "^the ([A-Za-z ]+):([0-9]+) (is|is not) cursed$" )
+GIVEN( "^the ([A-Za-z ]+) (is|is not) cursed$" )
 {
     ScenarioScope<TestCtx> context;
     REGEX_PARAM( std::string, item );
-    REGEX_PARAM( int, item_id );
     REGEX_PARAM( std::string, choice );
     bool cursed = ( choice == "is" ) ? true : false;
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item.c_str() );
@@ -118,22 +114,20 @@ GIVEN( "^the ([A-Za-z ]+):([0-9]+) (is|is not) cursed$" )
     EXPECT_EQ( actual, expected );
 }
 
-GIVEN( "^the ([A-Za-z ]+):([0-9]+) (is|is not) identified$" )
+GIVEN( "^the ([A-Za-z ]+) (is|is not) identified$" )
 {
     ScenarioScope<TestCtx> context;
     REGEX_PARAM( std::string, item );
-    REGEX_PARAM( int, item_id );
     REGEX_PARAM( std::string, choice );
     bool cursed = ( choice == "is" ) ? true : false;
 
     JLog( LOG_LEVEL_DEBUG, true, "Checking identified\n" );
 }
 
-GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in equipment at ([-0-9]+)$" )
+GIVEN( "^the player has a ([A-Za-z ]+) in equipment at ([-0-9]+)$" )
 {
     ScenarioScope<TestCtx> context;
     REGEX_PARAM( std::string, item );
-    REGEX_PARAM( int, item_id );
     REGEX_PARAM( int, equip_id );
     CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item.c_str() );
     int compare = Util::jstrcmp( item.c_str(), pid->m_szName );
@@ -152,11 +146,11 @@ GIVEN( "^the player has a ([A-Za-z ]+):([0-9]+) in equipment at ([-0-9]+)$" )
     EXPECT_EQ( Util::jstrcmp( want, have ), 0 );
 }
 
-GIVEN( "^the player equips the item ([0-9]+)$" )
+GIVEN( "^the player equips the ([A-Za-z ]+)$" )
 {
-    REGEX_PARAM( int, item_id );
+    REGEX_PARAM( std::string, item );
     ScenarioScope<TestCtx> context;
-    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
+    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item.c_str() );
     context->result = g_pGame->GetPlayer()->Wield(
         g_pGame->GetPlayer()->m_llInventory->GetLink( pid->m_dwIndex ) );
     // EXPECT_EQ( context->result, JSUCCESS );
@@ -168,12 +162,11 @@ GIVEN( "^the player equips the item ([0-9]+)$" )
 ##
 #######*/
 
-WHEN( "^the player takes off the item ([0-9]+) at ([-0-9]+)$" )
+WHEN( "^the player takes off the ([A-Za-z ]+) at ([-0-9]+)$" )
 {
-    REGEX_PARAM( int, item_id );
+    REGEX_PARAM( std::string, item );
     REGEX_PARAM( int, equip_id );
     ScenarioScope<TestCtx> context;
-    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item_id );
     CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llEquipment->GetLink( equip_id );
     context->result = g_pGame->GetPlayer()->RemoveEquipment( pLink );
 }
@@ -183,7 +176,7 @@ WHEN( "^the player reads the scroll in inventory at ([-0-9]+)$" )
     REGEX_PARAM( int, inv_id );
     ScenarioScope<TestCtx> context;
     CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetLink( inv_id );
-    JLog( LOG_LEVEL_ERROR, true, "Found item to read is %s\n", pLink->m_lpData->GetName() );
+    JLog( LOG_LEVEL_DEBUG, true, "Found item to read is %s\n", pLink->m_lpData->GetName() );
     g_pGame->GetPlayer()->Read( pLink );
 }
 
@@ -245,10 +238,9 @@ WHEN( "^I programmatically attempt to remove the spawned item$" )
 ##
 #######*/
 
-THEN( "^The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment) at ([-0-9]+)$" )
+THEN( "^The ([A-Za-z ]+) is in (inventory|equipment) at ([-0-9]+)$" )
 {
     REGEX_PARAM( std::string, item );
-    REGEX_PARAM( int, item_id );
     REGEX_PARAM( std::string, list );
     REGEX_PARAM( int, equip_id );
     ScenarioScope<TestCtx> context;
@@ -279,10 +271,9 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is in (inventory|equipment) at ([-0-9]+)$" )
     EXPECT_EQ( result, 0 );
 }
 
-THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment) at ([-0-9]+)$" )
+THEN( "^The ([A-Za-z ]+) is not in (inventory|equipment) at ([-0-9]+)$" )
 {
     REGEX_PARAM( std::string, item );
-    REGEX_PARAM( int, item_id );
     REGEX_PARAM( std::string, list );
     REGEX_PARAM( int, equip_id );
     ScenarioScope<TestCtx> context;
@@ -293,11 +284,7 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment) at ([-0-9]+)$"
     int compare = Util::jstrcmp( item.c_str(), pid->m_szName );
     if( compare != 0 )
     {
-        JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", item.c_str(), pid->m_szName );
-    }
-    else
-    {
-        JLog( LOG_LEVEL_ERROR, true, "have %s as expected\n", pid->m_szName );
+        JLog( LOG_LEVEL_WARN, true, "want %s have %s\n", item.c_str(), pid->m_szName );
     }
     EXPECT_EQ( compare, 0 );
     int index = ( list == "inventory" ) ? pid->m_dwIndex : equip_id;
@@ -307,23 +294,20 @@ THEN( "^The ([A-Za-z ]+):([0-9]+) is not in (inventory|equipment) at ([-0-9]+)$"
 
     if( pLink )
     {
-        JLog( LOG_LEVEL_ERROR, true, "Found item in that position\n" );
         // found an item of the same type, make sure it's a different one
         actual = pLink->m_lpData;
         EXPECT_NE( actual->m_id->m_szName, item );
     }
     else
     {
-        JLog( LOG_LEVEL_ERROR, true, "No item in that position\n" );
         // nothing of this type; win
         EXPECT_EQ( expected, actual );
     }
 }
 
-THEN( "^the equipped ([A-Za-z ]+):([0-9]+) at ([-0-9]+) (is|is not) cursed$" )
+THEN( "^the equipped ([A-Za-z ]+) at ([-0-9]+) (is|is not) cursed$" )
 {
     REGEX_PARAM( std::string, item );
-    REGEX_PARAM( int, item_id );
     REGEX_PARAM( int, equip_id );
     REGEX_PARAM( std::string, choice );
 
@@ -368,7 +352,7 @@ THEN( "^the spawned item is removed from inventory$" )
     EXPECT_FALSE( found );
 }
 
-THEN( "^the ([A-Za-z ]+):([0-9]+) is not labeled as cursed$" )
+THEN( "^the ([A-Za-z ]+) is not labeled as cursed$" )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Showing label on equipment\n" );
 }
@@ -391,20 +375,23 @@ WHEN( "^I programmatically drop the spawned item$" )
     uint32 dwInst = pItem->GetInstanceId();
     /* pick up the spawned item into inventory so programmatic APIs can find it */
     g_pGame->GetPlayer()->PickUp( context->vec_b );
-     context->result_int = (int)dwInst;
-     JLog( LOG_LEVEL_INFO, true, "[DROP STEP] before DropItem: dwInst=%u context->result_int=%d\n", dwInst, context->result_int );
-     bool ok = g_pGame->GetPlayer()->DropItem( dwInst );
-     EXPECT_TRUE( ok );
-     /* ensure tile at spawn location now contains the item */
-     CDungeonTile *pGround = g_pGame->GetDungeon()->GetTile( context->vec_b );
-     ASSERT_NE( pGround->m_pCurItem, (CItem *)NULL );
-     /* store the actual instance id from the ground tile to the scenario context
-         (some runs didn't preserve the previously-stored id reliably), then
-         assert equality. */
-     uint32 dwGroundInst = pGround->m_pCurItem->GetInstanceId();
-     context->result_int = (int)dwGroundInst;
-     JLog( LOG_LEVEL_INFO, true, "[DROP STEP] after DropItem: groundInst=%u context->result_int=%d\n", dwGroundInst, context->result_int );
-     EXPECT_EQ( dwGroundInst, dwInst );
+    context->result_int = (int)dwInst;
+    JLog( LOG_LEVEL_INFO, true, "[DROP STEP] before DropItem: dwInst=%u context->result_int=%d\n",
+          dwInst, context->result_int );
+    bool ok = g_pGame->GetPlayer()->DropItem( dwInst );
+    EXPECT_TRUE( ok );
+    /* ensure tile at spawn location now contains the item */
+    CDungeonTile *pGround = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    ASSERT_NE( pGround->m_pCurItem, (CItem *)NULL );
+    /* store the actual instance id from the ground tile to the scenario context
+        (some runs didn't preserve the previously-stored id reliably), then
+        assert equality. */
+    uint32 dwGroundInst = pGround->m_pCurItem->GetInstanceId();
+    context->result_int = (int)dwGroundInst;
+    JLog( LOG_LEVEL_INFO, true,
+          "[DROP STEP] after DropItem: groundInst=%u context->result_int=%d\n", dwGroundInst,
+          context->result_int );
+    EXPECT_EQ( dwGroundInst, dwInst );
 }
 
 WHEN( "^I programmatically read the spawned item$" )
@@ -444,7 +431,8 @@ THEN( "^the spawned item is on the ground at spawn location$" )
     ScenarioScope<TestCtx> context;
     CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
     ASSERT_NE( pTile->m_pCurItem, (CItem *)NULL );
-    JLog( LOG_LEVEL_INFO, true, "[THEN GROUND] pTile inst=%u context->result_int=%d\n", pTile->m_pCurItem->GetInstanceId(), context->result_int );
+    JLog( LOG_LEVEL_INFO, true, "[THEN GROUND] pTile inst=%u context->result_int=%d\n",
+          pTile->m_pCurItem->GetInstanceId(), context->result_int );
     EXPECT_EQ( pTile->m_pCurItem->GetInstanceId(), (uint32)context->result_int );
 }
 

@@ -42,9 +42,6 @@ GIVEN( "^I have a room create step$" )
     ScenarioScope<TestCtx> context;
     JIVector vRoom( 50, 50 );
     context->pStep = context->map.CreateRoom( vRoom, DIR_NONE, 0 );
-
-    JLog( LOG_LEVEL_ERROR, false, "room: <%d %d %d %d>\n",
-          RECT_EXPAND( context->pStep->m_rcArea ) );
 }
 
 GIVEN( "^I have a E hallway create step$" )
@@ -53,7 +50,6 @@ GIVEN( "^I have a E hallway create step$" )
     JIVector vHallway = context->map.GetWallOrigin( context->pStep, DIR_EAST );
     context->pStep = context->map.CreateHallway( vHallway, DIR_EAST, 1 );
     context->area.Init( context->pStep->m_rcArea );
-    JLog( LOG_LEVEL_ERROR, false, "E hallway: <%d %d %d %d>\n", RECT_EXPAND( context->area ) );
 }
 
 /*#######
@@ -66,8 +62,6 @@ WHEN( "^I create a S hallway create step$" )
     ScenarioScope<TestCtx> context;
     context->vec_i = context->map.GetHallOrigin( context->pStep, DUNG_CREATE_STEP_MAKE_HALLWAY );
     context->pStep = context->map.CreateHallway( context->vec_i, DIR_SOUTH, 2 );
-
-    JLog( LOG_LEVEL_ERROR, false, "S origin: <%d %d>\n", VEC_EXPAND( context->vec_i ) );
 }
 
 WHEN( "^I call GetHallRect for (east|west|north|south) from ([0-9.-]+),([0-9.-]+)$" )
@@ -209,14 +203,14 @@ THEN( "^The dungeon matches another dungeon with the same seed$" )
             original_tiles[i] = *context->map.GetTile( vPos );
         }
     }
-    
+
     unsigned int seed = context->map.GetSeed();
     int depth = 1; // Assume depth 1 for test
-    
+
     // Create a new dungeon with same seed
     CDungeonMap map2;
     map2.CreateDungeon( depth, seed );
-    
+
     // Compare tile types
     bool maps_match = true;
     int differences = 0;
@@ -233,16 +227,16 @@ THEN( "^The dungeon matches another dungeon with the same seed$" )
                 differences++;
                 if( differences <= 5 ) // Log first 5 differences
                 {
-                    JLog( LOG_LEVEL_ERROR, true, "Tile mismatch at <%d %d>: %d vs %d\n", 
+                    JLog( LOG_LEVEL_ERROR, true, "Tile mismatch at <%d %d>: %d vs %d\n",
                           VEC_EXPAND( vPos ), type1, type2 );
                 }
             }
         }
     }
-    
+
     delete[] original_tiles;
-    
-    JLog( LOG_LEVEL_INFO, true, "Maps %s (differences: %d)\n", 
+
+    JLog( LOG_LEVEL_INFO, true, "Maps %s (differences: %d)\n",
           maps_match ? "MATCH" : "DO NOT MATCH", differences );
     EXPECT_TRUE( maps_match );
 }
@@ -278,11 +272,11 @@ THEN( "^The dungeon has a valid room count \\(between ([0-9]+) and ([0-9]+)\\)$"
     REGEX_PARAM( int, min_rooms );
     REGEX_PARAM( int, max_rooms );
     ScenarioScope<TestCtx> context;
-    
+
     int room_count = context->map.HowManyRooms();
-    JLog( LOG_LEVEL_INFO, true, "Room count: %d (expected: %d-%d)\n", 
-          room_count, min_rooms, max_rooms );
-    
+    JLog( LOG_LEVEL_INFO, true, "Room count: %d (expected: %d-%d)\n", room_count, min_rooms,
+          max_rooms );
+
     EXPECT_GE( room_count, min_rooms );
     EXPECT_LE( room_count, max_rooms );
 }
@@ -303,22 +297,19 @@ GIVEN( "^I create ([0-9]+) consecutive dungeons at depth ([0-9]+) with seed ([0-
     REGEX_PARAM( int, depth );
     REGEX_PARAM( unsigned int, seed );
     ScenarioScope<TestCtx> context;
-    
+
     context->dungeon_history.clear();
-    
+
     for( int i = 0; i < count; i++ )
     {
         CDungeonMap map;
         map.CreateDungeon( depth, seed );
-        
+
         // Store room and hallway counts
-        context->dungeon_history.push_back({
-            map.HowManyRooms(),
-            map.HowManyHallways(),
-            map.GetStackSize()
-        });
+        context->dungeon_history.push_back(
+            { map.HowManyRooms(), map.HowManyHallways(), map.GetStackSize() } );
     }
-    
+
     JLog( LOG_LEVEL_INFO, true, "Created %d dungeons with seed %u\n", count, seed );
 }
 
@@ -326,9 +317,9 @@ THEN( "^All ([0-9]+) dungeons are identical$" )
 {
     REGEX_PARAM( int, count );
     ScenarioScope<TestCtx> context;
-    
+
     ASSERT_EQ( context->dungeon_history.size(), count );
-    
+
     // All should have same room count
     bool all_match = true;
     for( int i = 1; i < context->dungeon_history.size(); i++ )
@@ -336,18 +327,18 @@ THEN( "^All ([0-9]+) dungeons are identical$" )
         if( context->dungeon_history[i].rooms != context->dungeon_history[0].rooms )
         {
             all_match = false;
-            JLog( LOG_LEVEL_ERROR, true, "Dungeon %d has %d rooms, expected %d\n",
-                  i, context->dungeon_history[i].rooms, context->dungeon_history[0].rooms );
+            JLog( LOG_LEVEL_ERROR, true, "Dungeon %d has %d rooms, expected %d\n", i,
+                  context->dungeon_history[i].rooms, context->dungeon_history[0].rooms );
         }
     }
-    
+
     EXPECT_TRUE( all_match );
 }
 
 THEN( "^All have the same room count$" )
 {
     ScenarioScope<TestCtx> context;
-    
+
     if( context->dungeon_history.size() > 0 )
     {
         int expected_rooms = context->dungeon_history[0].rooms;
@@ -361,7 +352,7 @@ THEN( "^All have the same room count$" )
 THEN( "^All have the same hallway count$" )
 {
     ScenarioScope<TestCtx> context;
-    
+
     if( context->dungeon_history.size() > 0 )
     {
         int expected_halls = context->dungeon_history[0].hallways;
@@ -375,10 +366,10 @@ THEN( "^All have the same hallway count$" )
 THEN( "^Each hallway tile is adjacent to at least one room floor tile$" )
 {
     ScenarioScope<TestCtx> context;
-    
+
     int hallway_count = 0;
     int orphan_hallways = 0;
-    
+
     // Check each tile
     for( int y = 0; y < DUNG_HEIGHT; y++ )
     {
@@ -386,20 +377,20 @@ THEN( "^Each hallway tile is adjacent to at least one room floor tile$" )
         {
             JIVector vPos( x, y );
             Uint8 tile_type = context->map.GetdtdIndex( vPos );
-            
+
             // If this is a hallway tile
             if( tile_type == DUNG_IDX_FLOOR )
             {
                 Uint8 flags = context->map.GetFlags( vPos );
                 // Hallways are not lit, rooms are lit
-                if( !(flags & DUNG_FLAG_LIT) )
+                if( !( flags & DUNG_FLAG_LIT ) )
                 {
                     hallway_count++;
-                    
+
                     // Check 4 adjacent tiles for room floor
                     bool adjacent_to_room = false;
-                    int directions[4][2] = { {-1,0}, {1,0}, {0,-1}, {0,1} };
-                    
+                    int directions[4][2] = { { -1, 0 }, { 1, 0 }, { 0, -1 }, { 0, 1 } };
+
                     for( int dir = 0; dir < 4; dir++ )
                     {
                         JIVector vAdjacent( x + directions[dir][0], y + directions[dir][1] );
@@ -407,16 +398,16 @@ THEN( "^Each hallway tile is adjacent to at least one room floor tile$" )
                         {
                             Uint8 adj_type = context->map.GetdtdIndex( vAdjacent );
                             Uint8 adj_flags = context->map.GetFlags( vAdjacent );
-                            
+
                             // Adjacent room floor is floor AND lit
-                            if( adj_type == DUNG_IDX_FLOOR && (adj_flags & DUNG_FLAG_LIT) )
+                            if( adj_type == DUNG_IDX_FLOOR && ( adj_flags & DUNG_FLAG_LIT ) )
                             {
                                 adjacent_to_room = true;
                                 break;
                             }
                         }
                     }
-                    
+
                     if( !adjacent_to_room )
                     {
                         orphan_hallways++;
@@ -426,16 +417,16 @@ THEN( "^Each hallway tile is adjacent to at least one room floor tile$" )
             }
         }
     }
-    
-    JLog( LOG_LEVEL_INFO, true, "Found %d hallway tiles, %d orphaned\n", 
-          hallway_count, orphan_hallways );
+
+    JLog( LOG_LEVEL_INFO, true, "Found %d hallway tiles, %d orphaned\n", hallway_count,
+          orphan_hallways );
     EXPECT_EQ( orphan_hallways, 0 );
 }
 
 THEN( "^The out-of-world portion remains as walls$" )
 {
     ScenarioScope<TestCtx> context;
-    
+
     // Check tiles outside world bounds
     JIVector vOutOfWorld( 99, 99 );
     if( !vOutOfWorld.IsInWorld() )
@@ -458,7 +449,8 @@ THEN( "^The fixture file exists$" )
     ScenarioScope<TestCtx> context;
     FILE *fp = fopen( context->fixture_filename.c_str(), "r" );
     EXPECT_NE( fp, (FILE *)NULL );
-    if( fp ) fclose( fp );
+    if( fp )
+        fclose( fp );
 }
 
 WHEN( "^I import the fixture file into a new dungeon$" )
@@ -479,14 +471,15 @@ THEN( "^The fixture file has valid JMORIA header$" )
     ScenarioScope<TestCtx> context;
     FILE *fp = fopen( context->fixture_filename.c_str(), "r" );
     ASSERT_NE( fp, (FILE *)NULL );
-    
+
     char buf[256];
-    EXPECT_TRUE( fgets( buf, sizeof(buf), fp ) != NULL );
-    
+    EXPECT_TRUE( fgets( buf, sizeof( buf ), fp ) != NULL );
+
     // Remove newline for comparison
     char *newline = strchr( buf, '\n' );
-    if( newline ) *newline = '\0';
-    
+    if( newline )
+        *newline = '\0';
+
     EXPECT_STREQ( buf, "JMORIA_FIXTURE_v1" );
     fclose( fp );
 }
@@ -496,25 +489,25 @@ THEN( "^The fixture metadata contains correct seed and depth$" )
     ScenarioScope<TestCtx> context;
     FILE *fp = fopen( context->fixture_filename.c_str(), "r" );
     ASSERT_NE( fp, (FILE *)NULL );
-    
+
     char buf[512];
     // Skip header
-    fgets( buf, sizeof(buf), fp );
-    
+    fgets( buf, sizeof( buf ), fp );
+
     // Read metadata
-    EXPECT_TRUE( fgets( buf, sizeof(buf), fp ) != NULL );
-    
+    EXPECT_TRUE( fgets( buf, sizeof( buf ), fp ) != NULL );
+
     unsigned int seed, depth;
     int width, height, rooms, hallways;
-    int result = sscanf( buf, "seed=%u,depth=%u,width=%d,height=%d,rooms=%d,hallways=%d",
-                         &seed, &depth, &width, &height, &rooms, &hallways );
-    
+    int result = sscanf( buf, "seed=%u,depth=%u,width=%d,height=%d,rooms=%d,hallways=%d", &seed,
+                         &depth, &width, &height, &rooms, &hallways );
+
     EXPECT_EQ( result, 6 );
     EXPECT_EQ( seed, 42 );
     EXPECT_EQ( depth, 1 );
     EXPECT_EQ( width, DUNG_WIDTH );
     EXPECT_EQ( height, DUNG_HEIGHT );
-    
+
     fclose( fp );
 }
 
@@ -524,21 +517,21 @@ THEN( "^The fixture file contains ([0-9]+) tile rows$" )
     ScenarioScope<TestCtx> context;
     FILE *fp = fopen( context->fixture_filename.c_str(), "r" );
     ASSERT_NE( fp, (FILE *)NULL );
-    
+
     char buf[4096];
     int row_count = 0;
-    
+
     // Skip header and metadata (2 lines)
-    fgets( buf, sizeof(buf), fp );
-    fgets( buf, sizeof(buf), fp );
-    
+    fgets( buf, sizeof( buf ), fp );
+    fgets( buf, sizeof( buf ), fp );
+
     // Count tile rows
-    while( fgets( buf, sizeof(buf), fp ) )
+    while( fgets( buf, sizeof( buf ), fp ) )
     {
         if( buf[0] != '\0' && buf[0] != '\n' )
             row_count++;
     }
-    
+
     EXPECT_EQ( row_count, expected_rows );
     fclose( fp );
 }
@@ -548,9 +541,8 @@ WHEN( "^I validate dungeon connectivity$" )
 {
     ScenarioScope<TestCtx> context;
 
-    context->connectivity_result = context->map.ValidateConnectivity( 
-        context->reachable_tiles, 
-        context->total_walkable_tiles );
+    context->connectivity_result = context->map.ValidateConnectivity(
+        context->reachable_tiles, context->total_walkable_tiles );
 }
 
 THEN( "^All tiles are reachable$" )
@@ -597,13 +589,13 @@ WHEN( "^I call GetRoomRect with position at ([0-9]+),([0-9]+) direction (north|s
     REGEX_PARAM( int, x );
     REGEX_PARAM( int, y );
     REGEX_PARAM( std::string, direction );
-    
+
     int dir = ( direction == "east" )    ? DIR_EAST
               : ( direction == "west" )  ? DIR_WEST
               : ( direction == "north" ) ? DIR_NORTH
               : ( direction == "south" ) ? DIR_SOUTH
                                          : DIR_NONE;
-    
+
     ScenarioScope<TestCtx> context;
     context->area.Init( x, y, x, y );
     context->result = context->map.GetRoomRect( context->area, dir );
@@ -614,47 +606,49 @@ WHEN( "^I call GetHallRect with position at ([0-9]+),([0-9]+) direction (north|s
     REGEX_PARAM( int, x );
     REGEX_PARAM( int, y );
     REGEX_PARAM( std::string, direction );
-    
+
     int dir = ( direction == "east" )    ? DIR_EAST
               : ( direction == "west" )  ? DIR_WEST
               : ( direction == "north" ) ? DIR_NORTH
               : ( direction == "south" ) ? DIR_SOUTH
                                          : DIR_NONE;
-    
+
     ScenarioScope<TestCtx> context;
     context->area.Init( x, y, x, y );
     context->result = context->map.GetHallRect( context->area, dir );
 }
 
-WHEN( "^I attempt to create a room step at world boundary ([0-9]+),([0-9]+) direction (north|south|east|west)$" )
+WHEN( "^I attempt to create a room step at world boundary ([0-9]+),([0-9]+) direction "
+      "(north|south|east|west)$" )
 {
     REGEX_PARAM( int, x );
     REGEX_PARAM( int, y );
     REGEX_PARAM( std::string, direction );
-    
+
     int dir = ( direction == "east" )    ? DIR_EAST
               : ( direction == "west" )  ? DIR_WEST
               : ( direction == "north" ) ? DIR_NORTH
               : ( direction == "south" ) ? DIR_SOUTH
                                          : DIR_NONE;
-    
+
     ScenarioScope<TestCtx> context;
     JIVector vPos( x, y );
     context->pStep = context->map.CreateRoom( vPos, dir, 0 );
 }
 
-WHEN( "^I attempt to create a hallway step at world boundary ([0-9]+),([0-9]+) direction (north|south|east|west)$" )
+WHEN( "^I attempt to create a hallway step at world boundary ([0-9]+),([0-9]+) direction "
+      "(north|south|east|west)$" )
 {
     REGEX_PARAM( int, x );
     REGEX_PARAM( int, y );
     REGEX_PARAM( std::string, direction );
-    
+
     int dir = ( direction == "east" )    ? DIR_EAST
               : ( direction == "west" )  ? DIR_WEST
               : ( direction == "north" ) ? DIR_NORTH
               : ( direction == "south" ) ? DIR_SOUTH
                                          : DIR_NONE;
-    
+
     ScenarioScope<TestCtx> context;
     JIVector vPos( x, y );
     context->pStep = context->map.CreateHallway( vPos, dir, 0 );
@@ -707,7 +701,8 @@ THEN( "^The hallway step either succeeds with valid geometry or returns NULL$" )
         // If step was created, it should have valid geometry
         EXPECT_GE( context->pStep->m_rcArea.Width(), 0 );
         EXPECT_GE( context->pStep->m_rcArea.Height(), 0 );
-        EXPECT_TRUE( context->pStep->m_rcArea.Width() > 0 || context->pStep->m_rcArea.Height() > 0 );
+        EXPECT_TRUE( context->pStep->m_rcArea.Width() > 0 ||
+                     context->pStep->m_rcArea.Height() > 0 );
         EXPECT_TRUE( context->pStep->m_rcArea.IsWithinWorld() );
     }
     // NULL is also acceptable - creation failed gracefully

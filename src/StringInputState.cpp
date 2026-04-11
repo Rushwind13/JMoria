@@ -62,7 +62,7 @@ int CStringInputState::OnHandleName( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_WARN, true, "Name cmd still waiting for a Alphanumeric key.\n" );
+        JLog( LOG_LEVEL_DEBUG, true, "Name cmd still waiting for a Alphanumeric key.\n" );
         //        g_pGame->GetMsgs()->Printf("Direction(1 2 3 4 6 7 8 9):\n");
         return 0;
     }
@@ -103,7 +103,7 @@ int CStringInputState::OnHandleItem( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_WARN, true, "ITEM cmd still waiting for a Alphanumeric key.\n" );
+        JLog( LOG_LEVEL_DEBUG, true, "ITEM cmd still waiting for a Alphanumeric key.\n" );
         return 0;
     }
 
@@ -146,7 +146,7 @@ int CStringInputState::OnHandleFlag( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_WARN, true, "FLAG cmd still waiting for a Alphanumeric key.\n" );
+        JLog( LOG_LEVEL_DEBUG, true, "FLAG cmd still waiting for a Alphanumeric key.\n" );
         return 0;
     }
 
@@ -186,7 +186,7 @@ int CStringInputState::OnHandleMonster( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_WARN, true, "MONSTER cmd still waiting for a Alphanumeric key.\n" );
+        JLog( LOG_LEVEL_DEBUG, true, "MONSTER cmd still waiting for a Alphanumeric key.\n" );
         return 0;
     }
 
@@ -211,7 +211,7 @@ int CStringInputState::OnHandleHaggle( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_WARN, true, "HAGGLE cmd still waiting for a Numeric key.\n" );
+        JLog( LOG_LEVEL_DEBUG, true, "HAGGLE cmd still waiting for a Numeric key.\n" );
         g_pGame->GetMsgs()->Printf( "Enter a number.\n" );
         return 0;
     }

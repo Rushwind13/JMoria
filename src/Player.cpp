@@ -1059,7 +1059,7 @@ JResult CPlayer::DoDestroyEffects( CEffect *pEffect, int dwItemFlags )
         }
         else
         {
-            JLog( LOG_LEVEL_ERROR, true, "Uncursing\n" );
+            JLog( LOG_LEVEL_DEBUG, true, "Uncursing\n" );
             return DoRemoveCurse();
         }
         break;
@@ -1075,7 +1075,7 @@ JResult CPlayer::DoRemoveCurse()
     {
         if( pLink->m_lpData->m_dwFlags & ITEM_FLAG_CURSED )
         {
-            JLog( LOG_LEVEL_ERROR, true, "Item is cursed %s, uncursing it.\n",
+            JLog( LOG_LEVEL_DEBUG, true, "Item is cursed %s, uncursing it.\n",
                   pLink->m_lpData->GetName() );
             pLink->m_lpData->m_dwFlags &= ~ITEM_FLAG_CURSED;
             break;

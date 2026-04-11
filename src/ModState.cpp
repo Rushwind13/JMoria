@@ -41,7 +41,7 @@ int CModState::OnHandleOpen( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_DEBUG, true,
               "Open cmd still waiting for a directional key: Directional key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
         return 0;
@@ -86,7 +86,7 @@ int CModState::OnHandleClose( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_DEBUG, true,
               "close cmd still waiting for a directional key: Directional key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
         return 0;
@@ -131,7 +131,7 @@ int CModState::OnHandleTunnel( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_DEBUG, true,
               "Tunnel cmd still waiting for a directional key: Directional key not pressed.\n" );
         g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
         return 0;
@@ -186,7 +186,7 @@ int CModState::OnHandleInit( JKeysym *keysym )
             }
             else
             {
-                JLog( LOG_LEVEL_WARN, true, "THROW not implemented yet.\n" );
+                JLog( LOG_LEVEL_INFO, true, "THROW not implemented yet.\n" );
                 ResetToState( STATE_COMMAND );
                 return 0;
             }

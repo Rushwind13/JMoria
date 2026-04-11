@@ -554,7 +554,7 @@ bool CGame::Update( float fCurTime )
             GetPlayer()->DisplayEquipment( PLACEMENT_USE );
             break;
         default:
-            JLog( LOG_LEVEL_WARN, true, "Nothing to display for command\n" );
+            JLog( LOG_LEVEL_DEBUG, true, "Nothing to display for command\n" );
             break;
         }
         GetUse()->Update( fCurTime );
@@ -570,7 +570,7 @@ bool CGame::Update( float fCurTime )
             GetPlayer()->DisplayInventory( PLACEMENT_USE );
             break;
         default:
-            JLog( LOG_LEVEL_WARN, true, "Nothing to display for command\n" );
+            JLog( LOG_LEVEL_DEBUG, true, "Nothing to display for command\n" );
             break;
         }
         GetUse()->Update( fCurTime );
@@ -733,7 +733,7 @@ void CGame::HandleEvents( int &isActive, int &done )
             retval = m_pCurState->HandleKey( &jkey );
             if( retval == JBOGUSKEY )
             {
-                JLog( LOG_LEVEL_ERROR, true, "Bogus command: 0x%x\n", jkey.sym );
+                JLog( LOG_LEVEL_INFO, true, "Bogus command: 0x%x\n", jkey.sym );
                 GetMsgs()->Printf( "Unrecognized command: 0x%x\n", jkey.sym );
             }
             else if( retval == JQUITREQUEST )
@@ -885,7 +885,7 @@ void CGame::HandleEventsASCII( int &isActive, int &done )
     JResult retval = m_pCurState->HandleKey( &keysym );
     if( retval == JBOGUSKEY )
     {
-        JLog( LOG_LEVEL_ERROR, true, "Bogus command: 0x%x\n", keysym.sym );
+        JLog( LOG_LEVEL_INFO, true, "Bogus command: 0x%x\n", keysym.sym );
         GetMsgs()->Printf( "Unrecognized command: 0x%x\n", keysym.sym );
     }
     else if( retval == JQUITREQUEST )

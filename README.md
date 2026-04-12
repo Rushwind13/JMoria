@@ -1,15 +1,27 @@
 # JMoria
 My from-scratch implementation of a Roguelike game that will be an homage to IMoria
 
-Requires SDL2, SDL2_image, OpenGL
+## Build Modes
 
-To compile it, run _"make"_
+JMoria supports three build configurations:
 
-To run it, run _"jmoria"_
+| Command | Renderer | Dependencies |
+|---|---|---|
+| `make` | Both (runtime selection) | SDL2, SDL2_image, OpenGL, ncurses |
+| `make ascii` | ASCII only | ncurses |
+| `make opengl` | OpenGL only | SDL2, SDL2_image, OpenGL |
 
-Keyboard commands recognized:
+## Running
+
+* **ASCII-only build:** `./jmoria` (renders in the current terminal)
+* **OpenGL-only build:** `./jmoria` (opens an OpenGL window)
+* **Both build:** `./jmoria --renderer=ascii` or `./jmoria --renderer=opengl` (required)
+
+## Keyboard commands
 * *Ctrl-C* - Exit
 * *Arrow keys (or numberpad)* - movement
+* *hjklyubn* - movement
+* *HJKLYUBN* - run until disturbed
 * *o* - open a door
 * *c* - close a door
 * *T* - tunnel through rubble
@@ -19,12 +31,21 @@ Keyboard commands recognized:
 * *w* - wield an item
 * *t* - remove (take off) a piece of equipment
 * *d* - drop
+* *** - choose target monster (choose target with *.*)
+* *:* - look (choose target with *.*)
 * *.* - rest one turn
-* *R* - rest indefinitely (not fully implemented)
+* *R* - rest until at full health, or until disturbed
 * *q* - quaff a potion
-* *n* - set character name
+* *r* - read a scroll
+* *z* - zap a wand
+* *N* - set character name
+* *Ctrl-T* - ^t - teleport (Note: will turn on Wizard Mode)
+* *Ctrl-F* - ^f - set player intrinsic flag (Note: needs Wizard Mode)
+* *Ctrl-I* - ^i - create item (Note: needs Wizard Mode)
+* *Ctrl-S* - ^s - summon monster (Note: needs Wizard Mode)
+
 
 Monster definitions are in _Resources/Monsters.txt_
 Item definitions are in _Resources/Items.txt_
 
-Graphics tileset is _Resources/Courier.png_
+Graphics tileset is _Resources/Courier.png_ (OpenGL mode only)

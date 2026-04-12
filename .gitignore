@@ -1,13 +1,37 @@
+.vscode
 .DS_Store
 *.psd
 #*.png
+clockstep_log*.txt
 #*.txt
+scripts/*.txt
+**/knowledge.json
 Scores.txt
 
 # XCode
 *.xcodeproj
 DerivedData
 
+# VSCode
+.vscode/
+
 # G++
 *.o
 jmoria
+jmoria.log
+
+# Cucumber
+bin/
+
+# Ruby Bundler (test dependencies)
+# Gemfile.lock ignored - generated per-platform (Linux vs Mac)
+test/vendor/
+test/.bundle/
+test/Gemfile.lock
+.goo.swp
+
+# Bot local learning state (optional per-user alternates)
+scripts/bot/knowledge.local.json
+# Bot artifacts
+scripts/bot/knowledge.json
+scripts/bot_test_latest.txt

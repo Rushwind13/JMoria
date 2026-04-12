@@ -1,0 +1,64 @@
+{
+  "consumable_knowledge": {},
+  "door_knowledge": {
+    "lock_fail": 1,
+    "lock_success": 120
+  },
+  "item_knowledge": {
+    "best_by_slot": {},
+    "equip_compat": {},
+    "gear_strength": {},
+    "light_sources": {},
+    "value_estimates": {}
+  },
+  "map_knowledge": {
+    "depth_notes": {}
+  },
+  "monster_knowledge": {
+    "giant ant": {
+      "attacks": {
+        "bites": 6
+      },
+      "damage_instances": 5,
+      "damage_taken_total": 9,
+      "hits": 0,
+      "hits_taken": 6,
+      "kills": 0,
+      "max_observed_hit": 3,
+      "misses": 4
+    },
+    "giant snake": {
+      "attacks": {},
+      "damage_instances": 0,
+      "damage_taken_total": 0,
+      "hits": 1,
+      "hits_taken": 0,
+      "kills": 0,
+      "max_observed_hit": 0,
+      "misses": 0
+    },
+    "green icky thing": {
+      "attacks": {},
+      "damage_instances": 0,
+      "damage_taken_total": 0,
+      "hits": 4,
+      "hits_taken": 0,
+      "kills": 3,
+      "max_observed_hit": 0,
+      "misses": 1
+    },
+    "green jelly": {
+      "attacks": {},
+      "damage_instances": 0,
+      "damage_taken_total": 0,
+      "hits": 4,
+      "hits_taken": 0,
+      "kills": 3,
+      "max_observed_hit": 0,
+      "misses": 2
+    }
+  },
+  "non_wieldable_categories": [],
+  "schema_version": 4,
+  "scroll_knowledge": {}
+}

@@ -183,8 +183,15 @@ int CStringInputState::OnHandleMonster( JKeysym *keysym )
         // One way or another, we're done with this state now.
 
         CMonsterDef *pmd = g_pGame->GetDungeon()->GetMonsterDef( m_szInput );
-        JIVector vPos( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
-        CMonster::CreateMonster( pmd, vPos, true );
+        if( pmd != NULL )
+        {
+            JIVector vPos( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+            CMonster::CreateMonster( pmd, vPos, true );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "Unknown monster: %s\n", m_szInput );
+        }
 
         memset( m_szInput, 0, MAX_STRING_LENGTH );
         g_pGame->GetMsgs()->Clear();
@@ -273,12 +280,18 @@ int CStringInputState::OnHandleInit( JKeysym *keysym )
             break;
         case JKEY_f:
             mod = SI_FLAG;
+            g_pGame->GetMsgs()->Clear();
+            g_pGame->GetMsgs()->Printf( "Flag Name: %s", m_szInput );
             break;
         case JKEY_i:
             mod = SI_ITEM;
+            g_pGame->GetMsgs()->Clear();
+            g_pGame->GetMsgs()->Printf( "Item Name: %s", m_szInput );
             break;
         case JKEY_s:
             mod = SI_MONSTER;
+            g_pGame->GetMsgs()->Clear();
+            g_pGame->GetMsgs()->Printf( "Monster Name: %s", m_szInput );
             break;
         default:
             JLog( LOG_LEVEL_ERROR, true,

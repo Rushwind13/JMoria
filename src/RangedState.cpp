@@ -492,11 +492,11 @@ bool CRangedState::DoTrajectory()
         BuildTrajectory();
     }
 
-    JLog( LOG_LEVEL_DEBUG, true, "doing trajectory %d/%d\n",
-          m_llTrajectory->length() - m_dwTrajectory, m_llTrajectory->length() );
-    m_dwClock++;
+    JLog( LOG_LEVEL_DEBUG, true, "doing trajectory %d/%d\n", m_dwClock,
+          m_llTrajectory->length() );
     m_vCurrentPosition.Init(
-        VEC_EXPAND( *( m_llTrajectory->GetNthLink( m_dwTrajectory - 1 )->m_lpData ) ) );
+        VEC_EXPAND( *( m_llTrajectory->GetNthLink( m_dwClock )->m_lpData ) ) );
+    m_dwClock++;
     JVector vTest( VEC_EXPAND( m_vCurrentPosition ) );
     JLog( LOG_LEVEL_DEBUG, true, "pos <%d %d>\n", VEC_EXPAND( m_vCurrentPosition ) );
 
@@ -553,9 +553,7 @@ bool CRangedState::DoTrajectory()
         return false;
     }
 
-    m_dwTrajectory--;
-
-    if( m_dwTrajectory == 0 )
+    if( m_dwClock >= m_dwTrajectory )
     {
         JLog( LOG_LEVEL_DEBUG, true, "RANGED state complete, reset to CMD state.\n" );
         ResetToState( STATE_COMMAND );

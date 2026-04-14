@@ -1,0 +1,27 @@
+# Scenario: Wand of Light
+# Tests ranged wand combat and immunity detection.
+#
+# Setup: Teleport (enters wizard mode), create a Wand of Light,
+# pick it up, then exit wizard mode to test as a normal player.
+#
+# Usage:
+#   bash scripts/crawl_metric.sh --init-file scripts/scenarios/wand_of_light.init --max-turns 100
+
+# Teleport to enter wizard mode
+C-t
+sleep
+
+# Create a Wand of Light (^i = Tab in tmux)
+Tab
+Wand of Light
+Enter
+sleep
+
+# Pick it up
+g
+sleep
+
+# Exit wizard mode
+C-w
+xyzzy
+Enter

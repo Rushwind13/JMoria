@@ -1287,3 +1287,8 @@ void CPlayer::SetWizard()
     }
     m_bWizardMode = true;
 }
+
+void CPlayer::ClearWizard()
+{
+    m_bWizardMode = false;
+}

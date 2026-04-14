@@ -26,6 +26,7 @@ CStringInputState::CStringInputState() : m_cCommand( 0 )
     m_pKeyHandlers[SI_MONSTER] = &CStringInputState::OnHandleMonster;
     m_pKeyHandlers[SI_NAME] = &CStringInputState::OnHandleName;
     m_pKeyHandlers[SI_HAGGLE] = &CStringInputState::OnHandleHaggle;
+    m_pKeyHandlers[SI_PASSWORD] = &CStringInputState::OnHandlePassword;
 
     m_eCurModifier = SI_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -212,6 +213,52 @@ int CStringInputState::OnHandleMonster( JKeysym *keysym )
     return 0;
 }
 
+int CStringInputState::OnHandlePassword( JKeysym *keysym )
+{
+    int retval;
+    JLog( LOG_LEVEL_DEBUG, true, "Handling PASSWORD modifier\n" );
+    retval = OnBaseHandleKey( keysym );
+
+    if( retval == JRESETSTATE )
+    {
+        return 0;
+    }
+
+    if( retval == JCOMPLETESTATE )
+    {
+        JLog( LOG_LEVEL_DEBUG, true,
+              "PASSWORD modifier resetting game state to COMMAND, PASSWORD state to INIT\n" );
+
+        if( Util::jstrcmp( m_szInput, "xyzzy" ) == 0 )
+        {
+            g_pGame->GetPlayer()->ClearWizard();
+            g_pGame->GetMsgs()->Printf( "Wizard Mode: Off. You are still a cheater.\n" );
+            JLog( LOG_LEVEL_WARN, true, "Wizard Mode: Off. You are still a cheater.\n" );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "Incorrect password.\n" );
+        }
+
+        memset( m_szInput, 0, MAX_STRING_LENGTH );
+        g_pGame->GetMsgs()->Clear();
+        ResetToState( STATE_COMMAND );
+    }
+
+    if( retval != JSUCCESS )
+    {
+        JLog( LOG_LEVEL_DEBUG, true, "PASSWORD cmd still waiting for a Alphanumeric key.\n" );
+        return 0;
+    }
+
+    // We got a alpha key; append it to the name
+    JLog( LOG_LEVEL_NOISE, true, "PASSWORD modifier got a alpha\n" );
+    g_pGame->GetMsgs()->Clear();
+    g_pGame->GetMsgs()->Printf( "Password: %s", m_szInput );
+
+    return 0;
+}
+
 int CStringInputState::OnHandleHaggle( JKeysym *keysym )
 {
     int retval;
@@ -292,6 +339,11 @@ int CStringInputState::OnHandleInit( JKeysym *keysym )
             mod = SI_MONSTER;
             g_pGame->GetMsgs()->Clear();
             g_pGame->GetMsgs()->Printf( "Monster Name: %s", m_szInput );
+            break;
+        case JKEY_w:
+            mod = SI_PASSWORD;
+            g_pGame->GetMsgs()->Clear();
+            g_pGame->GetMsgs()->Printf( "Password: %s", m_szInput );
             break;
         default:
             JLog( LOG_LEVEL_ERROR, true,

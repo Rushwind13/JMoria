@@ -280,6 +280,7 @@ public:
     void OnKillMonster( CMonster *pMon );
 
     void SetWizard();
+    void ClearWizard();
     bool IsWizard() { return m_bWizardMode; };
 
     JVector m_vPos;

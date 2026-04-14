@@ -215,11 +215,89 @@ def run_startup() -> bool:
     return True
 
 
+def replay_init_keys(init_keys_str: str) -> None:
+    """Send a sequence of initialization keys before the bot loop starts.
+
+    Keys are comma-separated.  Special tokens:
+      C-x    → Ctrl+x (sent as tmux C-x)
+      Tab    → Tab key (same as Ctrl+I)
+      Enter  → Enter key
+      sleep  → pause 1 second
+      anything else → individual characters sent one at a time
+    """
+    if not init_keys_str:
+        return
+    tokens = [t.strip() for t in init_keys_str.split(",") if t.strip()]
+    log(f"[crawler] Sending {len(tokens)} init-key tokens...")
+    _send_tokens(tokens)
+    log("[crawler] Init keys sent.")
+
+
+def load_init_file(filepath: str) -> None:
+    """Load and replay init keys from a scenario file.
+
+    Scenario file format (one token per line):
+      - Lines starting with '#' are comments
+      - Blank lines are ignored
+      - Each non-comment line is one init-key token (same syntax as --init-keys)
+      - Tokens: C-x (Ctrl+x), Tab, Enter, sleep, or literal text
+
+    Example scenario file::
+
+        # Teleport to enter wizard mode
+        C-t
+        sleep
+        # Create a Wand of Light
+        Tab
+        Wand of Light
+        Enter
+        sleep
+        # Pick it up
+        g
+        sleep
+        # Exit wizard mode
+        C-w
+        xyzzy
+        Enter
+    """
+    path = Path(filepath)
+    if not path.exists():
+        log(f"[crawler] Init file not found: {filepath}")
+        sys.exit(1)
+    tokens = []
+    for line in path.read_text().splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        tokens.append(stripped)
+    log(f"[crawler] Loading {len(tokens)} init tokens from {filepath}")
+    _send_tokens(tokens)
+    log("[crawler] Init file replay complete.")
+
+
+def _send_tokens(tokens: list) -> None:
+    """Send a list of init-key tokens to the game via tmux."""
+    for token in tokens:
+        if token == "Enter":
+            cmd.send_enter()
+        elif token == "Tab":
+            cmd.send("Tab")
+        elif token == "sleep":
+            time.sleep(1.0)
+        elif token.startswith("C-") and len(token) == 3:
+            cmd.send_ctrl(token[2])
+        else:
+            # Send each character individually (e.g. "Wand of Light")
+            for ch in token:
+                cmd.send(ch)
+        time.sleep(TICK_DELAY)
+
+
 # ---------------------------------------------------------------------------
 # Main loop
 # ---------------------------------------------------------------------------
 
-def run_loop(verbose: bool = False, knowledge_file: str = "", think: bool = False) -> None:
+def run_loop(verbose: bool = False, knowledge_file: str = "", think: bool = False, max_turns: int = 0) -> None:
     depth = 1
     prev_msg = ""
     msg_age_turns = 0
@@ -242,6 +320,10 @@ def run_loop(verbose: bool = False, knowledge_file: str = "", think: bool = Fals
         # reflects the actual depth even when staircase messages are missed.
         depth = state.dungeon_depth
         turn += 1
+
+        if max_turns and turn > max_turns:
+            log(f"[crawler] Reached max turns ({max_turns}). Stopping.")
+            break
 
         # Track dungeon depth from messages
         msg = state.last_message
@@ -394,6 +476,22 @@ def main() -> None:
         default="scripts/bot/knowledge.json",
         help="path to persistent learned bot knowledge json",
     )
+    parser.add_argument(
+        "--init-keys",
+        default="",
+        help="comma-separated keys to send before bot starts (e.g. C-t,Tab,Wand of Light,Enter,g,C-w,xyzzy,Enter)",
+    )
+    parser.add_argument(
+        "--init-file",
+        default="",
+        help="path to a scenario file with init keys (one token per line, # comments)",
+    )
+    parser.add_argument(
+        "--max-turns",
+        type=int,
+        default=0,
+        help="stop after this many turns (0 = unlimited)",
+    )
     args = parser.parse_args()
 
     # Propagate session name to submodules
@@ -421,6 +519,19 @@ def main() -> None:
         log("[crawler] Failed to reach dungeon. Exiting.")
         sys.exit(1)
 
+    if args.init_file:
+        time.sleep(0.5)
+        load_init_file(args.init_file)
+        time.sleep(0.5)
+        lines = screen.get_raw_lines()
+        log(f"[crawler] Post-init screen top: {lines[0:3]}")
+    elif args.init_keys:
+        time.sleep(0.5)
+        replay_init_keys(args.init_keys)
+        time.sleep(0.5)
+        lines = screen.get_raw_lines()
+        log(f"[crawler] Post-init screen top: {lines[0:3]}")
+
     # Create think pane after startup so the game pane is already active.
     think_enabled = args.think
     if think_enabled:
@@ -429,7 +540,7 @@ def main() -> None:
             think_enabled = False
 
     try:
-        run_loop(verbose=args.verbose, knowledge_file=args.knowledge_file, think=think_enabled)
+        run_loop(verbose=args.verbose, knowledge_file=args.knowledge_file, think=think_enabled, max_turns=args.max_turns)
     except KeyboardInterrupt:
         log("\n[crawler] Interrupted.")
     finally:

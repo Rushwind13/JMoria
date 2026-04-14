@@ -13,7 +13,10 @@ class CMonster;
 #define PLAYER_BASE_DAMAGE "1d2"
 #define CLASS_HD_WARRIOR "1d10"
 #define PLAYER_MAX_LEVEL 11
+#include "DungeonConstants.h"
+
 #define SIGHT_DISTANCE_PLAYER 5
+#define SIGHT_DISTANCE_LIT DUNG_ROOM_MAX_DIAGONAL
 #define SIGHT_DISTANCE_INFRA 10
 #define SIGHT_DISTANCE_ESP 15
 

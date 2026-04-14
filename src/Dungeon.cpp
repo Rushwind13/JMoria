@@ -772,7 +772,13 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
 
     // check for "in visible range" before doing the
     // more expensive line-of-sight test
-    if( !Util::Nearby( vSource, SIGHT_DISTANCE_PLAYER ).Contains( vTarget ) )
+    // If target is in a lit room, use extended sight distance
+    // (player can see into lit rooms from down the hall through doorways)
+    int sight_distance = SIGHT_DISTANCE_PLAYER;
+    if( prTarget && prTarget->HasFlags( DUNG_FLAG_LIT ) )
+        sight_distance = SIGHT_DISTANCE_LIT;
+
+    if( !Util::Nearby( vSource, sight_distance ).Contains( vTarget ) )
         return false;
 
     // No "see through walls" effects are active
@@ -780,7 +786,7 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
     // the player and the position
     // Use SightCollisionTest to allow vision through doors
     //
-    return Util::Bresenham( vSource, vTarget, SIGHT_DISTANCE_PLAYER, SightCollisionTest );
+    return Util::Bresenham( vSource, vTarget, sight_distance, SightCollisionTest );
 }
 
 bool CDungeon::PlayerCanSee( JVector vCheck, uint32 dwFlags )

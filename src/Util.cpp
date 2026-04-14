@@ -256,66 +256,108 @@ int gcd( const int a, const int b )
 bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 distance,
                 bool ( *isWalkable )( JVector & ), JLinkList<JIVector> *llLine )
 {
-    // Bresenham Line Algorithm
+    JLinkList<JIVector> *pGenerated = GenerateLine( vSource, vTarget, distance );
+    bool result = CheckLineCollision( pGenerated, vSource, isWalkable );
+
+    if( llLine )
+    {
+        // Transfer generated points to caller's list
+        CLink<JIVector> *pLink = pGenerated->GetHead();
+        while( pLink )
+        {
+            llLine->Add( new JIVector( *pLink->m_lpData ) );
+            pLink = pLink->next;
+        }
+    }
+
+    pGenerated->Terminate();
+    delete pGenerated;
+    return result;
+}
+
+JLinkList<JIVector> *GenerateLine( const JIVector vSource, const JIVector vTarget,
+                                    const uint8 distance )
+{
+    JLinkList<JIVector> *llLine = new JLinkList<JIVector>;
+
+    // Bresenham Line Algorithm — pure line generation, no collision checks
     JIVector vDelta( abs( vTarget.x - vSource.x ), abs( vTarget.y - vSource.y ) );
     JIVector vStep( vSource.x < vTarget.x ? 1 : -1, vSource.y < vTarget.y ? 1 : -1 );
     int error = 2 * ( vDelta.y - vDelta.x );
 
-    JVector vTest;
     JIVector vCurrent = vSource;
     bool alreadyAdded = false;
     uint8 steps_remaining = distance;
-    // while( vCurrent.x != vTarget.x || vCurrent.y != vTarget.y )
+
     while( steps_remaining > 0 )
     {
         if( !alreadyAdded )
         {
-            if( llLine )
-                llLine->Add( new JIVector( vCurrent ) );
+            llLine->Add( new JIVector( vCurrent ) );
             alreadyAdded = true;
             steps_remaining--;
             if( steps_remaining == 0 )
                 break;
         }
-        if( vCurrent != vSource )
-        {
-            vTest.Init( VEC_EXPAND( vCurrent ) );
-            if( !isWalkable( vTest ) )
-            {
-                return false;
-            }
-        }
 
         JIVector vNextPos = vCurrent;
         if( error > 0 )
         {
-            vNextPos.y += vStep.y; // Increment y if error is positive
+            vNextPos.y += vStep.y;
             error -= 2 * vDelta.x;
         }
         else
         {
-            vNextPos.x += vStep.x; // Increment x if error is negative
+            vNextPos.x += vStep.x;
             error += 2 * vDelta.y;
-        }
-
-        // Check for diagonal movement - if both X and Y changed, check the diagonal gap
-        if( vNextPos.x != vCurrent.x && vNextPos.y != vCurrent.y )
-        {
-            // Moving diagonally - check both intermediate positions
-            JIVector vDiag1( vNextPos.x, vCurrent.y ); // Step along X first
-            JIVector vDiag2( vCurrent.x, vNextPos.y ); // Step along Y first
-
-            vTest.Init( VEC_EXPAND( vDiag1 ) );
-            if( !isWalkable( vTest ) )
-                return false;
-
-            vTest.Init( VEC_EXPAND( vDiag2 ) );
-            if( !isWalkable( vTest ) )
-                return false;
         }
 
         vCurrent = vNextPos;
         alreadyAdded = false;
+    }
+    return llLine;
+}
+
+bool CheckLineCollision( JLinkList<JIVector> *llLine, const JIVector vSource,
+                          bool ( *isWalkable )( JVector & ) )
+{
+    JVector vTest;
+    CLink<JIVector> *pLink = llLine->GetHead();
+    CLink<JIVector> *pPrev = NULL;
+
+    while( pLink )
+    {
+        JIVector *pCurrent = pLink->m_lpData;
+
+        // Skip collision check on the source tile
+        if( !( pCurrent->x == vSource.x && pCurrent->y == vSource.y ) )
+        {
+            vTest.Init( VEC_EXPAND( *pCurrent ) );
+            if( !isWalkable( vTest ) )
+                return false;
+        }
+
+        // Check for diagonal movement between consecutive points
+        if( pPrev )
+        {
+            JIVector *pPrevPt = pPrev->m_lpData;
+            if( pCurrent->x != pPrevPt->x && pCurrent->y != pPrevPt->y )
+            {
+                JIVector vDiag1( pCurrent->x, pPrevPt->y );
+                JIVector vDiag2( pPrevPt->x, pCurrent->y );
+
+                vTest.Init( VEC_EXPAND( vDiag1 ) );
+                if( !isWalkable( vTest ) )
+                    return false;
+
+                vTest.Init( VEC_EXPAND( vDiag2 ) );
+                if( !isWalkable( vTest ) )
+                    return false;
+            }
+        }
+
+        pPrev = pLink;
+        pLink = pLink->next;
     }
     return true;
 }

@@ -154,11 +154,15 @@ Standard implementation with error-term tracking and diagonal gap checking. Supp
 - ✅ `CDungeon::m_llLOSLine` with `SetLOSLine()`/`ClearLOSLine()`/`IsOnLOSLine()` API
 - Future: Show line in red when blocked vs green when clear
 
-### [P2] Split Bresenham responsibilities
-- Make LOS computation pure: separate line-generation from collision checks
-- New function: `Util::GenerateLine(start, end, distance)` → returns line as `JLinkList<JVector>`
-- Collision check becomes a separate pass over the generated line
-- Enables deterministic unit testing without callback mocking
+### [P2] ✅ IMPLEMENTED — Split Bresenham responsibilities
+- ✅ New `Util::GenerateLine(start, end, distance)` → returns `JLinkList<JIVector>*` (pure line, no callbacks)
+- ✅ New `Util::CheckLineCollision(line, source, isWalkable)` → walks line checking collision callback
+- ✅ `Bresenham()` refactored to compose `GenerateLine()` + `CheckLineCollision()`
+- ✅ `TargetState::UpdateLOSLine()` calls `GenerateLine()` directly (removed `LOSNoCollision` no-op callback)
+- ✅ `RangedState::BuildTrajectory()` calls `GenerateLine()` directly (removed `NoCollisionCheck` no-op callback)
+- ✅ `Dungeon::CanSeeEachOther()` still uses `Bresenham()` with `SightCollisionTest` (needs collision)
+- ✅ 4 new BDD scenarios: GenerateLine horizontal, GenerateLine diagonal, CheckLineCollision pass, CheckLineCollision fail
+- ✅ All 124 scenarios passing
 
 ### [P3] Target mark / persistent tracking
 - Assign stable unique IDs to monsters (consider reusing `CItem`-style instance IDs)

@@ -7,6 +7,7 @@ using cucumber::ScenarioScope;
 static JLinkList<JIVector> *s_bresLine = NULL;
 static bool s_bresResult = true;
 static JIVector s_obstacle( -1, -1 );
+static bool s_collisionResult = true;
 
 // Callback: everything is walkable
 static bool AlwaysWalkable( JVector &v ) { return true; }
@@ -28,6 +29,7 @@ static void CleanupBresLine()
         s_bresLine = NULL;
     }
     s_bresResult = true;
+    s_collisionResult = true;
     s_obstacle.Init( -1, -1 );
 }
 
@@ -69,6 +71,52 @@ WHEN( "^I compute a Bresenham line from ([0-9]+),([0-9]+) to ([0-9]+),([0-9]+) w
     JIVector src( sx, sy );
     JIVector tgt( tx, ty );
     s_bresResult = Util::Bresenham( src, tgt, (uint8)dist, WalkableExceptObstacle, s_bresLine );
+}
+
+WHEN( "^I generate a line from ([0-9]+),([0-9]+) to ([0-9]+),([0-9]+) with distance ([0-9]+)$" )
+{
+    REGEX_PARAM( int, sx );
+    REGEX_PARAM( int, sy );
+    REGEX_PARAM( int, tx );
+    REGEX_PARAM( int, ty );
+    REGEX_PARAM( int, dist );
+    ScenarioScope<TestCtx> context;
+
+    CleanupBresLine();
+    JIVector src( sx, sy );
+    JIVector tgt( tx, ty );
+    s_bresLine = Util::GenerateLine( src, tgt, (uint8)dist );
+}
+
+WHEN( "^I generate a line from ([0-9]+),([0-9]+) to ([0-9]+),([0-9]+) with distance ([0-9]+) and obstacle at ([0-9]+),([0-9]+)$" )
+{
+    REGEX_PARAM( int, sx );
+    REGEX_PARAM( int, sy );
+    REGEX_PARAM( int, tx );
+    REGEX_PARAM( int, ty );
+    REGEX_PARAM( int, dist );
+    REGEX_PARAM( int, ox );
+    REGEX_PARAM( int, oy );
+    ScenarioScope<TestCtx> context;
+
+    CleanupBresLine();
+    s_obstacle.Init( ox, oy );
+    JIVector src( sx, sy );
+    JIVector tgt( tx, ty );
+    s_bresLine = Util::GenerateLine( src, tgt, (uint8)dist );
+}
+
+WHEN( "^I check collision on the line from ([0-9]+),([0-9]+)$" )
+{
+    REGEX_PARAM( int, sx );
+    REGEX_PARAM( int, sy );
+    ScenarioScope<TestCtx> context;
+
+    JIVector src( sx, sy );
+    if( s_obstacle.x >= 0 )
+        s_collisionResult = Util::CheckLineCollision( s_bresLine, src, WalkableExceptObstacle );
+    else
+        s_collisionResult = Util::CheckLineCollision( s_bresLine, src, AlwaysWalkable );
 }
 
 /*#######
@@ -148,4 +196,16 @@ THEN( "^the Bresenham result is true$" )
 {
     ScenarioScope<TestCtx> context;
     EXPECT_TRUE( s_bresResult );
+}
+
+THEN( "^the collision result is true$" )
+{
+    ScenarioScope<TestCtx> context;
+    EXPECT_TRUE( s_collisionResult );
+}
+
+THEN( "^the collision result is false$" )
+{
+    ScenarioScope<TestCtx> context;
+    EXPECT_FALSE( s_collisionResult );
 }

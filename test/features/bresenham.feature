@@ -45,3 +45,24 @@ Feature: Bresenham Line
     Scenario: Zero distance produces empty line
         When I compute a Bresenham line from 0,0 to 5,0 with distance 0
         Then the line has 0 points
+
+    # GenerateLine - pure line generation without collision
+    Scenario: GenerateLine produces same points as Bresenham without obstacles
+        When I generate a line from 0,0 to 5,0 with distance 6
+        Then the line has 6 points
+        And the line contains 0,0 and 1,0 and 2,0 and 3,0 and 4,0 and 5,0
+
+    Scenario: GenerateLine diagonal
+        When I generate a line from 0,0 to 4,4 with distance 5
+        Then the line has 5 points
+
+    # CheckLineCollision - collision checking on a pre-generated line
+    Scenario: CheckLineCollision passes with no obstacles
+        When I generate a line from 0,0 to 5,0 with distance 6
+        And I check collision on the line from 0,0
+        Then the collision result is true
+
+    Scenario: CheckLineCollision fails at obstacle
+        When I generate a line from 0,0 to 5,0 with distance 6 and obstacle at 3,0
+        And I check collision on the line from 0,0
+        Then the collision result is false

@@ -11,8 +11,6 @@
 
 extern CGame *g_pGame;
 
-static bool LOSNoCollision( JVector &vTest ) { return true; }
-
 CTargetState::CTargetState()
     : m_cCommand( 0 ),
       m_llTargets( NULL ),
@@ -309,7 +307,7 @@ void CTargetState::UpdateLOSLine()
 
     JIVector vSource( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
     JIVector vTarget( VEC_EXPAND( pTarget->GetPos() ) );
-    JLinkList<JIVector> *pLine = new JLinkList<JIVector>;
-    Util::Bresenham( vSource, vTarget, SIGHT_DISTANCE_PLAYER, LOSNoCollision, pLine );
+    JLinkList<JIVector> *pLine =
+        Util::GenerateLine( vSource, vTarget, SIGHT_DISTANCE_PLAYER );
     g_pGame->GetDungeon()->SetLOSLine( pLine );
 }

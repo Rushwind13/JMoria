@@ -320,13 +320,10 @@ bool CollisionCheck( JVector &vTest )
     return false;
 }
 
-bool NoCollisionCheck( JVector &viTest ) { return true; }
-
 int CRangedState::BuildTrajectory()
 {
-    m_llTrajectory = new JLinkList<JIVector>;
-    Util::Bresenham( m_vCurrentPosition, m_vTarget, PROJECTILE_RANGE, NoCollisionCheck,
-                     m_llTrajectory );
+    m_llTrajectory =
+        Util::GenerateLine( m_vCurrentPosition, m_vTarget, PROJECTILE_RANGE );
 
     if( m_llTrajectory && m_llTrajectory->length() > 0 )
     {

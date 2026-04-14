@@ -74,11 +74,14 @@ Standard implementation with error-term tracking and diagonal gap checking. Supp
 - **Fix applied**: Confirm (`.`) in `CTargetState::OnBaseHandleKey()` now re-runs `PlayerCanSee()` before accepting the target. If the target is no longer visible, displays "You can no longer see that target." and clears the target.
 - **Test**: Add BDD scenario — select target, close door, confirm, verify rejection message.
 
-### [P0] AIMgr timing during ranged — fragile design
+### [P0] ✅ IMPLEMENTED — AIMgr timing during ranged — documented + assertion guard
 - **Status**: Currently NOT a runtime bug in TURN_BASED mode. `DoLaunch()` calls `SetReadyForUpdate(false)`, which gates `AIMgr::Update()` for the entire trajectory animation. Monsters do not move during projectile flight.
 - **Risk**: This safety depends entirely on the `m_bReadyForUpdate` flag in the `TURN_BASED` code path. Removing TURN_BASED or restructuring `CGame::Update()` would immediately create a race where AIMgr moves monsters while the projectile follows a stale pre-built path.
 - **Position capture**: `UsePlayerTarget()` reads `GetTarget()->GetPos()` from the live `CMonster*` pointer, so the position IS current at capture time. The trajectory is pre-computed from this snapshot and never re-read.
-- **Recommendation**: Document this coupling. Consider resolving hit at trajectory-build time (make animation purely cosmetic) to decouple from update ordering. Add an assertion/guard in `DoTrajectory()` that `m_bReadyForUpdate == false`.
+- **Fix applied**:
+  - Added `assert(!g_pGame->IsReadyForUpdate())` guard at top of `DoTrajectory()` — will catch any future breakage of the timing coupling
+  - Added `IsReadyForUpdate()` getter to `CGame` (TURN_BASED only)
+  - Added documentation comment block above `DoTrajectory()` explaining the timing coupling, the `SetReadyForUpdate` contract, and the risk of removing TURN_BASED
 
 ### [P1] Skip OpenGL tests — get targeting working in ASCII Renderer (#225)
 - ✅ **FIXED**: `HandleEventsASCII` now maps `'*'` (Shift+8) to `JKEY_8 + JMOD_SHIFT`
@@ -108,18 +111,33 @@ Standard implementation with error-term tracking and diagonal gap checking. Supp
 - Seeded dungeon step in `GameSteps.cpp`
 - Public accessors `GetLOSLine()` and `GetTileDef()` added to `Dungeon.h`
 
-### [P1] Add `test/features/ranged.feature`
-- Acceptance tests for CRangedState:
-  - Fire weapon at visible target — projectile hits
-  - Zap wand at visible target — effect applies
-  - Fire at out-of-range target — rejected
-  - Auto-target reuse from previous `*` selection
-  - Projectile trajectory animation renders correctly
+### [P1] ✅ IMPLEMENTED — Add `test/features/ranged.feature`
+- 6 BDD scenarios covering CRangedState lifecycle, all passing
+- Step definitions in `test/features/step_definitions/RangedSteps.cpp`
+- Scenarios:
+  - Zap wand at visible target — projectile hits monster (ranged hit position verified)
+  - Zap with no charges — "Nothing happens.", returns to command state
+  - Auto-target reuses previous `*` selection (enters trajectory state directly)
+  - Projectile trajectory completes and returns to command state
+  - Zap non-zappable item (Torch) — rejected, returns to command state
+  - Fire non-fireable item (Wand) — rejected, returns to command state
+- **Bug fixed**: `OnHandleZap()` and `OnHandleFire()` did not `ResetToState(STATE_COMMAND)` when item type check failed — game would stay stuck in ranged state. Now both paths call `ResetToState(STATE_COMMAND)` and return `JCOMPLETESTATE`.
 
-### [P1] Unit tests for `Util::Bresenham()`
-- Extract pure line-generation function (no callbacks, no logging)
-- Test cases: horizontal, vertical, diagonal, near-diagonal, obstacle blocking, max distance cap, diagonal gap checking
-- Verify against canonical Bresenham output
+### [P1] ✅ IMPLEMENTED — Unit tests for `Util::Bresenham()`
+- 9 BDD scenarios in `test/features/bresenham.feature`, all passing
+- Step definitions in `test/features/step_definitions/BresenhamSteps.cpp`
+- Uses `AlwaysWalkable` and `WalkableExceptObstacle` static callbacks (no game state needed)
+- Scenarios:
+  - Horizontal line east — correct 6 points with exact coordinate verification
+  - Horizontal line west — reverse direction, correct 6 points with coordinates
+  - Vertical line south — correct 6 points with coordinates
+  - Vertical line north — correct 6 points
+  - Diagonal line — correct 5 points
+  - Near-diagonal line — at least 4 points
+  - Distance cap limits line length — 5 steps from longer line
+  - Obstacle blocks line — returns false on collision
+  - Zero distance produces empty line — 0 points
+- Key finding: `distance` param is a step budget, not target distance; algorithm walks past target if budget allows
 
 ### [P1] Cached visible-set + distance-sorted target list
 - ✅ **IMPLEMENTED**: Target list now sorted by taxicab distance (nearest first) using `JLinkList::Add(pData, dist)` sorted insert

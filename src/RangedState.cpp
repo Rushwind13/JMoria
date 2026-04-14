@@ -12,6 +12,8 @@
 #include "Game.h"
 #include "Player.h"
 
+#include "assert.h"
+
 extern CGame *g_pGame;
 
 CRangedState::CRangedState()
@@ -183,6 +185,8 @@ int CRangedState::OnHandleFire( JKeysym *keysym )
     else
     {
         g_pGame->GetMsgs()->Printf( "You can't fire a %s!\n", m_pSelected->m_lpData->GetName() );
+        ResetToState( STATE_COMMAND );
+        return JCOMPLETESTATE;
     }
     return JSUCCESS;
 }
@@ -249,6 +253,8 @@ int CRangedState::OnHandleZap( JKeysym *keysym )
     else
     {
         g_pGame->GetMsgs()->Printf( "You can't zap a %s!\n", m_pSelected->m_lpData->GetName() );
+        ResetToState( STATE_COMMAND );
+        return JCOMPLETESTATE;
     }
     return JSUCCESS;
 }
@@ -467,8 +473,16 @@ bool CRangedState::DoLaunch()
     g_pGame->SetReadyForUpdate( false );
     return true;
 }
+// TIMING COUPLING: DoTrajectory() relies on SetReadyForUpdate(false) being called
+// by DoLaunch() before the trajectory animation begins. This prevents AIMgr::Update()
+// from moving monsters while the projectile follows its pre-computed Bresenham path.
+// The trajectory is a snapshot built at launch time — if monsters moved during flight,
+// the projectile would follow a stale path. ResetToState() calls SetReadyForUpdate(true)
+// to resume normal turn processing after the animation completes.
+// See also: CGame::Update() TURN_BASED path, which gates AIMgr on m_bReadyForUpdate.
 bool CRangedState::DoTrajectory()
 {
+    assert( !g_pGame->IsReadyForUpdate() );
     if( !ReadyToLaunch() )
         return true;
 

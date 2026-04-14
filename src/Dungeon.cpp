@@ -772,7 +772,13 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
 
     // check for "in visible range" before doing the
     // more expensive line-of-sight test
-    if( !Util::Nearby( vSource, SIGHT_DISTANCE_PLAYER ).Contains( vTarget ) )
+    // If target is in a lit room, use extended sight distance
+    // (player can see into lit rooms from down the hall through doorways)
+    int sight_distance = SIGHT_DISTANCE_PLAYER;
+    if( prTarget && prTarget->HasFlags( DUNG_FLAG_LIT ) )
+        sight_distance = SIGHT_DISTANCE_LIT;
+
+    if( !Util::Nearby( vSource, sight_distance ).Contains( vTarget ) )
         return false;
 
     // No "see through walls" effects are active
@@ -780,7 +786,7 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
     // the player and the position
     // Use SightCollisionTest to allow vision through doors
     //
-    return Util::Bresenham( vSource, vTarget, SIGHT_DISTANCE_PLAYER, SightCollisionTest );
+    return Util::Bresenham( vSource, vTarget, sight_distance, SightCollisionTest );
 }
 
 bool CDungeon::PlayerCanSee( JVector vCheck, uint32 dwFlags )
@@ -918,7 +924,11 @@ void CDungeon::DrawDungeon()
             }
             else if( g_pGame->GetGameStateIndex() == STATE_RANGED && vScreen == vProjectile )
             {
-                color = JColor( 100, 100, 0, 255 );
+                color = JColor( 255, 255, 85, 255 );
+            }
+            else if( IsOnLOSLine( vScreen ) )
+            {
+                color = JColor( 85, 255, 255, 255 );
             }
             else if( g_pGame->GetGameStateIndex() != STATE_CLOCKSTEP && IsLit( vScreen ) )
             {
@@ -935,6 +945,21 @@ void CDungeon::DrawDungeon()
 }
 
 void CDungeon::DisturbPlayer() { g_pGame->GetPlayer()->m_bIsDisturbed = true; }
+
+bool CDungeon::IsOnLOSLine( JVector vPos )
+{
+    if( !m_llLOSLine )
+        return false;
+    CLink<JIVector> *pLink = m_llLOSLine->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData && pLink->m_lpData->x == (int)vPos.x &&
+            pLink->m_lpData->y == (int)vPos.y )
+            return true;
+        pLink = pLink->next;
+    }
+    return false;
+}
 
 void CDungeon::DrawItems()
 {
@@ -1068,6 +1093,8 @@ void CDungeon::Term()
         delete m_llItemDefs;
         m_llItemDefs = NULL;
     }
+
+    ClearLOSLine();
 }
 
 void CDungeon::RemoveMonster( CMonster *pMon )
@@ -1075,8 +1102,26 @@ void CDungeon::RemoveMonster( CMonster *pMon )
     CLink<CMonster> *pLink;
     pLink = pMon->m_pllLink;
 
+    // Clear player's target if it points to this monster (prevents dangling pointer)
+    if( g_pGame->GetPlayer()->GetTarget() == pMon )
+    {
+        g_pGame->GetPlayer()->SetTarget( NULL );
+    }
+
     GetTile( pMon->GetPos() )->m_pCurMonster = NULL;
     m_llMonsters->Remove( pLink );
+}
+
+CMonster *CDungeon::FindMonsterByInstanceId( uint32 dwInstanceId )
+{
+    CLink<CMonster> *pLink = m_llMonsters->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData && pLink->m_lpData->GetInstanceId() == dwInstanceId )
+            return pLink->m_lpData;
+        pLink = m_llMonsters->GetNext( pLink );
+    }
+    return NULL;
 }
 
 int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )

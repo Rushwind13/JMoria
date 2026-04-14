@@ -119,6 +119,13 @@ protected:
             return true;
         }
 
+        // Plain digit keys 1-9 as directional (ASCII renderer has no numpad)
+        // Exclude shifted digits (e.g. Shift+8 = '*' is the target command)
+        if( keysym->sym >= JKEY_1 && keysym->sym <= JKEY_9 && !( keysym->mod & JMOD_SHIFT ) )
+        {
+            return true;
+        }
+
         // Use "roguelike" directional keybinds
         char sym = GetAlpha( keysym );
         if( sym == NULL )
@@ -138,53 +145,62 @@ protected:
         {
         case JKEY_UP:
         case JKEY_KP_8:
+        case JKEY_8:
         case JKEY_k:
             // up
             vDir.y = -1;
             break;
         case JKEY_DOWN:
         case JKEY_KP_2:
+        case JKEY_2:
         case JKEY_j:
             // down
             vDir.y = 1;
             break;
         case JKEY_LEFT:
         case JKEY_KP_4:
+        case JKEY_4:
         case JKEY_h:
             // left
             vDir.x = -1;
             break;
         case JKEY_RIGHT:
         case JKEY_KP_6:
+        case JKEY_6:
         case JKEY_l:
             vDir.x = 1;
             // right
             break;
         case JKEY_KP_7:
+        case JKEY_7:
         case JKEY_y:
             // up + left
             vDir.x = -1;
             vDir.y = -1;
             break;
         case JKEY_KP_9:
+        case JKEY_9:
         case JKEY_u:
             // up + right
             vDir.x = 1;
             vDir.y = -1;
             break;
         case JKEY_KP_1:
+        case JKEY_1:
         case JKEY_b:
             // down + left
             vDir.x = -1;
             vDir.y = 1;
             break;
         case JKEY_KP_3:
+        case JKEY_3:
         case JKEY_n:
             // down + right
             vDir.x = 1;
             vDir.y = 1;
             break;
         case JKEY_KP_5:
+        case JKEY_5:
             // rest
             break;
         case JKEY_KP_0:

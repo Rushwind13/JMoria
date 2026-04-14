@@ -69,6 +69,7 @@ public:
 
 #ifdef TURN_BASED
     void SetReadyForUpdate( const bool isReady ) { m_bReadyForUpdate = isReady; }
+    bool IsReadyForUpdate() const { return m_bReadyForUpdate; }
 #endif
 #ifdef CLOCKSTEP
     bool WaitForTick();

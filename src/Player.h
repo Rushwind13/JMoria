@@ -13,7 +13,10 @@ class CMonster;
 #define PLAYER_BASE_DAMAGE "1d2"
 #define CLASS_HD_WARRIOR "1d10"
 #define PLAYER_MAX_LEVEL 11
+#include "DungeonConstants.h"
+
 #define SIGHT_DISTANCE_PLAYER 5
+#define SIGHT_DISTANCE_LIT DUNG_ROOM_MAX_DIAGONAL
 #define SIGHT_DISTANCE_INFRA 10
 #define SIGHT_DISTANCE_ESP 15
 
@@ -108,7 +111,8 @@ public:
           m_bWizardMode( false ),
           m_pClass( NULL ),
           m_pTarget( NULL ),
-          m_vRangedHitPosition( 0, 0 )
+          m_vRangedHitPosition( 0, 0 ),
+          m_llVisibleMonsters( NULL )
     {
         memset( m_szName, 0, MAX_STRING_LENGTH );
         Util::jstrcpy( m_szName, "Anonymous" );
@@ -178,6 +182,7 @@ public:
             delete[] m_szKilledBy;
             m_szKilledBy = NULL;
         }
+        ClearVisibleMonsters();
     };
     const char *GetName() { return m_szName; }
     float GetLevel() { return m_fLevel; }
@@ -280,6 +285,7 @@ public:
     void OnKillMonster( CMonster *pMon );
 
     void SetWizard();
+    void ClearWizard();
     bool IsWizard() { return m_bWizardMode; };
 
     JVector m_vPos;
@@ -324,5 +330,11 @@ protected:
 
     CMonster *m_pTarget;
     JVector m_vRangedHitPosition;
+    JLinkList<uint32> *m_llVisibleMonsters;
+
+public:
+    void UpdateVisibleMonsters();
+    void ClearVisibleMonsters();
+    JLinkList<uint32> *GetVisibleMonsters() { return m_llVisibleMonsters; }
 };
 #endif // __PLAYER_H__

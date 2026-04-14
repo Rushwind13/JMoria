@@ -45,6 +45,7 @@ protected:
     JLinkList<CItemDef> *m_llItemDefs;
     JVector m_vLookPos;
     JVector m_vProjectilePos;
+    JLinkList<JIVector> *m_llLOSLine;
 
 private:
     Uint16 m_dwZoom;
@@ -69,6 +70,7 @@ public:
           m_llOpenArea( NULL ),
           m_llItemDefs( NULL ),
           m_llMonsterDefs( NULL ),
+          m_llLOSLine( NULL ),
           m_dmCurLevel( NULL ) {};
     ~CDungeon() { Term(); }
     void DumpMap();
@@ -96,6 +98,24 @@ public:
         m_vProjectilePos.Init( VEC_EXPAND( vNewPos ) );
     }
     JVector GetProjectilePosition() { return m_vProjectilePos; }
+
+    void SetLOSLine( JLinkList<JIVector> *pLine )
+    {
+        ClearLOSLine();
+        m_llLOSLine = pLine;
+    }
+    void ClearLOSLine()
+    {
+        if( m_llLOSLine )
+        {
+            m_llLOSLine->Terminate();
+            delete m_llLOSLine;
+            m_llLOSLine = NULL;
+        }
+    }
+    bool IsOnLOSLine( JVector vPos );
+    JLinkList<JIVector> *GetLOSLine() { return m_llLOSLine; }
+    CDungeonTileDef *GetTileDef( int idx ) { return &m_dtdlist[idx]; }
 
     JResult OnChangeLevel( const int delta );
 
@@ -155,6 +175,7 @@ public:
     CItemDef *GetItemDef( int which_item );
     bool SpawnMonster( int which_monster );
     void RemoveMonster( CMonster *pMon );
+    CMonster *FindMonsterByInstanceId( uint32 dwInstanceId );
     JResult Modify( JVector &vPos );
     CItem *PickUp( JVector &vPickupPos );
     void Drop( CItem *pItem, JVector &vDropPos );

@@ -13,7 +13,9 @@
 
 #include "Dungeon.h"
 
-#define PROJECTILE_RANGE 8
+#include "DungeonConstants.h"
+
+#define PROJECTILE_RANGE DUNG_PROJECTILE_RANGE
 #define PROJECTILE_UPDATE_INTERVAL 10.0f
 class CRangedState;
 typedef int ( CRangedState::*RangedKeyHandler )( JKeysym *keysym );

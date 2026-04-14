@@ -26,6 +26,11 @@ class DecisionEngine:
         self.learned_non_wieldable_categories = set()
         self.monster_knowledge = {}
         self.consumable_knowledge = {}
+        self._ranged_immunities = set()  # (wand_name, monster_name) pairs
+        self._empty_wands = set()        # wand names with no charges left
+        self._last_zap_wand = None       # wand name used in most recent zap
+        self._last_zap_target_char = None # monster char targeted in most recent zap
+        self._monster_char_to_name = {}  # display char → monster name from feedback
         self.flavor_map = {}  # per-run: flavor name -> observed effect
         self.pending_use_cmd = None  # "q" or "r"
         self.pending_use_slot = None
@@ -358,6 +363,12 @@ class DecisionEngine:
         use_action = self._consider_consumable_use(state, adjacent)
         if use_action:
             return use_action
+
+        # 2b) Ranged combat: zap a wand at a visible non-adjacent monster.
+        if adjacent is None and state.monsters and self._monster_signal_reliable(state):
+            ranged_action = self._consider_ranged_attack(state, pos)
+            if ranged_action:
+                return ranged_action
 
         # 3) Immediate combat: bump-attack adjacent monster.
         # Skip phantom positions (stuck attacking same spot with no feedback).
@@ -1085,6 +1096,8 @@ class DecisionEngine:
         if t.startswith("adjacent_attack"):
             name = self.recent_attacker_name or "monster"
             return f"Fighting {name}"[:60]
+        if t.startswith("ranged_zap"):
+            return f"Zapping wand at monster"[:60]
         if t.startswith("post_combat_rest"):
             return f"Resting after combat ({self.mode})"[:60]
         if t.startswith("goal_item"):
@@ -1634,6 +1647,39 @@ class DecisionEngine:
             if hp_loss > 0:
                 self._monster_damage_note(monster, hp_loss)
 
+        # Ranged combat feedback
+        m = re.search(r"the\s+(.+?)\s+screams in agony", msg, flags=re.IGNORECASE)
+        if m:
+            self.turns_since_combat_feedback = 0
+            self._monster_note(m.group(1), "hits", 1)
+            if self._last_zap_target_char:
+                self._monster_char_to_name[self._last_zap_target_char] = m.group(1).strip().lower()
+            return
+
+        m = re.search(r"the\s+(.+?)\s+shrivels away", msg, flags=re.IGNORECASE)
+        if m:
+            self.turns_since_combat_feedback = 0
+            self._monster_note(m.group(1), "kills", 1)
+            if self._last_zap_target_char:
+                self._monster_char_to_name[self._last_zap_target_char] = m.group(1).strip().lower()
+            return
+
+        m = re.search(r"the\s+(.+?)\s+is unaffected", msg, flags=re.IGNORECASE)
+        if m:
+            self.turns_since_combat_feedback = 0
+            monster_name = m.group(1).strip()
+            if self._last_zap_wand:
+                self._ranged_immunities.add((self._last_zap_wand, monster_name.lower()))
+            if self._last_zap_target_char:
+                self._monster_char_to_name[self._last_zap_target_char] = monster_name.lower()
+            return
+
+        if "nothing happens" in msg.lower():
+            if self._last_zap_wand:
+                self._empty_wands.add(self._last_zap_wand)
+                self._last_zap_wand = None
+            return
+
     def _monster_note(self, monster_name, key, amount):
         name = monster_name.strip().lower()
         if not name:
@@ -1947,6 +1993,46 @@ class DecisionEngine:
             if self._item_category(name) == "potion" and self._is_known_healing_flavor(name):
                 return slot, name
         return None, None
+
+    def _find_inventory_wand(self, inventory):
+        """Find the first usable wand in inventory, return (slot, name) or (None, None)."""
+        for slot, name in (inventory or []):
+            if "wand" in name.lower() and name not in self._empty_wands:
+                return slot, name
+        return None, None
+
+    def _visible_ranged_target(self, pos, monsters, wand_name=None):
+        """Find the nearest visible monster that is NOT adjacent (distance > 1).
+        Skips monsters known to be immune to the given wand."""
+        pr, pc = pos
+        best = None
+        best_dist = 999
+        for mr, mc, ch in monsters:
+            dist = abs(mr - pr) + abs(mc - pc)
+            if dist > 1 and dist < best_dist:
+                if wand_name:
+                    mon_name = self._monster_char_to_name.get(ch)
+                    if mon_name and (wand_name, mon_name) in self._ranged_immunities:
+                        continue
+                best = (mr, mc, ch)
+                best_dist = dist
+        return best
+
+    def _consider_ranged_attack(self, state, pos):
+        """If we have a wand and a non-adjacent visible monster, initiate zap sequence."""
+        wand_slot, wand_name = self._find_inventory_wand(state.inventory)
+        if wand_slot is None:
+            return None
+        target = self._visible_ranged_target(pos, state.monsters, wand_name)
+        if target is None:
+            return None
+        # Remember what we zapped for feedback correlation
+        self._last_zap_wand = wand_name
+        self._last_zap_target_char = target[2]
+        # Queue: z (zap cmd) → slot (wand) → * (target) → . (confirm)
+        self.mode = "combat"
+        self.pending_keys = [wand_slot, "*", "."]
+        return self._record_decision("z", f"ranged_zap_{wand_name}_at_{target[2]}")
 
     def _consider_consumable_use(self, state, adjacent):
         """Decide whether to use a consumable. Returns an action string or None."""

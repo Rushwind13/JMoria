@@ -1,7 +1,6 @@
 #include "TargetState.h"
 
 #include "DisplayText.h"
-#include "DungeonTile.h"
 #include "Game.h"
 #include "JMDefs.h"
 
@@ -106,38 +105,33 @@ int CTargetState::DoInit()
     //         pTarget->UnsetAsTarget();
     //     }
     // }
-    CLink<CMonster> *pLink = g_pGame->GetDungeon()->m_llMonsters->GetHead();
-    CMonster *pMon = NULL;
-    CDungeonTile *monPos = NULL;
-    while( pLink != NULL )
-    {
-        if( !pLink->m_lpData )
-        {
-            pLink = pLink->next;
-            continue;
-        }
-        pMon = pLink->m_lpData;
-        monPos = g_pGame->GetDungeon()->GetTile( pMon->GetPos() );
-        bool bTargeted = false; //( pMon == g_pGame->GetPlayer()->GetTarget() );
-        bool bSeen = true;      //( ( monPos->m_dwFlags & DUNG_FLAG_SEEN ) == DUNG_FLAG_SEEN );
-        bool bPlayerSees = ( g_pGame->GetDungeon()->PlayerCanSee(
-            pMon->GetPos(), pMon->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) );
 
-        JLog( LOG_LEVEL_NOISE, true, "mon: %s target %d seen %d sees %d\n", pMon->GetName(),
-              bTargeted, bSeen, bPlayerSees );
-        if( /*!bTargeted && bSeen && /**/ bPlayerSees )
-        {
-            uint32 *dwTargetable = new uint32( pMon->GetInstanceId() );
-            JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
-            JVector vMonPos = pMon->GetPos();
-            int dist = abs( (int)vMonPos.x - (int)vPlayerPos.x ) +
-                       abs( (int)vMonPos.y - (int)vPlayerPos.y );
-            JLog( LOG_LEVEL_DEBUG, true, "Adding %s to targets instance %d dist %d\n",
-                  pMon->GetName(), pMon->GetInstanceId(), dist );
-            m_llTargets->Add( dwTargetable, dist );
-        }
-        pLink = pLink->next;
+    // Read from cached visible-set (updated each turn by CDungeon::UpdateVisibleMonsters)
+    JLinkList<uint32> *pVisible = g_pGame->GetPlayer()->GetVisibleMonsters();
+    if( !pVisible )
+    {
+        // Cache not yet populated (e.g. first turn); compute on demand
+        g_pGame->GetPlayer()->UpdateVisibleMonsters();
+        pVisible = g_pGame->GetPlayer()->GetVisibleMonsters();
     }
+    if( pVisible )
+    {
+        CLink<uint32> *pLink = pVisible->GetHead();
+        while( pLink != NULL )
+        {
+            CMonster *pMon =
+                g_pGame->GetDungeon()->FindMonsterByInstanceId( *pLink->m_lpData );
+            if( pMon )
+            {
+                uint32 *dwTargetable = new uint32( pMon->GetInstanceId() );
+                JLog( LOG_LEVEL_DEBUG, true, "Adding %s to targets instance %d dist %d\n",
+                      pMon->GetName(), pMon->GetInstanceId(), pLink->m_dwIndex );
+                m_llTargets->Add( dwTargetable, pLink->m_dwIndex );
+            }
+            pLink = pLink->next;
+        }
+    }
+
     if( m_llTargets->length() )
     {
         JLog( LOG_LEVEL_INFO, true, "Total targetable monsters: %d\n", m_llTargets->length() );

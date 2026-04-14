@@ -83,6 +83,7 @@ bool CPlayer::Update( float fCurTime )
         m_fLastLightTime = (float)g_pGame->GetTime();
     }
     UpdateActiveEffects( fCurTime );
+    UpdateVisibleMonsters();
     CheckDisturbance();
     DisplayStats();
     DisplayInventory( PLACEMENT_INV );
@@ -1291,4 +1292,43 @@ void CPlayer::SetWizard()
 void CPlayer::ClearWizard()
 {
     m_bWizardMode = false;
+}
+
+void CPlayer::ClearVisibleMonsters()
+{
+    if( m_llVisibleMonsters )
+    {
+        m_llVisibleMonsters->Terminate();
+        delete m_llVisibleMonsters;
+        m_llVisibleMonsters = NULL;
+    }
+}
+
+void CPlayer::UpdateVisibleMonsters()
+{
+    ClearVisibleMonsters();
+    m_llVisibleMonsters = new JLinkList<uint32>;
+
+    CDungeon *pDungeon = g_pGame->GetDungeon();
+    CLink<CMonster> *pLink = pDungeon->m_llMonsters->GetHead();
+    while( pLink != NULL )
+    {
+        if( !pLink->m_lpData )
+        {
+            pLink = pLink->next;
+            continue;
+        }
+        CMonster *pMon = pLink->m_lpData;
+        bool bPlayerSees = pDungeon->PlayerCanSee(
+            pMon->GetPos(), pMon->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) );
+        if( bPlayerSees )
+        {
+            uint32 *dwVisible = new uint32( pMon->GetInstanceId() );
+            JVector vMonPos = pMon->GetPos();
+            int dist = abs( (int)vMonPos.x - (int)m_vPos.x ) +
+                       abs( (int)vMonPos.y - (int)m_vPos.y );
+            m_llVisibleMonsters->Add( dwVisible, dist );
+        }
+        pLink = pLink->next;
+    }
 }

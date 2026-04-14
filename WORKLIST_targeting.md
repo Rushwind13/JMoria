@@ -139,12 +139,12 @@ Standard implementation with error-term tracking and diagonal gap checking. Supp
   - Zero distance produces empty line — 0 points
 - Key finding: `distance` param is a step budget, not target distance; algorithm walks past target if budget allows
 
-### [P1] Cached visible-set + distance-sorted target list
-- ✅ **IMPLEMENTED**: Target list now sorted by taxicab distance (nearest first) using `JLinkList::Add(pData, dist)` sorted insert
-- ✅ **IMPLEMENTED**: Initial target set to nearest visible monster
-- Maintain a set of visible monsters, recomputed when player moves or world state changes (door open/close, monster move/die)
-- `CTargetState::DoInit()` reads from cache instead of re-scanning entire monster list
-- Consistent target lists; avoids redundant LOS computation
+### [P1] ✅ IMPLEMENTED — Cached visible-set + distance-sorted target list
+- ✅ Target list now sorted by taxicab distance (nearest first) using `JLinkList::Add(pData, dist)` sorted insert
+- ✅ Initial target set to nearest visible monster
+- ✅ `CPlayer::m_llVisibleMonsters` cache recomputed each turn in `CPlayer::Update()`
+- ✅ `CTargetState::DoInit()` reads from cache instead of re-scanning entire monster list
+- ✅ Lazy init on first access if cache not yet populated
 
 ### [P1] ✅ IMPLEMENTED — UI feedback — draw LOS line while targeting
 - ✅ Bresenham LOS line from player to current target rendered in bright cyan (A_BOLD in ASCII)
@@ -153,6 +153,14 @@ Standard implementation with error-term tracking and diagonal gap checking. Supp
 - ✅ Projectile tile color bumped to bright yellow (A_BOLD in ASCII)
 - ✅ `CDungeon::m_llLOSLine` with `SetLOSLine()`/`ClearLOSLine()`/`IsOnLOSLine()` API
 - Future: Show line in red when blocked vs green when clear
+
+### [P2] ✅ IMPLEMENTED — Lit-room field of view
+- ✅ `SIGHT_DISTANCE_LIT = DUNG_ROOM_MAX_DIAGONAL` (28 tiles) for seeing into lit rooms
+- ✅ `CanSeeEachOther()` uses extended range when target is in a lit room
+- ✅ Bresenham LOS through doorways creates natural v → Y → V cone-shaped FOV
+- ✅ Dark hallway sight unchanged at `SIGHT_DISTANCE_PLAYER` (5 tiles)
+- ✅ `PROJECTILE_RANGE = DUNG_ROOM_MAXWIDTH` (20 tiles) — wands reach across rooms
+- ✅ All visibility/range constants derived from room dimensions in `DungeonConstants.h`
 
 ### [P2] ✅ IMPLEMENTED — Split Bresenham responsibilities
 - ✅ New `Util::GenerateLine(start, end, distance)` → returns `JLinkList<JIVector>*` (pure line, no callbacks)
@@ -164,12 +172,20 @@ Standard implementation with error-term tracking and diagonal gap checking. Supp
 - ✅ 4 new BDD scenarios: GenerateLine horizontal, GenerateLine diagonal, CheckLineCollision pass, CheckLineCollision fail
 - ✅ All 124 scenarios passing
 
-### [P3] Target mark / persistent tracking
-- Assign stable unique IDs to monsters (consider reusing `CItem`-style instance IDs)
-- Target "mark" persists across list reordering and state transitions
-- Enables "last target" recall for repeated attacks
+### [P3] ✅ IMPLEMENTED — Target mark / persistent tracking
+- ✅ Stable unique IDs on monsters (`m_dwInstanceID`)
+- ✅ `m_bIsPlayerTarget` flag on `CMonster` — renders target in dark red `(100,0,0)`
+- ✅ `SetTarget()`/`GetTarget()` on Player persist across state transitions
+- ✅ `RangedState` auto-reuses existing target (no re-selection needed)
+- ✅ Target follows monster as it moves (flag on object, not position)
+- ✅ `RemoveMonster()` clears player target on death (prevents dangle)
 
-### [P3] Bot ranged combat support
-- Add targeting/fire/zap commands to `scripts/bot/decision.py`
-- Bot should evaluate ranged vs melee based on distance and available items
-- Enables automated testing of targeting paths via `crawl_metric.sh`
+### [P3] ✅ IMPLEMENTED — Bot ranged combat support
+- ✅ Zap command sequence in `decision.py`: `z` → slot → `*` → `.`
+- ✅ `_consider_ranged_attack()` evaluates ranged vs melee by distance
+- ✅ Immunity tracking: `(wand_name, monster_name)` pairs from "is unaffected" feedback
+- ✅ Empty wand tracking: "nothing happens" marks wand as out of charges
+- ✅ Monster char→name mapping built from combat feedback
+- ✅ `--init-keys` and `--init-file` for scripted scenario testing
+- ✅ `--max-turns` for bounded test runs
+- ✅ Scenario files in `scripts/scenarios/` for reproducible bot tests

@@ -111,7 +111,8 @@ public:
           m_bWizardMode( false ),
           m_pClass( NULL ),
           m_pTarget( NULL ),
-          m_vRangedHitPosition( 0, 0 )
+          m_vRangedHitPosition( 0, 0 ),
+          m_llVisibleMonsters( NULL )
     {
         memset( m_szName, 0, MAX_STRING_LENGTH );
         Util::jstrcpy( m_szName, "Anonymous" );
@@ -181,6 +182,7 @@ public:
             delete[] m_szKilledBy;
             m_szKilledBy = NULL;
         }
+        ClearVisibleMonsters();
     };
     const char *GetName() { return m_szName; }
     float GetLevel() { return m_fLevel; }
@@ -328,5 +330,11 @@ protected:
 
     CMonster *m_pTarget;
     JVector m_vRangedHitPosition;
+    JLinkList<uint32> *m_llVisibleMonsters;
+
+public:
+    void UpdateVisibleMonsters();
+    void ClearVisibleMonsters();
+    JLinkList<uint32> *GetVisibleMonsters() { return m_llVisibleMonsters; }
 };
 #endif // __PLAYER_H__

@@ -26,6 +26,7 @@ CStringInputState::CStringInputState() : m_cCommand( 0 )
     m_pKeyHandlers[SI_MONSTER] = &CStringInputState::OnHandleMonster;
     m_pKeyHandlers[SI_NAME] = &CStringInputState::OnHandleName;
     m_pKeyHandlers[SI_HAGGLE] = &CStringInputState::OnHandleHaggle;
+    m_pKeyHandlers[SI_PASSWORD] = &CStringInputState::OnHandlePassword;
 
     m_eCurModifier = SI_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -93,8 +94,15 @@ int CStringInputState::OnHandleItem( JKeysym *keysym )
         // One way or another, we're done with this state now.
 
         CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( m_szInput );
-        JVector vPos = g_pGame->GetPlayer()->m_vPos;
-        CItem::CreateItem( pid, vPos );
+        if( pid != NULL )
+        {
+            JVector vPos = g_pGame->GetPlayer()->m_vPos;
+            CItem::CreateItem( pid, vPos );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "Unknown item: %s\n", m_szInput );
+        }
 
         memset( m_szInput, 0, MAX_STRING_LENGTH );
         g_pGame->GetMsgs()->Clear();
@@ -176,8 +184,15 @@ int CStringInputState::OnHandleMonster( JKeysym *keysym )
         // One way or another, we're done with this state now.
 
         CMonsterDef *pmd = g_pGame->GetDungeon()->GetMonsterDef( m_szInput );
-        JIVector vPos( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
-        CMonster::CreateMonster( pmd, vPos, true );
+        if( pmd != NULL )
+        {
+            JIVector vPos( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+            CMonster::CreateMonster( pmd, vPos, true );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "Unknown monster: %s\n", m_szInput );
+        }
 
         memset( m_szInput, 0, MAX_STRING_LENGTH );
         g_pGame->GetMsgs()->Clear();
@@ -194,6 +209,52 @@ int CStringInputState::OnHandleMonster( JKeysym *keysym )
     JLog( LOG_LEVEL_NOISE, true, "MONSTER modifier got a alpha\n" );
     g_pGame->GetMsgs()->Clear();
     g_pGame->GetMsgs()->Printf( "Monster Name: %s", m_szInput );
+
+    return 0;
+}
+
+int CStringInputState::OnHandlePassword( JKeysym *keysym )
+{
+    int retval;
+    JLog( LOG_LEVEL_DEBUG, true, "Handling PASSWORD modifier\n" );
+    retval = OnBaseHandleKey( keysym );
+
+    if( retval == JRESETSTATE )
+    {
+        return 0;
+    }
+
+    if( retval == JCOMPLETESTATE )
+    {
+        JLog( LOG_LEVEL_DEBUG, true,
+              "PASSWORD modifier resetting game state to COMMAND, PASSWORD state to INIT\n" );
+
+        if( Util::jstrcmp( m_szInput, "xyzzy" ) == 0 )
+        {
+            g_pGame->GetPlayer()->ClearWizard();
+            g_pGame->GetMsgs()->Printf( "Wizard Mode: Off. You are still a cheater.\n" );
+            JLog( LOG_LEVEL_WARN, true, "Wizard Mode: Off. You are still a cheater.\n" );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "Incorrect password.\n" );
+        }
+
+        memset( m_szInput, 0, MAX_STRING_LENGTH );
+        g_pGame->GetMsgs()->Clear();
+        ResetToState( STATE_COMMAND );
+    }
+
+    if( retval != JSUCCESS )
+    {
+        JLog( LOG_LEVEL_DEBUG, true, "PASSWORD cmd still waiting for a Alphanumeric key.\n" );
+        return 0;
+    }
+
+    // We got a alpha key; append it to the name
+    JLog( LOG_LEVEL_NOISE, true, "PASSWORD modifier got a alpha\n" );
+    g_pGame->GetMsgs()->Clear();
+    g_pGame->GetMsgs()->Printf( "Password: %s", m_szInput );
 
     return 0;
 }
@@ -266,12 +327,23 @@ int CStringInputState::OnHandleInit( JKeysym *keysym )
             break;
         case JKEY_f:
             mod = SI_FLAG;
+            g_pGame->GetMsgs()->Clear();
+            g_pGame->GetMsgs()->Printf( "Flag Name: %s", m_szInput );
             break;
         case JKEY_i:
             mod = SI_ITEM;
+            g_pGame->GetMsgs()->Clear();
+            g_pGame->GetMsgs()->Printf( "Item Name: %s", m_szInput );
             break;
         case JKEY_s:
             mod = SI_MONSTER;
+            g_pGame->GetMsgs()->Clear();
+            g_pGame->GetMsgs()->Printf( "Monster Name: %s", m_szInput );
+            break;
+        case JKEY_w:
+            mod = SI_PASSWORD;
+            g_pGame->GetMsgs()->Clear();
+            g_pGame->GetMsgs()->Printf( "Password: %s", m_szInput );
             break;
         default:
             JLog( LOG_LEVEL_ERROR, true,

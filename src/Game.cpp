@@ -801,9 +801,10 @@ void CGame::HandleEventsASCII( int &isActive, int &done )
         keysym.sym = (JKeycode)( ch - 'A' + 'a' );
         keysym.mod = JMOD_SHIFT;
     }
-    else if( ch >= 1 && ch <= 26 )
+    else if( ch >= 1 && ch <= 26 && ch != '\n' && ch != '\r' )
     {
         // Ctrl+letter: ch 1 = Ctrl+A, ch 3 = Ctrl+C, etc.
+        // Exclude \n (10) and \r (13) so they reach the Enter case below.
         keysym.sym = (JKeycode)( 'a' + ch - 1 );
         keysym.mod = JMOD_CTRL;
     }
@@ -844,6 +845,10 @@ void CGame::HandleEventsASCII( int &isActive, int &done )
             break;
         case ';':
             keysym.sym = JKEY_SEMICOLON;
+            break;
+        case '*': // Shift+8: target command
+            keysym.sym = JKEY_8;
+            keysym.mod = JMOD_SHIFT;
             break;
         case KEY_BACKSPACE:
         case 127: // DEL on some terminals

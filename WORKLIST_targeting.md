@@ -1,0 +1,191 @@
+# JMoria Targeting & Line-of-Sight — Work List
+
+PR: https://github.com/Rushwind13/JMoria/pull/144
+
+## Build & Run Commands
+- Build: `make clean && make ascii`
+- Run: `tmux new-session -d -s crawler -x 200 -y 50 './jmoria 2>/tmp/jmoria_map.txt'`
+- Capture: `tmux capture-pane -t crawler -p`
+- Kill: `tmux kill-session -t crawler`
+- Bot test: `bash /tmp/run_bot_test.sh`
+
+## Key Files
+- `src/TargetState.h` / `src/TargetState.cpp` — target selection state machine
+- `src/RangedState.h` / `src/RangedState.cpp` — ranged attack (fire/zap) state machine
+- `src/Dungeon.cpp` — `PlayerCanSee()`, `CanSeeEachOther()`, `SightCollisionTest()` callback
+- `src/Util.cpp` — `Bresenham()` line-of-sight / trajectory generator
+- `src/Player.h` — `SIGHT_DISTANCE_PLAYER` (5 tiles)
+- `src/CmdState.cpp` — targeting entry point (Shift+8 = `*`)
+
+## Current Architecture
+
+### Target Selection (`CTargetState`)
+`DoInit()` builds a list of targetable monsters by iterating the monster list and calling `CDungeon::PlayerCanSee()` for each. Targets are stored as **list-position indices** (`uint32`) in a `JLinkList<uint32>`. The player cycles targets with `*` and confirms with `.`.
+
+### Line-of-Sight (`CDungeon::CanSeeEachOther`)
+Three-layer visibility check:
+1. **Same-room shortcut** — if both entities are in the same lit room, immediate pass
+2. **Special senses** — ESP (15 tiles, non-empty-mind) and Infravision (10 tiles, warm bodies)
+3. **Bresenham LOS** — range-limited (`SIGHT_DISTANCE_PLAYER` = 5), uses `SightCollisionTest` callback
+
+`SightCollisionTest` blocks on: walls, rubble, closed/secret doors. Open doors and floors are transparent.
+
+### Ranged Attacks (`CRangedState`)
+State-machine flow: `RANGED_INIT` → fire(`f`)/zap(`z`) → item selection → target/direction → trajectory animation → hit resolution.
+- Trajectory built via `Util::Bresenham()` with `NoCollisionCheck` (projectiles fly full range)
+- Hardcoded `PROJECTILE_RANGE` = 8 tiles, animated at 10ms intervals
+- Auto-target: if player already has a target from `*`, ranged commands reuse it
+- `RANGED_LAUNCH` state wired in preparation for full ranged pipeline (thrown weapons, etc.)
+
+### Bresenham (`Util::Bresenham`)
+Standard implementation with error-term tracking and diagonal gap checking. Supports distance limit and optional line collection for trajectory visualization. Mixed responsibilities: line generation, collision checking, logging, and list collection all in one function.
+
+### Wizard Mode
+`PlayerCanSee()` returns `true` unconditionally if wizard mode is active, bypassing all LOS checks.
+
+## Existing Test Coverage
+- `test/features/light.feature` — tests lighting (affects visibility indirectly)
+- `test/features/dungeonmap.feature` — room connectivity (affects same-room shortcut)
+- **No dedicated targeting or ranged feature tests exist**
+
+## Bot / Crawler Status
+- Bot (`scripts/bot/decision.py`) has **no ranged combat logic** — melee only
+- No `fire`, `zap`, or targeting commands in the bot decision engine
+- Bot cannot exercise targeting paths; manual testing or new bot capabilities needed
+
+---
+
+## Priority Worklist
+
+### [P0] ✅ IMPLEMENTED — Dangling target pointer — targeted monster dies
+- **Bug**: `CPlayer::m_pTarget` is a raw `CMonster*` pointer. If the targeted monster is killed by another monster (or despawns), the pointer dangles → use-after-free crash. `OnKillMonster()` clears `m_pTarget` only when the PLAYER kills it; no cleanup path exists for other death causes.
+- **Fix applied**: `CDungeon::RemoveMonster()` now checks if the removed monster is the player's current target, and calls `SetTarget(NULL)` to clear it before removing from the list.
+- **Test**: Add BDD scenario — target monster, another monster kills it, player tries to zap → verify no crash, graceful "target lost" message.
+
+### [P0] ✅ IMPLEMENTED — Target index staleness in CTargetState — bounds & NULL guards
+- **Bug**: `DoInit()` stores monster list-position indices (`uint32`) in `JLinkList<uint32>`. If monsters die, spawn, or the list mutates between `DoInit()` and confirm (`.`), the index can point to the wrong monster or go out of bounds.
+- **Evidence**: `OnBaseHandleKey()` retrieves `m_llMonsters->GetNthLink(*dwTarget)` without bounds checking or identity validation.
+- **Fix applied**: Added bounds checking on the index against current monster list length, and NULL guards on the retrieved link/monster pointer in `OnBaseHandleKey()` target cycling. Stale indices now skip gracefully instead of crashing.
+- **Future**: Consider storing `CMonster*` pointers directly instead of indices for full robustness.
+- **Test**: Add BDD scenario — select target, monster dies before confirm, verify graceful handling.
+
+### [P0] ✅ IMPLEMENTED — Re-validate LOS on confirm
+- **Bug**: LOS depends on map state via `isWalkable` callback. Doors opening/closing or tunneling between selection and confirm silently change outcome.
+- **Fix applied**: Confirm (`.`) in `CTargetState::OnBaseHandleKey()` now re-runs `PlayerCanSee()` before accepting the target. If the target is no longer visible, displays "You can no longer see that target." and clears the target.
+- **Test**: Add BDD scenario — select target, close door, confirm, verify rejection message.
+
+### [P0] ✅ IMPLEMENTED — AIMgr timing during ranged — documented + assertion guard
+- **Status**: Currently NOT a runtime bug in TURN_BASED mode. `DoLaunch()` calls `SetReadyForUpdate(false)`, which gates `AIMgr::Update()` for the entire trajectory animation. Monsters do not move during projectile flight.
+- **Risk**: This safety depends entirely on the `m_bReadyForUpdate` flag in the `TURN_BASED` code path. Removing TURN_BASED or restructuring `CGame::Update()` would immediately create a race where AIMgr moves monsters while the projectile follows a stale pre-built path.
+- **Position capture**: `UsePlayerTarget()` reads `GetTarget()->GetPos()` from the live `CMonster*` pointer, so the position IS current at capture time. The trajectory is pre-computed from this snapshot and never re-read.
+- **Fix applied**:
+  - Added `assert(!g_pGame->IsReadyForUpdate())` guard at top of `DoTrajectory()` — will catch any future breakage of the timing coupling
+  - Added `IsReadyForUpdate()` getter to `CGame` (TURN_BASED only)
+  - Added documentation comment block above `DoTrajectory()` explaining the timing coupling, the `SetReadyForUpdate` contract, and the risk of removing TURN_BASED
+
+### [P1] Skip OpenGL tests — get targeting working in ASCII Renderer (#225)
+- ✅ **FIXED**: `HandleEventsASCII` now maps `'*'` (Shift+8) to `JKEY_8 + JMOD_SHIFT`
+- ✅ **FIXED**: `IsDirectional`/`GetDir` now accept plain digit keys `1`-`9` as directional input (ASCII renderer has no numpad); shifted digits excluded to preserve `*` target command
+- ✅ **FIXED**: Enter key was mapping to `'j'` (move down) — excluded `\n`/`\r` from Ctrl+letter branch
+- ✅ **FIXED**: `StringInputState::OnHandleItem` NULL guard — `CreateItem(NULL, ...)` segfaulted on unknown item names
+- All targeting and ranged test development should use ASCII renderer (`make ascii`)
+- Skip or gate any OpenGL-dependent test paths
+- Ensure `CTargetState` and `CRangedState` work correctly with `CRenderASCII`
+- Validate trajectory rendering in terminal mode
+
+### [P1] ✅ IMPLEMENTED — Add `test/features/targeting.feature`
+- 9 BDD scenarios covering CTargetState lifecycle, all passing
+- Deterministic via `Util::SeedRandom(42)` — same dungeon layout every run
+- Player spawns at (46,36) in large central room; seed-42 map saved to `test/map42.txt`
+- Scenarios:
+  - Visible monster appears in target list
+  - Non-visible monster (behind wall) excluded from target list
+  - Target list sorted by distance (nearest first)
+  - Target cycling wraps around
+  - Confirm selects target and returns to command state
+  - Cancel (ESC) returns to command state
+  - LOS line drawn while targeting
+  - LOS line cleared after targeting exits
+  - Target dies before confirm — handled gracefully
+- Step definitions in `test/features/step_definitions/TargetSteps.cpp`
+- Seeded dungeon step in `GameSteps.cpp`
+- Public accessors `GetLOSLine()` and `GetTileDef()` added to `Dungeon.h`
+
+### [P1] ✅ IMPLEMENTED — Add `test/features/ranged.feature`
+- 6 BDD scenarios covering CRangedState lifecycle, all passing
+- Step definitions in `test/features/step_definitions/RangedSteps.cpp`
+- Scenarios:
+  - Zap wand at visible target — projectile hits monster (ranged hit position verified)
+  - Zap with no charges — "Nothing happens.", returns to command state
+  - Auto-target reuses previous `*` selection (enters trajectory state directly)
+  - Projectile trajectory completes and returns to command state
+  - Zap non-zappable item (Torch) — rejected, returns to command state
+  - Fire non-fireable item (Wand) — rejected, returns to command state
+- **Bug fixed**: `OnHandleZap()` and `OnHandleFire()` did not `ResetToState(STATE_COMMAND)` when item type check failed — game would stay stuck in ranged state. Now both paths call `ResetToState(STATE_COMMAND)` and return `JCOMPLETESTATE`.
+
+### [P1] ✅ IMPLEMENTED — Unit tests for `Util::Bresenham()`
+- 9 BDD scenarios in `test/features/bresenham.feature`, all passing
+- Step definitions in `test/features/step_definitions/BresenhamSteps.cpp`
+- Uses `AlwaysWalkable` and `WalkableExceptObstacle` static callbacks (no game state needed)
+- Scenarios:
+  - Horizontal line east — correct 6 points with exact coordinate verification
+  - Horizontal line west — reverse direction, correct 6 points with coordinates
+  - Vertical line south — correct 6 points with coordinates
+  - Vertical line north — correct 6 points
+  - Diagonal line — correct 5 points
+  - Near-diagonal line — at least 4 points
+  - Distance cap limits line length — 5 steps from longer line
+  - Obstacle blocks line — returns false on collision
+  - Zero distance produces empty line — 0 points
+- Key finding: `distance` param is a step budget, not target distance; algorithm walks past target if budget allows
+
+### [P1] ✅ IMPLEMENTED — Cached visible-set + distance-sorted target list
+- ✅ Target list now sorted by taxicab distance (nearest first) using `JLinkList::Add(pData, dist)` sorted insert
+- ✅ Initial target set to nearest visible monster
+- ✅ `CPlayer::m_llVisibleMonsters` cache recomputed each turn in `CPlayer::Update()`
+- ✅ `CTargetState::DoInit()` reads from cache instead of re-scanning entire monster list
+- ✅ Lazy init on first access if cache not yet populated
+
+### [P1] ✅ IMPLEMENTED — UI feedback — draw LOS line while targeting
+- ✅ Bresenham LOS line from player to current target rendered in bright cyan (A_BOLD in ASCII)
+- ✅ Line updates when cycling targets with `*`
+- ✅ Line cleared on ESC or confirm (`.`)
+- ✅ Projectile tile color bumped to bright yellow (A_BOLD in ASCII)
+- ✅ `CDungeon::m_llLOSLine` with `SetLOSLine()`/`ClearLOSLine()`/`IsOnLOSLine()` API
+- Future: Show line in red when blocked vs green when clear
+
+### [P2] ✅ IMPLEMENTED — Lit-room field of view
+- ✅ `SIGHT_DISTANCE_LIT = DUNG_ROOM_MAX_DIAGONAL` (28 tiles) for seeing into lit rooms
+- ✅ `CanSeeEachOther()` uses extended range when target is in a lit room
+- ✅ Bresenham LOS through doorways creates natural v → Y → V cone-shaped FOV
+- ✅ Dark hallway sight unchanged at `SIGHT_DISTANCE_PLAYER` (5 tiles)
+- ✅ `PROJECTILE_RANGE = DUNG_ROOM_MAXWIDTH` (20 tiles) — wands reach across rooms
+- ✅ All visibility/range constants derived from room dimensions in `DungeonConstants.h`
+
+### [P2] ✅ IMPLEMENTED — Split Bresenham responsibilities
+- ✅ New `Util::GenerateLine(start, end, distance)` → returns `JLinkList<JIVector>*` (pure line, no callbacks)
+- ✅ New `Util::CheckLineCollision(line, source, isWalkable)` → walks line checking collision callback
+- ✅ `Bresenham()` refactored to compose `GenerateLine()` + `CheckLineCollision()`
+- ✅ `TargetState::UpdateLOSLine()` calls `GenerateLine()` directly (removed `LOSNoCollision` no-op callback)
+- ✅ `RangedState::BuildTrajectory()` calls `GenerateLine()` directly (removed `NoCollisionCheck` no-op callback)
+- ✅ `Dungeon::CanSeeEachOther()` still uses `Bresenham()` with `SightCollisionTest` (needs collision)
+- ✅ 4 new BDD scenarios: GenerateLine horizontal, GenerateLine diagonal, CheckLineCollision pass, CheckLineCollision fail
+- ✅ All 124 scenarios passing
+
+### [P3] ✅ IMPLEMENTED — Target mark / persistent tracking
+- ✅ Stable unique IDs on monsters (`m_dwInstanceID`)
+- ✅ `m_bIsPlayerTarget` flag on `CMonster` — renders target in dark red `(100,0,0)`
+- ✅ `SetTarget()`/`GetTarget()` on Player persist across state transitions
+- ✅ `RangedState` auto-reuses existing target (no re-selection needed)
+- ✅ Target follows monster as it moves (flag on object, not position)
+- ✅ `RemoveMonster()` clears player target on death (prevents dangle)
+
+### [P3] ✅ IMPLEMENTED — Bot ranged combat support
+- ✅ Zap command sequence in `decision.py`: `z` → slot → `*` → `.`
+- ✅ `_consider_ranged_attack()` evaluates ranged vs melee by distance
+- ✅ Immunity tracking: `(wand_name, monster_name)` pairs from "is unaffected" feedback
+- ✅ Empty wand tracking: "nothing happens" marks wand as out of charges
+- ✅ Monster char→name mapping built from combat feedback
+- ✅ `--init-keys` and `--init-file` for scripted scenario testing
+- ✅ `--max-turns` for bounded test runs
+- ✅ Scenario files in `scripts/scenarios/` for reproducible bot tests

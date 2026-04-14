@@ -47,6 +47,7 @@ private:
     int OnHandleInit( JKeysym *keysym );
 
     int DoInit();
+    void UpdateLOSLine();
 
     bool TestTarget();
     bool DoTarget();

@@ -34,6 +34,10 @@ JVector Near( const JVector vOrig, int distance = 1 );
 JRect Nearby( const JIVector vTarget, const int radius = 2 );
 bool Taxicab( const JIVector vOrigin, const JIVector vTarget, const uint8 distance = 2 );
 bool WithinRadius( const JIVector vOrigin, const JIVector vTarget, const uint8 distance = 2 );
+JLinkList<JIVector> *GenerateLine( const JIVector vSource, const JIVector vTarget,
+                                   const uint8 distance );
+bool CheckLineCollision( JLinkList<JIVector> *llLine, const JIVector vSource,
+                         bool ( *isWalkable )( JVector & ) );
 bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 distance,
                 bool ( *isWalkable )( JVector & ), JLinkList<JIVector> *llLine = NULL );
 int abs( const int a );

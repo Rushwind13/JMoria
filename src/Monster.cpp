@@ -2,6 +2,8 @@
 #include "DisplayText.h"
 #include "Dungeon.h"
 #include "Game.h"
+static uint32 s_nextMonsterInstanceId = 1;
+
 CMonster::CMonster()
     : m_fHP( 0.0f ),
       m_fCurHP( 0.0f ),
@@ -11,7 +13,8 @@ CMonster::CMonster()
       m_md( NULL ),
       m_pBrain( NULL ),
       m_fColorChangeInterval( COLOR_CHANGE_TIMEOUT + 1 ),
-      m_fLastBreed( BREED_INTERVAL )
+      m_fLastBreed( BREED_INTERVAL ),
+      m_dwInstanceId( 0 )
 {
     m_pBrain = new CAIBrain;
 }
@@ -39,6 +42,10 @@ void CMonster::Init( CMonsterDef *pmd )
     m_fCurAC = pmd->m_fBaseAC;
     m_pCurrentAttack = NULL;
     m_bIsPlayerTarget = false;
+    if( m_dwInstanceId == 0 )
+    {
+        m_dwInstanceId = s_nextMonsterInstanceId++;
+    }
     memset( m_szCurrentFlavorText, 0, sizeof( char ) * 64 );
 }
 

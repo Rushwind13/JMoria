@@ -12,6 +12,8 @@
 #include "Game.h"
 #include "Player.h"
 
+#include "assert.h"
+
 extern CGame *g_pGame;
 
 CRangedState::CRangedState()
@@ -183,6 +185,8 @@ int CRangedState::OnHandleFire( JKeysym *keysym )
     else
     {
         g_pGame->GetMsgs()->Printf( "You can't fire a %s!\n", m_pSelected->m_lpData->GetName() );
+        ResetToState( STATE_COMMAND );
+        return JCOMPLETESTATE;
     }
     return JSUCCESS;
 }
@@ -249,6 +253,8 @@ int CRangedState::OnHandleZap( JKeysym *keysym )
     else
     {
         g_pGame->GetMsgs()->Printf( "You can't zap a %s!\n", m_pSelected->m_lpData->GetName() );
+        ResetToState( STATE_COMMAND );
+        return JCOMPLETESTATE;
     }
     return JSUCCESS;
 }
@@ -314,13 +320,10 @@ bool CollisionCheck( JVector &vTest )
     return false;
 }
 
-bool NoCollisionCheck( JVector &viTest ) { return true; }
-
 int CRangedState::BuildTrajectory()
 {
-    m_llTrajectory = new JLinkList<JIVector>;
-    Util::Bresenham( m_vCurrentPosition, m_vTarget, PROJECTILE_RANGE, NoCollisionCheck,
-                     m_llTrajectory );
+    m_llTrajectory =
+        Util::GenerateLine( m_vCurrentPosition, m_vTarget, PROJECTILE_RANGE );
 
     if( m_llTrajectory && m_llTrajectory->length() > 0 )
     {
@@ -467,8 +470,16 @@ bool CRangedState::DoLaunch()
     g_pGame->SetReadyForUpdate( false );
     return true;
 }
+// TIMING COUPLING: DoTrajectory() relies on SetReadyForUpdate(false) being called
+// by DoLaunch() before the trajectory animation begins. This prevents AIMgr::Update()
+// from moving monsters while the projectile follows its pre-computed Bresenham path.
+// The trajectory is a snapshot built at launch time — if monsters moved during flight,
+// the projectile would follow a stale path. ResetToState() calls SetReadyForUpdate(true)
+// to resume normal turn processing after the animation completes.
+// See also: CGame::Update() TURN_BASED path, which gates AIMgr on m_bReadyForUpdate.
 bool CRangedState::DoTrajectory()
 {
+    assert( !g_pGame->IsReadyForUpdate() );
     if( !ReadyToLaunch() )
         return true;
 
@@ -481,11 +492,11 @@ bool CRangedState::DoTrajectory()
         BuildTrajectory();
     }
 
-    JLog( LOG_LEVEL_DEBUG, true, "doing trajectory %d/%d\n",
-          m_llTrajectory->length() - m_dwTrajectory, m_llTrajectory->length() );
-    m_dwClock++;
+    JLog( LOG_LEVEL_DEBUG, true, "doing trajectory %d/%d\n", m_dwClock,
+          m_llTrajectory->length() );
     m_vCurrentPosition.Init(
-        VEC_EXPAND( *( m_llTrajectory->GetNthLink( m_dwTrajectory - 1 )->m_lpData ) ) );
+        VEC_EXPAND( *( m_llTrajectory->GetNthLink( m_dwClock )->m_lpData ) ) );
+    m_dwClock++;
     JVector vTest( VEC_EXPAND( m_vCurrentPosition ) );
     JLog( LOG_LEVEL_DEBUG, true, "pos <%d %d>\n", VEC_EXPAND( m_vCurrentPosition ) );
 
@@ -542,9 +553,7 @@ bool CRangedState::DoTrajectory()
         return false;
     }
 
-    m_dwTrajectory--;
-
-    if( m_dwTrajectory == 0 )
+    if( m_dwClock >= m_dwTrajectory )
     {
         JLog( LOG_LEVEL_DEBUG, true, "RANGED state complete, reset to CMD state.\n" );
         ResetToState( STATE_COMMAND );

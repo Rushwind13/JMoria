@@ -113,10 +113,23 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
     {
         g_pGame->SetState( STATE_RANGED );
         g_pGame->GetGameState()->HandleKey( keysym );
-        retval = -1;
+        retval = 0;
+    }
+
+    else if( IsPickupCommand( keysym ) )
+    {
+        g_pGame->GetPlayer()->PickUp( g_pGame->GetPlayer()->m_vPos );
+        retval = 0;
     }
 
     // Wizard-mode commands
+
+    else if( IsExitWizardCommand( keysym ) )
+    {
+        g_pGame->SetState( STATE_STRINGINPUT );
+        g_pGame->GetGameState()->HandleKey( keysym );
+        retval = 0;
+    }
 
     else if( IsTeleportCommand( keysym ) )
     {
@@ -399,6 +412,26 @@ bool CCmdState::IsSummonMonsterCommand( JKeysym *keysym )
     {
     case JKEY_s:
         // want ^t not t
+        return ( keysym->mod & JMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
+        break;
+    default:
+        return false;
+        break;
+    }
+
+    return false;
+}
+
+bool CCmdState::IsPickupCommand( JKeysym *keysym )
+{
+    return ( keysym->sym == JKEY_g && !( keysym->mod & ( JMOD_SHIFT | JMOD_CTRL ) ) );
+}
+
+bool CCmdState::IsExitWizardCommand( JKeysym *keysym )
+{
+    switch( keysym->sym )
+    {
+    case JKEY_w:
         return ( keysym->mod & JMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
         break;
     default:

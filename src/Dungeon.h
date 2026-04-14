@@ -175,6 +175,7 @@ public:
     CItemDef *GetItemDef( int which_item );
     bool SpawnMonster( int which_monster );
     void RemoveMonster( CMonster *pMon );
+    CMonster *FindMonsterByInstanceId( uint32 dwInstanceId );
     JResult Modify( JVector &vPos );
     CItem *PickUp( JVector &vPickupPos );
     void Drop( CItem *pItem, JVector &vDropPos );

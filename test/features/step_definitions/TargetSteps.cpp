@@ -4,6 +4,7 @@ using cucumber::ScenarioScope;
 #include "Game.h"
 #include "JKeys.h"
 #include "TargetState.h"
+#include <vector>
 
 /*#######
 ##
@@ -204,4 +205,47 @@ THEN( "^the player has no target$" )
 
     CMonster *pTarget = g_pGame->GetPlayer()->GetTarget();
     EXPECT_EQ( pTarget, nullptr );
+}
+
+THEN( "^the spawned monsters have different instance IDs$" )
+{
+    ScenarioScope<TestCtx> context;
+
+    // Collect all monster instance IDs
+    CLink<CMonster> *pLink = g_pGame->GetDungeon()->m_llMonsters->GetHead();
+    std::vector<uint32> ids;
+    while( pLink )
+    {
+        if( pLink->m_lpData )
+            ids.push_back( pLink->m_lpData->GetInstanceId() );
+        pLink = g_pGame->GetDungeon()->m_llMonsters->GetNext( pLink );
+    }
+    ASSERT_GE( (int)ids.size(), 2 );
+    // All IDs should be unique and non-zero
+    for( size_t i = 0; i < ids.size(); i++ )
+    {
+        EXPECT_NE( ids[i], (uint32)0 );
+        for( size_t j = i + 1; j < ids.size(); j++ )
+        {
+            EXPECT_NE( ids[i], ids[j] );
+        }
+    }
+}
+
+WHEN( "^the ([-A-Za-z ]+) is removed from the dungeon$" )
+{
+    REGEX_PARAM( std::string, monster );
+    ScenarioScope<TestCtx> context;
+
+    CLink<CMonster> *pLink = g_pGame->GetDungeon()->m_llMonsters->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData && Util::jstrcmp( monster.c_str(), pLink->m_lpData->GetName() ) == 0 )
+        {
+            g_pGame->GetDungeon()->RemoveMonster( pLink->m_lpData );
+            return;
+        }
+        pLink = g_pGame->GetDungeon()->m_llMonsters->GetNext( pLink );
+    }
+    FAIL() << "Monster not found: " << monster;
 }

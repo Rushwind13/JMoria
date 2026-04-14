@@ -1106,6 +1106,18 @@ void CDungeon::RemoveMonster( CMonster *pMon )
     m_llMonsters->Remove( pLink );
 }
 
+CMonster *CDungeon::FindMonsterByInstanceId( uint32 dwInstanceId )
+{
+    CLink<CMonster> *pLink = m_llMonsters->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData && pLink->m_lpData->GetInstanceId() == dwInstanceId )
+            return pLink->m_lpData;
+        pLink = m_llMonsters->GetNext( pLink );
+    }
+    return NULL;
+}
+
 int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
 {
     if( !vPos.IsWithinWorld() )

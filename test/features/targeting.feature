@@ -66,3 +66,29 @@ Feature: Targeting
         And the targeted monster is removed
         And I confirm the target
         Then the player has no target
+
+    Scenario: Monsters have unique instance IDs
+        Given I spawn a Kobold, a monster at distance 1
+        And I spawn a Giant Ant, a monster at distance 3
+        Then the spawned monsters have different instance IDs
+
+    Scenario: Target persists after another monster is removed
+        Given I spawn a Kobold, a monster at distance 1
+        And I spawn a Giant Ant, a monster at distance 3
+        When I enter targeting mode
+        And I cycle to the next target
+        Then the target is a Giant Ant
+        When I confirm the target
+        And the Kobold is removed from the dungeon
+        Then the player has a target
+        And the target is a Giant Ant
+
+    Scenario: Target survives retargeting after monster list mutation
+        Given I spawn a Kobold, a monster at distance 1
+        And I spawn a Giant Ant, a monster at distance 2
+        And I spawn a Red Jelly, a monster at distance 3
+        When I enter targeting mode
+        And I confirm the target
+        And the Kobold is removed from the dungeon
+        When I enter targeting mode
+        Then the target is a Giant Ant

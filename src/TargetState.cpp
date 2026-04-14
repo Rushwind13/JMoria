@@ -109,7 +109,6 @@ int CTargetState::DoInit()
     CLink<CMonster> *pLink = g_pGame->GetDungeon()->m_llMonsters->GetHead();
     CMonster *pMon = NULL;
     CDungeonTile *monPos = NULL;
-    uint32 count = 0;
     while( pLink != NULL )
     {
         if( !pLink->m_lpData )
@@ -128,26 +127,25 @@ int CTargetState::DoInit()
               bTargeted, bSeen, bPlayerSees );
         if( /*!bTargeted && bSeen && /**/ bPlayerSees )
         {
-            uint32 *dwTargetable = new uint32( count );
+            uint32 *dwTargetable = new uint32( pMon->GetInstanceId() );
             JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
             JVector vMonPos = pMon->GetPos();
             int dist = abs( (int)vMonPos.x - (int)vPlayerPos.x ) +
                        abs( (int)vMonPos.y - (int)vPlayerPos.y );
-            JLog( LOG_LEVEL_DEBUG, true, "Adding %s to targets mon %d at idx %d dist %d\n",
-                  pMon->GetName(), pMon->m_pllLink->m_dwIndex, *dwTargetable, dist );
+            JLog( LOG_LEVEL_DEBUG, true, "Adding %s to targets instance %d dist %d\n",
+                  pMon->GetName(), pMon->GetInstanceId(), dist );
             m_llTargets->Add( dwTargetable, dist );
         }
         pLink = pLink->next;
-        count++;
     }
     if( m_llTargets->length() )
     {
         JLog( LOG_LEVEL_INFO, true, "Total targetable monsters: %d\n", m_llTargets->length() );
         // Set initial target to nearest monster (first in distance-sorted list)
         uint32 *dwFirst = m_llTargets->GetHead()->m_lpData;
-        CLink<CMonster> *pFirst = g_pGame->GetDungeon()->m_llMonsters->GetNthLink( *dwFirst );
-        if( pFirst && pFirst->m_lpData )
-            g_pGame->GetPlayer()->SetTarget( pFirst->m_lpData );
+        CMonster *pFirst = g_pGame->GetDungeon()->FindMonsterByInstanceId( *dwFirst );
+        if( pFirst )
+            g_pGame->GetPlayer()->SetTarget( pFirst );
         UpdateLOSLine();
     }
     else
@@ -215,25 +213,16 @@ int CTargetState::OnBaseHandleKey( JKeysym *keysym )
         }
         uint32 *dwTarget = m_llTargets->GetNthLink( m_dwCurrentSelection )->m_lpData;
 
-        // Bounds-check: index may be stale if monster list mutated since DoInit()
-        if( *dwTarget >= (uint32)g_pGame->GetDungeon()->m_llMonsters->length() )
+        CMonster *pMon = g_pGame->GetDungeon()->FindMonsterByInstanceId( *dwTarget );
+        if( !pMon )
         {
-            JLog( LOG_LEVEL_WARN, true, "Target index %d out of bounds (list size %d), skipping\n",
-                  *dwTarget, g_pGame->GetDungeon()->m_llMonsters->length() );
-            return JSUCCESS;
-        }
-
-        CLink<CMonster> *pLink = g_pGame->GetDungeon()->m_llMonsters->GetNthLink( *dwTarget );
-        if( !pLink || !pLink->m_lpData )
-        {
-            JLog( LOG_LEVEL_WARN, true, "Target index %d returned NULL monster, skipping\n",
+            JLog( LOG_LEVEL_WARN, true, "Target instance %d no longer exists, skipping\n",
                   *dwTarget );
             return JSUCCESS;
         }
 
-        CMonster *pMon = pLink->m_lpData;
-        JLog( LOG_LEVEL_INFO, true, "desired monster index: %d retrieved idx %d, monster: %s\n",
-              *dwTarget, pMon->m_pllLink->m_dwIndex, pMon->GetName() );
+        JLog( LOG_LEVEL_INFO, true, "desired monster instance: %d, monster: %s\n",
+              *dwTarget, pMon->GetName() );
         g_pGame->GetPlayer()->SetTarget( pMon );
         UpdateLOSLine();
         return JSUCCESS;

@@ -14,8 +14,9 @@ Complete implementation of ranged mundane weapons (bows/arrows, slings/stones, c
 
 ### 1. Fix Existing Longbow Configuration ⚠️ BLOCKER
 - Longbows in Items.txt currently have damage set to 1d8 (incorrect)
-- Should be 1d2 (reload time penalty for ranged weapons)
+- Should be 1d2 (melee damage; bows don't do meaningful melee damage)
 - Longbows must be in secondary weapon slot; cannot be wielded as melee weapons
+- Actual damage comes from arrows (e.g., Flight arrows: 1d8)
 - **Impact**: Breaks balance; prevents testing of fire command
 
 ### 2. Implement x)change Command (Primary → Secondary Swap)
@@ -43,10 +44,12 @@ Complete implementation of ranged mundane weapons (bows/arrows, slings/stones, c
 ### Data & Constants
 - [ ] Fix Longbow damage: 1d8 → 1d2 in [Resources/Items.txt](Resources/Items.txt)
 - [ ] Add ITEM_IDX_ARROW to [src/Constants.h](src/Constants.h)
-- [ ] Add ITEM_IDX_ARROW entry to [Resources/Items.txt](Resources/Items.txt)
-- [ ] Add ITEM_IDX_STONE (for slings)
-- [ ] Add ITEM_IDX_BOLT (for crossbows)
+- [ ] Add ITEM_IDX_ARROW entry to [Resources/Items.txt](Resources/Items.txt) with damage 1d8
+- [ ] Add ITEM_IDX_ARROW_WOUNDING to [Resources/Items.txt](Resources/Items.txt) with damage 1d8 + bleed effect
+- [ ] Add ITEM_IDX_STONE (for slings) with appropriate damage
+- [ ] Add ITEM_IDX_BOLT (for crossbows) with appropriate damage
 - [ ] Mark weapons with ammo type compatibility (BOW→ARROW, SLING→STONE, CROSSBOW→BOLT)
+- [ ] Verify bow enchantments (+to hit, +damage, special properties) apply to ammo, not bow melee attacks
 
 ### Weapon Exchange Command (x)change)
 - [ ] Implement x)change keybinding in CmdState
@@ -108,15 +111,37 @@ Optional:
 
 ## TECHNICAL NOTES
 
+### Damage Model: Ammo-Centric Architecture
+
+**Critical Design Principle**: Ammo does the damage, not the bow. Bows are delivery mechanisms.
+
+- **Bows**: Always do 1d2 base damage (equivalent to unarmed strike)
+  - Even unique/magical bows (e.g., "Foe Halter Bow of The Ancients +13 to hit, +15 damage") do 1d2 in melee
+  - Bow enchantments (+to hit, +damage) only apply when firing arrows through them
+  
+- **Arrows**: Carry the actual damage
+  - Flight arrows: 1d8 damage
+  - Arrows of Wounding: 1d8 + magical bonus + bleed effect (N turns)
+  - Arrows can only be fired; cannot be wielded directly as melee weapons
+  - Magical properties on arrow apply regardless of bow type
+  
+- **Magical Bow Properties** enhance fired arrows:
+  - +to hit bonus applies to arrow accuracy
+  - +damage bonus adds to arrow damage
+  - Special properties (Fire, Shards, etc.) apply to all arrows passing through
+  - Example: "Bow of The Ancients +13 to hit, +15 damage" adds +13/+15 to every arrow fired, plus fire/shards damage
+
+- **Consequence**: Player must x)exchange back to melee weapon after ranged combat; forgot to swap = stuck with 1d2 damage
+
 ### Ammo Compatibility Table
 ```
-Weapon Type    | Ammo Type      | Min Range | Max Range
-Short bow      | Arrow          | 2         | 8
-Long bow       | Arrow          | 2         | 15
-Composite bow  | Arrow          | 2         | 20
-Sling          | Stone          | 1         | 10
-Crossbow       | Bolt           | 3         | 18
-Wand (magic)   | Charge         | N/A       | 20+
+Weapon Type    | Ammo Type      | Damage Source  | Min Range | Max Range
+Short bow      | Arrow          | Arrow type     | 2         | 8
+Long bow       | Arrow          | Arrow type     | 2         | 15
+Composite bow  | Arrow          | Arrow type     | 2         | 20
+Sling          | Stone          | Stone type     | 1         | 10
+Crossbow       | Bolt           | Bolt type      | 3         | 18
+Wand (magic)   | Charge         | Wand enchant   | N/A       | 20+
 ```
 
 ### Implementation Strategy

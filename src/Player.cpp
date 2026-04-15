@@ -1251,7 +1251,7 @@ void CPlayer::ClearVisibleMonsters()
 void CPlayer::UpdateVisibleMonsters()
 {
     ClearVisibleMonsters();
-    m_llVisibleMonsters = new JLinkList<uint32>;
+    m_llVisibleMonsters = new JLinkList<CMonster>( false );
 
     CDungeon *pDungeon = g_pGame->GetDungeon();
     CLink<CMonster> *pLink = pDungeon->m_llMonsters->GetHead();
@@ -1267,12 +1267,18 @@ void CPlayer::UpdateVisibleMonsters()
             pMon->GetPos(), pMon->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) );
         if( bPlayerSees )
         {
-            uint32 *dwVisible = new uint32( pMon->GetInstanceId() );
             JVector vMonPos = pMon->GetPos();
             int dist = abs( (int)vMonPos.x - (int)m_vPos.x ) +
                        abs( (int)vMonPos.y - (int)m_vPos.y );
-            m_llVisibleMonsters->Add( dwVisible, dist );
+            m_llVisibleMonsters->Add( pMon, dist, pMon->GetInstanceId() );
         }
         pLink = pLink->next;
     }
+}
+
+JLinkList<CMonster> *CPlayer::GetVisibleMonsters()
+{
+    if( !m_llVisibleMonsters )
+        UpdateVisibleMonsters();
+    return m_llVisibleMonsters;
 }

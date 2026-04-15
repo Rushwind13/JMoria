@@ -14,6 +14,11 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
     // If you haven't handled the key by the end of this function,
     // it's an invalid key, so return an error.
     int retval = -1;
+
+    // Panel toggles are display-only and don't consume a game turn.
+    if( IsToggleCommand( keysym ) )
+        return JHANDLED_NOTURN;
+
     if( IsDirectional( keysym ) )
     {
         JVector vTestDir( 0, 0 );
@@ -439,6 +444,26 @@ bool CCmdState::IsExitWizardCommand( JKeysym *keysym )
         break;
     }
 
+    return false;
+}
+
+bool CCmdState::IsToggleCommand( JKeysym *keysym )
+{
+    if( keysym->sym == JKEY_i && keysym->mod == JMOD_NONE )
+    {
+        g_pGame->ToggleInv();
+        return true;
+    }
+    if( keysym->sym == JKEY_e && keysym->mod == JMOD_NONE )
+    {
+        g_pGame->ToggleEquip();
+        return true;
+    }
+    if( keysym->sym == JKEY_c && ( keysym->mod & JMOD_SHIFT ) )
+    {
+        g_pGame->ToggleStats();
+        return true;
+    }
     return false;
 }
 

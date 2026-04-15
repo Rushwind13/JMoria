@@ -323,11 +323,12 @@ protected:
 
     CMonster *m_pTarget;
     JVector m_vRangedHitPosition;
-    JLinkList<uint32> *m_llVisibleMonsters;
+    JLinkList<CMonster> *m_llVisibleMonsters;
 
 public:
     void UpdateVisibleMonsters();
     void ClearVisibleMonsters();
-    JLinkList<uint32> *GetVisibleMonsters() { return m_llVisibleMonsters; }
+    JLinkList<CMonster> *GetVisibleMonsters();
+
 };
 #endif // __PLAYER_H__

@@ -23,7 +23,6 @@
 #include "DisplayText.h"
 #ifdef RENDER_OPENGL
 #include "Render.h"
-#include "SDL2/SDL.h"
 #endif
 #ifdef RENDER_ASCII
 #include "RenderASCII.h"
@@ -91,35 +90,25 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     {
         m_pRender = new CRenderNull;
     }
-#if defined( RENDER_ASCII ) && defined( RENDER_OPENGL )
+#ifdef RENDER_ASCII
     else if( m_eRenderMode == RenderMode::ASCII )
     {
         m_pRender = new CRenderASCII;
         result = m_pRender->Init( 80, 24, 0 );
     }
+#endif
+#ifdef RENDER_OPENGL
     else if( m_eRenderMode == RenderMode::OpenGL )
     {
         m_pRender = new CRender;
         result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
     }
+#endif
     else
     {
         JLog( LOG_LEVEL_ERROR, true, "No render mode specified.\n" );
         return 1;
     }
-#elif defined( RENDER_ASCII )
-    else
-    {
-        m_pRender = new CRenderASCII;
-        result = m_pRender->Init( 80, 24, 0 );
-    }
-#elif defined( RENDER_OPENGL )
-    else
-    {
-        m_pRender = new CRender;
-        result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
-    }
-#endif
     if( m_pRender && result != JSUCCESS )
     {
         m_pRender->Term();
@@ -144,13 +133,12 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     m_pEndGameDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, 480 ), 255 );
     m_pEndGameDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
 
-    if( m_eRenderMode == RenderMode::ASCII )
-    {
-#ifdef RENDER_ASCII
-        UpdateASCIILayout();
-        m_bShowInv = ( m_pRender->GetScreenWidth() >= ASCIILayout::INV_AUTO_WIDTH );
-#endif
-    }
+    // Let the renderer configure display region rects for its coordinate system
+    m_pRender->ConfigureDisplayRegions( m_pMsgsDT, m_pStatsDT, m_pInvDT, m_pEquipDT, m_pUseDT,
+                                        m_pEndGameDT );
+
+    m_bShowInv = m_pRender->ShouldAutoShowInventory();
+    m_bShowEquip = m_pRender->ShouldAutoShowEquipment();
 
     m_pAIMgr = new CAIMgr;
     m_pAIMgr->Init();
@@ -588,27 +576,6 @@ bool CGame::Update( float fCurTime )
     return true;
 }
 
-// Convert ASCIILayout regions (char coords) to pixel-space JRects
-// that DisplayText expects (x*6, y*8).
-#ifdef RENDER_ASCII
-void CGame::UpdateASCIILayout()
-{
-    CRenderASCII *pASCII = static_cast<CRenderASCII *>( m_pRender );
-    const ASCIILayout &l = pASCII->GetLayout();
-
-    auto toPixelRect = []( const ASCIILayoutRegion &r )
-    { return JRect( r.left * 6, r.top * 8, r.right * 6, r.bottom * 8 ); };
-
-    m_pMsgsDT->SetRect( toPixelRect( l.messages ) );
-    m_pStatsDT->SetRect( toPixelRect( l.stats ) );
-    m_pInvDT->SetRect( toPixelRect( l.inventory ) );
-    m_pEquipDT->SetRect( toPixelRect( l.equipment ) );
-    m_pUseDT->SetRect( toPixelRect( l.use ) );
-    m_pEndGameDT->SetRect( toPixelRect( l.endgame ) );
-    m_pEndGameDT->SetContentMargin( 0, 0 );
-}
-#endif // RENDER_ASCII
-
 void CGame::Draw()
 {
     bool bResized = GetRender()->CheckResize();
@@ -617,13 +584,13 @@ void CGame::Draw()
     bool bASCII = ( m_eRenderMode == RenderMode::ASCII );
 
     // After resize, update DisplayText rects and auto-show/hide inventory
-#ifdef RENDER_ASCII
-    if( bASCII && bResized )
+    if( bResized )
     {
-        UpdateASCIILayout();
-        m_bShowInv = ( GetRender()->GetScreenWidth() >= ASCIILayout::INV_AUTO_WIDTH );
+        GetRender()->ConfigureDisplayRegions( m_pMsgsDT, m_pStatsDT, m_pInvDT, m_pEquipDT, m_pUseDT,
+                                              m_pEndGameDT );
+        if( bASCII )
+            m_bShowInv = GetRender()->ShouldAutoShowInventory();
     }
-#endif
 
     bool bOverlayState = ( m_eCurState == STATE_INTRO || m_eCurState == STATE_ENDGAME );
 
@@ -639,22 +606,13 @@ void CGame::Draw()
 
         GetMsgs()->Draw();
 
-        // In ASCII mode, stats/inv/equip are fly-out panels toggled by c/i/e
-        if( !bASCII )
-        {
+        // Panel visibility toggled by i/e/C keys
+        if( m_bShowStats )
             GetStats()->Draw();
+        if( m_bShowInv )
             GetInv()->Draw();
+        if( m_bShowEquip )
             GetEquip()->Draw();
-        }
-        else
-        {
-            if( m_bShowStats )
-                GetStats()->Draw();
-            if( m_bShowInv )
-                GetInv()->Draw();
-            if( m_bShowEquip )
-                GetEquip()->Draw();
-        }
     }
 
     if( m_eCurState == STATE_USE )
@@ -684,218 +642,30 @@ void CGame::Draw()
 
 void CGame::HandleEvents( int &isActive, int &done )
 {
-#ifdef RENDER_ASCII
-    if( m_eRenderMode == RenderMode::ASCII )
-    {
-        HandleEventsASCII( isActive, done );
-        return;
-    }
-#endif
-
-#ifdef RENDER_OPENGL
-    // used to collect events
-    SDL_Event event;
+    JInputEvent event;
     JResult retval;
 
-    while( SDL_PollEvent( &event ) )
+    while( m_pRender->PollEvent( event ) )
     {
         switch( event.type )
         {
-        case SDL_WINDOWEVENT:
-            switch( event.window.event )
-            {
-            // Something's happend with our focus
-            // If we lost focus or we are iconified, we
-            // shouldn't draw the screen
-            case SDL_WINDOWEVENT_FOCUS_GAINED:
-                isActive = true;
-                break;
-            case SDL_WINDOWEVENT_FOCUS_LOST:
-                isActive = false;
-                break;
-            case SDL_WINDOWEVENT_RESIZED:
-                // used to be SDL_VIDEORESIZE:
-                retval = static_cast<CRender *>( GetRender() )
-                             ->ResizeWindow( event.window.data1, event.window.data2 );
-                if( retval != JSUCCESS )
-                {
-                    Quit( retval );
-                }
-                break;
-            }
-            break;
-        case SDL_KEYDOWN:
-        {
-            // Translate SDL keysym to JMoria keysym at the boundary
-            JKeysym jkey;
-            jkey.sym = (JKeycode)event.key.keysym.sym;
-            jkey.mod = (JKeymod)event.key.keysym.mod;
-            retval = m_pCurState->HandleKey( &jkey );
+        case JInputEvent::KEY:
+            retval = m_pCurState->HandleKey( &event.keysym );
             if( retval == JBOGUSKEY )
             {
-                JLog( LOG_LEVEL_INFO, true, "Bogus command: 0x%x\n", jkey.sym );
-                GetMsgs()->Printf( "Unrecognized command: 0x%x\n", jkey.sym );
+                JLog( LOG_LEVEL_INFO, true, "Bogus command: 0x%x\n", event.keysym.sym );
+                GetMsgs()->Printf( "Unrecognized command: 0x%x\n", event.keysym.sym );
             }
             else if( retval == JQUITREQUEST )
             {
                 Quit( 0 );
             }
             break;
-        }
-        case SDL_QUIT:
-            // handle quit requests
+        case JInputEvent::QUIT:
             done = true;
             break;
-        case SDL_MOUSEBUTTONDOWN:
-        case SDL_MOUSEBUTTONUP:
-            if( event.button.state == SDL_RELEASED )
-            {
-                // Nothing to see here.
-                break;
-            }
-            switch( event.button.button )
-            {
-            case MOUSE_WHEEL_UP:
-                g_pGame->GetDungeon()->Zoom( 3 );
-                break;
-            case MOUSE_WHEEL_DOWN:
-                g_pGame->GetDungeon()->Zoom( -3 );
-                break;
-            }
-            /*JLog( LOG_LEVEL_NOISE, true, "Got up event type: %d which: %d button: %d state: %d at
-            <%d %d>\n", event.button.type, event.button.which, event.button.button,
-            event.button.state, event.button.x, event.button.y );/* */
-            break;
         default:
-            JLog( LOG_LEVEL_NOISE, true, "unhandled event type: %d\n", event.type );
             break;
         }
-    }
-#endif // RENDER_OPENGL
-}
-
-#ifdef RENDER_ASCII
-void CGame::HandleEventsASCII( int &isActive, int &done )
-{
-    int ch = getch();
-    if( ch == ERR )
-        return; // no input available
-
-    // Terminal resize: consume the event, PreDraw handles the actual resize
-    if( ch == KEY_RESIZE )
-        return;
-
-    JKeysym keysym;
-    memset( &keysym, 0, sizeof( keysym ) );
-
-    // Map ncurses keys to SDL keysyms
-    // For ASCII printable characters, SDLK values match ASCII codes
-    if( ch >= 'a' && ch <= 'z' )
-    {
-        keysym.sym = (JKeycode)ch;
-        keysym.mod = JMOD_NONE;
-    }
-    else if( ch >= 'A' && ch <= 'Z' )
-    {
-        // Uppercase: map to lowercase sym + shift modifier
-        keysym.sym = (JKeycode)( ch - 'A' + 'a' );
-        keysym.mod = JMOD_SHIFT;
-    }
-    else if( ch >= 1 && ch <= 26 && ch != '\n' && ch != '\r' )
-    {
-        // Ctrl+letter: ch 1 = Ctrl+A, ch 3 = Ctrl+C, etc.
-        // Exclude \n (10) and \r (13) so they reach the Enter case below.
-        keysym.sym = (JKeycode)( 'a' + ch - 1 );
-        keysym.mod = JMOD_CTRL;
-    }
-    else if( ch >= '0' && ch <= '9' )
-    {
-        keysym.sym = (JKeycode)ch;
-        keysym.mod = JMOD_NONE;
-    }
-    else
-    {
-        // Map special keys
-        switch( ch )
-        {
-        case '\n':
-        case '\r':
-        case KEY_ENTER:
-            keysym.sym = JKEY_RETURN;
-            break;
-        case 27: // Escape
-            keysym.sym = JKEY_ESCAPE;
-            break;
-        case ' ':
-            keysym.sym = JKEY_SPACE;
-            break;
-        case '.':
-            keysym.sym = JKEY_PERIOD;
-            break;
-        case '>': // Shift+.
-            keysym.sym = JKEY_PERIOD;
-            keysym.mod = JMOD_SHIFT;
-            break;
-        case ',':
-            keysym.sym = JKEY_COMMA;
-            break;
-        case '<': // Shift+,
-            keysym.sym = JKEY_COMMA;
-            keysym.mod = JMOD_SHIFT;
-            break;
-        case ';':
-            keysym.sym = JKEY_SEMICOLON;
-            break;
-        case '*': // Shift+8: target command
-            keysym.sym = JKEY_8;
-            keysym.mod = JMOD_SHIFT;
-            break;
-        case KEY_BACKSPACE:
-        case 127: // DEL on some terminals
-            keysym.sym = JKEY_BACKSPACE;
-            break;
-        case KEY_DC: // ncurses Delete key
-            keysym.sym = JKEY_DELETE;
-            break;
-        case KEY_F( 1 ):
-            keysym.sym = JKEY_F1;
-            break;
-        default:
-            // Unknown key, ignore
-            return;
-        }
-    }
-
-    // ASCII fly-out panel toggles: i=inventory, e=equipment, C=character stats
-    // These are display-only and don't consume a game turn.
-    if( m_eCurState == STATE_COMMAND )
-    {
-        if( keysym.sym == JKEY_i && keysym.mod == JMOD_NONE )
-        {
-            ToggleInv();
-            return;
-        }
-        if( keysym.sym == JKEY_e && keysym.mod == JMOD_NONE )
-        {
-            ToggleEquip();
-            return;
-        }
-        if( keysym.sym == JKEY_c && ( keysym.mod & JMOD_SHIFT ) )
-        {
-            ToggleStats();
-            return;
-        }
-    }
-
-    JResult retval = m_pCurState->HandleKey( &keysym );
-    if( retval == JBOGUSKEY )
-    {
-        JLog( LOG_LEVEL_INFO, true, "Bogus command: 0x%x\n", keysym.sym );
-        GetMsgs()->Printf( "Unrecognized command: 0x%x\n", keysym.sym );
-    }
-    else if( retval == JQUITREQUEST )
-    {
-        Quit( 0 );
     }
 }
-#endif // RENDER_ASCII

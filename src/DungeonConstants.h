@@ -42,6 +42,6 @@
 #define DOOR_OFFSET 1 // Distance from room edge to place door
 #define WALL_OFFSET 2 // Distance from room edge to start hallway/room connection
 
-#define DUNG_MAXDEPTH 1000 // in levels * 50ft
+#define DUNG_MAXDEPTH 100 // 5000' max depth / 50' per level = 100 levels
 
 #endif // __DUNGEONCONSTANTS_H__

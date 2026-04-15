@@ -1,7 +1,6 @@
 
 #include "DungeonMap.h"
 #include "DisplayText.h"
-#include <ctime>
 
 // Uncomment or set via -DDUNGEN_DEBUG compiler flag to enable detailed diagnostics
 // #define DUNGEN_DEBUG

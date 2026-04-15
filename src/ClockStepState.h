@@ -72,5 +72,6 @@ private:
     void ResetToState( int newstate );
 
     bool DoTick();
+    void CompleteGeneration();
 };
 #endif /* ClockStepState_h */

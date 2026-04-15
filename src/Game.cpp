@@ -91,35 +91,25 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     {
         m_pRender = new CRenderNull;
     }
-#if defined( RENDER_ASCII ) && defined( RENDER_OPENGL )
+#ifdef RENDER_ASCII
     else if( m_eRenderMode == RenderMode::ASCII )
     {
         m_pRender = new CRenderASCII;
         result = m_pRender->Init( 80, 24, 0 );
     }
+#endif
+#ifdef RENDER_OPENGL
     else if( m_eRenderMode == RenderMode::OpenGL )
     {
         m_pRender = new CRender;
         result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
     }
+#endif
     else
     {
         JLog( LOG_LEVEL_ERROR, true, "No render mode specified.\n" );
         return 1;
     }
-#elif defined( RENDER_ASCII )
-    else
-    {
-        m_pRender = new CRenderASCII;
-        result = m_pRender->Init( 80, 24, 0 );
-    }
-#elif defined( RENDER_OPENGL )
-    else
-    {
-        m_pRender = new CRender;
-        result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
-    }
-#endif
     if( m_pRender && result != JSUCCESS )
     {
         m_pRender->Term();
@@ -150,6 +140,12 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
         UpdateASCIILayout();
         m_bShowInv = ( m_pRender->GetScreenWidth() >= ASCIILayout::INV_AUTO_WIDTH );
 #endif
+    }
+    else
+    {
+        // OpenGL: panels visible by default
+        m_bShowInv = true;
+        m_bShowEquip = true;
     }
 
     m_pAIMgr = new CAIMgr;
@@ -639,22 +635,13 @@ void CGame::Draw()
 
         GetMsgs()->Draw();
 
-        // In ASCII mode, stats/inv/equip are fly-out panels toggled by c/i/e
-        if( !bASCII )
-        {
+        // Panel visibility toggled by i/e/C keys
+        if( m_bShowStats )
             GetStats()->Draw();
+        if( m_bShowInv )
             GetInv()->Draw();
+        if( m_bShowEquip )
             GetEquip()->Draw();
-        }
-        else
-        {
-            if( m_bShowStats )
-                GetStats()->Draw();
-            if( m_bShowInv )
-                GetInv()->Draw();
-            if( m_bShowEquip )
-                GetEquip()->Draw();
-        }
     }
 
     if( m_eCurState == STATE_USE )
@@ -862,27 +849,6 @@ void CGame::HandleEventsASCII( int &isActive, int &done )
             break;
         default:
             // Unknown key, ignore
-            return;
-        }
-    }
-
-    // ASCII fly-out panel toggles: i=inventory, e=equipment, C=character stats
-    // These are display-only and don't consume a game turn.
-    if( m_eCurState == STATE_COMMAND )
-    {
-        if( keysym.sym == JKEY_i && keysym.mod == JMOD_NONE )
-        {
-            ToggleInv();
-            return;
-        }
-        if( keysym.sym == JKEY_e && keysym.mod == JMOD_NONE )
-        {
-            ToggleEquip();
-            return;
-        }
-        if( keysym.sym == JKEY_c && ( keysym.mod & JMOD_SHIFT ) )
-        {
-            ToggleStats();
             return;
         }
     }

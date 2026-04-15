@@ -166,13 +166,7 @@ JResult CDungeon::CreateNewLevel( const int delta )
 
 #ifndef CLOCKSTEP
     // In normal mode, place scenery/items/monsters immediately after dungeon creation
-    PlaceScenery( depth );
-
-    // Place items appropriate to this level.
-    PlaceItems( depth );
-
-    // Spawn monsters appropriate to this level.
-    SpawnMonsters( depth );
+    PopulateLevel( depth );
 #else
     // In CLOCKSTEP mode, these will be placed after dungeon generation completes
     JLog( LOG_LEVEL_INFO, false,
@@ -1108,20 +1102,11 @@ void CDungeon::RemoveMonster( CMonster *pMon )
         g_pGame->GetPlayer()->SetTarget( NULL );
     }
 
+    // Invalidate visible monsters cache (it holds non-owning CMonster* pointers)
+    g_pGame->GetPlayer()->ClearVisibleMonsters();
+
     GetTile( pMon->GetPos() )->m_pCurMonster = NULL;
     m_llMonsters->Remove( pLink );
-}
-
-CMonster *CDungeon::FindMonsterByInstanceId( uint32 dwInstanceId )
-{
-    CLink<CMonster> *pLink = m_llMonsters->GetHead();
-    while( pLink )
-    {
-        if( pLink->m_lpData && pLink->m_lpData->GetInstanceId() == dwInstanceId )
-            return pLink->m_lpData;
-        pLink = m_llMonsters->GetNext( pLink );
-    }
-    return NULL;
 }
 
 int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
@@ -1363,5 +1348,5 @@ void CDungeon::Drop( CItem *pItem, JVector &vDropPos )
 {
     GetTile( vDropPos )->m_pCurItem = pItem;
     pItem->m_vPos = vDropPos;
-    pItem->m_pllLink = m_llItems->Add( pItem, pItem->m_id->m_dwIndex );
+    pItem->m_pllLink = m_llItems->Add( pItem, pItem->m_id->m_dwIndex, pItem->GetInstanceId() );
 }

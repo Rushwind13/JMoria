@@ -95,7 +95,11 @@ private:
 template <class T> class JLinkList
 {
 public:
-    inline JLinkList<T>() : m_lpHead( NULL ), m_lpTail( NULL ), m_iNumElements( 0 ) {}
+    inline JLinkList<T>( bool bOwnsData = true )
+        : m_lpHead( NULL ),
+          m_lpTail( NULL ),
+          m_iNumElements( 0 ),
+          m_bOwnsData( bOwnsData ) {}
     virtual inline ~JLinkList( void ) { Terminate(); };
     CLink<T> *Add( T *pData, int dwIndex = -1, int dwInstanceId = -1, bool bAscending = true )
     {
@@ -204,6 +208,8 @@ public:
 
         if( bDelete )
         {
+            if( !m_bOwnsData )
+                pLink->m_lpData = NULL;
             delete pLink;
             pLink = NULL;
         }
@@ -318,6 +324,7 @@ protected:
     CLink<T> *m_lpHead;
     CLink<T> *m_lpTail;
     int m_iNumElements;
+    bool m_bOwnsData;
 
 private:
 };

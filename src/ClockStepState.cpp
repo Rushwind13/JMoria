@@ -10,12 +10,8 @@
 
 #include "DisplayText.h"
 #include "Dungeon.h"
-#include "DungeonConstants.h"
-#include "DungeonTile.h"
 #include "Game.h"
 #include "Player.h"
-
-#include "FileParse.h"
 
 extern CGame *g_pGame;
 

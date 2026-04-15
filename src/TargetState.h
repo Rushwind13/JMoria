@@ -2,7 +2,6 @@
 #define __TARGETSTATE_H__
 #include "JMDefs.h"
 
-#include "JLinkList.h"
 #include "StateBase.h"
 
 class CTargetState;
@@ -22,7 +21,6 @@ class CTargetState : public CStateBase
 public:
 protected:
     char m_cCommand;
-    JLinkList<uint32> *m_llTargets;
     uint32 m_dwCurrentSelection;
     int m_dwPreviousState;
 

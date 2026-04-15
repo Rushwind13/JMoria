@@ -59,7 +59,7 @@ public:
     int GetITime() { return (int)m_fGameTime; }
     int GetTime() { return GetITime(); }
 
-    // ASCII fly-out panel toggles
+    // Panel visibility toggles (i=inventory, e=equipment, C=stats)
     void ToggleStats() { m_bShowStats = !m_bShowStats; }
     void ToggleInv() { m_bShowInv = !m_bShowInv; }
     void ToggleEquip() { m_bShowEquip = !m_bShowEquip; }
@@ -107,7 +107,7 @@ private:
     IRenderBackend *m_pRender;
     RenderMode m_eRenderMode;
 
-    // ASCII fly-out panel visibility (toggled by c/i/e keys)
+    // Panel visibility (toggled by i/e/C keys)
     bool m_bShowStats;
     bool m_bShowInv;
     bool m_bShowEquip;

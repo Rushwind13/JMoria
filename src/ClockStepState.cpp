@@ -11,7 +11,6 @@
 #include "DisplayText.h"
 #include "Dungeon.h"
 #include "Game.h"
-#include "Player.h"
 
 extern CGame *g_pGame;
 
@@ -76,9 +75,9 @@ int CClockStepState::OnHandleInit( JKeysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing CLOCKSTEP state...\n" );
 
-    // Create the initial dungeon level without spawning player yet.
-    // Player spawn is deferred to avoid NULL pointer crashes during generation
-    // (many functions check g_pGame->GetPlayer()->m_bHasSpawned)
+    // Create the initial dungeon level.
+    // In CLOCKSTEP mode, CreateNewLevel skips PopulateLevel,
+    // so the player won't be spawned yet.
     if( g_pGame && g_pGame->GetDungeon() && g_pGame->GetDungeon()->depth == 0 )
     {
         g_pGame->GetDungeon()->OnChangeLevel( DUNG_CFG_START_LEVEL );
@@ -113,19 +112,21 @@ int CClockStepState::OnBaseHandleKey( JKeysym *keysym )
 
     if( keysym->sym == JKEY_ESCAPE )
     {
-        // Exit CLOCKSTEP mode and spawn player
-        g_pGame->GetPlayer()->m_bHasSpawned = false;
-        g_pGame->GetPlayer()->SpawnPlayer();
+        // Force-complete generation if still in progress, redrawing each step
+        while( g_pGame->GetDungeon()->Tick( m_dwClock++ ) )
+        {
+            g_pGame->GetDungeon()->SetDrawFlag( true );
+        }
 
-        // Set tile visibility around spawn point before first render frame,
-        // otherwise DrawDungeon() skips all tiles (DUNG_FLAG_SEEN not set yet)
-        g_pGame->GetDungeon()->UpdateSeen();
+        // Complete generation with stats + populate if not done yet
+        if( !m_bLevelPopulated )
+        {
+            CompleteGeneration();
+        }
 
         // Clear stale CLOCKSTEP diagnostics from stats panel
         g_pGame->GetStats()->Clear();
 
-        g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
-                                    g_pGame->GetDungeon()->depth );
         ResetToState( STATE_COMMAND );
         return JRESETSTATE;
     }
@@ -183,27 +184,8 @@ bool CClockStepState::DoTick()
 
     if( !bStillGenerating && !m_bLevelPopulated )
     {
-        CDungeonMap *pMap = g_pGame->GetDungeon()->GetCurLevel();
-        const DungeonGenDiagnostics &diag = pMap->GetDiagnostics();
-        double total_ms = Util::GetTimeInMillis() - diag.start_time_ms;
-
-        g_pGame->GetStats()->Printf( "\nGeneration complete!\n" );
-        g_pGame->GetStats()->Printf( "Time: %.2f ms (%.3f sec)\n", total_ms, total_ms / 1000.0 );
-        g_pGame->GetStats()->Printf( "Rooms: %d, Halls: %d\n", pMap->GetRoomCount(),
-                                     pMap->GetHallwayCount() );
-        if( total_ms > 0.0 )
-        {
-            double steps_per_sec = ( diag.steps_created * 1000.0 ) / total_ms;
-            g_pGame->GetStats()->Printf( "Rate: %.1f steps/sec\n", steps_per_sec );
-        }
-        g_pGame->GetStats()->Printf( "Placing scenery, items, and monsters...\n" );
-
-        // PopulateLevel() called exactly once after generation completes.
-        // m_bLevelPopulated flag prevents duplicate spawns on subsequent ticks.
-        g_pGame->GetDungeon()->PopulateLevel( g_pGame->GetDungeon()->depth );
-        m_bLevelPopulated = true;
-
-        g_pGame->GetStats()->Printf( "Press ESC to spawn player.\n" );
+        CompleteGeneration();
+        g_pGame->GetStats()->Printf( "Press ESC to start playing.\n" );
     }
 
     // Optional: Add small delay to prevent CPU spike during stepped generation
@@ -211,4 +193,27 @@ bool CClockStepState::DoTick()
     // SDL_Delay( 1 ); // Uncomment to add 1ms delay per step
 
     return true;
+}
+
+void CClockStepState::CompleteGeneration()
+{
+    CDungeonMap *pMap = g_pGame->GetDungeon()->GetCurLevel();
+    const DungeonGenDiagnostics &diag = pMap->GetDiagnostics();
+    double total_ms = Util::GetTimeInMillis() - diag.start_time_ms;
+
+    g_pGame->GetStats()->Printf( "\nGeneration complete!\n" );
+    g_pGame->GetStats()->Printf( "Time: %.2f ms (%.3f sec)\n", total_ms, total_ms / 1000.0 );
+    g_pGame->GetStats()->Printf( "Rooms: %d, Halls: %d\n", pMap->GetRoomCount(),
+                                 pMap->GetHallwayCount() );
+    if( total_ms > 0.0 )
+    {
+        double steps_per_sec = ( diag.steps_created * 1000.0 ) / total_ms;
+        g_pGame->GetStats()->Printf( "Rate: %.1f steps/sec\n", steps_per_sec );
+    }
+    g_pGame->GetStats()->Printf( "Placing scenery, items, and monsters...\n" );
+
+    // PopulateLevel() called exactly once after generation completes.
+    // m_bLevelPopulated flag prevents duplicate spawns on subsequent ticks.
+    g_pGame->GetDungeon()->PopulateLevel( g_pGame->GetDungeon()->depth );
+    m_bLevelPopulated = true;
 }

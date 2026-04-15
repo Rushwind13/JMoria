@@ -22,10 +22,6 @@
 #define DUNG_ASPECT vSize( 0.75f, 1.0f )
 #endif
 
-#define DUNG_ZOOM_MIN 4
-#define DUNG_ZOOM_NORMAL 20
-#define DUNG_ZOOM_MAX 100
-
 class CDungeon
 {
     // Member Variables
@@ -48,7 +44,6 @@ protected:
     JLinkList<JIVector> *m_llLOSLine;
 
 private:
-    Uint16 m_dwZoom;
     bool m_bDraw;
 
     // Member Functions
@@ -62,7 +57,6 @@ public:
           m_dtdlist( NULL ),
           m_Rect( -DUNG_WIDTH, DUNG_HEIGHT, DUNG_WIDTH, -DUNG_HEIGHT ),
           m_vfTranslate( (int)( -DUNG_WIDTH * 0.5f ), (int)( -DUNG_HEIGHT * 0.5f ) ),
-          m_dwZoom( DUNG_ZOOM_NORMAL ),
           m_vLookPos( (int)( -DUNG_WIDTH * 0.5f ), (int)( -DUNG_HEIGHT * 0.5f ) ),
           // m_dmTownLevel(NULL),
           m_llItems( NULL ),
@@ -118,19 +112,6 @@ public:
     CDungeonTileDef *GetTileDef( int idx ) { return &m_dtdlist[idx]; }
 
     JResult OnChangeLevel( const int delta );
-
-    void Zoom( Uint16 dwDelta )
-    {
-        m_dwZoom += dwDelta;
-        if( m_dwZoom < DUNG_ZOOM_MIN )
-        {
-            m_dwZoom = DUNG_ZOOM_MIN;
-        }
-        else if( m_dwZoom > DUNG_ZOOM_MAX )
-        {
-            m_dwZoom = DUNG_ZOOM_MAX;
-        }
-    }
 
     CDungeonTile *GetITile( JIVector &vPos )
     {

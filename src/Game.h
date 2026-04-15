@@ -112,11 +112,6 @@ private:
     bool m_bShowInv;
     bool m_bShowEquip;
 
-#ifdef RENDER_ASCII
-    void HandleEventsASCII( int &isActive, int &done );
-    void UpdateASCIILayout();
-#endif
-
     int m_dwNextTime;
     float m_fGameTime;
 #ifdef TURN_BASED

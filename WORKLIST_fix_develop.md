@@ -1,6 +1,6 @@
 # WORKLIST: Fix Develop Branch (Code Smell Rework)
 
-**Status**: Phase 5 complete + post-merge refactoring done  
+**Status**: Phase 6 complete  
 **Based on**: PR#251 code review (e602823 → develop diff)  
 **Strategy**: Create fixes branch from develop, apply targeted fixes on top of committed code  
 **Total Items**: 35 fixes across 14 files  
@@ -41,17 +41,18 @@
 - [x] `GetMonster()`/`FindMonsterByInstanceId()` removed — zero callers remain
 - [x] `Dungeon::Drop()` passes instanceId to `Add()`
 
+### Phase 6 – Renderer Separation of Concerns
+- [x] 6a: `PollEvent()` on `IRenderBackend` — each renderer owns its input handling
+- [x] 6b: `ConfigureDisplayRegions()` / `ShouldAutoShowInventory()` — ASCII layout logic moved to renderer
+- [x] 6c: `SpawnPlayerOnLevel()` extracted — `OnChangeLevel()` is creation-only, no `#ifndef CLOCKSTEP` guards
+- [x] 6d: DungeonMap test guards — investigated, requires build restructuring (deferred)
+
 ---
 
 ## Remaining Work
 
-### Deferred (too invasive for this PR)
+### Deferred (needs prerequisite work)
 
-- [ ] **ClockStepState line 121**: Duplicates `OnChangeLevel()` — merge or extract shared utility
-- [ ] **Game.cpp line 594**: ASCII-specific code belongs in `RenderASCII`, not `Game`
-- [ ] **Game.cpp line 793**: Key mapping in Game — standardize input abstraction
-- [ ] **DungeonMap.h/cpp**: Test functions (`import`, `Compare`) embedded in gameplay code — move behind `#ifdef` or to test code
-  - Lines 127, 207, 223, 226 in .h; lines 1359, 1401, 1520 in .cpp
 - [ ] **JColor.h**: `<cstdlib>`/`<cstring>` needed by `strtok`/`atoi` in `SetColor(char*)` — needs Util wrappers first
 
 ### New: JLinkList Usage Improvements

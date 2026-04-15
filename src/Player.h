@@ -210,13 +210,6 @@ public:
     bool IsWieldable( CLink<CItem> *pLink );
     JResult Wield( CLink<CItem> *pItem );
 
-    // Programmatic API: operations by item instance id (helpers for tests)
-    JResult WieldItem( uint32 dwInstanceId );
-    bool RemoveItem( uint32 dwInstanceId );
-    bool DropItem( uint32 dwInstanceId );
-    JResult ReadItem( uint32 dwInstanceId );
-    JResult QuaffItem( uint32 dwInstanceId );
-
     bool IsRemovable( CLink<CItem> *pLink );
     bool RemoveEquipment( CLink<CItem> *pLink );
 

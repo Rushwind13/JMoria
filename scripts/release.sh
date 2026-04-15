@@ -53,19 +53,47 @@ finish_release() {
         echo "--- Tag $VERSION found ---"
     fi
 
-    echo "--- Merging main back to develop ---"
+    # Create a branch from develop, merge main into it, push, and PR back to develop
+    # This brings the version bump + release notes back to develop via PR
+    local FINISH_BRANCH="merge-release/$VERSION"
+
     git checkout develop
     git pull origin develop
-    git merge main -m "Merge main back to develop after release $VERSION"
-    git push origin develop
+
+    if git diff --quiet main develop; then
+        echo "--- develop already matches main (no content diff) ---"
+        echo "--- No merge needed ---"
+    else
+        echo "--- Creating branch $FINISH_BRANCH from develop ---"
+        git checkout -b "$FINISH_BRANCH"
+
+        echo "--- Merging main into $FINISH_BRANCH ---"
+        git merge main -m "Merge main back after release $VERSION (version bump + release notes)"
+
+        echo "--- Pushing $FINISH_BRANCH ---"
+        git push -u origin "$FINISH_BRANCH"
+
+        echo ""
+        echo "============================================"
+        echo "  Branch $FINISH_BRANCH pushed!"
+        echo "============================================"
+        echo ""
+        echo "Create and squash-merge this PR:"
+        echo "  https://github.com/Rushwind13/JMoria/compare/develop...$FINISH_BRANCH"
+        echo ""
+        echo "Then clean up locally:"
+        echo "  git checkout develop && git pull"
+        echo "  git branch -d $FINISH_BRANCH"
+
+        git checkout develop
+    fi
 
     echo "--- Cleaning up release branch ---"
     git branch -d "release/$VERSION" 2>/dev/null || true
     git push origin --delete "release/$VERSION" 2>/dev/null || true
 
     echo ""
-    echo "=== Release $VERSION finished! ==="
-    echo "develop is up to date with main."
+    echo "=== Release $VERSION finish step complete ==="
 }
 
 # --- Main release flow ---

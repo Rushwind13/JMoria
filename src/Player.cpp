@@ -21,21 +21,6 @@ static bool ShowPlayerPosInStats()
              Util::jstrcmp( flag, "yes" ) == 0 || Util::jstrcmp( flag, "on" ) == 0 );
 }
 
-// Helper: find an inventory link by item instance id
-static CLink<CItem> *FindInventoryLinkByInstance( JLinkList<CItem> *pList, uint32 dwInstanceId )
-{
-    if( pList == NULL )
-        return NULL;
-    CLink<CItem> *pLink = pList->GetHead();
-    while( pLink )
-    {
-        if( pLink->m_lpData && pLink->m_lpData->GetInstanceId() == dwInstanceId )
-            return pLink;
-        pLink = pList->GetNext( pLink );
-    }
-    return NULL;
-}
-
 void CPlayer::Init( const char *szBasedir )
 {
     // Initialize all the player stuff, baby.
@@ -329,7 +314,7 @@ void CPlayer::PickUp( JVector &vPickupPos )
                 pExists = pExists->next;
             }
         }
-        pItem->m_pllLink = m_llInventory->Add( pItem, pItem->m_id->m_dwIndex );
+        pItem->m_pllLink = m_llInventory->Add( pItem, pItem->m_id->m_dwIndex, pItem->GetInstanceId() );
         g_pGame->GetMsgs()->Printf( "You have a %s.\n", pItem->GetName() );
 
         g_pGame->GetDungeon()->GetTile( vPickupPos )->m_pCurItem = NULL;
@@ -425,7 +410,7 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
     }
     // Now put on the new item.
     m_llInventory->Remove( pLink, false );
-    pItem->m_pllLink = m_llEquipment->Add( pItem, pItem->EquipType() );
+    pItem->m_pllLink = m_llEquipment->Add( pItem, pItem->EquipType(), pItem->GetInstanceId() );
     m_fArmorClass += pItem->m_id->m_fBaseAC + pItem->m_id->m_fACBonus;
     if( pItem->m_id->m_szBaseDamage != NULL )
         Util::jstrcpy( m_szDamage, pItem->m_id->m_szBaseDamage );
@@ -487,7 +472,7 @@ bool CPlayer::RemoveEquipment( CLink<CItem> *pLink )
     }
 
     m_llEquipment->Remove( pLink, false );
-    pItem->m_pllLink = m_llInventory->Add( pItem, pItem->m_id->m_dwIndex );
+    pItem->m_pllLink = m_llInventory->Add( pItem, pItem->m_id->m_dwIndex, pItem->GetInstanceId() );
     m_fArmorClass -= pItem->m_id->m_fBaseAC + pItem->m_id->m_fACBonus;
     if( pItem->m_id->m_szBaseDamage != NULL )
         Util::jstrcpy( m_szDamage, PLAYER_BASE_DAMAGE );
@@ -509,47 +494,6 @@ float CPlayer::LightSource()
     CItem *pTorch = pLink->m_lpData;
 
     return pTorch->GetDuration();
-}
-
-JResult CPlayer::WieldItem( uint32 dwInstanceId )
-{
-    CLink<CItem> *pLink = FindInventoryLinkByInstance( m_llInventory, dwInstanceId );
-    if( pLink == NULL )
-        return JBOGUSKEY;
-    return Wield( pLink );
-}
-
-bool CPlayer::RemoveItem( uint32 dwInstanceId )
-{
-    CLink<CItem> *pLink = FindInventoryLinkByInstance( m_llEquipment, dwInstanceId );
-    if( pLink == NULL )
-        return false;
-    return RemoveEquipment( pLink );
-}
-
-bool CPlayer::DropItem( uint32 dwInstanceId )
-{
-    CLink<CItem> *pLink = FindInventoryLinkByInstance( m_llInventory, dwInstanceId );
-    if( pLink == NULL )
-        return false;
-    CItem *pItem = pLink->m_lpData;
-    return Drop( pItem );
-}
-
-JResult CPlayer::ReadItem( uint32 dwInstanceId )
-{
-    CLink<CItem> *pLink = FindInventoryLinkByInstance( m_llInventory, dwInstanceId );
-    if( pLink == NULL )
-        return JBOGUSKEY;
-    return Read( pLink );
-}
-
-JResult CPlayer::QuaffItem( uint32 dwInstanceId )
-{
-    CLink<CItem> *pLink = FindInventoryLinkByInstance( m_llInventory, dwInstanceId );
-    if( pLink == NULL )
-        return JBOGUSKEY;
-    return Quaff( pLink );
 }
 
 void CPlayer::UpdateLight( float fValue, bool bReset )

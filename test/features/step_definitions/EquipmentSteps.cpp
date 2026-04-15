@@ -192,7 +192,8 @@ WHEN( "^I programmatically wield the spawned item$" )
     uint32 dwInst = pItem->GetInstanceId();
     /* pick up the spawned item into inventory so programmatic APIs can find it */
     g_pGame->GetPlayer()->PickUp( context->vec_b );
-    context->result = g_pGame->GetPlayer()->WieldItem( dwInst );
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetInstanceId( dwInst );
+    context->result = g_pGame->GetPlayer()->Wield( pLink );
     context->result_int = (int)dwInst;
     EXPECT_EQ( context->result, JSUCCESS );
 }
@@ -206,7 +207,8 @@ WHEN( "^I programmatically quaff the spawned item$" )
     uint32 dwInst = pItem->GetInstanceId();
     /* pick up the spawned item into inventory so programmatic APIs can find it */
     g_pGame->GetPlayer()->PickUp( context->vec_b );
-    context->result = g_pGame->GetPlayer()->QuaffItem( dwInst );
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetInstanceId( dwInst );
+    context->result = g_pGame->GetPlayer()->Quaff( pLink );
     context->result_int = (int)dwInst;
     EXPECT_EQ( context->result, JSUCCESS );
 }
@@ -220,7 +222,8 @@ WHEN( "^I programmatically attempt to wield the spawned item$" )
     ASSERT_NE( pItem, (CItem *)NULL );
     uint32 dwInst = pItem->GetInstanceId();
     g_pGame->GetPlayer()->PickUp( context->vec_b );
-    context->result = g_pGame->GetPlayer()->WieldItem( dwInst );
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetInstanceId( dwInst );
+    context->result = g_pGame->GetPlayer()->Wield( pLink );
     context->result_int = (int)dwInst;
 }
 
@@ -229,7 +232,8 @@ WHEN( "^I programmatically attempt to remove the spawned item$" )
     ScenarioScope<TestCtx> context;
     uint32 dwInst = (uint32)context->result_int;
     /* attempt to remove and store boolean result for assertion in THEN */
-    context->result_bool = g_pGame->GetPlayer()->RemoveItem( dwInst );
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llEquipment->GetInstanceId( dwInst );
+    context->result_bool = g_pGame->GetPlayer()->RemoveEquipment( pLink );
 }
 
 /*#######
@@ -362,7 +366,8 @@ WHEN( "^I programmatically remove the spawned item$" )
     ScenarioScope<TestCtx> context;
     uint32 dwInst = (uint32)context->result_int;
     /* Expect the item to be currently equipped */
-    bool ok = g_pGame->GetPlayer()->RemoveItem( dwInst );
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llEquipment->GetInstanceId( dwInst );
+    bool ok = g_pGame->GetPlayer()->RemoveEquipment( pLink );
     EXPECT_TRUE( ok );
 }
 
@@ -378,7 +383,8 @@ WHEN( "^I programmatically drop the spawned item$" )
     context->result_int = (int)dwInst;
     JLog( LOG_LEVEL_INFO, true, "[DROP STEP] before DropItem: dwInst=%u context->result_int=%d\n",
           dwInst, context->result_int );
-    bool ok = g_pGame->GetPlayer()->DropItem( dwInst );
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetInstanceId( dwInst );
+    bool ok = g_pGame->GetPlayer()->Drop( pLink->m_lpData );
     EXPECT_TRUE( ok );
     /* ensure tile at spawn location now contains the item */
     CDungeonTile *pGround = g_pGame->GetDungeon()->GetTile( context->vec_b );
@@ -403,7 +409,8 @@ WHEN( "^I programmatically read the spawned item$" )
     uint32 dwInst = pItem->GetInstanceId();
     /* pick up the spawned item into inventory so programmatic APIs can find it */
     g_pGame->GetPlayer()->PickUp( context->vec_b );
-    context->result = g_pGame->GetPlayer()->ReadItem( dwInst );
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetInstanceId( dwInst );
+    context->result = g_pGame->GetPlayer()->Read( pLink );
     context->result_int = (int)dwInst;
     EXPECT_EQ( context->result, JSUCCESS );
 }

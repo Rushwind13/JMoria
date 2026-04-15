@@ -148,6 +148,9 @@ CLOCKSTEP mode enables step-by-step visualization of dungeon generation for debu
 Enable CLOCKSTEP by passing `-DCLOCKSTEP` through `CC_FLAGS` when building:
 ```makefile
 make ascii CC_FLAGS="-w -DCLOCKSTEP"
+tmux new-session -d -s crawler -x 125 -y 30 './jmoria 2>/tmp/jmoria_map.txt'
+tmux send-keys -t crawler Space   # step generation
+tmux send-keys -t crawler Escape  # spawn player + start playing
 ```
 
 Rebuild with `make clean && make`.

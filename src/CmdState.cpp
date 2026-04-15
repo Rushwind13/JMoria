@@ -14,6 +14,11 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
     // If you haven't handled the key by the end of this function,
     // it's an invalid key, so return an error.
     int retval = -1;
+
+    // Panel toggles are display-only and don't consume a game turn.
+    if( IsToggleCommand( keysym ) )
+        return JHANDLED_NOTURN;
+
     if( IsDirectional( keysym ) )
     {
         JVector vTestDir( 0, 0 );
@@ -113,10 +118,23 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
     {
         g_pGame->SetState( STATE_RANGED );
         g_pGame->GetGameState()->HandleKey( keysym );
-        retval = -1;
+        retval = 0;
+    }
+
+    else if( IsPickupCommand( keysym ) )
+    {
+        g_pGame->GetPlayer()->PickUp( g_pGame->GetPlayer()->m_vPos );
+        retval = 0;
     }
 
     // Wizard-mode commands
+
+    else if( IsExitWizardCommand( keysym ) )
+    {
+        g_pGame->SetState( STATE_STRINGINPUT );
+        g_pGame->GetGameState()->HandleKey( keysym );
+        retval = 0;
+    }
 
     else if( IsTeleportCommand( keysym ) )
     {
@@ -406,6 +424,46 @@ bool CCmdState::IsSummonMonsterCommand( JKeysym *keysym )
         break;
     }
 
+    return false;
+}
+
+bool CCmdState::IsPickupCommand( JKeysym *keysym )
+{
+    return ( keysym->sym == JKEY_g && !( keysym->mod & ( JMOD_SHIFT | JMOD_CTRL ) ) );
+}
+
+bool CCmdState::IsExitWizardCommand( JKeysym *keysym )
+{
+    switch( keysym->sym )
+    {
+    case JKEY_w:
+        return ( keysym->mod & JMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
+        break;
+    default:
+        return false;
+        break;
+    }
+
+    return false;
+}
+
+bool CCmdState::IsToggleCommand( JKeysym *keysym )
+{
+    if( keysym->sym == JKEY_i && keysym->mod == JMOD_NONE )
+    {
+        g_pGame->ToggleInv();
+        return true;
+    }
+    if( keysym->sym == JKEY_e && keysym->mod == JMOD_NONE )
+    {
+        g_pGame->ToggleEquip();
+        return true;
+    }
+    if( keysym->sym == JKEY_c && ( keysym->mod & JMOD_SHIFT ) )
+    {
+        g_pGame->ToggleStats();
+        return true;
+    }
     return false;
 }
 

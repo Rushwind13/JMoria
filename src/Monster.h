@@ -130,6 +130,9 @@ public:
     CLink<CMonster> *m_pllLink;
     CAIBrain *m_pBrain;       // this is the place to get info for the AI.
     uint32 m_dwActiveEffects; // this monster is confused, blind, ...
+    uint32 m_dwInstanceId;    // unique instance id for this monster
+
+    uint32 GetInstanceId() { return m_dwInstanceId; }
 
     char *GetName()
     {

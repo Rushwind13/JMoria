@@ -22,10 +22,6 @@
 #define DUNG_ASPECT vSize( 0.75f, 1.0f )
 #endif
 
-#define DUNG_ZOOM_MIN 4
-#define DUNG_ZOOM_NORMAL 20
-#define DUNG_ZOOM_MAX 100
-
 class CDungeon
 {
     // Member Variables
@@ -45,9 +41,9 @@ protected:
     JLinkList<CItemDef> *m_llItemDefs;
     JVector m_vLookPos;
     JVector m_vProjectilePos;
+    JLinkList<JIVector> *m_llLOSLine;
 
 private:
-    Uint16 m_dwZoom;
     bool m_bDraw;
 
     // Member Functions
@@ -61,7 +57,6 @@ public:
           m_dtdlist( NULL ),
           m_Rect( -DUNG_WIDTH, DUNG_HEIGHT, DUNG_WIDTH, -DUNG_HEIGHT ),
           m_vfTranslate( (int)( -DUNG_WIDTH * 0.5f ), (int)( -DUNG_HEIGHT * 0.5f ) ),
-          m_dwZoom( DUNG_ZOOM_NORMAL ),
           m_vLookPos( (int)( -DUNG_WIDTH * 0.5f ), (int)( -DUNG_HEIGHT * 0.5f ) ),
           // m_dmTownLevel(NULL),
           m_llItems( NULL ),
@@ -69,6 +64,7 @@ public:
           m_llOpenArea( NULL ),
           m_llItemDefs( NULL ),
           m_llMonsterDefs( NULL ),
+          m_llLOSLine( NULL ),
           m_dmCurLevel( NULL ) {};
     ~CDungeon() { Term(); }
     void DumpMap();
@@ -97,20 +93,25 @@ public:
     }
     JVector GetProjectilePosition() { return m_vProjectilePos; }
 
-    JResult OnChangeLevel( const int delta );
-
-    void Zoom( Uint16 dwDelta )
+    void SetLOSLine( JLinkList<JIVector> *pLine )
     {
-        m_dwZoom += dwDelta;
-        if( m_dwZoom < DUNG_ZOOM_MIN )
+        ClearLOSLine();
+        m_llLOSLine = pLine;
+    }
+    void ClearLOSLine()
+    {
+        if( m_llLOSLine )
         {
-            m_dwZoom = DUNG_ZOOM_MIN;
-        }
-        else if( m_dwZoom > DUNG_ZOOM_MAX )
-        {
-            m_dwZoom = DUNG_ZOOM_MAX;
+            m_llLOSLine->Terminate();
+            delete m_llLOSLine;
+            m_llLOSLine = NULL;
         }
     }
+    bool IsOnLOSLine( JVector vPos );
+    JLinkList<JIVector> *GetLOSLine() { return m_llLOSLine; }
+    CDungeonTileDef *GetTileDef( int idx ) { return &m_dtdlist[idx]; }
+
+    JResult OnChangeLevel( const int delta );
 
     CDungeonTile *GetITile( JIVector &vPos )
     {
@@ -155,6 +156,7 @@ public:
     CItemDef *GetItemDef( int which_item );
     bool SpawnMonster( int which_monster );
     void RemoveMonster( CMonster *pMon );
+
     JResult Modify( JVector &vPos );
     CItem *PickUp( JVector &vPickupPos );
     void Drop( CItem *pItem, JVector &vDropPos );

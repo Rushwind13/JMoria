@@ -1,18 +1,17 @@
 #include "TargetState.h"
 
 #include "DisplayText.h"
-#include "DungeonTile.h"
 #include "Game.h"
 #include "JMDefs.h"
 
 #include "Dungeon.h"
 #include "Player.h"
+#include "Util.h"
 
 extern CGame *g_pGame;
 
 CTargetState::CTargetState()
     : m_cCommand( 0 ),
-      m_llTargets( NULL ),
       m_dwCurrentSelection( 0 ),
       m_dwPreviousState( STATE_COMMAND )
 {
@@ -25,12 +24,6 @@ CTargetState::CTargetState()
 
 CTargetState::~CTargetState()
 {
-    if( m_llTargets )
-    {
-        m_llTargets->Terminate();
-        delete m_llTargets;
-        m_llTargets = NULL;
-    }
 }
 
 int CTargetState::OnHandleKey( JKeysym *keysym )
@@ -87,59 +80,17 @@ int CTargetState::DoInit()
 {
     m_eCurModifier = TARGET_TARGET;
     m_dwCurrentSelection = 0;
-    m_llTargets = new JLinkList<uint32>;
-    // CMonster *pTarget = g_pGame->GetPlayer()->GetTarget();
-    // if( pTarget )
-    // {
-    //     if( g_pGame->GetDungeon()->PlayerCanSee(
-    //             pTarget->GetPos(),
-    //             pTarget->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) )
-    //             )
-    //     {
-    //         uint32 *dwTarget = new uint32( pTarget->m_pllLink->m_dwIndex );
-    //         m_llTargets->Add( dwTarget );
-    //     }
-    //     else
-    //     {
 
-    //         pTarget->UnsetAsTarget();
-    //     }
-    // }
-    CLink<CMonster> *pLink = g_pGame->GetDungeon()->m_llMonsters->GetHead();
-    CMonster *pMon = NULL;
-    CDungeonTile *monPos = NULL;
-    uint32 count = 0;
-    while( pLink != NULL )
-    {
-        if( !pLink->m_lpData )
-        {
-            pLink = pLink->next;
-            continue;
-        }
-        pMon = pLink->m_lpData;
-        monPos = g_pGame->GetDungeon()->GetTile( pMon->GetPos() );
-        bool bTargeted = false; //( pMon == g_pGame->GetPlayer()->GetTarget() );
-        bool bSeen = true;      //( ( monPos->m_dwFlags & DUNG_FLAG_SEEN ) == DUNG_FLAG_SEEN );
-        bool bPlayerSees = ( g_pGame->GetDungeon()->PlayerCanSee(
-            pMon->GetPos(), pMon->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) );
+    JLinkList<CMonster> *pVisible = g_pGame->GetPlayer()->GetVisibleMonsters();
 
-        JLog( LOG_LEVEL_NOISE, true, "mon: %s target %d seen %d sees %d\n", pMon->GetName(),
-              bTargeted, bSeen, bPlayerSees );
-        if( /*!bTargeted && bSeen && /**/ bPlayerSees )
-        {
-            uint32 *dwTargetable = new uint32( count );
-            JLog( LOG_LEVEL_DEBUG, true, "Adding %s to targets mon %d at idx %d\n", pMon->GetName(),
-                  pMon->m_pllLink->m_dwIndex, *dwTargetable );
-            m_llTargets->Add( dwTargetable );
-            // if( !g_pGame->GetPlayer()->GetTarget() )
-            g_pGame->GetPlayer()->SetTarget( pMon );
-        }
-        pLink = pLink->next;
-        count++;
-    }
-    if( m_llTargets->length() )
+    if( pVisible && pVisible->length() )
     {
-        JLog( LOG_LEVEL_INFO, true, "Total targetable monsters: %d\n", m_llTargets->length() );
+        JLog( LOG_LEVEL_INFO, true, "Total targetable monsters: %d\n", pVisible->length() );
+        // Set initial target to nearest monster (first in distance-sorted list)
+        CMonster *pFirst = pVisible->GetHead()->m_lpData;
+        if( pFirst )
+            g_pGame->GetPlayer()->SetTarget( pFirst );
+        UpdateLOSLine();
     }
     else
     {
@@ -192,28 +143,53 @@ int CTargetState::OnHandleInit( JKeysym *keysym )
 
 int CTargetState::OnBaseHandleKey( JKeysym *keysym )
 {
+    JLinkList<CMonster> *pVisible = g_pGame->GetPlayer()->GetVisibleMonsters();
+
     if( keysym->sym == JKEY_8 && keysym->mod & JMOD_SHIFT )
     {
+        if( !pVisible || !pVisible->length() )
+            return JSUCCESS;
+
         m_dwCurrentSelection++;
         JLog( LOG_LEVEL_NOISE, true, "Choosing next target... %d/%d\n", m_dwCurrentSelection,
-              m_llTargets->length() );
+              pVisible->length() );
 
-        if( m_dwCurrentSelection >= m_llTargets->length() )
+        if( m_dwCurrentSelection >= pVisible->length() )
         {
             m_dwCurrentSelection = 0;
             JLog( LOG_LEVEL_NOISE, true, "wrapping... %d/%d\n", m_dwCurrentSelection,
-                  m_llTargets->length() );
+                  pVisible->length() );
         }
-        uint32 *dwTarget = m_llTargets->GetNthLink( m_dwCurrentSelection )->m_lpData;
-        CMonster *pMon = g_pGame->GetDungeon()->m_llMonsters->GetNthLink( *dwTarget )->m_lpData;
-        JLog( LOG_LEVEL_INFO, true, "desired monster index: %d retrieved idx %d, monster: %s\n",
-              *dwTarget, pMon->m_pllLink->m_dwIndex, pMon->GetName() );
+        CLink<CMonster> *pTargetLink = pVisible->GetNthLink( m_dwCurrentSelection );
+        CMonster *pMon = pTargetLink->m_lpData;
+        if( !pMon )
+        {
+            JLog( LOG_LEVEL_WARN, true, "Target instance %d no longer exists, skipping\n",
+                  pTargetLink->m_dwInstanceId );
+            return JSUCCESS;
+        }
+
+        JLog( LOG_LEVEL_INFO, true, "desired monster instance: %d, monster: %s\n",
+              pMon->GetInstanceId(), pMon->GetName() );
         g_pGame->GetPlayer()->SetTarget( pMon );
+        UpdateLOSLine();
         return JSUCCESS;
     }
     else if( keysym->sym == JKEY_PERIOD )
     {
-        g_pGame->GetMsgs()->Printf( "Target selected.\n" );
+        // Re-validate LOS before confirming target
+        CMonster *pTarget = g_pGame->GetPlayer()->GetTarget();
+        if( pTarget && g_pGame->GetDungeon()->PlayerCanSee(
+                           pTarget->GetPos(),
+                           pTarget->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) )
+        {
+            g_pGame->GetMsgs()->Printf( "Target selected.\n" );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "You can no longer see that target.\n" );
+            g_pGame->GetPlayer()->SetTarget( NULL );
+        }
         // now reset
         ResetToState( m_dwPreviousState );
         return JRESETSTATE;
@@ -230,12 +206,7 @@ int CTargetState::OnBaseHandleKey( JKeysym *keysym )
 
 void CTargetState::ResetToState( int newstate )
 {
-    if( m_llTargets )
-    {
-        m_llTargets->Terminate();
-        delete m_llTargets;
-        m_llTargets = NULL;
-    }
+    g_pGame->GetDungeon()->ClearLOSLine();
     g_pGame->SetState( newstate );
     m_cCommand = NULL;
     m_eCurModifier = TARGET_INIT;
@@ -255,3 +226,19 @@ void CTargetState::ResetToState( int newstate )
 // {
 //     return true;
 // }
+
+void CTargetState::UpdateLOSLine()
+{
+    CMonster *pTarget = g_pGame->GetPlayer()->GetTarget();
+    if( !pTarget )
+    {
+        g_pGame->GetDungeon()->ClearLOSLine();
+        return;
+    }
+
+    JIVector vSource( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+    JIVector vTarget( VEC_EXPAND( pTarget->GetPos() ) );
+    JLinkList<JIVector> *pLine =
+        Util::GenerateLine( vSource, vTarget, SIGHT_DISTANCE_PLAYER );
+    g_pGame->GetDungeon()->SetLOSLine( pLine );
+}

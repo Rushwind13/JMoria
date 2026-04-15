@@ -22,6 +22,7 @@ enum eStringInputModifier
     SI_FLAG,
     SI_ITEM,
     SI_MONSTER,
+    SI_PASSWORD,
     SI_MAX
 };
 class CStringInputState : public CStateBase
@@ -54,6 +55,7 @@ private:
     int OnHandleMonster( JKeysym *keysym );
     int OnHandleHaggle( JKeysym *keysym );
     int OnHandleInit( JKeysym *keysym );
+    int OnHandlePassword( JKeysym *keysym );
 
     bool TestName();
     bool DoName();

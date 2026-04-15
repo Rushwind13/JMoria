@@ -81,6 +81,21 @@ public:
     // Check if terminal was resized and recalculate layout
     bool CheckResize() override;
 
+    bool ShouldAutoShowInventory() const override
+    {
+        return m_layout.termWidth >= ASCIILayout::INV_AUTO_WIDTH;
+    }
+
+    bool ShouldAutoShowEquipment() const override { return false; }
+
+    // Set DisplayText rects from ASCII layout (char coords → pixel space)
+    void ConfigureDisplayRegions( CDisplayText *pMsgs, CDisplayText *pStats, CDisplayText *pInv,
+                                  CDisplayText *pEquip, CDisplayText *pUse,
+                                  CDisplayText *pEndGame ) override;
+
+    // Translate ncurses input into renderer-agnostic events
+    bool PollEvent( JInputEvent &event ) override;
+
     const ASCIILayout &GetLayout() const { return m_layout; }
 
 private:

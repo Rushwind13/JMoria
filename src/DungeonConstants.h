@@ -28,6 +28,12 @@
 #define DUNG_ROOM_MAXWIDTH 20
 #define DUNG_ROOM_MAXHEIGHT 20
 
+// Derived constants — keep in sync with room max dimensions
+// Max room diagonal: sqrt(w² + h²), used for seeing into lit rooms from hallways
+#define DUNG_ROOM_MAX_DIAGONAL 28 // ~sqrt(20² + 20²) ≈ 28.3
+// Projectile range: at least the larger room dimension
+#define DUNG_PROJECTILE_RANGE DUNG_ROOM_MAXWIDTH
+
 // Dungeon generation algorithm constants
 #define MAX_TRIES 10 // Maximum placement attempts for rooms/hallways before giving up
 #define HALLWAY_LEADS_TO_ROOM_PERCENT 80 // 80% chance hallway leads to room, 20% to more hallways
@@ -36,6 +42,6 @@
 #define DOOR_OFFSET 1 // Distance from room edge to place door
 #define WALL_OFFSET 2 // Distance from room edge to start hallway/room connection
 
-#define DUNG_MAXDEPTH 1000 // in levels * 50ft
+#define DUNG_MAXDEPTH 100 // 5000' max depth / 50' per level = 100 levels
 
 #endif // __DUNGEONCONSTANTS_H__

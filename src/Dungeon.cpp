@@ -166,13 +166,7 @@ JResult CDungeon::CreateNewLevel( const int delta )
 
 #ifndef CLOCKSTEP
     // In normal mode, place scenery/items/monsters immediately after dungeon creation
-    PlaceScenery( depth );
-
-    // Place items appropriate to this level.
-    PlaceItems( depth );
-
-    // Spawn monsters appropriate to this level.
-    SpawnMonsters( depth );
+    PopulateLevel( depth );
 #else
     // In CLOCKSTEP mode, these will be placed after dungeon generation completes
     JLog( LOG_LEVEL_INFO, false,
@@ -190,6 +184,15 @@ void CDungeon::PopulateLevel( const int depth )
     PlaceScenery( depth );
     PlaceItems( depth );
     SpawnMonsters( depth );
+
+    // Spawn the player last — they arrive on a fully populated level
+    g_pGame->GetPlayer()->m_bHasSpawned = false;
+    g_pGame->GetPlayer()->SpawnPlayer();
+    UpdateSeen();
+    JLog( LOG_LEVEL_INFO, false, "You pass through a one-way door, to arrive on level %d.\n",
+          depth );
+    g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
+                                depth );
 }
 
 JResult CDungeon::CreateMap()
@@ -582,26 +585,9 @@ int CDungeon::ChooseMonsterForDepth( const int depth )
 JResult CDungeon::OnChangeLevel( const int delta )
 {
     JLog( LOG_LEVEL_INFO, false, "Changing level...\n" );
-    // Clean up old level, then
     TerminateLevel();
-
-    // Create new level
     CreateNewLevel( delta );
-
-#ifndef CLOCKSTEP
-    // In normal mode, spawn player immediately after level creation
-    g_pGame->GetPlayer()->m_bHasSpawned = false;
-    g_pGame->GetPlayer()->SpawnPlayer();
     JLog( LOG_LEVEL_INFO, false, "done.\n" );
-    JLog( LOG_LEVEL_INFO, false, "You pass through a one-way door, to arrive on level %d.\n",
-          depth );
-    g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
-                                depth );
-#else
-    // In CLOCKSTEP mode, player will be spawned manually after generation completes
-    JLog( LOG_LEVEL_INFO, false, "done.\n" );
-#endif
-
     return JSUCCESS;
 }
 
@@ -772,7 +758,13 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
 
     // check for "in visible range" before doing the
     // more expensive line-of-sight test
-    if( !Util::Nearby( vSource, SIGHT_DISTANCE_PLAYER ).Contains( vTarget ) )
+    // If target is in a lit room, use extended sight distance
+    // (player can see into lit rooms from down the hall through doorways)
+    int sight_distance = SIGHT_DISTANCE_PLAYER;
+    if( prTarget && prTarget->HasFlags( DUNG_FLAG_LIT ) )
+        sight_distance = SIGHT_DISTANCE_LIT;
+
+    if( !Util::Nearby( vSource, sight_distance ).Contains( vTarget ) )
         return false;
 
     // No "see through walls" effects are active
@@ -780,7 +772,7 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
     // the player and the position
     // Use SightCollisionTest to allow vision through doors
     //
-    return Util::Bresenham( vSource, vTarget, SIGHT_DISTANCE_PLAYER, SightCollisionTest );
+    return Util::Bresenham( vSource, vTarget, sight_distance, SightCollisionTest );
 }
 
 bool CDungeon::PlayerCanSee( JVector vCheck, uint32 dwFlags )
@@ -918,7 +910,11 @@ void CDungeon::DrawDungeon()
             }
             else if( g_pGame->GetGameStateIndex() == STATE_RANGED && vScreen == vProjectile )
             {
-                color = JColor( 100, 100, 0, 255 );
+                color = JColor( 255, 255, 85, 255 );
+            }
+            else if( IsOnLOSLine( vScreen ) )
+            {
+                color = JColor( 85, 255, 255, 255 );
             }
             else if( g_pGame->GetGameStateIndex() != STATE_CLOCKSTEP && IsLit( vScreen ) )
             {
@@ -935,6 +931,21 @@ void CDungeon::DrawDungeon()
 }
 
 void CDungeon::DisturbPlayer() { g_pGame->GetPlayer()->m_bIsDisturbed = true; }
+
+bool CDungeon::IsOnLOSLine( JVector vPos )
+{
+    if( !m_llLOSLine )
+        return false;
+    CLink<JIVector> *pLink = m_llLOSLine->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData && pLink->m_lpData->x == (int)vPos.x &&
+            pLink->m_lpData->y == (int)vPos.y )
+            return true;
+        pLink = pLink->next;
+    }
+    return false;
+}
 
 void CDungeon::DrawItems()
 {
@@ -982,11 +993,11 @@ void CDungeon::PreDraw()
 #ifdef CLOCKSTEP
         // Wide zoom during generation to see full dungeon; normal zoom during gameplay
         if( g_pGame->GetGameStateIndex() == STATE_CLOCKSTEP )
-            m_dwZoom = DUNG_WIDTH / 2;
+            g_pGame->GetRender()->SetZoom( DUNG_WIDTH / 2 );
         else
-            m_dwZoom = DUNG_ZOOM_NORMAL;
+            g_pGame->GetRender()->SetZoom( 20 );
 #endif
-        int xinitval = m_dwZoom;
+        int xinitval = g_pGame->GetRender()->GetZoom();
         // int xinitval = 16;
         int yinitval = xinitval;
 
@@ -1068,12 +1079,23 @@ void CDungeon::Term()
         delete m_llItemDefs;
         m_llItemDefs = NULL;
     }
+
+    ClearLOSLine();
 }
 
 void CDungeon::RemoveMonster( CMonster *pMon )
 {
     CLink<CMonster> *pLink;
     pLink = pMon->m_pllLink;
+
+    // Clear player's target if it points to this monster (prevents dangling pointer)
+    if( g_pGame->GetPlayer()->GetTarget() == pMon )
+    {
+        g_pGame->GetPlayer()->SetTarget( NULL );
+    }
+
+    // Invalidate visible monsters cache (it holds non-owning CMonster* pointers)
+    g_pGame->GetPlayer()->ClearVisibleMonsters();
 
     GetTile( pMon->GetPos() )->m_pCurMonster = NULL;
     m_llMonsters->Remove( pLink );
@@ -1318,5 +1340,5 @@ void CDungeon::Drop( CItem *pItem, JVector &vDropPos )
 {
     GetTile( vDropPos )->m_pCurItem = pItem;
     pItem->m_vPos = vDropPos;
-    pItem->m_pllLink = m_llItems->Add( pItem, pItem->m_id->m_dwIndex );
+    pItem->m_pllLink = m_llItems->Add( pItem, pItem->m_id->m_dwIndex, pItem->GetInstanceId() );
 }

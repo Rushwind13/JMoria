@@ -5,6 +5,7 @@
 #include "JMDefs.h"
 #ifdef RENDER_ASCII
 
+#include "DisplayText.h"
 #include "RenderASCII.h"
 #include <cmath>
 #include <cstring>
@@ -110,6 +111,116 @@ bool CRenderASCII::CheckResize()
         return false;
 
     m_layout = ASCIILayout::CreateForSize( termW, termH );
+    return true;
+}
+
+void CRenderASCII::ConfigureDisplayRegions( CDisplayText *pMsgs, CDisplayText *pStats,
+                                            CDisplayText *pInv, CDisplayText *pEquip,
+                                            CDisplayText *pUse, CDisplayText *pEndGame )
+{
+    auto toPixelRect = []( const ASCIILayoutRegion &r )
+    { return JRect( r.left * 6, r.top * 8, r.right * 6, r.bottom * 8 ); };
+
+    pMsgs->SetRect( toPixelRect( m_layout.messages ) );
+    pStats->SetRect( toPixelRect( m_layout.stats ) );
+    pInv->SetRect( toPixelRect( m_layout.inventory ) );
+    pEquip->SetRect( toPixelRect( m_layout.equipment ) );
+    pUse->SetRect( toPixelRect( m_layout.use ) );
+    pEndGame->SetRect( toPixelRect( m_layout.endgame ) );
+    pEndGame->SetContentMargin( 0, 0 );
+}
+
+bool CRenderASCII::PollEvent( JInputEvent &event )
+{
+    int ch = getch();
+    if( ch == ERR )
+        return false; // no input available
+
+    // Terminal resize: consume the event, CheckResize handles the actual resize
+    if( ch == KEY_RESIZE )
+        return false;
+
+    event.type = JInputEvent::KEY;
+    memset( &event.keysym, 0, sizeof( event.keysym ) );
+
+    // Map ncurses keys to JMoria keysyms
+    // For ASCII printable characters, JKeycode values match ASCII codes
+    if( ch >= 'a' && ch <= 'z' )
+    {
+        event.keysym.sym = (JKeycode)ch;
+        event.keysym.mod = JMOD_NONE;
+    }
+    else if( ch >= 'A' && ch <= 'Z' )
+    {
+        // Uppercase: map to lowercase sym + shift modifier
+        event.keysym.sym = (JKeycode)( ch - 'A' + 'a' );
+        event.keysym.mod = JMOD_SHIFT;
+    }
+    else if( ch >= 1 && ch <= 26 && ch != '\n' && ch != '\r' )
+    {
+        // Ctrl+letter: ch 1 = Ctrl+A, ch 3 = Ctrl+C, etc.
+        // Exclude \n (10) and \r (13) so they reach the Enter case below.
+        event.keysym.sym = (JKeycode)( 'a' + ch - 1 );
+        event.keysym.mod = JMOD_CTRL;
+    }
+    else if( ch >= '0' && ch <= '9' )
+    {
+        event.keysym.sym = (JKeycode)ch;
+        event.keysym.mod = JMOD_NONE;
+    }
+    else
+    {
+        // Map special keys
+        switch( ch )
+        {
+        case '\n':
+        case '\r':
+        case KEY_ENTER:
+            event.keysym.sym = JKEY_RETURN;
+            break;
+        case 27: // Escape
+            event.keysym.sym = JKEY_ESCAPE;
+            break;
+        case ' ':
+            event.keysym.sym = JKEY_SPACE;
+            break;
+        case '.':
+            event.keysym.sym = JKEY_PERIOD;
+            break;
+        case '>': // Shift+.
+            event.keysym.sym = JKEY_PERIOD;
+            event.keysym.mod = JMOD_SHIFT;
+            break;
+        case ',':
+            event.keysym.sym = JKEY_COMMA;
+            break;
+        case '<': // Shift+,
+            event.keysym.sym = JKEY_COMMA;
+            event.keysym.mod = JMOD_SHIFT;
+            break;
+        case ';':
+            event.keysym.sym = JKEY_SEMICOLON;
+            break;
+        case '*': // Shift+8: target command
+            event.keysym.sym = JKEY_8;
+            event.keysym.mod = JMOD_SHIFT;
+            break;
+        case KEY_BACKSPACE:
+        case 127: // DEL on some terminals
+            event.keysym.sym = JKEY_BACKSPACE;
+            break;
+        case KEY_DC: // ncurses Delete key
+            event.keysym.sym = JKEY_DELETE;
+            break;
+        case KEY_F( 1 ):
+            event.keysym.sym = JKEY_F1;
+            break;
+        default:
+            // Unknown key, ignore
+            return false;
+        }
+    }
+
     return true;
 }
 

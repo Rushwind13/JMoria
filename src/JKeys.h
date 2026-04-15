@@ -7,11 +7,11 @@
 #ifndef __JKEYS_H__
 #define __JKEYS_H__
 
-#include <cstdint>
+#include "JTypes.h"
 
 // --- Key types ---
-typedef int32_t JKeycode;
-typedef uint16_t JKeymod;
+typedef Sint32 JKeycode;
+typedef Uint16 JKeymod;
 
 struct JKeysym
 {

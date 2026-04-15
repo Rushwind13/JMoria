@@ -166,13 +166,7 @@ JResult CDungeon::CreateNewLevel( const int delta )
 
 #ifndef CLOCKSTEP
     // In normal mode, place scenery/items/monsters immediately after dungeon creation
-    PlaceScenery( depth );
-
-    // Place items appropriate to this level.
-    PlaceItems( depth );
-
-    // Spawn monsters appropriate to this level.
-    SpawnMonsters( depth );
+    PopulateLevel( depth );
 #else
     // In CLOCKSTEP mode, these will be placed after dungeon generation completes
     JLog( LOG_LEVEL_INFO, false,
@@ -190,6 +184,15 @@ void CDungeon::PopulateLevel( const int depth )
     PlaceScenery( depth );
     PlaceItems( depth );
     SpawnMonsters( depth );
+
+    // Spawn the player last — they arrive on a fully populated level
+    g_pGame->GetPlayer()->m_bHasSpawned = false;
+    g_pGame->GetPlayer()->SpawnPlayer();
+    UpdateSeen();
+    JLog( LOG_LEVEL_INFO, false, "You pass through a one-way door, to arrive on level %d.\n",
+          depth );
+    g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
+                                depth );
 }
 
 JResult CDungeon::CreateMap()
@@ -582,26 +585,9 @@ int CDungeon::ChooseMonsterForDepth( const int depth )
 JResult CDungeon::OnChangeLevel( const int delta )
 {
     JLog( LOG_LEVEL_INFO, false, "Changing level...\n" );
-    // Clean up old level, then
     TerminateLevel();
-
-    // Create new level
     CreateNewLevel( delta );
-
-#ifndef CLOCKSTEP
-    // In normal mode, spawn player immediately after level creation
-    g_pGame->GetPlayer()->m_bHasSpawned = false;
-    g_pGame->GetPlayer()->SpawnPlayer();
     JLog( LOG_LEVEL_INFO, false, "done.\n" );
-    JLog( LOG_LEVEL_INFO, false, "You pass through a one-way door, to arrive on level %d.\n",
-          depth );
-    g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
-                                depth );
-#else
-    // In CLOCKSTEP mode, player will be spawned manually after generation completes
-    JLog( LOG_LEVEL_INFO, false, "done.\n" );
-#endif
-
     return JSUCCESS;
 }
 
@@ -1007,11 +993,11 @@ void CDungeon::PreDraw()
 #ifdef CLOCKSTEP
         // Wide zoom during generation to see full dungeon; normal zoom during gameplay
         if( g_pGame->GetGameStateIndex() == STATE_CLOCKSTEP )
-            m_dwZoom = DUNG_WIDTH / 2;
+            g_pGame->GetRender()->SetZoom( DUNG_WIDTH / 2 );
         else
-            m_dwZoom = DUNG_ZOOM_NORMAL;
+            g_pGame->GetRender()->SetZoom( 20 );
 #endif
-        int xinitval = m_dwZoom;
+        int xinitval = g_pGame->GetRender()->GetZoom();
         // int xinitval = 16;
         int yinitval = xinitval;
 
@@ -1108,20 +1094,11 @@ void CDungeon::RemoveMonster( CMonster *pMon )
         g_pGame->GetPlayer()->SetTarget( NULL );
     }
 
+    // Invalidate visible monsters cache (it holds non-owning CMonster* pointers)
+    g_pGame->GetPlayer()->ClearVisibleMonsters();
+
     GetTile( pMon->GetPos() )->m_pCurMonster = NULL;
     m_llMonsters->Remove( pLink );
-}
-
-CMonster *CDungeon::FindMonsterByInstanceId( uint32 dwInstanceId )
-{
-    CLink<CMonster> *pLink = m_llMonsters->GetHead();
-    while( pLink )
-    {
-        if( pLink->m_lpData && pLink->m_lpData->GetInstanceId() == dwInstanceId )
-            return pLink->m_lpData;
-        pLink = m_llMonsters->GetNext( pLink );
-    }
-    return NULL;
 }
 
 int CDungeon::IsWalkableFor( JVector &vPos, bool isPlayer )
@@ -1363,5 +1340,5 @@ void CDungeon::Drop( CItem *pItem, JVector &vDropPos )
 {
     GetTile( vDropPos )->m_pCurItem = pItem;
     pItem->m_vPos = vDropPos;
-    pItem->m_pllLink = m_llItems->Add( pItem, pItem->m_id->m_dwIndex );
+    pItem->m_pllLink = m_llItems->Add( pItem, pItem->m_id->m_dwIndex, pItem->GetInstanceId() );
 }

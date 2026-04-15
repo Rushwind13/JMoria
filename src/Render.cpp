@@ -214,6 +214,62 @@ void CRender::SwapBuffers()
     SDL_GL_SwapWindow( m_hWindow );
 }
 
+bool CRender::PollEvent( JInputEvent &event )
+{
+    SDL_Event sdlEvent;
+
+    while( SDL_PollEvent( &sdlEvent ) )
+    {
+        switch( sdlEvent.type )
+        {
+        case SDL_WINDOWEVENT:
+            switch( sdlEvent.window.event )
+            {
+            case SDL_WINDOWEVENT_RESIZED:
+            {
+                JResult retval = ResizeWindow( sdlEvent.window.data1, sdlEvent.window.data2 );
+                if( retval != JSUCCESS )
+                {
+                    event.type = JInputEvent::QUIT;
+                    return true;
+                }
+                break;
+            }
+            }
+            // Focus events handled internally; continue polling
+            break;
+        case SDL_KEYDOWN:
+        {
+            event.type = JInputEvent::KEY;
+            event.keysym.sym = (JKeycode)sdlEvent.key.keysym.sym;
+            event.keysym.mod = (JKeymod)sdlEvent.key.keysym.mod;
+            return true;
+        }
+        case SDL_QUIT:
+            event.type = JInputEvent::QUIT;
+            return true;
+        case SDL_MOUSEBUTTONDOWN:
+        case SDL_MOUSEBUTTONUP:
+            if( sdlEvent.button.state == SDL_RELEASED )
+                break;
+            switch( sdlEvent.button.button )
+            {
+            case MOUSE_WHEEL_UP:
+                Zoom( 3 );
+                break;
+            case MOUSE_WHEEL_DOWN:
+                Zoom( -3 );
+                break;
+            }
+            break;
+        default:
+            break;
+        }
+    }
+
+    return false;
+}
+
 void CRender::PreDrawTile()
 {
     // Skip in headless mode

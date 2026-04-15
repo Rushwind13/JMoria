@@ -8,9 +8,6 @@
 #endif // __WIN32__
 #include <stdio.h>
 #include <string.h>
-#ifndef TURN_BASED
-#include <sys/time.h>
-#endif
 #include <sys/time.h>
 
 #include "JMDefs.h"
@@ -29,6 +26,13 @@ void SeedRandom( unsigned int seed )
 }
 
 unsigned int GetRandomSeed() { return g_RandomSeed; }
+
+void SeedRandomFromClock()
+{
+    struct timeval tv;
+    gettimeofday( &tv, NULL );
+    SeedRandom( (unsigned int)( tv.tv_sec ^ tv.tv_usec ) );
+}
 
 // The RNG in all its glory
 float GetRandom( float lo, float hi )

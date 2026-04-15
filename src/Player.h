@@ -210,13 +210,6 @@ public:
     bool IsWieldable( CLink<CItem> *pLink );
     JResult Wield( CLink<CItem> *pItem );
 
-    // Programmatic API: operations by item instance id (helpers for tests)
-    JResult WieldItem( uint32 dwInstanceId );
-    bool RemoveItem( uint32 dwInstanceId );
-    bool DropItem( uint32 dwInstanceId );
-    JResult ReadItem( uint32 dwInstanceId );
-    JResult QuaffItem( uint32 dwInstanceId );
-
     bool IsRemovable( CLink<CItem> *pLink );
     bool RemoveEquipment( CLink<CItem> *pLink );
 
@@ -330,11 +323,12 @@ protected:
 
     CMonster *m_pTarget;
     JVector m_vRangedHitPosition;
-    JLinkList<uint32> *m_llVisibleMonsters;
+    JLinkList<CMonster> *m_llVisibleMonsters;
 
 public:
     void UpdateVisibleMonsters();
     void ClearVisibleMonsters();
-    JLinkList<uint32> *GetVisibleMonsters() { return m_llVisibleMonsters; }
+    JLinkList<CMonster> *GetVisibleMonsters();
+
 };
 #endif // __PLAYER_H__

@@ -11,11 +11,13 @@ template <class T> class CLink
 public:
     T *m_lpData;
     int m_dwIndex;
+    int m_dwInstanceId;
     CLink *next, *prev;
 
-    inline CLink( T *pData = NULL, int dwIndex = -1 )
+    inline CLink( T *pData = NULL, int dwIndex = -1, int dwInstanceId = -1 )
         : m_lpData( pData ),
           m_dwIndex( dwIndex ),
+          m_dwInstanceId( dwInstanceId ),
           next( NULL ),
           prev( NULL ) {};
 
@@ -27,6 +29,7 @@ public:
             m_lpData = NULL;
         }
         m_dwIndex = -1;
+        m_dwInstanceId = -1;
         next = NULL;
         prev = NULL;
     }
@@ -92,11 +95,15 @@ private:
 template <class T> class JLinkList
 {
 public:
-    inline JLinkList<T>() : m_lpHead( NULL ), m_lpTail( NULL ), m_iNumElements( 0 ) {}
+    inline JLinkList<T>( bool bOwnsData = true )
+        : m_lpHead( NULL ),
+          m_lpTail( NULL ),
+          m_iNumElements( 0 ),
+          m_bOwnsData( bOwnsData ) {}
     virtual inline ~JLinkList( void ) { Terminate(); };
-    CLink<T> *Add( T *pData, int dwIndex = -1, bool bAscending = true )
+    CLink<T> *Add( T *pData, int dwIndex = -1, int dwInstanceId = -1, bool bAscending = true )
     {
-        CLink<T> *pLink = new CLink<T>( pData, dwIndex );
+        CLink<T> *pLink = new CLink<T>( pData, dwIndex, dwInstanceId );
 
         if( dwIndex != -1 )
         {
@@ -201,6 +208,8 @@ public:
 
         if( bDelete )
         {
+            if( !m_bOwnsData )
+                pLink->m_lpData = NULL;
             delete pLink;
             pLink = NULL;
         }
@@ -273,6 +282,25 @@ public:
         }
         return curr_link;
     }
+
+    // Retrieve the entry with the given instance ID (m_dwInstanceId) from the list
+    CLink<T> *GetInstanceId( int dwInstanceId )
+    {
+        if( dwInstanceId == -1 )
+            return NULL;
+
+        CLink<T> *curr_link = GetHead();
+        while( curr_link != NULL )
+        {
+            if( curr_link->m_dwInstanceId == dwInstanceId )
+            {
+                return curr_link;
+            }
+            curr_link = GetNext( curr_link );
+        }
+        return NULL;
+    }
+
     int length() { return m_iNumElements; }
 
     void Terminate()
@@ -296,6 +324,7 @@ protected:
     CLink<T> *m_lpHead;
     CLink<T> *m_lpTail;
     int m_iNumElements;
+    bool m_bOwnsData;
 
 private:
 };

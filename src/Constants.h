@@ -81,6 +81,13 @@
 
 #define DUNG_FLAG_TRAP 0x00000010
 #define DUNG_FLAG_LOCKED 0x00000020
+
+// Door and search chance percentages (1-100)
+#define CHANCE_PICK_LOCK 75
+#define CHANCE_CLOSE_DOOR 90
+#define CHANCE_FIND_SECRET_BUMP 20
+#define CHANCE_SEARCH_ACTIVE 25
+#define CHANCE_SEARCH_PASSIVE 5
 // #define DUNG_FLAG_x  0x00000040
 // #define DUNG_FLAG_x  0x00000080
 

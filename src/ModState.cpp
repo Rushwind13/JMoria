@@ -247,7 +247,7 @@ bool CModState::TestOpen() { return ( g_pGame->GetDungeon()->IsOpenable( m_vNewP
 
 bool CModState::DoOpen()
 {
-    if( Util::GetRandom( 1, 100 ) > 25 )
+    if( Util::GetRandom( 1, 100 ) <= CHANCE_PICK_LOCK )
     {
         g_pGame->GetDungeon()->Modify( m_vNewPos );
         return true;
@@ -273,7 +273,7 @@ bool CModState::TestClose() { return ( g_pGame->GetDungeon()->IsCloseable( m_vNe
 
 bool CModState::DoClose()
 {
-    if( Util::GetRandom( 1, 100 ) < 75 )
+    if( Util::GetRandom( 1, 100 ) <= CHANCE_CLOSE_DOOR )
     {
         g_pGame->GetDungeon()->Modify( m_vNewPos );
         return true;

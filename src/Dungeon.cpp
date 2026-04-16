@@ -12,9 +12,19 @@
 #include "RenderBase.h"
 
 unsigned char TileIDs[DUNG_IDX_MAX + 1] = ".#+'<<>>:#@";
-int ModifiedTileTypes[DUNG_IDX_MAX + 1] = { DUNG_IDX_INVALID, DUNG_IDX_INVALID, DUNG_IDX_OPEN_DOOR,
-                                            DUNG_IDX_DOOR,    DUNG_IDX_INVALID, DUNG_IDX_INVALID,
-                                            DUNG_IDX_FLOOR,   DUNG_IDX_DOOR,    DUNG_IDX_INVALID };
+int ModifiedTileTypes[DUNG_IDX_MAX + 1] = {
+    DUNG_IDX_INVALID,   // 0  FLOOR: can't modify
+    DUNG_IDX_INVALID,   // 1  WALL: can't modify
+    DUNG_IDX_OPEN_DOOR, // 2  DOOR: opens
+    DUNG_IDX_DOOR,      // 3  OPEN_DOOR: closes
+    DUNG_IDX_INVALID,   // 4  UPSTAIRS: can't modify
+    DUNG_IDX_INVALID,   // 5  LONG_UPSTAIRS: can't modify
+    DUNG_IDX_INVALID,   // 6  DOWNSTAIRS: can't modify
+    DUNG_IDX_INVALID,   // 7  LONG_DOWNSTAIRS: can't modify
+    DUNG_IDX_FLOOR,     // 8  RUBBLE: tunnels to floor
+    DUNG_IDX_DOOR,      // 9  SECRET_DOOR: reveals as closed door
+    DUNG_IDX_INVALID,   // 10 PLAYER: can't modify
+};
 // extern Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH];
 
 // Setup - the one-time-run stuff to set up the Dungeon
@@ -1237,7 +1247,7 @@ bool CDungeon::IsOpenable( JVector &vPos )
     // If you get here, the square was unoccupied. Now check for running into inanimates...
     if( curTile->m_dtd->m_dwType == DUNG_IDX_SECRET_DOOR )
     {
-        if( Util::GetRandom( 1, 100 ) > 25 )
+        if( Util::GetRandom( 1, 100 ) <= CHANCE_FIND_SECRET_BUMP )
         {
             g_pGame->GetMsgs()->Printf( "You have found a secret door!\n" );
             g_pGame->GetDungeon()->Modify( curTile->m_vPos );

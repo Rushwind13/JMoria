@@ -228,6 +228,12 @@ public:
     bool IsCastable( CLink<CItem> *pLink );
     JResult Magic( CLink<CItem> *pLink );
 
+    bool IsFuel( CLink<CItem> *pLink );
+    JResult Fuel( CLink<CItem> *pLink );
+
+    void Search();
+    void PassiveSearch();
+
     float LightSource();
     void UpdateLight( float fValue, bool bReset = false );
 
@@ -329,6 +335,5 @@ public:
     void UpdateVisibleMonsters();
     void ClearVisibleMonsters();
     JLinkList<CMonster> *GetVisibleMonsters();
-
 };
 #endif // __PLAYER_H__

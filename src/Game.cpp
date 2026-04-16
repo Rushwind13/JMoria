@@ -536,6 +536,7 @@ bool CGame::Update( float fCurTime )
         case USE_DROP:
         case USE_READ:
         case USE_QUAFF:
+        case USE_FUEL:
             GetPlayer()->DisplayInventory( PLACEMENT_USE );
             break;
         case USE_REMOVE:

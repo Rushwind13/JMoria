@@ -18,6 +18,7 @@ CUseState::CUseState() : m_cCommand( 0 )
     m_pKeyHandlers[USE_DROP] = &CUseState::OnHandleDrop;
     m_pKeyHandlers[USE_QUAFF] = &CUseState::OnHandleQuaff;
     m_pKeyHandlers[USE_READ] = &CUseState::OnHandleRead;
+    m_pKeyHandlers[USE_FUEL] = &CUseState::OnHandleFuel;
 
     m_eCurModifier = USE_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -288,6 +289,10 @@ int CUseState::OnHandleInit( JKeysym *keysym )
             mod = USE_QUAFF;
             g_pGame->GetMsgs()->Printf( "Quaff which item? [a-z]\n" );
             break;
+        case JKEY_f:
+            mod = USE_FUEL;
+            g_pGame->GetMsgs()->Printf( "Fill with which fuel? [a-z]\n" );
+            break;
         default:
             JLog( LOG_LEVEL_ERROR, true,
                   "There seems to be some kind of mistake; I don't handle mod: %d\n", m_cCommand );
@@ -354,6 +359,7 @@ CLink<CItem> *CUseState::GetResponse( eUseModifier whichUse )
     case USE_READ:
     case USE_QUAFF:
     case USE_WIELD:
+    case USE_FUEL:
         pList = g_pGame->GetPlayer()->m_llInventory;
         pLink = pList->GetNthLink( m_dwSelected );
         break;
@@ -396,3 +402,52 @@ bool CUseState::DoQuaff() { return g_pGame->GetPlayer()->Quaff( m_pSelected ) ==
 bool CUseState::TestRead() { return g_pGame->GetPlayer()->IsReadable( m_pSelected ); }
 
 bool CUseState::DoRead() { return g_pGame->GetPlayer()->Read( m_pSelected ) == JSUCCESS; }
+
+//// Fuel commands
+bool CUseState::TestFuel() { return g_pGame->GetPlayer()->IsFuel( m_pSelected ); }
+
+bool CUseState::DoFuel() { return g_pGame->GetPlayer()->Fuel( m_pSelected ) == JSUCCESS; }
+
+int CUseState::OnHandleFuel( JKeysym *keysym )
+{
+    int retval;
+    JLog( LOG_LEVEL_DEBUG, true, "Handling FUEL\n" );
+    retval = OnBaseHandleKey( keysym, USE_FUEL );
+
+    if( retval == JRESETSTATE )
+    {
+        return 0;
+    }
+
+    if( retval != JSUCCESS )
+    {
+        JLog( LOG_LEVEL_DEBUG, true,
+              "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
+        g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
+        return 0;
+    }
+
+    JLog( LOG_LEVEL_NOISE, true, "FUEL got a selection\n" );
+    if( TestFuel() )
+    {
+        if( DoFuel() )
+        {
+            g_pGame->GetMsgs()->Printf( "You fill your lantern with the %s.\n",
+                                        m_pSelected->m_lpData->GetName() );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "You have no lantern to fill.\n" );
+        }
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "You can't use a %s as fuel!\n",
+                                    m_pSelected->m_lpData->GetName() );
+    }
+    m_pSelected = NULL;
+
+    JLog( LOG_LEVEL_DEBUG, true, "FUEL resetting game state to COMMAND, USE state to INIT\n" );
+    ResetToState( STATE_COMMAND );
+    return 0;
+}

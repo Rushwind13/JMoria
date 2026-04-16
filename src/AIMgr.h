@@ -29,7 +29,11 @@ public:
     float m_fSpeed;
     int m_dwMoveType;
     JFVector m_vPos;
+    JVector m_vTargetPos;
     CLink<CAIBrain> *m_pllLink;
+
+    void SetTargetPos( JVector vTarget ) { m_vTargetPos = vTarget; }
+    JVector GetTargetPos() { return m_vTargetPos; }
 
     bool SetRandomDest( float fCurTime );
     bool WalkSeek( float fCurTime );

@@ -842,17 +842,23 @@ void CDungeon::UpdateVisibility()
             if( !pTile || ( pTile->m_dwFlags & DUNG_FLAG_VISIBLE ) )
                 continue;
 
-            // Determine sight distance for this tile
-            JVector vCheckF( viCheck.x, viCheck.y );
-            CRoom *pTargetRoom = InRoom( vCheckF );
-            int sight_distance = SIGHT_DISTANCE_PLAYER;
-            if( pTargetRoom && pTargetRoom->HasFlags( DUNG_FLAG_LIT ) )
-                sight_distance = SIGHT_DISTANCE_LIT;
+            int dx = Util::abs( viCheck.x - vPlayer.x );
+            int dy = Util::abs( viCheck.y - vPlayer.y );
+            int chebyshev = MAX( dx, dy );
 
-            if( !Util::Nearby( vPlayer, sight_distance ).Contains( viCheck ) )
-                continue;
+            // Tiles beyond base sight range need to be in a lit room to be visible
+            if( chebyshev > SIGHT_DISTANCE_PLAYER )
+            {
+                JVector vCheckF( viCheck.x, viCheck.y );
+                CRoom *pTargetRoom = InRoom( vCheckF );
+                if( !pTargetRoom || !pTargetRoom->HasFlags( DUNG_FLAG_LIT ) )
+                    continue;
+            }
 
-            if( Util::Bresenham( vPlayer, viCheck, sight_distance, SightCollisionTest ) )
+            // +1 because GenerateLine counts the source tile as a step
+            int target_distance = chebyshev + 1;
+
+            if( Util::Bresenham( vPlayer, viCheck, target_distance, SightCollisionTest ) )
             {
                 pTile->SetFlags( DUNG_FLAG_VISIBLE );
             }
@@ -940,12 +946,20 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
     if( !Util::Nearby( vSource, sight_distance ).Contains( vTarget ) )
         return false;
 
+    // Use exact distance to target so the Bresenham line stops AT the target
+    // rather than continuing past it into potential walls
+    int dx = Util::abs( vTarget.x - vSource.x );
+    int dy = Util::abs( vTarget.y - vSource.y );
+    int target_distance = MAX( dx, dy );
+    // +1 because GenerateLine counts the source tile as a step
+    target_distance += 1;
+
     // No "see through walls" effects are active
     // Check for obstacles along the line between
     // the player and the position
     // Use SightCollisionTest to allow vision through doors
     //
-    return Util::Bresenham( vSource, vTarget, sight_distance, SightCollisionTest );
+    return Util::Bresenham( vSource, vTarget, target_distance, SightCollisionTest );
 }
 
 bool CDungeon::PlayerCanSee( JVector vCheck, uint32 dwFlags )

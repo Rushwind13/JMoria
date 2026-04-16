@@ -638,6 +638,7 @@ bool CPlayer::RemoveEquipment( CLink<CItem> *pLink )
     CItem *pItem = pLink->m_lpData;
     if( pItem && pItem->m_dwFlags & ITEM_FLAG_CURSED )
     {
+        pItem->RevealProperty( KNOWN_CURSED );
         g_pGame->GetMsgs()->Printf( "You can't remove the %s... it seems to be cursed.\n",
                                     pItem->GetName() );
 
@@ -903,6 +904,10 @@ JResult CPlayer::Quaff( CLink<CItem> *pLink )
         pItem->Identify();
         g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
     }
+    else if( !wasIdentified && !m_bLastEffectNoticed )
+    {
+        pItem->m_id->m_bTried = true;
+    }
     if( pItem->IsStackable() && pItem->m_dwCount > 1 )
     {
         pItem->m_dwCount--;
@@ -924,6 +929,10 @@ JResult CPlayer::Read( CLink<CItem> *pLink )
     {
         pItem->Identify();
         g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
+    }
+    else if( !wasIdentified && !m_bLastEffectNoticed )
+    {
+        pItem->m_id->m_bTried = true;
     }
     if( pItem->IsStackable() && pItem->m_dwCount > 1 )
     {

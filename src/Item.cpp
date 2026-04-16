@@ -182,28 +182,107 @@ int CItem::EquipType()
     return EquipTypes[item_type];
 }
 
+void CItemDef::FormatProperties( char *szOut, int maxLen, uint32 knownProps, uint32 itemFlags,
+                                 uint32 charges )
+{
+    int pos = 0;
+    if( knownProps & KNOWN_BONUSES )
+    {
+        switch( m_dwIndex )
+        {
+        case ITEM_IDX_SWORD:
+        case ITEM_IDX_DAGGER:
+        case ITEM_IDX_MACE:
+        case ITEM_IDX_SPEAR:
+        case ITEM_IDX_AXE:
+        case ITEM_IDX_POLEARM:
+        case ITEM_IDX_2H_SWORD:
+            if( m_fBonusToHit != 0.0f || m_fBonusToDamage != 0.0f )
+                pos += snprintf( szOut + pos, maxLen - pos, " (%+.0f, %+.0f)", m_fBonusToHit,
+                                 m_fBonusToDamage );
+            break;
+        case ITEM_IDX_ARMOR:
+        case ITEM_IDX_SHIELD:
+        case ITEM_IDX_HELMET:
+        case ITEM_IDX_CLOAK:
+        case ITEM_IDX_GLOVES:
+        case ITEM_IDX_BOOTS:
+            if( m_fACBonus != 0.0f )
+                pos += snprintf( szOut + pos, maxLen - pos, " [%+.0f]", m_fACBonus );
+            break;
+        case ITEM_IDX_RING:
+        case ITEM_IDX_AMULET:
+            if( m_fBonusToHit != 0.0f || m_fBonusToDamage != 0.0f )
+                pos += snprintf( szOut + pos, maxLen - pos, " (%+.0f, %+.0f)", m_fBonusToHit,
+                                 m_fBonusToDamage );
+            else if( m_fACBonus != 0.0f )
+                pos += snprintf( szOut + pos, maxLen - pos, " [%+.0f]", m_fACBonus );
+            break;
+        default:
+            break;
+        }
+    }
+    if( ( knownProps & KNOWN_CHARGES ) &&
+        ( m_dwIndex == ITEM_IDX_WAND || m_dwIndex == ITEM_IDX_STAFF ) )
+    {
+        pos += snprintf( szOut + pos, maxLen - pos, " (%d charges)", charges );
+    }
+    if( ( knownProps & KNOWN_CURSED ) && ( itemFlags & ITEM_FLAG_CURSED ) )
+    {
+        pos += snprintf( szOut + pos, maxLen - pos, " {cursed}" );
+    }
+}
+
 const char *CItem::GetName()
 {
+    static char szDisplay[128];
+    const char *baseName;
     if( IsIdentified() )
     {
-        return const_cast<const char *>( m_id->m_szName );
+        baseName = m_id->m_szName;
     }
     else
     {
-        return m_id->m_szUnidentifiedName;
+        baseName = m_id->m_szUnidentifiedName;
+        if( m_id->m_bTried )
+        {
+            snprintf( szDisplay, sizeof( szDisplay ), "%s {tried}", baseName );
+            return szDisplay;
+        }
+        return baseName;
     }
+
+    snprintf( szDisplay, sizeof( szDisplay ), "%s", baseName );
+    int baseLen = strlen( szDisplay );
+    m_id->FormatProperties( szDisplay + baseLen, sizeof( szDisplay ) - baseLen, m_dwKnownProps,
+                            m_dwFlags, m_dwCharges );
+    return szDisplay;
 }
 
 const char *CItem::GetPlural()
 {
+    static char szDisplay[128];
+    const char *baseName;
     if( IsIdentified() )
     {
-        return const_cast<const char *>( m_id->m_szPlural );
+        baseName = m_id->m_szPlural;
     }
     else
     {
-        return m_id->m_szUnidentifiedPlural;
+        baseName = m_id->m_szUnidentifiedPlural;
+        if( m_id->m_bTried )
+        {
+            snprintf( szDisplay, sizeof( szDisplay ), "%s {tried}", baseName );
+            return szDisplay;
+        }
+        return baseName;
     }
+
+    snprintf( szDisplay, sizeof( szDisplay ), "%s", baseName );
+    int baseLen = strlen( szDisplay );
+    m_id->FormatProperties( szDisplay + baseLen, sizeof( szDisplay ) - baseLen, m_dwKnownProps,
+                            m_dwFlags, m_dwCharges );
+    return szDisplay;
 }
 
 void CItem::Draw()

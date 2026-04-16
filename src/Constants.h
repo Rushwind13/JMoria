@@ -346,7 +346,7 @@
 #define ITEM_FLAG_CURSED 0x00000001
 #define ITEM_FLAG_STACKS 0x00000002
 #define ITEM_FLAG_IDENTIFIED 0x00000004
-// #define ITEM_FLAG_x 0x00000008
+#define ITEM_FLAG_MAGIC 0x00000008
 
 #define ITEM_FLAG_2HANDED 0x00000010
 #define ITEM_FLAG_OFFHAND 0x00000020
@@ -365,7 +365,13 @@
 
 #define ITEM_COLOR_MULTI 0x10000000
 
-#define NUM_ITEM_FLAGS 10
+// Known-property flags for CItem::m_dwKnownProps
+#define KNOWN_CURSED 0x00000001
+#define KNOWN_BONUSES 0x00000002
+#define KNOWN_CHARGES 0x00000004
+#define KNOWN_TRIED 0x00000008
+
+#define NUM_ITEM_FLAGS 11
 
 // Make sure you change below here if you added any flags.
 #define NUM_STRINGS                                                                                \
@@ -597,6 +603,7 @@ public:
         m_StringTable[i++].Init( "ITEM_FLAG_CURSED", ITEM_FLAG_CURSED );
         m_StringTable[i++].Init( "ITEM_FLAG_STACKS", ITEM_FLAG_STACKS );
         m_StringTable[i++].Init( "ITEM_FLAG_IDENTIFIED", ITEM_FLAG_IDENTIFIED );
+        m_StringTable[i++].Init( "ITEM_FLAG_MAGIC", ITEM_FLAG_MAGIC );
         m_StringTable[i++].Init( "ITEM_FLAG_2HANDED", ITEM_FLAG_2HANDED );
         m_StringTable[i++].Init( "ITEM_FLAG_OFFHAND", ITEM_FLAG_OFFHAND );
         m_StringTable[i++].Init( "ITEM_FLAG_MAINHAND", ITEM_FLAG_MAINHAND );
@@ -605,13 +612,17 @@ public:
         m_StringTable[i++].Init( "ITEM_FLAG_HOLDING", ITEM_FLAG_HOLDING );
         m_StringTable[i++].Init( "ITEM_COLOR_MULTI", ITEM_COLOR_MULTI );
 
-        if( i == NUM_STRINGS )
+        if( i != NUM_STRINGS )
         {
-            JLog( LOG_LEVEL_INFO, false, "Success!\n" );
+            JLog( LOG_LEVEL_ERROR, true,
+                  "FATAL: StringTable expected %d entries but got %d. "
+                  "NUM_ITEM_FLAGS or another NUM_ constant is out of sync!\n",
+                  NUM_STRINGS, i );
+            assert( i == NUM_STRINGS && "StringTable entry count mismatch" );
         }
         else
         {
-            JLog( LOG_LEVEL_ERROR, true, "got %d strings instead, misconfiguration error!\n", i );
+            JLog( LOG_LEVEL_INFO, false, "Success!\n" );
         }
     };
 

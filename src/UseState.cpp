@@ -372,7 +372,7 @@ int CUseState::OnHandleIdentify( JKeysym *keysym )
 
     CItem *pItem = m_pSelected->m_lpData;
     pItem->Identify();
-    g_pGame->GetMsgs()->Printf( "It is %s.\n", pItem->m_id->m_szName );
+    g_pGame->GetMsgs()->Printf( "It is %s.\n", pItem->GetName() );
     g_pGame->GetPlayer()->ClearPendingIdentify();
     m_pSelected = NULL;
 

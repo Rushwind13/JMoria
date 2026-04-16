@@ -54,7 +54,8 @@ public:
           m_dwFlags( 0 ),
           m_dwIndex( ITEM_IDX_INVALID ),
           m_dwBaseHP( 0.0f ),
-          m_bIdentified( false )
+          m_bIdentified( false ),
+          m_bTried( false )
     {
         m_Colors = new JLinkList<JColor>;
         m_llEffects = new JLinkList<CEffect>;
@@ -127,13 +128,15 @@ public:
     JLinkList<CEffect> *m_llEffects;
     JColor m_Color;
     bool m_bIdentified; // has this item type been identified?
+    bool m_bTried;      // has this item type been used without identifying?
 
 protected:
 private:
     // Member Functions
 public:
-    //    virtual int HandleModify(/*cmd?*/); // how do you deal with a modify cmd?
-    // ... need one of these per state (virt in base, defined in subclasses)?
+    void FormatProperties( char *szOut, int maxLen, uint32 knownProps, uint32 itemFlags,
+                           uint32 charges );
+
 protected:
 private:
 };
@@ -149,6 +152,7 @@ public:
                    // CItemDef
     uint32 m_dwCharges;    // for wands and staves and other items that have an "ammo count"
     uint32 m_dwInstanceId; // unique instance id for this item
+    uint32 m_dwKnownProps; // bitmask of known properties (KNOWN_CURSED, KNOWN_BONUSES, etc.)
 protected:
     float m_fColorChangeInterval;
     JColor m_Color;
@@ -163,6 +167,7 @@ public:
           m_dwFlags( 0 ),
           m_dwCharges( 0 ),
           m_dwInstanceId( 0 ),
+          m_dwKnownProps( 0 ),
           m_dwCount( 1 ),
           m_pllLink( NULL ),
           m_id( NULL ),
@@ -176,7 +181,17 @@ public:
     const char *GetPlural();
     bool IsStackable() { return ( m_id->m_dwFlags & ITEM_FLAG_STACKS ) == ITEM_FLAG_STACKS; }
     bool IsIdentified() { return m_id->m_bIdentified || ( m_dwFlags & ITEM_FLAG_IDENTIFIED ); }
-    void Identify() { m_id->m_bIdentified = true; }
+    void Identify()
+    {
+        m_id->m_bIdentified = true;
+        RevealAllProperties();
+    }
+    bool KnowsProperty( uint32 prop ) { return ( m_dwKnownProps & prop ) != 0; }
+    void RevealProperty( uint32 prop ) { m_dwKnownProps |= prop; }
+    void RevealAllProperties()
+    {
+        m_dwKnownProps |= ( KNOWN_CURSED | KNOWN_BONUSES | KNOWN_CHARGES );
+    }
     bool IsOpenable() { return false; }   // for chests, etc.
     bool IsCloseable() { return false; }  // closeable pickup?
     bool IsTunnelable() { return false; } // Tunnelable pickup? unlikely.

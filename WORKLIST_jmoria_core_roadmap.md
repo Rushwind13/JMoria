@@ -15,9 +15,9 @@ The core roadmap prioritizes:
 ## 🎯 Priority 1: Core Mechanics & Foundation
 
 ### #121 - Fuel for Lanterns & Wand Charges
-**Status**: Not started
+**Status**: ✅ Lantern fuel done (phase2-gameplay-expansion). Wand charges/recharging not yet implemented.
 **Description**: Add consumable resource management for light sources and wands.
-- Lanterns: Fill with Flask of Oil (give 5000 turns, max 15000)
+- ✅ Lanterns: Fill with Flask of Oil (Shift+F), max 15000 fuel, consumes flask
 - Wands: Scroll of Recharging adds charges (amount varies by wand/user/depth)
 - Wand risk: recharging at high depth can cause wand to explode
 **Impact**: Strategic resource planning, depth-based risk/reward.
@@ -33,10 +33,11 @@ The core roadmap prioritizes:
 
 
 ### #117 - Search Command & Secret Door Detection
-**Status**: Not started
+**Status**: ✅ Core search done (phase2-gameplay-expansion). Scrolls/rings not yet implemented.
 **Description**: Implement active search mechanic for finding hidden doors and traps.
-- Passive: 5% chance to detect secret doors within 1 square
-- Active search: 60% chance within 1 square, 20% at 2 squares (acts like rest)
+- ✅ Passive: 5% chance to detect secret doors within 1 square (CHANCE_SEARCH_PASSIVE)
+- ✅ Active search: 25% chance within 1 square via 's' key (CHANCE_SEARCH_ACTIVE)
+- ✅ Configurable chance constants for all door/search interactions in Constants.h
 - Ring of Searching: adds base % to both passive and active
 - Scroll of Detect Doors/Stairs: reveals all secret doors in radius 30
 - Scroll of Detect Traps: reveals all traps in radius 30
@@ -46,7 +47,7 @@ The core roadmap prioritizes:
 **Note**: **Blocks** #214 (dungeon gen isolated hallways)
 
 ### #180 - Dump Full Dungeon Map on Death
-**Status**: Not started
+**Status**: ✅ Done (phase1-quick-wins)
 **Description**: Display the full 100×100 dungeon map on the death screen, revealing all unexplored areas.
 - Uses canonical TileIDs character set
 - Shown between tombstone and score list
@@ -56,7 +57,7 @@ The core roadmap prioritizes:
 **Effort**: Low
 
 ### #111 - Use Commands: Inventory Filtered by Type
-**Status**: Not started
+**Status**: ✅ Done (phase1-quick-wins)
 **Description**: When using a command (quaff, read, zap, eat), show only types applicable to that action.
 - Quaff: potions only
 - Read: scrolls only
@@ -67,7 +68,7 @@ The core roadmap prioritizes:
 **Effort**: Low
 
 ### #110 - Monsters Don't Move During Use Commands
-**Status**: Not started
+**Status**: ✅ Done (phase1-quick-wins)
 **Description**: Prevent AI from moving between player selecting a use-command and selecting the target/item.
 - Check `m_bReadyForUpdate` flag during use command flow.
 **Impact**: Removes unfair surprise attacks during inventory management.
@@ -75,8 +76,10 @@ The core roadmap prioritizes:
 **Effort**: Low
 
 ### #45 - MON_AI_SEEK: Target Position vs Player
-**Status**: Not started
+**Status**: ✅ Foundation done (phase2-gameplay-expansion). Higher-level behaviors not yet implemented.
 **Description**: Allow AI to seek arbitrary target positions, not just the player.
+- ✅ m_vTargetPos + SetTargetPos() on CAIBrain, WalkSeek() uses arbitrary target
+- ✅ MON_AI_SEEKPLAYER sets target to player pos before seeking
 - Tigers attack other creatures (rabbits, kobolds, player)
 - Shamans path to altars for summon casting
 - Flock/school/pack behaviors
@@ -314,18 +317,18 @@ The core roadmap prioritizes:
 
 Following the re-prioritized P1/P2/P3 structure:
 
-### **Phase 1: Quick Wins & Accessibility** (Days/Week)
+### **Phase 1: Quick Wins & Accessibility** ✅ COMPLETE
 Low-effort, immediate player-facing improvements:
-- #111 (Filtered inventory) — UX polish, reduces confusion
-- #110 (Monsters don't move during use commands) — fairness fix
-- #180 (Death screen full map dump) — satisfying endgame UX
+- ✅ #111 (Filtered inventory) — branch: phase1-quick-wins
+- ✅ #110 (Monsters don't move during use commands) — branch: phase1-quick-wins
+- ✅ #180 (Death screen full map dump) — branch: phase1-quick-wins
 
-### **Phase 2: Gameplay Expansion & Exploration** (Weeks)
+### **Phase 2: Gameplay Expansion & Exploration** ✅ COMPLETE
 Core P1 features that extend playstyle and unlock dungeon accessibility:
-- #39 (Ranged attacks) — *already in progress*, opens playstyle
-- #117 (Search command) — **unblocks #214** (isolated hallways)
-- #121 (Lantern fuel) — resource management, pairs with #72
-- #45 (MON_AI_SEEK target positions) — monster AI depth
+- #39 (Ranged attacks) — *separate branch* (issue/39-ranged-weapon-system)
+- ✅ #117 (Search command) — branch: phase2-gameplay-expansion
+- ✅ #121 (Lantern fuel) — branch: phase2-gameplay-expansion (wand recharging TBD)
+- ✅ #45 (MON_AI_SEEK target positions) — branch: phase2-gameplay-expansion (foundation)
 
 ### **Phase 3: Deep Systems Foundation** (Weeks/Sprint)
 Complex P2 systems that enable everything downstream:

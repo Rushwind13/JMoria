@@ -70,6 +70,7 @@ bool CPlayer::Update( float fCurTime )
     UpdateActiveEffects( fCurTime );
     UpdateVisibleMonsters();
     CheckDisturbance();
+    PassiveSearch();
     DisplayStats();
     DisplayInventory( PLACEMENT_INV );
     DisplayEquipment( PLACEMENT_EQUIP );
@@ -124,6 +125,67 @@ void CPlayer::CheckDisturbance()
             }
             // items and monsters already tag themselves as disturbing
             // TODO: traps, altars, water,...
+        }
+    }
+}
+
+void CPlayer::Search()
+{
+    JIVector vPlayer( VEC_EXPAND( m_vPos ) );
+    JRect rcCheck = Util::Nearby( vPlayer, 1 );
+
+    JIVector vCheck;
+    CDungeonTile *pTile;
+    bool bFound = false;
+    for( vCheck.y = rcCheck.top; vCheck.y <= rcCheck.bottom; vCheck.y++ )
+    {
+        for( vCheck.x = rcCheck.left; vCheck.x <= rcCheck.right; vCheck.x++ )
+        {
+            if( vCheck.x == vPlayer.x && vCheck.y == vPlayer.y )
+                continue;
+            pTile = g_pGame->GetDungeon()->GetITile( vCheck );
+            if( pTile && pTile->m_dtd->m_dwType == DUNG_IDX_SECRET_DOOR )
+            {
+                if( Util::GetRandom( 1, 100 ) <= CHANCE_SEARCH_ACTIVE )
+                {
+                    JVector vPos( vCheck.x, vCheck.y );
+                    g_pGame->GetDungeon()->Modify( vPos );
+                    g_pGame->GetMsgs()->Printf( "You have found a secret door!\n" );
+                    bFound = true;
+                }
+            }
+        }
+    }
+    if( !bFound )
+    {
+        g_pGame->GetMsgs()->Printf( "You found nothing.\n" );
+    }
+}
+
+void CPlayer::PassiveSearch()
+{
+    JIVector vPlayer( VEC_EXPAND( m_vPos ) );
+    JRect rcCheck = Util::Nearby( vPlayer, 1 );
+
+    JIVector vCheck;
+    CDungeonTile *pTile;
+    for( vCheck.y = rcCheck.top; vCheck.y <= rcCheck.bottom; vCheck.y++ )
+    {
+        for( vCheck.x = rcCheck.left; vCheck.x <= rcCheck.right; vCheck.x++ )
+        {
+            if( vCheck.x == vPlayer.x && vCheck.y == vPlayer.y )
+                continue;
+            pTile = g_pGame->GetDungeon()->GetITile( vCheck );
+            if( pTile && pTile->m_dtd->m_dwType == DUNG_IDX_SECRET_DOOR )
+            {
+                if( Util::GetRandom( 1, 100 ) <= CHANCE_SEARCH_PASSIVE )
+                {
+                    JVector vPos( vCheck.x, vCheck.y );
+                    g_pGame->GetDungeon()->Modify( vPos );
+                    g_pGame->GetMsgs()->Printf( "You have found a secret door!\n" );
+                    m_bIsDisturbed = true;
+                }
+            }
         }
     }
 }
@@ -891,6 +953,46 @@ JResult CPlayer::Magic( CLink<CItem> *pLink )
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
     return retval;
+}
+
+bool CPlayer::IsFuel( CLink<CItem> *pLink )
+{
+    return ( pLink->m_lpData->m_id->m_dwIndex == ITEM_IDX_FUEL );
+}
+
+#define LANTERN_MAX_FUEL 15000.0f
+
+JResult CPlayer::Fuel( CLink<CItem> *pLink )
+{
+    CLink<CItem> *pLantern = m_llEquipment->GetLink( EQUIP_IDX_TORCH );
+    if( pLantern == NULL || pLantern->m_lpData == NULL )
+        return JERROR();
+
+    CItem *pTorch = pLantern->m_lpData;
+    if( !( pTorch->m_id->m_dwFlags & ITEM_FLAG_NEEDSAMMO ) )
+    {
+        g_pGame->GetMsgs()->Printf( "Your %s cannot be refueled.\n", pTorch->GetName() );
+        return JERROR();
+    }
+
+    CItem *pFuel = pLink->m_lpData;
+    float fFuelAmount = pFuel->m_id->m_fDuration;
+    float fCurrent = pTorch->GetDuration();
+    float fNew = fCurrent + fFuelAmount;
+    if( fNew > LANTERN_MAX_FUEL )
+        fNew = LANTERN_MAX_FUEL;
+    pTorch->ChangeDuration( fNew, true );
+
+    // Consume the flask
+    if( pFuel->m_dwCount > 1 )
+    {
+        pFuel->m_dwCount--;
+    }
+    else
+    {
+        m_llInventory->Remove( pFuel->m_pllLink, false );
+    }
+    return JSUCCESS;
 }
 
 JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwItemFlags )

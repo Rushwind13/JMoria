@@ -127,6 +127,12 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
         retval = 0;
     }
 
+    else if( IsSearchCommand( keysym ) )
+    {
+        g_pGame->GetPlayer()->Search();
+        retval = 0;
+    }
+
     // Wizard-mode commands
 
     else if( IsExitWizardCommand( keysym ) )
@@ -253,6 +259,15 @@ bool CCmdState::IsUseCommand( JKeysym *keysym )
     case JKEY_w:
     {
         if( !( keysym->mod & JMOD_SHIFT ) && !( keysym->mod & JMOD_CTRL ) )
+        {
+            return true;
+        }
+        break;
+    }
+    case JKEY_f:
+    {
+        // F (shift+f, not ^f) for fuel/fill
+        if( ( keysym->mod & JMOD_SHIFT ) && !( keysym->mod & JMOD_CTRL ) )
         {
             return true;
         }
@@ -430,6 +445,11 @@ bool CCmdState::IsSummonMonsterCommand( JKeysym *keysym )
 bool CCmdState::IsPickupCommand( JKeysym *keysym )
 {
     return ( keysym->sym == JKEY_g && !( keysym->mod & ( JMOD_SHIFT | JMOD_CTRL ) ) );
+}
+
+bool CCmdState::IsSearchCommand( JKeysym *keysym )
+{
+    return ( keysym->sym == JKEY_s && !( keysym->mod & ( JMOD_SHIFT | JMOD_CTRL ) ) );
 }
 
 bool CCmdState::IsExitWizardCommand( JKeysym *keysym )

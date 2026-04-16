@@ -16,6 +16,7 @@ enum eUseModifier
     USE_DROP,
     USE_QUAFF,
     USE_READ,
+    USE_FUEL,
     USE_MAX
 };
 
@@ -55,6 +56,7 @@ private:
     int OnHandleDrop( JKeysym *keysym );
     int OnHandleQuaff( JKeysym *keysym );
     int OnHandleRead( JKeysym *keysym );
+    int OnHandleFuel( JKeysym *keysym );
 
     bool TestWield();
     bool DoWield();
@@ -70,6 +72,9 @@ private:
 
     bool TestRead();
     bool DoRead();
+
+    bool TestFuel();
+    bool DoFuel();
 
     void ResetToState( int newstate );
 };

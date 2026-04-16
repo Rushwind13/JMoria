@@ -15,6 +15,16 @@ class CMonster;
 #define PLAYER_MAX_LEVEL 11
 #include "DungeonConstants.h"
 
+enum eInvFilter
+{
+    INV_COMPLETE = 0,
+    INV_QUAFF,
+    INV_READ,
+    INV_WIELD,
+    INV_ZAP,
+    INV_FIRE,
+};
+
 #define SIGHT_DISTANCE_PLAYER 5
 #define SIGHT_DISTANCE_LIT DUNG_ROOM_MAX_DIAGONAL
 #define SIGHT_DISTANCE_INFRA 10
@@ -196,8 +206,8 @@ public:
     void Draw();
     void PostDraw();
     void DisplayStats();
-    void DisplayInventory( uint8 dwPlacement );
-    void DisplayEquipment( uint8 dwPlacement );
+    void DisplayInventory( uint8 dwPlacement, eInvFilter filter = INV_COMPLETE );
+    void DisplayEquipment( uint8 dwPlacement, eInvFilter filter = INV_COMPLETE );
     void PickUp( JVector &vPickupPos );
     bool Drop( CItem *pItem );
 
@@ -329,6 +339,5 @@ public:
     void UpdateVisibleMonsters();
     void ClearVisibleMonsters();
     JLinkList<CMonster> *GetVisibleMonsters();
-
 };
 #endif // __PLAYER_H__

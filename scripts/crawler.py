@@ -451,7 +451,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="JMoria dungeon crawler bot")
     parser.add_argument("--session", default="crawler", help="tmux session name")
     parser.add_argument("--term-w", type=int, default=125, help="terminal width")
-    parser.add_argument("--term-h", type=int, default=40, help="terminal height")
+    parser.add_argument("--term-h", type=int, default=45, help="terminal height")
     parser.add_argument(
         "--jmoria", default="./jmoria", help="path to jmoria executable"
     )

@@ -67,7 +67,7 @@ public:
           m_llLOSLine( NULL ),
           m_dmCurLevel( NULL ) {};
     ~CDungeon() { Term(); }
-    void DumpMap();
+    char *DumpMap();
     void PreDraw();
     void Draw();
     void DrawDungeon();

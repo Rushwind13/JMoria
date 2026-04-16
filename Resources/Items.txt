@@ -367,6 +367,66 @@ Color       <225,225,50,255>
 Flags       <ITEM_FLAG_STACKS>
 }
 
+Item <Scroll of Identify>
+{
+Plural      <Scrolls of Identify>
+Type        <ITEM_IDX_SCROLL>
+Effect      <EFFECT_TYPE_RESTORE>,<EFFECT_FLAG_IDENTIFY>
+Value       50.0
+Level       1
+Weight      0.2
+Color       <255,255,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of Phase Door>
+{
+Plural      <Scrolls of Phase Door>
+Type        <ITEM_IDX_SCROLL>
+Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_TELEPORT>,<EFFECT_MOD_AREA>
+Value       80.0
+Level       2
+Weight      0.2
+Color       <200,200,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of Teleportation>
+{
+Plural      <Scrolls of Teleportation>
+Type        <ITEM_IDX_SCROLL>
+Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_TELEPORT>
+Value       200.0
+Level       10
+Weight      0.2
+Color       <180,180,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of Magic Mapping>
+{
+Plural      <Scrolls of Magic Mapping>
+Type        <ITEM_IDX_SCROLL>
+Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_MAPPING>,<EFFECT_MOD_AREA>
+Value       150.0
+Level       8
+Weight      0.2
+Color       <200,255,200,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of *Magic Mapping*>
+{
+Plural      <Scrolls of *Magic Mapping*>
+Type        <ITEM_IDX_SCROLL>
+Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_MAPPING>
+Value       500.0
+Level       25
+Weight      0.2
+Color       <150,255,150,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
 # Shields
 Item <Large Steel Shield>
 {

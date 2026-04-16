@@ -17,6 +17,7 @@ enum eUseModifier
     USE_QUAFF,
     USE_READ,
     USE_FUEL,
+    USE_IDENTIFY,
     USE_MAX
 };
 
@@ -57,6 +58,7 @@ private:
     int OnHandleQuaff( JKeysym *keysym );
     int OnHandleRead( JKeysym *keysym );
     int OnHandleFuel( JKeysym *keysym );
+    int OnHandleIdentify( JKeysym *keysym );
 
     bool TestWield();
     bool DoWield();

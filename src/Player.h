@@ -30,6 +30,9 @@ enum eInvFilter
 #define SIGHT_DISTANCE_INFRA 10
 #define SIGHT_DISTANCE_ESP 15
 
+#define PHASE_DOOR_RANGE 20
+#define MAGIC_MAPPING_RANGE 25
+
 class CClass
 {
     // Methods
@@ -107,6 +110,8 @@ public:
           m_szKilledBy( NULL ),
           m_bIsRested( true ),
           m_bIsDisturbed( false ),
+          m_bPendingIdentify( false ),
+          m_bLastEffectNoticed( false ),
           m_fDamageModifier( 0.0f ),
           m_fToHitModifier( 0.0f ),
           m_fArmorClass( 1.0f ),
@@ -260,8 +265,11 @@ public:
     JResult UndoIntrinsicEffects( CEffect *pEffect );
     JResult DoApplyCurse();
     JResult DoRestoreEffects( CEffect *pEffect );
+    JResult DoIdentify();
     JResult DoGainEffects( CEffect *pEffect );
     JResult DoLoseEffects( CEffect *pEffect );
+    JResult DoTeleport( CEffect *pEffect );
+    JResult DoMagicMapping( CEffect *pEffect );
 
     bool SetName( const char *szName );
 
@@ -315,6 +323,11 @@ public:
 
     bool m_bIsRested;
     bool m_bIsDisturbed;
+    bool m_bPendingIdentify;
+    bool m_bLastEffectNoticed;
+
+    bool HasPendingIdentify() { return m_bPendingIdentify; }
+    void ClearPendingIdentify() { m_bPendingIdentify = false; }
 
 protected:
     void GainLevel();

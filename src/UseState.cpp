@@ -19,6 +19,7 @@ CUseState::CUseState() : m_cCommand( 0 )
     m_pKeyHandlers[USE_QUAFF] = &CUseState::OnHandleQuaff;
     m_pKeyHandlers[USE_READ] = &CUseState::OnHandleRead;
     m_pKeyHandlers[USE_FUEL] = &CUseState::OnHandleFuel;
+    m_pKeyHandlers[USE_IDENTIFY] = &CUseState::OnHandleIdentify;
 
     m_eCurModifier = USE_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -207,6 +208,14 @@ int CUseState::OnHandleRead( JKeysym *keysym )
         }
     }
 
+    if( g_pGame->GetPlayer()->HasPendingIdentify() )
+    {
+        g_pGame->GetMsgs()->Printf( "Identify which item? [a-z]\n" );
+        m_eCurModifier = USE_IDENTIFY;
+        m_pCurKeyHandler = m_pKeyHandlers[USE_IDENTIFY];
+        return 0;
+    }
+
     JLog( LOG_LEVEL_DEBUG, true, "READ resetting game state to COMMAND, USE state to INIT\n" );
     // One way or another, we're done with this state now.
     ResetToState( STATE_COMMAND );
@@ -341,6 +350,37 @@ int CUseState::OnBaseHandleKey( JKeysym *keysym, eUseModifier whichUse )
     return -1;
 }
 
+int CUseState::OnHandleIdentify( JKeysym *keysym )
+{
+    int retval;
+    JLog( LOG_LEVEL_DEBUG, true, "Handling IDENTIFY\n" );
+    retval = OnBaseHandleKey( keysym, USE_IDENTIFY );
+
+    if( retval == JRESETSTATE )
+    {
+        g_pGame->GetPlayer()->ClearPendingIdentify();
+        return 0;
+    }
+
+    if( retval != JSUCCESS )
+    {
+        JLog( LOG_LEVEL_DEBUG, true,
+              "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
+        g_pGame->GetMsgs()->Printf( "Choose an item to identify (a to z):\n" );
+        return 0;
+    }
+
+    CItem *pItem = m_pSelected->m_lpData;
+    pItem->Identify();
+    g_pGame->GetMsgs()->Printf( "It is %s.\n", pItem->m_id->m_szName );
+    g_pGame->GetPlayer()->ClearPendingIdentify();
+    m_pSelected = NULL;
+
+    JLog( LOG_LEVEL_DEBUG, true, "IDENTIFY resetting game state to COMMAND, USE state to INIT\n" );
+    ResetToState( STATE_COMMAND );
+    return 0;
+}
+
 void CUseState::ResetToState( int newstate )
 {
     g_pGame->SetState( newstate );
@@ -360,6 +400,7 @@ CLink<CItem> *CUseState::GetResponse( eUseModifier whichUse )
     case USE_QUAFF:
     case USE_WIELD:
     case USE_FUEL:
+    case USE_IDENTIFY:
         pList = g_pGame->GetPlayer()->m_llInventory;
         pLink = pList->GetNthLink( m_dwSelected );
         break;

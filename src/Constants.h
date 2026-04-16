@@ -81,6 +81,7 @@
 
 #define DUNG_FLAG_TRAP 0x00000010
 #define DUNG_FLAG_LOCKED 0x00000020
+#define DUNG_FLAG_VISIBLE 0x00000040
 
 // Door and search chance percentages (1-100)
 #define CHANCE_PICK_LOCK 75
@@ -88,7 +89,6 @@
 #define CHANCE_FIND_SECRET_BUMP 20
 #define CHANCE_SEARCH_ACTIVE 25
 #define CHANCE_SEARCH_PASSIVE 5
-// #define DUNG_FLAG_x  0x00000040
 // #define DUNG_FLAG_x  0x00000080
 
 // Dungeon Flags
@@ -345,7 +345,7 @@
 
 #define ITEM_FLAG_CURSED 0x00000001
 #define ITEM_FLAG_STACKS 0x00000002
-// #define ITEM_FLAG_x 0x00000004
+#define ITEM_FLAG_IDENTIFIED 0x00000004
 // #define ITEM_FLAG_x 0x00000008
 
 #define ITEM_FLAG_2HANDED 0x00000010
@@ -365,7 +365,7 @@
 
 #define ITEM_COLOR_MULTI 0x10000000
 
-#define NUM_ITEM_FLAGS 9
+#define NUM_ITEM_FLAGS 10
 
 // Make sure you change below here if you added any flags.
 #define NUM_STRINGS                                                                                \
@@ -596,6 +596,7 @@ public:
         // Item flags
         m_StringTable[i++].Init( "ITEM_FLAG_CURSED", ITEM_FLAG_CURSED );
         m_StringTable[i++].Init( "ITEM_FLAG_STACKS", ITEM_FLAG_STACKS );
+        m_StringTable[i++].Init( "ITEM_FLAG_IDENTIFIED", ITEM_FLAG_IDENTIFIED );
         m_StringTable[i++].Init( "ITEM_FLAG_2HANDED", ITEM_FLAG_2HANDED );
         m_StringTable[i++].Init( "ITEM_FLAG_OFFHAND", ITEM_FLAG_OFFHAND );
         m_StringTable[i++].Init( "ITEM_FLAG_MAINHAND", ITEM_FLAG_MAINHAND );

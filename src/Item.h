@@ -24,7 +24,7 @@ public:
         }
     }
     int m_dwEffect;
-    int m_dwFlags;
+    uint32 m_dwFlags;
     int m_dwModifier;
     char *m_szAmount;
     float m_fDuration;
@@ -53,7 +53,8 @@ public:
           m_fDuration( 0.0f ),
           m_dwFlags( 0 ),
           m_dwIndex( ITEM_IDX_INVALID ),
-          m_dwBaseHP( 0.0f )
+          m_dwBaseHP( 0.0f ),
+          m_bIdentified( false )
     {
         m_Colors = new JLinkList<JColor>;
         m_llEffects = new JLinkList<CEffect>;
@@ -125,6 +126,7 @@ public:
     JLinkList<JColor> *m_Colors;
     JLinkList<CEffect> *m_llEffects;
     JColor m_Color;
+    bool m_bIdentified; // has this item type been identified?
 
 protected:
 private:
@@ -173,6 +175,8 @@ public:
     const char *GetName();
     const char *GetPlural();
     bool IsStackable() { return ( m_id->m_dwFlags & ITEM_FLAG_STACKS ) == ITEM_FLAG_STACKS; }
+    bool IsIdentified() { return m_id->m_bIdentified || ( m_dwFlags & ITEM_FLAG_IDENTIFIED ); }
+    void Identify() { m_id->m_bIdentified = true; }
     bool IsOpenable() { return false; }   // for chests, etc.
     bool IsCloseable() { return false; }  // closeable pickup?
     bool IsTunnelable() { return false; } // Tunnelable pickup? unlikely.

@@ -365,6 +365,53 @@ char *CDungeon::DumpMap()
     return result;
 }
 
+void CDungeon::RevealMap( int xMin, int yMin, int xMax, int yMax )
+{
+    if( xMin < 0 )
+        xMin = 0;
+    if( yMin < 0 )
+        yMin = 0;
+    if( xMax >= DUNG_WIDTH )
+        xMax = DUNG_WIDTH - 1;
+    if( yMax >= DUNG_HEIGHT )
+        yMax = DUNG_HEIGHT - 1;
+
+    for( int y = yMin; y <= yMax; y++ )
+    {
+        for( int x = xMin; x <= xMax; x++ )
+        {
+            JIVector v( x, y );
+            CDungeonTile *pTile = GetITile( v );
+            if( !pTile || !pTile->m_dtd )
+                continue;
+            if( pTile->m_dtd->m_dwType != DUNG_IDX_WALL )
+            {
+                pTile->SetFlags( DUNG_FLAG_SEEN );
+            }
+            else
+            {
+                // Reveal walls adjacent to non-wall tiles (same logic as DumpMap)
+                for( int dy = -1; dy <= 1; dy++ )
+                {
+                    for( int dx = -1; dx <= 1; dx++ )
+                    {
+                        if( dx == 0 && dy == 0 )
+                            continue;
+                        JIVector vN( x + dx, y + dy );
+                        CDungeonTile *pN = GetITile( vN );
+                        if( pN && pN->m_dtd && pN->m_dtd->m_dwType != DUNG_IDX_WALL )
+                        {
+                            pTile->SetFlags( DUNG_FLAG_SEEN );
+                            goto next_tile;
+                        }
+                    }
+                }
+            }
+        next_tile:;
+        }
+    }
+}
+
 JResult CDungeon::InitDungeonTiles()
 {
     JIVector vDungeon;
@@ -696,6 +743,7 @@ bool CDungeon::Update( float fCurTime )
     }
 
     UpdateSeen();
+    UpdateVisibility();
     return true;
 }
 
@@ -743,6 +791,73 @@ void CDungeon::LightRoom( CRoom *pRoom )
         }
     }
     pRoom->SetFlags( DUNG_FLAG_SEEN );
+}
+
+bool SightCollisionTest( JVector &vTest );
+
+void CDungeon::UpdateVisibility()
+{
+    if( !g_pGame->GetPlayer() || !g_pGame->GetPlayer()->m_bHasSpawned )
+        return;
+
+    // Clear all VISIBLE flags
+    JVector vTile;
+    for( vTile.x = 0; vTile.x < DUNG_WIDTH; vTile.x++ )
+    {
+        for( vTile.y = 0; vTile.y < DUNG_HEIGHT; vTile.y++ )
+        {
+            GetTile( vTile )->UnsetFlags( DUNG_FLAG_VISIBLE );
+        }
+    }
+
+    JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+
+    // Player's own tile is always visible
+    GetITile( vPlayer )->SetFlags( DUNG_FLAG_VISIBLE );
+
+    // If player is in a lit room, entire room is visible
+    JVector vPlayerF( g_pGame->GetPlayer()->m_vPos );
+    CRoom *pPlayerRoom = InRoom( vPlayerF );
+    if( pPlayerRoom && pPlayerRoom->HasFlags( DUNG_FLAG_LIT ) )
+    {
+        JRect rcRoom = pPlayerRoom->GetEdges();
+        for( vTile.y = rcRoom.top; vTile.y <= rcRoom.bottom; vTile.y++ )
+        {
+            for( vTile.x = rcRoom.left; vTile.x <= rcRoom.right; vTile.x++ )
+            {
+                GetTile( vTile )->SetFlags( DUNG_FLAG_VISIBLE );
+            }
+        }
+    }
+
+    // Check tiles within max sight distance using LOS
+    int maxDist = SIGHT_DISTANCE_LIT;
+    JRect rcCheck = Util::Nearby( vPlayer, maxDist );
+    JIVector viCheck;
+    for( viCheck.y = rcCheck.top; viCheck.y <= rcCheck.bottom; viCheck.y++ )
+    {
+        for( viCheck.x = rcCheck.left; viCheck.x <= rcCheck.right; viCheck.x++ )
+        {
+            CDungeonTile *pTile = GetITile( viCheck );
+            if( !pTile || ( pTile->m_dwFlags & DUNG_FLAG_VISIBLE ) )
+                continue;
+
+            // Determine sight distance for this tile
+            JVector vCheckF( viCheck.x, viCheck.y );
+            CRoom *pTargetRoom = InRoom( vCheckF );
+            int sight_distance = SIGHT_DISTANCE_PLAYER;
+            if( pTargetRoom && pTargetRoom->HasFlags( DUNG_FLAG_LIT ) )
+                sight_distance = SIGHT_DISTANCE_LIT;
+
+            if( !Util::Nearby( vPlayer, sight_distance ).Contains( viCheck ) )
+                continue;
+
+            if( Util::Bresenham( vPlayer, viCheck, sight_distance, SightCollisionTest ) )
+            {
+                pTile->SetFlags( DUNG_FLAG_VISIBLE );
+            }
+        }
+    }
 }
 
 bool CollisionTest( JVector &vTest )
@@ -945,21 +1060,15 @@ void CDungeon::DrawDungeon()
                 ; // need to display this tile
             }
 
-            // In CLOCKSTEP mode, show all tiles regardless of visibility (bypasses DUNG_FLAG_SEEN
-            // check) In normal gameplay, only show tiles that have been explored or are occupied
+            // In CLOCKSTEP mode, show all tiles regardless of visibility
+            // In normal gameplay, only show tiles that have been seen
             else if( g_pGame->GetGameStateIndex() != STATE_CLOCKSTEP &&
-                     ( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_SEEN ) == 0 ) ||
-                       ( g_pGame->GetPlayer()->IsWizard() &&
-                         ( curTile->m_dwFlags & ( DUNG_FLAG_SEEN | DUNG_FLAG_LIT ) ) == 0 ) ||
-                       vScreen == g_pGame->GetPlayer()->m_vPos ||
-                       ( curTile->m_pCurMonster != NULL &&
-                         PlayerCanSee( vScreen, curTile->m_pCurMonster->m_md->m_dwFlags &
-                                                    ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) ) ||
-                       ( curTile->m_pCurItem != NULL &&
-                         PlayerCanSee( vScreen, MON_FLAG_EMPTY_MIND ) ) ) )
+                     ( curTile == NULL || ( ( curTile->m_dwFlags & DUNG_FLAG_SEEN ) == 0 ) ) )
             {
                 continue;
             }
+
+            bool isVisible = ( curTile->m_dwFlags & DUNG_FLAG_VISIBLE ) != 0;
 
             // Determine tile color based on game state
             if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
@@ -974,7 +1083,17 @@ void CDungeon::DrawDungeon()
             {
                 color = JColor( 85, 255, 255, 255 );
             }
-            else if( g_pGame->GetGameStateIndex() != STATE_CLOCKSTEP && IsLit( vScreen ) )
+            else if( g_pGame->GetGameStateIndex() == STATE_CLOCKSTEP ||
+                     g_pGame->GetPlayer()->IsWizard() )
+            {
+                color = curTile->m_dtd->m_Color;
+            }
+            else if( !isVisible )
+            {
+                // Fog of War: seen but not currently visible — dim grey
+                color = JColor( 60, 60, 80, 255 );
+            }
+            else if( IsLit( vScreen ) )
             {
                 color = JColor( 200, 200, 0, 255 );
             }

@@ -895,8 +895,14 @@ bool CPlayer::CanDropHere()
 JResult CPlayer::Quaff( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
+    bool wasIdentified = pItem->IsIdentified();
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
+    if( !wasIdentified && m_bLastEffectNoticed )
+    {
+        pItem->Identify();
+        g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
+    }
     if( pItem->IsStackable() && pItem->m_dwCount > 1 )
     {
         pItem->m_dwCount--;
@@ -911,8 +917,14 @@ JResult CPlayer::Quaff( CLink<CItem> *pLink )
 JResult CPlayer::Read( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
+    bool wasIdentified = pItem->IsIdentified();
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
+    if( !wasIdentified && m_bLastEffectNoticed )
+    {
+        pItem->Identify();
+        g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
+    }
     if( pItem->IsStackable() && pItem->m_dwCount > 1 )
     {
         pItem->m_dwCount--;
@@ -998,6 +1010,7 @@ JResult CPlayer::Fuel( CLink<CItem> *pLink )
 JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwItemFlags )
 {
     CEffect *pEffect;
+    m_bLastEffectNoticed = false;
     while( plEffect != NULL )
     {
         pEffect = plEffect->m_lpData;
@@ -1050,12 +1063,14 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
     {
     case EFFECT_FLAG_HP:
         DoHealHP( pEffect );
+        m_bLastEffectNoticed = true;
         break;
     case EFFECT_FLAG_AFRAID:
         if( needsHeal )
         {
             g_pGame->GetMsgs()->Printf( "You are no longer afraid.\n" );
             UnsetIntrinsic( pEffect->m_dwFlags );
+            m_bLastEffectNoticed = true;
         }
         break;
     case EFFECT_FLAG_BLIND:
@@ -1063,6 +1078,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
         {
             g_pGame->GetMsgs()->Printf( "You can see again.\n" );
             UnsetIntrinsic( pEffect->m_dwFlags );
+            m_bLastEffectNoticed = true;
         }
         break;
     case EFFECT_FLAG_CONFUSE:
@@ -1070,6 +1086,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
         {
             g_pGame->GetMsgs()->Printf( "You can think clearly again.\n" );
             UnsetIntrinsic( pEffect->m_dwFlags );
+            m_bLastEffectNoticed = true;
         }
         break;
     case EFFECT_FLAG_POISON:
@@ -1077,6 +1094,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
         {
             g_pGame->GetMsgs()->Printf( "You are no longer poisoned.\n" );
             UnsetIntrinsic( pEffect->m_dwFlags );
+            m_bLastEffectNoticed = true;
         }
         break;
     case EFFECT_FLAG_PARALYZE:
@@ -1084,6 +1102,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
         {
             g_pGame->GetMsgs()->Printf( "You can move again.\n" );
             UnsetIntrinsic( pEffect->m_dwFlags );
+            m_bLastEffectNoticed = true;
         }
         break;
     case EFFECT_FLAG_SLEEP:
@@ -1091,6 +1110,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
         {
             g_pGame->GetMsgs()->Printf( "You wake up.\n" );
             UnsetIntrinsic( pEffect->m_dwFlags );
+            m_bLastEffectNoticed = true;
         }
         break;
     default:
@@ -1186,13 +1206,22 @@ JResult CPlayer::DoLightRay( CEffect *pEffect )
 
 JResult CPlayer::DoCreateEffects( CEffect *pEffect )
 {
+    JResult retval = JBOGUSKEY;
     switch( pEffect->m_dwFlags )
     {
     case EFFECT_FLAG_LIGHT:
-        return DoLightArea();
+        retval = DoLightArea();
+        break;
+    case EFFECT_FLAG_TELEPORT:
+        retval = DoTeleport( pEffect );
+        break;
+    case EFFECT_FLAG_MAPPING:
+        retval = DoMagicMapping( pEffect );
         break;
     }
-    return JBOGUSKEY;
+    if( retval == JSUCCESS )
+        m_bLastEffectNoticed = true;
+    return retval;
 }
 
 JResult CPlayer::DoLightArea()
@@ -1205,6 +1234,57 @@ JResult CPlayer::DoLightArea()
         return JSUCCESS;
     }
     return JBOGUSKEY;
+}
+
+JResult CPlayer::DoTeleport( CEffect *pEffect )
+{
+    if( pEffect->m_dwModifier & EFFECT_MOD_AREA )
+    {
+        // Phase Door: limited range teleport
+        for( int attempt = 0; attempt < 100; attempt++ )
+        {
+            int dx = ( rand() % ( PHASE_DOOR_RANGE * 2 + 1 ) ) - PHASE_DOOR_RANGE;
+            int dy = ( rand() % ( PHASE_DOOR_RANGE * 2 + 1 ) ) - PHASE_DOOR_RANGE;
+            JVector vTarget( m_vPos.x + dx, m_vPos.y + dy );
+            if( vTarget.x >= 0 && vTarget.x < DUNG_WIDTH && vTarget.y >= 0 &&
+                vTarget.y < DUNG_HEIGHT )
+            {
+                if( g_pGame->GetDungeon()->IsWalkableFor( vTarget, true ) ==
+                    DUNG_COLL_NO_COLLISION )
+                {
+                    m_vPos = vTarget;
+                    g_pGame->GetMsgs()->Printf( "You feel a brief shimmer.\n" );
+                    return JSUCCESS;
+                }
+            }
+        }
+        g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+        return JSUCCESS;
+    }
+    // Full teleport: reuse SpawnPlayer logic
+    m_bHasSpawned = false;
+    SpawnPlayer();
+    g_pGame->GetMsgs()->Printf( "You feel a wrenching sensation.\n" );
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoMagicMapping( CEffect *pEffect )
+{
+    if( pEffect->m_dwModifier & EFFECT_MOD_AREA )
+    {
+        // Limited range mapping
+        int xMin = (int)m_vPos.x - MAGIC_MAPPING_RANGE;
+        int xMax = (int)m_vPos.x + MAGIC_MAPPING_RANGE;
+        int yMin = (int)m_vPos.y - MAGIC_MAPPING_RANGE;
+        int yMax = (int)m_vPos.y + MAGIC_MAPPING_RANGE;
+        g_pGame->GetDungeon()->RevealMap( xMin, yMin, xMax, yMax );
+        g_pGame->GetMsgs()->Printf( "The area around you is revealed.\n" );
+        return JSUCCESS;
+    }
+    // Full dungeon mapping
+    g_pGame->GetDungeon()->RevealMap( 0, 0, DUNG_WIDTH - 1, DUNG_HEIGHT - 1 );
+    g_pGame->GetMsgs()->Printf( "The dungeon is revealed to you.\n" );
+    return JSUCCESS;
 }
 
 JResult CPlayer::DoDestroyEffects( CEffect *pEffect, int dwItemFlags )
@@ -1295,12 +1375,43 @@ JResult CPlayer::DoIntrinsicEffects( CEffect *pEffect, float fDuration )
     case EFFECT_FLAG_ESP:
         g_pGame->GetMsgs()->Printf( "You sense stray thoughts around you.\n" );
         break;
+    case EFFECT_FLAG_FIRE:
+        if( pEffect->m_dwModifier & EFFECT_MOD_RESIST )
+            g_pGame->GetMsgs()->Printf( "You feel resistant to fire.\n" );
+        break;
+    case EFFECT_FLAG_COLD:
+        if( pEffect->m_dwModifier & EFFECT_MOD_RESIST )
+            g_pGame->GetMsgs()->Printf( "You feel resistant to cold.\n" );
+        break;
+    case EFFECT_FLAG_ELECTRICITY:
+        if( pEffect->m_dwModifier & EFFECT_MOD_RESIST )
+            g_pGame->GetMsgs()->Printf( "You feel resistant to electricity.\n" );
+        break;
+    case EFFECT_FLAG_ACID:
+        if( pEffect->m_dwModifier & EFFECT_MOD_RESIST )
+            g_pGame->GetMsgs()->Printf( "You feel resistant to acid.\n" );
+        break;
+    case EFFECT_FLAG_INVISIBLE:
+        g_pGame->GetMsgs()->Printf( "You fade from view.\n" );
+        break;
+    case EFFECT_FLAG_LEVITATE:
+        g_pGame->GetMsgs()->Printf( "You feel light on your feet.\n" );
+        break;
+    case EFFECT_FLAG_FREE_ACTION:
+        g_pGame->GetMsgs()->Printf( "You feel free to move.\n" );
+        break;
+    case EFFECT_FLAG_SPEED:
+        g_pGame->GetMsgs()->Printf( "You feel yourself moving faster.\n" );
+        break;
+    case EFFECT_FLAG_LIGHT:
+        break;
     default:
         JLog( LOG_LEVEL_ERROR, true, "unknown intrinsic type: %d\n", pEffect->m_dwFlags );
         return JBOGUSKEY;
     }
     CEffect *pActive = new CEffect( *pEffect );
     SetIntrinsic( pActive->m_dwFlags );
+    m_bLastEffectNoticed = true;
     if( ( pActive->m_dwModifier & EFFECT_MOD_TIMED ) != 0 )
     {
         pActive->m_fDuration = (int)fDuration;
@@ -1327,6 +1438,32 @@ JResult CPlayer::UndoIntrinsicEffects( CEffect *pEffect )
     case EFFECT_FLAG_ESP:
         g_pGame->GetMsgs()->Printf( "You no longer sense stray thoughts.\n" );
         break;
+    case EFFECT_FLAG_FIRE:
+        g_pGame->GetMsgs()->Printf( "You no longer feel resistant to fire.\n" );
+        break;
+    case EFFECT_FLAG_COLD:
+        g_pGame->GetMsgs()->Printf( "You no longer feel resistant to cold.\n" );
+        break;
+    case EFFECT_FLAG_ELECTRICITY:
+        g_pGame->GetMsgs()->Printf( "You no longer feel resistant to electricity.\n" );
+        break;
+    case EFFECT_FLAG_ACID:
+        g_pGame->GetMsgs()->Printf( "You no longer feel resistant to acid.\n" );
+        break;
+    case EFFECT_FLAG_INVISIBLE:
+        g_pGame->GetMsgs()->Printf( "You reappear.\n" );
+        break;
+    case EFFECT_FLAG_LEVITATE:
+        g_pGame->GetMsgs()->Printf( "You float gently to the ground.\n" );
+        break;
+    case EFFECT_FLAG_FREE_ACTION:
+        g_pGame->GetMsgs()->Printf( "You feel sluggish.\n" );
+        break;
+    case EFFECT_FLAG_SPEED:
+        g_pGame->GetMsgs()->Printf( "You feel yourself slowing down.\n" );
+        break;
+    case EFFECT_FLAG_LIGHT:
+        break;
     default:
         JLog( LOG_LEVEL_ERROR, true, "unknown intrinsic type: %d\n", pEffect->m_dwFlags );
         return JBOGUSKEY;
@@ -1339,9 +1476,30 @@ JResult CPlayer::DoRestoreEffects( CEffect *pEffect )
 {
     switch( pEffect->m_dwFlags )
     {
+    case EFFECT_FLAG_IDENTIFY:
+        m_bLastEffectNoticed = true;
+        return DoIdentify();
+    case EFFECT_FLAG_HP:
+        if( m_fCurHitPoints < m_fHitPoints )
+        {
+            m_fCurHitPoints = m_fHitPoints;
+            g_pGame->GetMsgs()->Printf( "You feel completely healthy.\n" );
+            m_bLastEffectNoticed = true;
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+        }
+        return JSUCCESS;
     default:
         break;
     }
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoIdentify()
+{
+    m_bPendingIdentify = true;
     return JSUCCESS;
 }
 
@@ -1349,6 +1507,18 @@ JResult CPlayer::DoGainEffects( CEffect *pEffect )
 {
     switch( pEffect->m_dwFlags )
     {
+    case EFFECT_FLAG_FUEL:
+        // Fuel gain is handled by the Fuel command in UseState
+        m_bLastEffectNoticed = true;
+        return JSUCCESS;
+    case EFFECT_FLAG_XP:
+    {
+        float fGain = pEffect->m_szAmount ? Util::Roll( pEffect->m_szAmount ) : 50.0f;
+        m_fExperience += fGain;
+        g_pGame->GetMsgs()->Printf( "You feel more experienced.\n" );
+        m_bLastEffectNoticed = true;
+        return JSUCCESS;
+    }
     default:
         break;
     }
@@ -1359,6 +1529,28 @@ JResult CPlayer::DoLoseEffects( CEffect *pEffect )
 {
     switch( pEffect->m_dwFlags )
     {
+    case EFFECT_FLAG_XP:
+    {
+        float fLoss = pEffect->m_szAmount ? Util::Roll( pEffect->m_szAmount ) : 50.0f;
+        m_fExperience -= fLoss;
+        if( m_fExperience < 0.0f )
+            m_fExperience = 0.0f;
+        g_pGame->GetMsgs()->Printf( "You feel less experienced.\n" );
+        m_bLastEffectNoticed = true;
+        return JSUCCESS;
+    }
+    case EFFECT_FLAG_HP:
+    {
+        float fLoss = pEffect->m_szAmount ? Util::Roll( pEffect->m_szAmount ) : 10.0f;
+        m_fHitPoints -= fLoss;
+        if( m_fHitPoints < 1.0f )
+            m_fHitPoints = 1.0f;
+        if( m_fCurHitPoints > m_fHitPoints )
+            m_fCurHitPoints = m_fHitPoints;
+        g_pGame->GetMsgs()->Printf( "You feel weakened.\n" );
+        m_bLastEffectNoticed = true;
+        return JSUCCESS;
+    }
     default:
         break;
     }

@@ -184,7 +184,7 @@ int CItem::EquipType()
 
 const char *CItem::GetName()
 {
-    if( false ) // IsIdentified() ) // TODO: MIKE: ID goes here
+    if( IsIdentified() )
     {
         return const_cast<const char *>( m_id->m_szName );
     }
@@ -196,7 +196,7 @@ const char *CItem::GetName()
 
 const char *CItem::GetPlural()
 {
-    if( false ) // IsIdentified() )// TODO: MIKE: ID goes here
+    if( IsIdentified() )
     {
         return const_cast<const char *>( m_id->m_szPlural );
     }

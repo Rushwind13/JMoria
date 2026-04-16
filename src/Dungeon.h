@@ -68,6 +68,7 @@ public:
           m_dmCurLevel( NULL ) {};
     ~CDungeon() { Term(); }
     char *DumpMap();
+    void RevealMap( int xMin, int yMin, int xMax, int yMax );
     void PreDraw();
     void Draw();
     void DrawDungeon();
@@ -162,6 +163,7 @@ public:
     void Drop( CItem *pItem, JVector &vDropPos );
     void PopulateLevel( const int depth ); // Place scenery, items, and monsters
     void SetDrawFlag( bool bDraw ) { m_bDraw = bDraw; }
+    void UpdateVisibility();
 
 protected:
     JRect m_Rect;

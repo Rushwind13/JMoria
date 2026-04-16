@@ -18,18 +18,18 @@ Foundation commit landed — this tracks what's left before Phase 3 is done.
 ### Remaining
 
 #### Core (Acceptance Criteria)
-- [ ] **`m_dwKnownIntrinsics` on CItem** — per-instance bitmask. As properties are discovered (cursed, magic, bonuses), the relevant FLAG is OR-ed in. This is separate from `m_bIdentified` (which is type-level "I know what this potion is"). `m_dwKnownIntrinsics` is instance-level "I know this specific dagger is cursed".
-- [ ] **`ITEM_FLAG_MAGIC`** — new flag to mark items as magical
-- [ ] **Display known intrinsics in item name** — `if(known(cursed)) display(item.cursed?"cursed":"uncursed")`, `if(known(magic)) display("(+x, +y)")`. Examples: "a Dagger", "a Dagger {cursed}", "a Dagger (+3, +7)", "a Dagger (+3, +7) (cursed)"
-- [ ] **Scroll of ID sets `m_dwKnownIntrinsics`** to all displayable flags (MAGIC|CURSED|bonuses). Currently `Identify()` only sets `m_bIdentified` on CItemDef.
-- [ ] **?ID reveals `m_dwCharges`** for wands and staves
+- [x] **`m_dwKnownProps` on CItem** — per-instance bitmask (KNOWN_CURSED, KNOWN_BONUSES, KNOWN_CHARGES, KNOWN_TRIED). KnowsProperty()/RevealProperty()/RevealAllProperties(). CItemDef::FormatProperties() builds type-aware display strings (weapons: +hit/+dam, armor: [+AC], wands: charges, cursed: {cursed}).
+- [x] **`ITEM_FLAG_MAGIC`** — new flag in Constants.h, added to string table
+- [x] **Display known properties in item name** — GetName()/GetPlural() call FormatProperties(). Examples: "a Dagger", "a Dagger {cursed}", "a Dagger (+3, +7)", "a Wand of Light (5 charges)"
+- [x] **Scroll of ID sets all known properties** — Identify() calls RevealAllProperties()
+- [x] **?ID reveals `m_dwCharges`** for wands and staves via KNOWN_CHARGES
 
 #### Unidentified Names / Flavors
-- [ ] **Use `m_szUnidentifiedName`/`m_szUnidentifiedPlural`** — fields exist on CItemDef but aren't used. When unidentified, potions show as "a Blue Potion", scrolls as "a Scroll titled 'ABRA CADABRA'", etc. Type-level identification reveals the real name.
-- [ ] **`{tried}` flag** — if you use an item but the effect wasn't noticeable enough to auto-ID, mark it "2 Blue Potions {tried}" so you know you've tested it
+- [x] **Use `m_szUnidentifiedName`/`m_szUnidentifiedPlural`** — FileParse generates randomized names at load. GetName()/GetPlural() use them when unidentified.
+- [x] **`{tried}` flag** — KNOWN_TRIED on CItemDef (m_bTried). Use without auto-ID marks items "{tried}"
 
 #### Discovery Mechanics
-- [ ] **Cursed discovery via failed remove** — trying to remove a cursed item reveals `ITEM_FLAG_CURSED` in `m_dwKnownIntrinsics`. Display as "a Dagger {cursed}"
+- [x] **Cursed discovery via failed remove** — RevealProperty(KNOWN_CURSED) on failed equipment remove. Display as "a Dagger {cursed}"
 - [ ] **Feeling tiers** — passive discovery over time: "magical" (has bonuses), "excellent" (ego item like Slay Beast), "special" (unique like "Sting"). Displayed as "a Dagger {excellent}" before full ID
 - [ ] **Class-specific feelings** — Warriors sense weapon curses fast, Mages sense magic fast, Priests sense blessings/curses, Rogues sense traps/AC. Low chance per turn like passive searching. Requires class/stat system.
 - [ ] **Cursed/uncursed/blessed states** — three-state system with bonuses/penalties between versions of the same item
@@ -50,7 +50,7 @@ Foundation commit landed — this tracks what's left before Phase 3 is done.
 ### Remaining
 
 #### Rendering
-- [ ] **FOW rendering differentiation** — `DUNG_FLAG_VISIBLE` is set but not consumed by the renderer. Unseen tiles = background color, seen-but-not-currently-visible = dimmed/gray, currently visible = normal bright. The comment on #72 shows the three-state rendering target.
+- [x] **FOW rendering differentiation** — Seen-but-not-visible tiles render as dim grey (60,60,80). Currently visible tiles render normally. Unseen tiles not drawn.
 
 #### Light Sources
 - [ ] **Lanterns** — light radius 5, refuel with oil, +5000 per oil can, limit 15000. Lantern fuel item partially scaffolded in Phase 2 (`USE_FUEL`).
@@ -144,15 +144,17 @@ Monsters need richer attack types beyond simple HP damage. Currently monsters ha
 
 These are ordered by "unblocks the most other work" and "most visible gameplay impact":
 
-### Tier 1 — Core Knowledge System
-1. **`m_dwKnownIntrinsics` on CItem + display in item name** (#114) — This is the core acceptance criterion for identification. Everything else in #114 builds on top of this. Required before feelings, cursed discovery, or ?*ID* make sense.
-2. **Unidentified names / flavors** (#114) — "Blue Potion" vs "Potion of Healing". Without this, auto-ID and Scroll of ID have no visible payoff. The fields already exist on CItemDef.
-3. **FOW rendering (three-state)** (#72) — `DUNG_FLAG_VISIBLE` is being set every frame but nothing renders differently. This is the visible payoff for all the visibility work.
+### Tier 1 — Core Knowledge System ✅
+1. ~~**`m_dwKnownProps` on CItem + display in item name**~~ (#114) — Done. FormatProperties() with type-aware templates.
+2. ~~**Unidentified names / flavors**~~ (#114) — Done. FileParse randomized names + {tried} marking.
+3. ~~**FOW rendering (three-state)**~~ (#72) — Done. Dim grey for seen-not-visible.
+
+**Also fixed**: LOS Bresenham was passing sight_distance instead of actual target distance, causing line to extend past target into walls. Fixed in CanSeeEachOther() and UpdateVisibility(). All 12 targeting/ranged tests now pass.
 
 ### Tier 2 — Effect System Completeness
 4. **`EFFECT_TYPE_TIMED` as primary type** (#77) — Needed for temporary potions (resistance, invisibility, heroism, blindness). Many items in the spreadsheet depend on this.
 5. **Multi-effect items in Items.txt** (#77) — Potion of Minor Healing (HP + cure blind + cure confuse) is the canonical use case. The loop already works; just need item data.
-6. **`{tried}` flag** (#114) — Simple but important UX: if you quaff something and it doesn't auto-ID, mark it tried.
+6. ~~**`{tried}` flag**~~ (#114) — Done (moved to Tier 1).
 
 ### Tier 3 — Monster Combat Depth
 7. **Monster attack type flags** (#77) — MON_FLAG_CLAW/BITE/BREATHE/TOUCH/CRAWL/TRAMPLE. Gives monsters distinct attack flavors beyond "hits".

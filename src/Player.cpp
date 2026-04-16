@@ -305,10 +305,9 @@ void CPlayer::DisplayStats()
     }
 }
 
-void CPlayer::DisplayInventory( uint8 dwPlacement )
+void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
 {
     CDisplayMeta meta;
-    sprintf( meta.header, "You are Carrying:\n" );
     meta.limit = 'z';
     sprintf( meta.footer, "Inventory past first page not shown.\n" );
     CDisplayText *pDT = NULL;
@@ -326,15 +325,97 @@ void CPlayer::DisplayInventory( uint8 dwPlacement )
         break;
     }
 
-    pDT->DisplayList( m_llInventory, &meta );
+    switch( filter )
+    {
+    case INV_QUAFF:
+        sprintf( meta.header, "Quaff which potion?\n" );
+        break;
+    case INV_READ:
+        sprintf( meta.header, "Read which scroll?\n" );
+        break;
+    case INV_WIELD:
+        sprintf( meta.header, "Wield which item?\n" );
+        break;
+    case INV_ZAP:
+        sprintf( meta.header, "Zap which wand?\n" );
+        break;
+    default:
+        sprintf( meta.header, "You are Carrying:\n" );
+        break;
+    }
+
+    if( filter == INV_COMPLETE )
+    {
+        pDT->DisplayList( m_llInventory, &meta );
+        return;
+    }
+
+    pDT->Clear();
+    pDT->Printf( meta.header );
+    CLink<CItem> *pLink = m_llInventory->GetHead();
+    char cListId = 'a';
+    while( pLink != NULL )
+    {
+        bool show = false;
+        switch( filter )
+        {
+        case INV_QUAFF:
+            show = IsDrinkable( pLink );
+            break;
+        case INV_READ:
+            show = IsReadable( pLink );
+            break;
+        case INV_WIELD:
+            show = IsWieldable( pLink );
+            break;
+        case INV_ZAP:
+            show = IsZappable( pLink );
+            break;
+        default:
+            show = true;
+            break;
+        }
+        if( show )
+        {
+            CItem *pItem = pLink->m_lpData;
+            if( pItem->IsStackable() && pItem->m_dwCount > 1 )
+            {
+                pDT->Printf( "%c - %d %s\n", cListId, pItem->m_dwCount, pItem->GetPlural() );
+            }
+            else
+            {
+                pDT->Printf( "%c - %s\n", cListId, pItem->GetName() );
+            }
+        }
+        if( cListId < meta.limit )
+        {
+            cListId++;
+        }
+        else
+        {
+            pDT->Printf( meta.footer );
+            break;
+        }
+        pLink = m_llInventory->GetNext( pLink );
+    }
 }
 
-void CPlayer::DisplayEquipment( uint8 dwPlacement )
+void CPlayer::DisplayEquipment( uint8 dwPlacement, eInvFilter filter )
 {
     CDisplayMeta meta;
-    sprintf( meta.header, "You are wearing:\n" );
     meta.limit = 'm';
     sprintf( meta.footer, "Equipment is limited to 10 items, one each for specific body parts.\n" );
+
+    switch( filter )
+    {
+    case INV_FIRE:
+        sprintf( meta.header, "Fire which weapon?\n" );
+        break;
+    default:
+        sprintf( meta.header, "You are wearing:\n" );
+        break;
+    }
+
     CDisplayText *pDT = NULL;
     switch( dwPlacement )
     {
@@ -350,7 +431,38 @@ void CPlayer::DisplayEquipment( uint8 dwPlacement )
         break;
     }
 
-    pDT->DisplayFixedList( m_llEquipment, &meta );
+    if( filter == INV_COMPLETE )
+    {
+        pDT->DisplayFixedList( m_llEquipment, &meta );
+        return;
+    }
+
+    pDT->Clear();
+    pDT->Printf( meta.header );
+    CLink<CItem> *pLink = m_llEquipment->GetHead();
+    char cListId = 'a';
+    while( cListId <= meta.limit )
+    {
+        if( pLink != NULL && pLink->m_dwIndex == cListId - 'a' )
+        {
+            bool show = false;
+            switch( filter )
+            {
+            case INV_FIRE:
+                show = IsFireable( pLink );
+                break;
+            default:
+                show = true;
+                break;
+            }
+            if( show )
+            {
+                pDT->Printf( "%c - %s\n", cListId, pLink->m_lpData->GetName() );
+            }
+            pLink = m_llEquipment->GetNext( pLink );
+        }
+        cListId++;
+    }
 }
 
 void CPlayer::PickUp( JVector &vPickupPos )

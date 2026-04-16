@@ -20,6 +20,7 @@ CEndGameState::CEndGameState() : m_cCommand( 0 ), m_szTombstone( NULL )
 {
     m_pKeyHandlers[ENDGAME_INIT] = &CEndGameState::OnHandleInit;
     m_pKeyHandlers[ENDGAME_TOMB] = &CEndGameState::OnHandleTomb;
+    m_pKeyHandlers[ENDGAME_MAP] = &CEndGameState::OnHandleMap;
     m_pKeyHandlers[ENDGAME_SCORES] = &CEndGameState::OnHandleScores;
 
     m_eCurModifier = ENDGAME_INIT;
@@ -72,7 +73,41 @@ int CEndGameState::OnHandleTomb( JKeysym *keysym )
 
     if( retval == JCOMPLETESTATE )
     {
-        JLog( LOG_LEVEL_DEBUG, true, "TOMB modifier complete, ENDGAME state to SCORES\n" );
+        JLog( LOG_LEVEL_DEBUG, true, "TOMB modifier complete, ENDGAME state to MAP\n" );
+        g_pGame->GetEnd()->Clear();
+        DoMap();
+        m_eCurModifier = ENDGAME_MAP;
+        m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
+    }
+
+    if( retval != JSUCCESS )
+    {
+        JLog( LOG_LEVEL_DEBUG, true, "Name cmd still waiting for a valid key.\n" );
+        return 0;
+    }
+
+    // We got a valid key
+    JLog( LOG_LEVEL_NOISE, true, "TOMB modifier got a valid key\n" );
+    g_pGame->GetEnd()->Clear();
+    DoTomb();
+
+    return 0;
+}
+
+int CEndGameState::OnHandleMap( JKeysym *keysym )
+{
+    int retval;
+    JLog( LOG_LEVEL_DEBUG, true, "Handling MAP modifier\n" );
+    retval = OnBaseHandleKey( keysym );
+
+    if( retval == JRESETSTATE )
+    {
+        return 0;
+    }
+
+    if( retval == JCOMPLETESTATE )
+    {
+        JLog( LOG_LEVEL_DEBUG, true, "MAP modifier complete, ENDGAME state to SCORES\n" );
         g_pGame->GetEnd()->Clear();
         if( g_pGame->GetPlayer()->IsWizard() )
         {
@@ -87,14 +122,9 @@ int CEndGameState::OnHandleTomb( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        JLog( LOG_LEVEL_DEBUG, true, "Name cmd still waiting for a valid key.\n" );
+        JLog( LOG_LEVEL_DEBUG, true, "Map cmd still waiting for a valid key.\n" );
         return 0;
     }
-
-    // We got a valid key
-    JLog( LOG_LEVEL_NOISE, true, "TOMB modifier got a valid key\n" );
-    g_pGame->GetEnd()->Clear();
-    DoTomb();
 
     return 0;
 }
@@ -182,6 +212,17 @@ bool CEndGameState::DoTomb()
                                m_pScore->m_dwLevel, m_pScore->m_szClass, m_pScore->m_dwDepth,
                                dwKillerPadding + Util::jstrlen( m_pScore->m_szKilledBy ),
                                m_pScore->m_szKilledBy, dwKillerPadding + dwKillerExtraPad, "" );
+    return true;
+}
+
+//// Map commands
+bool CEndGameState::DoMap()
+{
+    char *map = g_pGame->GetDungeon()->DumpMap();
+    g_pGame->GetEnd()->Printf( "Dungeon Level %d (%d ft)\n\n", g_pGame->GetDungeon()->depth,
+                               g_pGame->GetDungeon()->depth * 50 );
+    g_pGame->GetEnd()->Printf( "%s", map );
+    delete[] map;
     return true;
 }
 

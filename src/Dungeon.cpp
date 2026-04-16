@@ -183,7 +183,11 @@ JResult CDungeon::CreateNewLevel( const int delta )
           "CLOCKSTEP: Scenery/items/monsters will be placed after generation.\n" );
 #endif
 
-    DumpMap();
+    char *mapStr = DumpMap();
+    JLog( LOG_LEVEL_DEBUG, false, "[MAP] Dungeon map (%d rooms, %d halls):\n",
+          m_dmCurLevel->HowManyRooms(), m_dmCurLevel->HowManyHallways() );
+    JLog( LOG_LEVEL_DEBUG, false, "%s", mapStr );
+    delete[] mapStr;
 
     m_bDraw = true;
     return JSUCCESS;
@@ -270,16 +274,18 @@ JResult CDungeon::CreateMap()
     return JSUCCESS;
 }
 
-void CDungeon::DumpMap()
+char *CDungeon::DumpMap()
 {
     extern unsigned char TileIDs[];
     extern unsigned char MonIDs[];
     extern unsigned char ItemIDs[];
-    JLog( LOG_LEVEL_DEBUG, false, "[MAP] Dungeon map (%d rooms, %d halls):\n",
-          m_dmCurLevel->HowManyRooms(), m_dmCurLevel->HowManyHallways() );
+
+    // Build the full map into a temporary buffer
+    char map[DUNG_HEIGHT][DUNG_WIDTH + 1];
+    int minX = DUNG_WIDTH, maxX = 0, minY = DUNG_HEIGHT, maxY = 0;
+
     for( int y = 0; y < DUNG_HEIGHT; y++ )
     {
-        char row[DUNG_WIDTH + 1];
         for( int x = 0; x < DUNG_WIDTH; x++ )
         {
             JIVector v( x, y );
@@ -288,12 +294,11 @@ void CDungeon::DumpMap()
 
             // Overlay monsters and items on the base map
             if( pTile && pTile->m_pCurMonster )
-                row[x] = (char)MonIDs[pTile->m_pCurMonster->m_md->m_dwIndex];
+                map[y][x] = (char)MonIDs[pTile->m_pCurMonster->m_md->m_dwIndex];
             else if( pTile && pTile->m_pCurItem )
-                row[x] = (char)ItemIDs[pTile->m_pCurItem->m_id->m_dwIndex];
+                map[y][x] = (char)ItemIDs[pTile->m_pCurItem->m_id->m_dwIndex];
             else if( type == DUNG_IDX_WALL )
             {
-                // Show wall only if adjacent to a non-wall tile
                 bool show = false;
                 for( int dy = -1; dy <= 1 && !show; dy++ )
                 {
@@ -307,14 +312,57 @@ void CDungeon::DumpMap()
                             show = true;
                     }
                 }
-                row[x] = show ? '#' : ' ';
+                map[y][x] = show ? '#' : ' ';
             }
             else
-                row[x] = ( type >= 0 && type < DUNG_IDX_MAX ) ? (char)TileIDs[type] : '?';
+                map[y][x] = ( type >= 0 && type < DUNG_IDX_MAX ) ? (char)TileIDs[type] : '?';
+
+            if( map[y][x] != ' ' )
+            {
+                if( x < minX )
+                    minX = x;
+                if( x > maxX )
+                    maxX = x;
+                if( y < minY )
+                    minY = y;
+                if( y > maxY )
+                    maxY = y;
+            }
         }
-        row[DUNG_WIDTH] = '\0';
-        JLog( LOG_LEVEL_DEBUG, false, "%s\n", row );
+        map[y][DUNG_WIDTH] = '\0';
     }
+
+    // Add a 1-tile margin
+    if( minX > 0 )
+        minX--;
+    if( minY > 0 )
+        minY--;
+    if( maxX < DUNG_WIDTH - 1 )
+        maxX++;
+    if( maxY < DUNG_HEIGHT - 1 )
+        maxY++;
+
+    // Build output string: each trimmed row + newline
+    // Worst case: (maxX-minX+2) chars per row * (maxY-minY+1) rows + null
+    int rowLen = maxX - minX + 2; // content + newline
+    int numRows = maxY - minY + 1;
+    char *result = new char[rowLen * numRows + 1];
+    char *ptr = result;
+
+    for( int y = minY; y <= maxY; y++ )
+    {
+        int end = maxX;
+        while( end > minX && map[y][end] == ' ' )
+            end--;
+
+        int len = end - minX + 1;
+        memcpy( ptr, &map[y][minX], len );
+        ptr += len;
+        *ptr++ = '\n';
+    }
+    *ptr = '\0';
+
+    return result;
 }
 
 JResult CDungeon::InitDungeonTiles()

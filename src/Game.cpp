@@ -495,8 +495,11 @@ bool CGame::Update()
 bool CGame::Update( float fCurTime )
 {
     m_fGameTime += fCurTime;
-    // Update the AI
-    GetAIMgr()->Update( fCurTime );
+    // Don't update AI during use commands or ranged item selection
+    if( m_eCurState != STATE_USE && m_eCurState != STATE_RANGED )
+    {
+        GetAIMgr()->Update( fCurTime );
+    }
 #endif // TURN_BASED
 
 #ifdef CLOCKSTEP
@@ -530,14 +533,30 @@ bool CGame::Update( float fCurTime )
     GetEquip()->Update( fCurTime );
     if( m_eCurState == STATE_USE )
     {
-        switch( reinterpret_cast<CUseState *>( m_pCurState )->GetModifier() )
+        eUseModifier mod = reinterpret_cast<CUseState *>( m_pCurState )->GetModifier();
+        eInvFilter filter = INV_COMPLETE;
+        switch( mod )
+        {
+        case USE_QUAFF:
+            filter = INV_QUAFF;
+            break;
+        case USE_READ:
+            filter = INV_READ;
+            break;
+        case USE_WIELD:
+            filter = INV_WIELD;
+            break;
+        default:
+            break;
+        }
+        switch( mod )
         {
         case USE_WIELD:
         case USE_DROP:
         case USE_READ:
         case USE_QUAFF:
         case USE_FUEL:
-            GetPlayer()->DisplayInventory( PLACEMENT_USE );
+            GetPlayer()->DisplayInventory( PLACEMENT_USE, filter );
             break;
         case USE_REMOVE:
             GetPlayer()->DisplayEquipment( PLACEMENT_USE );
@@ -550,13 +569,13 @@ bool CGame::Update( float fCurTime )
     }
     else if( m_eCurState == STATE_RANGED )
     {
-        switch( reinterpret_cast<CRangedState *>( m_pCurState )->GetCommand() )
+        switch( reinterpret_cast<CRangedState *>( m_pCurState )->GetModifier() )
         {
-        case JKEY_f:
-            GetPlayer()->DisplayEquipment( PLACEMENT_USE );
+        case RANGED_FIRE:
+            GetPlayer()->DisplayEquipment( PLACEMENT_USE, INV_FIRE );
             break;
-        case JKEY_z:
-            GetPlayer()->DisplayInventory( PLACEMENT_USE );
+        case RANGED_ZAP:
+            GetPlayer()->DisplayInventory( PLACEMENT_USE, INV_ZAP );
             break;
         default:
             JLog( LOG_LEVEL_DEBUG, true, "Nothing to display for command\n" );

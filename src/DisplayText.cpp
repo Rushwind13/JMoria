@@ -18,7 +18,9 @@ class CGame;
 #define FONT_DRAW_W 6
 #define FONT_DRAW_H 8
 
-#define TEXT_MAXCHARS 2048
+// 12288 = ~12KB, enough for the 100x100 dungeon map on the death screen
+// (worst case ~100 rows * ~102 chars/row ≈ 10200, plus header/margin)
+#define TEXT_MAXCHARS 12288
 // Constructor
 CDisplayText::CDisplayText( const char *szBasedir, JRect in, uint8 inAlpha )
     : m_Rect( in ),

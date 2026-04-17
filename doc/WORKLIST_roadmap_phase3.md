@@ -83,21 +83,33 @@ Foundation commit landed — this tracks what's left before Phase 3 is done.
 
 ### Remaining — Item Effect Types
 
-#### New Effect Types
-- [ ] **`EFFECT_TYPE_TIMED`** — distinct from `EFFECT_TYPE_INTRINSIC` + `EFFECT_MOD_TIMED`. The spreadsheet uses TIMED as a primary type for temporary potions: Potion of Fire Resistance, Potion of Invisibility, Potion of Blindness, Potion of Heroism, temp HP, Scroll of Blessing
-- [ ] **`EFFECT_TYPE_CAUSE`** — used for Mapping, Door/Stair Location, Trap Detection, Trap Creation. Currently Magic Mapping uses `EFFECT_TYPE_CREATE` — should it be CAUSE?
+#### Effect Type Decisions (resolved)
+- [x] **`EFFECT_TYPE_TIMED` NOT needed** — use `EFFECT_TYPE_INTRINSIC` + `EFFECT_MOD_TIMED` instead. Was a spreadsheet typo.
+- [x] **`EFFECT_TYPE_CAUSE` NOT needed** — Mapping stays `EFFECT_TYPE_CREATE`. Detection effects will use proposed `EFFECT_TYPE_SEE` (reserved at 0x100 in Constants.h).
+- [x] **`EFFECT_TYPE_SEE`** — reserved as comment. "SEE changes what you know, CREATE changes the world." Will handle: mapping, identify, detect doors/traps/monsters.
 
-#### New Effect Modifiers
-- [ ] **`EFFECT_MOD_IMMUNE`** — Helmet of Lordly Protection: fire immune vs resist
-- [ ] **`EFFECT_MOD_WEAK`** — weakness flag. Potion of Flames has Cold weakness (potions can shatter if user takes cold damage)
-- [ ] **`EFFECT_MOD_SEE`** — See Invisible, Door/Stair Location, Trap Detection
+#### Effect Modifiers (all exist in Constants.h)
+- [x] **`EFFECT_MOD_IMMUNE`** (0x04) — Helmet of Lordly Protection: fire immune vs resist
+- [x] **`EFFECT_MOD_WEAK`** (0x08) — weakness flag. Potion of Flames has Cold weakness
+- [x] **`EFFECT_MOD_SEE`** (0x02) — See Invisible, Door/Stair Location, Trap Detection
+- [x] **`EFFECT_MOD_TIMED`** (0x10) — temporary effect duration
+- [x] **`EFFECT_MOD_AREA`** (0x20), **`EFFECT_MOD_LINE`** (0x40), **`EFFECT_MOD_BALL`** (0x80) — shape modifiers
+- [x] **`EFFECT_MOD_ENCHANT`** (0x100) — enchantment modifier
 
-#### New Effect Flags
-- [ ] **`EFFECT_FLAG_STAT`** — stat gain/restore/lose/timed. Requires stats system (STR/DEX/CON/INT/WIS/CHA). Potion of Gain Strength, Potion of Restore Strength, Potion of Weakness, Potion of Heroism.
-- [ ] **`EFFECT_FLAG_AC`** — timed AC bonus (Scroll of Blessing)
-- [ ] **`EFFECT_FLAG_SUMMON`** — Scroll of Summon Monsters: summons high-level monsters surrounding the character
-- [ ] **`EFFECT_FLAG_DOOR`** + `EFFECT_MOD_SEE` — Scroll of Door/Stair Location: reveals doors and stairs
-- [ ] **`EFFECT_FLAG_TRAP`** — detect (with `EFFECT_MOD_SEE`) and create traps. Requires trap system.
+#### Effect Flags — Word 1 (EFFECT_FLAG, 32/32 bits allocated)
+All 32 flags exist and are in the string table. Includes: FIRE, COLD, ELEC, ACID, POISON, AFRAID, BLIND, CONFUSE, PARALYZE, SLEEP, INFRA, ESP, INVISIBLE, LEVITATE, FREE_ACTION, SPEED, LIGHT, RECALL, TELEPORT, STONE_TO_MUD, IDENTIFY, MAPPING, SUMMON, AC, STAT, HP, FUEL, XP, FOOD, SEE_INVIS, INTRINSIC, RESIST.
+
+#### Effect Flags — Word 2 (EFFECT_FLAG2, 3/32 bits used) ✅
+- [x] **`EFFECT_FLAG2_DOOR`** (0x01) + `EFFECT_MOD_SEE` — Scroll of Door/Stair Location
+- [x] **`EFFECT_FLAG2_TRAP`** (0x02) — detect (with `EFFECT_MOD_SEE`) and create traps
+- [x] **`EFFECT_FLAG2_MONSTERS`** (0x04) — detect monsters
+- [x] **`m_dwFlags2` on CEffect** — second 32-bit word, parsed transparently by `LookupEffectFlag()`
+- [x] **`LookupEffectFlag()` / `EffectFlagToString()`** — convenience methods route between words invisibly
+- [x] **7 test scenarios** in effects.feature covering lookup, routing, and round-trip
+
+#### Flags Blocked by Other Systems
+- [ ] **`EFFECT_FLAG_STAT`** — exists in word 1, but stat gain/restore/lose requires stats system (#197)
+- [ ] **`EFFECT_FLAG_AC`** — exists in word 1, but timed AC bonus requires implementation in DoIntrinsicEffects
 
 #### Multi-Effect Items
 - [ ] **Multi-effect item definitions in Items.txt** — Potion of Minor Healing (HP gain + cure blind + cure confuse), Potion of Heroism (stat boost + temp HP), Potion of Flames (fire hit + cold weakness). The effect loop processes multiple CEffects per item already, but these items need to be defined.
@@ -109,13 +121,14 @@ Foundation commit landed — this tracks what's left before Phase 3 is done.
 
 Monsters need richer attack types beyond simple HP damage. Currently monsters have `Attack` lines in Monsters.txt parsed as effects. The following extends the attack/effect system:
 
-#### Monster Attack Types (new MON_FLAGs)
-- [ ] **`MON_FLAG_CRAWL`** — worm mass crawl attack (HP damage)
-- [ ] **`MON_FLAG_TOUCH`** — elemental/status touch attacks
-- [ ] **`MON_FLAG_CLAW`** — standard melee (dragons, demons)
-- [ ] **`MON_FLAG_BITE`** — bite attack
-- [ ] **`MON_FLAG_BREATHE`** — breath weapon (elemental, large AoE)
-- [ ] **`MON_FLAG_TRAMPLE`** — ancient dragon trample
+#### Monster Attack Types (6 MON_FLAGs — already in Constants.h ✅)
+These are all defined, in the string table, and already used in Monsters.txt Attack lines.
+- [x] **`MON_FLAG_CRAWL`** (0x80) — worm mass crawl attack (HP damage)
+- [x] **`MON_FLAG_TOUCH`** (0x02) — elemental/status touch attacks
+- [x] **`MON_FLAG_CLAW`** (0x10) — standard melee (dragons, demons)
+- [x] **`MON_FLAG_BITE`** (0x04) — bite attack
+- [x] **`MON_FLAG_BREATHE`** (0x40) — breath weapon (elemental, large AoE)
+- [x] **`MON_FLAG_TRAMPLE`** (0x20) — ancient dragon trample
 
 #### Monster Attack Definitions
 
@@ -151,18 +164,22 @@ These are ordered by "unblocks the most other work" and "most visible gameplay i
 
 **Also fixed**: LOS Bresenham was passing sight_distance instead of actual target distance, causing line to extend past target into walls. Fixed in CanSeeEachOther() and UpdateVisibility(). All 12 targeting/ranged tests now pass.
 
-### Tier 2 — Effect System Completeness
-4. **`EFFECT_TYPE_TIMED` as primary type** (#77) — Needed for temporary potions (resistance, invisibility, heroism, blindness). Many items in the spreadsheet depend on this.
-5. **Multi-effect items in Items.txt** (#77) — Potion of Minor Healing (HP + cure blind + cure confuse) is the canonical use case. The loop already works; just need item data.
+### Tier 2 — Effect Vocabulary + Item Content ✅ (vocabulary done)
+The effect vocabulary (types, modifiers, flags, second bitmask) is complete. Remaining work is item content:
+4. ~~**`EFFECT_TYPE_TIMED`**~~ — Resolved: use `EFFECT_TYPE_INTRINSIC` + `EFFECT_MOD_TIMED`. Not a separate type.
+5. ~~**EFFECT_FLAG2 second bitmask**~~ — Done. DOOR, TRAP, MONSTERS + LookupEffectFlag/EffectFlagToString.
 6. ~~**`{tried}` flag**~~ (#114) — Done (moved to Tier 1).
+7. **Multi-effect items in Items.txt** (#77) — Potion of Minor Healing (HP + cure blind + cure confuse) is the canonical use case. The loop already works; just need item data.
+8. **Define ~20 new items in Items.txt** (#77) — Potions, scrolls, rings using existing vocabulary. No code changes needed for most.
 
 ### Tier 3 — Monster Combat Depth
-7. **Monster attack type flags** (#77) — MON_FLAG_CLAW/BITE/BREATHE/TOUCH/CRAWL/TRAMPLE. Gives monsters distinct attack flavors beyond "hits".
-8. **Elemental monster attacks** (#77) — Fire/cold/acid/poison touch and breath. Requires resist/immune checks.
-9. **Item destruction from attacks** (#77) — Fire burns scrolls, acid destroys metal. High-impact gameplay consequence.
+~~**Prerequisite**: Add 6 new `MON_FLAG_*` constants~~ — Already done (CRAWL, TOUCH, CLAW, BITE, BREATHE, TRAMPLE all in Constants.h and Monsters.txt).
+9. **Elemental monster attacks** (#77) — Fire/cold/acid/poison touch and breath. Requires resist/immune checks in combat code.
+10. **Item destruction from attacks** (#77) — Fire burns scrolls, acid destroys metal. High-impact gameplay consequence.
+11. **New monster definitions in Monsters.txt** (#77) — Baby Red Dragon, Ancient Red Dragon, Ghost, Greater Demon. Attack lines use existing vocabulary.
 
 ### Tier 4 — Advanced Systems (Require Stats, Classes, Spells)
-10. **`EFFECT_FLAG_STAT`** (#77) — Requires stat system (STR/DEX/CON/INT/WIS/CHA) to exist first
-11. **Class-specific feelings** (#114) — Requires class system with stat priorities
-12. **Spell of Light Area / Mage ID spell** (#72, #114) — Requires spell/magic system
-13. **`?*Identify*`** (#114) — Requires ego/unique item system
+12. **`EFFECT_FLAG_STAT`** (#77) — Requires stat system (STR/DEX/CON/INT/WIS/CHA) to exist first
+13. **Class-specific feelings** (#114) — Requires class system with stat priorities
+14. **Spell of Light Area / Mage ID spell** (#72, #114) — Requires spell/magic system
+15. **`?*Identify*`** (#114) — Requires ego/unique item system

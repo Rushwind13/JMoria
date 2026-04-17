@@ -1227,6 +1227,12 @@ JResult CPlayer::DoCreateEffects( CEffect *pEffect )
     case EFFECT_FLAG_MAPPING:
         retval = DoMagicMapping( pEffect );
         break;
+    case EFFECT_FLAG_RECALL:
+        retval = DoRecall();
+        break;
+    case EFFECT_FLAG_SUMMON:
+        retval = DoSummonMonsters();
+        break;
     }
     if( retval == JSUCCESS )
         m_bLastEffectNoticed = true;
@@ -1293,6 +1299,57 @@ JResult CPlayer::DoMagicMapping( CEffect *pEffect )
     // Full dungeon mapping
     g_pGame->GetDungeon()->RevealMap( 0, 0, DUNG_WIDTH - 1, DUNG_HEIGHT - 1 );
     g_pGame->GetMsgs()->Printf( "The dungeon is revealed to you.\n" );
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoRecall()
+{
+    CDungeon *pDungeon = g_pGame->GetDungeon();
+    if( pDungeon->depth > 0 )
+    {
+        // In dungeon: save current depth, return to town
+        if( m_dwRecallDepth > (uint8)pDungeon->depth )
+        {
+            g_pGame->GetMsgs()->Printf( "Recall depth reset (was: %dft)\n", m_dwRecallDepth * 50 );
+        }
+        m_dwRecallDepth = pDungeon->depth;
+        int delta = -pDungeon->depth; // go to depth 0
+        g_pGame->GetMsgs()->Printf( "The world spins and you find yourself in town.\n" );
+        pDungeon->OnChangeLevel( delta );
+    }
+    else
+    {
+        // In town: return to last-visited dungeon depth
+        int delta = m_dwRecallDepth; // go from 0 to recall depth
+        g_pGame->GetMsgs()->Printf( "The world spins and you are back at %d ft.\n",
+                                    m_dwRecallDepth * 50 );
+        pDungeon->OnChangeLevel( delta );
+    }
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoSummonMonsters()
+{
+    CDungeon *pDungeon = g_pGame->GetDungeon();
+    JIVector vPlayerPos( (int)m_vPos.x, (int)m_vPos.y );
+    int count = Util::Roll( 1, 3 );
+
+    // Summon as if 20 levels deeper — punishes careless reading
+    int effectiveDepth = pDungeon->depth + 20;
+    if( effectiveDepth > DUNG_MAXDEPTH )
+        effectiveDepth = DUNG_MAXDEPTH;
+
+    for( int i = 0; i < count; i++ )
+    {
+        int which = pDungeon->ChooseMonsterForDepth( effectiveDepth, 15 );
+        if( which == MON_IDX_INVALID )
+            continue;
+        CMonsterDef *pDef = pDungeon->GetMonsterDef( which );
+        if( pDef )
+            CMonster::CreateMonster( pDef, vPlayerPos, true );
+    }
+
+    g_pGame->GetMsgs()->Printf( "Monsters appear around you!\n" );
     return JSUCCESS;
 }
 

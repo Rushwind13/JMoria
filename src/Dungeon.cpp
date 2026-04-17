@@ -167,8 +167,8 @@ JResult CDungeon::TerminateLevel()
 JResult CDungeon::CreateNewLevel( const int delta )
 {
     depth += delta;
-    if( depth < 1 )
-        depth = 1;
+    if( depth < 0 )
+        depth = 0;
     if( depth > DUNG_MAXDEPTH )
         depth = DUNG_MAXDEPTH;
 
@@ -196,17 +196,34 @@ JResult CDungeon::CreateNewLevel( const int delta )
 void CDungeon::PopulateLevel( const int depth )
 {
     PlaceScenery( depth );
-    PlaceItems( depth );
-    SpawnMonsters( depth );
+    if( depth > 0 )
+    {
+        PlaceItems( depth );
+        SpawnMonsters( depth );
+    }
+    else
+    {
+        // Town: empty item and monster lists
+        m_llItems = new JLinkList<CItem>;
+        m_llMonsters = new JLinkList<CMonster>;
+    }
 
     // Spawn the player last — they arrive on a fully populated level
     g_pGame->GetPlayer()->m_bHasSpawned = false;
     g_pGame->GetPlayer()->SpawnPlayer();
     UpdateSeen();
-    JLog( LOG_LEVEL_INFO, false, "You pass through a one-way door, to arrive on level %d.\n",
-          depth );
-    g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
-                                depth );
+    if( depth <= 0 )
+    {
+        JLog( LOG_LEVEL_INFO, false, "You are in town.\n" );
+        g_pGame->GetMsgs()->Printf( "You are in town.\n" );
+    }
+    else
+    {
+        JLog( LOG_LEVEL_INFO, false, "You pass through a one-way door, to arrive on level %d.\n",
+              depth );
+        g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
+                                    depth );
+    }
 }
 
 JResult CDungeon::CreateMap()
@@ -222,6 +239,10 @@ JResult CDungeon::CreateMap()
     {
         while( m_dmCurLevel->ProcessStep() )
             ;
+
+        // Town level always has exactly 1 room — skip room count check
+        if( depth <= 0 )
+            break;
 
         int rooms = m_dmCurLevel->HowManyRooms();
         if( rooms >= DUNG_MIN_ROOMS_REQUIRED )
@@ -451,8 +472,16 @@ JResult CDungeon::InitDungeonTiles()
 
 JResult CDungeon::PlaceScenery( const int depth )
 {
-    int upstairs = ( depth > 1 ) ? Util::GetRandom( 1, 5 ) : 0;
-    int long_upstairs = ( depth > 1 ) ? Util::GetRandom( 0, 2 ) : 0;
+    // Town level: only downstairs
+    if( depth <= 0 )
+    {
+        PlaceStairs( 1, DUNG_IDX_DOWNSTAIRS );
+        PlaceStairs( 1, DUNG_IDX_LONG_DOWNSTAIRS );
+        return JSUCCESS;
+    }
+
+    int upstairs = Util::GetRandom( 1, 5 );
+    int long_upstairs = Util::GetRandom( 0, 2 );
     int downstairs = ( depth < DUNG_MAXDEPTH ) ? Util::GetRandom( 1, 5 ) : 0;
     int long_downstairs = ( depth < DUNG_MAXDEPTH ) ? Util::GetRandom( 0, 2 ) : 0;
 
@@ -663,7 +692,7 @@ int CDungeon::ChooseItemForDepth( const int depth )
     return which_item;
 }
 
-int CDungeon::ChooseMonsterForDepth( const int depth )
+int CDungeon::ChooseMonsterForDepth( const int depth, const int range )
 {
     int which_monster = MON_IDX_INVALID;
     int count = 0;
@@ -671,7 +700,7 @@ int CDungeon::ChooseMonsterForDepth( const int depth )
     {
         int try_monster = Util::GetRandom( 0, m_llMonsterDefs->length() - 1 );
         CMonsterDef *chosen_monster = GetMonsterDef( try_monster );
-        if( abs( depth - chosen_monster->m_dwLevel ) < 5 )
+        if( abs( depth - chosen_monster->m_dwLevel ) < range )
         {
             which_monster = try_monster;
             break;

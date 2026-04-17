@@ -627,15 +627,27 @@ Color       <150,255,150,255>
 Flags       <ITEM_FLAG_STACKS>
 }
 
-Item <Scroll of Recall>
+Item <Scroll of Word of Recall>
 {
-Plural      <Scrolls of Recall>
+Plural      <Scrolls of Word of Recall>
 Type        <ITEM_IDX_SCROLL>
 Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_RECALL>
 Value       200.0
 Level       8
 Weight      0.2
 Color       <200,200,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of Summon Monsters>
+{
+Plural      <Scrolls of Summon Monsters>
+Type        <ITEM_IDX_SCROLL>
+Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_SUMMON>
+Value       10.0
+Level       3
+Weight      0.2
+Color       <255,100,100,255>
 Flags       <ITEM_FLAG_STACKS>
 }
 

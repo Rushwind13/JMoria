@@ -53,8 +53,27 @@ void CDungeonMap::CreateDungeon( const int depth )
     // First, fill the whole dungeon with rock
     FillDungeonArea( DUNG_IDX_WALL, rcWorld, false );
 
+    // Town level: single lit room, no random generation
+    if( depth <= 0 )
+    {
+        JLog( LOG_LEVEL_INFO, false, "Welcome to town.\n" );
+        // 80x24 room centered in the 100x100 grid
+        int townW = 80;
+        int townH = 24;
+        int x0 = ( DUNG_WIDTH - townW ) / 2;
+        int y0 = ( DUNG_HEIGHT - townH ) / 2;
+        JRect rcTown( x0, y0, x0 + townW - 1, y0 + townH - 1 );
+        CRoom *pTown = new CRoom( rcTown );
+        pTown->SetFlags( DUNG_FLAG_ROOM | DUNG_FLAG_LIT );
+        m_llRooms->Add( pTown );
+        FillDungeonArea( DUNG_IDX_FLOOR, rcTown );
+        LightArea( pTown );
+        return;
+    }
+
     // Do something with the depth, here...
-    if( depth > 100 )
+    // Note: depth 0 (town) returns early above; this block only runs for depth >= 1
+    if( depth >= DUNG_MAXDEPTH - 5 )
     {
         JLog( LOG_LEVEL_INFO, false, "You have a bad feeling about this level...\n" );
     }
@@ -79,10 +98,6 @@ void CDungeonMap::CreateDungeon( const int depth )
     else if( depth > 5 )
     {
         JLog( LOG_LEVEL_INFO, false, "Please keep hands and arms inside the carriage.\n" );
-    }
-    else if( depth <= 0 )
-    {
-        JLog( LOG_LEVEL_ERROR, false, "Error, levels don't go below 0.\n" );
     }
 #ifdef FIXED_DUNGEON
     //    For setpiece rooms, treasure rooms, &c

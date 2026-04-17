@@ -72,3 +72,51 @@ THEN( "^the effect flag name is <([^>]+)>$" )
     ScenarioScope<TestCtx> context;
     EXPECT_STREQ( context->szBuffer, expected.c_str() );
 }
+
+GIVEN( "^I record the dungeon depth$" )
+{
+    ScenarioScope<TestCtx> context;
+    context->hi = g_pGame->GetDungeon()->depth;
+}
+
+GIVEN( "^the player descends to depth (\\d+)$" )
+{
+    REGEX_PARAM( int, target );
+    ScenarioScope<TestCtx> context;
+    int delta = target - g_pGame->GetDungeon()->depth;
+    g_pGame->GetDungeon()->OnChangeLevel( delta );
+}
+
+THEN( "^the dungeon depth is the same$" )
+{
+    ScenarioScope<TestCtx> context;
+    EXPECT_EQ( g_pGame->GetDungeon()->depth, context->hi );
+}
+
+THEN( "^the dungeon depth is (\\d+)$" )
+{
+    REGEX_PARAM( int, expected );
+    ScenarioScope<TestCtx> context;
+    EXPECT_EQ( g_pGame->GetDungeon()->depth, expected );
+}
+
+THEN( "^the dungeon depth is greater than (\\d+)$" )
+{
+    REGEX_PARAM( int, threshold );
+    ScenarioScope<TestCtx> context;
+    EXPECT_GT( g_pGame->GetDungeon()->depth, threshold );
+}
+
+GIVEN( "^I record the monster count$" )
+{
+    ScenarioScope<TestCtx> context;
+    context->lo = g_pGame->GetDungeon()->m_llMonsters->length();
+}
+
+THEN( "^the monster count increased$" )
+{
+    ScenarioScope<TestCtx> context;
+    int before = context->lo;
+    int after = g_pGame->GetDungeon()->m_llMonsters->length();
+    EXPECT_GT( after, before );
+}

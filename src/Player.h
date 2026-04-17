@@ -123,6 +123,7 @@ public:
           m_fExperience( 0.0f ),
           m_fLevel( 1.0f ),
           m_dwIntrinsics( 0 ),
+          m_dwRecallDepth( 1 ),
           m_bWizardMode( false ),
           m_pClass( NULL ),
           m_pTarget( NULL ),
@@ -270,6 +271,8 @@ public:
     JResult DoLoseEffects( CEffect *pEffect );
     JResult DoTeleport( CEffect *pEffect );
     JResult DoMagicMapping( CEffect *pEffect );
+    JResult DoRecall();
+    JResult DoSummonMonsters();
 
     bool SetName( const char *szName );
 
@@ -343,6 +346,7 @@ protected:
     float m_fLevel;
 
     uint32 m_dwIntrinsics;
+    uint8 m_dwRecallDepth;
     JLinkList<CEffect> *m_llActiveEffects;
 
     CClass *m_pClass;

@@ -104,4 +104,5 @@ test/%.o: test/%.cpp
 clean:
 	rm -f $(EXEC) $(OBJECTS) $(TEST_DIR)/$(TEST_EXEC) $(TEST_OBJECTS)
 	rm -rf $(TEST_DIR)
+	find . -name '* [0-9].*' -not -path './.git/*' -delete
 

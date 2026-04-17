@@ -181,7 +181,11 @@ protected:
     JResult PlaceStairs( const int desired, const int type );
     JResult PlaceItems( const int depth );
     JResult SpawnMonsters( const int depth );
-    int ChooseMonsterForDepth( const int depth );
+
+public:
+    int ChooseMonsterForDepth( const int depth, const int range = 5 );
+
+protected:
     int ChooseItemForDepth( const int depth );
 
     JResult TerminateLevel();

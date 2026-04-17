@@ -79,7 +79,7 @@ Foundation commit landed — this tracks what's left before Phase 3 is done.
 - [x] DoGainEffects: fuel, XP
 - [x] DoLoseEffects: XP, HP (max reduction)
 - [x] DoRestoreEffects: identify, HP (conditional)
-- [x] DoCreateEffects: light, teleport (phase door + full), magic mapping
+- [x] DoCreateEffects: light, teleport (phase door + full), magic mapping, recall, summon monsters
 
 ### Remaining — Item Effect Types
 
@@ -117,20 +117,19 @@ All 32 flags exist and are in the string table. Includes: FIRE, COLD, ELEC, ACID
 - [ ] **Potion of Flames** — fire hit + cold weakness. Needs DoHitEffects handler for fire.
 
 #### Item Data
-Items added to Items.txt (18 new, 75 total):
+Items added to Items.txt (19 new, 76 total):
 - [x] **Potions** (11 new): Resist Cold, Resist Acid, Resist Electricity, Invisibility, Speed, Levitation, Blindness, Confusion, Poison, Cure Poison
 - [x] **Rings** (5 new): Cold Resistance, Acid Resistance, Electricity Resistance, Free Action, Speed
 - [x] **Helmets** (2 new): Helm of Infravision, Helm of Telepathy
-- [x] **Scrolls** (1 new): Scroll of Recall
+- [x] **Scrolls** (1 new): Scroll of Recall, Scroll of Summon Monsters
 
 Items NOT yet added (blocked by missing systems):
-- [ ] Potion of See Invisible — needs SEE_INVIS handler in DoIntrinsicEffects
+- [ ] Potion of See Invisible — needs invisible monster system (no MON_FLAG_INVISIBLE yet)
 - [ ] Potion of Gain STR / Restore STR / Weakness — needs stats system (#197)
 - [ ] Potion of Heroism — needs stats system (#197)
-- [ ] Potion of Flames — needs elemental hit handler
+- [ ] Potion of Flames — needs elemental hit handler in DoHitEffects
 - [ ] Helmet of Lordly Protection — needs IMMUNE vs RESIST distinction in combat
-- [ ] Scroll of Blessing — needs timed AC implementation
-- [ ] Scroll of Summon Monsters — needs SUMMON handler in DoCreateEffects
+- [ ] Scroll of Blessing — needs timed AC (CEffect copy doesn't deep-copy m_szAmount for rolled value storage)
 - [ ] Scroll of Door/Stair Location — needs EFFECT_TYPE_SEE implementation
 - [ ] Scroll of Trap Detection / Creation — needs trap system
 

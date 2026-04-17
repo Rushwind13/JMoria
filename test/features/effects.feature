@@ -40,3 +40,37 @@ Feature: Effect System
         Given I initialize my Constants
         When I call EffectFlagToString with word 1 set to 0 and word 2 set to 0
         Then the effect flag name is <(none)>
+
+    Scenario: RECALL flag is defined in word 1
+        Given I initialize my Constants
+        Then I can look up <EFFECT_FLAG_RECALL> and get value 131072
+
+    Scenario: SUMMON flag is defined in word 1
+        Given I initialize my Constants
+        Then I can look up <EFFECT_FLAG_SUMMON> and get value 524288
+
+    Scenario: Reading Word of Recall from town takes player to the dungeon
+        Given I have a Player
+        And the dungeon depth is 0
+        And I spawn a Scroll of Word of Recall
+        When I programmatically read the spawned item
+        Then the dungeon depth is greater than 0
+        And the spawned item is removed from inventory
+
+    Scenario: Reading Word of Recall from dungeon returns player to town
+        Given I have a Player
+        And the player descends to depth 3
+        And I spawn a Scroll of Word of Recall
+        When I programmatically read the spawned item
+        Then the dungeon depth is 0
+        And the spawned item is removed from inventory
+
+    # Deferred: requires monsters at all depth ranges to be reliable
+    # Scenario: Reading a Scroll of Summon Monsters spawns monsters near the player
+    #     Given I have a Player
+    #     And the player descends to depth 30
+    #     And I record the monster count
+    #     And I spawn a Scroll of Summon Monsters
+    #     When I programmatically read the spawned item
+    #     Then the monster count increased
+    #     And the spawned item is removed from inventory

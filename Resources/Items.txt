@@ -193,6 +193,32 @@ Weight      2.0
 Color        <225,225,50,255>
 }
 
+Item <Helm of Infravision>
+{
+Plural      <Helms of Infravision>
+Type        <ITEM_IDX_HELMET>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_INFRA>
+Value       500.0
+Level       15
+AC          4.0
+Weight      2.0
+Color       <225,100,50,255>
+Flags       <ITEM_FLAG_MAGIC>
+}
+
+Item <Helm of Telepathy>
+{
+Plural      <Helms of Telepathy>
+Type        <ITEM_IDX_HELMET>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ESP>
+Value       2000.0
+Level       25
+AC          4.0
+Weight      2.0
+Color       <150,150,255,255>
+Flags       <ITEM_FLAG_MAGIC>
+}
+
 # Light Sources
 Item <Torch>
 {
@@ -285,6 +311,125 @@ Duration    100.0
 Flags       <ITEM_FLAG_STACKS>
 }
 
+Item <Potion of Resist Cold>
+{
+Plural      <Potions of Resist Cold>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_COLD>,<EFFECT_MOD_RESIST>
+Value       200.0
+Level       4
+Weight      0.2
+Duration    150.0
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Resist Acid>
+{
+Plural      <Potions of Resist Acid>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ACID>,<EFFECT_MOD_RESIST>
+Value       200.0
+Level       6
+Weight      0.2
+Duration    150.0
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Resist Electricity>
+{
+Plural      <Potions of Resist Electricity>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ELECTRICITY>,<EFFECT_MOD_RESIST>
+Value       200.0
+Level       6
+Weight      0.2
+Duration    150.0
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Invisibility>
+{
+Plural      <Potions of Invisibility>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_INVISIBLE>
+Value       250.0
+Level       8
+Weight      0.2
+Duration    100.0
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Speed>
+{
+Plural      <Potions of Speed>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_SPEED>
+Value       300.0
+Level       10
+Weight      0.2
+Duration    80.0
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Levitation>
+{
+Plural      <Potions of Levitation>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LEVITATE>
+Value       150.0
+Level       6
+Weight      0.2
+Duration    100.0
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Blindness>
+{
+Plural      <Potions of Blindness>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_BLIND>
+Value       0.0
+Level       1
+Weight      0.2
+Duration    50.0
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Confusion>
+{
+Plural      <Potions of Confusion>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>
+Value       0.0
+Level       1
+Weight      0.2
+Duration    30.0
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Poison>
+{
+Plural      <Potions of Poison>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>
+Value       0.0
+Level       3
+Weight      0.2
+Duration    80.0
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Cure Poison>
+{
+Plural      <Potions of Cure Poison>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+Value       75.0
+Level       3
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+
 Item <Ring of Levitation>
 {
 Plural        <Rings of Levitation>
@@ -327,6 +472,61 @@ Item <Ring of Protection>
     Level       20
     Weight      0.2
     Color        <225,50,225,255>
+}
+
+Item <Ring of Cold Resistance>
+{
+Plural      <Rings of Cold Resistance>
+Type        <ITEM_IDX_RING>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_COLD>,<EFFECT_MOD_RESIST>
+Value       300.0
+Level       10
+Weight      0.2
+Color       <50,150,255,255>
+}
+
+Item <Ring of Acid Resistance>
+{
+Plural      <Rings of Acid Resistance>
+Type        <ITEM_IDX_RING>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ACID>,<EFFECT_MOD_RESIST>
+Value       300.0
+Level       12
+Weight      0.2
+Color       <100,255,100,255>
+}
+
+Item <Ring of Electricity Resistance>
+{
+Plural      <Rings of Electricity Resistance>
+Type        <ITEM_IDX_RING>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ELECTRICITY>,<EFFECT_MOD_RESIST>
+Value       300.0
+Level       12
+Weight      0.2
+Color       <255,255,100,255>
+}
+
+Item <Ring of Free Action>
+{
+Plural      <Rings of Free Action>
+Type        <ITEM_IDX_RING>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FREE_ACTION>
+Value       500.0
+Level       15
+Weight      0.2
+Color       <200,200,255,255>
+}
+
+Item <Ring of Speed>
+{
+Plural      <Rings of Speed>
+Type        <ITEM_IDX_RING>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_SPEED>
+Value       3000.0
+Level       30
+Weight      0.2
+Color       <255,200,50,255>
 }
 
 # Scrolls
@@ -424,6 +624,18 @@ Value       500.0
 Level       25
 Weight      0.2
 Color       <150,255,150,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of Recall>
+{
+Plural      <Scrolls of Recall>
+Type        <ITEM_IDX_SCROLL>
+Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_RECALL>
+Value       200.0
+Level       8
+Weight      0.2
+Color       <200,200,255,255>
 Flags       <ITEM_FLAG_STACKS>
 }
 

@@ -112,10 +112,27 @@ All 32 flags exist and are in the string table. Includes: FIRE, COLD, ELEC, ACID
 - [ ] **`EFFECT_FLAG_AC`** — exists in word 1, but timed AC bonus requires implementation in DoIntrinsicEffects
 
 #### Multi-Effect Items
-- [ ] **Multi-effect item definitions in Items.txt** — Potion of Minor Healing (HP gain + cure blind + cure confuse), Potion of Heroism (stat boost + temp HP), Potion of Flames (fire hit + cold weakness). The effect loop processes multiple CEffects per item already, but these items need to be defined.
+- [x] **Potion of Minor Healing** — already existed with HP + cure poison + cure blind (3 effects)
+- [ ] **Potion of Heroism** — stat boost + temp HP. Blocked by stats system (#197).
+- [ ] **Potion of Flames** — fire hit + cold weakness. Needs DoHitEffects handler for fire.
 
 #### Item Data
-- [ ] **Define items in Items.txt** — Ring of Levitation, Ring of Fire Resistance, Ring of Cold Resistance, Potion of Fire Resistance, Potion of Flames, Helmet of Lordly Protection, Potion of Invisibility, Ring of Invisibility, Potion of See Invisible, Potion of Blindness, Potion of Minor Healing, Potion of Gain STR, Potion of Restore STR, Potion of Weakness, Potion of Heroism, Scroll of Blessing, Scroll of Summon Monsters, Scroll of Door/Stair Location, Scroll of Trap Detection, Scroll of Trap Creation
+Items added to Items.txt (18 new, 75 total):
+- [x] **Potions** (11 new): Resist Cold, Resist Acid, Resist Electricity, Invisibility, Speed, Levitation, Blindness, Confusion, Poison, Cure Poison
+- [x] **Rings** (5 new): Cold Resistance, Acid Resistance, Electricity Resistance, Free Action, Speed
+- [x] **Helmets** (2 new): Helm of Infravision, Helm of Telepathy
+- [x] **Scrolls** (1 new): Scroll of Recall
+
+Items NOT yet added (blocked by missing systems):
+- [ ] Potion of See Invisible — needs SEE_INVIS handler in DoIntrinsicEffects
+- [ ] Potion of Gain STR / Restore STR / Weakness — needs stats system (#197)
+- [ ] Potion of Heroism — needs stats system (#197)
+- [ ] Potion of Flames — needs elemental hit handler
+- [ ] Helmet of Lordly Protection — needs IMMUNE vs RESIST distinction in combat
+- [ ] Scroll of Blessing — needs timed AC implementation
+- [ ] Scroll of Summon Monsters — needs SUMMON handler in DoCreateEffects
+- [ ] Scroll of Door/Stair Location — needs EFFECT_TYPE_SEE implementation
+- [ ] Scroll of Trap Detection / Creation — needs trap system
 
 ### Remaining — Monster Effects
 

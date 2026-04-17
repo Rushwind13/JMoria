@@ -104,62 +104,71 @@
 
 // Types of Monsters
 #define MON_IDX_INVALID -1
-#define MON_IDX_ANT 0
-#define MON_IDX_BAT 1
-#define MON_IDX_CENTIPEDE 2
-#define MON_IDX_DRAGON 3
-#define MON_IDX_DINOSAUR 4
-#define MON_IDX_EYE 5
-#define MON_IDX_CAT 6
-#define MON_IDX_GOLEM 7
-#define MON_IDX_HUMANOID 8
-#define MON_IDX_HARPY 9
-#define MON_IDX_ICKY 10
-#define MON_IDX_KOBOLD 11
-#define MON_IDX_LOUSE 12
-#define MON_IDX_LEECH 13
-#define MON_IDX_MOLD 14
-#define MON_IDX_NAGA 15
-#define MON_IDX_ORC 16
-#define MON_IDX_PERSON 17
-#define MON_IDX_RAT 18
-#define MON_IDX_SKELETON 19
-#define MON_IDX_MINOR_DEMON 20
-#define MON_IDX_WORM 21
-#define MON_IDX_SPIDER 22
-#define MON_IDX_YEEK 23
-#define MON_IDX_ZOMBIE 24
-#define MON_IDX_FROG 25
-#define MON_IDX_BALROG 26
-#define MON_IDX_DOG 27
-#define MON_IDX_ANCIENT_DRAGON 28
-#define MON_IDX_FLY 29
-#define MON_IDX_DRAGON_FLY 30
-#define MON_IDX_FAERIE_DRAGON 31
-#define MON_IDX_GHOUL 32
-#define MON_IDX_GHOST 33
-#define MON_IDX_GIANT 34
-#define MON_IDX_INSECT 35
-#define MON_IDX_JELLY 36
-#define MON_IDX_BEETLE 37
-#define MON_IDX_LICH 38
-#define MON_IDX_OGRE 39
-#define MON_IDX_L_PERSON 40
-#define MON_IDX_REPTILE 41
-#define MON_IDX_SNAKE 42
-#define MON_IDX_TROLL 43
-#define MON_IDX_MAJOR_DEMON 44
-#define MON_IDX_VAMPIRE 45
-#define MON_IDX_WIGHT 46
-#define MON_IDX_WRAITH 47
-#define MON_IDX_XORN 48
-#define MON_IDX_YETI 49
-#define MON_IDX_MIMIC 50
-#define MON_IDX_LURKER 51
-#define MON_IDX_SHROOM 52
-#define MON_IDX_COIN 53
-#define MON_IDX_TOWNSFOLK 54
-#define MON_IDX_MAX 55
+// Lowercase tiles (a-z) — minor creatures
+#define MON_IDX_ANT 0           // a
+#define MON_IDX_BAT 1           // b
+#define MON_IDX_CENTIPEDE 2     // c
+#define MON_IDX_DRAGON 3        // d
+#define MON_IDX_HYDRA 4         // d (shares with DRAGON)
+#define MON_IDX_EYE 5           // e
+#define MON_IDX_FLY 6           // f
+#define MON_IDX_DRAGON_FLY 7    // f (shares with FLY)
+#define MON_IDX_FAERIE_DRAGON 8 // f (shares with FLY)
+#define MON_IDX_GOLEM 9         // g
+#define MON_IDX_HUMANOID 10     // h
+#define MON_IDX_ICKY 11         // i
+#define MON_IDX_OOZE 12         // j
+#define MON_IDX_KOBOLD 13       // k
+#define MON_IDX_LOUSE 14        // l
+#define MON_IDX_LEECH 15        // l (shares with LOUSE)
+#define MON_IDX_MOLD 16         // m
+#define MON_IDX_NAGA 17         // n
+#define MON_IDX_ORC 18          // o
+#define MON_IDX_PERSON 19       // p
+#define MON_IDX_RAT 20          // r
+#define MON_IDX_SKELETON 21     // s
+#define MON_IDX_MINOR_DEMON 22  // u
+#define MON_IDX_WORM 23         // w
+#define MON_IDX_SPIDER 24       // x
+#define MON_IDX_YEEK 25         // y
+#define MON_IDX_ZOMBIE 26       // z
+// Uppercase tiles (A-Y) — major creatures
+#define MON_IDX_FROG 27           // A
+#define MON_IDX_BALROG 28         // B
+#define MON_IDX_DOG 29            // C
+#define MON_IDX_ANCIENT_DRAGON 30 // D
+#define MON_IDX_DINOSAUR 31       // D (shares with ANCIENT_DRAGON)
+#define MON_IDX_ELEMENTAL 32      // E
+#define MON_IDX_BIRD 33           // F
+#define MON_IDX_GHOUL 34          // G
+#define MON_IDX_GHOST 35          // G (shares with GHOUL)
+#define MON_IDX_HARPY 36          // H
+#define MON_IDX_INSECT 37         // I
+#define MON_IDX_JELLY 38          // J
+#define MON_IDX_BEETLE 39         // K
+#define MON_IDX_LICH 40           // L
+#define MON_IDX_MAMMAL 41         // M
+#define MON_IDX_CAT 42            // M (shares with MAMMAL)
+#define MON_IDX_OGRE 43           // O
+#define MON_IDX_GIANT 44          // P
+#define MON_IDX_L_PERSON 45       // P (shares with GIANT)
+#define MON_IDX_REPTILE 46        // R
+#define MON_IDX_SNAKE 47          // S
+#define MON_IDX_TROLL 48          // T
+#define MON_IDX_MAJOR_DEMON 49    // U
+#define MON_IDX_VAMPIRE 50        // V
+#define MON_IDX_WIGHT 51          // W
+#define MON_IDX_WRAITH 52         // W (shares with WIGHT)
+#define MON_IDX_XORN 53           // X
+#define MON_IDX_YETI 54           // Y
+// Special tiles
+#define MON_IDX_MIMIC 55           // &
+#define MON_IDX_LURKER 56          // .
+#define MON_IDX_SHROOM 57          // ,
+#define MON_IDX_COIN 58            // $
+#define MON_IDX_TOWNSFOLK 59       // t
+#define MON_IDX_ANIMATED_WEAPON 60 // |
+#define MON_IDX_MAX 61
 
 // Monster flags
 #define MON_FLAG_SPORE 0x00000001
@@ -476,6 +485,12 @@ public:
         m_StringTable[i++].Init( "MON_IDX_LURKER", MON_IDX_LURKER );
         m_StringTable[i++].Init( "MON_IDX_COIN", MON_IDX_COIN );
         m_StringTable[i++].Init( "MON_IDX_TOWNSFOLK", MON_IDX_TOWNSFOLK );
+        m_StringTable[i++].Init( "MON_IDX_HYDRA", MON_IDX_HYDRA );
+        m_StringTable[i++].Init( "MON_IDX_OOZE", MON_IDX_OOZE );
+        m_StringTable[i++].Init( "MON_IDX_ELEMENTAL", MON_IDX_ELEMENTAL );
+        m_StringTable[i++].Init( "MON_IDX_MAMMAL", MON_IDX_MAMMAL );
+        m_StringTable[i++].Init( "MON_IDX_BIRD", MON_IDX_BIRD );
+        m_StringTable[i++].Init( "MON_IDX_ANIMATED_WEAPON", MON_IDX_ANIMATED_WEAPON );
 
         // Monster flags (attack types, ai types, color types)
         m_StringTable[i++].Init( "MON_FLAG_SPORE", MON_FLAG_SPORE );

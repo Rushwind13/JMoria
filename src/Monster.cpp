@@ -344,7 +344,12 @@ void CMonster::SetColor()
     m_fColorChangeInterval = 0.0f;
 }
 
-unsigned char MonIDs[MON_IDX_MAX + 1] = "abcddefghhikllmnoprsuwxyzABCDFFFGGHIJKLOPRSTUVWWXY&.,$t";
+// MonIDs: index → tile character, alphabetical within each group
+// lowercase: a b c d d e f f f g h i j k l l m n o p r s u w x y z
+// uppercase: A B C D D E F G G H I J K L M M O P P R S T U V W W X Y
+// special:   & . , $ t |
+unsigned char MonIDs[MON_IDX_MAX + 1] =
+    "abcddefffghijkllmnoprsuwxyzABCDDEFGGHIJKLMMOPPRSTUVWWXY&.,$t|";
 void CMonster::Draw()
 {
     char monster_char = MonIDs[m_md->m_dwIndex];

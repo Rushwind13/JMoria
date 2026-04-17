@@ -95,7 +95,7 @@ Monster <Flaming Bat>
     Color		<255,100,0,255>
 }
 
- Monster <Floating Eye>
+Monster <Floating Eye>
 {
      Plural		<Floating Eyes>
      Appear      <1d1>

@@ -241,7 +241,7 @@ Monster <Shadow Mastiff>
 
 Monster <White Harpy>
 {
-    Plural		<White Harpy>
+    Plural		<White Harpies>
     Appear      <1d1>
     Speed		1.0
     MoveType	<MON_AI_SEEKPLAYER>
@@ -300,6 +300,7 @@ Monster <White Worm Mass>
     Level       1
     ExpValue	5.0
     Type		<MON_IDX_WORM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
     Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d5
     Color		<255,255,255,255>
     Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
@@ -375,7 +376,7 @@ Monster <Green Worm Mass>
 
 Monster <Huge Spider>
 {
-    Plural		<Huge Spider>
+    Plural		<Huge Spiders>
     Appear      <1d5>
     Speed		1.0
     MoveType	<MON_AI_100RANDOMMOVE>
@@ -442,6 +443,7 @@ Monster <White Dragon>
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,3d8,5
     Color		<255,255,255,255>
 }
 
@@ -459,6 +461,7 @@ Monster <Black Dragon>
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ACID>,4d8,5
     Color		<0,0,0,255>
 }
 
@@ -476,6 +479,7 @@ Monster <Green Dragon>
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d10
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_POISON>,5d8,5
     Color		<12,255,0,255>
 }
 
@@ -493,6 +497,7 @@ Monster <Blue Dragon>
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,6d8,5
     Color		<13,7,81,255>
 }
 
@@ -510,6 +515,7 @@ Monster <Red Dragon>
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d8
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d8
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d10
+    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,7d8,5
     Color		<255,0,0,255>
 }
 

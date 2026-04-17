@@ -53,9 +53,9 @@ Monster <Giant Frog>
     Appear      <1d1>
     Speed		2.0
     MoveType	<MON_AI_SEEKPLAYER>
-    HD          <3d8>
+    HD          <2d8>
     AC          40.0
-    Level       5
+    Level       7
     ExpValue	35.0
     Type		<MON_IDX_FROG>
     Flags       <MON_FLAG_WARM>
@@ -71,7 +71,7 @@ Monster <Death Slaad>
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <4d8>
     AC          50.0
-    Level       10
+    Level       16
     ExpValue	100.0
     Type		<MON_IDX_FROG>
     Flags       <MON_FLAG_WARM>
@@ -87,7 +87,7 @@ Monster <Flaming Bat>
     MoveType	<MON_AI_100RANDOMMOVE>
     HD          <4d8>
     AC          50.0
-    Level       5
+    Level       8
     ExpValue	100.0
     Type		<MON_IDX_BAT>
     Flags       <MON_FLAG_WARM>
@@ -104,124 +104,12 @@ Monster <Floating Eye>
      HD          <1d4>
      AC          20.0
      Level       1
-     ExpValue	100.0
+     ExpValue	5.0
      Type		<MON_IDX_EYE>
      Flags      <MON_FLAG_HURT_BY_LIGHT>
      Attack     <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d20
      Color		<255,100,0,255>
 }
-#
-#Monster <Flaming Bat>
-#{
-#    Plural		<Flaming Bats>
-#    Appear      <1d1>
-#    Speed		2.0
-#    MoveType	<MON_AI_100RANDOMMOVE>
-#    HD          <4d8>
-#    AC          50.0
-#    Level       5
-#    ExpValue	100.0
-#    Type		<MON_IDX_BAT>
-#   Flags       <MON_FLAG_WARM>
-#    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,0d0
-#    Color		<255,100,0,255>
-#}
-#
-#Monster <Flaming Bat>
-#{
-#    Plural		<Flaming Bats>
-#    Appear      <1d1>
-#    Speed		2.0
-#    MoveType	<MON_AI_100RANDOMMOVE>
-#    HD          <4d8>
-#    AC          50.0
-#    Level       5
-#    ExpValue	100.0
-#    Type		<MON_IDX_BAT>
-#   Flags       <MON_FLAG_WARM>
-#    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d8
-#    Color		<255,100,0,255>
-#}
-#
-#Monster <Flaming Bat>
-#{
-#    Plural		<Flaming Bats>
-#    Appear      <1d1>
-#    Speed		2.0
-#    MoveType	<MON_AI_100RANDOMMOVE>
-#    HD          <4d8>
-#    AC          50.0
-#    Level       5
-#    ExpValue	100.0
-#    Type		<MON_IDX_BAT>
-#   Flags       <MON_FLAG_WARM>
-#    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d8
-#    Color		<255,100,0,255>
-#}
-#
-#Monster <Flaming Bat>
-#{
-#    Plural		<Flaming Bats>
-#    Appear      <1d1>
-#    Speed		2.0
-#    MoveType	<MON_AI_100RANDOMMOVE>
-#    HD          <4d8>
-#    AC          50.0
-#    Level       5
-#    ExpValue	100.0
-#    Type		<MON_IDX_BAT>
-#   Flags       <MON_FLAG_WARM>
-#    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d8
-#    Color		<255,100,0,255>
-#}
-#
-#Monster <Flaming Bat>
-#{
-#    Plural		<Flaming Bats>
-#    Appear      <1d1>
-#    Speed		2.0
-#    MoveType	<MON_AI_100RANDOMMOVE>
-#    HD          <4d8>
-#    AC          50.0
-#    Level       5
-#    ExpValue	100.0
-#    Type		<MON_IDX_BAT>
-#   Flags       <MON_FLAG_WARM>
-#    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d8
-#    Color		<255,100,0,255>
-#}
-#
-#Monster <Flaming Bat>
-#{
-#    Plural		<Death Watch Beetle>
-#    Appear      <1d1>
-#    Speed		2.0
-#    MoveType	<MON_AI_100RANDOMMOVE>
-#    HD          <9d8>
-#    AC          50.0
-#    Level       5
-#    ExpValue	100.0
-#    Type		<MON_IDX_BAT>
-#   Flags       <MON_FLAG_WARM>
-#    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d8
-#    Color		<255,100,0,255>
-#}
-#
-#Monster <Flaming Bat>
-#{
-#    Plural		<Flaming Bats>
-#    Appear      <1d1>
-#    Speed		2.0
-#    MoveType	<MON_AI_100RANDOMMOVE>
-#    HD          <2d8>
-#    AC          30.0
-#    Level       5
-#    ExpValue	100.0
-#    Type		<MON_IDX_BAT>
-#   Flags       <MON_FLAG_WARM>
-#    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d8
-#    Color		<<255,250,0,255>;<0,0,0,255>>
-#}
 
 Monster <Shadow Mastiff>
 {
@@ -231,7 +119,7 @@ Monster <Shadow Mastiff>
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <4d8>
     AC          50.0
-    Level       15
+    Level       18
     ExpValue	100.0
     Type		<MON_IDX_DOG>
     Flags       <MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
@@ -247,7 +135,7 @@ Monster <White Harpy>
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <5d8>
     AC          60.0
-    Level       15
+    Level       20
     ExpValue	100.0
     Type		<MON_IDX_HARPY>
     Flags       <MON_FLAG_WARM>
@@ -263,7 +151,7 @@ Monster <Brontosaurus>
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <25d8>
     AC          60.0
-    Level       15
+    Level       40
     ExpValue	100.0
     Type		<MON_IDX_DINOSAUR>
     Flags       <MON_FLAG_WARM>
@@ -279,7 +167,7 @@ Monster <Tyrannosaurus Rex>
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <18d8>
     AC          60.0
-    Level       15
+    Level       50
     ExpValue	100.0
     Type		<MON_IDX_DINOSAUR>
     Flags       <MON_FLAG_WARM>
@@ -398,7 +286,7 @@ Monster <Ancient Multi-hued Dragon>
     MoveType	<MON_AI_SEEKPLAYER>
     HD			<15d8>
     AC          110.0
-    Level		50
+    Level		85
     ExpValue	9000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
     Flags       <MON_FLAG_WARM>
@@ -436,7 +324,7 @@ Monster <White Dragon>
     MoveType	<MON_AI_SEEKPLAYER>
     HD			<7d8>
     AC          80.0
-    Level		15
+    Level		25
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Flags       <MON_FLAG_WARM>
@@ -454,7 +342,7 @@ Monster <Black Dragon>
     MoveType	<MON_AI_SEEKPLAYER>
     HD			<8d8>
     AC          80.0
-    Level		20
+    Level		35
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Flags       <MON_FLAG_WARM>
@@ -472,7 +360,7 @@ Monster <Green Dragon>
     MoveType	<MON_AI_SEEKPLAYER>
     HD			<9d8>
     AC          90.0
-    Level		25
+    Level		45
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Flags       <MON_FLAG_WARM>
@@ -490,7 +378,7 @@ Monster <Blue Dragon>
     MoveType	<MON_AI_SEEKPLAYER>
     HD			<10d8>
     AC          90.0
-    Level		30
+    Level		55
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Flags       <MON_FLAG_WARM>
@@ -508,7 +396,7 @@ Monster <Red Dragon>
     MoveType	<MON_AI_SEEKPLAYER>
     HD			<11d8>
     AC          120.0
-    Level		35
+    Level		65
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Flags       <MON_FLAG_WARM>
@@ -524,13 +412,13 @@ Monster <Giant Snake>
     Plural		<Giant Snakes>
     Speed		1.0
     MoveType	<MON_AI_100RANDOMMOVE>
-    HD			<4d8>
+    HD			<2d8>
     AC			34.0
     Level		2
     ExpValue	3.0
     Type		<MON_IDX_SNAKE>
     Flags       <MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d3
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
     Color		<198,142,0,255>
 }
 
@@ -686,7 +574,7 @@ Monster <Giant Ant>
     Speed		1.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD			<3d8>
-    AC			80.0
+    AC			30.0
     Level		3
     ExpValue	4.0
     Type		<MON_IDX_ANT>
@@ -719,7 +607,7 @@ Monster <Fire Drake>
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <6d8>
     AC          50.0
-    Level       7
+    Level       12
     ExpValue	200.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
@@ -736,7 +624,7 @@ Monster <Frost Drake>
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <6d8>
     AC          50.0
-    Level       7
+    Level       12
     ExpValue	200.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
@@ -753,7 +641,7 @@ Monster <Storm Drake>
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <6d8>
     AC          50.0
-    Level       7
+    Level       14
     ExpValue	200.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
@@ -770,7 +658,7 @@ Monster <Acid Drake>
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <6d8>
     AC          50.0
-    Level       7
+    Level       14
     ExpValue	200.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
@@ -787,7 +675,7 @@ Monster <Venomous Spider>
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <6d8>
     AC          50.0
-    Level       7
+    Level       10
     ExpValue	180.0
     Type		<MON_IDX_SPIDER>
     Flags		<MON_FLAG_WARM>
@@ -804,7 +692,7 @@ Monster <Cursed Skeleton>
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <5d8>
     AC          40.0
-    Level       7
+    Level       10
     ExpValue	150.0
     Type		<MON_IDX_SKELETON>
     Flags		<MON_FLAG_EMPTY_MIND>

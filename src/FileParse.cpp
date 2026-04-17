@@ -555,7 +555,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 // {
 
                 JLog( LOG_LEVEL_NOISE, false, "%s ", begin );
-                curEffect->m_dwFlags = g_Constants.LookupString( begin );
+                g_Constants.LookupEffectFlag( begin, curEffect->m_dwFlags, curEffect->m_dwFlags2 );
                 // }
                 cur = end;
 

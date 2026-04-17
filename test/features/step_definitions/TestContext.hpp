@@ -77,6 +77,10 @@ struct TestCtx
 
     // AI Brain
     CAIBrain *brain;
+    // Effect system
+    uint32 effect_flags;
+    uint32 effect_flags2;
+
     // ItemDef
     CItemDef *ItemDef;
     JResult Success;

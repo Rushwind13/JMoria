@@ -10,6 +10,7 @@ public:
     CEffect()
         : m_dwEffect( -1 ),
           m_dwFlags( 0 ),
+          m_dwFlags2( 0 ),
           m_dwModifier( 0 ),
           m_szAmount( NULL ),
           m_fDuration( 0 )
@@ -25,6 +26,7 @@ public:
     }
     int m_dwEffect;
     uint32 m_dwFlags;
+    uint32 m_dwFlags2;
     int m_dwModifier;
     char *m_szAmount;
     float m_fDuration;

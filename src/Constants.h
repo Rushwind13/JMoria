@@ -241,10 +241,19 @@
 #define EFFECT_FLAG_SPEED 0x80000000
 
 #define NUM_EFFECT_FLAGS 32
-// probably need a second set of effects
-// cursed
-// trap
-// holding might be an item thing
+
+// Effect Flags (word 2) — dungeon features
+#define EFFECT_FLAG2_DOOR 0x00000001
+#define EFFECT_FLAG2_TRAP 0x00000002
+#define EFFECT_FLAG2_MONSTERS 0x00000004
+// #define EFFECT_FLAG2_x 0x00000008
+
+// #define EFFECT_FLAG2_x 0x00000010
+// #define EFFECT_FLAG2_x 0x00000020
+// #define EFFECT_FLAG2_x 0x00000040
+// #define EFFECT_FLAG2_x 0x00000080
+
+#define NUM_EFFECT_FLAGS2 3
 
 // Effect Modifiers
 #define EFFECT_MOD_RESIST 0x000000001
@@ -275,7 +284,7 @@
 #define EFFECT_TYPE_GAIN 0x00000040
 #define EFFECT_TYPE_LOSE 0x00000080
 
-// #define EFFECT_TYPE_x 0x00000100
+// #define EFFECT_TYPE_SEE 0x00000100 // proposed: reveal / detect
 // #define EFFECT_TYPE_x 0x00000200
 // #define EFFECT_TYPE_x 0x00000400
 // #define EFFECT_TYPE_x 0x00000800
@@ -376,7 +385,7 @@
 // Make sure you change below here if you added any flags.
 #define NUM_STRINGS                                                                                \
     MON_IDX_MAX + NUM_MON_FLAGS + EQUIP_IDX_MAX + ITEM_IDX_MAX + NUM_ITEM_FLAGS +                  \
-        NUM_EFFECT_FLAGS + NUM_EFFECT_MODIFIERS + NUM_EFFECT_TYPES
+        NUM_EFFECT_FLAGS + NUM_EFFECT_FLAGS2 + NUM_EFFECT_MODIFIERS + NUM_EFFECT_TYPES
 
 #define MON_IDX 0
 #define MON_FLAG 1
@@ -384,9 +393,10 @@
 #define ITEM_IDX 3
 #define ITEM_FLAG 4
 #define EFFECT_FLAG 5
-#define EFFECT_MOD 6
-#define MON_AI 7
-#define EFFECT_TYPE 8
+#define EFFECT_FLAG2 6
+#define EFFECT_MOD 7
+#define MON_AI 8
+#define EFFECT_TYPE 9
 
 #define NUM_POTION_TYPES 32
 #define NUM_SCROLL_TYPES 32
@@ -488,45 +498,51 @@ public:
         m_StringTable[i++].Init( "MON_COLOR_MULTI", MON_COLOR_MULTI );
 
         // Effect flags (flags, modifiers, types)
-        m_StringTable[i++].Init( "EFFECT_FLAG_FIRE", EFFECT_FLAG_FIRE );
-        m_StringTable[i++].Init( "EFFECT_FLAG_COLD", EFFECT_FLAG_COLD );
-        m_StringTable[i++].Init( "EFFECT_FLAG_ELECTRICITY", EFFECT_FLAG_ELECTRICITY );
-        m_StringTable[i++].Init( "EFFECT_FLAG_ACID", EFFECT_FLAG_ACID );
+        m_StringTable[i++].Init( "EFFECT_FLAG_FIRE", EFFECT_FLAG_FIRE, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_COLD", EFFECT_FLAG_COLD, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_ELECTRICITY", EFFECT_FLAG_ELECTRICITY, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_ACID", EFFECT_FLAG_ACID, EFFECT_FLAG );
 
-        m_StringTable[i++].Init( "EFFECT_FLAG_POISON", EFFECT_FLAG_POISON );
-        m_StringTable[i++].Init( "EFFECT_FLAG_LIGHT", EFFECT_FLAG_LIGHT );
-        m_StringTable[i++].Init( "EFFECT_FLAG_PARALYZE", EFFECT_FLAG_PARALYZE );
-        m_StringTable[i++].Init( "EFFECT_FLAG_TREASURE", EFFECT_FLAG_TREASURE );
+        m_StringTable[i++].Init( "EFFECT_FLAG_POISON", EFFECT_FLAG_POISON, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_LIGHT", EFFECT_FLAG_LIGHT, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_PARALYZE", EFFECT_FLAG_PARALYZE, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_TREASURE", EFFECT_FLAG_TREASURE, EFFECT_FLAG );
 
-        m_StringTable[i++].Init( "EFFECT_FLAG_AFRAID", EFFECT_FLAG_AFRAID );
-        m_StringTable[i++].Init( "EFFECT_FLAG_BLIND", EFFECT_FLAG_BLIND );
-        m_StringTable[i++].Init( "EFFECT_FLAG_SLEEP", EFFECT_FLAG_SLEEP );
-        m_StringTable[i++].Init( "EFFECT_FLAG_CONFUSE", EFFECT_FLAG_CONFUSE );
+        m_StringTable[i++].Init( "EFFECT_FLAG_AFRAID", EFFECT_FLAG_AFRAID, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_BLIND", EFFECT_FLAG_BLIND, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_SLEEP", EFFECT_FLAG_SLEEP, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_CONFUSE", EFFECT_FLAG_CONFUSE, EFFECT_FLAG );
 
-        m_StringTable[i++].Init( "EFFECT_FLAG_STONE_TO_MUD", EFFECT_FLAG_STONE_TO_MUD );
-        m_StringTable[i++].Init( "EFFECT_FLAG_FUEL", EFFECT_FLAG_FUEL );
-        m_StringTable[i++].Init( "EFFECT_FLAG_INFRA", EFFECT_FLAG_INFRA );
-        m_StringTable[i++].Init( "EFFECT_FLAG_ESP", EFFECT_FLAG_ESP );
+        m_StringTable[i++].Init( "EFFECT_FLAG_STONE_TO_MUD", EFFECT_FLAG_STONE_TO_MUD,
+                                 EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_FUEL", EFFECT_FLAG_FUEL, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_INFRA", EFFECT_FLAG_INFRA, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_ESP", EFFECT_FLAG_ESP, EFFECT_FLAG );
 
-        m_StringTable[i++].Init( "EFFECT_FLAG_IDENTIFY", EFFECT_FLAG_IDENTIFY );
-        m_StringTable[i++].Init( "EFFECT_FLAG_RECALL", EFFECT_FLAG_RECALL );
-        m_StringTable[i++].Init( "EFFECT_FLAG_MAPPING", EFFECT_FLAG_MAPPING );
-        m_StringTable[i++].Init( "EFFECT_FLAG_SUMMON", EFFECT_FLAG_SUMMON );
+        m_StringTable[i++].Init( "EFFECT_FLAG_IDENTIFY", EFFECT_FLAG_IDENTIFY, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_RECALL", EFFECT_FLAG_RECALL, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_MAPPING", EFFECT_FLAG_MAPPING, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_SUMMON", EFFECT_FLAG_SUMMON, EFFECT_FLAG );
 
-        m_StringTable[i++].Init( "EFFECT_FLAG_STAT", EFFECT_FLAG_STAT );
-        m_StringTable[i++].Init( "EFFECT_FLAG_TOHIT", EFFECT_FLAG_TOHIT );
-        m_StringTable[i++].Init( "EFFECT_FLAG_TODAM", EFFECT_FLAG_TODAM );
-        m_StringTable[i++].Init( "EFFECT_FLAG_AC", EFFECT_FLAG_AC );
+        m_StringTable[i++].Init( "EFFECT_FLAG_STAT", EFFECT_FLAG_STAT, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_TOHIT", EFFECT_FLAG_TOHIT, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_TODAM", EFFECT_FLAG_TODAM, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_AC", EFFECT_FLAG_AC, EFFECT_FLAG );
 
-        m_StringTable[i++].Init( "EFFECT_FLAG_HP", EFFECT_FLAG_HP );
-        m_StringTable[i++].Init( "EFFECT_FLAG_XP", EFFECT_FLAG_XP );
-        m_StringTable[i++].Init( "EFFECT_FLAG_MP", EFFECT_FLAG_MP );
-        m_StringTable[i++].Init( "EFFECT_FLAG_TELEPORT", EFFECT_FLAG_TELEPORT );
+        m_StringTable[i++].Init( "EFFECT_FLAG_HP", EFFECT_FLAG_HP, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_XP", EFFECT_FLAG_XP, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_MP", EFFECT_FLAG_MP, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_TELEPORT", EFFECT_FLAG_TELEPORT, EFFECT_FLAG );
 
-        m_StringTable[i++].Init( "EFFECT_FLAG_FREE_ACTION", EFFECT_FLAG_FREE_ACTION );
-        m_StringTable[i++].Init( "EFFECT_FLAG_INVISIBLE", EFFECT_FLAG_INVISIBLE );
-        m_StringTable[i++].Init( "EFFECT_FLAG_LEVITATE", EFFECT_FLAG_LEVITATE );
-        m_StringTable[i++].Init( "EFFECT_FLAG_SPEED", EFFECT_FLAG_SPEED );
+        m_StringTable[i++].Init( "EFFECT_FLAG_FREE_ACTION", EFFECT_FLAG_FREE_ACTION, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_INVISIBLE", EFFECT_FLAG_INVISIBLE, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_LEVITATE", EFFECT_FLAG_LEVITATE, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_SPEED", EFFECT_FLAG_SPEED, EFFECT_FLAG );
+
+        // Effect Flags (word 2) — dungeon features
+        m_StringTable[i++].Init( "EFFECT_FLAG2_DOOR", EFFECT_FLAG2_DOOR, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG2_TRAP", EFFECT_FLAG2_TRAP, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG2_MONSTERS", EFFECT_FLAG2_MONSTERS, EFFECT_FLAG2 );
 
         // Effect Modifiers
         m_StringTable[i++].Init( "EFFECT_MOD_RESIST", EFFECT_MOD_RESIST );
@@ -672,6 +688,8 @@ public:
         case EFFECT_TYPE:
             offset += NUM_EFFECT_MODIFIERS;
         case EFFECT_MOD:
+            offset += NUM_EFFECT_FLAGS2;
+        case EFFECT_FLAG2:
             offset += NUM_EFFECT_FLAGS;
         case EFFECT_FLAG:
             offset += NUM_MON_FLAGS;
@@ -692,6 +710,33 @@ public:
             index = Util::jlog2( dwIndex );
         }
         return m_StringTable[offset + index].m_szString;
+    }
+
+    // Look up an effect flag string and assign to the correct word
+    void LookupEffectFlag( const char *szIn, uint32 &dwFlags, uint32 &dwFlags2 )
+    {
+        for( int i = 0; i < NUM_STRINGS; i++ )
+        {
+            if( Util::jstrcmp( m_StringTable[i].m_szString, szIn ) == 0 )
+            {
+                if( m_StringTable[i].m_dwFlagSet == EFFECT_FLAG2 )
+                    dwFlags2 = m_StringTable[i].m_dwValue;
+                else
+                    dwFlags = m_StringTable[i].m_dwValue;
+                return;
+            }
+        }
+        JLog( LOG_LEVEL_WARN, true, "bad effect flag string: %s\n", szIn );
+    }
+
+    // Return the name of whichever effect flag word is set
+    const char *EffectFlagToString( uint32 dwFlags, uint32 dwFlags2 )
+    {
+        if( dwFlags2 )
+            return IndexToString( EFFECT_FLAG2, dwFlags2 );
+        if( dwFlags )
+            return IndexToString( EFFECT_FLAG, dwFlags );
+        return "(none)";
     }
 
     const char *PotionColor( const uint32 dwIndex )

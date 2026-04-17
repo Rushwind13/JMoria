@@ -1025,7 +1025,7 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwIte
         pEffect = plEffect->m_lpData;
         JLog( LOG_LEVEL_DEBUG, true, "Effect: %s Flag: %s Mod: %s\n",
               g_Constants.IndexToString( EFFECT_TYPE, pEffect->m_dwEffect ),
-              g_Constants.IndexToString( EFFECT_FLAG, pEffect->m_dwFlags ),
+              g_Constants.EffectFlagToString( pEffect->m_dwFlags, pEffect->m_dwFlags2 ),
               g_Constants.IndexToString( EFFECT_MOD, pEffect->m_dwModifier ) );
         switch( pEffect->m_dwEffect )
         {

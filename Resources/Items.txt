@@ -768,7 +768,7 @@ Item <Battle Mace>
     Type        <ITEM_IDX_MACE>
     Value        80.0
     Flags       <ITEM_FLAG_2HANDED>
-    Level        110
+    Level        10
     Damage       <2d3>
     Weight       10.0
     Speed        7.0
@@ -827,7 +827,7 @@ Item <Halberd>
 
 Item <Hand Axe>
 {
-    Plural        <Battle  Axes>
+    Plural        <Hand Axes>
     Type        <ITEM_IDX_AXE>
     Value        150.0
     Level        7
@@ -913,7 +913,7 @@ Item <Quarter Staff>
 
 Item <Scimitar>
 {
-Plural        <Scimitar>>
+Plural        <Scimitars>
 Type        <ITEM_IDX_SWORD>
 Value     150.0
 Level        10

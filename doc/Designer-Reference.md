@@ -62,6 +62,7 @@ Multiple `Flags` on one line are comma-separated.
 | ITEM_IDX_RING | — | — | Finger |
 | ITEM_IDX_AMULET | — | — | Neck |
 | ITEM_IDX_TORCH | — | — | Light source |
+| ITEM_IDX_FUEL | — | — | — (consumable) |
 | ITEM_IDX_POTION | Quaff (q) | Random color | — |
 | ITEM_IDX_SCROLL | Read (r) | Random label | — |
 | ITEM_IDX_WAND | Zap (z) | Random wood | — |

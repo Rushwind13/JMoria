@@ -191,10 +191,10 @@
 // #define MON_FLAG_x          0x00004000
 #define MON_FLAG_BREED 0x00008000
 
-// #define MON_FLAG_x          0x00100000
+#define MON_FLAG_INVISIBLE          0x00100000
 // #define MON_FLAG_x          0x00200000
 // #define MON_FLAG_x          0x00400000
-// #define MON_FLAG_x          0x00800000
+#define MON_FLAG_MAXHP          0x00800000
 
 #define MON_AI_DONTMOVE 0x01000000
 #define MON_AI_100RANDOMMOVE 0x02000000
@@ -206,7 +206,7 @@
 // #define MON_COLOR_x          0x40000000
 // #define MON_COLOR_x          0x80000000
 
-#define NUM_MON_FLAGS 18
+#define NUM_MON_FLAGS 20
 
 // Effect Flags
 #define EFFECT_FLAG_FIRE 0x00000001
@@ -266,14 +266,14 @@
 
 // Effect Modifiers
 #define EFFECT_MOD_RESIST 0x000000001
-#define EFFECT_MOD_SEE 0x000000002
-#define EFFECT_MOD_IMMUNE 0x000000004
-#define EFFECT_MOD_WEAK 0x000000008
+#define EFFECT_MOD_IMMUNE 0x000000002
+#define EFFECT_MOD_WEAK   0x000000004
+#define EFFECT_MOD_TIMED  0x000000008
 
-#define EFFECT_MOD_TIMED 0x000000010
-#define EFFECT_MOD_AREA 0x000000020
-#define EFFECT_MOD_LINE 0x000000040
-#define EFFECT_MOD_BALL 0x000000080
+#define EFFECT_MOD_AREA 0x000000010
+#define EFFECT_MOD_LINE 0x000000020
+#define EFFECT_MOD_BALL 0x000000040
+#define EFFECT_MOD_STAR 0x000000080
 
 #define EFFECT_MOD_ENCHANT 0x000000100
 // #define EFFECT_MOD_x 0x000000200
@@ -293,12 +293,12 @@
 #define EFFECT_TYPE_GAIN 0x00000040
 #define EFFECT_TYPE_LOSE 0x00000080
 
-// #define EFFECT_TYPE_SEE 0x00000100 // proposed: reveal / detect
+#define EFFECT_TYPE_SEE 0x00000100 // proposed: reveal / detect
 // #define EFFECT_TYPE_x 0x00000200
 // #define EFFECT_TYPE_x 0x00000400
 // #define EFFECT_TYPE_x 0x00000800
 
-#define NUM_EFFECT_TYPES 8
+#define NUM_EFFECT_TYPES 9
 
 // Character equipment slots
 // index for m_llEquipment
@@ -378,7 +378,7 @@
 
 // #define ITEM_FLAG_x 0x00001000
 // #define ITEM_FLAG_x 0x00002000
-// #define ITEM_FLAG_x 0x00004000
+#define ITEM_FLAG_BLESSED 0x00004000
 #define ITEM_FLAG_HOLDING 0x00008000
 
 #define ITEM_COLOR_MULTI 0x10000000
@@ -389,7 +389,7 @@
 #define KNOWN_CHARGES 0x00000004
 #define KNOWN_TRIED 0x00000008
 
-#define NUM_ITEM_FLAGS 11
+#define NUM_ITEM_FLAGS 12
 
 // Make sure you change below here if you added any flags.
 #define NUM_STRINGS                                                                                \
@@ -506,6 +506,8 @@ public:
         m_StringTable[i++].Init( "MON_FLAG_REGENERATE", MON_FLAG_REGENERATE );
         m_StringTable[i++].Init( "MON_FLAG_HURT_BY_LIGHT", MON_FLAG_HURT_BY_LIGHT );
         m_StringTable[i++].Init( "MON_FLAG_BREED", MON_FLAG_BREED );
+        m_StringTable[i++].Init( "MON_FLAG_INVISIBLE", MON_FLAG_INVISIBLE );
+        m_StringTable[i++].Init( "MON_FLAG_MAXHP", MON_FLAG_MAXHP );
         m_StringTable[i++].Init( "MON_AI_DONTMOVE", MON_AI_DONTMOVE );
         m_StringTable[i++].Init( "MON_AI_100RANDOMMOVE", MON_AI_100RANDOMMOVE );
         m_StringTable[i++].Init( "MON_AI_75RANDOMMOVE", MON_AI_75RANDOMMOVE );
@@ -561,7 +563,6 @@ public:
 
         // Effect Modifiers
         m_StringTable[i++].Init( "EFFECT_MOD_RESIST", EFFECT_MOD_RESIST );
-        m_StringTable[i++].Init( "EFFECT_MOD_SEE", EFFECT_MOD_SEE );
         m_StringTable[i++].Init( "EFFECT_MOD_IMMUNE", EFFECT_MOD_IMMUNE );
         m_StringTable[i++].Init( "EFFECT_MOD_WEAK", EFFECT_MOD_WEAK );
 
@@ -569,6 +570,7 @@ public:
         m_StringTable[i++].Init( "EFFECT_MOD_AREA", EFFECT_MOD_AREA );
         m_StringTable[i++].Init( "EFFECT_MOD_LINE", EFFECT_MOD_LINE );
         m_StringTable[i++].Init( "EFFECT_MOD_BALL", EFFECT_MOD_BALL );
+        m_StringTable[i++].Init( "EFFECT_MOD_STAR", EFFECT_MOD_STAR );
 
         m_StringTable[i++].Init( "EFFECT_MOD_ENCHANT", EFFECT_MOD_ENCHANT );
 
@@ -581,7 +583,7 @@ public:
         m_StringTable[i++].Init( "EFFECT_TYPE_RESTORE", EFFECT_TYPE_RESTORE );
         m_StringTable[i++].Init( "EFFECT_TYPE_GAIN", EFFECT_TYPE_GAIN );
         m_StringTable[i++].Init( "EFFECT_TYPE_LOSE", EFFECT_TYPE_LOSE );
-
+        m_StringTable[i++].Init( "EFFECT_TYPE_SEE", EFFECT_TYPE_SEE );
         // Equipment slots
         m_StringTable[i++].Init( "EQUIP_IDX_MAIN_HAND", EQUIP_IDX_MAIN_HAND );
         m_StringTable[i++].Init( "EQUIP_IDX_OFF_HAND", EQUIP_IDX_OFF_HAND );
@@ -640,6 +642,7 @@ public:
         m_StringTable[i++].Init( "ITEM_FLAG_MAINHAND", ITEM_FLAG_MAINHAND );
         m_StringTable[i++].Init( "ITEM_FLAG_NEEDSAMMO", ITEM_FLAG_NEEDSAMMO );
         m_StringTable[i++].Init( "ITEM_FLAG_NO_COLLIDE", ITEM_FLAG_NO_COLLIDE );
+        m_StringTable[i++].Init( "ITEM_FLAG_BLESSED", ITEM_FLAG_BLESSED );
         m_StringTable[i++].Init( "ITEM_FLAG_HOLDING", ITEM_FLAG_HOLDING );
         m_StringTable[i++].Init( "ITEM_COLOR_MULTI", ITEM_COLOR_MULTI );
 

@@ -97,18 +97,18 @@ Monster <Flaming Bat>
 
 Monster <Floating Eye>
 {
-     Plural		<Floating Eyes>
-     Appear      <1d1>
-     Speed		.25
-     MoveType	<MON_AI_DONTMOVE>
-     HD          <1d4>
-     AC          20.0
-     Level       1
-     ExpValue	5.0
-     Type		<MON_IDX_EYE>
-     Flags      <MON_FLAG_HURT_BY_LIGHT>
-     Attack     <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d20
-     Color		<255,100,0,255>
+    Plural		<Floating Eyes>
+    Appear		<1d1>
+    Speed		0.25
+    MoveType	<MON_AI_DONTMOVE>
+    HD			<1d4>
+    AC			20.0
+    Level		1
+    ExpValue	5.0
+    Type		<MON_IDX_EYE>
+    Flags		<MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d20
+    Color		<255,100,0,255>
 }
 
 Monster <Shadow Mastiff>
@@ -409,9 +409,9 @@ Monster <Red Dragon>
     Color		<255,0,0,255>
 }
 
-Monster <Giant Snake>
+Monster <Giant Yendi>
 {
-    Plural		<Giant Snakes>
+    Plural		<Giant Yendi>
     Speed		1.0
     MoveType	<MON_AI_100RANDOMMOVE>
     HD			<2d8>
@@ -458,32 +458,32 @@ Monster <Green Jelly>
 
 Monster <Yellow Mushroom Patch>
 {
-	Plural		<Yellow Mushroom Patches>
-	Speed		1.0
-	MoveType	<MON_AI_DONTMOVE>
-	HD			<1d4>
-	AC			50.0
-	Level		1
-	ExpValue	2.0
-	Type		<MON_IDX_SHROOM>
-    Flags       <MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-	Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,1d1
-    Attack      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d5
-	Color		<255,255,0,255>
+    Plural		<Yellow Mushroom Patches>
+    Speed		1.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD			<1d4>
+    AC			50.0
+    Level		1
+    ExpValue	2.0
+    Type		<MON_IDX_SHROOM>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,1d1
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d5
+    Color		<255,255,0,255>
 }
 
 Monster <Blue Icky Thing>
 {
-	Plural		<Blue Icky Things>
-	Speed		1.0
-	MoveType	<MON_AI_100RANDOMMOVE>
-	HD			<2d8>
-	AC			50.0
-	Level		1
-	ExpValue	4.0
-	Type		<MON_IDX_ICKY>
-	Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
-	Color		<0,0,255,255>
+    Plural		<Blue Icky Things>
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD			<2d8>
+    AC			50.0
+    Level		1
+    ExpValue	4.0
+    Type		<MON_IDX_ICKY>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Color		<0,0,255,255>
 }
 
 Monster <Clear Icky Thing>
@@ -502,15 +502,15 @@ Monster <Clear Icky Thing>
 
 Monster <Opal Icky Thing>
 {
-	Plural		<Opal Icky Things>
-	Speed		1.0
-	MoveType	<MON_AI_100RANDOMMOVE>
-	HD		    <2d8>
-	AC		    20.0
-	Level		1
-	ExpValue	4.0
-	Type		<MON_IDX_ICKY>
-	Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Plural		<Opal Icky Things>
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD			<2d8>
+    AC			20.0
+    Level		1
+    ExpValue	4.0
+    Type		<MON_IDX_ICKY>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
     Color		<<240,240,240,255>;<135,201,190,255>;<236,161,180,255>;<205,235,238,255>;<238,203,179,255>>
 }
 
@@ -529,7 +529,7 @@ Monster <Red Icky Thing>
 }
 
 Monster <Green Icky Thing>
-    {
+{
     Plural		<Green Icky Things>
     Speed		1.0
     MoveType	<MON_AI_100RANDOMMOVE>
@@ -1517,7 +1517,7 @@ Monster <Red Mushroom Patch>
 # =============================================================================
 # Wave 3 — Mid-Game Families (levels 11-30)
 # Orcs, Trolls, Canines (continued), Undead, Insects, Nagas, Humanoids,
-# Jellies, Beetles, Reptiles, Flies, Snakes, Molds, Yeeks, Spiders, Harpies
+# Jellies, Beetles, Reptiles, Flies, Yendi, Molds, Yeeks, Spiders, Harpies
 # =============================================================================
 
 # --- CANINES (C) continued ---
@@ -1801,11 +1801,11 @@ Monster <Giant Fly>
     Color		<0,100,0,255>
 }
 
-# --- SNAKES (S) ---
+# --- YENDI (S) ---
 
-Monster <Poison Snake>
+Monster <Poison Yendi>
 {
-    Plural		<Poison Snakes>
+    Plural		<Poison Yendi>
     Speed		1.2
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <4d8>
@@ -2697,11 +2697,11 @@ Monster <Wraith>
     Color		<100,100,120,255>
 }
 
-# --- SNAKES (S) continued ---
+# --- YENDI (S) continued ---
 
-Monster <King Cobra>
+Monster <King Yendi>
 {
-    Plural		<King Cobras>
+    Plural		<King Yendi>
     Speed		1.5
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <8d8>
@@ -4564,9 +4564,9 @@ Monster <Orc Skeleton>
     Color		<200,200,200,255>
 }
 
-Monster <Snake Skeleton>
+Monster <Yendi Skeleton>
 {
-    Plural		<Snake Skeletons>
+    Plural		<Yendi Skeletons>
     Appear		<1d2>
     Speed		1.2
     MoveType	<MON_AI_SEEKPLAYER>
@@ -5135,9 +5135,9 @@ Monster <Elder Dzur>
     Color		<5,5,5,255>
 }
 
-Monster <Teckla (Dragaeran)>
+Monster <Teckla>
 {
-    Plural		<Teckla (Dragaerans)>
+    Plural		<Teckla>
     Appear		<1d2>
     Speed		1.0
     MoveType	<MON_AI_100RANDOMMOVE>
@@ -5149,6 +5149,108 @@ Monster <Teckla (Dragaeran)>
     Flags		<MON_FLAG_WARM>
     Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d4
     Color		<139,119,101,255>
+}
+
+Monster <Lyorn>
+{
+    Plural		<Lyorn>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          40.0
+    Level       15
+    ExpValue	40.0
+    Type		<MON_IDX_L_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
+    Color		<180,160,120,255>
+}
+
+Monster <Tiassa>
+{
+    Plural		<Tiassa>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          42.0
+    Level       18
+    ExpValue	55.0
+    Type		<MON_IDX_L_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,1d4
+    Color		<0,191,255,255>
+}
+
+Monster <Hawklord>
+{
+    Plural		<Hawklords>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          45.0
+    Level       22
+    ExpValue	70.0
+    Type		<MON_IDX_L_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,1d6
+    Color		<200,200,220,255>
+}
+
+Monster <Yendi>
+{
+    Plural		<Yendi>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          48.0
+    Level       25
+    ExpValue	80.0
+    Type		<MON_IDX_L_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,2d4
+    Color		<0,128,0,255>
+}
+
+Monster <Dzurlord>
+{
+    Plural		<Dzurlords>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          58.0
+    Level       35
+    ExpValue	200.0
+    Type		<MON_IDX_L_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Color		<10,10,10,255>
+}
+
+Monster <Dragonlord>
+{
+    Plural		<Dragonlords>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <12d8>
+    AC          62.0
+    Level       40
+    ExpValue	300.0
+    Type		<MON_IDX_L_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_FIRE>,2d8
+    Color		<200,0,0,255>
 }
 
 Monster <Cat-centaur>
@@ -5167,6 +5269,59 @@ Monster <Cat-centaur>
     Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
     Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
     Color		<180,140,100,255>
+}
+
+Monster <Phoenix Guard>
+{
+    Plural		<Phoenix Guards>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <14d8>
+    AC          70.0
+    Level       50
+    ExpValue	500.0
+    Type		<MON_IDX_L_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,4d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d6
+    Color		<255,140,0,255>
+}
+
+Monster <Guard Captain>
+{
+    Plural		<Guard Captains>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <16d8>
+    AC          78.0
+    Level       60
+    ExpValue	800.0
+    Type		<MON_IDX_L_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,4d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_FIRE>,2d6
+    Color		<255,200,0,255>
+}
+
+Monster <Lavode>
+{
+    Plural		<Lavode>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <18d8>
+    AC          85.0
+    Level       75
+    ExpValue	1500.0
+    Type		<MON_IDX_L_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,5d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,3d8
+    Color		<100,0,200,255>
 }
 
 # --- ANIMATED WEAPONS (|) ---

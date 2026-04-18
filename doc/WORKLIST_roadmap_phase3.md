@@ -146,21 +146,23 @@ These are all defined, in the string table, and already used in Monsters.txt Att
 - [x] **`MON_FLAG_BREATHE`** (0x40) — breath weapon (elemental, large AoE)
 - [x] **`MON_FLAG_TRAMPLE`** (0x20) — ancient dragon trample
 
-#### Monster Attack Definitions
+#### Monster Attack Definitions ✅
+
+All monster definitions complete and in [Resources/Monsters.txt](Resources/Monsters.txt):
 
 | Monster | Attacks | Notes |
 |---------|---------|-------|
-| White Worm Mass | Crawl (HP), Touch (poison, timed) | Poison touch applies timed poison |
-| Red Worm Mass | Crawl (HP), Touch (fire hit) | Fire touch can burn scrolls, potions, leather |
-| Blue Worm Mass | Crawl (HP), Touch (cold hit) | Cold touch can shatter potions |
-| Green Worm Mass | Crawl (HP), Touch (acid hit + CHA lose) | Acid destroys scrolls, potions, leather, metal. "You feel ugly" |
-| Yellow Worm Mass | Crawl (HP), Touch (stat lose DEX) | "You feel clumsy" |
-| Baby Red Dragon | Claw (HP), Bite (HP), Breathe (fire, less often, less damage) | |
-| Red Dragon | Claw ×2 (HP), Bite (HP), Breathe (fire) | |
-| Ancient Red Dragon | Claw ×2 (HP), Bite (HP), Trample (HP), Breathe (fire) | |
-| Green Dragon | Claw ×2 (HP), Bite (HP), Breathe (poison) | |
-| Ghost | Touch (paralyze, timed) | |
-| Greater Demon | Claw ×2 (HP), Bite (HP), Summon (lesser demons) | |
+| White Worm Mass | Crawl (HP), Touch (poison, timed) | ✅ EXISTS |
+| Red Worm Mass | Crawl (HP), Touch (fire hit) | ✅ EXISTS |
+| Blue Worm Mass | Crawl (HP), Touch (cold hit) | ✅ EXISTS |
+| Green Worm Mass | Crawl (HP), Touch (acid hit + CHA lose) | ✅ EXISTS |
+| Yellow Worm Mass | Crawl (HP), Touch (stat lose DEX) | ✅ EXISTS |
+| Baby Red Dragon | Claw (HP), Bite (HP), Breathe (fire) | ✅ EXISTS (Level 15) |
+| Red Dragon | Claw ×2 (HP), Bite (HP), Breathe (fire) | ✅ EXISTS (Level 45) |
+| Ancient Red Dragon | Claw ×2 (HP), Bite (HP), Trample (HP), Breathe (fire) | ✅ EXISTS (Level 70) |
+| Green Dragon | Claw ×2 (HP), Bite (HP), Breathe (poison) | ✅ EXISTS (Level 35) |
+| Ghost | Touch (paralyze, timed) | ✅ EXISTS (Level 15) |
+| Greater Demon | Claw ×2 (HP), Bite (HP), Summon (lesser demons) | ✅ EXISTS (Level 30) |
 
 #### Item Destruction from Monster Attacks
 - [ ] **Fire damage destroys scrolls, potions, leather items** — equipment damage system
@@ -188,11 +190,11 @@ The effect vocabulary (types, modifiers, flags, second bitmask) is complete. Rem
 7. **Multi-effect items in Items.txt** (#77) — Potion of Minor Healing (HP + cure blind + cure confuse) is the canonical use case. The loop already works; just need item data.
 8. **Define ~20 new items in Items.txt** (#77) — Potions, scrolls, rings using existing vocabulary. No code changes needed for most.
 
-### Tier 3 — Monster Combat Depth
+### Tier 3 — Monster Combat Depth ✅ (content complete, code TBD)
 ~~**Prerequisite**: Add 6 new `MON_FLAG_*` constants~~ — Already done (CRAWL, TOUCH, CLAW, BITE, BREATHE, TRAMPLE all in Constants.h and Monsters.txt).
 9. **Elemental monster attacks** (#77) — Fire/cold/acid/poison touch and breath. Requires resist/immune checks in combat code.
 10. **Item destruction from attacks** (#77) — Fire burns scrolls, acid destroys metal. High-impact gameplay consequence.
-11. **New monster definitions in Monsters.txt** (#77) — Baby Red Dragon, Ancient Red Dragon, Ghost, Greater Demon. Attack lines use existing vocabulary.
+11. ~~**New monster definitions in Monsters.txt**~~ (#77) — DONE. All dragons, worm masses, ghosts, demons fully defined with attack lines. See [Resources/Monsters.txt](Resources/Monsters.txt) and [doc/Monster-Design.md](Monster-Design.md).
 
 ### Tier 4 — Advanced Systems (Require Stats, Classes, Spells)
 12. **`EFFECT_FLAG_STAT`** (#77) — Requires stat system (STR/DEX/CON/INT/WIS/CHA) to exist first

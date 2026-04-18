@@ -200,13 +200,14 @@ Monster <Red Worm Mass>
     Appear      <1d3>
     Speed		0.5
     MoveType	<MON_AI_100RANDOMMOVE>
-    HD          <1d8>
+    HD          <2d8>
     AC          40.0
-    Level       1
-    ExpValue	5.0
+    Level       3
+    ExpValue	10.0
     Type		<MON_IDX_WORM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d3
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CRAWL>,<EFFECT_FLAG_FIRE>,1d5
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_STAT>,1d2
     Color		<255,0,0,255>
     Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
 }
@@ -217,13 +218,14 @@ Monster <Blue Worm Mass>
     Appear      <1d3>
     Speed		0.5
     MoveType	<MON_AI_100RANDOMMOVE>
-    HD          <1d8>
+    HD          <2d8>
     AC          40.0
-    Level       1
-    ExpValue	5.0
+    Level       3
+    ExpValue	10.0
     Type		<MON_IDX_WORM>
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d3
     Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CRAWL>,<EFFECT_FLAG_COLD>,1d5
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_STAT>,1d2
     Color		<0,0,255,255>
     Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
 }
@@ -234,13 +236,13 @@ Monster <Yellow Worm Mass>
     Appear      <1d3>
     Speed		0.5
     MoveType	<MON_AI_100RANDOMMOVE>
-    HD          <1d8>
-    AC          40.0
-    Level       1
-    ExpValue	5.0
+    HD          <3d8>
+    AC          42.0
+    Level       5
+    ExpValue	18.0
     Type		<MON_IDX_WORM>
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CRAWL>,<EFFECT_FLAG_POISON>,1d5
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d4
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_STAT>,1d3
     Color		<214,201,17,255>
     Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
 }
@@ -251,20 +253,20 @@ Monster <Green Worm Mass>
     Appear      <1d3>
     Speed		0.5
     MoveType	<MON_AI_100RANDOMMOVE>
-    HD          <1d8>
-    AC          40.0
-    Level       1
-    ExpValue	5.0
+    HD          <3d8>
+    AC          42.0
+    Level       5
+    ExpValue	18.0
     Type		<MON_IDX_WORM>
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CRAWL>,<EFFECT_FLAG_ACID>,1d5
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d4
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_STAT>,1d3
     Color		<0,255,0,255>
     Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
 }
 
-Monster <Huge Spider>
+Monster <Huge Creotha>
 {
-    Plural		<Huge Spiders>
+    Plural		<Huge Creotha>
     Appear      <1d5>
     Speed		1.0
     MoveType	<MON_AI_100RANDOMMOVE>
@@ -286,7 +288,7 @@ Monster <Ancient Multi-hued Dragon>
     MoveType	<MON_AI_SEEKPLAYER>
     HD			<15d8>
     AC          110.0
-    Level		85
+    Level		88
     ExpValue	9000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
     Flags       <MON_FLAG_WARM>
@@ -667,9 +669,9 @@ Monster <Acid Drake>
     Color		<69,69,69,255>
 }
 
-Monster <Venomous Spider>
+Monster <Venomous Creotha>
 {
-    Plural		<Venomous Spiders>
+    Plural		<Venomous Creotha>
     Appear		<1d2>
     Speed		0.8
     MoveType	<MON_AI_SEEKPLAYER>
@@ -701,19 +703,4486 @@ Monster <Cursed Skeleton>
     Color		<192,192,192,255>
 }
 
-# Monster <Troll Berserker>
-# {
-#     Plural		<Troll Berserkers>
-#     Appear		<1d1>
-#     Speed		0.75
-#     MoveType	<MON_AI_SEEKPLAYER>
-#     HD          <7d8>
-#     AC          45.0
-#     Level       8
-#     ExpValue	210.0
-#     Type		<MON_IDX_TROLL>
-#     Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
-#     Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
-#     Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,2d10
-#     Color		<34,139,34,255>
-# }
+Monster <Troll Berserker>
+{
+    Plural		<Troll Berserkers>
+    Appear		<1d1>
+    Speed		0.75
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          55.0
+    Level       25
+    ExpValue	210.0
+    Type		<MON_IDX_TROLL>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,2d10
+    Color		<34,139,34,255>
+}
+
+# =============================================================================
+# Dragon Family — 5 colors x 5 ages
+# Color order (weakest to strongest): White, Black, Green, Blue, Red
+# Age order: Baby, Young, Adult, Mature (above), Ancient (D tile)
+# Babies are tankier than you'd expect. Breath cooldowns: baby=8, young=6, adult/mature/ancient=5
+# TODO: Ancient dragons need MON_FLAG_MAX_DICE (always roll max on HD and breath)
+# =============================================================================
+
+# --- WHITE DRAGONS (Cold) ---
+
+Monster <Baby White Dragon>
+{
+    Plural		<Baby White Dragons>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          55.0
+    Level       8
+    ExpValue	60.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,2d8,8
+    Color		<255,255,255,255>
+}
+
+Monster <Young White Dragon>
+{
+    Plural		<Young White Dragons>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          65.0
+    Level       12
+    ExpValue	150.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,2d8,6
+    Color		<255,255,255,255>
+}
+
+Monster <Adult White Dragon>
+{
+    Plural		<Adult White Dragons>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          75.0
+    Level       18
+    ExpValue	250.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,3d8,5
+    Color		<255,255,255,255>
+}
+
+Monster <Ancient White Dragon>
+{
+    Plural		<Ancient White Dragons>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <15d8>
+    AC          110.0
+    Level       70
+    ExpValue	1500.0
+    Type		<MON_IDX_ANCIENT_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,8d8,5
+    Color		<255,255,255,255>
+}
+
+# --- BLACK DRAGONS (Acid) ---
+
+Monster <Baby Black Dragon>
+{
+    Plural		<Baby Black Dragons>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          55.0
+    Level       15
+    ExpValue	80.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ACID>,2d8,8
+    Color		<0,0,0,255>
+}
+
+Monster <Young Black Dragon>
+{
+    Plural		<Young Black Dragons>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          65.0
+    Level       22
+    ExpValue	180.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ACID>,3d8,6
+    Color		<0,0,0,255>
+}
+
+Monster <Adult Black Dragon>
+{
+    Plural		<Adult Black Dragons>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          75.0
+    Level       28
+    ExpValue	280.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ACID>,3d8,5
+    Color		<0,0,0,255>
+}
+
+Monster <Ancient Black Dragon>
+{
+    Plural		<Ancient Black Dragons>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <16d8>
+    AC          110.0
+    Level       75
+    ExpValue	2000.0
+    Type		<MON_IDX_ANCIENT_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ACID>,9d8,5
+    Color		<0,0,0,255>
+}
+
+# --- GREEN DRAGONS (Poison) ---
+
+Monster <Baby Green Dragon>
+{
+    Plural		<Baby Green Dragons>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          60.0
+    Level       22
+    ExpValue	100.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_POISON>,2d8,8
+    Color		<12,255,0,255>
+}
+
+Monster <Young Green Dragon>
+{
+    Plural		<Young Green Dragons>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          75.0
+    Level       30
+    ExpValue	200.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_POISON>,3d8,6
+    Color		<12,255,0,255>
+}
+
+Monster <Adult Green Dragon>
+{
+    Plural		<Adult Green Dragons>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          85.0
+    Level       38
+    ExpValue	300.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_POISON>,4d8,5
+    Color		<12,255,0,255>
+}
+
+Monster <Ancient Green Dragon>
+{
+    Plural		<Ancient Green Dragons>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <17d8>
+    AC          120.0
+    Level       78
+    ExpValue	2500.0
+    Type		<MON_IDX_ANCIENT_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d10
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_POISON>,10d8,5
+    Color		<12,255,0,255>
+}
+
+# --- BLUE DRAGONS (Electricity) ---
+
+Monster <Baby Blue Dragon>
+{
+    Plural		<Baby Blue Dragons>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          60.0
+    Level       28
+    ExpValue	120.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,3d8,8
+    Color		<13,7,81,255>
+}
+
+Monster <Young Blue Dragon>
+{
+    Plural		<Young Blue Dragons>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          75.0
+    Level       38
+    ExpValue	250.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,4d8,6
+    Color		<13,7,81,255>
+}
+
+Monster <Adult Blue Dragon>
+{
+    Plural		<Adult Blue Dragons>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <9d8>
+    AC          85.0
+    Level       48
+    ExpValue	350.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d10
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,5d8,5
+    Color		<13,7,81,255>
+}
+
+Monster <Ancient Blue Dragon>
+{
+    Plural		<Ancient Blue Dragons>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <18d8>
+    AC          120.0
+    Level       82
+    ExpValue	3000.0
+    Type		<MON_IDX_ANCIENT_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,11d8,5
+    Color		<13,7,81,255>
+}
+
+# --- RED DRAGONS (Fire) ---
+
+Monster <Baby Red Dragon>
+{
+    Plural		<Baby Red Dragons>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          80.0
+    Level       35
+    ExpValue	150.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,3d8,8
+    Color		<255,0,0,255>
+}
+
+Monster <Young Red Dragon>
+{
+    Plural		<Young Red Dragons>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          100.0
+    Level       45
+    ExpValue	300.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,4d8,6
+    Color		<255,0,0,255>
+}
+
+Monster <Adult Red Dragon>
+{
+    Plural		<Adult Red Dragons>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          115.0
+    Level       55
+    ExpValue	400.0
+    Type		<MON_IDX_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,6d8,5
+    Color		<255,0,0,255>
+}
+
+Monster <Ancient Red Dragon>
+{
+    Plural		<Ancient Red Dragons>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <19d8>
+    AC          150.0
+    Level       85
+    ExpValue	4000.0
+    Type		<MON_IDX_ANCIENT_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d10
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,12d8,5
+    Color		<255,0,0,255>
+}
+
+# =============================================================================
+# Wave 2 — Early Game Families (levels 0-10)
+# Rats, Bats, Centipedes, Molds, Lice/Leeches, Yeeks, Kobolds, Canines,
+# Zombies, Oozes, Mushrooms
+# =============================================================================
+
+# --- CANINES (C) ---
+
+Monster <Stray Dog>
+{
+    Plural		<Stray Dogs>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <1d4>
+    AC          10.0
+    Level       0
+    ExpValue	0.0
+    Type		<MON_IDX_DOG>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,0d0
+    Color		<180,130,70,255>
+}
+
+Monster <Jackal>
+{
+    Plural		<Jackals>
+    Appear		<1d3>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <1d8>
+    AC          20.0
+    Level       3
+    ExpValue	6.0
+    Type		<MON_IDX_DOG>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+    Color		<194,178,128,255>
+}
+
+Monster <Wild Dog>
+{
+    Plural		<Wild Dogs>
+    Appear		<1d2>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <2d8>
+    AC          30.0
+    Level       6
+    ExpValue	15.0
+    Type		<MON_IDX_DOG>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Color		<160,120,80,255>
+}
+
+# --- RATS (r) ---
+
+Monster <Teckla>
+{
+    Plural		<Tecklas>
+    Appear		<1d3>
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <1d4>
+    AC          10.0
+    Level       1
+    ExpValue	1.0
+    Type		<MON_IDX_RAT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d2
+    Color		<128,128,128,255>
+}
+
+Monster <Large Teckla>
+{
+    Plural		<Large Tecklas>
+    Appear		<1d2>
+    Speed		1.2
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <2d4>
+    AC          20.0
+    Level       4
+    ExpValue	5.0
+    Type		<MON_IDX_RAT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+    Color		<139,90,43,255>
+}
+
+Monster <Giant Teckla>
+{
+    Plural		<Giant Tecklas>
+    Appear		<1d2>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <2d8>
+    AC          30.0
+    Level       6
+    ExpValue	12.0
+    Type		<MON_IDX_RAT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d4
+    Color		<101,67,33,255>
+}
+
+# --- BATS (b) ---
+
+Monster <Fruit Bat>
+{
+    Plural		<Fruit Bats>
+    Appear		<1d2>
+    Speed		1.5
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <1d4>
+    AC          20.0
+    Level       2
+    ExpValue	2.0
+    Type		<MON_IDX_BAT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d2
+    Color		<139,90,43,255>
+}
+
+# --- CENTIPEDES (c) ---
+
+Monster <White Centipede>
+{
+    Plural		<White Centipedes>
+    Appear		<1d2>
+    Speed		0.8
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <1d4>
+    AC          20.0
+    Level       2
+    ExpValue	2.0
+    Type		<MON_IDX_CENTIPEDE>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d3
+    Color		<255,255,255,255>
+}
+
+Monster <Yellow Centipede>
+{
+    Plural		<Yellow Centipedes>
+    Appear		<1d2>
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <2d4>
+    AC          25.0
+    Level       4
+    ExpValue	6.0
+    Type		<MON_IDX_CENTIPEDE>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d3
+    Color		<214,201,17,255>
+}
+
+Monster <Giant Centipede>
+{
+    Plural		<Giant Centipedes>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          35.0
+    Level       7
+    ExpValue	25.0
+    Type		<MON_IDX_CENTIPEDE>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d6
+    Color		<200,50,0,255>
+}
+
+# --- MOLDS (m) ---
+
+Monster <White Mold>
+{
+    Plural		<White Molds>
+    Speed		1.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <1d4>
+    AC          10.0
+    Level       1
+    ExpValue	2.0
+    Type		<MON_IDX_MOLD>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,1d2
+    Color		<255,255,255,255>
+}
+
+Monster <Brown Mold>
+{
+    Plural		<Brown Molds>
+    Speed		1.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <2d4>
+    AC          15.0
+    Level       4
+    ExpValue	5.0
+    Type		<MON_IDX_MOLD>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,1d3
+    Color		<139,90,43,255>
+}
+
+Monster <Green Mold>
+{
+    Plural		<Green Molds>
+    Speed		1.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <2d8>
+    AC          20.0
+    Level       6
+    ExpValue	10.0
+    Type		<MON_IDX_MOLD>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_ACID>,1d4
+    Color		<0,128,0,255>
+}
+
+# --- LICE / LEECHES (l) ---
+
+Monster <Louse>
+{
+    Plural		<Lice>
+    Appear		<1d5>
+    Speed		0.5
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <1d2>
+    AC          5.0
+    Level       1
+    ExpValue	1.0
+    Type		<MON_IDX_LOUSE>
+    Flags		<MON_FLAG_BREED,MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d1
+    Color		<170,170,170,255>
+}
+
+Monster <Giant Leech>
+{
+    Plural		<Giant Leeches>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <2d8>
+    AC          30.0
+    Level       5
+    ExpValue	15.0
+    Type		<MON_IDX_LEECH>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Color		<0,80,0,255>
+}
+
+# --- YEEKS (y) ---
+
+Monster <Yeek>
+{
+    Plural		<Yeeks>
+    Appear		<1d2>
+    Speed		0.8
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <1d4>
+    AC          15.0
+    Level       2
+    ExpValue	2.0
+    Type		<MON_IDX_YEEK>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
+    Color		<200,150,80,255>
+}
+
+Monster <Blue Yeek>
+{
+    Plural		<Blue Yeeks>
+    Appear		<1d2>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <2d4>
+    AC          20.0
+    Level       5
+    ExpValue	8.0
+    Type		<MON_IDX_YEEK>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Color		<0,0,255,255>
+}
+
+# --- KOBOLDS (k) ---
+
+Monster <Small Kobold>
+{
+    Plural		<Small Kobolds>
+    Appear		<1d2>
+    Speed		0.8
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <1d4>
+    AC          20.0
+    Level       1
+    ExpValue	2.0
+    Type		<MON_IDX_KOBOLD>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d2
+    Color		<150,150,150,255>
+}
+
+Monster <Kobold Shaman>
+{
+    Plural		<Kobold Shamans>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <2d4>
+    AC          35.0
+    Level       5
+    ExpValue	20.0
+    Type		<MON_IDX_KOBOLD>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,1d4
+    Color		<128,0,128,255>
+}
+
+# --- ZOMBIES (z) ---
+
+Monster <Kobold Zombie>
+{
+    Plural		<Kobold Zombies>
+    Appear		<1d2>
+    Speed		0.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <2d4>
+    AC          20.0
+    Level       3
+    ExpValue	5.0
+    Type		<MON_IDX_ZOMBIE>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
+    Color		<128,140,100,255>
+}
+
+Monster <Orc Zombie>
+{
+    Plural		<Orc Zombies>
+    Appear		<1d2>
+    Speed		0.6
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          30.0
+    Level       7
+    ExpValue	20.0
+    Type		<MON_IDX_ZOMBIE>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Color		<100,120,80,255>
+}
+
+# --- OOZES / SLIMES (j) ---
+
+Monster <Grey Ooze>
+{
+    Plural		<Grey Oozes>
+    Speed		1.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <2d8>
+    AC          15.0
+    Level       5
+    ExpValue	10.0
+    Type		<MON_IDX_OOZE>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d4
+    Color		<128,128,128,255>
+}
+
+Monster <Green Slime>
+{
+    Plural		<Green Slimes>
+    Speed		1.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <3d8>
+    AC          20.0
+    Level       8
+    ExpValue	20.0
+    Type		<MON_IDX_OOZE>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_ACID>,1d6
+    Color		<0,200,0,255>
+}
+
+# --- MUSHROOMS (,) ---
+
+Monster <Red Mushroom Patch>
+{
+    Plural		<Red Mushroom Patches>
+    Speed		1.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <1d4>
+    AC          50.0
+    Level       3
+    ExpValue	3.0
+    Type		<MON_IDX_SHROOM>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,1d3
+    Color		<255,0,0,255>
+}
+
+# =============================================================================
+# Wave 3 — Mid-Game Families (levels 11-30)
+# Orcs, Trolls, Canines (continued), Undead, Insects, Nagas, Humanoids,
+# Jellies, Beetles, Reptiles, Flies, Snakes, Molds, Yeeks, Spiders, Harpies
+# =============================================================================
+
+# --- CANINES (C) continued ---
+
+Monster <Lyorn>
+{
+    Plural		<Lyorn>
+    Appear		<1d2>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          35.0
+    Level       11
+    ExpValue	30.0
+    Type		<MON_IDX_DOG>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
+    Color		<180,160,120,255>
+}
+
+Monster <Wolf>
+{
+    Plural		<Wolves>
+    Appear		<1d2>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          45.0
+    Level       14
+    ExpValue	60.0
+    Type		<MON_IDX_DOG>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Color		<128,128,128,255>
+}
+
+Monster <Dire Wolf>
+{
+    Plural		<Dire Wolves>
+    Appear		<1d1>
+    Speed		1.4
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          55.0
+    Level       18
+    ExpValue	120.0
+    Type		<MON_IDX_DOG>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Color		<80,80,80,255>
+}
+
+Monster <Warg>
+{
+    Plural		<Wargs>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          60.0
+    Level       23
+    ExpValue	200.0
+    Type		<MON_IDX_DOG>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Color		<40,40,40,255>
+}
+
+# --- ORCS (o) ---
+
+Monster <Skaven>
+{
+    Plural		<Skaven>
+    Appear		<1d3>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          35.0
+    Level       11
+    ExpValue	25.0
+    Type		<MON_IDX_ORC>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Color		<100,100,80,255>
+}
+
+Monster <Orc>
+{
+    Plural		<Orcs>
+    Appear		<1d2>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          45.0
+    Level       15
+    ExpValue	50.0
+    Type		<MON_IDX_ORC>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Color		<80,120,40,255>
+}
+
+Monster <Uruk-hai>
+{
+    Plural		<Uruk-hai>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          55.0
+    Level       20
+    ExpValue	120.0
+    Type		<MON_IDX_ORC>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Color		<50,80,30,255>
+}
+
+Monster <Orc Shaman>
+{
+    Plural		<Orc Shamans>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          40.0
+    Level       25
+    ExpValue	160.0
+    Type		<MON_IDX_ORC>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,2d6
+    Color		<80,40,80,255>
+}
+
+# --- TROLLS (T) ---
+
+Monster <Hill Troll>
+{
+    Plural		<Hill Trolls>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          50.0
+    Level       16
+    ExpValue	100.0
+    Type		<MON_IDX_TROLL>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d8
+    Color		<34,139,34,255>
+}
+
+Monster <Stone Troll>
+{
+    Plural		<Stone Trolls>
+    Appear		<1d1>
+    Speed		0.7
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <9d8>
+    AC          70.0
+    Level       23
+    ExpValue	180.0
+    Type		<MON_IDX_TROLL>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,2d8
+    Color		<128,128,128,255>
+}
+
+Monster <War Troll>
+{
+    Plural		<War Trolls>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <11d8>
+    AC          80.0
+    Level       30
+    ExpValue	300.0
+    Type		<MON_IDX_TROLL>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Color		<60,60,60,255>
+}
+
+# --- INSECTS (I) ---
+
+Monster <Giant Bee>
+{
+    Plural		<Giant Bees>
+    Appear		<1d3>
+    Speed		1.5
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <3d8>
+    AC          40.0
+    Level       13
+    ExpValue	40.0
+    Type		<MON_IDX_INSECT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d4
+    Color		<255,200,0,255>
+}
+
+Monster <Giant Scorpion>
+{
+    Plural		<Giant Scorpions>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          60.0
+    Level       22
+    ExpValue	140.0
+    Type		<MON_IDX_INSECT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,2d6
+    Color		<100,60,20,255>
+}
+
+# --- GHOULS / GHOSTS (G) ---
+
+Monster <Ghoul>
+{
+    Plural		<Ghouls>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          40.0
+    Level       13
+    ExpValue	50.0
+    Type		<MON_IDX_GHOUL>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d10
+    Color		<150,150,170,255>
+}
+
+Monster <Ghast>
+{
+    Plural		<Ghasts>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          50.0
+    Level       21
+    ExpValue	120.0
+    Type		<MON_IDX_GHOUL>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d15
+    Color		<120,120,150,255>
+}
+
+# --- FLIES (f) ---
+
+Monster <Giant Fly>
+{
+    Plural		<Giant Flies>
+    Appear		<1d3>
+    Speed		2.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <3d8>
+    AC          35.0
+    Level       15
+    ExpValue	30.0
+    Type		<MON_IDX_FLY>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Color		<0,100,0,255>
+}
+
+# --- SNAKES (S) ---
+
+Monster <Poison Snake>
+{
+    Plural		<Poison Snakes>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          40.0
+    Level       16
+    ExpValue	60.0
+    Type		<MON_IDX_SNAKE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,2d4
+    Color		<0,180,0,255>
+}
+
+# --- OGRES (O) ---
+
+Monster <Ogre>
+{
+    Plural		<Ogres>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          50.0
+    Level       17
+    ExpValue	80.0
+    Type		<MON_IDX_OGRE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Color		<139,119,101,255>
+}
+
+# --- JELLIES (J) continued ---
+
+Monster <Blue Jelly>
+{
+    Plural		<Blue Jellies>
+    Speed		1.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <4d5>
+    AC          20.0
+    Level       17
+    ExpValue	15.0
+    Type		<MON_IDX_JELLY>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d3
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,2d4
+    Color		<0,0,255,255>
+}
+
+Monster <Ochre Jelly>
+{
+    Plural		<Ochre Jellies>
+    Speed		1.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <6d5>
+    AC          25.0
+    Level       24
+    ExpValue	40.0
+    Type		<MON_IDX_JELLY>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_ACID>,2d6
+    Color		<204,153,0,255>
+}
+
+# --- MOLDS (m) continued ---
+
+Monster <Black Mold>
+{
+    Plural		<Black Molds>
+    Speed		1.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <4d8>
+    AC          25.0
+    Level       19
+    ExpValue	30.0
+    Type		<MON_IDX_MOLD>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_POISON>,2d6
+    Color		<0,0,0,255>
+}
+
+# --- YEEKS (y) continued ---
+
+Monster <Master Yeek>
+{
+    Plural		<Master Yeeks>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          35.0
+    Level       19
+    ExpValue	50.0
+    Type		<MON_IDX_YEEK>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Color		<255,200,0,255>
+}
+
+# --- ZOMBIES (z) continued ---
+
+Monster <Human Zombie>
+{
+    Plural		<Human Zombies>
+    Appear		<1d1>
+    Speed		0.6
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          35.0
+    Level       20
+    ExpValue	60.0
+    Type		<MON_IDX_ZOMBIE>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Color		<140,130,100,255>
+}
+
+Monster <Mummified Orc>
+{
+    Plural		<Mummified Orcs>
+    Appear		<1d1>
+    Speed		0.7
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          50.0
+    Level       27
+    ExpValue	100.0
+    Type		<MON_IDX_ZOMBIE>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_AFRAID>,1d10
+    Color		<180,160,100,255>
+}
+
+# --- SPIDERS (x) continued ---
+
+Monster <Cave Creotha>
+{
+    Plural		<Cave Creotha>
+    Appear		<1d3>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          45.0
+    Level       21
+    ExpValue	80.0
+    Type		<MON_IDX_SPIDER>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d8
+    Color		<80,60,40,255>
+}
+
+# --- NAGAS (n) ---
+
+Monster <Naga>
+{
+    Plural		<Nagas>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          55.0
+    Level       22
+    ExpValue	100.0
+    Type		<MON_IDX_NAGA>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d8
+    Color		<0,180,100,255>
+}
+
+Monster <Water Naga>
+{
+    Plural		<Water Nagas>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          65.0
+    Level       27
+    ExpValue	180.0
+    Type		<MON_IDX_NAGA>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,2d8,6
+    Color		<0,100,200,255>
+}
+
+# --- HARPIES (H) continued ---
+
+Monster <Green Harpy>
+{
+    Plural		<Green Harpies>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          65.0
+    Level       24
+    ExpValue	140.0
+    Type		<MON_IDX_HARPY>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Color		<12,255,0,255>
+}
+
+# --- BEETLES (K) ---
+
+Monster <Giant Beetle>
+{
+    Plural		<Giant Beetles>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          70.0
+    Level       26
+    ExpValue	120.0
+    Type		<MON_IDX_BEETLE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Color		<60,30,0,255>
+}
+
+# --- REPTILES (R) ---
+
+Monster <Lizardman>
+{
+    Plural		<Lizardmen>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          55.0
+    Level       26
+    ExpValue	100.0
+    Type		<MON_IDX_REPTILE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d8
+    Color		<0,120,60,255>
+}
+
+# --- HUMANOIDS (h) ---
+
+Monster <Dark Elf>
+{
+    Plural		<Dark Elves>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          60.0
+    Level       28
+    ExpValue	200.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,2d6
+    Color		<80,0,120,255>
+}
+
+# --- WIGHTS / WRAITHS (W) ---
+
+Monster <Wight>
+{
+    Plural		<Wights>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          55.0
+    Level       29
+    ExpValue	200.0
+    Type		<MON_IDX_WIGHT>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_XP>,1d4
+    Color		<160,160,180,255>
+}
+
+# --- OOZES (j) continued ---
+
+Monster <Black Pudding>
+{
+    Plural		<Black Puddings>
+    Speed		1.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <8d8>
+    AC          30.0
+    Level       29
+    ExpValue	150.0
+    Type		<MON_IDX_OOZE>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_ACID>,2d8
+    Color		<20,20,20,255>
+}
+
+# =============================================================================
+# Wave 4 — Late-Game Families (levels 31-65)
+# Giants, Vampires, Elementals, Golems, Mammals, Birds, Persons,
+# Major Demons, Liches, Xorns, plus continuing progressions
+# =============================================================================
+
+# --- GIANTS (P) ---
+
+Monster <Hill Giant>
+{
+    Plural		<Hill Giants>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          65.0
+    Level       32
+    ExpValue	250.0
+    Type		<MON_IDX_GIANT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d6
+    Color		<139,119,101,255>
+}
+
+Monster <Stone Giant>
+{
+    Plural		<Stone Giants>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <13d8>
+    AC          80.0
+    Level       38
+    ExpValue	400.0
+    Type		<MON_IDX_GIANT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,2d8
+    Color		<128,128,128,255>
+}
+
+Monster <Frost Giant>
+{
+    Plural		<Frost Giants>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <14d8>
+    AC          85.0
+    Level       44
+    ExpValue	500.0
+    Type		<MON_IDX_GIANT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,3d8,6
+    Color		<150,200,255,255>
+}
+
+Monster <Fire Giant>
+{
+    Plural		<Fire Giants>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <15d8>
+    AC          90.0
+    Level       50
+    ExpValue	600.0
+    Type		<MON_IDX_GIANT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,4d8,6
+    Color		<255,80,0,255>
+}
+
+Monster <Cloud Giant>
+{
+    Plural		<Cloud Giants>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <16d8>
+    AC          100.0
+    Level       56
+    ExpValue	800.0
+    Type		<MON_IDX_GIANT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,4d8,5
+    Color		<200,200,255,255>
+}
+
+Monster <Storm Giant>
+{
+    Plural		<Storm Giants>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <18d8>
+    AC          110.0
+    Level       62
+    ExpValue	1200.0
+    Type		<MON_IDX_GIANT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d10
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d10
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,6d8,5
+    Color		<100,100,200,255>
+}
+
+# --- VAMPIRES (V) ---
+
+Monster <Vampire>
+{
+    Plural		<Vampires>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          70.0
+    Level       35
+    ExpValue	350.0
+    Type		<MON_IDX_VAMPIRE>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_XP>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Color		<150,0,0,255>
+}
+
+Monster <Greater Vampire>
+{
+    Plural		<Greater Vampires>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <13d8>
+    AC          85.0
+    Level       48
+    ExpValue	600.0
+    Type		<MON_IDX_VAMPIRE>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_XP>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Color		<120,0,0,255>
+}
+
+Monster <Master Vampire>
+{
+    Plural		<Master Vampires>
+    Appear		<1d1>
+    Speed		1.4
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <16d8>
+    AC          100.0
+    Level       60
+    ExpValue	1000.0
+    Type		<MON_IDX_VAMPIRE>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_XP>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d15
+    Color		<80,0,0,255>
+}
+
+# --- ELEMENTALS (E) ---
+
+Monster <Fire Elemental>
+{
+    Plural		<Fire Elementals>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          70.0
+    Level       36
+    ExpValue	300.0
+    Type		<MON_IDX_ELEMENTAL>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_FIRE>,3d8
+    Color		<255,100,0,255>
+}
+
+Monster <Ice Elemental>
+{
+    Plural		<Ice Elementals>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          75.0
+    Level       40
+    ExpValue	350.0
+    Type		<MON_IDX_ELEMENTAL>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,3d8
+    Color		<150,200,255,255>
+}
+
+Monster <Lightning Elemental>
+{
+    Plural		<Lightning Elementals>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <11d8>
+    AC          70.0
+    Level       46
+    ExpValue	400.0
+    Type		<MON_IDX_ELEMENTAL>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_ELECTRICITY>,4d8
+    Color		<255,255,100,255>
+}
+
+Monster <Earth Elemental>
+{
+    Plural		<Earth Elementals>
+    Appear		<1d1>
+    Speed		0.7
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <14d8>
+    AC          100.0
+    Level       52
+    ExpValue	500.0
+    Type		<MON_IDX_ELEMENTAL>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Color		<120,80,40,255>
+}
+
+Monster <Air Elemental>
+{
+    Plural		<Air Elementals>
+    Appear		<1d1>
+    Speed		2.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <12d8>
+    AC          60.0
+    Level       58
+    ExpValue	600.0
+    Type		<MON_IDX_ELEMENTAL>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d8
+    Color		<200,220,255,128>
+}
+
+# --- GOLEMS (g) ---
+
+Monster <Clay Golem>
+{
+    Plural		<Clay Golems>
+    Appear		<1d1>
+    Speed		0.6
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          70.0
+    Level       33
+    ExpValue	250.0
+    Type		<MON_IDX_GOLEM>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Color		<180,140,100,255>
+}
+
+Monster <Stone Golem>
+{
+    Plural		<Stone Golems>
+    Appear		<1d1>
+    Speed		0.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <14d8>
+    AC          100.0
+    Level       42
+    ExpValue	450.0
+    Type		<MON_IDX_GOLEM>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Color		<128,128,128,255>
+}
+
+Monster <Iron Golem>
+{
+    Plural		<Iron Golems>
+    Appear		<1d1>
+    Speed		0.6
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <18d8>
+    AC          130.0
+    Level       55
+    ExpValue	800.0
+    Type		<MON_IDX_GOLEM>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,5d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,3d10
+    Color		<160,160,180,255>
+}
+
+# --- MAMMALS (M) ---
+
+Monster <Cave Bear>
+{
+    Plural		<Cave Bears>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          40.0
+    Level       18
+    ExpValue	60.0
+    Type		<MON_IDX_MAMMAL>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Color		<100,60,20,255>
+}
+
+Monster <Young Dzur>
+{
+    Plural		<Young Dzur>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          36.0
+    Level       20
+    ExpValue	55.0
+    Type		<MON_IDX_CAT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Color		<20,20,20,255>
+}
+
+Monster <Tsalmoth>
+{
+    Plural		<Tsalmoth>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          50.0
+    Level       28
+    ExpValue	120.0
+    Type		<MON_IDX_MAMMAL>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Color		<139,90,43,255>
+}
+
+# --- BIRDS (F) ---
+
+Monster <Hawk>
+{
+    Plural		<Hawks>
+    Appear		<1d1>
+    Speed		2.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <2d8>
+    AC          30.0
+    Level       8
+    ExpValue	15.0
+    Type		<MON_IDX_BIRD>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Color		<139,90,43,255>
+}
+
+Monster <Giant Eagle>
+{
+    Plural		<Giant Eagles>
+    Appear		<1d1>
+    Speed		2.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          45.0
+    Level       25
+    ExpValue	100.0
+    Type		<MON_IDX_BIRD>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Color		<180,140,60,255>
+}
+
+# --- PERSONS (p) ---
+
+Monster <Rogue>
+{
+    Plural		<Rogues>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          60.0
+    Level       33
+    ExpValue	200.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Color		<40,40,40,255>
+}
+
+Monster <Mage>
+{
+    Plural		<Mages>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <9d8>
+    AC          50.0
+    Level       40
+    ExpValue	350.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,3d8
+    Color		<0,0,180,255>
+}
+
+Monster <Priest>
+{
+    Plural		<Priests>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          65.0
+    Level       47
+    ExpValue	450.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,2d8
+    Color		<255,255,200,255>
+}
+
+# --- MINOR DEMONS (u) ---
+
+Monster <Lesser Demon>
+{
+    Plural		<Lesser Demons>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <9d8>
+    AC          65.0
+    Level       36
+    ExpValue	300.0
+    Type		<MON_IDX_MINOR_DEMON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d6
+    Color		<200,50,50,255>
+}
+
+Monster <Imp>
+{
+    Plural		<Imps>
+    Appear		<1d2>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          50.0
+    Level       43
+    ExpValue	200.0
+    Type		<MON_IDX_MINOR_DEMON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,1d8
+    Color		<255,80,0,255>
+}
+
+# --- MAJOR DEMONS (U) ---
+
+Monster <Greater Demon>
+{
+    Plural		<Greater Demons>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <14d8>
+    AC          90.0
+    Level       52
+    ExpValue	700.0
+    Type		<MON_IDX_MAJOR_DEMON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,3d8
+    Color		<180,0,0,255>
+}
+
+# --- LICHES (L) ---
+
+Monster <Lich>
+{
+    Plural		<Liches>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <12d8>
+    AC          80.0
+    Level       50
+    ExpValue	600.0
+    Type		<MON_IDX_LICH>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,3d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d15
+    Color		<200,200,220,255>
+}
+
+Monster <Greater Lich>
+{
+    Plural		<Greater Liches>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <16d8>
+    AC          100.0
+    Level       64
+    ExpValue	1200.0
+    Type		<MON_IDX_LICH>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,4d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d20
+    Color		<150,150,200,255>
+}
+
+# --- XORNS (X) ---
+
+Monster <Xorn>
+{
+    Plural		<Xorns>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          90.0
+    Level       41
+    ExpValue	350.0
+    Type		<MON_IDX_XORN>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Color		<160,140,100,255>
+}
+
+# --- WRAITHS (W) continued ---
+
+Monster <Wraith>
+{
+    Plural		<Wraiths>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <12d8>
+    AC          70.0
+    Level       42
+    ExpValue	450.0
+    Type		<MON_IDX_WRAITH>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_XP>,1d6
+    Color		<100,100,120,255>
+}
+
+# --- SNAKES (S) continued ---
+
+Monster <King Cobra>
+{
+    Plural		<King Cobras>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          60.0
+    Level       37
+    ExpValue	250.0
+    Type		<MON_IDX_SNAKE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,3d6
+    Color		<0,120,0,255>
+}
+
+# --- TROLLS (T) continued ---
+
+Monster <Troll Shaman>
+{
+    Plural		<Troll Shamans>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <12d8>
+    AC          70.0
+    Level       41
+    ExpValue	400.0
+    Type		<MON_IDX_TROLL>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,3d8
+    Color		<34,100,34,255>
+}
+
+# --- ZOMBIES (z) continued ---
+
+Monster <Troll Zombie>
+{
+    Plural		<Troll Zombies>
+    Appear		<1d1>
+    Speed		0.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          55.0
+    Level       36
+    ExpValue	250.0
+    Type		<MON_IDX_ZOMBIE>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_REGENERATE>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Color		<80,100,60,255>
+}
+
+Monster <Zombie Dragon>
+{
+    Plural		<Zombie Dragons>
+    Appear		<1d1>
+    Speed		0.7
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <14d8>
+    AC          80.0
+    Level       58
+    ExpValue	800.0
+    Type		<MON_IDX_ZOMBIE>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d8
+    Color		<100,110,80,255>
+}
+
+# --- HARPIES (H) continued ---
+
+Monster <Black Harpy>
+{
+    Plural		<Black Harpies>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <9d8>
+    AC          75.0
+    Level       38
+    ExpValue	250.0
+    Type		<MON_IDX_HARPY>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Color		<0,0,0,255>
+}
+
+# --- OGRES (O) continued ---
+
+Monster <Ogre Mage>
+{
+    Plural		<Ogre Mages>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          65.0
+    Level       37
+    ExpValue	350.0
+    Type		<MON_IDX_OGRE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,3d6
+    Color		<100,80,140,255>
+}
+
+# --- BEETLES (K) continued ---
+
+Monster <Death Watch Beetle>
+{
+    Plural		<Death Watch Beetles>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <12d8>
+    AC          90.0
+    Level       44
+    ExpValue	450.0
+    Type		<MON_IDX_BEETLE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,2d10
+    Color		<40,20,0,255>
+}
+
+# --- NAGAS (n) continued ---
+
+Monster <Spirit Naga>
+{
+    Plural		<Spirit Nagas>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <12d8>
+    AC          80.0
+    Level       45
+    ExpValue	500.0
+    Type		<MON_IDX_NAGA>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_POISON>,3d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d10
+    Color		<150,200,255,128>
+}
+
+# --- GHOSTS (G) continued ---
+
+Monster <Ghost>
+{
+    Plural		<Ghosts>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          60.0
+    Level       39
+    ExpValue	300.0
+    Type		<MON_IDX_GHOST>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,2d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_AFRAID>,1d15
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_XP>,1d6
+    Color		<200,200,220,128>
+}
+
+# --- SPIDERS (x) continued ---
+
+Monster <Giant Creotha>
+{
+    Plural		<Giant Creotha>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          65.0
+    Level       38
+    ExpValue	300.0
+    Type		<MON_IDX_SPIDER>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,2d8
+    Color		<0,0,0,255>
+}
+
+# --- REPTILES (R) continued ---
+
+Monster <Basilisk>
+{
+    Plural		<Basilisks>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <11d8>
+    AC          80.0
+    Level       47
+    ExpValue	500.0
+    Type		<MON_IDX_REPTILE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d20
+    Color		<0,100,40,255>
+}
+
+# --- YETIS (Y) ---
+
+Monster <Yeti>
+{
+    Plural		<Yetis>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          60.0
+    Level       34
+    ExpValue	200.0
+    Type		<MON_IDX_YETI>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,2d8,8
+    Color		<240,240,255,255>
+}
+
+# --- OOZES (j) continued ---
+
+Monster <Ochre Ooze>
+{
+    Plural		<Ochre Oozes>
+    Speed		0.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          30.0
+    Level       35
+    ExpValue	200.0
+    Type		<MON_IDX_OOZE>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_ACID>,3d6
+    Color		<204,153,0,255>
+}
+
+# =============================================================================
+# Wave 5 — Deep / Endgame Families (levels 66-100)
+# Ancient Dragons already placed at 70-88. This fills the rest:
+# Balrog, Titans, Demon Lords, Vampire/Lich Emperors, Hydras,
+# Mind Flayer, Purple Worm, Animated Weapons, Spectres, etc.
+# =============================================================================
+
+# --- BALROG (B) --- THE BOSS ---
+
+Monster <Balrog>
+{
+    Plural		<Balrogs>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <25d8>
+    AC          160.0
+    Level       98
+    ExpValue	15000.0
+    Type		<MON_IDX_BALROG>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d10
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d10
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,5d10
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,15d8,5
+    Color		<<255,60,0,255>;<255,200,0,255>>
+}
+
+# --- VAMPIRES (V) continued ---
+
+Monster <Lordly Vampire>
+{
+    Plural		<Lordly Vampires>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <18d8>
+    AC          115.0
+    Level       72
+    ExpValue	1800.0
+    Type		<MON_IDX_VAMPIRE>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_XP>,4d10
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d20
+    Color		<100,0,0,255>
+}
+
+Monster <Emperor Vampire>
+{
+    Plural		<Emperor Vampires>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <22d8>
+    AC          140.0
+    Level       90
+    ExpValue	5000.0
+    Type		<MON_IDX_VAMPIRE>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_XP>,5d10
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d25
+    Color		<60,0,0,255>
+}
+
+# --- LICHES (L) continued ---
+
+Monster <Master Lich>
+{
+    Plural		<Master Liches>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <20d8>
+    AC          120.0
+    Level       76
+    ExpValue	2500.0
+    Type		<MON_IDX_LICH>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,5d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,5d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d25
+    Color		<100,100,180,255>
+}
+
+Monster <Emperor Lich>
+{
+    Plural		<Emperor Liches>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <24d8>
+    AC          150.0
+    Level       92
+    ExpValue	8000.0
+    Type		<MON_IDX_LICH>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,6d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,6d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,6d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d30
+    Color		<60,60,160,255>
+}
+
+# --- MAJOR DEMONS (U) continued ---
+
+Monster <Demon Lord>
+{
+    Plural		<Demon Lords>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <18d8>
+    AC          110.0
+    Level       70
+    ExpValue	2000.0
+    Type		<MON_IDX_MAJOR_DEMON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,6d8,5
+    Color		<140,0,0,255>
+}
+
+Monster <Greater Demon Lord>
+{
+    Plural		<Greater Demon Lords>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <22d8>
+    AC          140.0
+    Level       86
+    ExpValue	6000.0
+    Type		<MON_IDX_MAJOR_DEMON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,5d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,5d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,5d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,10d8,5
+    Color		<100,0,0,255>
+}
+
+# --- GIANTS (P) continued ---
+
+Monster <Ettin>
+{
+    Plural		<Ettins>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <16d8>
+    AC          100.0
+    Level       66
+    ExpValue	1200.0
+    Type		<MON_IDX_GIANT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Color		<120,100,80,255>
+}
+
+Monster <Titan>
+{
+    Plural		<Titans>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <22d8>
+    AC          140.0
+    Level       84
+    ExpValue	5000.0
+    Type		<MON_IDX_GIANT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,5d10
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,5d10
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,8d8,5
+    Color		<255,215,0,255>
+}
+
+# --- WRAITHS (W) continued ---
+
+Monster <Spectre>
+{
+    Plural		<Spectres>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <16d8>
+    AC          90.0
+    Level       68
+    ExpValue	1500.0
+    Type		<MON_IDX_WRAITH>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,4d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d20
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_XP>,2d6
+    Color		<140,140,180,128>
+}
+
+Monster <Emperor Wraith>
+{
+    Plural		<Emperor Wraiths>
+    Appear		<1d1>
+    Speed		1.4
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <20d8>
+    AC          120.0
+    Level       88
+    ExpValue	4000.0
+    Type		<MON_IDX_WRAITH>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,5d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,5d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d25
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_XP>,2d8
+    Color		<80,80,140,128>
+}
+
+# --- HYDRAS (d — small, D — big) ---
+
+Monster <5-Headed Hydra>
+{
+    Plural		<5-Headed Hydras>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <12d8>
+    AC          75.0
+    Level       40
+    ExpValue	400.0
+    Type		<MON_IDX_HYDRA>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Color		<0,140,0,255>
+}
+
+Monster <7-Headed Hydra>
+{
+    Plural		<7-Headed Hydras>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <16d8>
+    AC          90.0
+    Level       56
+    ExpValue	800.0
+    Type		<MON_IDX_HYDRA>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Color		<0,120,60,255>
+}
+
+Monster <11-Headed Hydra>
+{
+    Plural		<11-Headed Hydras>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <22d8>
+    AC          120.0
+    Level       78
+    ExpValue	3000.0
+    Type		<MON_IDX_HYDRA>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Color		<0,80,40,255>
+}
+
+# --- HUMANOIDS (h) continued ---
+
+Monster <Mind Flayer>
+{
+    Plural		<Mind Flayers>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <16d8>
+    AC          90.0
+    Level       72
+    ExpValue	2000.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d20
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,1d15
+    Color		<120,0,160,255>
+}
+
+# --- PURPLE WORM (w) ---
+
+Monster <Purple Worm>
+{
+    Plural		<Purple Worms>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <20d8>
+    AC          100.0
+    Level       80
+    ExpValue	3000.0
+    Type		<MON_IDX_WORM>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,5d10
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,4d8
+    Color		<128,0,255,255>
+}
+
+# --- ANIMATED WEAPONS (|) ---
+
+Monster <Animated Sword>
+{
+    Plural		<Animated Swords>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          70.0
+    Level       66
+    ExpValue	400.0
+    Type		<MON_IDX_ANIMATED_WEAPON>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d6
+    Color		<192,192,192,255>
+}
+
+Monster <Animated Spear>
+{
+    Plural		<Animated Spears>
+    Appear		<1d1>
+    Speed		1.4
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <9d8>
+    AC          65.0
+    Level       70
+    ExpValue	500.0
+    Type		<MON_IDX_ANIMATED_WEAPON>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,5d6
+    Color		<180,140,100,255>
+}
+
+Monster <Animated Axe>
+{
+    Plural		<Animated Axes>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <11d8>
+    AC          80.0
+    Level       76
+    ExpValue	700.0
+    Type		<MON_IDX_ANIMATED_WEAPON>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,5d8
+    Color		<160,160,170,255>
+}
+
+# --- TROLLS (T) endgame ---
+
+Monster <Olog-hai>
+{
+    Plural		<Olog-hai>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <16d8>
+    AC          100.0
+    Level       68
+    ExpValue	1500.0
+    Type		<MON_IDX_TROLL>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Color		<30,30,30,255>
+}
+
+# --- SPIDERS (x) endgame ---
+
+Monster <Shelob>
+{
+    Plural		<Shelobs>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <18d8>
+    AC          110.0
+    Level       80
+    ExpValue	3500.0
+    Type		<MON_IDX_SPIDER>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,5d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,4d8
+    Color		<20,20,20,255>
+}
+
+# --- GHOSTS (G) endgame ---
+
+Monster <Phantom>
+{
+    Plural		<Phantoms>
+    Appear		<1d1>
+    Speed		1.4
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <14d8>
+    AC          80.0
+    Level       73
+    ExpValue	1500.0
+    Type		<MON_IDX_GHOST>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,4d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_AFRAID>,1d20
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d15
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_XP>,2d6
+    Color		<180,180,220,64>
+}
+
+# --- OGRES (O) endgame ---
+
+Monster <Ogre Chieftain>
+{
+    Plural		<Ogre Chieftains>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <14d8>
+    AC          85.0
+    Level       66
+    ExpValue	1000.0
+    Type		<MON_IDX_OGRE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Color		<120,100,80,255>
+}
+
+# --- ORCS (o) mid-game ---
+
+Monster <Orc Captain>
+{
+    Plural		<Orc Captains>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          55.0
+    Level       35
+    ExpValue	200.0
+    Type		<MON_IDX_ORC>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Color		<40,60,20,255>
+}
+
+# --- INSECTS (I) endgame ---
+
+Monster <Giant Wasp>
+{
+    Plural		<Giant Wasps>
+    Appear		<1d2>
+    Speed		2.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          70.0
+    Level       68
+    ExpValue	800.0
+    Type		<MON_IDX_INSECT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,3d8
+    Color		<200,200,0,255>
+}
+
+# --- ELEMENTALS (E) endgame ---
+
+Monster <Elemental Lord>
+{
+    Plural		<Elemental Lords>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <20d8>
+    AC          130.0
+    Level       82
+    ExpValue	4000.0
+    Type		<MON_IDX_ELEMENTAL>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_FIRE>,5d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,5d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_ELECTRICITY>,5d8
+    Color		<255,200,100,255>
+}
+
+# --- NAGAS (n) endgame ---
+
+Monster <Guardian Naga>
+{
+    Plural		<Guardian Nagas>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <16d8>
+    AC          100.0
+    Level       74
+    ExpValue	2000.0
+    Type		<MON_IDX_NAGA>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_POISON>,4d8,5
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d15
+    Color		<0,200,150,255>
+}
+
+# --- PERSONS (p) endgame ---
+
+Monster <Archmage>
+{
+    Plural		<Archmages>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <16d8>
+    AC          90.0
+    Level       72
+    ExpValue	2000.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,5d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,5d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_ELECTRICITY>,5d8
+    Color		<0,0,120,255>
+}
+
+# --- GELATINOUS CUBE (J) endgame ---
+
+Monster <Gelatinous Cube>
+{
+    Plural		<Gelatinous Cubes>
+    Speed		0.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <15d8>
+    AC          60.0
+    Level       70
+    ExpValue	1200.0
+    Type		<MON_IDX_JELLY>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_ACID>,4d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d15
+    Color		<200,255,200,64>
+}
+
+# =============================================================================
+# Wave 6 — Family Spread, Color Variants, New Types
+# Jellies, Centipedes, Humanoids, Orcs/Goblins, Persons, Mammals, Birds
+# =============================================================================
+
+# --- JELLIES (J) — color spread ---
+
+Monster <White Jelly>
+{
+    Plural		<White Jellies>
+    Speed		0.3
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <2d8>
+    AC          15.0
+    Level       5
+    ExpValue	8.0
+    Type		<MON_IDX_JELLY>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,1d4
+    Color		<220,220,255,255>
+}
+
+Monster <Black Jelly>
+{
+    Plural		<Black Jellies>
+    Speed		0.3
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <6d8>
+    AC          30.0
+    Level       12
+    ExpValue	40.0
+    Type		<MON_IDX_JELLY>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_ACID>,2d6
+    Color		<20,20,20,255>
+}
+
+Monster <Grape Jelly>
+{
+    Plural		<Grape Jellies>
+    Speed		0.3
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <10d8>
+    AC          50.0
+    Level       30
+    ExpValue	200.0
+    Type		<MON_IDX_JELLY>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_XP>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
+    Color		<128,0,255,255>
+}
+
+Monster <Yellow Jelly>
+{
+    Plural		<Yellow Jellies>
+    Speed		0.3
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <12d8>
+    AC          55.0
+    Level       35
+    ExpValue	250.0
+    Type		<MON_IDX_JELLY>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_ELECTRICITY>,3d8
+    Color		<255,255,0,255>
+}
+
+# --- CENTIPEDES (c) — color spread ---
+
+Monster <Red Centipede>
+{
+    Plural		<Red Centipedes>
+    Appear		<1d2>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <2d8>
+    AC          25.0
+    Level       6
+    ExpValue	10.0
+    Type		<MON_IDX_CENTIPEDE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+    Color		<255,0,0,255>
+}
+
+Monster <Blue Centipede>
+{
+    Plural		<Blue Centipedes>
+    Appear		<1d2>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          30.0
+    Level       9
+    ExpValue	15.0
+    Type		<MON_IDX_CENTIPEDE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Color		<0,100,255,255>
+}
+
+Monster <Green Centipede>
+{
+    Plural		<Green Centipedes>
+    Appear		<1d2>
+    Speed		1.1
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          35.0
+    Level       13
+    ExpValue	30.0
+    Type		<MON_IDX_CENTIPEDE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d8
+    Color		<0,200,0,255>
+}
+
+Monster <Cyan Centipede>
+{
+    Plural		<Cyan Centipedes>
+    Appear		<1d2>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          40.0
+    Level       18
+    ExpValue	50.0
+    Type		<MON_IDX_CENTIPEDE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Color		<0,255,255,255>
+}
+
+Monster <Magenta Centipede>
+{
+    Plural		<Magenta Centipedes>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          48.0
+    Level       24
+    ExpValue	80.0
+    Type		<MON_IDX_CENTIPEDE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d8
+    Color		<255,0,255,255>
+}
+
+# --- HUMANOIDS (h) — full spread ---
+
+Monster <Hobgoblin>
+{
+    Plural		<Hobgoblins>
+    Appear		<1d2>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          30.0
+    Level       8
+    ExpValue	15.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Color		<140,100,60,255>
+}
+
+Monster <Gnoll>
+{
+    Plural		<Gnolls>
+    Appear		<1d2>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          38.0
+    Level       12
+    ExpValue	30.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+    Color		<160,120,60,255>
+}
+
+Monster <Dark Elven Warrior>
+{
+    Plural		<Dark Elven Warriors>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          45.0
+    Level       15
+    ExpValue	60.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Color		<100,0,140,255>
+}
+
+Monster <Bugbear>
+{
+    Plural		<Bugbears>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          42.0
+    Level       18
+    ExpValue	65.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Color		<120,80,40,255>
+}
+
+Monster <Dark Elven Mage>
+{
+    Plural		<Dark Elven Mages>
+    Appear		<1d1>
+    Speed		1.1
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          55.0
+    Level       30
+    ExpValue	250.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,3d6
+    Color		<120,0,180,255>
+}
+
+Monster <Dark Elven Priest>
+{
+    Plural		<Dark Elven Priests>
+    Appear		<1d1>
+    Speed		1.1
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          65.0
+    Level       35
+    ExpValue	350.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,3d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d10
+    Color		<100,0,160,255>
+}
+
+Monster <Dark Elven Ranger>
+{
+    Plural		<Dark Elven Rangers>
+    Appear		<1d1>
+    Speed		1.4
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <9d8>
+    AC          60.0
+    Level       40
+    ExpValue	400.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Color		<90,0,140,255>
+}
+
+Monster <Dark Elven Lord>
+{
+    Plural		<Dark Elven Lords>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <14d8>
+    AC          85.0
+    Level       50
+    ExpValue	800.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,4d6
+    Color		<60,0,100,255>
+}
+
+# --- ORCS (o) — goblins and spread ---
+
+Monster <Goblin>
+{
+    Plural		<Goblins>
+    Appear		<1d3>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <2d8>
+    AC          25.0
+    Level       5
+    ExpValue	10.0
+    Type		<MON_IDX_ORC>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Color		<60,100,40,255>
+}
+
+Monster <Cave Orc>
+{
+    Plural		<Cave Orcs>
+    Appear		<1d2>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          42.0
+    Level       18
+    ExpValue	60.0
+    Type		<MON_IDX_ORC>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+    Color		<70,90,50,255>
+}
+
+Monster <Hill Orc>
+{
+    Plural		<Hill Orcs>
+    Appear		<1d2>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          48.0
+    Level       22
+    ExpValue	80.0
+    Type		<MON_IDX_ORC>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Color		<90,100,40,255>
+}
+
+Monster <Black Orc>
+{
+    Plural		<Black Orcs>
+    Appear		<1d1>
+    Speed		1.1
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          52.0
+    Level       30
+    ExpValue	150.0
+    Type		<MON_IDX_ORC>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Color		<30,30,30,255>
+}
+
+Monster <Orc Chieftain>
+{
+    Plural		<Orc Chieftains>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <14d8>
+    AC          85.0
+    Level       66
+    ExpValue	1200.0
+    Type		<MON_IDX_ORC>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Color		<20,40,10,255>
+}
+
+# --- PERSONS (p) — class spread ---
+
+Monster <Acolyte>
+{
+    Plural		<Acolytes>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          28.0
+    Level       12
+    ExpValue	25.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_LIGHT>,1d4
+    Color		<255,255,200,255>
+}
+
+Monster <Apprentice Mage>
+{
+    Plural		<Apprentice Mages>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          25.0
+    Level       15
+    ExpValue	30.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,1d6
+    Color		<0,0,200,255>
+}
+
+Monster <Warrior>
+{
+    Plural		<Warriors>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          45.0
+    Level       20
+    ExpValue	70.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Color		<160,160,160,255>
+}
+
+Monster <Ranger>
+{
+    Plural		<Rangers>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          40.0
+    Level       25
+    ExpValue	80.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Color		<0,100,0,255>
+}
+
+Monster <Veteran Warrior>
+{
+    Plural		<Veteran Warriors>
+    Appear		<1d1>
+    Speed		1.1
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <9d8>
+    AC          60.0
+    Level       38
+    ExpValue	250.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Color		<180,180,180,255>
+}
+
+Monster <Master Ranger>
+{
+    Plural		<Master Rangers>
+    Appear		<1d1>
+    Speed		1.4
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          55.0
+    Level       48
+    ExpValue	500.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Color		<0,80,0,255>
+}
+
+Monster <Champion>
+{
+    Plural		<Champions>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <13d8>
+    AC          80.0
+    Level       55
+    ExpValue	700.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Color		<200,200,200,255>
+}
+
+Monster <High Priest>
+{
+    Plural		<High Priests>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <14d8>
+    AC          75.0
+    Level       65
+    ExpValue	1000.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_LIGHT>,4d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,3d6
+    Color		<255,255,100,255>
+}
+
+# --- MAMMALS (M) — low-level additions ---
+
+Monster <Wild Cat>
+{
+    Plural		<Wild Cats>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <1d8>
+    AC          18.0
+    Level       3
+    ExpValue	5.0
+    Type		<MON_IDX_CAT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
+    Color		<160,120,80,255>
+}
+
+Monster <Wild Boar>
+{
+    Plural		<Wild Boars>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          30.0
+    Level       8
+    ExpValue	15.0
+    Type		<MON_IDX_MAMMAL>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
+    Color		<100,80,40,255>
+}
+
+Monster <Wolverine>
+{
+    Plural		<Wolverines>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          35.0
+    Level       15
+    ExpValue	40.0
+    Type		<MON_IDX_MAMMAL>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Color		<80,60,30,255>
+}
+
+Monster <Lion>
+{
+    Plural		<Lions>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          48.0
+    Level       24
+    ExpValue	100.0
+    Type		<MON_IDX_MAMMAL>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Color		<200,160,60,255>
+}
+
+# --- BIRDS (F) — low-level addition ---
+
+Monster <Raven>
+{
+    Plural		<Ravens>
+    Appear		<1d3>
+    Speed		2.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <1d8>
+    AC          20.0
+    Level       3
+    ExpValue	4.0
+    Type		<MON_IDX_BIRD>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
+    Color		<20,20,30,255>
+}
+
+# =============================================================================
+# Wave 7 — Brust-themed + family fills
+# =============================================================================
+
+# --- BATS (b) — fill out the family ---
+
+Monster <Bat>
+{
+    Plural		<Bats>
+    Appear		<1d3>
+    Speed		2.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <1d4>
+    AC          15.0
+    Level       1
+    ExpValue	1.0
+    Type		<MON_IDX_BAT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d2
+    Color		<100,80,60,255>
+}
+
+Monster <Large Bat>
+{
+    Plural		<Large Bats>
+    Appear		<1d2>
+    Speed		2.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <2d4>
+    AC          25.0
+    Level       3
+    ExpValue	4.0
+    Type		<MON_IDX_BAT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+    Color		<80,60,40,255>
+}
+
+Monster <Vampire Bat>
+{
+    Plural		<Vampire Bats>
+    Appear		<1d2>
+    Speed		2.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          35.0
+    Level       12
+    ExpValue	30.0
+    Type		<MON_IDX_BAT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_XP>,1d4
+    Color		<139,0,0,255>
+}
+
+# --- FLIES (f) — small breeding pests ---
+
+Monster <Fruit Fly>
+{
+    Plural		<Fruit Flies>
+    Appear		<1d5>
+    Speed		2.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <1d4>
+    AC          10.0
+    Level       2
+    ExpValue	1.0
+    Type		<MON_IDX_FLY>
+    Flags		<MON_FLAG_BREED,MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d1
+    Color		<139,90,43,255>
+}
+
+Monster <Fire Fly>
+{
+    Plural		<Fire Flies>
+    Appear		<1d4>
+    Speed		2.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <2d4>
+    AC          20.0
+    Level       5
+    ExpValue	6.0
+    Type		<MON_IDX_FLY>
+    Flags		<MON_FLAG_BREED,MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,1d4
+    Color		<255,140,0,255>
+}
+
+# --- DRAGON FLIES (f) — 5 colors matching dragon elements ---
+
+Monster <White Dragon Fly>
+{
+    Plural		<White Dragon Flies>
+    Appear		<1d2>
+    Speed		1.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          35.0
+    Level       15
+    ExpValue	40.0
+    Type		<MON_IDX_DRAGON_FLY>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_COLD>,2d4
+    Color		<255,255,255,255>
+}
+
+Monster <Black Dragon Fly>
+{
+    Plural		<Black Dragon Flies>
+    Appear		<1d2>
+    Speed		1.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          38.0
+    Level       20
+    ExpValue	60.0
+    Type		<MON_IDX_DRAGON_FLY>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_ACID>,2d6
+    Color		<30,30,30,255>
+}
+
+Monster <Green Dragon Fly>
+{
+    Plural		<Green Dragon Flies>
+    Appear		<1d2>
+    Speed		1.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          42.0
+    Level       25
+    ExpValue	80.0
+    Type		<MON_IDX_DRAGON_FLY>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_POISON>,2d8
+    Color		<0,200,0,255>
+}
+
+Monster <Blue Dragon Fly>
+{
+    Plural		<Blue Dragon Flies>
+    Appear		<1d2>
+    Speed		1.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          46.0
+    Level       30
+    ExpValue	100.0
+    Type		<MON_IDX_DRAGON_FLY>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_ELECTRICITY>,3d6
+    Color		<0,100,255,255>
+}
+
+Monster <Red Dragon Fly>
+{
+    Plural		<Red Dragon Flies>
+    Appear		<1d2>
+    Speed		1.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          50.0
+    Level       35
+    ExpValue	130.0
+    Type		<MON_IDX_DRAGON_FLY>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,3d8
+    Color		<255,0,0,255>
+}
+
+# --- FAERIE DRAGONS (f) — 7 tiers, prismatic colors ---
+
+Monster <Pink Baby Faerie Dragon>
+{
+    Plural		<Pink Baby Faerie Dragons>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          45.0
+    Level       30
+    ExpValue	100.0
+    Type		<MON_IDX_FAERIE_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,1d4
+    Color		<255,182,193,255>
+}
+
+Monster <Cyan Young Faerie Dragon>
+{
+    Plural		<Cyan Young Faerie Dragons>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          52.0
+    Level       38
+    ExpValue	160.0
+    Type		<MON_IDX_FAERIE_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,1d6
+    Color		<0,255,255,255>
+}
+
+Monster <Violet Immature Faerie Dragon>
+{
+    Plural		<Violet Immature Faerie Dragons>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          58.0
+    Level       46
+    ExpValue	250.0
+    Type		<MON_IDX_FAERIE_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,2d4
+    Color		<148,0,211,255>
+}
+
+Monster <Indigo Faerie Dragon>
+{
+    Plural		<Indigo Faerie Dragons>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <12d8>
+    AC          65.0
+    Level       54
+    ExpValue	380.0
+    Type		<MON_IDX_FAERIE_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,2d6
+    Color		<75,0,130,255>
+}
+
+Monster <Purple Lordly Faerie Dragon>
+{
+    Plural		<Purple Lordly Faerie Dragons>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <14d8>
+    AC          72.0
+    Level       62
+    ExpValue	550.0
+    Type		<MON_IDX_FAERIE_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,2d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d4
+    Color		<128,0,128,255>
+}
+
+Monster <Platinum Duke Faerie Dragon>
+{
+    Plural		<Platinum Duke Faerie Dragons>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <16d8>
+    AC          80.0
+    Level       72
+    ExpValue	800.0
+    Type		<MON_IDX_FAERIE_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,5d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,3d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d6
+    Color		<220,220,220,255>
+}
+
+Monster <Prismatic Emperor Faerie Dragon>
+{
+    Plural		<Prismatic Emperor Faerie Dragons>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <20d8>
+    AC          88.0
+    Level       82
+    ExpValue	1200.0
+    Type		<MON_IDX_FAERIE_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,6d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,3d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,2d6
+    Color		<255,255,255,255>
+}
+
+# --- MUSHROOMS (,) — fill family ---
+
+Monster <White Mushroom Patch>
+{
+    Plural		<White Mushroom Patches>
+    Appear		<1d1>
+    Speed		0.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <1d4>
+    AC          5.0
+    Level       1
+    ExpValue	1.0
+    Type		<MON_IDX_SHROOM>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Color		<255,255,255,255>
+}
+
+Monster <Black Mushroom Patch>
+{
+    Plural		<Black Mushroom Patches>
+    Appear		<1d1>
+    Speed		0.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <2d4>
+    AC          8.0
+    Level       2
+    ExpValue	3.0
+    Type		<MON_IDX_SHROOM>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d3
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d3
+    Color		<30,30,30,255>
+}
+
+Monster <Clear Mushroom Patch>
+{
+    Plural		<Clear Mushroom Patches>
+    Appear		<1d1>
+    Speed		0.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <2d4>
+    AC          8.0
+    Level       3
+    ExpValue	4.0
+    Type		<MON_IDX_SHROOM>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d3
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,1d4
+    Color		<200,200,200,128>
+}
+
+Monster <Blue Mushroom Patch>
+{
+    Plural		<Blue Mushroom Patches>
+    Appear		<1d1>
+    Speed		0.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <3d4>
+    AC          10.0
+    Level       4
+    ExpValue	6.0
+    Type		<MON_IDX_SHROOM>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d4
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_STAT>,1d3
+    Color		<0,0,255,255>
+}
+
+# --- KOBOLDS (k) — warrior and chieftain ---
+
+Monster <Kobold Warrior>
+{
+    Plural		<Kobold Warriors>
+    Appear		<1d3>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <2d8>
+    AC          30.0
+    Level       4
+    ExpValue	8.0
+    Type		<MON_IDX_KOBOLD>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d6
+    Color		<139,90,43,255>
+}
+
+Monster <Kobold Chieftain>
+{
+    Plural		<Kobold Chieftains>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          40.0
+    Level       8
+    ExpValue	25.0
+    Type		<MON_IDX_KOBOLD>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d4
+    Color		<180,120,60,255>
+}
+
+# --- SKELETONS (s) — 7 variants ---
+
+Monster <Kobold Skeleton>
+{
+    Plural		<Kobold Skeletons>
+    Appear		<1d3>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <1d8>
+    AC          20.0
+    Level       5
+    ExpValue	6.0
+    Type		<MON_IDX_SKELETON>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d4
+    Color		<200,200,200,255>
+}
+
+Monster <Orc Skeleton>
+{
+    Plural		<Orc Skeletons>
+    Appear		<1d2>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          30.0
+    Level       10
+    ExpValue	20.0
+    Type		<MON_IDX_SKELETON>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d4
+    Color		<200,200,200,255>
+}
+
+Monster <Snake Skeleton>
+{
+    Plural		<Snake Skeletons>
+    Appear		<1d2>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          28.0
+    Level       12
+    ExpValue	25.0
+    Type		<MON_IDX_SKELETON>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Color		<200,200,200,255>
+}
+
+Monster <Human Skeleton>
+{
+    Plural		<Human Skeletons>
+    Appear		<1d2>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          35.0
+    Level       16
+    ExpValue	40.0
+    Type		<MON_IDX_SKELETON>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
+    Color		<220,220,220,255>
+}
+
+Monster <Elf Skeleton>
+{
+    Plural		<Elf Skeletons>
+    Appear		<1d2>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          42.0
+    Level       22
+    ExpValue	70.0
+    Type		<MON_IDX_SKELETON>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d8
+    Color		<230,230,230,255>
+}
+
+Monster <Troll Skeleton>
+{
+    Plural		<Troll Skeletons>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          50.0
+    Level       28
+    ExpValue	120.0
+    Type		<MON_IDX_SKELETON>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_REGENERATE>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Color		<180,180,180,255>
+}
+
+Monster <Dragon Skeleton>
+{
+    Plural		<Dragon Skeletons>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <12d8>
+    AC          65.0
+    Level       45
+    ExpValue	350.0
+    Type		<MON_IDX_SKELETON>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Color		<160,160,160,255>
+}
+
+# --- TROLLS (T) — base Troll, Ice, Fire ---
+
+Monster <Troll>
+{
+    Plural		<Trolls>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          40.0
+    Level       12
+    ExpValue	35.0
+    Type		<MON_IDX_TROLL>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Color		<0,128,0,255>
+}
+
+Monster <Ice Troll>
+{
+    Plural		<Ice Trolls>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          48.0
+    Level       20
+    ExpValue	80.0
+    Type		<MON_IDX_TROLL>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,<EFFECT_FLAG_COLD>,2d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
+    Color		<173,216,230,255>
+}
+
+Monster <Fire Troll>
+{
+    Plural		<Fire Trolls>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          55.0
+    Level       35
+    ExpValue	200.0
+    Type		<MON_IDX_TROLL>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,<EFFECT_FLAG_FIRE>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Color		<255,69,0,255>
+}
+
+# --- CREEPING COINS ($) ---
+
+Monster <Creeping Copper Coins>
+{
+    Plural		<Creeping Copper Coins>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          40.0
+    Level       8
+    ExpValue	25.0
+    Type		<MON_IDX_COIN>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d4
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_TREASURE>,1d1
+    Color		<184,115,51,255>
+}
+
+Monster <Creeping Silver Coins>
+{
+    Plural		<Creeping Silver Coins>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          50.0
+    Level       18
+    ExpValue	70.0
+    Type		<MON_IDX_COIN>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d4
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_TREASURE>,1d1
+    Color		<192,192,192,255>
+}
+
+Monster <Creeping Gold Coins>
+{
+    Plural		<Creeping Gold Coins>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          60.0
+    Level       30
+    ExpValue	150.0
+    Type		<MON_IDX_COIN>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,4d4
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_TREASURE>,1d1
+    Color		<255,215,0,255>
+}
+
+# --- LURKER / TRAPPER (.) ---
+
+Monster <Lurker>
+{
+    Plural		<Lurkers>
+    Appear		<1d1>
+    Speed		0.5
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <5d8>
+    AC          45.0
+    Level       15
+    ExpValue	45.0
+    Type		<MON_IDX_LURKER>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d4
+    Color		<128,128,128,255>
+}
+
+Monster <Trapper>
+{
+    Plural		<Trappers>
+    Appear		<1d1>
+    Speed		0.5
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <10d8>
+    AC          60.0
+    Level       30
+    ExpValue	150.0
+    Type		<MON_IDX_LURKER>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,2d4
+    Color		<100,100,100,255>
+}
+
+# --- MIMIC (&) ---
+
+Monster <Mimic>
+{
+    Plural		<Mimics>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          50.0
+    Level       25
+    ExpValue	100.0
+    Type		<MON_IDX_MIMIC>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d6
+    Color		<180,140,60,255>
+}
+
+Monster <Chest Mimic>
+{
+    Plural		<Chest Mimics>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <12d8>
+    AC          65.0
+    Level       40
+    ExpValue	280.0
+    Type		<MON_IDX_MIMIC>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,4d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,2d6
+    Color		<139,90,43,255>
+}
+
+# --- REPTILES (R) ---
+
+Monster <Newt>
+{
+    Plural		<Newts>
+    Appear		<1d3>
+    Speed		0.8
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <1d4>
+    AC          10.0
+    Level       1
+    ExpValue	1.0
+    Type		<MON_IDX_REPTILE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d2
+    Color		<0,128,0,255>
+}
+
+Monster <Salamander>
+{
+    Plural		<Salamanders>
+    Appear		<1d2>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          25.0
+    Level       6
+    ExpValue	12.0
+    Type		<MON_IDX_REPTILE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Color		<255,140,0,255>
+}
+
+Monster <Fire Salamander>
+{
+    Plural		<Fire Salamanders>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          38.0
+    Level       14
+    ExpValue	40.0
+    Type		<MON_IDX_REPTILE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d6
+    Color		<255,69,0,255>
+}
+
+Monster <Crocodile>
+{
+    Plural		<Crocodiles>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          50.0
+    Level       22
+    ExpValue	80.0
+    Type		<MON_IDX_REPTILE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Color		<0,100,0,255>
+}
+
+Monster <Emperor Crocodile>
+{
+    Plural		<Emperor Crocodiles>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <12d8>
+    AC          65.0
+    Level       40
+    ExpValue	280.0
+    Type		<MON_IDX_REPTILE>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Color		<34,100,34,255>
+}
+
+# --- MAMMALS (M) — fill family ---
+
+Monster <Black Bear>
+{
+    Plural		<Black Bears>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          35.0
+    Level       12
+    ExpValue	30.0
+    Type		<MON_IDX_MAMMAL>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Color		<30,30,30,255>
+}
+
+Monster <Hippo>
+{
+    Plural		<Hippos>
+    Appear		<1d1>
+    Speed		0.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          50.0
+    Level       22
+    ExpValue	80.0
+    Type		<MON_IDX_MAMMAL>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,2d8
+    Color		<128,128,128,255>
+}
+
+Monster <Tiger>
+{
+    Plural		<Tigers>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          52.0
+    Level       30
+    ExpValue	150.0
+    Type		<MON_IDX_CAT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Color		<255,140,0,255>
+}
+
+# --- WORMS (w) — Clear and Black additions ---
+
+Monster <Clear Worm Mass>
+{
+    Plural		<Clear Worm Masses>
+    Appear		<1d3>
+    Speed		0.5
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <2d8>
+    AC          40.0
+    Level       3
+    ExpValue	10.0
+    Type		<MON_IDX_WORM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d3
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_STAT>,1d2
+    Color		<200,200,200,128>
+    Flags		<MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+}
+
+Monster <Black Worm Mass>
+{
+    Plural		<Black Worm Masses>
+    Appear		<1d3>
+    Speed		0.5
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <5d8>
+    AC          45.0
+    Level       10
+    ExpValue	35.0
+    Type		<MON_IDX_WORM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d4
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CRAWL>,<EFFECT_FLAG_ACID>,2d6
+    Color		<30,30,30,255>
+    Flags		<MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+}
+
+# --- BRUST CREATURES ---
+
+Monster <Norska>
+{
+    Plural		<Norska>
+    Appear		<1d4>
+    Speed		1.5
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <1d4>
+    AC          10.0
+    Level       0
+    ExpValue	1.0
+    Type		<MON_IDX_RAT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d2
+    Color		<200,200,200,255>
+}
+
+Monster <Large Norska>
+{
+    Plural		<Large Norska>
+    Appear		<1d3>
+    Speed		1.5
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <2d4>
+    AC          18.0
+    Level       5
+    ExpValue	5.0
+    Type		<MON_IDX_RAT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+    Color		<180,180,180,255>
+}
+
+Monster <Jhereg>
+{
+    Plural		<Jhereg>
+    Appear		<1d1>
+    Speed		1.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          30.0
+    Level       10
+    ExpValue	25.0
+    Type		<MON_IDX_FAERIE_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,2d4
+    Color		<128,0,128,255>
+}
+
+Monster <Greater Jhereg>
+{
+    Plural		<Greater Jhereg>
+    Appear		<1d1>
+    Speed		1.8
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          48.0
+    Level       25
+    ExpValue	100.0
+    Type		<MON_IDX_FAERIE_DRAGON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,3d6
+    Color		<160,0,160,255>
+}
+
+Monster <Tiassa>
+{
+    Plural		<Tiassa>
+    Appear		<1d1>
+    Speed		2.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          38.0
+    Level       18
+    ExpValue	55.0
+    Type		<MON_IDX_FLY>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,1d4
+    Color		<0,191,255,255>
+}
+
+Monster <Athyra>
+{
+    Plural		<Athyra>
+    Appear		<1d1>
+    Speed		2.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          42.0
+    Level       20
+    ExpValue	65.0
+    Type		<MON_IDX_BIRD>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,1d6
+    Color		<75,0,130,255>
+}
+
+Monster <Dzur>
+{
+    Plural		<Dzur>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          58.0
+    Level       35
+    ExpValue	200.0
+    Type		<MON_IDX_CAT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Color		<10,10,10,255>
+}
+
+Monster <Elder Dzur>
+{
+    Plural		<Elder Dzur>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <14d8>
+    AC          72.0
+    Level       55
+    ExpValue	550.0
+    Type		<MON_IDX_CAT>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d6
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d8
+    Color		<5,5,5,255>
+}
+
+Monster <Teckla (Dragaeran)>
+{
+    Plural		<Teckla (Dragaerans)>
+    Appear		<1d2>
+    Speed		1.0
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <2d8>
+    AC          20.0
+    Level       4
+    ExpValue	5.0
+    Type		<MON_IDX_L_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d4
+    Color		<139,119,101,255>
+}
+
+Monster <Cat-centaur>
+{
+    Plural		<Cat-centaurs>
+    Appear		<1d1>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <12d8>
+    AC          65.0
+    Level       40
+    ExpValue	300.0
+    Type		<MON_IDX_L_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Color		<180,140,100,255>
+}
+
+# --- ANIMATED WEAPONS (|) ---
+
+Monster <Animated Club>
+{
+    Plural		<Animated Clubs>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          30.0
+    Level       8
+    ExpValue	18.0
+    Type		<MON_IDX_ANIMATED_WEAPON>
+    Flags		<MON_FLAG_EMPTY_MIND>
+    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
+    Color		<139,90,43,255>
+}

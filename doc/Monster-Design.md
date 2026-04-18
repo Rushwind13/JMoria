@@ -500,63 +500,54 @@ Giants moved from `H` to `P`. Shares tile with L_PERSON (Titans).
 | Animated Axe | | | | | SEEKPLAYER | HIT,BITE | EMPTY_MIND | *(match Battle Axe color)* | PLANNED |
 | Animated Club | | | | | SEEKPLAYER | HIT,BITE | EMPTY_MIND | *(match Club color)* | PLANNED |
 
----
-
-## Known Issues in Existing Monsters
-
-1. **Floating Eye** — leading space on `Monster` line in Monsters.txt (not found by find_monster.sh)
-2. **White Harpy** — Plural is "White Harpy" (should be "White Harpies")
-3. **Dragons (d)** — White through Red have no breath attacks; should have element-appropriate breath
-4. **Dinosaurs** — Both at level 15, Brontosaurus has 25d8 HD (enormous). Now confirmed as `D` creatures.
-5. **Bats** — Only Flaming Bat exists; need a regular Bat at lower level
-6. **Worm Masses** — All at level 1 with identical stats; White has no physical attack (only INTRINSIC)
-7. **Icky Things** — All at level 1 except Clear (level 3); need attack differentiation and missing colors
-8. **Shadow Mastiff** — level 15, no lower-tier canines exist
-9. **Kobold** — single entry; needs full family (Small, Shaman, Chieftain, Brute)
-10. **Drakes** — All at level 7 with identical stats except element; reasonable?
-
-## Data File Issues
-
-1. Floating Eye: leading space on `Monster` line breaks find_monster.sh
-2. Some entries missing `Appear` field (Giant Ant, Giant Snake, etc.)
 
 ---
 
-## Locked Design Decisions
+## Brust / Dragaeran Creatures — Design Notes
 
-All type mapping questions resolved (Rounds 1-3).
+The game world uses Brust-flavored naming wherever possible. Animals and monsters from the Dragaeran cycle replace their generic counterparts:
 
-### Tile Reassignments
-- `f` = Flies, Dragon Flies, Faerie Dragons (moved from `F`)
-- `F` = Birds (Fowl) — freed by flies moving to `f`
-- `H` = Harpies (moved from `h`)
-- `P` = Giants + Titans (Giants moved from `H`; shares with L_PERSON)
-- `D` = Ancient Dragons + Dinosaurs (Dinos moved from `d`)
-- `M` = Mammals — bears, hippos, cats (cats moved from `f`)
-- `j` = Oozes/Slimes (mobile counterpart to stationary `J` Jellies)
-- `E` = Elementals (new)
-- `|` = Animated Weapons (camouflage — same color as real dropped weapons)
+### Naming Convention
+- **No "(Dragaeran)" suffix** — Dragaeran names replace the generic name directly
+- If both a Dragaeran and mundane version exist (e.g., a `teckla` rat and a Teckla person), use **lowercase for the animal** and **uppercase for the Dragaeran** (e.g., `teckla` vs `Teckla`)
+- Open question: will duplicate names break monster lookup? Needs testing with the data file parser
 
-### Family Decisions
-- **Orcs (`o`)**: includes goblins — Skaven, Orc, Uruk-hai + role variants
-- **Canines (`C`)**: Stray Dog (town, 0d0) → Coyote → Wolf → Dire Wolf → Warg → Shadow Mastiff
-- **Zombies (`z`)**: themed variants — Kobold Zombie, Orc Zombie, Troll Zombie (regenerates), Human Zombie, Zombie Dragon, Mummified Orc...
-- **Dragons (`d`/`D`)**: 5 colors × 5 ages (Baby, Young, Adult, Mature [untitled], Ancient). Acid > Fire difficulty.
-- **Hydras**: separate MON_IDX_HYDRA, small `d`, big `D`
-- **Mushrooms (`,`)**: camouflage (looks like food). Shrieker wakes/aggravates nearby monsters. Needs MONSTER_SLEEPING + AGGRAVATE_MONSTER flags.
-- **Mind Flayer**: `h` (humanoid)
-- **Purple Worm**: `w` (surprise at deep levels)
-- **Animated Weapons**: Sword, Spear, Axe, Club. Same color as real weapon items.
-- **Elementals**: Fire, Cold, Lightning, Acid + Earth, Air; possibly Elemental Lords
-- **Oozes/Slimes**: single MON_IDX_OOZE for `j` (no separate OOZE vs SLIME types)
+### Implemented Renames (Wave 7)
+- **Rat → Teckla** (all 3 tiers: Teckla, Large Teckla, Giant Teckla) — `r` RAT type
+- **Spider → Creotha** (Huge, Venomous, Cave, Giant) — `S` SPIDER type. Shelob stays as-is (unique)
+- **Panther → Young Dzur** — `M` CAT type
+- **Grizzly Bear → Tsalmoth** — `M` MAMMAL type
+- **Coyote → Lyorn** — `C` DOG type
 
-### Age/Rank Progressions
-- **Dragons**: Baby, Young, Adult, Mature (untitled, e.g. "Red Dragon"), Ancient (`D`)
-- **Faerie Dragons**: Baby, Young, Immature, (untitled), Lordly, Duke, Emperor
-- **Vampires**: (untitled), Greater, Master, Lordly, Emperor
-- **Liches**: (untitled), Greater, Master, Lordly, Emperor
+### Implemented Brust Creatures (Wave 7)
+- **Norska** (0), **Large Norska** (5) — `r` RAT type (rabbits)
+- **Jhereg** (10), **Greater Jhereg** (25) — `f` FAERIE_DRAGON type (venomous flying lizards)
+- **Tiassa** (18) — `f` FLY type (confuse attack)
+- **Athyra** (20) — `F` BIRD type (confuse attack)
+- **Dzur** (35), **Elder Dzur** (55) — `M` CAT type
+- **Teckla (Dragaeran)** (4) — `P` L_PERSON type (rename needed — see below)
+- **Cat-centaur** (40) — `P` L_PERSON type
 
-### New Constants/Flags Needed
-- `MON_IDX_HYDRA`, `MON_IDX_OOZE`, `MON_IDX_ELEMENTAL`, `MON_IDX_MAMMAL`, `MON_IDX_BIRD`, `MON_IDX_ANIMATED_WEAPON`
-- `MONSTER_SLEEPING` state flag (for Shrieker mechanic)
-- `AGGRAVATE_MONSTER` effect/mechanic (wake + aggro within X range)
+### TODO: Dragaeran Persons (`P` L_PERSON)
+Drop the "(Dragaeran)" suffix — just use the House name directly:
+- **Teckla** — peasant/commoner, low level (~4). Same name as the animal; context (tile `P` vs `r`) distinguishes them
+- **Dragonlord** — Dragaeran warrior-noble. Mid-high level (or several ranks of them)
+- **Dzurlord** — fierce Dzur-house warrior, aggressive. Mid-high level
+- **Hawklord** — Dragaeran scholar. Mid level
+- **Tiassa** (person) — same name as the flying creature on `f`; `P` tile distinguishes. Mid level
+- **Lyorn** (person) — same name as the animal on `C`; `P` tile distinguishes. Mid level
+- **Yendi** (person) — sorcerous, sneaky. Mid level
+- **Phoenix Guard** — elite soldier, high level (can have ranks, Guard Sergeant, Guard Captain, Captain of the Phoenix Guards (unique))
+- **Lavode** — one of the Lavode troops, very high level warrior / wizard with magic blade and magic staff
+
+### TODO: Sethra Lavode (Unique)
+- Sethra Lavode should exist as a unique monster
+- **Not killable in any real sense** — needs special handling (immortal / respawns / unkillable flag?)
+- May need to move uniques out of Monsters.txt once we introduce loot tables and flavor text
+- Design the unique monster system before implementing Sethra
+
+### TODO: Snake → Yendi Rename
+- Rename ALL snakes to Yendi: "X Snake" → "X Yendi"
+- e.g., Giant Snake → Giant Yendi, King Snake → King Yendi, etc.
+- Snake Skeleton -> Skeleton Yendi
+- Uses `J` (or whatever tile snakes are on) — same type, just renamed

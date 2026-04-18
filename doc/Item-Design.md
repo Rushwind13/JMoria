@@ -1,6 +1,6 @@
 # Item Design — JMoria
 
-Authoritative design document for the JMoria item system. Raw source material in [WORKLIST_items_design.md](WORKLIST_items_design.md).
+Authoritative design document for the JMoria item system. Effect system (verbs, nouns, adverbs, named effects) is in [Effects-Design.md](Effects-Design.md). Raw source material in [WORKLIST_items_design.md](WORKLIST_items_design.md).
 
 ---
 
@@ -40,94 +40,26 @@ Every item in [Resources/Items.txt](../Resources/Items.txt) is a named block wit
 | m_dwLevel, m_fValue, m_fWeight | m_dwKnownProps (KNOWN_* bitmask) |
 | m_fDuration, m_fRadius | m_fRemainingDuration |
 
-### CEffect Structure
+### Effects
 
-Each item can have one or more effects. An effect is a sentence: **verb** + **noun** + **adverb**.
+Each item can have one or more effects. Effects are reusable LEGO pieces — the same named effect can appear on multiple items. See [Effects-Design.md](Effects-Design.md) for the full effect data model, grammar, and catalog.
+
+Items reference effects by name in Items.txt:
 
 ```
-CEffect {
-    m_dwEffect    // EFFECT_TYPE_*  (verb: what it does)
-    m_dwFlags     // EFFECT_FLAG_*  (noun: what it affects, word 1)
-    m_dwFlags2    // EFFECT_FLAG2_* (noun: what it affects, word 2)
-    m_dwModifier  // EFFECT_MOD_*   (adverb: how it does it)
-    m_szAmount    // NdM string     (how much)
-    m_fDuration   // float          (how long)
-}
+Effect <Firebolt>
+Effect <Resist Acid>
+```
+
+Or inline (legacy):
+
+```
+Effect <EFFECT_TYPE_HIT>,<EFFECT_FLAG_FIRE>,<EFFECT_MOD_LINE>,<2d8>
 ```
 
 ---
 
-## 2. Effect System Grammar
-
-### Verbs (EFFECT_TYPE)
-
-| Define | Hex | Meaning |
-|---|---|---|
-| HEAL | 0x01 | Restore HP/MP/stat to player |
-| HIT | 0x02 | Deal damage or directed effect at target |
-| CREATE | 0x04 | Bring something into the world |
-| DESTROY | 0x08 | Remove something from the world |
-| INTRINSIC | 0x10 | Grant permanent property to player/item |
-| RESTORE | 0x20 | Restore a depleted resource |
-| GAIN | 0x40 | Permanently increase a value |
-| LOSE | 0x80 | Permanently decrease a value |
-| *SEE* | *0x100* | *Reveal/detect (proposed, not yet coded)* |
-
-### Nouns — Word 1 (EFFECT_FLAG, 32 flags)
-
-| Group | Flags |
-|---|---|
-| Elements | FIRE, COLD, ELECTRICITY, ACID |
-| Conditions | POISON, LIGHT, PARALYZE, TREASURE |
-| Mental | AFRAID, BLIND, SLEEP, CONFUSE |
-| Utility | STONE_TO_MUD, FUEL, INFRA, ESP |
-| Info | IDENTIFY, RECALL, MAPPING, SUMMON |
-| Stats | STAT, TOHIT, TODAM, AC |
-| Resources | XP, HP, MP, TELEPORT |
-| Intrinsics | FREE_ACTION, INVISIBLE, LEVITATE, SPEED |
-
-### Nouns — Word 2 (EFFECT_FLAG2, 3 flags)
-
-| Flag | Meaning |
-|---|---|
-| DOOR | Doors |
-| TRAP | Traps |
-| MONSTERS | Creatures |
-
-### Adverbs (EFFECT_MOD, 9 modifiers)
-
-| Define | Meaning |
-|---|---|
-| RESIST | 50% damage reduction |
-| SEE | Reveal / perceive |
-| IMMUNE | 0 damage (full immunity) |
-| WEAK | Increased damage taken |
-| TIMED | Temporary effect with duration |
-| AREA | Affects surrounding area |
-| LINE | Affects a line from source |
-| BALL | Affects a radius from impact point |
-| ENCHANT | Modifies item bonuses |
-
-### Reading an Effect Line
-
-Examples of how to read the grammar:
-
-| Item | Verb | Noun | Adverb | In English |
-|---|---|---|---|---|
-| Potion of Healing | HEAL | HP | — | Restore HP |
-| Potion of Flames | HIT | FIRE | — | Deal fire damage to target |
-| Scroll of Blessing | HIT | AC | TIMED | Temporarily increase AC |
-| Staff of Light | CREATE | LIGHT | AREA | Light up the surrounding area |
-| Wand of Teleport Away | HIT | TELEPORT | — | Teleport target away from player |
-| Staff of Teleportation | CREATE | TELEPORT | — | Teleport the user |
-| Ring of Resist Fire | INTRINSIC | FIRE | RESIST | Permanent 50% fire resistance |
-| Potion of See Invisible | HIT | INVISIBLE | TIMED + SEE | Temporarily see invisible creatures |
-| Scroll of Enchant Weapon | GAIN | TOHIT | ENCHANT | Permanently increase weapon to-hit |
-| Potion of Gain Strength | GAIN | STAT | — | Permanently increase STR |
-
----
-
-## 3. Wands vs Staves
+## 2. Wands vs Staves
 
 Wands and staves share the same effect nouns and adverbs but use different verbs. A wand is **directed at a target** (HIT); a staff is **self or area effect** (CREATE / RESTORE).
 
@@ -138,7 +70,7 @@ Wands and staves share the same effect nouns and adverbs but use different verbs
 | Targeting | Player aims at monster/tile | Automatic (self or AoE) |
 | Example | Wand of Teleport Away → HIT + TELEPORT | Staff of Teleportation → CREATE + TELEPORT |
 | Example | Wand of Probing → HIT + IDENTIFY | Staff of Perception → RESTORE + IDENTIFY |
-| Charges | Yes (NdM, see §7) | Yes (NdM, see §7) |
+| Charges | Yes (NdM, see §6) | Yes (NdM, see §6) |
 | Rechargeable | Yes | Yes |
 | Stackable | Yes (same flavor, ID'd, same charges) | Yes (same flavor, ID'd, same charges) |
 
@@ -162,7 +94,7 @@ Wands and staves share the same effect nouns and adverbs but use different verbs
 
 ---
 
-## 4. Item Quality Tiers
+## 3. Item Quality Tiers
 
 Six tiers of item quality. Quality is determined at spawn time.
 
@@ -199,7 +131,7 @@ All items have one of three blessed states. Two versions of the same item can be
 
 ---
 
-## 5. Identification System
+## 4. Identification System
 
 ### Known Properties Bitmask (CItem::m_dwKnownProps)
 
@@ -235,7 +167,7 @@ Some items are always identified on sight:
 
 ---
 
-## 6. Stacking Rules
+## 5. Stacking Rules
 
 ### Core Principle
 
@@ -305,7 +237,7 @@ When dropping or selling a stack, prompt: **"How many? (1-n)"** where n is the s
 
 ---
 
-## 7. Charges & Recharge
+## 6. Charges & Recharge
 
 ### Initial Charges
 
@@ -332,7 +264,7 @@ At 0 charges, the wand/staff becomes **inert** — stays in inventory, can be re
 
 ---
 
-## 8. Item Destruction
+## 7. Item Destruction
 
 When a monster hits the player with an elemental attack, an inventory scan checks for vulnerable items. Items can be destroyed based on their material and the element.
 
@@ -362,7 +294,7 @@ Material is **implicit from ITEM_IDX type** (no explicit field needed). Ego and 
 
 ---
 
-## 9. Ego Items
+## 8. Ego Items
 
 Ego items are magic items with a **named suffix** granting specific intrinsics. Ego type is restricted to certain ITEM_IDX types. Semi-rare: ~1% of magical item spawns, roughly 1-3 per 40-level run.
 
@@ -402,7 +334,7 @@ Ego definitions need a data structure specifying:
 
 ---
 
-## 10. Legendary Items
+## 9. Legendary Items
 
 Legendary items are pre-defined constellations of bonuses — fixed ego items with specific names and known properties. Very rare (<0.01% of magical spawns), dungeon level 20+ only.
 
@@ -416,7 +348,7 @@ Legendary items are pre-defined constellations of bonuses — fixed ego items wi
 
 ---
 
-## 11. Unique Items
+## 10. Unique Items
 
 One instance per character save. Always a specific base item type. Typically carried by a specific mob.
 
@@ -447,7 +379,7 @@ Unique items need their own resource file. Format per entry:
 
 ---
 
-## 12. Enchant Scrolls
+## 11. Enchant Scrolls
 
 Enchant scrolls modify the bonuses on equipped items.
 
@@ -465,7 +397,7 @@ Enchanting past **+10** has a chance to fail. Failure chance increases with curr
 
 ---
 
-## 13. New Item Catalog
+## 12. New Item Catalog
 
 All items mentioned in design discussions not yet in Items.txt, organized by type.
 
@@ -557,13 +489,13 @@ All items mentioned in design discussions not yet in Items.txt, organized by typ
 
 ---
 
-## 14. Encumbrance
+## 13. Encumbrance
 
 Weight-based encumbrance system. Triggered when STR stat system (#197) is implemented. STR determines carry capacity; exceeding it reduces speed / prevents actions.
 
 ---
 
-## 15. Economy & Shops
+## 14. Economy & Shops
 
 Brief reference — detailed design in town system (#243).
 
@@ -594,32 +526,26 @@ Thieves can steal lightweight items only: potions, scrolls. NOT books, staves, o
 
 ---
 
-## 16. Dependency Map
+## 15. Dependency Map
 
 | System | Blocks These Items/Features | Issue |
 |---|---|---|
 | **Stats (#197)** | Gain/Restore/Weakness potions, Heroism, Sustain rings, Gloves of Dexterity, class feelings, CHA shop prices, Encumbrance | #197 |
 | **Classes (#239)** | Spell books, class feelings, class equipment (Holy Symbol, etc.), Mage ID spell | #239 |
 | **Town (#243)** | Shop system, shopkeeper ID, Player House, Word of Recall (full loop) | #243 |
-| **EFFECT_TYPE_SEE** | Detection scrolls (doors, traps, monsters), Ring of Searching | Phase 3 |
-| **MON_FLAG_INVISIBLE** | Potion/Ring of See Invisible, Sting unique | #72 |
 | **Trap system** | Scroll of Trap Detection/Creation | #117 |
 | **Ranged (PR #235)** | Item destruction from elemental attacks | #271 |
-| **CEffect deep copy** | Scroll of Blessing (timed AC) | Phase 3 |
-| **Elemental DoHitEffects** | Potion of Flames (player-sourced elemental) | Phase 3 |
+
+Effect system dependencies (EFFECT_TYPE_SEE, CEffect deep copy, elemental DoHitEffects, IMMUNE/RESIST combat math) are in [Effects-Design.md](Effects-Design.md) §12.
 
 ---
 
-## 17. Code Logic Tracking
+## 16. Code Logic Tracking
 
-Enhancements needed in C++ code, tracked separately from item data.
+Enhancements needed in C++ code, tracked separately from item data. Effect handler tracking is in [Effects-Design.md](Effects-Design.md) §10.
 
 | Enhancement | Description | Status |
 |---|---|---|
-| EFFECT_TYPE_SEE handler | "SEE changes what you know, CREATE changes the world." Detection/reveal dispatch. | Not started |
-| Elemental DoHitEffects | Player-sourced elemental damage from items (currently only monsters deal elemental). | Not started |
-| IMMUNE vs RESIST combat math | RESIST = 50%, IMMUNE = 0 damage. Check EFFECT_MOD during damage calc. | Not started |
-| CEffect deep copy | Scroll of Blessing timed AC: m_szAmount not deep-copied for rolled values. | Not started |
 | Sustain stat mechanics | Restore stat to max achieved + prevent stat damage. "The feeling passes." | Not started (blocked #197) |
 | Item spawn quality chain | Normal → Cursed → Magic → Ego → Legendary → Unique probability cascade. | Not started |
 | Charges system | NdM initial charges, lifetime limit, recharge, explosion risk. | Not started |
@@ -635,17 +561,15 @@ Enhancements needed in C++ code, tracked separately from item data.
 
 ---
 
-## 18. Constants.h Tracking
+## 17. Constants.h Tracking
 
-New defines and string table entries needed.
+New defines and string table entries needed. Effect constants (EFFECT_TYPE, EFFECT_FLAG, EFFECT_FLAG2, EFFECT_MOD) are in [Effects-Design.md](Effects-Design.md) §11.
 
 | Define | Type | Purpose | Status |
 |---|---|---|---|
-| EFFECT_TYPE_SEE (0x100) | EFFECT_TYPE | Detection/reveal verb | Done (NUM_EFFECT_TYPES=9) |
 | MON_FLAG_INVISIBLE (0x100000) | MON_FLAG | Invisible monster property | Done |
 | ~~ITEM_FLAG_EQUIPMENT~~ | — | Not needed; EquipTypes[] already maps ITEM_IDX→slot | N/A |
 | ITEM_FLAG_BLESSED (0x4000) | ITEM_FLAG | Three-state blessed system | Done (NUM_ITEM_FLAGS=12) |
-| EFFECT_MOD_ENCHANT | EFFECT_MOD | Item bonus modification | Already defined (0x100) |
 
 ### String Table
 
@@ -661,7 +585,7 @@ Every new EFFECT_TYPE, EFFECT_FLAG, EFFECT_MOD, ITEM_FLAG, or MON_FLAG must be a
 
 ---
 
-## 19. Class/Item Synergies (#239)
+## 18. Class/Item Synergies (#239)
 
 Reference only — this drives book content and class equipment, blocked by #239.
 
@@ -678,7 +602,7 @@ Reference only — this drives book content and class equipment, blocked by #239
 
 ---
 
-## 20. Intrinsics Grid (#244)
+## 19. Intrinsics Grid (#244)
 
 Equipment × intrinsic matrix display showing per-item resistance status:
 
@@ -689,8 +613,4 @@ Equipment × intrinsic matrix display showing per-item resistance status:
 | Permanent debuff | Cursed equipment | While equipped |
 | Temporary debuff | Monster/trap attack | Timed |
 
-Resistance math:
-- Resist = 50% damage reduction
-- Immune = 0 damage
-- Weak = ×2 damage
-- Stacking TBD (deferred to intrinsics deep-dive)
+Resistance/immunity combat math and stacking rules are in [Effects-Design.md](Effects-Design.md) §8.

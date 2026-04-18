@@ -251,6 +251,7 @@ public:
     void PassiveSearch();
 
     float LightSource();
+    float LightRadius();
     void UpdateLight( float fValue, bool bReset = false );
 
     JResult DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwFlags );

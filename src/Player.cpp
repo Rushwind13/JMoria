@@ -672,6 +672,20 @@ float CPlayer::LightSource()
     return pTorch->GetDuration();
 }
 
+float CPlayer::LightRadius()
+{
+    if( m_llEquipment == NULL )
+        return 0.0f;
+
+    CLink<CItem> *pLink = m_llEquipment->GetLink( EQUIP_IDX_TORCH );
+    if( pLink == NULL || pLink->m_lpData == NULL )
+        return 0.0f;
+
+    CItem *pTorch = pLink->m_lpData;
+
+    return pTorch->GetRadius();
+}
+
 void CPlayer::UpdateLight( float fValue, bool bReset )
 {
     if( m_llEquipment == NULL )

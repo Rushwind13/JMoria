@@ -1068,7 +1068,7 @@ bool CDungeon::IsLit( JVector vPos )
         return false;
     JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
     JIVector vTarget( VEC_EXPAND( vPos ) );
-    return Util::WithinRadius( vPlayer, vTarget );
+    return Util::WithinRadius( vPlayer, vTarget, g_pGame->GetPlayer()->LightRadius() );
 }
 
 void CDungeon::DrawDungeon()

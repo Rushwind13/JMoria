@@ -212,6 +212,8 @@ public:
         }
     };
 
+    float GetRadius() { return m_id->m_fRadius; };
+
     static JResult CreateItem( CItemDef *pid, JVector vSpawnPoint = JVector( -1, -1 ),
                                bool bNear = false );
     JResult SpawnItem( JVector vSpawnPoint = JVector( -1, -1 ) );

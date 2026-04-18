@@ -1236,7 +1236,8 @@ void CDungeon::DrawMonsters()
     {
         pMon = pLink->m_lpData;
         uint32 dwFlags = pMon->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND );
-        if( pMon && IsOnScreen( pMon->GetPos() ) && PlayerCanSee( pMon->GetPos(), dwFlags ) )
+        if( pMon && IsOnScreen( pMon->GetPos() ) &&
+            ( PlayerCanSee( pMon->GetPos(), dwFlags ) || pMon->m_bDetected ) )
         {
             pMon->Draw();
         }

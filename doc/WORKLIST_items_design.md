@@ -62,15 +62,25 @@ Section key (Effects-Design.md): §1 Data Model, §2 Effects.txt Format, §3 Gra
 - [x] NO_COLLIDE moved from ITEM_FLAG to EFFECT_FLAG2_NO_COLLIDE on effects (Effects §6)
 
 ### Effect System — Unimplemented Handlers
-- [ ] EFFECT_TYPE_SEE handler (Effects §4, §10)
+- [x] EFFECT_TYPE_SEE handler — DoSeeEffects: DOOR (secret+regular+stairs, permanent, range-bounded), TRAP (permanent, range-bounded), MONSTERS (one-turn m_bDetected flag, range-bounded). See #272 for visible monsters pane. (Effects §4, §10)
 - [ ] DoHitEffects: elemental nouns (FIRE, COLD, ELECTRICITY, ACID) — only handled in Monster.cpp, not player-side (Effects §10)
 - [ ] 7 to-be-used EFFECT_FLAGs: TREASURE, STONE_TO_MUD, STAT, TOHIT, TODAM, AC, MP — no items built with these yet (Effects §5)
 - [ ] EFFECT_MOD audit: ENCHANT, IMMUNE, WEAK, SEE — verify which are checked in handler code (Effects §7)
 - [ ] DESTROY handler uses ITEM_FLAG_CURSED instead of EFFECT_FLAG — design smell, clarify intent (Effects §10)
 
+### Effect System — CEffect Class Cleanup (Done)
+- [x] CEffect deep copy: copy constructor and assignment operator deep-copy m_szAmount (fixes DoIntrinsicEffects shallow copy bug) (Item §16, Effects §10)
+- [x] CEffect::SetAmount() helper — consolidates manual alloc/copy in copy ctor, operator=, and FileParse.cpp (2 sites)
+- [x] CEffect::Resist() — returns multiplier for IMMUNE (0×), RESIST (0.5×), WEAK (2×); used by CPlayer::Resist()
+
+### Combat Math — Elemental Resistance (Done)
+- [x] CPlayer::Resist(dwElement) — checks active effects then equipment for elemental modifier multiplier (Effects §8)
+- [x] CPlayer::TakeDamage extended with optional dwElement param; applies resistance with player feedback (Effects §8)
+- [x] CollideWithPlayer passes m_pCurrentAttack->m_dwEffectFlags through damage pipeline (Effects §8)
+
 ### Code Logic — Not Started
-- [ ] CEffect deep copy fix for timed AC (Item §16, Effects §10)
-- [ ] IMMUNE vs RESIST combat math (Effects §8)
+- [x] CEffect deep copy fix for timed AC (Item §16, Effects §10)
+- [x] IMMUNE vs RESIST combat math (Effects §8)
 - [ ] Item spawn quality chain (Item §3, §16)
 - [x] Charges system: NdM initial (m_szCharges on CItemDef), lifetime limit (m_dwMaxCharges on CItem), fallback 1d20 (Item §6, §16)
 - [ ] Recharge risk curve: f(charges, lifetime, depth) (Item §6, §16)

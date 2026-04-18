@@ -3,6 +3,7 @@
 
 #include "JLinkList.h"
 #include "JMDefs.h"
+#include "Util.h"
 
 // Named effect template — shared catalog entry parsed from Effects.txt.
 // Items, monsters, and spells reference these by name.
@@ -58,6 +59,31 @@ public:
           m_fDuration( 0 )
     {
     }
+    CEffect( const CEffect &other )
+        : m_ed( other.m_ed ),
+          m_dwEffect( other.m_dwEffect ),
+          m_dwFlags( other.m_dwFlags ),
+          m_dwFlags2( other.m_dwFlags2 ),
+          m_dwModifier( other.m_dwModifier ),
+          m_szAmount( NULL ),
+          m_fDuration( other.m_fDuration )
+    {
+        SetAmount( other.m_szAmount );
+    }
+    CEffect &operator=( const CEffect &other )
+    {
+        if( this != &other )
+        {
+            m_ed = other.m_ed;
+            m_dwEffect = other.m_dwEffect;
+            m_dwFlags = other.m_dwFlags;
+            m_dwFlags2 = other.m_dwFlags2;
+            m_dwModifier = other.m_dwModifier;
+            m_fDuration = other.m_fDuration;
+            SetAmount( other.m_szAmount );
+        }
+        return *this;
+    }
     ~CEffect()
     {
         if( m_szAmount )
@@ -65,6 +91,31 @@ public:
             delete[] m_szAmount;
             m_szAmount = NULL;
         }
+    }
+    void SetAmount( const char *szAmount )
+    {
+        if( m_szAmount )
+        {
+            delete[] m_szAmount;
+            m_szAmount = NULL;
+        }
+        if( szAmount )
+        {
+            int len = Util::jstrlen( szAmount );
+            m_szAmount = new char[len + 1];
+            memset( m_szAmount, 0, len + 1 );
+            Util::jstrcpy( m_szAmount, szAmount );
+        }
+    }
+    float Resist() const
+    {
+        if( m_dwModifier & EFFECT_MOD_IMMUNE )
+            return 0.0f;
+        if( m_dwModifier & EFFECT_MOD_RESIST )
+            return 0.5f;
+        if( m_dwModifier & EFFECT_MOD_WEAK )
+            return 2.0f;
+        return 1.0f;
     }
     CEffectDef *m_ed; // pointer to shared effect definition (NULL for inline effects)
     int m_dwEffect;

@@ -858,12 +858,72 @@ void CPlayer::GainLevel()
 
 bool CPlayer::Hit( float &fRoll ) { return ( fRoll >= m_fArmorClass ); }
 
-int CPlayer::TakeDamage( float fDamage, const char *szMon )
+float CPlayer::Resist( uint32 dwElement )
+{
+    if( dwElement == 0 )
+        return 1.0f;
+
+    // Check each element bit in the flags
+    uint32 elementMask =
+        EFFECT_FLAG_FIRE | EFFECT_FLAG_COLD | EFFECT_FLAG_ELECTRICITY | EFFECT_FLAG_ACID;
+    uint32 elements = dwElement & elementMask;
+    if( elements == 0 )
+        return 1.0f;
+
+    if( !GetIntrinsic( elements ) )
+        return 1.0f;
+
+    // We have the intrinsic — look up what modifier (RESIST, IMMUNE, WEAK) in active effects
+    CLink<CEffect> *pLink = m_llActiveEffects->GetHead();
+    while( pLink )
+    {
+        CEffect *pEffect = pLink->m_lpData;
+        if( pEffect->m_dwFlags & elements )
+            return pEffect->Resist();
+        pLink = pLink->next;
+    }
+
+    // Check equipped items for permanent resistances
+    CLink<CItem> *pEquip = m_llEquipment->GetHead();
+    while( pEquip )
+    {
+        CItem *pItem = pEquip->m_lpData;
+        if( pItem->m_id->m_llEffects )
+        {
+            CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
+            while( plEffect )
+            {
+                CEffect *pEffect = plEffect->m_lpData;
+                if( ( pEffect->m_dwEffect == EFFECT_TYPE_INTRINSIC ) &&
+                    ( pEffect->m_dwFlags & elements ) )
+                    return pEffect->Resist();
+                plEffect = plEffect->next;
+            }
+        }
+        pEquip = pEquip->next;
+    }
+
+    // Intrinsic set but no modifier found — default to resist
+    return 0.5f;
+}
+
+int CPlayer::TakeDamage( float fDamage, const char *szMon, uint32 dwElement )
 {
 #ifdef CLOCKSTEP
     return STATUS_ALIVE;
 #endif
     int retval = STATUS_INVALID;
+
+    // Apply elemental resistance
+    float fMult = Resist( dwElement );
+    if( fMult != 1.0f )
+    {
+        if( fMult == 0.0f )
+            g_pGame->GetMsgs()->Printf( "You are immune!\n" );
+        else if( fMult < 1.0f )
+            g_pGame->GetMsgs()->Printf( "You resist!\n" );
+        fDamage *= fMult;
+    }
 
     if( (int)fDamage < (int)m_fCurHitPoints )
     {
@@ -1068,6 +1128,9 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwIte
             break;
         case EFFECT_TYPE_LOSE:
             DoLoseEffects( pEffect );
+            break;
+        case EFFECT_TYPE_SEE:
+            DoSeeEffects( pEffect );
             break;
         default:
             JLog( LOG_LEVEL_ERROR, true, "bad effect type: %d\n", pEffect->m_dwEffect );
@@ -1637,6 +1700,120 @@ JResult CPlayer::DoLoseEffects( CEffect *pEffect )
     return JSUCCESS;
 }
 
+JResult CPlayer::DoSeeEffects( CEffect *pEffect )
+{
+    CDungeon *pDungeon = g_pGame->GetDungeon();
+    int range = ( pEffect->m_ed && pEffect->m_ed->m_fRange > 0 ) ? (int)pEffect->m_ed->m_fRange
+                                                                 : MAGIC_MAPPING_RANGE;
+    JIVector vPlayer( VEC_EXPAND( m_vPos ) );
+    JRect rcCheck = Util::Nearby( vPlayer, range );
+
+    if( pEffect->m_dwFlags2 & EFFECT_FLAG2_DOOR )
+    {
+        // Reveal doors (secret and non-secret) and stairs within range.
+        // Permanent for this level — once you know where they are, they stay on the map.
+        bool bFoundDoors = false;
+        bool bFoundStairs = false;
+        JIVector vCheck;
+        for( vCheck.y = rcCheck.top; vCheck.y <= rcCheck.bottom; vCheck.y++ )
+        {
+            for( vCheck.x = rcCheck.left; vCheck.x <= rcCheck.right; vCheck.x++ )
+            {
+                CDungeonTile *pTile = pDungeon->GetITile( vCheck );
+                if( !pTile || !pTile->m_dtd )
+                    continue;
+                switch( pTile->m_dtd->m_dwType )
+                {
+                case DUNG_IDX_SECRET_DOOR:
+                {
+                    JVector vPos( (float)vCheck.x, (float)vCheck.y );
+                    pDungeon->Modify( vPos );
+                    bFoundDoors = true;
+                    break;
+                }
+                case DUNG_IDX_DOOR:
+                case DUNG_IDX_OPEN_DOOR:
+                    pTile->SetFlags( DUNG_FLAG_SEEN );
+                    bFoundDoors = true;
+                    break;
+                case DUNG_IDX_UPSTAIRS:
+                case DUNG_IDX_LONG_UPSTAIRS:
+                case DUNG_IDX_DOWNSTAIRS:
+                case DUNG_IDX_LONG_DOWNSTAIRS:
+                    pTile->SetFlags( DUNG_FLAG_SEEN );
+                    bFoundStairs = true;
+                    break;
+                }
+            }
+        }
+        if( bFoundDoors )
+            g_pGame->GetMsgs()->Printf( "You sense the presence of doors!\n" );
+        if( bFoundStairs )
+            g_pGame->GetMsgs()->Printf( "You sense the presence of stairs!\n" );
+        if( !bFoundDoors && !bFoundStairs )
+            g_pGame->GetMsgs()->Printf( "You sense no doors or stairs.\n" );
+        m_bLastEffectNoticed = true;
+    }
+
+    if( pEffect->m_dwFlags2 & EFFECT_FLAG2_TRAP )
+    {
+        // Reveal traps within range. Permanent for this level.
+        bool bFound = false;
+        JIVector vCheck;
+        for( vCheck.y = rcCheck.top; vCheck.y <= rcCheck.bottom; vCheck.y++ )
+        {
+            for( vCheck.x = rcCheck.left; vCheck.x <= rcCheck.right; vCheck.x++ )
+            {
+                CDungeonTile *pTile = pDungeon->GetITile( vCheck );
+                if( pTile && ( pTile->m_dwFlags & DUNG_FLAG_TRAP ) )
+                {
+                    pTile->SetFlags( DUNG_FLAG_SEEN );
+                    bFound = true;
+                }
+            }
+        }
+        if( bFound )
+            g_pGame->GetMsgs()->Printf( "You sense traps.\n" );
+        else
+            g_pGame->GetMsgs()->Printf( "You sense no traps.\n" );
+        m_bLastEffectNoticed = true;
+    }
+
+    if( pEffect->m_dwFlags2 & EFFECT_FLAG2_MONSTERS )
+    {
+        // Detect monsters within range. One-turn duration: m_bDetected is cleared
+        // at the start of the next UpdateVisibleMonsters() call.
+        CLink<CMonster> *pLink = pDungeon->m_llMonsters->GetHead();
+        bool bFound = false;
+        while( pLink )
+        {
+            CMonster *pMon = pLink->m_lpData;
+            if( pMon )
+            {
+                JVector vMonPos = pMon->GetPos();
+                int dx = abs( (int)vMonPos.x - vPlayer.x );
+                int dy = abs( (int)vMonPos.y - vPlayer.y );
+                if( dx <= range && dy <= range )
+                {
+                    pMon->m_bDetected = true;
+                    CDungeonTile *pTile = pDungeon->GetTile( vMonPos );
+                    if( pTile )
+                        pTile->SetFlags( DUNG_FLAG_SEEN );
+                    bFound = true;
+                }
+            }
+            pLink = pLink->next;
+        }
+        if( bFound )
+            g_pGame->GetMsgs()->Printf( "You sense the presence of monsters!\n" );
+        else
+            g_pGame->GetMsgs()->Printf( "You sense no monsters.\n" );
+        m_bLastEffectNoticed = true;
+    }
+
+    return JSUCCESS;
+}
+
 bool CPlayer::IsDrinkable( CLink<CItem> *pLink )
 {
     bool retval = false;
@@ -1747,6 +1924,10 @@ void CPlayer::UpdateVisibleMonsters()
             continue;
         }
         CMonster *pMon = pLink->m_lpData;
+
+        // Clear one-turn detection flag from previous turn
+        pMon->m_bDetected = false;
+
         bool bPlayerSees = pDungeon->PlayerCanSee(
             pMon->GetPos(), pMon->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) );
         if( bPlayerSees )

@@ -563,12 +563,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                         curEffect->m_dwFlags2 = pFound->m_dwFlags2;
                         curEffect->m_dwModifier = pFound->m_dwModifier;
                         curEffect->m_fDuration = pFound->m_fDuration;
-                        if( pFound->m_szAmount )
-                        {
-                            curEffect->m_szAmount =
-                                new char[Util::jstrlen( pFound->m_szAmount ) + 1];
-                            Util::jstrcpy( curEffect->m_szAmount, pFound->m_szAmount );
-                        }
+                        curEffect->SetAmount( pFound->m_szAmount );
                         idIn.m_llEffects->Add( curEffect );
                     }
                     else
@@ -632,8 +627,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                         {
                             *end = NULL;
                             begin++;
-                            curEffect->m_szAmount = new char[Util::jstrlen( begin ) + 1];
-                            Util::jstrcpy( curEffect->m_szAmount, begin );
+                            curEffect->SetAmount( begin );
                             JLog( LOG_LEVEL_NOISE, false, "amount=%s ", curEffect->m_szAmount );
                         }
                     }

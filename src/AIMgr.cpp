@@ -234,7 +234,10 @@ void CAIBrain::CollideWithPlayer()
         }
 
         float fDamage = m_pParent->Damage( fDamageMult );
-        g_pGame->GetPlayer()->TakeDamage( fDamage, m_pParent->GetName() );
+        uint32 dwElement = ( m_pParent->m_pCurrentAttack->m_dwEffectFlags > 0 )
+                               ? (uint32)m_pParent->m_pCurrentAttack->m_dwEffectFlags
+                               : 0;
+        g_pGame->GetPlayer()->TakeDamage( fDamage, m_pParent->GetName(), dwElement );
         m_pParent->AttackDone();
     }
 }

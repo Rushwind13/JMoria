@@ -270,6 +270,7 @@ public:
     JResult DoIdentify();
     JResult DoGainEffects( CEffect *pEffect );
     JResult DoLoseEffects( CEffect *pEffect );
+    JResult DoSeeEffects( CEffect *pEffect );
     JResult DoTeleport( CEffect *pEffect );
     JResult DoMagicMapping( CEffect *pEffect );
     JResult DoRecall();
@@ -301,7 +302,8 @@ public:
     float Damage( float fDamageMult );
 
     bool Hit( float &fRoll );
-    int TakeDamage( float fDamage, const char *szMon );
+    int TakeDamage( float fDamage, const char *szMon, uint32 dwElement = 0 );
+    float Resist( uint32 dwElement );
 
     void OnKillMonster( CMonster *pMon );
 

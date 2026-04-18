@@ -14,7 +14,8 @@ CMonster::CMonster()
       m_pBrain( NULL ),
       m_fColorChangeInterval( COLOR_CHANGE_TIMEOUT + 1 ),
       m_fLastBreed( BREED_INTERVAL ),
-      m_dwInstanceId( 0 )
+      m_dwInstanceId( 0 ),
+      m_bDetected( false )
 {
     m_pBrain = new CAIBrain;
 }

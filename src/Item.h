@@ -345,6 +345,7 @@ public:
 
     static JResult CreateItem( CItemDef *pid, JVector vSpawnPoint = JVector( -1, -1 ),
                                bool bNear = false );
+    void Imbue( int depth );
     JResult SpawnItem( JVector vSpawnPoint = JVector( -1, -1 ) );
     JResult SpawnAt( JVector vSpawnPoint );
 

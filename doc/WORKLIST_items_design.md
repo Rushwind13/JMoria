@@ -14,6 +14,79 @@ Section key (Effects-Design.md): §1 Data Model, §2 Effects.txt Format, §3 Gra
 §13 Monster Attack Architecture
 
 ### Design Decisions (need answers before implementation)
+Open design decisions Matrix. All items that have `+` need an item to be created for that effect, and require confirmation by asking questions.
+Word 1 (32 flags, all used)
+Flag	Has Potion	Has Scroll	Has Wand	Has Staff	Has Ring	Gap?
+FIRE	Resist	—	Firebolt, Fireball (Effects.txt)	+	Resist	No wand item yet
+COLD	Resist	—	Frost Bolt (Effects.txt)	+	Resist	No wand item yet
+ELECTRICITY	Resist	—	Lightning (Effects.txt)	+	Resist	No wand item yet
+ACID	Resist	—	+	+	Resist	No bolt/ball effect, no wand
+POISON	Inflict, Cure, +Slow	—	—	+	—	No offensive wand/staff
+LIGHT	—	Light	Light (wand)	+	+protfrom	Covered
+PARALYZE	+	—	+	—	—	Nothing uses it as item
+TREASURE	—	+	—	+	+	Nothing uses it
+AFRAID	+cure	+scare	+	—	—	Nothing uses it as item
+BLIND	Inflict (potion)	—	—	—	—	Only negative potion
+SLEEP	+	—	+	+	—	Nothing uses it as item
+CONFUSE	Inflict	—	+	—	—	Only negative potion
+STONE_TO_MUD	—	—	+	—	—	Nothing uses it
+FUEL	—	+	—	+	—	Flask of Oil only
+INFRA	Timed buff	—	—	—	+	Helm of Infravision
+ESP	—	Telepathy	—	+	Telepathy	Covered
+IDENTIFY	—	Identify	—	+	—	No staff yet
+RECALL	—	Word of Recall	—	+	—	No staff yet
+MAPPING	—	Magic Mapping, *MM*	—	+	—	No staff yet
+SUMMON	—	Summon Monsters	+	+	—	No staff yet
+STAT	+	—	—	—	+	Blocked by #197
+TOHIT	—	+	—	—	+	Enchant system needed
+TODAM	—	+	—	—	+	Enchant system needed
+AC	—	+	—	—	Protection	Partial
+XP	+	—	—	—	—	Nothing uses it
+HP	Minor Healing	—	—	+	+	Missing higher tiers
+MP	+	—	—	—	+	Blocked by classes #239
+TELEPORT	—	Phase Door, Teleport	Teleport Away (Effects.txt)	—	+	No staff yet
+FREE_ACTION	—	—	—	—	Ring	Only ring
+INVISIBLE	Timed buff	—	—	+	Ring	Covered
+LEVITATE	Timed buff	—	—	+	Ring	Covered
+SPEED	Timed buff	—	—	+	Ring	Covered
+
+### Coverage Map — Confirmed Designs
+
+**FIRE / COLD / ELECTRICITY / ACID (Resistance Staves)**
+- Per-element Staff of Fire Resistance, Staff of Cold Resistance, etc. — timed elemental resistance
+- Staff of Resistance — grants all 4 timed resistances at once
+- Staff of *Resistance* — grants all 4 timed immunities (very rare, deep dungeon)
+- Each element needs bolt and ball effects in Effects.txt (ACID bolt/ball not yet defined)
+
+**POISON**
+- Potion of Slow Poison — halves poison damage rate, extends duration (buys time to get to town)
+- Potion of Neutralize Poison — full cure, removes all poison effects
+- Staff of Cure Poison — cure effect available on some healing staves (e.g., Staff of Healing may bundle HP + poison cure)
+
+**LIGHT (Ring)**
+- Deferred — Ring of Light is part of Vampire player race feature (protection from light damage)
+- Not building until Vampire race is implemented
+
+**AFRAID**
+- Potion of Courage — cures fear, grants short timed immunity to fear effects
+- Scroll of Scare Monster — AoE fear effect, causes nearby monsters to flee
+
+**TREASURE**
+- Scroll of Treasure Detection — one-shot, reveals treasure within nearby rect (range-bounded)
+- Staff of Treasure Detection — rechargeable version, same effect
+- Ring of Greed / Ring of Sensing — permanent treasure detection in radius 15 while worn
+- "Greed" = gold/items, "Sensing" = broader (doors, traps, treasure) — naming TBD
+
+**FUEL**
+- Scroll of Recharging — restores charges to a wand or staff, risk of explosion on overcharge
+- Scroll of *Recharging* — stronger version, more charges restored, lower explosion risk
+- Staff of Recharging — rechargeable version (can recharge other staves/wands including other Staves of Recharging, but recharging a Staff of Recharging has higher explosion risk)
+
+**SUMMON**
+- Wand of Summoning — short range (2-3 tiles), spawns monsters at target point
+- Staff of Summoning — summons elite monster + adds (entourage), spawns near player
+
+Get clarity on the above, before doing any other design work.
 - [x] Material system: **implicit from ITEM_IDX type**. Ego+ items resist/are immune to elemental destruction. Books 3-4 resist (books 1-2 vulnerable — players learn to carry spares). (Item §7)
 - [ ] Resistance stacking formula: 50% + 25% = 62.5%? (Effects §8) — deferred to intrinsics deep-dive
 - [x] Weak multiplier: **×2 damage**. (Effects §8)
@@ -81,7 +154,7 @@ Section key (Effects-Design.md): §1 Data Model, §2 Effects.txt Format, §3 Gra
 ### Code Logic — Not Started
 - [x] CEffect deep copy fix for timed AC (Item §16, Effects §10)
 - [x] IMMUNE vs RESIST combat math (Effects §8)
-- [ ] Item spawn quality chain (Item §3, §16)
+- [x] Item spawn quality chain: Normal/Cursed/Magic tier (Item §3, §16) — Ego/Legendary/Unique deferred
 - [x] Charges system: NdM initial (m_szCharges on CItemDef), lifetime limit (m_dwMaxCharges on CItem), fallback 1d20 (Item §6, §16)
 - [ ] Recharge risk curve: f(charges, lifetime, depth) (Item §6, §16)
 - [ ] Enchantment system: +1/+1d3, failure above +10 (Item §11, §16)
@@ -298,7 +371,7 @@ Six tiers of item quality, from the item spawn process:
 
 | Enhancement | Details | Blocking | Source |
 |---|---|---|---|
-| **Item spawn quality chain** | Normal → Cursed → Magic → Ego → Legendary → Unique probability cascade based on dungeon level, item level, luck. | Ego/Legendary/Unique items | #128 comment |
+| ~~**Item spawn quality chain**~~ | ✅ Normal/Cursed/Magic implemented via `Imbue(depth)`: magic chance 5%-85% over depths 0-80, weapon pool 1-7 (depth/10) split to-hit/to-dam, ranged to-hit only, ammo to-dam only, armor 1-4 (depth/15) AC, 5% cursed. Uses `EquipType()` + item index for category. Tuning via `#define IMBUE_*` constants. Ego/Legendary/Unique tiers deferred. | Ego/Legendary/Unique items | #128 comment |
 | **Fuel/recharge system** | F)ill lantern with Flask of Oil (+5000 turns, max 15000). Scroll of Recharging for wands (risk of explosion). | Lantern refueling, wand economy | #121 |
 | **Item destruction from elemental attacks** | Inventory scan on monster elemental hit. Fire: scrolls/potions/leather. Cold: potions. Acid: scrolls/potions/leather/metal. | — (postponed post-PR #235) | #271 |
 | **Enchantment system** | ?Enchant scrolls modify to-hit/to-dam/AC bonuses on equipment. Failure chance above +10. Star-enchant for bulk bonuses. | Enchant scrolls, item quality | #128 |

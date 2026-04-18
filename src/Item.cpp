@@ -13,6 +13,25 @@
 // Simple instance id generator for items
 static uint32 s_nextItemInstanceId = 1;
 
+// --- Magic item spawn tuning ---
+#define IMBUE_CHANCE_MIN 5    // % magic chance at depth 0
+#define IMBUE_CHANCE_MAX 85   // % magic chance at depth 80
+#define IMBUE_CHANCE_DEPTH 80 // depth at which max chance is reached
+#define IMBUE_WEAPON_MAX 7    // max weapon bonus pool
+#define IMBUE_WEAPON_SCALE 10 // depth divisor for weapon pool
+#define IMBUE_ARMOR_MAX 4     // max armor AC bonus
+#define IMBUE_ARMOR_SCALE 15  // depth divisor for armor pool
+#define IMBUE_CURSED_CHANCE 5 // % chance a magic item spawns cursed
+
+// Roll a bonus from 1..(1 + depth/scale), capped at cap
+static int BonusForDepth( int depth, int scale, int cap )
+{
+    int maxVal = 1 + depth / scale;
+    if( maxVal > cap )
+        maxVal = cap;
+    return Util::GetRandom( 1, maxVal );
+}
+
 JResult CItem::CreateItem( CItemDef *pid, JVector vSpawnPoint, bool bNear )
 {
     //    int desired = Util::Roll(pid->m_szAppear);
@@ -24,8 +43,10 @@ JResult CItem::CreateItem( CItemDef *pid, JVector vSpawnPoint, bool bNear )
         // Initialize the Item from the ItemDef
         pItem->Init( pid );
 
-        // Apply cursed flag
-        pItem->SetCursed( 5 );
+        // Imbue weapons/armor with magic bonuses based on dungeon depth
+        int depth =
+            ( g_pGame && g_pGame->GetDungeon() ) ? g_pGame->GetDungeon()->depth : pid->m_dwLevel;
+        pItem->Imbue( depth );
 
         if( g_pGame )
         {
@@ -96,6 +117,72 @@ void CItem::SetCursed( int likelihood )
 {
     int rolled = (int)Util::GetRandom( 1.0f, 100.0f );
     SetCursed( rolled < likelihood );
+}
+
+void CItem::Imbue( int depth )
+{
+    // Items already flagged MAGIC in their definition (e.g., Helm of Infravision)
+    // keep their data-defined bonuses — skip the random magic roll
+    if( m_id->m_dwFlags & ITEM_FLAG_MAGIC )
+        return;
+
+    // Only equipment slots that benefit from magic bonuses
+    int slot = EquipType();
+    bool isRanged = ( m_id->m_dwIndex == ITEM_IDX_BOW || m_id->m_dwIndex == ITEM_IDX_XBOW );
+    bool isWeapon = ( slot == EQUIP_IDX_MAIN_HAND ) && !isRanged;
+    bool isAmmo = ( slot == EQUIP_IDX_AMMO );
+    bool isArmor =
+        ( slot == EQUIP_IDX_ARMOR || slot == EQUIP_IDX_OFF_HAND || slot == EQUIP_IDX_HELMET ||
+          slot == EQUIP_IDX_CLOAK || slot == EQUIP_IDX_GLOVES || slot == EQUIP_IDX_BOOTS );
+
+    if( !isWeapon && !isRanged && !isAmmo && !isArmor )
+        return;
+
+    // Magic chance scales with depth: 5% at depth 0, up to 85% at depth 80
+    int magicChance =
+        IMBUE_CHANCE_MIN + ( depth * ( IMBUE_CHANCE_MAX - IMBUE_CHANCE_MIN ) ) / IMBUE_CHANCE_DEPTH;
+    if( magicChance > IMBUE_CHANCE_MAX )
+        magicChance = IMBUE_CHANCE_MAX;
+
+    int roll = Util::GetRandom( 1, 100 );
+    if( roll > magicChance )
+        return; // mundane: +0, +0
+
+    // -- This item is magical --
+    m_dwFlags |= ITEM_FLAG_MAGIC;
+
+    if( isWeapon )
+    {
+        int pool = BonusForDepth( depth, IMBUE_WEAPON_SCALE, IMBUE_WEAPON_MAX );
+        // Split pool between to-hit and to-damage
+        int toHit = Util::GetRandom( 0, pool );
+        int toDam = pool - toHit;
+        m_fBonusToHit = (float)toHit;
+        m_fBonusToDamage = (float)toDam;
+    }
+    else if( isRanged )
+    {
+        // Ranged weapons (bows/xbows) get to-hit only
+        m_fBonusToHit = (float)BonusForDepth( depth, IMBUE_WEAPON_SCALE, IMBUE_WEAPON_MAX );
+    }
+    else if( isAmmo )
+    {
+        // Ammo (arrows/bolts) get to-dam only
+        m_fBonusToDamage = (float)BonusForDepth( depth, IMBUE_WEAPON_SCALE, IMBUE_WEAPON_MAX );
+    }
+    else if( isArmor )
+    {
+        m_fACBonus = (float)BonusForDepth( depth, IMBUE_ARMOR_SCALE, IMBUE_ARMOR_MAX );
+    }
+
+    // ~5% chance the magic item is cursed — bonuses become penalties
+    if( Util::GetRandom( 1, 100 ) <= IMBUE_CURSED_CHANCE )
+    {
+        SetCursed( true );
+        m_fBonusToHit = -m_fBonusToHit;
+        m_fBonusToDamage = -m_fBonusToDamage;
+        m_fACBonus = -m_fACBonus;
+    }
 }
 
 JResult CItem::SpawnItem( JVector vSpawnPoint )

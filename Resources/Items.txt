@@ -640,6 +640,42 @@ Color       <200,200,255,255>
 Flags       <ITEM_FLAG_STACKS>
 }
 
+Item <Scroll of Door/Stair Location>
+{
+Plural      <Scrolls of Door/Stair Location>
+Type        <ITEM_IDX_SCROLL>
+Effect      <EFFECT_TYPE_SEE>,<EFFECT_FLAG_DOOR>
+Value       40.0
+Level       1
+Weight      0.2
+Color       <200,200,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of Detect Traps>
+{
+Plural      <Scrolls of Detect Traps>
+Type        <ITEM_IDX_SCROLL>
+Effect      <EFFECT_TYPE_SEE>,<EFFECT_FLAG_TRAP>
+Value       50.0
+Level       3
+Weight      0.2
+Color       <200,255,200,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of Detect Monsters>
+{
+Plural      <Scrolls of Detect Monsters>
+Type        <ITEM_IDX_SCROLL>
+Effect      <EFFECT_TYPE_SEE>,<EFFECT_FLAG_MONSTERS>
+Value       60.0
+Level       3
+Weight      0.2
+Color       <255,200,200,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
 Item <Scroll of Summon Monsters>
 {
 Plural      <Scrolls of Summon Monsters>

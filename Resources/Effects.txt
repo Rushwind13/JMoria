@@ -1,0 +1,109 @@
+# Effects.txt
+#
+# Named effect catalog — the single source of truth for what an effect does.
+# Items, monsters, and spells all reference these by name.
+#
+# Each Effect entry is of the following form:
+#
+# Effect <effect-name>
+# {
+#    variable-name    value
+#     ...
+# }
+#
+# Note: delimit <string> values with angle brackets <>
+# Where variable-name/value are name/value pairs
+# from the following list:
+#
+# Type        string    EFFECT_TYPE_* verb (HIT, HEAL, CREATE, DESTROY, INTRINSIC, etc.)
+# Flag        string    EFFECT_FLAG_* noun (FIRE, COLD, LIGHT, HP, etc.)
+# Flag2       string    EFFECT_FLAG2_* noun word 2 (DOOR, TRAP, MONSTERS)
+# Modifier    string    EFFECT_MOD_* adverb (LINE, BALL, AREA, RESIST, TIMED, etc.)
+# Amount      XdY       damage/healing dice rolled per use
+# Duration    float     for timed effects, how long (in game turns)
+# Range       float     max range in tiles (0 = self only)
+# Radius      float     AoE radius (0 = single target)
+
+# Light Ray — a beam of bright light that damages light-sensitive monsters.
+# Used by: Wand of Light, Staff of Starlight (line component)
+Effect <Light Ray>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_LIGHT>
+    Flag2       <EFFECT_FLAG2_NO_COLLIDE>
+    Modifier    <EFFECT_MOD_LINE>
+    Amount      <1d5>
+    Range       15
+}
+
+# Light Area — illuminate the surrounding area.
+# Used by: Scroll of Light, Staff of Light, Wand of Light (area component)
+Effect <Light Area>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_LIGHT>
+    Modifier    <EFFECT_MOD_AREA>
+    Radius      15
+}
+
+# Firebolt — a bolt of fire that damages a target.
+# Used by: Wand of Firebolts, dragon breath (baby), fire traps
+Effect <Firebolt>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_FIRE>
+    Modifier    <EFFECT_MOD_LINE>
+    Amount      <2d8>
+    Range       15
+}
+
+# Fireball — an explosion of fire at a target location.
+# Used by: Wand of Fireballs, dragon breath (mature)
+Effect <Fireball>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_FIRE>
+    Modifier    <EFFECT_MOD_BALL>
+    Amount      <6d8>
+    Range       20
+    Radius      3
+}
+
+# Frost Bolt — a bolt of cold that damages a target.
+Effect <Frost Bolt>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_COLD>
+    Modifier    <EFFECT_MOD_LINE>
+    Amount      <2d8>
+    Range       15
+}
+
+# Lightning Bolt — a bolt of electricity.
+Effect <Lightning Bolt>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_ELECTRICITY>
+    Flag2       <EFFECT_FLAG2_NO_COLLIDE>
+    Modifier    <EFFECT_MOD_LINE>
+    Amount      <3d6>
+    Range       20
+}
+
+# Teleport Away — sends the target to a random location.
+# Used by: Wand of Teleport Away
+Effect <Teleport Away>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_TELEPORT>
+    Range       15
+}
+
+# Minor Healing — restores a small amount of HP and cures poison/blindness.
+# Used by: Potion of Minor Healing
+Effect <Minor Healing>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <4d4>
+}

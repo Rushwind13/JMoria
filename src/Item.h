@@ -4,11 +4,53 @@
 #include "JLinkList.h"
 #include "JMDefs.h"
 
+// Named effect template — shared catalog entry parsed from Effects.txt.
+// Items, monsters, and spells reference these by name.
+class CEffectDef
+{
+public:
+    CEffectDef()
+        : m_szName( NULL ),
+          m_dwEffect( -1 ),
+          m_dwFlags( 0 ),
+          m_dwFlags2( 0 ),
+          m_dwModifier( 0 ),
+          m_szAmount( NULL ),
+          m_fDuration( 0 ),
+          m_fRange( 0.0f ),
+          m_fRadius( 0.0f )
+    {
+    }
+    ~CEffectDef()
+    {
+        if( m_szName )
+        {
+            delete[] m_szName;
+            m_szName = NULL;
+        }
+        if( m_szAmount )
+        {
+            delete[] m_szAmount;
+            m_szAmount = NULL;
+        }
+    }
+    char *m_szName;    // "Firebolt", "Light Ray", etc.
+    int m_dwEffect;    // EFFECT_TYPE_HIT, EFFECT_TYPE_HEAL, etc.
+    uint32 m_dwFlags;  // EFFECT_FLAG_FIRE, EFFECT_FLAG_LIGHT, etc.
+    uint32 m_dwFlags2; // EFFECT_FLAG2_DOOR, EFFECT_FLAG2_NO_COLLIDE, etc.
+    int m_dwModifier;  // EFFECT_MOD_LINE, EFFECT_MOD_BALL, etc.
+    char *m_szAmount;  // NdM dice string for damage/healing per use
+    float m_fDuration; // for timed effects
+    float m_fRange;    // max range in tiles
+    float m_fRadius;   // AoE radius (0 = single target)
+};
+
 class CEffect
 {
 public:
     CEffect()
-        : m_dwEffect( -1 ),
+        : m_ed( NULL ),
+          m_dwEffect( -1 ),
           m_dwFlags( 0 ),
           m_dwFlags2( 0 ),
           m_dwModifier( 0 ),
@@ -24,6 +66,7 @@ public:
             m_szAmount = NULL;
         }
     }
+    CEffectDef *m_ed; // pointer to shared effect definition (NULL for inline effects)
     int m_dwEffect;
     uint32 m_dwFlags;
     uint32 m_dwFlags2;
@@ -43,11 +86,12 @@ public:
           m_szUnidentifiedPlural( NULL ),
           m_szFlavor( NULL ),
           m_fSpeed( 0.0f ),
-          m_fACBonus( 0.0f ),
+          m_szACBonus( NULL ),
           m_fBaseAC( 0.0f ),
           m_szBaseDamage( NULL ),
-          m_fBonusToHit( 0.0f ),
-          m_fBonusToDamage( 0.0f ),
+          m_szBonusToHit( NULL ),
+          m_szBonusToDamage( NULL ),
+          m_szCharges( NULL ),
           m_dwLevel( 0 ),
           m_fValue( 0.0f ),
           m_fWeight( 0.0f ),
@@ -94,6 +138,26 @@ public:
             delete[] m_szBaseDamage;
             m_szBaseDamage = NULL;
         }
+        if( m_szACBonus )
+        {
+            delete[] m_szACBonus;
+            m_szACBonus = NULL;
+        }
+        if( m_szBonusToHit )
+        {
+            delete[] m_szBonusToHit;
+            m_szBonusToHit = NULL;
+        }
+        if( m_szBonusToDamage )
+        {
+            delete[] m_szBonusToDamage;
+            m_szBonusToDamage = NULL;
+        }
+        if( m_szCharges )
+        {
+            delete[] m_szCharges;
+            m_szCharges = NULL;
+        }
         if( m_Colors )
         {
             m_Colors->Terminate();
@@ -113,11 +177,12 @@ public:
     char *m_szUnidentifiedPlural;
     char *m_szFlavor; // "Green" Potion
     float m_fSpeed;
-    float m_fACBonus;
+    char *m_szACBonus; // NdM dice string for magical AC bonus (rolled per-instance)
     float m_fBaseAC;
     char *m_szBaseDamage;
-    float m_fBonusToHit;
-    float m_fBonusToDamage;
+    char *m_szBonusToHit;    // NdM dice string for magical to-hit bonus (rolled per-instance)
+    char *m_szBonusToDamage; // NdM dice string for magical to-damage bonus (rolled per-instance)
+    char *m_szCharges;       // NdM dice string for initial charges (rolled per-instance)
     int m_dwLevel;
     float m_fValue;
     float m_fWeight;
@@ -137,7 +202,8 @@ private:
     // Member Functions
 public:
     void FormatProperties( char *szOut, int maxLen, uint32 knownProps, uint32 itemFlags,
-                           uint32 charges );
+                           uint32 charges, float fACBonus, float fBonusToHit,
+                           float fBonusToDamage );
 
 protected:
 private:
@@ -152,9 +218,13 @@ public:
     int m_dwCount; // how many of this item are being carried?
     int m_dwFlags; // item cursed, or other specific to this instance, rather than in the general
                    // CItemDef
-    uint32 m_dwCharges;    // for wands and staves and other items that have an "ammo count"
-    uint32 m_dwInstanceId; // unique instance id for this item
-    uint32 m_dwKnownProps; // bitmask of known properties (KNOWN_CURSED, KNOWN_BONUSES, etc.)
+    uint32 m_dwCharges;     // for wands and staves and other items that have an "ammo count"
+    uint32 m_dwMaxCharges;  // lifetime charge limit for recharge explosion curve
+    uint32 m_dwInstanceId;  // unique instance id for this item
+    uint32 m_dwKnownProps;  // bitmask of known properties (KNOWN_CURSED, KNOWN_BONUSES, etc.)
+    float m_fACBonus;       // per-instance rolled magical AC bonus
+    float m_fBonusToHit;    // per-instance rolled magical to-hit bonus
+    float m_fBonusToDamage; // per-instance rolled magical to-damage bonus
 protected:
     float m_fColorChangeInterval;
     JColor m_Color;
@@ -168,8 +238,12 @@ public:
         : m_vPos( 0, 0 ),
           m_dwFlags( 0 ),
           m_dwCharges( 0 ),
+          m_dwMaxCharges( 0 ),
           m_dwInstanceId( 0 ),
           m_dwKnownProps( 0 ),
+          m_fACBonus( 0.0f ),
+          m_fBonusToHit( 0.0f ),
+          m_fBonusToDamage( 0.0f ),
           m_dwCount( 1 ),
           m_pllLink( NULL ),
           m_id( NULL ),

@@ -191,10 +191,10 @@
 // #define MON_FLAG_x          0x00004000
 #define MON_FLAG_BREED 0x00008000
 
-#define MON_FLAG_INVISIBLE          0x00100000
+#define MON_FLAG_INVISIBLE 0x00100000
 // #define MON_FLAG_x          0x00200000
 // #define MON_FLAG_x          0x00400000
-#define MON_FLAG_MAXHP          0x00800000
+#define MON_FLAG_MAXHP 0x00800000
 
 #define MON_AI_DONTMOVE 0x01000000
 #define MON_AI_100RANDOMMOVE 0x02000000
@@ -255,20 +255,20 @@
 #define EFFECT_FLAG2_DOOR 0x00000001
 #define EFFECT_FLAG2_TRAP 0x00000002
 #define EFFECT_FLAG2_MONSTERS 0x00000004
-// #define EFFECT_FLAG2_x 0x00000008
+#define EFFECT_FLAG2_NO_COLLIDE 0x00000008
 
 // #define EFFECT_FLAG2_x 0x00000010
 // #define EFFECT_FLAG2_x 0x00000020
 // #define EFFECT_FLAG2_x 0x00000040
 // #define EFFECT_FLAG2_x 0x00000080
 
-#define NUM_EFFECT_FLAGS2 3
+#define NUM_EFFECT_FLAGS2 4
 
 // Effect Modifiers
 #define EFFECT_MOD_RESIST 0x000000001
 #define EFFECT_MOD_IMMUNE 0x000000002
-#define EFFECT_MOD_WEAK   0x000000004
-#define EFFECT_MOD_TIMED  0x000000008
+#define EFFECT_MOD_WEAK 0x000000004
+#define EFFECT_MOD_TIMED 0x000000008
 
 #define EFFECT_MOD_AREA 0x000000010
 #define EFFECT_MOD_LINE 0x000000020
@@ -371,7 +371,7 @@
 #define ITEM_FLAG_MAINHAND 0x00000040
 #define ITEM_FLAG_NEEDSAMMO 0x00000080
 
-#define ITEM_FLAG_NO_COLLIDE 0x00000100
+// #define ITEM_FLAG_x 0x00000100
 // #define ITEM_FLAG_x 0x00000200
 // #define ITEM_FLAG_x 0x00000400
 // #define ITEM_FLAG_x 0x00000800
@@ -389,7 +389,7 @@
 #define KNOWN_CHARGES 0x00000004
 #define KNOWN_TRIED 0x00000008
 
-#define NUM_ITEM_FLAGS 12
+#define NUM_ITEM_FLAGS 11
 
 // Make sure you change below here if you added any flags.
 #define NUM_STRINGS                                                                                \
@@ -560,6 +560,7 @@ public:
         m_StringTable[i++].Init( "EFFECT_FLAG2_DOOR", EFFECT_FLAG2_DOOR, EFFECT_FLAG2 );
         m_StringTable[i++].Init( "EFFECT_FLAG2_TRAP", EFFECT_FLAG2_TRAP, EFFECT_FLAG2 );
         m_StringTable[i++].Init( "EFFECT_FLAG2_MONSTERS", EFFECT_FLAG2_MONSTERS, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG2_NO_COLLIDE", EFFECT_FLAG2_NO_COLLIDE, EFFECT_FLAG2 );
 
         // Effect Modifiers
         m_StringTable[i++].Init( "EFFECT_MOD_RESIST", EFFECT_MOD_RESIST );
@@ -641,7 +642,6 @@ public:
         m_StringTable[i++].Init( "ITEM_FLAG_OFFHAND", ITEM_FLAG_OFFHAND );
         m_StringTable[i++].Init( "ITEM_FLAG_MAINHAND", ITEM_FLAG_MAINHAND );
         m_StringTable[i++].Init( "ITEM_FLAG_NEEDSAMMO", ITEM_FLAG_NEEDSAMMO );
-        m_StringTable[i++].Init( "ITEM_FLAG_NO_COLLIDE", ITEM_FLAG_NO_COLLIDE );
         m_StringTable[i++].Init( "ITEM_FLAG_BLESSED", ITEM_FLAG_BLESSED );
         m_StringTable[i++].Init( "ITEM_FLAG_HOLDING", ITEM_FLAG_HOLDING );
         m_StringTable[i++].Init( "ITEM_COLOR_MULTI", ITEM_COLOR_MULTI );

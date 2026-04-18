@@ -79,6 +79,24 @@ void CDungeon::Init( const char *szBasedir )
         }
     }
 
+    // Load the effect catalog from config (before monsters and items, so both can reference by
+    // name)
+    m_llEffectDefs = new JLinkList<CEffectDef>;
+
+    CEffectDef *ped;
+    CDataFile dfEffects;
+    char szEffectFilename[256];
+    sprintf( szEffectFilename, "%s%s", szBasedir, "Resources/Effects.txt" );
+    dfEffects.Open( szEffectFilename );
+
+    ped = new CEffectDef;
+    while( dfEffects.ReadEffect( *ped ) )
+    {
+        m_llEffectDefs->Add( ped );
+        ped = new CEffectDef;
+    }
+    delete ped;
+
     // Load the monster list from config
     // TODO: Make this a method on CMonsterDef.
     m_llMonsterDefs = new JLinkList<CMonsterDef>;
@@ -88,6 +106,7 @@ void CDungeon::Init( const char *szBasedir )
     char szMonsterFile[256];
     sprintf( szMonsterFile, "%s%s", szBasedir, "Resources/Monsters.txt" );
     dfMonsters.Open( szMonsterFile );
+    dfMonsters.SetDungeon( this );
 
     pmd = new CMonsterDef;
     while( dfMonsters.ReadMonster( *pmd ) )
@@ -107,6 +126,7 @@ void CDungeon::Init( const char *szBasedir )
     char szItemFilename[256];
     sprintf( szItemFilename, "%s%s", szBasedir, "Resources/Items.txt" );
     dfItems.Open( szItemFilename );
+    dfItems.SetDungeon( this );
 
     pid = new CItemDef;
     while( dfItems.ReadItem( *pid ) )
@@ -666,6 +686,24 @@ CItemDef *CDungeon::GetItemDef( int which_item )
         return NULL;
     }
     return m_llItemDefs->GetLink( which_item )->m_lpData;
+}
+
+CEffectDef *CDungeon::GetEffectDef( const char *szEffectName )
+{
+    CLink<CEffectDef> *pLink = m_llEffectDefs->GetHead();
+    CEffectDef *ped;
+    if( pLink == NULL )
+        return NULL;
+    while( pLink != NULL )
+    {
+        ped = pLink->m_lpData;
+        if( Util::jstrcmp( ped->m_szName, szEffectName ) == 0 )
+        {
+            return ped;
+        }
+        pLink = pLink->next;
+    }
+    return NULL;
 }
 
 int CDungeon::ChooseItemForDepth( const int depth )

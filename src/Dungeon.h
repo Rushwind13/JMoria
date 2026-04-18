@@ -39,6 +39,7 @@ protected:
     CDungeonTileDef *m_dtdlist;
     JLinkList<CMonsterDef> *m_llMonsterDefs;
     JLinkList<CItemDef> *m_llItemDefs;
+    JLinkList<CEffectDef> *m_llEffectDefs;
     JVector m_vLookPos;
     JVector m_vProjectilePos;
     JLinkList<JIVector> *m_llLOSLine;
@@ -63,6 +64,7 @@ public:
           m_llMonsters( NULL ),
           m_llOpenArea( NULL ),
           m_llItemDefs( NULL ),
+          m_llEffectDefs( NULL ),
           m_llMonsterDefs( NULL ),
           m_llLOSLine( NULL ),
           m_dmCurLevel( NULL ) {};
@@ -155,6 +157,7 @@ public:
     CMonsterDef *GetMonsterDef( int which_monster );
     CItemDef *GetItemDef( const char *szItemName );
     CItemDef *GetItemDef( int which_item );
+    CEffectDef *GetEffectDef( const char *szEffectName );
     bool SpawnMonster( int which_monster );
     void RemoveMonster( CMonster *pMon );
 

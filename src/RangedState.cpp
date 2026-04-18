@@ -322,8 +322,7 @@ bool CollisionCheck( JVector &vTest )
 
 int CRangedState::BuildTrajectory()
 {
-    m_llTrajectory =
-        Util::GenerateLine( m_vCurrentPosition, m_vTarget, PROJECTILE_RANGE );
+    m_llTrajectory = Util::GenerateLine( m_vCurrentPosition, m_vTarget, PROJECTILE_RANGE );
 
     if( m_llTrajectory && m_llTrajectory->length() > 0 )
     {
@@ -492,10 +491,8 @@ bool CRangedState::DoTrajectory()
         BuildTrajectory();
     }
 
-    JLog( LOG_LEVEL_DEBUG, true, "doing trajectory %d/%d\n", m_dwClock,
-          m_llTrajectory->length() );
-    m_vCurrentPosition.Init(
-        VEC_EXPAND( *( m_llTrajectory->GetNthLink( m_dwClock )->m_lpData ) ) );
+    JLog( LOG_LEVEL_DEBUG, true, "doing trajectory %d/%d\n", m_dwClock, m_llTrajectory->length() );
+    m_vCurrentPosition.Init( VEC_EXPAND( *( m_llTrajectory->GetNthLink( m_dwClock )->m_lpData ) ) );
     m_dwClock++;
     JVector vTest( VEC_EXPAND( m_vCurrentPosition ) );
     JLog( LOG_LEVEL_DEBUG, true, "pos <%d %d>\n", VEC_EXPAND( m_vCurrentPosition ) );
@@ -525,12 +522,27 @@ bool CRangedState::DoTrajectory()
             JLog( LOG_LEVEL_ERROR, true, "very confused in DoTrajectory: %d\n", m_cCommand );
             break;
         }
-        if( ( m_pSelected->m_lpData->m_dwFlags & ITEM_FLAG_NO_COLLIDE ) == 0 )
+        // Check if any effect on this item has NO_COLLIDE (pass-through)
         {
-            JLog( LOG_LEVEL_DEBUG, true,
-                  "Projectile collided. RANGED state complete, reset to CMD state.\n" );
-            ResetToState( STATE_COMMAND );
-            return true;
+            bool bNoCollide = false;
+            CLink<CEffect> *plEff = m_pSelected->m_lpData->m_id->m_llEffects->GetHead();
+            while( plEff != NULL )
+            {
+                CEffectDef *pDef = plEff->m_lpData->m_ed;
+                if( pDef && ( pDef->m_dwFlags2 & EFFECT_FLAG2_NO_COLLIDE ) )
+                {
+                    bNoCollide = true;
+                    break;
+                }
+                plEff = plEff->next;
+            }
+            if( !bNoCollide )
+            {
+                JLog( LOG_LEVEL_DEBUG, true,
+                      "Projectile collided. RANGED state complete, reset to CMD state.\n" );
+                ResetToState( STATE_COMMAND );
+                return true;
+            }
         }
         break;
     case DUNG_COLL_ITEM:

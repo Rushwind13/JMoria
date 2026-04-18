@@ -586,11 +586,11 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
     // Now put on the new item.
     m_llInventory->Remove( pLink, false );
     pItem->m_pllLink = m_llEquipment->Add( pItem, pItem->EquipType(), pItem->GetInstanceId() );
-    m_fArmorClass += pItem->m_id->m_fBaseAC + pItem->m_id->m_fACBonus;
+    m_fArmorClass += pItem->m_id->m_fBaseAC + pItem->m_fACBonus;
     if( pItem->m_id->m_szBaseDamage != NULL )
         Util::jstrcpy( m_szDamage, pItem->m_id->m_szBaseDamage );
-    m_fDamageModifier += pItem->m_id->m_fBonusToDamage;
-    m_fToHitModifier += pItem->m_id->m_fBonusToHit;
+    m_fDamageModifier += pItem->m_fBonusToDamage;
+    m_fToHitModifier += pItem->m_fBonusToHit;
 
     // Defensive: if this is a two-handed weapon, ensure off-hand is clear.
     if( pItem->m_id && ( pItem->m_id->m_dwFlags & ITEM_FLAG_2HANDED ) )
@@ -649,11 +649,11 @@ bool CPlayer::RemoveEquipment( CLink<CItem> *pLink )
 
     m_llEquipment->Remove( pLink, false );
     pItem->m_pllLink = m_llInventory->Add( pItem, pItem->m_id->m_dwIndex, pItem->GetInstanceId() );
-    m_fArmorClass -= pItem->m_id->m_fBaseAC + pItem->m_id->m_fACBonus;
+    m_fArmorClass -= pItem->m_id->m_fBaseAC + pItem->m_fACBonus;
     if( pItem->m_id->m_szBaseDamage != NULL )
         Util::jstrcpy( m_szDamage, PLAYER_BASE_DAMAGE );
-    m_fDamageModifier -= pItem->m_id->m_fBonusToDamage;
-    m_fToHitModifier -= pItem->m_id->m_fBonusToHit;
+    m_fDamageModifier -= pItem->m_fBonusToDamage;
+    m_fToHitModifier -= pItem->m_fBonusToHit;
 
     return true;
 }
@@ -961,7 +961,7 @@ JResult CPlayer::Read( CLink<CItem> *pLink )
 
 JResult CPlayer::Zap( CLink<CItem> *pLink )
 {
-    // this will get called multiple times for a single shot, if NO_COLLIDE is set,
+    // this will get called multiple times for a single shot, if EFFECT_FLAG2_NO_COLLIDE is set,
     // this function is to do damage to the monster in the current position
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
@@ -971,7 +971,7 @@ JResult CPlayer::Zap( CLink<CItem> *pLink )
 
 JResult CPlayer::Fire( CLink<CItem> *pLink )
 {
-    // this will get called multiple times for a single shot, if NO_COLLIDE is set,
+    // this will get called multiple times for a single shot, if EFFECT_FLAG2_NO_COLLIDE is set,
     // this function is to do damage to the monster in the current position
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();

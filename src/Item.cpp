@@ -49,6 +49,12 @@ void CItem::Init( CItemDef *pid )
         m_dwInstanceId = s_nextItemInstanceId++;
     }
     m_Color.SetColor( m_id->m_Color );
+
+    // Roll per-instance bonuses from CItemDef NdM dice strings
+    m_fACBonus = m_id->m_szACBonus ? Util::Roll( m_id->m_szACBonus ) : 0.0f;
+    m_fBonusToHit = m_id->m_szBonusToHit ? Util::Roll( m_id->m_szBonusToHit ) : 0.0f;
+    m_fBonusToDamage = m_id->m_szBonusToDamage ? Util::Roll( m_id->m_szBonusToDamage ) : 0.0f;
+
     switch( m_id->m_dwIndex )
     {
     case ITEM_IDX_POTION:
@@ -58,7 +64,15 @@ void CItem::Init( CItemDef *pid )
         break;
     case ITEM_IDX_STAFF:
     case ITEM_IDX_WAND:
-        m_dwCharges = Util::Roll( "1d20" );
+        if( m_id->m_szCharges )
+        {
+            m_dwCharges = (uint32)Util::Roll( m_id->m_szCharges );
+        }
+        else
+        {
+            m_dwCharges = (uint32)Util::Roll( "1d20" );
+        }
+        m_dwMaxCharges = m_dwCharges * 2;
         break;
     }
 }
@@ -183,7 +197,8 @@ int CItem::EquipType()
 }
 
 void CItemDef::FormatProperties( char *szOut, int maxLen, uint32 knownProps, uint32 itemFlags,
-                                 uint32 charges )
+                                 uint32 charges, float fACBonus, float fBonusToHit,
+                                 float fBonusToDamage )
 {
     int pos = 0;
     if( knownProps & KNOWN_BONUSES )
@@ -197,9 +212,9 @@ void CItemDef::FormatProperties( char *szOut, int maxLen, uint32 knownProps, uin
         case ITEM_IDX_AXE:
         case ITEM_IDX_POLEARM:
         case ITEM_IDX_2H_SWORD:
-            if( m_fBonusToHit != 0.0f || m_fBonusToDamage != 0.0f )
-                pos += snprintf( szOut + pos, maxLen - pos, " (%+.0f, %+.0f)", m_fBonusToHit,
-                                 m_fBonusToDamage );
+            if( fBonusToHit != 0.0f || fBonusToDamage != 0.0f )
+                pos += snprintf( szOut + pos, maxLen - pos, " (%+.0f, %+.0f)", fBonusToHit,
+                                 fBonusToDamage );
             break;
         case ITEM_IDX_ARMOR:
         case ITEM_IDX_SHIELD:
@@ -207,16 +222,16 @@ void CItemDef::FormatProperties( char *szOut, int maxLen, uint32 knownProps, uin
         case ITEM_IDX_CLOAK:
         case ITEM_IDX_GLOVES:
         case ITEM_IDX_BOOTS:
-            if( m_fACBonus != 0.0f )
-                pos += snprintf( szOut + pos, maxLen - pos, " [%+.0f]", m_fACBonus );
+            if( fACBonus != 0.0f )
+                pos += snprintf( szOut + pos, maxLen - pos, " [%+.0f]", fACBonus );
             break;
         case ITEM_IDX_RING:
         case ITEM_IDX_AMULET:
-            if( m_fBonusToHit != 0.0f || m_fBonusToDamage != 0.0f )
-                pos += snprintf( szOut + pos, maxLen - pos, " (%+.0f, %+.0f)", m_fBonusToHit,
-                                 m_fBonusToDamage );
-            else if( m_fACBonus != 0.0f )
-                pos += snprintf( szOut + pos, maxLen - pos, " [%+.0f]", m_fACBonus );
+            if( fBonusToHit != 0.0f || fBonusToDamage != 0.0f )
+                pos += snprintf( szOut + pos, maxLen - pos, " (%+.0f, %+.0f)", fBonusToHit,
+                                 fBonusToDamage );
+            else if( fACBonus != 0.0f )
+                pos += snprintf( szOut + pos, maxLen - pos, " [%+.0f]", fACBonus );
             break;
         default:
             break;
@@ -255,7 +270,7 @@ const char *CItem::GetName()
     snprintf( szDisplay, sizeof( szDisplay ), "%s", baseName );
     int baseLen = strlen( szDisplay );
     m_id->FormatProperties( szDisplay + baseLen, sizeof( szDisplay ) - baseLen, m_dwKnownProps,
-                            m_dwFlags, m_dwCharges );
+                            m_dwFlags, m_dwCharges, m_fACBonus, m_fBonusToHit, m_fBonusToDamage );
     return szDisplay;
 }
 
@@ -281,7 +296,7 @@ const char *CItem::GetPlural()
     snprintf( szDisplay, sizeof( szDisplay ), "%s", baseName );
     int baseLen = strlen( szDisplay );
     m_id->FormatProperties( szDisplay + baseLen, sizeof( szDisplay ) - baseLen, m_dwKnownProps,
-                            m_dwFlags, m_dwCharges );
+                            m_dwFlags, m_dwCharges, m_fACBonus, m_fBonusToHit, m_fBonusToDamage );
     return szDisplay;
 }
 

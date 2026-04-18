@@ -33,7 +33,7 @@ Section key: §1 Data Model, §2 Effect Grammar, §3 Wands vs Staves, §4 Qualit
 ### Effect System — Unimplemented Handlers
 - [ ] EFFECT_TYPE_SEE handler (§2, §17)
 - [ ] DoHitEffects: elemental nouns (FIRE, COLD, ELECTRICITY, ACID) — only handled in Monster.cpp, not player-side (§2, §17)
-- [ ] 7 dead EFFECT_FLAGs: TREASURE, STONE_TO_MUD, STAT, TOHIT, TODAM, AC, MP — no handler in any verb (§2)
+- [ ] 7 to-be-used EFFECT_FLAGs: TREASURE, STONE_TO_MUD, STAT, TOHIT, TODAM, AC, MP — no items built with these yet (§2)
 - [ ] EFFECT_MOD audit: ENCHANT, IMMUNE, WEAK, SEE — verify which are checked in handler code (§2)
 - [ ] DESTROY handler uses ITEM_FLAG_CURSED instead of EFFECT_FLAG — design smell, clarify intent (§2)
 

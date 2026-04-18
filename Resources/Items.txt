@@ -29,6 +29,7 @@
 # Speed        float     how quickly one can attack with this item
 # Weight       float     weight of the item in pounds
 # Effect       string,XdY string = what it does, XdY = how much or for how long
+# Charges      XdY    initial charges for wands/staves (rolled per instance)
 #
 #
 # example item entry follows: e.g.
@@ -726,14 +727,14 @@ Item <Wand of Light>
 {
 Plural      <Wands of Light>
 Type        <ITEM_IDX_WAND>
-Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_LIGHT>,<EFFECT_MOD_LINE>
-Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_LIGHT>
-Damage      1d5 #  "bright light" damage
+Effect      <Light Ray>
+Effect      <Light Area>
+Charges     <3d8>
 Value       100.0
 Level       1
 Weight      4.0
 Color       <255,255,255,255>
-Flags       <ITEM_FLAG_STACKS,ITEM_FLAG_NO_COLLIDE>
+Flags       <ITEM_FLAG_STACKS>
 }
 
 # Weapons

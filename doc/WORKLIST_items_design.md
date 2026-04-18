@@ -2,76 +2,99 @@
 
 ## Checklist: Item-Design.md Completion
 
-Section key: §1 Data Model, §2 Effect Grammar, §3 Wands vs Staves, §4 Quality Tiers,
-§5 Identification, §6 Stacking, §7 Charges & Recharge, §8 Item Destruction,
-§9 Ego Items, §10 Legendary Items, §11 Unique Items, §12 Enchant Scrolls,
-§13 New Item Catalog, §14 Encumbrance, §15 Economy & Shops, §16 Dependency Map,
-§17 Code Logic Tracking, §18 Constants.h Tracking, §19 Class/Item Synergies, §20 Intrinsics Grid
+Section key (Item-Design.md): §1 Data Model, §2 Wands vs Staves, §3 Quality Tiers,
+§4 Identification, §5 Stacking, §6 Charges & Recharge, §7 Item Destruction,
+§8 Ego Items, §9 Legendary Items, §10 Unique Items, §11 Enchant Scrolls,
+§12 New Item Catalog, §13 Encumbrance, §14 Economy & Shops, §15 Dependency Map,
+§16 Code Logic Tracking, §17 Constants.h Tracking, §18 Class/Item Synergies, §19 Intrinsics Grid
+
+Section key (Effects-Design.md): §1 Data Model, §2 Effects.txt Format, §3 Grammar,
+§4 Verbs, §5 Nouns Word 1, §6 Nouns Word 2, §7 Adverbs, §8 Combat Math,
+§9 Named Effect Catalog, §10 Handler Status, §11 Constants, §12 Dependencies,
+§13 Monster Attack Architecture
 
 ### Design Decisions (need answers before implementation)
-- [x] Material system: **implicit from ITEM_IDX type**. Ego+ items resist/are immune to elemental destruction. Books 3-4 resist (books 1-2 vulnerable — players learn to carry spares). (§8)
-- [ ] Resistance stacking formula: 50% + 25% = 62.5%? (§20) — deferred to intrinsics deep-dive
-- [x] Weak multiplier: **×2 damage**. (§20)
+- [x] Material system: **implicit from ITEM_IDX type**. Ego+ items resist/are immune to elemental destruction. Books 3-4 resist (books 1-2 vulnerable — players learn to carry spares). (Item §7)
+- [ ] Resistance stacking formula: 50% + 25% = 62.5%? (Effects §8) — deferred to intrinsics deep-dive
+- [x] Weak multiplier: **×2 damage**. (Effects §8)
+
+### Item/Effect Documentation Refactoring (Done)
+- [x] Effect grammar (verbs, nouns, adverbs) moved from Item-Design §2 to Effects-Design §3-§7
+- [x] Effect handler tracking moved to Effects-Design §10
+- [x] Effect constants moved to Effects-Design §11
+- [x] Effect dependencies moved to Effects-Design §12
+- [x] Resistance math moved to Effects-Design §8
+- [x] Item-Design renumbered §2-§19 (old §3-§20)
+- [x] Cross-references added between all three design docs
+
+### Monster Attack Architecture (Done — Effects-Design §13)
+- [x] CAttack group system: weighted groups, monster picks one per turn
+- [x] Attack entry format: delivery + optional dice + optional named effect + optional overrides
+- [x] Override syntax: `<Range=8, Radius=5, Amount=6d8>` for per-instance field overrides
+- [x] Compound attacks: physical dice + saving-throw-gated named effect (bite + poison)
+- [x] Backward compatibility: bare Attack lines auto-wrap into default Melee group
+- [x] AI range gating: new MON_AI types (CHASE_RANGED, LAZY_RANGED, PURE_RANGED)
+- [x] MAXED flag on CMonsterDef for max-damage monsters
 
 ### Item Data — TBD Definitions
-- [ ] Ego data format: file format for ego definitions (type restrictions, intrinsics, rarity, depth) (§9)
-- [ ] Legendary constellations: Westernesse, Holy Avenger, Defender, Amulet of the Magi, Morgul Blade — all TBD (§10)
-- [ ] Unique item details: Menthir intrinsics/carrier, Excalibur intrinsics (§11)
-- [ ] Uniques.txt file format design (§11)
-- [ ] Empty type content: Food, Books, Arrows, Bolts, Money, Chests, Belts, Amulets (§13)
+- [ ] Ego data format: file format for ego definitions (type restrictions, intrinsics, rarity, depth) (Item §8)
+- [ ] Legendary constellations: Westernesse, Holy Avenger, Defender, Amulet of the Magi, Morgul Blade — all TBD (Item §9)
+- [ ] Unique item details: Menthir intrinsics/carrier, Excalibur intrinsics (Item §10)
+- [ ] Uniques.txt file format design (Item §10)
+- [ ] Empty type content: Food, Books, Arrows, Bolts, Money, Chests, Belts, Amulets (Item §12)
 
 ### Item Data Model — CItem/CItemDef Fields Needed
-- [x] Per-instance bonuses on CItem: m_fBonusToHit, m_fBonusToDamage, m_fACBonus — CItemDef stores NdM strings, CItem rolls at creation (§1)
-- [x] Lifetime charge limit field on CItem (m_dwMaxCharges) — set to 2× initial charges (§1, §7)
-- [ ] Ego/legendary/unique identity field on CItem — needed for quality tier tracking (§1, §9, §10, §11)
-- [ ] Dead field: CItemDef::m_dwBaseHP — initialized to 0, never populated by parser. Remove or repurpose (§1)
+- [x] Per-instance bonuses on CItem: m_fBonusToHit, m_fBonusToDamage, m_fACBonus — CItemDef stores NdM strings, CItem rolls at creation (Item §1)
+- [x] Lifetime charge limit field on CItem (m_dwMaxCharges) — set to 2× initial charges (Item §1, §6)
+- [ ] Ego/legendary/unique identity field on CItem — needed for quality tier tracking (Item §1, §8, §9, §10)
+- [ ] Dead field: CItemDef::m_dwBaseHP — initialized to 0, never populated by parser. Remove or repurpose (Item §1)
 
 ### Items.txt Parser — Missing Fields
-- [x] Charges field in Items.txt parser — `Charges <NdM>` keyword, data-driven initial charges on CItemDef (§1, §7)
-- [x] Effect Amount parsing — 4th optional `<NdM>` field on inline Effect lines, named refs pull from CEffectDef (§1, §2)
+- [x] Charges field in Items.txt parser — `Charges <NdM>` keyword, data-driven initial charges on CItemDef (Item §1, §6)
+- [x] Effect Amount parsing — 4th optional `<NdM>` field on inline Effect lines, named refs pull from CEffectDef (Item §1, Effects §2)
 
 ### Effect System — Infrastructure (Done)
-- [x] Effects.txt shared effect catalog — CEffectDef class, ReadEffect parser, 8 named effects defined (§2)
-- [x] Items.txt Effect lines support named references: `Effect <Light Ray>` = catalog lookup (§2)
-- [x] CEffectDef declared before CEffect; CEffect has m_ed pointer to its CEffectDef (§2)
-- [x] CDataFile holds CDungeon* for GetEffectDef() lookups instead of m_llEffectDefs (§2)
-- [x] Load order: Effects.txt → Monsters.txt → Items.txt (dependency order) (§2)
-- [x] NO_COLLIDE moved from ITEM_FLAG to EFFECT_FLAG2_NO_COLLIDE on effects (§2, §17)
+- [x] Effects.txt shared effect catalog — CEffectDef class, ReadEffect parser, 8 named effects defined (Effects §2)
+- [x] Items.txt Effect lines support named references: `Effect <Light Ray>` = catalog lookup (Effects §2)
+- [x] CEffectDef declared before CEffect; CEffect has m_ed pointer to its CEffectDef (Effects §1)
+- [x] CDataFile holds CDungeon* for GetEffectDef() lookups instead of m_llEffectDefs (Effects §2)
+- [x] Load order: Effects.txt → Monsters.txt → Items.txt (dependency order) (Effects §2)
+- [x] NO_COLLIDE moved from ITEM_FLAG to EFFECT_FLAG2_NO_COLLIDE on effects (Effects §6)
 
 ### Effect System — Unimplemented Handlers
-- [ ] EFFECT_TYPE_SEE handler (§2, §17)
-- [ ] DoHitEffects: elemental nouns (FIRE, COLD, ELECTRICITY, ACID) — only handled in Monster.cpp, not player-side (§2, §17)
-- [ ] 7 to-be-used EFFECT_FLAGs: TREASURE, STONE_TO_MUD, STAT, TOHIT, TODAM, AC, MP — no items built with these yet (§2)
-- [ ] EFFECT_MOD audit: ENCHANT, IMMUNE, WEAK, SEE — verify which are checked in handler code (§2)
-- [ ] DESTROY handler uses ITEM_FLAG_CURSED instead of EFFECT_FLAG — design smell, clarify intent (§2)
+- [ ] EFFECT_TYPE_SEE handler (Effects §4, §10)
+- [ ] DoHitEffects: elemental nouns (FIRE, COLD, ELECTRICITY, ACID) — only handled in Monster.cpp, not player-side (Effects §10)
+- [ ] 7 to-be-used EFFECT_FLAGs: TREASURE, STONE_TO_MUD, STAT, TOHIT, TODAM, AC, MP — no items built with these yet (Effects §5)
+- [ ] EFFECT_MOD audit: ENCHANT, IMMUNE, WEAK, SEE — verify which are checked in handler code (Effects §7)
+- [ ] DESTROY handler uses ITEM_FLAG_CURSED instead of EFFECT_FLAG — design smell, clarify intent (Effects §10)
 
 ### Code Logic — Not Started
-- [ ] CEffect deep copy fix for timed AC (§17)
-- [ ] IMMUNE vs RESIST combat math (§17)
-- [ ] Item spawn quality chain (§4, §17)
-- [x] Charges system: NdM initial (m_szCharges on CItemDef), lifetime limit (m_dwMaxCharges on CItem), fallback 1d20 (§7, §17)
-- [ ] Recharge risk curve: f(charges, lifetime, depth) (§7, §17)
-- [ ] Enchantment system: +1/+1d3, failure above +10 (§12, §17)
-- [ ] Blessed three-state system (§4, §17)
-- [ ] Stacking identity check (per-category rules from §6) (§17) — partial
-- [ ] Partial stack split: "How many? (1-n)" (§6, §17)
-- [ ] Ground stacking + loot explosion (§6, §17)
-- [ ] Feeling tiers: {magical}, {excellent}, {special} (§5, §17)
-- [ ] Blind-use identification (§5, §17)
-- [ ] Item destruction scan: material vulnerability on elemental hit (§8, §17) — blocked by PR #235
+- [ ] CEffect deep copy fix for timed AC (Item §16, Effects §10)
+- [ ] IMMUNE vs RESIST combat math (Effects §8)
+- [ ] Item spawn quality chain (Item §3, §16)
+- [x] Charges system: NdM initial (m_szCharges on CItemDef), lifetime limit (m_dwMaxCharges on CItem), fallback 1d20 (Item §6, §16)
+- [ ] Recharge risk curve: f(charges, lifetime, depth) (Item §6, §16)
+- [ ] Enchantment system: +1/+1d3, failure above +10 (Item §11, §16)
+- [ ] Blessed three-state system (Item §3, §16)
+- [ ] Stacking identity check (per-category rules from Item §5) (Item §16) — partial
+- [ ] Partial stack split: "How many? (1-n)" (Item §5, §16)
+- [ ] Ground stacking + loot explosion (Item §5, §16)
+- [ ] Feeling tiers: {magical}, {excellent}, {special} (Item §4, §16)
+- [ ] Blind-use identification (Item §4, §16)
+- [ ] Item destruction scan: material vulnerability on elemental hit (Item §7, §16) — blocked by PR #235
 
 ### Code Logic — Blocked by Other Systems
-- [ ] Sustain stat mechanics — blocked by Stats #197 (§17)
-- [ ] Class-specific feelings — blocked by Classes #239 (§5)
-- [ ] Shopkeeper pricing as identification — blocked by Town #243 (§5)
-- [ ] Mage ID spell (level 37) — blocked by Classes #239 (§5)
+- [ ] Sustain stat mechanics — blocked by Stats #197 (Item §16)
+- [ ] Class-specific feelings — blocked by Classes #239 (Item §4)
+- [ ] Shopkeeper pricing as identification — blocked by Town #243 (Item §4)
+- [ ] Mage ID spell (level 37) — blocked by Classes #239 (Item §4)
 
 ### Constants.h — New Defines Needed
-- [x] Activate EFFECT_TYPE_SEE (0x100) — uncommented, NUM_EFFECT_TYPES=9, string table added (§18)
-- [x] MON_FLAG_INVISIBLE (0x100000) — defined, string table added (§18)
-- [x] ~~ITEM_FLAG_EQUIPMENT~~ — not needed; EquipTypes[] array already maps ITEM_IDX→slot (§18)
-- [x] ITEM_FLAG_BLESSED (0x4000) — defined, NUM_ITEM_FLAGS=12, string table added (§18)
-- [x] String table entries for all new defines (§18)
+- [x] Activate EFFECT_TYPE_SEE (0x100) — uncommented, NUM_EFFECT_TYPES=9, string table added (Effects §11)
+- [x] MON_FLAG_INVISIBLE (0x100000) — defined, string table added (Item §17)
+- [x] ~~ITEM_FLAG_EQUIPMENT~~ — not needed; EquipTypes[] array already maps ITEM_IDX→slot (Item §17)
+- [x] ITEM_FLAG_BLESSED (0x4000) — defined, NUM_ITEM_FLAGS=12, string table added (Item §17)
+- [x] String table entries for all new defines (Item §17, Effects §11)
 
 ---
 

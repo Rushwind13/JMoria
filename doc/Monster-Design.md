@@ -113,7 +113,7 @@ The game world uses Brust-flavored naming wherever possible. Animals and monster
 
 ## Monster Families — Full Design
 
-Attack format: `EFFECT_TYPE, MON_FLAG, [EFFECT_FLAG], NdM[, cooldown]`
+Attack format: `EFFECT_TYPE, MON_FLAG, [EFFECT_FLAG], NdM[, cooldown]` (legacy format — see [Effects-Design.md](Effects-Design.md) §13 for the new AttackGroup architecture)
 
 ### `a` — Ants (MON_IDX_ANT)
 

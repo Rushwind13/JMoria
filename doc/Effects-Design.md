@@ -433,4 +433,242 @@ Effect system dependencies — what blocks effect work.
 | **EFFECT_TYPE_SEE handler** | Detection effects (doors, traps, monsters) | Phase 3 |
 | **MON_FLAG_INVISIBLE** | See Invisible effect | #72 |
 | **Trap system** | Detect Traps, Create Traps | #117 |
-| **CAttack → CEffect unification** | Monster attacks referencing shared effects | Future |
+| **CAttack → CEffect unification** | Monster attacks referencing shared effects | Phase 3 |
+
+---
+
+## 13. Monster Attack Architecture
+
+Monsters use effects through an **attack group** system. Each turn, a monster picks one attack group; all effects in that group fire sequentially with independent to-hit rolls.
+
+### Hierarchy
+
+```
+CMonsterDef
+  ├─ CAttack "Melee" (weight=75)        ← monster picks ONE group per turn
+  │    ├─ CLAW, 2d6                      ← independent to-hit roll
+  │    ├─ CLAW, 2d6                      ← independent to-hit roll
+  │    └─ BITE, 3d8                      ← independent to-hit roll
+  └─ CAttack "Breathe" (weight=25)
+       └─ <Dragon Fire Breath>           ← named effect from Effects.txt
+```
+
+- **CAttack** is a named group with a weight (probability of selection). Weights across all groups on a monster should sum to 100.
+- Each entry in a group has a **delivery type** (CLAW, BITE, BREATHE, etc.) for flavor text, and optionally **physical damage dice** and/or a **named effect reference**.
+- Each entry rolls to-hit independently. A miss skips that entry entirely — no damage, no status effect.
+
+### Attack Entry Format (in Monsters.txt)
+
+An entry within an AttackGroup has up to four parts:
+
+| Part | Required | Example | Purpose |
+|---|---|---|---|
+| Delivery type | yes | `<CLAW>` | Flavor text ("claws you") |
+| Physical dice | no | `<2d6>` | Raw HP damage on hit |
+| Named effect | no | `<Venomous Bite>` | Secondary effect (saving throw applies) |
+| Overrides | no | `<Duration=10>` | Override CEffectDef fields |
+
+Parser rule: `=` inside angle brackets → override block. NdM pattern → damage dice. Constant lookup → delivery type. Everything else → named effect reference.
+
+### Entry Variants
+
+```
+# Pure physical — delivery + dice, no named effect
+Effect <CLAW>,<2d6>
+
+# Named effect only — all damage comes from the effect (breath weapon)
+Effect <BREATHE>,<Dragon Fire Breath>
+
+# Named effect with overrides
+Effect <BREATHE>,<Dragon Fire Breath>,<Range=8, Radius=5>
+
+# Compound — physical damage + on-hit status effect
+Effect <BITE>,<1d4>,<Venomous Bite>
+
+# Compound with overrides
+Effect <BITE>,<1d4>,<Venomous Bite>,<Duration=10>
+```
+
+### Override Syntax
+
+Any CEffectDef field (Amount, Range, Radius, Duration) can be overridden per-instance via comma-separated key=value pairs in angle brackets. Whitespace is allowed.
+
+```
+<Range=8, Radius=5, Amount=6d8, Duration=10>
+```
+
+This lets a single named effect (e.g., `<Fire Breath>`) scale across monster tiers:
+
+```
+# Young Red Dragon — short range, small radius
+Effect <BREATHE>,<Fire Breath>,<Range=3, Radius=2, Amount=4d8>
+
+# Mature Red Dragon — medium range
+Effect <BREATHE>,<Fire Breath>,<Range=5, Radius=3, Amount=8d8>
+
+# Ancient Red Dragon — long range, huge blast
+Effect <BREATHE>,<Fire Breath>,<Range=8, Radius=5, Amount=15d8>
+```
+
+All three reference the same `<Fire Breath>` effect definition (which has EFFECT_TYPE_HIT, EFFECT_FLAG_FIRE, EFFECT_MOD_BALL), just with different numbers.
+
+### Compound Attack Resolution (bite + poison)
+
+When an entry has both physical dice and a named effect:
+
+1. Roll to-hit
+2. If **miss** → skip entirely (no physical damage, no status)
+3. If **hit** → roll physical dice, apply physical damage
+4. Named effect fires → player gets a **saving throw** (based on effect type, player level, resistances)
+5. If save **fails** → apply the effect (poison DoT stacks, blindness, etc.)
+
+The physical damage always lands on hit. The named effect is gated by both the to-hit roll AND a saving throw. A venomous snake can bite you for 1d4 damage without the poison taking hold.
+
+### AttackGroup Format (in Monsters.txt)
+
+Full group syntax for monsters with multiple attack modes:
+
+```
+AttackGroup <Melee> <75>
+{
+    Effect <CLAW>,<2d6>
+    Effect <CLAW>,<2d6>
+    Effect <BITE>,<3d8>
+}
+AttackGroup <Breathe> <25>
+{
+    Effect <BREATHE>,<Dragon Fire Breath>,<Range=8, Radius=5>
+}
+```
+
+### Shorthand — Backward Compatibility
+
+Bare `Attack` lines (current Monsters.txt format) auto-wrap into a default "Melee" group with weight 100. 80% of monsters need zero syntax changes:
+
+```
+# Current format — still works
+Attack  <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+Attack  <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+
+# Parser treats this as:
+# AttackGroup <Melee> <100>
+# {
+#     Effect <BITE>,<2d8>
+#     Effect <CLAW>,<1d4>
+# }
+```
+
+### AI Range Gating
+
+Attack group selection is gated by range. The AIMgr decides behavior based on MON_AI type and distance to player:
+
+**At melee range (adjacent):**
+- All attack groups are eligible
+- Monster picks among them by weight (75% melee, 25% breathe)
+
+**At range (not adjacent):**
+- Only ranged-capable groups are eligible (groups containing effects with Range > 1)
+- If monster has ranged groups: choose between chase and ranged attack (ratio from MON_AI type)
+- If monster has NO ranged groups: chase only
+
+**Range of a group** = max Range of any effect in that group. A "Melee" group with only CLAW/BITE entries (no Range field) has effective range = 1 (adjacent only).
+
+### New MON_AI Types
+
+| AI Type | At Range Behavior | Example |
+|---|---|---|
+| MON_AI_SEEKPLAYER | 100% chase | Kobold, Orc (current) |
+| MON_AI_CHASE_RANGED | 75% chase, 25% ranged | Most ranged monsters |
+| MON_AI_LAZY_RANGED | 25% chase, 75% ranged | Dragons sitting on hoard |
+| MON_AI_PURE_RANGED | 0% chase, 100% ranged, flee at melee | Caster types |
+
+The chase/ranged split is the MON_AI type's contribution. The melee/breathe split is the attack group weights. These are independent decisions in the AI pipeline:
+
+```
+AIMgr decision:  "Am I at range? chase or ranged-attack?" (MON_AI type)
+                         │
+                         ▼
+Attack selection: "Which attack group?" (group weights, filtered by range)
+                         │
+                         ▼
+Group execution:  "Roll to-hit for each entry" (independent rolls)
+```
+
+### Delivery Types (flavor text)
+
+Delivery type determines the combat message. Monsters and weapons use different delivery types — a sword never "claws" and a dragon never "slashes."
+
+| Delivery | Flavor Text | Used By |
+|---|---|---|
+| MON_FLAG_CLAW | "claws" | Monsters |
+| MON_FLAG_BITE | "bites" | Monsters |
+| MON_FLAG_BREATHE | "breathes [element] on" | Monsters |
+| MON_FLAG_TOUCH | "touches" | Monsters |
+| MON_FLAG_CRAWL | "crawls on" | Monsters (oozes, jellies) |
+| MON_FLAG_TRAMPLE | "tramples" | Monsters (large) |
+| MON_FLAG_SPORE | "releases spores at" | Monsters (fungi) |
+| MON_FLAG_DROOL | "drools on" | Monsters |
+| (weapon) | "hits" / "slashes" / "stabs" | Player melee (future) |
+| (ranged) | "shoots" / "fires" | Player ranged (future) |
+
+Breath attacks compose: `"breathes [element] on"` where element comes from the named effect's EFFECT_FLAG (FIRE → "fire", COLD → "cold", etc.).
+
+### MAXED Flag
+
+On CMonsterDef, not on the effect. When a monster has MON_FLAG_MAXED, all dice rolls for that monster use maximum values (HP, damage). An Ancient Red Dragon with MAXED and `<Fire Breath>,<Amount=15d8>` always breathes for 120 damage.
+
+### Worked Examples
+
+**Kobold** (simple — backward-compatible shorthand):
+```
+Attack  <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+```
+→ One group "Melee" weight 100, one entry: BITE 1d4
+
+**Giant Venomous Snake** (compound attack):
+```
+AttackGroup <Melee> <100>
+{
+    Effect <BITE>,<1d4>,<Venomous Bite>
+}
+```
+→ Bites for 1d4 physical, then saving throw vs poison
+
+**Scorpion** (two attack modes):
+```
+AttackGroup <Melee> <75>
+{
+    Effect <CLAW>,<1d4>
+    Effect <CLAW>,<1d4>
+}
+AttackGroup <Sting> <25>
+{
+    Effect <STING>,<2d4>,<Venomous Bite>,<Duration=8>
+}
+```
+→ 75% double-claw, 25% venomous sting with longer duration
+
+**Ancient Red Dragon** (melee + breath, MAXED):
+```
+Flags   <MON_FLAG_MAXED>
+AttackGroup <Melee> <75>
+{
+    Effect <CLAW>,<2d6>
+    Effect <CLAW>,<2d6>
+    Effect <BITE>,<3d8>
+}
+AttackGroup <Breathe> <25>
+{
+    Effect <BREATHE>,<Fire Breath>,<Range=8, Radius=5, Amount=15d8>
+}
+```
+→ At melee: 75% claw-claw-bite, 25% breathe. At range: breathe or chase (MON_AI_LAZY_RANGED). All dice maxed.
+
+**Orc Wielding a Weapon** (future — monster picks up item):
+```
+AttackGroup <Melee> <100>
+{
+    Effect <HIT>,<weapon>
+}
+```
+→ `<weapon>` is a special token meaning "use equipped weapon's damage + effects." Delivery text from weapon type. Loot drop on death.

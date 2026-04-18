@@ -117,21 +117,25 @@ All 32 flags exist and are in the string table. Includes: FIRE, COLD, ELEC, ACID
 - [ ] **Potion of Flames** — fire hit + cold weakness. Needs DoHitEffects handler for fire.
 
 #### Item Data
-Items added to Items.txt (19 new, 76 total):
-- [x] **Potions** (11 new): Resist Cold, Resist Acid, Resist Electricity, Invisibility, Speed, Levitation, Blindness, Confusion, Poison, Cure Poison
-- [x] **Rings** (5 new): Cold Resistance, Acid Resistance, Electricity Resistance, Free Action, Speed
+See [#270 - Item Design & Content](https://github.com/Rushwind13/JMoria/issues/270) for comprehensive item inventory and design document.
+
+Items already added (19 new, 76 total):
+- [x] **Potions** (11 new): Resist Cold, Resist Acid, Resist Electricity, Invisibility, Speed, Levitation, Blindness, Confusion, Poison, Cure Poison, Infravision
+- [x] **Rings** (5 new): Cold Resistance, Acid Resistance, Electricity Resistance, Free Action, Speed, Telepathy
 - [x] **Helmets** (2 new): Helm of Infravision, Helm of Telepathy
-- [x] **Scrolls** (1 new): Scroll of Recall, Scroll of Summon Monsters
+- [x] **Scrolls** (1 new): Scroll of Recall, Scroll of Summon Monsters, Scroll of Light, Scroll of Telepathy
+- [x] **Light sources**: Torch (3), Brass Lantern (5)
 
 Items NOT yet added (blocked by missing systems):
+- [ ] Wand of Light, Staff of Light, Staff of Starlight — light source integration
+- [ ] Flask of Oil — refuel consumable
 - [ ] Potion of See Invisible — needs invisible monster system (no MON_FLAG_INVISIBLE yet)
 - [ ] Potion of Gain STR / Restore STR / Weakness — needs stats system (#197)
 - [ ] Potion of Heroism — needs stats system (#197)
 - [ ] Potion of Flames — needs elemental hit handler in DoHitEffects
 - [ ] Helmet of Lordly Protection — needs IMMUNE vs RESIST distinction in combat
 - [ ] Scroll of Blessing — needs timed AC (CEffect copy doesn't deep-copy m_szAmount for rolled value storage)
-- [ ] Scroll of Door/Stair Location — needs EFFECT_TYPE_SEE implementation
-- [ ] Scroll of Trap Detection / Creation — needs trap system
+- [ ] Scroll of Detect Doors/Stairs/Traps — needs EFFECT_TYPE_SEE implementation
 
 ### Remaining — Monster Effects
 
@@ -165,9 +169,8 @@ All monster definitions complete and in [Resources/Monsters.txt](Resources/Monst
 | Greater Demon | Claw ×2 (HP), Bite (HP), Summon (lesser demons) | ✅ EXISTS (Level 30) |
 
 #### Item Destruction from Monster Attacks
-- [ ] **Fire damage destroys scrolls, potions, leather items** — equipment damage system
-- [ ] **Cold damage shatters potions** — inventory damage on cold hit
-- [ ] **Acid damage destroys scrolls, potions, leather, AND metal items** — most destructive element
+
+**See [#271 - Item Destruction from Elemental Attacks](https://github.com/Rushwind13/JMoria/issues/271)** — Moved to Phase 3+ (postponed until after Ranged Attacks PR #235)
 
 ---
 
@@ -192,12 +195,17 @@ The effect vocabulary (types, modifiers, flags, second bitmask) is complete. Rem
 
 ### Tier 3 — Monster Combat Depth ✅ (content complete, code TBD)
 ~~**Prerequisite**: Add 6 new `MON_FLAG_*` constants~~ — Already done (CRAWL, TOUCH, CLAW, BITE, BREATHE, TRAMPLE all in Constants.h and Monsters.txt).
-9. **Elemental monster attacks** (#77) — Fire/cold/acid/poison touch and breath. Requires resist/immune checks in combat code.
-10. **Item destruction from attacks** (#77) — Fire burns scrolls, acid destroys metal. High-impact gameplay consequence.
-11. ~~**New monster definitions in Monsters.txt**~~ (#77) — DONE. All dragons, worm masses, ghosts, demons fully defined with attack lines. See [Resources/Monsters.txt](Resources/Monsters.txt) and [doc/Monster-Design.md](Monster-Design.md).
+9. ~~**New monster definitions in Monsters.txt**~~ (#77) — DONE. All dragons, worm masses, ghosts, demons fully defined with attack lines. See [Resources/Monsters.txt](Resources/Monsters.txt) and [doc/Monster-Design.md](Monster-Design.md).
+10. **Elemental resistances in combat** (#77) — Fire/cold/acid/poison resist/immune checks. Potion of Fire Resistance exists; extend to all elemental types.
+11. **Item destruction from attacks** — See [#271](https://github.com/Rushwind13/JMoria/issues/271). Postponed until after Ranged Attacks (PR #235).
 
-### Tier 4 — Advanced Systems (Require Stats, Classes, Spells)
-12. **`EFFECT_FLAG_STAT`** (#77) — Requires stat system (STR/DEX/CON/INT/WIS/CHA) to exist first
-13. **Class-specific feelings** (#114) — Requires class system with stat priorities
-14. **Spell of Light Area / Mage ID spell** (#72, #114) — Requires spell/magic system
-15. **`?*Identify*`** (#114) — Requires ego/unique item system
+### Tier 4 — Light Economy Integration
+12. **Light radius extends visibility** (#72, #121) — UpdateVisibility() uses torch Radius to extend sight range
+13. **Light source items** (#270) — Wand/Staff of Light, Flask of Oil for refueling
+14. **Infravision/ESP integration** (#72) — UpdateVisibility() checks for EFFECT_FLAG_INFRA/ESP on player
+
+### Tier 5 — Advanced Systems (Require Stats, Classes, Spells)
+15. **`EFFECT_FLAG_STAT`** (#77) — Requires stat system (STR/DEX/CON/INT/WIS/CHA) to exist first
+16. **Class-specific feelings** (#114) — Requires class system with stat priorities
+17. **Spell of Light Area / Mage ID spell** (#72, #114) — Requires spell/magic system
+18. **`?*Identify*`** (#114) — Requires ego/unique item system

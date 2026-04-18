@@ -92,18 +92,24 @@ The core roadmap prioritizes:
 ## 🔧 Priority 2: Major Systems
 
 ### #114 - Identify Spell & Item Knowledge System
-**Status**: Not started
+**Status**: In Progress (Phase 3)
 **Description**: Implement item identification mechanics with learned properties and class-specific "feelings."
 - Players learn item properties through: trying to remove, using, time-based discovery
 - Scroll of Identify reveals most properties; Scroll of *Identify* reveals all
 - Class feelings: Warriors sense weapon curses; Mages sense magic items; Priests sense blessings
 - Known intrinsics display in inventory; unknown ones remain hidden
+**Phase 3 Progress**:
+- ✅ Item property knowledge system complete (m_dwKnownProps, FormatProperties with type-aware display)
+- ✅ Unidentified names/flavors working (randomized names, {tried} marking)
+- ✅ Scroll of Identify reveals properties
+- ✅ Cursed discovery via failed equipment remove
+- ⚠️ Remaining: Feeling tiers (magical/excellent/special), class-specific feelings, cursed/uncursed/blessed three-state, Scroll of *Identify*
 **Impact**: Enables strategic item management and knowledge-based gameplay.
-**Dependencies**: None blocking (but pairs with #128)
+**Dependencies**: Class system (#239) for class-specific feelings
 **Effort**: Medium
 
 ### #72 - Fog of War & Sight Distance Expansion
-**Status**: Partially done (some features in)
+**Status**: In Progress (Phase 3)
 **Description**: Expand visibility/lighting systems with depth-based darkness, multiple light sources, and special sight modes.
 - Rooms spawn lit/dark based on depth (lit chance → 0 at depth 50)
 - Torches: 3000-turn fuel, radius 3
@@ -112,18 +118,29 @@ The core roadmap prioritizes:
 - ESP: race intrinsic, detects brains in dark, radius 8 (not undead/worms)
 - Scroll of Light: light current room radius 10
 - Wand of Light: shoot line of light, damage light-weak creatures (blue light hurts orcs, vampires, worm masses)
+**Phase 3 Progress**:
+- ✅ DUNG_FLAG_VISIBLE flag
+- ✅ UpdateVisibility() with LOS
+- ✅ FOW rendering (dim grey for seen-not-visible)
+- ⚠️ Remaining: Lanterns, light items, Infravision/ESP (blocked by race system #112)
 **Impact**: Emergent light economy, depth-based atmosphere, utility item variety.
-**Dependencies**: None blocking
+**Dependencies**: Race system (#112) for Infravision/ESP
 **Effort**: High
 
 ### #77 - Item Effects System
-**Status**: Not started
+**Status**: In Progress (Phase 3)
 **Description**: Implement comprehensive effect system for items and spells:
 - EFFECT_FLAG: fire, cold, acid, lightning, poison, identify, AC, etc.
 - EFFECT_MOD: weak/resistant/immune/gain/lose/restore for each effect
 - EFFECT_TYPE: determines target and persistence (instant, timed, permanent)
+**Phase 3 Progress**:
+- ✅ Effect system vocabulary complete (types, modifiers, flags, second bitmask)
+- ✅ Multi-effect items working (Potion of Minor Healing = 3 effects)
+- ✅ 19 new items added (potions, scrolls, rings)
+- ✅ All monster attack definitions complete (dragons, worms, demons, ghosts with attack lines in Monsters.txt)
+- ⚠️ Remaining: Item destruction from attacks (fire, cold, acid), elemental resistances in combat
 **Impact**: Unified system for all magical item/spell effects, enables complex interactions.
-**Documentation**: /doc/ItemEffectSystem.md (proposed)
+**Documentation**: See [doc/WORKLIST_roadmap_phase3.md](doc/WORKLIST_roadmap_phase3.md) for Phase 3 details
 **Dependencies**: None blocking
 **Effort**: High
 

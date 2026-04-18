@@ -90,7 +90,6 @@ Other item types show their real name even before identification.
 | ITEM_FLAG_OFFHAND | Equips to off hand |
 | ITEM_FLAG_MAINHAND | Equips to main hand |
 | ITEM_FLAG_NEEDSAMMO | Ranged weapon needs ammo |
-| ITEM_FLAG_NO_COLLIDE | Projectile passes through |
 | ITEM_FLAG_HOLDING | Container item |
 
 Comma-separate multiple flags: `<ITEM_FLAG_STACKS,ITEM_FLAG_CURSED>`
@@ -99,16 +98,51 @@ Comma-separate multiple flags: `<ITEM_FLAG_STACKS,ITEM_FLAG_CURSED>`
 
 ## Effect System
 
-Each Effect line has 2 or 3 parts:
+Effects can be defined **inline** on an item or as a **named reference** to `Effects.txt`.
+
+### Inline Effects
+
+Each Effect line has 2, 3, or 4 parts:
 
 ```
 Effect  <TYPE>,<FLAG>
 Effect  <TYPE>,<FLAG>,<MOD>
+Effect  <TYPE>,<FLAG>,<MOD>,<NdM>
 ```
 
 **TYPE** = what the effect does (verb).
 **FLAG** = what it targets (noun).
 **MOD** = how it does it (adverb). Optional.
+**NdM** = damage/healing dice. Optional.
+
+### Named Effect References
+
+Items can reference shared effects from `Effects.txt` by name:
+
+```
+Effect  <Light Ray>
+Effect  <Firebolt>
+```
+
+A single token (no commas) = catalog lookup. The CEffect gets a pointer (`m_ed`) to the shared CEffectDef.
+
+### Effects.txt Format
+
+```
+Effect <effect-name>
+{
+    Type        <EFFECT_TYPE_*>
+    Flag        <EFFECT_FLAG_*>
+    Flag2       <EFFECT_FLAG2_*>
+    Modifier    <EFFECT_MOD_*>
+    Amount      <NdM>
+    Duration    float
+    Range       float
+    Radius      float
+}
+```
+
+All fields except `Type` and `Flag` are optional.
 
 ### Effect Types (EFFECT_TYPE)
 
@@ -165,13 +199,14 @@ Effect  <TYPE>,<FLAG>,<MOD>
 
 ### Effect Flags — Word 2 (EFFECT_FLAG2)
 
-Overflow flags. 3/32 bits used. Parsed transparently — no special syntax.
+Overflow flags. 4/32 bits used. Parsed transparently — no special syntax.
 
 | Flag | Category | Example use |
 |---|---|---|
 | EFFECT_FLAG2_DOOR | Detection | Detect doors/stairs |
 | EFFECT_FLAG2_TRAP | Detection | Detect/create traps |
 | EFFECT_FLAG2_MONSTERS | Detection | Detect monsters |
+| EFFECT_FLAG2_NO_COLLIDE | Projectile | Line effects pass through targets |
 
 ### Effect Modifiers (EFFECT_MOD)
 

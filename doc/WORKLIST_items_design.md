@@ -21,14 +21,22 @@ Section key: §1 Data Model, §2 Effect Grammar, §3 Wands vs Staves, §4 Qualit
 - [ ] Empty type content: Food, Books, Arrows, Bolts, Money, Chests, Belts, Amulets (§13)
 
 ### Item Data Model — CItem/CItemDef Fields Needed
-- [ ] Per-instance bonuses on CItem: m_fBonusToHit, m_fBonusToDamage, m_fACBonus (currently only on CItemDef shared template) (§1)
-- [ ] Lifetime charge limit field on CItem (m_dwMaxCharges or similar) — needed for recharge explosion curve (§1, §7)
+- [x] Per-instance bonuses on CItem: m_fBonusToHit, m_fBonusToDamage, m_fACBonus — CItemDef stores NdM strings, CItem rolls at creation (§1)
+- [x] Lifetime charge limit field on CItem (m_dwMaxCharges) — set to 2× initial charges (§1, §7)
 - [ ] Ego/legendary/unique identity field on CItem — needed for quality tier tracking (§1, §9, §10, §11)
 - [ ] Dead field: CItemDef::m_dwBaseHP — initialized to 0, never populated by parser. Remove or repurpose (§1)
 
 ### Items.txt Parser — Missing Fields
-- [ ] Charges field in Items.txt parser — m_dwCharges is runtime-only, no data-driven initial charges (§1, §7)
-- [ ] Effect Amount parsing — commented out in FileParse.cpp ~L580-592. Blocks heal NdM, damage NdM from data file (§1, §2)
+- [x] Charges field in Items.txt parser — `Charges <NdM>` keyword, data-driven initial charges on CItemDef (§1, §7)
+- [x] Effect Amount parsing — 4th optional `<NdM>` field on inline Effect lines, named refs pull from CEffectDef (§1, §2)
+
+### Effect System — Infrastructure (Done)
+- [x] Effects.txt shared effect catalog — CEffectDef class, ReadEffect parser, 8 named effects defined (§2)
+- [x] Items.txt Effect lines support named references: `Effect <Light Ray>` = catalog lookup (§2)
+- [x] CEffectDef declared before CEffect; CEffect has m_ed pointer to its CEffectDef (§2)
+- [x] CDataFile holds CDungeon* for GetEffectDef() lookups instead of m_llEffectDefs (§2)
+- [x] Load order: Effects.txt → Monsters.txt → Items.txt (dependency order) (§2)
+- [x] NO_COLLIDE moved from ITEM_FLAG to EFFECT_FLAG2_NO_COLLIDE on effects (§2, §17)
 
 ### Effect System — Unimplemented Handlers
 - [ ] EFFECT_TYPE_SEE handler (§2, §17)
@@ -41,7 +49,7 @@ Section key: §1 Data Model, §2 Effect Grammar, §3 Wands vs Staves, §4 Qualit
 - [ ] CEffect deep copy fix for timed AC (§17)
 - [ ] IMMUNE vs RESIST combat math (§17)
 - [ ] Item spawn quality chain (§4, §17)
-- [ ] Charges system: NdM initial, lifetime limit, empty=inert (§7, §17)
+- [x] Charges system: NdM initial (m_szCharges on CItemDef), lifetime limit (m_dwMaxCharges on CItem), fallback 1d20 (§7, §17)
 - [ ] Recharge risk curve: f(charges, lifetime, depth) (§7, §17)
 - [ ] Enchantment system: +1/+1d3, failure above +10 (§12, §17)
 - [ ] Blessed three-state system (§4, §17)
@@ -499,7 +507,7 @@ Multiple `Flags` on one line are comma-separated.
 
 Potions, scrolls, wands, and staves get randomized unidentified names at load time. Other item types show their real name even before identification.
 
-### Item Flags (10 ITEM_FLAG constants)
+### Item Flags (12 ITEM_FLAG constants)
 
 | Flag | Meaning |
 |---|---|
@@ -511,8 +519,9 @@ Potions, scrolls, wands, and staves get randomized unidentified names at load ti
 | ITEM_FLAG_OFFHAND | Equips to off hand |
 | ITEM_FLAG_MAINHAND | Equips to main hand |
 | ITEM_FLAG_NEEDSAMMO | Ranged weapon needs ammo |
-| ITEM_FLAG_NO_COLLIDE | Projectile passes through |
 | ITEM_FLAG_HOLDING | Container item |
+| ITEM_FLAG_BLESSED | Item is blessed |
+| ITEM_COLOR_MULTI | Multi-color cycling |
 
 ### Effect Types (EFFECT_TYPE — verbs)
 
@@ -565,13 +574,14 @@ Potions, scrolls, wands, and staves get randomized unidentified names at load ti
 | EFFECT_FLAG_LEVITATE | Status | Grant levitation |
 | EFFECT_FLAG_SPEED | Character | Speed bonus |
 
-### Effect Flags — Word 2 (EFFECT_FLAG2 — 3/32 bits used)
+### Effect Flags — Word 2 (EFFECT_FLAG2 — 4/32 bits used)
 
 | Flag | Category | Example use |
 |---|---|---|
 | EFFECT_FLAG2_DOOR | Detection | Detect doors/stairs |
 | EFFECT_FLAG2_TRAP | Detection | Detect/create traps |
 | EFFECT_FLAG2_MONSTERS | Detection | Detect monsters |
+| EFFECT_FLAG2_NO_COLLIDE | Projectile | Pass-through on line effects |
 
 ### Effect Modifiers (EFFECT_MOD — adverbs)
 
@@ -1349,7 +1359,7 @@ Postponed until after ranged attack implementation
 57. Pickaxe — ITEM_IDX_SHOVEL, Level 1
 
 ### Wands (1)
-58. Wand of Light — ITEM_IDX_WAND, Level 1, HIT+LIGHT+LINE / CREATE+LIGHT, Damage 1d5, ITEM_FLAG_STACKS+ITEM_FLAG_NO_COLLIDE
+58. Wand of Light — ITEM_IDX_WAND, Level 1, Effect <Light Ray> / Effect <Light Area>, Charges <3d8>, ITEM_FLAG_STACKS
 
 ### Weapons (18)
 59. Bastard Sword — ITEM_IDX_SWORD, Level 5, Damage 2d8

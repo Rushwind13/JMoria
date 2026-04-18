@@ -778,12 +778,10 @@ void CPlayer::HandleCollision( JVector vPos, int dwCollideType )
 
             float fDamage = Damage( fDamageMult );
 
-            if( pMon->TakeDamage( fDamage ) == STATUS_DEAD )
+            if( DamageMonster( pMon, fDamage ) )
             {
                 sprintf( szStatus, "have slain" );
                 g_pGame->GetMsgs()->Printf( "You %s the %s.\n", szStatus, szMonster );
-                OnKillMonster( pMon );
-                g_pGame->GetDungeon()->RemoveMonster( pMon );
             }
         }
     }
@@ -841,6 +839,17 @@ void CPlayer::OnKillMonster( CMonster *pMon )
     m_fExperience += pMon->m_md->m_fExpValue / m_fLevel;
     GainLevel();
     m_pTarget = NULL;
+}
+
+bool CPlayer::DamageMonster( CMonster *pMon, float fDamage )
+{
+    if( pMon->TakeDamage( fDamage ) == STATUS_DEAD )
+    {
+        OnKillMonster( pMon );
+        g_pGame->GetDungeon()->RemoveMonster( pMon );
+        return true;
+    }
+    return false;
 }
 
 void CPlayer::GainLevel()
@@ -1021,7 +1030,7 @@ JResult CPlayer::Read( CLink<CItem> *pLink )
 
 JResult CPlayer::Zap( CLink<CItem> *pLink )
 {
-    // this will get called multiple times for a single shot, if EFFECT_FLAG2_NO_COLLIDE is set,
+    // this will get called multiple times for a single shot, if EFFECT_FLAG_NO_COLLIDE is set,
     // this function is to do damage to the monster in the current position
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
@@ -1031,7 +1040,7 @@ JResult CPlayer::Zap( CLink<CItem> *pLink )
 
 JResult CPlayer::Fire( CLink<CItem> *pLink )
 {
-    // this will get called multiple times for a single shot, if EFFECT_FLAG2_NO_COLLIDE is set,
+    // this will get called multiple times for a single shot, if EFFECT_FLAG_NO_COLLIDE is set,
     // this function is to do damage to the monster in the current position
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
@@ -1239,6 +1248,12 @@ JResult CPlayer::DoHitEffects( CEffect *pEffect )
     case EFFECT_FLAG_LIGHT:
         return DoLightRay( pEffect );
         break;
+    case EFFECT_FLAG_FIRE:
+    case EFFECT_FLAG_COLD:
+    case EFFECT_FLAG_ELECTRICITY:
+    case EFFECT_FLAG_ACID:
+        return DoElementalHit( pEffect );
+        break;
     default:
         break;
     }
@@ -1270,12 +1285,10 @@ JResult CPlayer::DoLightRay( CEffect *pEffect )
 
         float fDamage = Util::Roll( "1d5" ); // pEffect->m_szAmount );
 
-        if( pMon->TakeDamage( fDamage ) == STATUS_DEAD )
+        if( DamageMonster( pMon, fDamage ) )
         {
             g_pGame->GetMsgs()->Printf( "The %s shrivels away in the bright light!\n",
                                         pMon->GetName() );
-            OnKillMonster( pMon );
-            g_pGame->GetDungeon()->RemoveMonster( pMon );
         }
         else
         {
@@ -1285,6 +1298,44 @@ JResult CPlayer::DoLightRay( CEffect *pEffect )
     else
     {
         g_pGame->GetMsgs()->Printf( "The %s is unaffected.\n", pMon->GetName() );
+    }
+
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoElementalHit( CEffect *pEffect )
+{
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vRangedHitPosition );
+    if( !pTile )
+    {
+        return JBOGUSKEY;
+    }
+
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+        return JBOGUSKEY;
+    }
+
+    const char *szElement = g_Constants.IndexToString( EFFECT_FLAG, pEffect->m_dwFlags );
+    JLog( LOG_LEVEL_INFO, true, "elemental hit (%s) on %s\n", szElement, pMon->GetName() );
+
+    const char *szAmount = pEffect->m_szAmount;
+    if( !szAmount && pEffect->m_ed )
+        szAmount = pEffect->m_ed->m_szAmount;
+    if( !szAmount )
+        szAmount = "1d6";
+
+    float fDamage = Util::Roll( szAmount );
+
+    if( DamageMonster( pMon, fDamage ) )
+    {
+        g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", pMon->GetName() );
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "The %s is hit.\n", pMon->GetName() );
     }
 
     return JSUCCESS;
@@ -1432,9 +1483,8 @@ JResult CPlayer::DoSummonMonsters()
 
 JResult CPlayer::DoDestroyEffects( CEffect *pEffect, int dwItemFlags )
 {
-    switch( pEffect->m_dwFlags )
+    if( pEffect->HasFlag( "EFFECT_FLAG_CURSE" ) )
     {
-    case ITEM_FLAG_CURSED:
         if( dwItemFlags & ITEM_FLAG_CURSED )
         {
             JLog( LOG_LEVEL_DEBUG, true, "Cursing\n" );
@@ -1445,7 +1495,6 @@ JResult CPlayer::DoDestroyEffects( CEffect *pEffect, int dwItemFlags )
             JLog( LOG_LEVEL_DEBUG, true, "Uncursing\n" );
             return DoRemoveCurse();
         }
-        break;
     }
     return JBOGUSKEY;
 }
@@ -1708,7 +1757,7 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
     JIVector vPlayer( VEC_EXPAND( m_vPos ) );
     JRect rcCheck = Util::Nearby( vPlayer, range );
 
-    if( pEffect->m_dwFlags2 & EFFECT_FLAG2_DOOR )
+    if( pEffect->m_dwFlags2 & EFFECT_FLAG_DOOR )
     {
         // Reveal doors (secret and non-secret) and stairs within range.
         // Permanent for this level — once you know where they are, they stay on the map.
@@ -1755,7 +1804,7 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
         m_bLastEffectNoticed = true;
     }
 
-    if( pEffect->m_dwFlags2 & EFFECT_FLAG2_TRAP )
+    if( pEffect->m_dwFlags2 & EFFECT_FLAG_TRAP )
     {
         // Reveal traps within range. Permanent for this level.
         bool bFound = false;
@@ -1779,7 +1828,7 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
         m_bLastEffectNoticed = true;
     }
 
-    if( pEffect->m_dwFlags2 & EFFECT_FLAG2_MONSTERS )
+    if( pEffect->m_dwFlags2 & EFFECT_FLAG_MONSTERS )
     {
         // Detect monsters within range. One-turn duration: m_bDetected is cleared
         // at the start of the next UpdateVisibleMonsters() call.

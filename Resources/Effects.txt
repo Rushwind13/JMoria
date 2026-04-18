@@ -17,7 +17,7 @@
 #
 # Type        string    EFFECT_TYPE_* verb (HIT, HEAL, CREATE, DESTROY, INTRINSIC, etc.)
 # Flag        string    EFFECT_FLAG_* noun (FIRE, COLD, LIGHT, HP, etc.)
-# Flag2       string    EFFECT_FLAG2_* noun word 2 (DOOR, TRAP, MONSTERS)
+# Flag2       string    EFFECT_FLAG_* noun word 2 (DOOR, TRAP, MONSTERS)
 # Modifier    string    EFFECT_MOD_* adverb (LINE, BALL, AREA, RESIST, TIMED, etc.)
 # Amount      XdY       damage/healing dice rolled per use
 # Duration    float     for timed effects, how long (in game turns)
@@ -30,7 +30,7 @@ Effect <Light Ray>
 {
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_LIGHT>
-    Flag2       <EFFECT_FLAG2_NO_COLLIDE>
+    Flag2       <EFFECT_FLAG_NO_COLLIDE>
     Modifier    <EFFECT_MOD_LINE>
     Amount      <1d5>
     Range       15
@@ -84,7 +84,7 @@ Effect <Lightning Bolt>
 {
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_ELECTRICITY>
-    Flag2       <EFFECT_FLAG2_NO_COLLIDE>
+    Flag2       <EFFECT_FLAG_NO_COLLIDE>
     Modifier    <EFFECT_MOD_LINE>
     Amount      <3d6>
     Range       20

@@ -100,9 +100,9 @@ Foundation commit landed — this tracks what's left before Phase 3 is done.
 All 32 flags exist and are in the string table. Includes: FIRE, COLD, ELEC, ACID, POISON, AFRAID, BLIND, CONFUSE, PARALYZE, SLEEP, INFRA, ESP, INVISIBLE, LEVITATE, FREE_ACTION, SPEED, LIGHT, RECALL, TELEPORT, STONE_TO_MUD, IDENTIFY, MAPPING, SUMMON, AC, STAT, HP, FUEL, XP, FOOD, SEE_INVIS, INTRINSIC, RESIST.
 
 #### Effect Flags — Word 2 (EFFECT_FLAG2, 3/32 bits used) ✅
-- [x] **`EFFECT_FLAG2_DOOR`** (0x01) + `EFFECT_MOD_SEE` — Scroll of Door/Stair Location
-- [x] **`EFFECT_FLAG2_TRAP`** (0x02) — detect (with `EFFECT_MOD_SEE`) and create traps
-- [x] **`EFFECT_FLAG2_MONSTERS`** (0x04) — detect monsters
+- [x] **`EFFECT_FLAG_DOOR`** (0x01) + `EFFECT_MOD_SEE` — Scroll of Door/Stair Location
+- [x] **`EFFECT_FLAG_TRAP`** (0x02) — detect (with `EFFECT_MOD_SEE`) and create traps
+- [x] **`EFFECT_FLAG_MONSTERS`** (0x04) — detect monsters
 - [x] **`m_dwFlags2` on CEffect** — second 32-bit word, parsed transparently by `LookupEffectFlag()`
 - [x] **`LookupEffectFlag()` / `EffectFlagToString()`** — convenience methods route between words invisibly
 - [x] **7 test scenarios** in effects.feature covering lookup, routing, and round-trip

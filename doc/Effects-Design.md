@@ -15,7 +15,7 @@ The shared definition. One entry per named effect. Stored on CDungeon, looked up
 | m_szName | string | Human-readable name ("Firebolt", "Resist Acid") |
 | m_dwEffect | int | EFFECT_TYPE_* verb |
 | m_dwFlags | uint32 | EFFECT_FLAG_* noun (word 1) |
-| m_dwFlags2 | uint32 | EFFECT_FLAG2_* noun (word 2) |
+| m_dwFlags2 | uint32 | EFFECT_FLAG_* noun (word 2) |
 | m_dwModifier | int | EFFECT_MOD_* adverb |
 | m_szAmount | NdM string | Damage/healing dice rolled per use |
 | m_fDuration | float | Duration in game turns (timed effects) |
@@ -31,7 +31,7 @@ An effect instance on a specific CItemDef or CMonsterDef. Points back to its sha
 | m_ed | CEffectDef* | Pointer to shared definition (NULL for legacy inline effects) |
 | m_dwEffect | int | EFFECT_TYPE_* verb (copied from def or inline) |
 | m_dwFlags | uint32 | EFFECT_FLAG_* noun word 1 |
-| m_dwFlags2 | uint32 | EFFECT_FLAG2_* noun word 2 |
+| m_dwFlags2 | uint32 | EFFECT_FLAG_* noun word 2 |
 | m_dwModifier | int | EFFECT_MOD_* adverb |
 | m_szAmount | NdM string | Dice string (copied from def or inline) |
 | m_fDuration | float | Duration |
@@ -62,7 +62,7 @@ Effect <effect-name>
 {
     Type        <EFFECT_TYPE_*>
     Flag        <EFFECT_FLAG_*>
-    Flag2       <EFFECT_FLAG2_*>
+    Flag2       <EFFECT_FLAG_*>
     Modifier    <EFFECT_MOD_*>
     Amount      <NdM>
     Duration    float

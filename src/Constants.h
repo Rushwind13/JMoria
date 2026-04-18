@@ -252,17 +252,17 @@
 #define NUM_EFFECT_FLAGS 32
 
 // Effect Flags (word 2) — dungeon features
-#define EFFECT_FLAG2_DOOR 0x00000001
-#define EFFECT_FLAG2_TRAP 0x00000002
-#define EFFECT_FLAG2_MONSTERS 0x00000004
-#define EFFECT_FLAG2_NO_COLLIDE 0x00000008
+#define EFFECT_FLAG_DOOR 0x00000001
+#define EFFECT_FLAG_TRAP 0x00000002
+#define EFFECT_FLAG_MONSTERS 0x00000004
+#define EFFECT_FLAG_NO_COLLIDE 0x00000008
 
-// #define EFFECT_FLAG2_x 0x00000010
-// #define EFFECT_FLAG2_x 0x00000020
-// #define EFFECT_FLAG2_x 0x00000040
-// #define EFFECT_FLAG2_x 0x00000080
+#define EFFECT_FLAG_CURSE 0x00000010
+// #define EFFECT_FLAG_x 0x00000020
+// #define EFFECT_FLAG_x 0x00000040
+// #define EFFECT_FLAG_x 0x00000080
 
-#define NUM_EFFECT_FLAGS2 4
+#define NUM_EFFECT_FLAGS2 5
 
 // Effect Modifiers
 #define EFFECT_MOD_RESIST 0x000000001
@@ -557,10 +557,11 @@ public:
         m_StringTable[i++].Init( "EFFECT_FLAG_SPEED", EFFECT_FLAG_SPEED, EFFECT_FLAG );
 
         // Effect Flags (word 2) — dungeon features
-        m_StringTable[i++].Init( "EFFECT_FLAG2_DOOR", EFFECT_FLAG2_DOOR, EFFECT_FLAG2 );
-        m_StringTable[i++].Init( "EFFECT_FLAG2_TRAP", EFFECT_FLAG2_TRAP, EFFECT_FLAG2 );
-        m_StringTable[i++].Init( "EFFECT_FLAG2_MONSTERS", EFFECT_FLAG2_MONSTERS, EFFECT_FLAG2 );
-        m_StringTable[i++].Init( "EFFECT_FLAG2_NO_COLLIDE", EFFECT_FLAG2_NO_COLLIDE, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG_DOOR", EFFECT_FLAG_DOOR, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG_TRAP", EFFECT_FLAG_TRAP, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG_MONSTERS", EFFECT_FLAG_MONSTERS, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG_NO_COLLIDE", EFFECT_FLAG_NO_COLLIDE, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG_CURSE", EFFECT_FLAG_CURSE, EFFECT_FLAG2 );
 
         // Effect Modifiers
         m_StringTable[i++].Init( "EFFECT_MOD_RESIST", EFFECT_MOD_RESIST );
@@ -738,13 +739,29 @@ public:
             if( Util::jstrcmp( m_StringTable[i].m_szString, szIn ) == 0 )
             {
                 if( m_StringTable[i].m_dwFlagSet == EFFECT_FLAG2 )
-                    dwFlags2 = m_StringTable[i].m_dwValue;
+                    dwFlags2 |= m_StringTable[i].m_dwValue;
                 else
-                    dwFlags = m_StringTable[i].m_dwValue;
+                    dwFlags |= m_StringTable[i].m_dwValue;
                 return;
             }
         }
         JLog( LOG_LEVEL_WARN, true, "bad effect flag string: %s\n", szIn );
+    }
+
+    // Check whether a named effect flag is set in the given flag words
+    bool CheckEffectFlag( const char *szIn, uint32 dwFlags, uint32 dwFlags2 )
+    {
+        for( int i = 0; i < NUM_STRINGS; i++ )
+        {
+            if( Util::jstrcmp( m_StringTable[i].m_szString, szIn ) == 0 )
+            {
+                if( m_StringTable[i].m_dwFlagSet == EFFECT_FLAG2 )
+                    return ( dwFlags2 & m_StringTable[i].m_dwValue ) != 0;
+                else
+                    return ( dwFlags & m_StringTable[i].m_dwValue ) != 0;
+            }
+        }
+        return false;
     }
 
     // Return the name of whichever effect flag word is set

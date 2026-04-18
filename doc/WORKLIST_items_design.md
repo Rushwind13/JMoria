@@ -59,14 +59,14 @@ Section key (Effects-Design.md): §1 Data Model, §2 Effects.txt Format, §3 Gra
 - [x] CEffectDef declared before CEffect; CEffect has m_ed pointer to its CEffectDef (Effects §1)
 - [x] CDataFile holds CDungeon* for GetEffectDef() lookups instead of m_llEffectDefs (Effects §2)
 - [x] Load order: Effects.txt → Monsters.txt → Items.txt (dependency order) (Effects §2)
-- [x] NO_COLLIDE moved from ITEM_FLAG to EFFECT_FLAG2_NO_COLLIDE on effects (Effects §6)
+- [x] NO_COLLIDE moved from ITEM_FLAG to EFFECT_FLAG_NO_COLLIDE on effects (Effects §6)
 
 ### Effect System — Unimplemented Handlers
 - [x] EFFECT_TYPE_SEE handler — DoSeeEffects: DOOR (secret+regular+stairs, permanent, range-bounded), TRAP (permanent, range-bounded), MONSTERS (one-turn m_bDetected flag, range-bounded). See #272 for visible monsters pane. (Effects §4, §10)
-- [ ] DoHitEffects: elemental nouns (FIRE, COLD, ELECTRICITY, ACID) — only handled in Monster.cpp, not player-side (Effects §10)
+- [x] DoHitEffects: elemental dispatch (FIRE, COLD, ELECTRICITY, ACID) → DoElementalHit; rolls pEffect->m_szAmount, applies to monster at m_vRangedHitPosition (Effects §10)
 - [ ] 7 to-be-used EFFECT_FLAGs: TREASURE, STONE_TO_MUD, STAT, TOHIT, TODAM, AC, MP — no items built with these yet (Effects §5)
-- [ ] EFFECT_MOD audit: ENCHANT, IMMUNE, WEAK, SEE — verify which are checked in handler code (Effects §7)
-- [ ] DESTROY handler uses ITEM_FLAG_CURSED instead of EFFECT_FLAG — design smell, clarify intent (Effects §10)
+- [x] EFFECT_MOD audit: RESIST/IMMUNE/WEAK handled by CEffect::Resist(), TIMED by DoIntrinsicEffects, AREA by DoTeleport/DoMagicMapping. LINE/BALL/STAR are shape mods for future AoE targeting (data-ready, no handler yet). ENCHANT reserved. SEE is EFFECT_TYPE not MOD. (Effects §7)
+- [x] DESTROY handler: migrated from ITEM_FLAG_CURSED to EFFECT_FLAG_CURSE; uses HasFlag for lookup (Effects §10)
 
 ### Effect System — CEffect Class Cleanup (Done)
 - [x] CEffect deep copy: copy constructor and assignment operator deep-copy m_szAmount (fixes DoIntrinsicEffects shallow copy bug) (Item §16, Effects §10)
@@ -611,10 +611,10 @@ Potions, scrolls, wands, and staves get randomized unidentified names at load ti
 
 | Flag | Category | Example use |
 |---|---|---|
-| EFFECT_FLAG2_DOOR | Detection | Detect doors/stairs |
-| EFFECT_FLAG2_TRAP | Detection | Detect/create traps |
-| EFFECT_FLAG2_MONSTERS | Detection | Detect monsters |
-| EFFECT_FLAG2_NO_COLLIDE | Projectile | Pass-through on line effects |
+| EFFECT_FLAG_DOOR | Detection | Detect doors/stairs |
+| EFFECT_FLAG_TRAP | Detection | Detect/create traps |
+| EFFECT_FLAG_MONSTERS | Detection | Detect monsters |
+| EFFECT_FLAG_NO_COLLIDE | Projectile | Pass-through on line effects |
 
 ### Effect Modifiers (EFFECT_MOD — adverbs)
 
@@ -1437,7 +1437,7 @@ Postponed until after ranged attack implementation
 - Scroll of Door/Stair Location (EFFECT_FLAG_DOOR + EFFECT_MOD_SEE + EFFECT_TYPE_CAUSE) — #77 comment, #117
 - Scroll of Trap Detection (EFFECT_FLAG_TRAP + EFFECT_MOD_SEE + EFFECT_TYPE_CAUSE) — #77 comment, #117
 - Scroll of Trap Creation (EFFECT_FLAG_TRAP + EFFECT_TYPE_CAUSE) — #77 comment
-- Scroll of Detect Monsters (EFFECT_FLAG2_MONSTERS) — #270
+- Scroll of Detect Monsters (EFFECT_FLAG_MONSTERS) — #270
 - Scroll of Enchant Weapon to Hit — #128
 - Scroll of Enchant Weapon Damage — #128
 - Scroll of Enchant Armor — #128

@@ -560,7 +560,7 @@ Item <Scroll of Remove Curse>
 {
 Plural      <Scrolls of Remove Curse>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_DESTROY>,<ITEM_FLAG_CURSED>
+Effect      <EFFECT_TYPE_DESTROY>,<EFFECT_FLAG_CURSE>
 Value       100.0
 Level       1
 Weight      2.0

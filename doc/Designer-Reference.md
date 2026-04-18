@@ -133,7 +133,7 @@ Effect <effect-name>
 {
     Type        <EFFECT_TYPE_*>
     Flag        <EFFECT_FLAG_*>
-    Flag2       <EFFECT_FLAG2_*>
+    Flag2       <EFFECT_FLAG_*>
     Modifier    <EFFECT_MOD_*>
     Amount      <NdM>
     Duration    float
@@ -203,10 +203,10 @@ Overflow flags. 4/32 bits used. Parsed transparently — no special syntax.
 
 | Flag | Category | Example use |
 |---|---|---|
-| EFFECT_FLAG2_DOOR | Detection | Detect doors/stairs |
-| EFFECT_FLAG2_TRAP | Detection | Detect/create traps |
-| EFFECT_FLAG2_MONSTERS | Detection | Detect monsters |
-| EFFECT_FLAG2_NO_COLLIDE | Projectile | Line effects pass through targets |
+| EFFECT_FLAG_DOOR | Detection | Detect doors/stairs |
+| EFFECT_FLAG_TRAP | Detection | Detect/create traps |
+| EFFECT_FLAG_MONSTERS | Detection | Detect monsters |
+| EFFECT_FLAG_NO_COLLIDE | Projectile | Line effects pass through targets |
 
 ### Effect Modifiers (EFFECT_MOD)
 

@@ -529,7 +529,7 @@ bool CRangedState::DoTrajectory()
             while( plEff != NULL )
             {
                 CEffectDef *pDef = plEff->m_lpData->m_ed;
-                if( pDef && ( pDef->m_dwFlags2 & EFFECT_FLAG2_NO_COLLIDE ) )
+                if( pDef && ( pDef->m_dwFlags2 & EFFECT_FLAG_NO_COLLIDE ) )
                 {
                     bNoCollide = true;
                     break;

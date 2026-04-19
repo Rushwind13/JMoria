@@ -136,6 +136,19 @@ Weight      4.0
 Color        <225,225,50,255>
 }
 
+Item <Boots of Speed>
+{
+Plural      <Pairs of Boots of Speed>
+Type        <ITEM_IDX_BOOTS>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_SPEED>
+Value       5000.0
+Level       30
+AC          2.0
+Weight      3.0
+Color       <255,200,50,255>
+Flags       <ITEM_FLAG_MAGIC>
+}
+
 # Cloaks
 Item <Cloak>
 {
@@ -146,6 +159,19 @@ Level       1
 AC          1.0
 Weight      1.0
 Color        <225,225,50,255>
+}
+
+Item <Cloak of Protection>
+{
+Plural      <Cloaks of Protection>
+Type        <ITEM_IDX_CLOAK>
+ACBonus     <1d10>
+Value       500.0
+Level       10
+AC          1.0
+Weight      1.0
+Color       <200,200,255,255>
+Flags       <ITEM_FLAG_MAGIC>
 }
 
 # Gloves
@@ -431,6 +457,146 @@ Weight      0.2
 Flags       <ITEM_FLAG_STACKS>
 }
 
+Item <Potion of Slow Poison>
+{
+Plural      <Potions of Slow Poison>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,<EFFECT_MOD_RESIST>
+Duration    100.0
+Value       50.0
+Level       2
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Neutralize Poison>
+{
+Plural      <Potions of Neutralize Poison>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+Effect      <EFFECT_TYPE_DESTROY>,<EFFECT_FLAG_POISON>
+Value       150.0
+Level       6
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Courage>
+{
+Plural      <Potions of Courage>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_AFRAID>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_AFRAID>,<EFFECT_MOD_RESIST>
+Duration    50.0
+Value       100.0
+Level       5
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Cure Light Wounds>
+{
+Plural      <Potions of Cure Light Wounds>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
+Damage      8d8
+Value       200.0
+Level       20
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Cure Serious Wounds>
+{
+Plural      <Potions of Cure Serious Wounds>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_CONFUSE>
+Damage      16d8
+Value       400.0
+Level       40
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Cure Critical Wounds>
+{
+Plural      <Potions of Cure Critical Wounds>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_CONFUSE>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_AFRAID>
+Damage      24d8
+Value       600.0
+Level       60
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Healing>
+{
+Plural      <Potions of Healing>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_CONFUSE>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_AFRAID>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_PARALYZE>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_SLEEP>
+Damage      32d8
+Value       1000.0
+Level       80
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of *Healing*>
+{
+Plural      <Potions of *Healing*>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_CONFUSE>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_AFRAID>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_PARALYZE>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_SLEEP>
+Damage      100d8
+Value       2500.0
+Level       80
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Sleep>
+{
+Plural      <Potions of Sleep>
+Type        <ITEM_IDX_POTION>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_SLEEP>
+Duration    30.0
+Value       10.0
+Level       1
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Potion of Apple Juice>
+{
+Plural      <Potions of Apple Juice>
+Type        <ITEM_IDX_POTION>
+Value       1.0
+Level       1
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS,ITEM_FLAG_IDENTIFIED>
+}
+
 Item <Ring of Levitation>
 {
 Plural        <Rings of Levitation>
@@ -519,6 +685,17 @@ Weight      0.2
 Color       <200,200,255,255>
 }
 
+Item <Ring of Sensing>
+{
+Plural      <Rings of Sensing>
+Type        <ITEM_IDX_RING>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_TREASURE>
+Value       800.0
+Level       15
+Weight      0.2
+Color       <255,215,0,255>
+}
+
 Item <Ring of Speed>
 {
 Plural      <Rings of Speed>
@@ -528,6 +705,17 @@ Value       3000.0
 Level       30
 Weight      0.2
 Color       <255,200,50,255>
+}
+
+Item <Ring of Searching>
+{
+Plural      <Rings of Searching>
+Type        <ITEM_IDX_RING>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_SEARCHING>
+Value       1000.0
+Level       10
+Weight      0.2
+Color       <200,255,200,255>
 }
 
 # Scrolls
@@ -688,6 +876,30 @@ Color       <255,100,100,255>
 Flags       <ITEM_FLAG_STACKS>
 }
 
+Item <Scroll of Scare Monster>
+{
+Plural      <Scrolls of Scare Monster>
+Type        <ITEM_IDX_SCROLL>
+Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_AFRAID>
+Value       80.0
+Level       5
+Weight      0.2
+Color       <200,150,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of Treasure Detection>
+{
+Plural      <Scrolls of Treasure Detection>
+Type        <ITEM_IDX_SCROLL>
+Effect      <EFFECT_TYPE_SEE>,<EFFECT_FLAG_TREASURE>
+Value       60.0
+Level       3
+Weight      0.2
+Color       <255,215,0,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
 # Shields
 Item <Large Steel Shield>
 {
@@ -771,6 +983,463 @@ Level       1
 Weight      4.0
 Color       <255,255,255,255>
 Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Firebolts>
+{
+Plural      <Wands of Firebolts>
+Type        <ITEM_IDX_WAND>
+Effect      <Firebolt>
+Charges     <2d6>
+Value       300.0
+Level       5
+Weight      4.0
+Color       <255,100,50,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Fireballs>
+{
+Plural      <Wands of Fireballs>
+Type        <ITEM_IDX_WAND>
+Effect      <Fireball>
+Charges     <1d4>
+Value       600.0
+Level       15
+Weight      4.0
+Color       <255,60,20,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Frost>
+{
+Plural      <Wands of Frost>
+Type        <ITEM_IDX_WAND>
+Effect      <Frost Bolt>
+Charges     <2d6>
+Value       300.0
+Level       5
+Weight      4.0
+Color       <100,200,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Lightning>
+{
+Plural      <Wands of Lightning>
+Type        <ITEM_IDX_WAND>
+Effect      <Lightning Bolt>
+Charges     <2d6>
+Value       300.0
+Level       5
+Weight      4.0
+Color       <255,255,100,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Acid>
+{
+Plural      <Wands of Acid>
+Type        <ITEM_IDX_WAND>
+Effect      <Acid Bolt>
+Charges     <2d6>
+Value       300.0
+Level       5
+Weight      4.0
+Color       <100,255,100,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Sleep>
+{
+Plural      <Wands of Sleep>
+Type        <ITEM_IDX_WAND>
+Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_SLEEP>
+Charges     <2d6>
+Value       250.0
+Level       5
+Weight      4.0
+Color       <150,150,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Confusion>
+{
+Plural      <Wands of Confusion>
+Type        <ITEM_IDX_WAND>
+Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_CONFUSE>
+Charges     <2d6>
+Value       250.0
+Level       5
+Weight      4.0
+Color       <200,100,200,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Paralyze>
+{
+Plural      <Wands of Paralyze>
+Type        <ITEM_IDX_WAND>
+Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_PARALYZE>
+Charges     <2d6>
+Value       300.0
+Level       8
+Weight      4.0
+Color       <255,200,100,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Stone to Mud>
+{
+Plural      <Wands of Stone to Mud>
+Type        <ITEM_IDX_WAND>
+Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_STONE_TO_MUD>
+Charges     <2d4>
+Value       200.0
+Level       5
+Weight      4.0
+Color       <139,90,43,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Summoning>
+{
+Plural      <Wands of Summoning>
+Type        <ITEM_IDX_WAND>
+Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_SUMMON>
+Charges     <1d6>
+Value       200.0
+Level       10
+Weight      4.0
+Color       <255,100,100,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Teleport Away>
+{
+Plural      <Wands of Teleport Away>
+Type        <ITEM_IDX_WAND>
+Effect      <Teleport Away>
+Charges     <2d6>
+Value       400.0
+Level       8
+Weight      4.0
+Color       <180,180,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Frost Balls>
+{
+Plural      <Wands of Frost Balls>
+Type        <ITEM_IDX_WAND>
+Effect      <Frost Ball>
+Charges     <1d4>
+Value       600.0
+Level       15
+Weight      4.0
+Color       <80,180,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Lightning Balls>
+{
+Plural      <Wands of Lightning Balls>
+Type        <ITEM_IDX_WAND>
+Effect      <Lightning Ball>
+Charges     <1d4>
+Value       600.0
+Level       15
+Weight      4.0
+Color       <255,255,80,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Acid Balls>
+{
+Plural      <Wands of Acid Balls>
+Type        <ITEM_IDX_WAND>
+Effect      <Acid Ball>
+Charges     <1d4>
+Value       600.0
+Level       15
+Weight      4.0
+Color       <80,255,80,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Heal Monster>
+{
+Plural      <Wands of Heal Monster>
+Type        <ITEM_IDX_WAND>
+Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_HP>
+Charges     <2d6>
+Value       50.0
+Level       3
+Weight      4.0
+Color       <200,255,200,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Probing>
+{
+Plural      <Wands of Probing>
+Type        <ITEM_IDX_WAND>
+Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_IDENTIFY>
+Charges     <2d6>
+Value       400.0
+Level       8
+Weight      4.0
+Color       <200,200,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Wand of Fear>
+{
+Plural      <Wands of Fear>
+Type        <ITEM_IDX_WAND>
+Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_AFRAID>
+Charges     <2d6>
+Value       300.0
+Level       5
+Weight      4.0
+Color       <200,150,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+# Staves
+Item <Staff of Light>
+{
+Plural      <Staves of Light>
+Type        <ITEM_IDX_STAFF>
+Effect      <Light Area>
+Charges     <3d8>
+Value       200.0
+Level       3
+Weight      6.0
+Color       <255,255,200,255>
+}
+
+Item <Staff of Healing>
+{
+Plural      <Staves of Healing>
+Type        <ITEM_IDX_STAFF>
+Effect      <Minor Healing>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+Charges     <2d6>
+Value       500.0
+Level       8
+Weight      6.0
+Color       <200,255,200,255>
+}
+
+Item <Staff of Cure Light Wounds>
+{
+Plural      <Staves of Cure Light Wounds>
+Type        <ITEM_IDX_STAFF>
+Effect      <Cure Light Wounds>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
+Charges     <2d4>
+Value       800.0
+Level       20
+Weight      6.0
+Color       <180,255,180,255>
+}
+
+Item <Staff of Cure Serious Wounds>
+{
+Plural      <Staves of Cure Serious Wounds>
+Type        <ITEM_IDX_STAFF>
+Effect      <Cure Serious Wounds>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_CONFUSE>
+Charges     <2d4>
+Value       1200.0
+Level       40
+Weight      6.0
+Color       <150,255,150,255>
+}
+
+Item <Staff of Greater Healing>
+{
+Plural      <Staves of Greater Healing>
+Type        <ITEM_IDX_STAFF>
+Effect      <Greater Healing>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_CONFUSE>
+Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_AFRAID>
+Charges     <1d4>
+Value       2000.0
+Level       60
+Weight      6.0
+Color       <100,255,100,255>
+}
+
+Item <Staff of Fire Resistance>
+{
+Plural      <Staves of Fire Resistance>
+Type        <ITEM_IDX_STAFF>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FIRE>,<EFFECT_MOD_RESIST>
+Charges     <2d4>
+Duration    100.0
+Value       400.0
+Level       10
+Weight      6.0
+Color       <255,100,50,255>
+}
+
+Item <Staff of Cold Resistance>
+{
+Plural      <Staves of Cold Resistance>
+Type        <ITEM_IDX_STAFF>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_COLD>,<EFFECT_MOD_RESIST>
+Charges     <2d4>
+Duration    100.0
+Value       400.0
+Level       10
+Weight      6.0
+Color       <100,200,255,255>
+}
+
+Item <Staff of Electricity Resistance>
+{
+Plural      <Staves of Electricity Resistance>
+Type        <ITEM_IDX_STAFF>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ELECTRICITY>,<EFFECT_MOD_RESIST>
+Charges     <2d4>
+Duration    100.0
+Value       400.0
+Level       10
+Weight      6.0
+Color       <255,255,100,255>
+}
+
+Item <Staff of Acid Resistance>
+{
+Plural      <Staves of Acid Resistance>
+Type        <ITEM_IDX_STAFF>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ACID>,<EFFECT_MOD_RESIST>
+Charges     <2d4>
+Duration    100.0
+Value       400.0
+Level       10
+Weight      6.0
+Color       <100,255,100,255>
+}
+
+Item <Staff of Resistance>
+{
+Plural      <Staves of Resistance>
+Type        <ITEM_IDX_STAFF>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FIRE>,<EFFECT_MOD_RESIST>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_COLD>,<EFFECT_MOD_RESIST>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ELECTRICITY>,<EFFECT_MOD_RESIST>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ACID>,<EFFECT_MOD_RESIST>
+Charges     <1d4>
+Duration    80.0
+Value       1200.0
+Level       25
+Weight      6.0
+Color       <200,200,255,255>
+}
+
+Item <Staff of Perception>
+{
+Plural      <Staves of Perception>
+Type        <ITEM_IDX_STAFF>
+Effect      <EFFECT_TYPE_RESTORE>,<EFFECT_FLAG_IDENTIFY>
+Charges     <2d6>
+Value       400.0
+Level       8
+Weight      6.0
+Color       <200,200,255,255>
+}
+
+Item <Staff of Teleportation>
+{
+Plural      <Staves of Teleportation>
+Type        <ITEM_IDX_STAFF>
+Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_TELEPORT>
+Charges     <2d6>
+Value       300.0
+Level       5
+Weight      6.0
+Color       <100,200,255,255>
+}
+
+Item <Staff of Word of Recall>
+{
+Plural      <Staves of Word of Recall>
+Type        <ITEM_IDX_STAFF>
+Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_RECALL>
+Charges     <1d4>
+Value       500.0
+Level       15
+Weight      6.0
+Color       <200,150,100,255>
+}
+
+Item <Staff of Mapping>
+{
+Plural      <Staves of Mapping>
+Type        <ITEM_IDX_STAFF>
+Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_MAPPING>,<EFFECT_MOD_AREA>
+Charges     <2d4>
+Value       400.0
+Level       10
+Weight      6.0
+Color       <200,200,150,255>
+}
+
+Item <Staff of Telepathy>
+{
+Plural      <Staves of Telepathy>
+Type        <ITEM_IDX_STAFF>
+Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ESP>
+Charges     <2d4>
+Duration    80.0
+Value       500.0
+Level       15
+Weight      6.0
+Color       <200,150,255,255>
+}
+
+Item <Staff of Treasure Detection>
+{
+Plural      <Staves of Treasure Detection>
+Type        <ITEM_IDX_STAFF>
+Effect      <EFFECT_TYPE_SEE>,<EFFECT_FLAG_TREASURE>
+Charges     <2d6>
+Value       300.0
+Level       5
+Weight      6.0
+Color       <255,215,0,255>
+}
+
+Item <Staff of Summoning>
+{
+Plural      <Staves of Summoning>
+Type        <ITEM_IDX_STAFF>
+Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_SUMMON>
+Charges     <1d4>
+Value       300.0
+Level       15
+Weight      6.0
+Color       <255,100,100,255>
+}
+
+Item <Staff of Sleep>
+{
+Plural      <Staves of Sleep>
+Type        <ITEM_IDX_STAFF>
+Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_SLEEP>
+Charges     <2d4>
+Value       300.0
+Level       8
+Weight      6.0
+Color       <150,150,255,255>
 }
 
 # Weapons

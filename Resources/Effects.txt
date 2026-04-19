@@ -79,6 +79,17 @@ Effect <Frost Bolt>
     Range       15
 }
 
+# Frost Ball — an explosion of cold at a target location.
+Effect <Frost Ball>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_COLD>
+    Modifier    <EFFECT_MOD_BALL>
+    Amount      <6d8>
+    Range       20
+    Radius      3
+}
+
 # Lightning Bolt — a bolt of electricity.
 Effect <Lightning Bolt>
 {
@@ -88,6 +99,38 @@ Effect <Lightning Bolt>
     Modifier    <EFFECT_MOD_LINE>
     Amount      <3d6>
     Range       20
+}
+
+# Lightning Ball — an explosion of electricity at a target location.
+Effect <Lightning Ball>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_ELECTRICITY>
+    Modifier    <EFFECT_MOD_BALL>
+    Amount      <6d6>
+    Range       20
+    Radius      3
+}
+
+# Acid Bolt — a bolt of acid that damages a target.
+Effect <Acid Bolt>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_ACID>
+    Modifier    <EFFECT_MOD_LINE>
+    Amount      <2d8>
+    Range       15
+}
+
+# Acid Ball — an explosion of acid at a target location.
+Effect <Acid Ball>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_ACID>
+    Modifier    <EFFECT_MOD_BALL>
+    Amount      <6d8>
+    Range       20
+    Radius      3
 }
 
 # Teleport Away — sends the target to a random location.
@@ -106,4 +149,50 @@ Effect <Minor Healing>
     Type        <EFFECT_TYPE_HEAL>
     Flag        <EFFECT_FLAG_HP>
     Amount      <4d4>
+}
+
+# Cure Light Wounds — restores a moderate amount of HP.
+# Used by: Staff of Cure Light Wounds
+Effect <Cure Light Wounds>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <8d8>
+}
+
+# Cure Serious Wounds — restores a substantial amount of HP.
+# Used by: Staff of Cure Serious Wounds
+Effect <Cure Serious Wounds>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <16d8>
+}
+
+# Greater Healing — restores a large amount of HP.
+# Used by: Staff of Greater Healing
+Effect <Greater Healing>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <32d8>
+}
+
+# Poison Sting — a venomous attack that inflicts poison.
+# Used by: Spider/snake/scorpion monster attacks
+Effect <Poison Sting>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_POISON>
+    Amount      <1d4>
+    Range       1
+}
+
+# Stone to Mud — dissolves rock into mud, destroying a wall tile.
+# Used by: Wand of Stone to Mud
+Effect <Stone to Mud>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_STONE_TO_MUD>
+    Range       15
 }

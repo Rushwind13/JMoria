@@ -91,6 +91,31 @@ Get clarity on the above, before doing any other design work.
 - [ ] Resistance stacking formula: 50% + 25% = 62.5%? (Effects §8) — deferred to intrinsics deep-dive
 - [x] Weak multiplier: **×2 damage**. (Effects §8)
 
+### Gap Analysis Summary (current)
+
+**Items by ITEM_IDX type:**
+POTION 22 | WAND 16 | STAFF 18 | SCROLL 15 | RING 12 |
+ARMOR 6 | MACE 5 | SWORD 4 | SHIELD 4 | POLEARM 4 | HELMET 4 |
+TORCH 2 | SPEAR 2 | SHOVEL 2 | GLOVES 2 | BOOTS 3 | AXE 2 |
+FUEL 1 | DAGGER 1 | CLOAK 2 | BOW 1 |
+**Empty:** AMULET, ARROW, XBOW, BOLT, CHEST, BOOK, MONEY, FOOD, 2H_SWORD, BELT
+
+**EFFECT_FLAGs with zero items:** STAT, TOHIT, TODAM, AC, XP, MP (all blocked by #197 or #239)
+**NO_COLLIDE:** effect-only property on Light Ray / Lightning Bolt (working as intended)
+
+**Orphaned named effects (in Effects.txt, referenced by no item):** *(none — all assigned)*
+
+**Staff healing ladder:** Minor Healing (4d4), CLW (8d8), CSW (16d8), Greater Healing (32d8) — all staves created.
+
+**Detection coverage:** Doors/Traps/Monsters = scroll only. Treasure = scroll + staff + ring. Searching = Ring of Searching.
+
+**Newly unblocked systems (as of this batch):**
+- Elemental DoHitEffects — complete
+- CEffect deep copy — complete
+- Charges system — complete (recharge risk curve still TBD)
+- Searching — complete
+- IMMUNE combat — complete
+
 ### Item/Effect Documentation Refactoring (Done)
 - [x] Effect grammar (verbs, nouns, adverbs) moved from Item-Design §2 to Effects-Design §3-§7
 - [x] Effect handler tracking moved to Effects-Design §10
@@ -137,7 +162,7 @@ Get clarity on the above, before doing any other design work.
 ### Effect System — Unimplemented Handlers
 - [x] EFFECT_TYPE_SEE handler — DoSeeEffects: DOOR (secret+regular+stairs, permanent, range-bounded), TRAP (permanent, range-bounded), MONSTERS (one-turn m_bDetected flag, range-bounded). See #272 for visible monsters pane. (Effects §4, §10)
 - [x] DoHitEffects: elemental dispatch (FIRE, COLD, ELECTRICITY, ACID) → DoElementalHit; rolls pEffect->m_szAmount, applies to monster at m_vRangedHitPosition (Effects §10)
-- [ ] 7 to-be-used EFFECT_FLAGs: TREASURE, STONE_TO_MUD, STAT, TOHIT, TODAM, AC, MP — no items built with these yet (Effects §5)
+- [ ] 5 to-be-used EFFECT_FLAGs: STAT, TOHIT, TODAM, AC, MP — blocked by #197 or #239 (Effects §5)
 - [x] EFFECT_MOD audit: RESIST/IMMUNE/WEAK handled by CEffect::Resist(), TIMED by DoIntrinsicEffects, AREA by DoTeleport/DoMagicMapping. LINE/BALL/STAR are shape mods for future AoE targeting (data-ready, no handler yet). ENCHANT reserved. SEE is EFFECT_TYPE not MOD. (Effects §7)
 - [x] DESTROY handler: migrated from ITEM_FLAG_CURSED to EFFECT_FLAG_CURSE; uses HasFlag for lookup (Effects §10)
 
@@ -216,7 +241,7 @@ These ITEM_IDX types exist in Constants.h but have zero items in Items.txt:
 | Potion of Restore Strength | RESTORE + STAT | Stats #197 | #77 comment, #197 |
 | Potion of Weakness | LOSE + STAT | Stats #197 | #77 comment |
 | Potion of Heroism | TIMED + STAT, TIMED + HP | Stats #197 | #77 comment |
-| Potion of Flames | HIT + FIRE, (2nd: WEAK + COLD) | Elemental DoHitEffects | #77 comment |
+| Potion of Flames | HIT + FIRE, (2nd: WEAK + COLD) | — | #77 comment |
 | Potion of See Invisible | TIMED + INVISIBLE + SEE | MON_FLAG_INVISIBLE | #77 comment |
 | Potion of Gain CON/DEX/INT/WIS/CHA | GAIN + STAT (per stat) | Stats #197 | #197 comment |
 | Potion of Restore CON/DEX/INT/WIS/CHA | RESTORE + STAT (per stat) | Stats #197 | #197 comment |
@@ -225,7 +250,7 @@ These ITEM_IDX types exist in Constants.h but have zero items in Items.txt:
 ### Scrolls
 | Item | Effect Line(s) | Blocked By | Source |
 |---|---|---|---|
-| Scroll of Blessing | TIMED + AC | CEffect deep copy | #77 comment |
+| Scroll of Blessing | TIMED + AC | — | #77 comment |
 | Scroll of Door/Stair Location | SEE + DOOR | EFFECT_TYPE_SEE handler | #77 comment, #117 |
 | Scroll of Trap Detection | SEE + TRAP | EFFECT_TYPE_SEE handler | #77 comment, #117 |
 | Scroll of Trap Creation | CREATE + TRAP | Trap system | #77 comment |
@@ -237,7 +262,7 @@ These ITEM_IDX types exist in Constants.h but have zero items in Items.txt:
 | Scroll of *Enchant Armor* | GAIN + AC + ENCHANT (+1d3 + random intrinsic) | Enchant system | #128 |
 | Scroll of *Identify* | Full lore reveal | Ego/unique item system | #114, #128 |
 | Scroll of Curse Object | INTRINSIC + CURSED(?) | Cursed system | #128 |
-| Scroll of Recharging | RESTORE + charges | Charges system | #121 |
+| Scroll of Recharging | RESTORE + charges | Recharge risk curve | #121 |
 | Scroll of Restoration | (stat restore, Temple sells) | Stats #197 | #243 |
 | Scroll of Darkness | (Vampire PC town access) | Day/night system | #243 comment |
 | Scroll of Create Traps | CREATE + TRAP | Trap system | #114 comment |
@@ -263,7 +288,7 @@ These ITEM_IDX types exist in Constants.h but have zero items in Items.txt:
 ### Rings
 | Item | Effect Line(s) | Blocked By | Source |
 |---|---|---|---|
-| Ring of Searching | (adds % to passive/active search) | Search system | #117 |
+| Ring of Searching | INTRINSIC + SEARCHING (Flag2) | — (done) | #117 |
 | Ring of Fate | (unknown, Magic Shop great item) | — | #243 comment |
 | Sustain [Stat] Ring | INTRINSIC + STAT + sustain modifier | Stats #197 | #197, #244 |
 
@@ -273,7 +298,7 @@ These ITEM_IDX types exist in Constants.h but have zero items in Items.txt:
 | Boots of Speed | INTRINSIC + SPEED (permanent) | — | #244 |
 | Cloak of Protection | AC bonus (e.g., Cloak of Protection (1, +10) = 11 AC) | — | #114 comment |
 | Gloves of Dexterity | (adds % search, DEX bonus) | Stats #197 | #117 |
-| Helmet of Lordly Protection | INTRINSIC + FIRE + IMMUNE | IMMUNE vs RESIST in combat | #77 comment, #270 |
+| Helmet of Lordly Protection | INTRINSIC + FIRE + IMMUNE | — | #77 comment, #270 |
 | Holy Symbol | (Priest class equipment) | Classes #239 | #239 |
 | Nature Focus | (Druid class equipment) | Classes #239 | #239 |
 | Ki Focus | (Monk class equipment) | Classes #239 | #239 |
@@ -362,9 +387,9 @@ Six tiers of item quality, from the item spawn process:
 | Enhancement | Details | Blocking | Source |
 |---|---|---|---|
 | **EFFECT_TYPE_SEE handler** | "SEE changes what you know, CREATE changes the world." Handles: detect doors/traps/monsters, magic mapping (alternate), identify. | Detection scrolls, Ring of Searching | #77 Phase 3 roadmap |
-| **Elemental DoHitEffects** | Fire/cold/acid/poison hit damage from items (Potion of Flames). Currently only monsters do elemental hits. | Potion of Flames | #77 comment |
-| **IMMUNE vs RESIST in combat** | Resistance = 50% reduction. Immunity = 0 damage. Must check `EFFECT_MOD_IMMUNE` vs `EFFECT_MOD_RESIST` during damage calculation. | Helmet of Lordly Protection | #77 comment, #244 |
-| **Timed AC (CEffect deep copy)** | Scroll of Blessing grants timed AC bonus. CEffect copy doesn't deep-copy m_szAmount for rolled value storage. | Scroll of Blessing | Phase 3 roadmap |
+| **Elemental DoHitEffects** | ✅ Fire/cold/acid/elec hit damage from items. | — | #77 comment |
+| **IMMUNE vs RESIST in combat** | ✅ Resistance = 50% reduction. Immunity = 0 damage. Checks EFFECT_MOD_IMMUNE vs EFFECT_MOD_RESIST during damage calculation. | — | #77 comment, #244 |
+| **Timed AC (CEffect deep copy)** | ✅ Deep copy fixed. Scroll of Blessing etc. can use timed effects. | — | Phase 3 roadmap |
 | **Sustain [Stat] mechanics** | Restore stat to max achieved + prevent stat damage. "The feeling passes." | Sustain rings/armor | #244 comment |
 
 ## B2. Item Systems
@@ -482,7 +507,7 @@ Equipment × intrinsic matrix showing resist/immune/weak/no-effect per item.
 | **Classes (#239)** | Spell books, class-specific feelings, class equipment (Holy Symbol, etc.), Mage ID spell | #239 |
 | **Town (#243)** | Shop system, shopkeeper ID, Player House storage, Word of Recall (full loop) | #243 |
 | **Ranged Attacks (PR #235)** | Item destruction from elemental attacks | #271 |
-| **EFFECT_TYPE_SEE** | Detection scrolls, Ring of Searching | #77 / Phase 3 |
+| **EFFECT_TYPE_SEE** | ✅ Detection scrolls work, Ring of Searching works | #77 / Phase 3 |
 | **MON_FLAG_INVISIBLE** | Potion/Ring of See Invisible, Sting unique | #72 |
 | **Trap system** | Scroll of Trap Detection/Creation, trap-triggered intrinsics | #117, #244 |
 

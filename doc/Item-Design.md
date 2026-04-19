@@ -409,7 +409,7 @@ All items mentioned in design discussions not yet in Items.txt, organized by typ
 | Potion of Restore Strength | RESTORE + STAT | Stats #197 |
 | Potion of Weakness | LOSE + STAT | Stats #197 |
 | Potion of Heroism | TIMED + STAT, TIMED + HP | Stats #197 |
-| Potion of Flames | HIT + FIRE | Elemental DoHitEffects |
+| Potion of Flames | HIT + FIRE | — |
 | Potion of See Invisible | TIMED + INVISIBLE + SEE | MON_FLAG_INVISIBLE |
 | Potion of Gain CON/DEX/INT/WIS/CHA | GAIN + STAT (per stat) | Stats #197 |
 | Potion of Restore CON/DEX/INT/WIS/CHA | RESTORE + STAT (per stat) | Stats #197 |
@@ -419,7 +419,7 @@ All items mentioned in design discussions not yet in Items.txt, organized by typ
 
 | Item | Effect Line | Blocked By |
 |---|---|---|
-| Scroll of Blessing | HIT + AC + TIMED | CEffect deep copy fix |
+| Scroll of Blessing | HIT + AC + TIMED | — |
 | Scroll of Door/Stair Location | SEE + DOOR | EFFECT_TYPE_SEE |
 | Scroll of Trap Detection | SEE + TRAP | EFFECT_TYPE_SEE |
 | Scroll of Trap Creation | CREATE + TRAP | Trap system |
@@ -431,7 +431,7 @@ All items mentioned in design discussions not yet in Items.txt, organized by typ
 | Scroll of *Enchant Armor* | GAIN + AC + ENCHANT (+intrinsic) | Enchant system |
 | Scroll of *Identify* | Full lore reveal | Ego/unique system |
 | Scroll of Curse Object | INTRINSIC + CURSED | — |
-| Scroll of Recharging | RESTORE + charges | Charges system |
+| Scroll of Recharging | RESTORE + charges | Recharge risk curve |
 | Scroll of Restoration | (stat restore) | Stats #197 |
 | Scroll of Darkness | (Vampire PC town access) | Day/night |
 
@@ -457,7 +457,7 @@ All items mentioned in design discussions not yet in Items.txt, organized by typ
 
 | Item | Effect Line | Blocked By |
 |---|---|---|
-| Ring of Searching | (passive/active search bonus) | Search system |
+| Ring of Searching | INTRINSIC + SEARCHING (Flag2) | — (done) |
 | Ring of Fate | (unknown great item) | — |
 | Sustain [Stat] Ring | INTRINSIC + STAT + sustain | Stats #197 |
 
@@ -468,7 +468,7 @@ All items mentioned in design discussions not yet in Items.txt, organized by typ
 | Boots of Speed | BOOTS | INTRINSIC + SPEED | — |
 | Cloak of Protection | CLOAK | AC bonus (e.g., +10) | — |
 | Gloves of Dexterity | GLOVES | DEX bonus, search bonus | Stats #197 |
-| Helmet of Lordly Protection | HELMET | INTRINSIC + FIRE + IMMUNE | IMMUNE combat |
+| Helmet of Lordly Protection | HELMET | INTRINSIC + FIRE + IMMUNE | — |
 | Holy Symbol | (class equip) | Priest item | Classes #239 |
 | Nature Focus | (class equip) | Druid item | Classes #239 |
 | Ki Focus | (class equip) | Monk item | Classes #239 |

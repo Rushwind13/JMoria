@@ -24,16 +24,16 @@ Need explicit answers before these can be implemented.
 All flags below have no player-usable item that delivers them as a primary positive effect.
 Confirmed designs are documented in Item-Design.md §12.
 
-| Flag | Gap | Action |
-|---|---|---|
-| PARALYZE | ~~Nothing uses PARALYZE as a positive player-usable item~~ | Staff of Paralysis (Mass Paralyze AoE) |
-| SLEEP | ~~Nothing uses SLEEP as a positive player-usable item~~ | Staff of Mass Sleep + Scroll of Mass Sleep |
-| CONFUSE | Only a negative-effect potion exists | Skipped — Wand of Confusion sufficient |
-| STONE_TO_MUD | ~~Wand only; no staff or ring~~ | Ring of Tunneling (permanent intrinsic) |
-| AFRAID | ~~Potion of Courage confirmed (Item §12); no wand/staff yet~~ | Staff of Fear (Mass Fear AoE) |
-| AC | ~~Scroll of Blessing confirmed (Item §12); no staff or ring~~ | Staff of Protection (Timed Blessing) |
-| XP | One potion only; no staff | Skipped — niche, Staff of Enlightenment name reserved |
-| FREE_ACTION | Ring only; no scroll or staff | Skipped — Ascension Kit intrinsic, ring-only by design |
+| Flag | Resolution |
+|---|---|
+| PARALYZE | Staff of Paralysis (Mass Paralyze AoE) — added |
+| SLEEP | Staff of Mass Sleep + Scroll of Mass Sleep — added |
+| CONFUSE | Skipped — Wand of Confusion sufficient |
+| STONE_TO_MUD | Ring of Tunneling (permanent intrinsic) — added |
+| AFRAID | Staff of Fear (Mass Fear AoE) — added |
+| AC | Staff of Protection (Timed Blessing) — added |
+| XP | Skipped — niche, Staff of Enlightenment name reserved |
+| FREE_ACTION | Skipped — Ascension Kit intrinsic, ring-only by design |
 
 - [ ] Resistance stacking formula: 50% + 25% = 62.5%? — deferred to intrinsics deep-dive (Effects §8)
 

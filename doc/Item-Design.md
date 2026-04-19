@@ -686,7 +686,7 @@ New defines and string table entries needed. Effect constants (EFFECT_TYPE, EFFE
 | Define | Type | Purpose |
 |---|---|---|
 | MON_FLAG_INVISIBLE (0x100000) | MON_FLAG | Invisible monster property |
-| ~~ITEM_FLAG_EQUIPMENT~~ | — | Not needed; EquipTypes[] already maps ITEM_IDX→slot |
+| ITEM_FLAG_EQUIPMENT | — | Not needed; EquipTypes[] already maps ITEM_IDX→slot |
 | ITEM_FLAG_BLESSED (0x4000) | ITEM_FLAG | Three-state blessed system |
 
 ### String Table

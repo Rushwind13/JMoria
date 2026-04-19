@@ -95,6 +95,7 @@ Foundation commit landed — this tracks what's left before Phase 3 is done.
 - [x] **`EFFECT_MOD_TIMED`** (0x10) — temporary effect duration
 - [x] **`EFFECT_MOD_AREA`** (0x20), **`EFFECT_MOD_LINE`** (0x40), **`EFFECT_MOD_BALL`** (0x80) — shape modifiers
 - [x] **`EFFECT_MOD_ENCHANT`** (0x100) — enchantment modifier
+- [x] **`EFFECT_MOD_SUSTAIN`** (0x200) — sustain stat modifier. NUM_EFFECT_MODIFIERS=10.
 
 #### Effect Flags — Word 1 (EFFECT_FLAG, 32/32 bits allocated)
 All 32 flags exist and are in the string table. Includes: FIRE, COLD, ELEC, ACID, POISON, AFRAID, BLIND, CONFUSE, PARALYZE, SLEEP, INFRA, ESP, INVISIBLE, LEVITATE, FREE_ACTION, SPEED, LIGHT, RECALL, TELEPORT, STONE_TO_MUD, IDENTIFY, MAPPING, SUMMON, AC, STAT, HP, FUEL, XP, FOOD, SEE_INVIS, INTRINSIC, RESIST.
@@ -116,26 +117,28 @@ All 32 flags exist and are in the string table. Includes: FIRE, COLD, ELEC, ACID
 - [ ] **Potion of Heroism** — stat boost + temp HP. Blocked by stats system (#197).
 - [ ] **Potion of Flames** — fire hit + cold weakness. Needs DoHitEffects handler for fire.
 
-#### Item Data
+#### Item Data ✅ (150 items, 98 named effects)
 See [#270 - Item Design & Content](https://github.com/Rushwind13/JMoria/issues/270) for comprehensive item inventory and design document.
 
-Items already added (19 new, 76 total):
-- [x] **Potions** (11 new): Resist Cold, Resist Acid, Resist Electricity, Invisibility, Speed, Levitation, Blindness, Confusion, Poison, Cure Poison, Infravision
-- [x] **Rings** (5 new): Cold Resistance, Acid Resistance, Electricity Resistance, Free Action, Speed, Telepathy
-- [x] **Helmets** (2 new): Helm of Infravision, Helm of Telepathy
-- [x] **Scrolls** (1 new): Scroll of Recall, Scroll of Summon Monsters, Scroll of Light, Scroll of Telepathy
+All items are in Items.txt using named effect references (zero inline effects). 150 items total, 98 named effects in Effects.txt.
+
+Recent additions (74 new items across two passes):
+- [x] **Potions** (22 total): healing ramp (Minor→CLW→CSW→Major→Greater→Massive), Resist Cold/Acid/Electricity, Invisibility, Speed, Levitation, Blindness, Confusion, Poison, Cure Poison, Infravision, Flames
+- [x] **Scrolls** (18 total): Recall, Summon Monsters, Light, Telepathy, Blessing, Curse Object, Recharging, *Recharging*, Enchant Weapon to Hit/Damage, Enchant Armor, *Enchant Weapon*, *Enchant Armor*, Mass Sleep, Remove Curse, Identify, Phase Door
+- [x] **Wands** (18 total): full catalog including Light, Fire/Cold/Elec/Acid, Paralyze, Fear, etc.
+- [x] **Staves** (24 total): Starlight, *Resistance*, Mass Sleep, Fear, Paralysis, Protection, plus healing/resistance/detection
+- [x] **Rings** (14 total): Tunneling, Greed, Fire/Cold/Acid/Electricity Resistance, Free Action, Speed, Telepathy, Protection, etc.
+- [x] **Equipment**: Helmet of Lordly Protection, Helm of Infravision, Helm of Telepathy
 - [x] **Light sources**: Torch (3), Brass Lantern (5)
 
-Items NOT yet added (blocked by missing systems):
-- [ ] Wand of Light, Staff of Light, Staff of Starlight — light source integration
-- [ ] Flask of Oil — refuel consumable
+Items in Items.txt but effect code blocked by other systems:
+- [ ] Scroll of Blessing / Staff of Protection — needs timed AC in DoIntrinsicEffects
+- [ ] Staff of Light, Staff of Starlight — light source integration
+
+Items NOT yet in Items.txt (blocked by missing systems):
 - [ ] Potion of See Invisible — needs invisible monster system (no MON_FLAG_INVISIBLE yet)
 - [ ] Potion of Gain STR / Restore STR / Weakness — needs stats system (#197)
 - [ ] Potion of Heroism — needs stats system (#197)
-- [ ] Potion of Flames — needs elemental hit handler in DoHitEffects
-- [ ] Helmet of Lordly Protection — needs IMMUNE vs RESIST distinction in combat
-- [ ] Scroll of Blessing — needs timed AC (CEffect copy doesn't deep-copy m_szAmount for rolled value storage)
-- [ ] Scroll of Detect Doors/Stairs/Traps — needs EFFECT_TYPE_SEE implementation
 
 ### Remaining — Monster Effects
 
@@ -185,13 +188,13 @@ These are ordered by "unblocks the most other work" and "most visible gameplay i
 
 **Also fixed**: LOS Bresenham was passing sight_distance instead of actual target distance, causing line to extend past target into walls. Fixed in CanSeeEachOther() and UpdateVisibility(). All 12 targeting/ranged tests now pass.
 
-### Tier 2 — Effect Vocabulary + Item Content ✅ (vocabulary done)
-The effect vocabulary (types, modifiers, flags, second bitmask) is complete. Remaining work is item content:
+### Tier 2 — Effect Vocabulary + Item Content ✅
+The effect vocabulary (types, modifiers, flags, second bitmask) is complete. Item content catalog is complete (150 items, 98 named effects, all named refs).
 4. ~~**`EFFECT_TYPE_TIMED`**~~ — Resolved: use `EFFECT_TYPE_INTRINSIC` + `EFFECT_MOD_TIMED`. Not a separate type.
 5. ~~**EFFECT_FLAG2 second bitmask**~~ — Done. DOOR, TRAP, MONSTERS + LookupEffectFlag/EffectFlagToString.
 6. ~~**`{tried}` flag**~~ (#114) — Done (moved to Tier 1).
-7. **Multi-effect items in Items.txt** (#77) — Potion of Minor Healing (HP + cure blind + cure confuse) is the canonical use case. The loop already works; just need item data.
-8. **Define ~20 new items in Items.txt** (#77) — Potions, scrolls, rings using existing vocabulary. No code changes needed for most.
+7. ~~**Multi-effect items in Items.txt**~~ (#77) — Done. Many items use multiple named effects (healing potions with cure, staves with multiple effects).
+8. ~~**Define new items in Items.txt**~~ (#77) — Done. 74 new items added (150 total). All potions, scrolls, wands, staves, rings, equipment using named effect vocabulary. `EFFECT_MOD_SUSTAIN` (0x200) added to Constants.h.
 
 ### Tier 3 — Monster Combat Depth ✅ (content complete, code TBD)
 ~~**Prerequisite**: Add 6 new `MON_FLAG_*` constants~~ — Already done (CRAWL, TOUCH, CLAW, BITE, BREATHE, TRAMPLE all in Constants.h and Monsters.txt).
@@ -201,7 +204,7 @@ The effect vocabulary (types, modifiers, flags, second bitmask) is complete. Rem
 
 ### Tier 4 — Light Economy Integration
 12. **Light radius extends visibility** (#72, #121) — UpdateVisibility() uses torch Radius to extend sight range
-13. **Light source items** (#270) — Wand/Staff of Light, Flask of Oil for refueling
+13. **Light source items** (#270) — Staff of Light, Staff of Starlight in Items.txt; need light source code integration. Flask of Oil not yet added.
 14. **Infravision/ESP integration** (#72) — UpdateVisibility() checks for EFFECT_FLAG_INFRA/ESP on player
 
 ### Tier 5 — Advanced Systems (Require Stats, Classes, Spells)

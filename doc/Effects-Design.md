@@ -479,11 +479,11 @@ DOOR, TRAP, MONSTERS, NO_COLLIDE. 28 bits free.
 
 RESIST, SEE, IMMUNE, WEAK, TIMED, AREA, LINE, BALL, ENCHANT, SUSTAIN.
 
-### ~~Pending Defines~~
+### Completed Defines
 
 | Define | Type | Status |
 |---|---|---|
-| ~~EFFECT_MOD_SUSTAIN~~ | EFFECT_MOD | Done — 0x200, NUM_EFFECT_MODIFIERS=10, string table entry added |
+| EFFECT_MOD_SUSTAIN | EFFECT_MOD | Done — 0x200, NUM_EFFECT_MODIFIERS=10, string table entry added |
 
 ---
 

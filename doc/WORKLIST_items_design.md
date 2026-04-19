@@ -1,517 +1,122 @@
 # WORKLIST — Item Design & Content
 
-## Checklist: Item-Design.md Completion
+**Design references:** [Item-Design.md](Item-Design.md) | [Effects-Design.md](Effects-Design.md)
 
-Section key (Item-Design.md): §1 Data Model, §2 Wands vs Staves, §3 Quality Tiers,
+Section keys — Item-Design.md: §1 Data Model, §2 Wands vs Staves, §3 Quality Tiers,
 §4 Identification, §5 Stacking, §6 Charges & Recharge, §7 Item Destruction,
 §8 Ego Items, §9 Legendary Items, §10 Unique Items, §11 Enchant Scrolls,
 §12 New Item Catalog, §13 Encumbrance, §14 Economy & Shops, §15 Dependency Map,
-§16 Code Logic Tracking, §17 Constants.h Tracking, §18 Class/Item Synergies, §19 Intrinsics Grid
+§16 Code Logic, §17 Constants.h, §18 Class/Item Synergies, §19 Intrinsics Grid
 
-Section key (Effects-Design.md): §1 Data Model, §2 Effects.txt Format, §3 Grammar,
+Section keys — Effects-Design.md: §1 Data Model, §2 Effects.txt Format, §3 Grammar,
 §4 Verbs, §5 Nouns Word 1, §6 Nouns Word 2, §7 Adverbs, §8 Combat Math,
 §9 Named Effect Catalog, §10 Handler Status, §11 Constants, §12 Dependencies,
 §13 Monster Attack Architecture
 
-### Design Decisions (need answers before implementation)
-Open design decisions Matrix. All items that have `+` need an item to be created for that effect, and require confirmation by asking questions.
-Word 1 (32 flags, all used)
-Flag	Has Potion	Has Scroll	Has Wand	Has Staff	Has Ring	Gap?
-FIRE	Resist	—	Firebolt, Fireball (Effects.txt)	+	Resist	No wand item yet
-COLD	Resist	—	Frost Bolt (Effects.txt)	+	Resist	No wand item yet
-ELECTRICITY	Resist	—	Lightning (Effects.txt)	+	Resist	No wand item yet
-ACID	Resist	—	+	+	Resist	No bolt/ball effect, no wand
-POISON	Inflict, Cure, +Slow	—	—	+	—	No offensive wand/staff
-LIGHT	—	Light	Light (wand)	+	+protfrom	Covered
-PARALYZE	+	—	+	—	—	Nothing uses it as item
-TREASURE	—	+	—	+	+	Nothing uses it
-AFRAID	+cure	+scare	+	—	—	Nothing uses it as item
-BLIND	Inflict (potion)	—	—	—	—	Only negative potion
-SLEEP	+	—	+	+	—	Nothing uses it as item
-CONFUSE	Inflict	—	+	—	—	Only negative potion
-STONE_TO_MUD	—	—	+	—	—	Nothing uses it
-FUEL	—	+	—	+	—	Flask of Oil only
-INFRA	Timed buff	—	—	—	+	Helm of Infravision
-ESP	—	Telepathy	—	+	Telepathy	Covered
-IDENTIFY	—	Identify	—	+	—	No staff yet
-RECALL	—	Word of Recall	—	+	—	No staff yet
-MAPPING	—	Magic Mapping, *MM*	—	+	—	No staff yet
-SUMMON	—	Summon Monsters	+	+	—	No staff yet
-STAT	+	—	—	—	+	Blocked by #197
-TOHIT	—	+	—	—	+	Enchant system needed
-TODAM	—	+	—	—	+	Enchant system needed
-AC	—	+	—	—	Protection	Partial
-XP	+	—	—	—	—	Nothing uses it
-HP	Minor Healing	—	—	+	+	Missing higher tiers
-MP	+	—	—	—	+	Blocked by classes #239
-TELEPORT	—	Phase Door, Teleport	Teleport Away (Effects.txt)	—	+	No staff yet
-FREE_ACTION	—	—	—	—	Ring	Only ring
-INVISIBLE	Timed buff	—	—	+	Ring	Covered
-LEVITATE	Timed buff	—	—	+	Ring	Covered
-SPEED	Timed buff	—	—	+	Ring	Covered
-
-### Coverage Map — Confirmed Designs
-
-**FIRE / COLD / ELECTRICITY / ACID (Resistance Staves)**
-- Per-element Staff of Fire Resistance, Staff of Cold Resistance, etc. — timed elemental resistance
-- Staff of Resistance — grants all 4 timed resistances at once
-- Staff of *Resistance* — grants all 4 timed immunities (very rare, deep dungeon)
-- Each element needs bolt and ball effects in Effects.txt (ACID bolt/ball not yet defined)
-
-**POISON**
-- Potion of Slow Poison — halves poison damage rate, extends duration (buys time to get to town)
-- Potion of Neutralize Poison — full cure, removes all poison effects
-- Staff of Cure Poison — cure effect available on some healing staves (e.g., Staff of Healing may bundle HP + poison cure)
-
-**LIGHT (Ring)**
-- Deferred — Ring of Light is part of Vampire player race feature (protection from light damage)
-- Not building until Vampire race is implemented
-
-**AFRAID**
-- Potion of Courage — cures fear, grants short timed immunity to fear effects
-- Scroll of Scare Monster — AoE fear effect, causes nearby monsters to flee
-
-**TREASURE**
-- Scroll of Treasure Detection — one-shot, reveals treasure within nearby rect (range-bounded)
-- Staff of Treasure Detection — rechargeable version, same effect
-- Ring of Greed / Ring of Sensing — permanent treasure detection in radius 15 while worn
-- "Greed" = gold/items, "Sensing" = broader (doors, traps, treasure) — naming TBD
-
-**FUEL**
-- Scroll of Recharging — restores charges to a wand or staff, risk of explosion on overcharge
-- Scroll of *Recharging* — stronger version, more charges restored, lower explosion risk
-- Staff of Recharging — rechargeable version (can recharge other staves/wands including other Staves of Recharging, but recharging a Staff of Recharging has higher explosion risk)
-
-**SUMMON**
-- Wand of Summoning — short range (2-3 tiles), spawns monsters at target point
-- Staff of Summoning — summons elite monster + adds (entourage), spawns near player
-
-Get clarity on the above, before doing any other design work.
-- [x] Material system: **implicit from ITEM_IDX type**. Ego+ items resist/are immune to elemental destruction. Books 3-4 resist (books 1-2 vulnerable — players learn to carry spares). (Item §7)
-- [ ] Resistance stacking formula: 50% + 25% = 62.5%? (Effects §8) — deferred to intrinsics deep-dive
-- [x] Weak multiplier: **×2 damage**. (Effects §8)
-
-### Gap Analysis Summary (current)
-
-**Items by ITEM_IDX type:**
-POTION 22 | WAND 16 | STAFF 18 | SCROLL 15 | RING 12 |
-ARMOR 6 | MACE 5 | SWORD 4 | SHIELD 4 | POLEARM 4 | HELMET 4 |
-TORCH 2 | SPEAR 2 | SHOVEL 2 | GLOVES 2 | BOOTS 3 | AXE 2 |
-FUEL 1 | DAGGER 1 | CLOAK 2 | BOW 1 |
-**Empty:** AMULET, ARROW, XBOW, BOLT, CHEST, BOOK, MONEY, FOOD, 2H_SWORD, BELT
-
-**EFFECT_FLAGs with zero items:** STAT, TOHIT, TODAM, AC, XP, MP (all blocked by #197 or #239)
-**NO_COLLIDE:** effect-only property on Light Ray / Lightning Bolt (working as intended)
-
-**Orphaned named effects (in Effects.txt, referenced by no item):** *(none — all assigned)*
-
-**Staff healing ladder:** Minor Healing (4d4), CLW (8d8), CSW (16d8), Greater Healing (32d8) — all staves created.
-
-**Detection coverage:** Doors/Traps/Monsters = scroll only. Treasure = scroll + staff + ring. Searching = Ring of Searching.
-
-**Newly unblocked systems (as of this batch):**
-- Elemental DoHitEffects — complete
-- CEffect deep copy — complete
-- Charges system — complete (recharge risk curve still TBD)
-- Searching — complete
-- IMMUNE combat — complete
-
-### Item/Effect Documentation Refactoring (Done)
-- [x] Effect grammar (verbs, nouns, adverbs) moved from Item-Design §2 to Effects-Design §3-§7
-- [x] Effect handler tracking moved to Effects-Design §10
-- [x] Effect constants moved to Effects-Design §11
-- [x] Effect dependencies moved to Effects-Design §12
-- [x] Resistance math moved to Effects-Design §8
-- [x] Item-Design renumbered §2-§19 (old §3-§20)
-- [x] Cross-references added between all three design docs
-
-### Monster Attack Architecture (Done — Effects-Design §13)
-- [x] CAttack group system: weighted groups, monster picks one per turn
-- [x] Attack entry format: delivery + optional dice + optional named effect + optional overrides
-- [x] Override syntax: `<Range=8, Radius=5, Amount=6d8>` for per-instance field overrides
-- [x] Compound attacks: physical dice + saving-throw-gated named effect (bite + poison)
-- [x] Backward compatibility: bare Attack lines auto-wrap into default Melee group
-- [x] AI range gating: new MON_AI types (CHASE_RANGED, LAZY_RANGED, PURE_RANGED)
-- [x] MAXED flag on CMonsterDef for max-damage monsters
-
-### Item Data — TBD Definitions
-- [ ] Ego data format: file format for ego definitions (type restrictions, intrinsics, rarity, depth) (Item §8)
-- [ ] Legendary constellations: Westernesse, Holy Avenger, Defender, Amulet of the Magi, Morgul Blade — all TBD (Item §9)
-- [ ] Unique item details: Menthir intrinsics/carrier, Excalibur intrinsics (Item §10)
-- [ ] Uniques.txt file format design (Item §10)
-- [ ] Empty type content: Food, Books, Arrows, Bolts, Money, Chests, Belts, Amulets (Item §12)
-
-### Item Data Model — CItem/CItemDef Fields Needed
-- [x] Per-instance bonuses on CItem: m_fBonusToHit, m_fBonusToDamage, m_fACBonus — CItemDef stores NdM strings, CItem rolls at creation (Item §1)
-- [x] Lifetime charge limit field on CItem (m_dwMaxCharges) — set to 2× initial charges (Item §1, §6)
-- [ ] Ego/legendary/unique identity field on CItem — needed for quality tier tracking (Item §1, §8, §9, §10)
-- [ ] Dead field: CItemDef::m_dwBaseHP — initialized to 0, never populated by parser. Remove or repurpose (Item §1)
-
-### Items.txt Parser — Missing Fields
-- [x] Charges field in Items.txt parser — `Charges <NdM>` keyword, data-driven initial charges on CItemDef (Item §1, §6)
-- [x] Effect Amount parsing — 4th optional `<NdM>` field on inline Effect lines, named refs pull from CEffectDef (Item §1, Effects §2)
-
-### Effect System — Infrastructure (Done)
-- [x] Effects.txt shared effect catalog — CEffectDef class, ReadEffect parser, 8 named effects defined (Effects §2)
-- [x] Items.txt Effect lines support named references: `Effect <Light Ray>` = catalog lookup (Effects §2)
-- [x] CEffectDef declared before CEffect; CEffect has m_ed pointer to its CEffectDef (Effects §1)
-- [x] CDataFile holds CDungeon* for GetEffectDef() lookups instead of m_llEffectDefs (Effects §2)
-- [x] Load order: Effects.txt → Monsters.txt → Items.txt (dependency order) (Effects §2)
-- [x] NO_COLLIDE moved from ITEM_FLAG to EFFECT_FLAG_NO_COLLIDE on effects (Effects §6)
-
-### Effect System — Unimplemented Handlers
-- [x] EFFECT_TYPE_SEE handler — DoSeeEffects: DOOR (secret+regular+stairs, permanent, range-bounded), TRAP (permanent, range-bounded), MONSTERS (one-turn m_bDetected flag, range-bounded). See #272 for visible monsters pane. (Effects §4, §10)
-- [x] DoHitEffects: elemental dispatch (FIRE, COLD, ELECTRICITY, ACID) → DoElementalHit; rolls pEffect->m_szAmount, applies to monster at m_vRangedHitPosition (Effects §10)
-- [ ] 5 to-be-used EFFECT_FLAGs: STAT, TOHIT, TODAM, AC, MP — blocked by #197 or #239 (Effects §5)
-- [x] EFFECT_MOD audit: RESIST/IMMUNE/WEAK handled by CEffect::Resist(), TIMED by DoIntrinsicEffects, AREA by DoTeleport/DoMagicMapping. LINE/BALL/STAR are shape mods for future AoE targeting (data-ready, no handler yet). ENCHANT reserved. SEE is EFFECT_TYPE not MOD. (Effects §7)
-- [x] DESTROY handler: migrated from ITEM_FLAG_CURSED to EFFECT_FLAG_CURSE; uses HasFlag for lookup (Effects §10)
-
-### Effect System — CEffect Class Cleanup (Done)
-- [x] CEffect deep copy: copy constructor and assignment operator deep-copy m_szAmount (fixes DoIntrinsicEffects shallow copy bug) (Item §16, Effects §10)
-- [x] CEffect::SetAmount() helper — consolidates manual alloc/copy in copy ctor, operator=, and FileParse.cpp (2 sites)
-- [x] CEffect::Resist() — returns multiplier for IMMUNE (0×), RESIST (0.5×), WEAK (2×); used by CPlayer::Resist()
-
-### Combat Math — Elemental Resistance (Done)
-- [x] CPlayer::Resist(dwElement) — checks active effects then equipment for elemental modifier multiplier (Effects §8)
-- [x] CPlayer::TakeDamage extended with optional dwElement param; applies resistance with player feedback (Effects §8)
-- [x] CollideWithPlayer passes m_pCurrentAttack->m_dwEffectFlags through damage pipeline (Effects §8)
-
-### Code Logic — Not Started
-- [x] CEffect deep copy fix for timed AC (Item §16, Effects §10)
-- [x] IMMUNE vs RESIST combat math (Effects §8)
-- [x] Item spawn quality chain: Normal/Cursed/Magic tier (Item §3, §16) — Ego/Legendary/Unique deferred
-- [x] Charges system: NdM initial (m_szCharges on CItemDef), lifetime limit (m_dwMaxCharges on CItem), fallback 1d20 (Item §6, §16)
-- [ ] Recharge risk curve: f(charges, lifetime, depth) (Item §6, §16)
-- [ ] Enchantment system: +1/+1d3, failure above +10 (Item §11, §16)
-- [ ] Blessed three-state system (Item §3, §16)
-- [ ] Stacking identity check (per-category rules from Item §5) (Item §16) — partial
-- [ ] Partial stack split: "How many? (1-n)" (Item §5, §16)
-- [ ] Ground stacking + loot explosion (Item §5, §16)
-- [ ] Feeling tiers: {magical}, {excellent}, {special} (Item §4, §16)
-- [ ] Blind-use identification (Item §4, §16)
-- [ ] Item destruction scan: material vulnerability on elemental hit (Item §7, §16) — blocked by PR #235
-
-### Code Logic — Blocked by Other Systems
-- [ ] Sustain stat mechanics — blocked by Stats #197 (Item §16)
-- [ ] Class-specific feelings — blocked by Classes #239 (Item §4)
-- [ ] Shopkeeper pricing as identification — blocked by Town #243 (Item §4)
-- [ ] Mage ID spell (level 37) — blocked by Classes #239 (Item §4)
-
-### Constants.h — New Defines Needed
-- [x] Activate EFFECT_TYPE_SEE (0x100) — uncommented, NUM_EFFECT_TYPES=9, string table added (Effects §11)
-- [x] MON_FLAG_INVISIBLE (0x100000) — defined, string table added (Item §17)
-- [x] ~~ITEM_FLAG_EQUIPMENT~~ — not needed; EquipTypes[] array already maps ITEM_IDX→slot (Item §17)
-- [x] ITEM_FLAG_BLESSED (0x4000) — defined, NUM_ITEM_FLAGS=12, string table added (Item §17)
-- [x] String table entries for all new defines (Item §17, Effects §11)
-
 ---
 
-All item mentions gathered from WORKLIST.txt, Developer's Guide, Designer-Reference, Phase 3 Roadmap, and GitHub issues (#43, #72, #77, #114, #117, #121, #128, #197, #239, #243, #244, #270, #271). Reorganized into actionable categories.
+## Open Design Decisions
 
-Three tracks:
-- **A. Item Data Design** — Items.txt entries, effect combinations, quality tiers, named items
-- **B. Code Logic Enhancements** — C++ handlers, systems, mechanics
-- **C. Constants.h / Data Model** — New defines, flags, structures
+Need explicit answers before these can be implemented.
 
----
+### Effect Coverage Gaps — Items Still Needed
 
-# A. Item Data Design (Items.txt)
+All flags below have no player-usable item that delivers them as a primary positive effect.
+Confirmed designs are documented in Item-Design.md §12.
 
-## A1. Mundane Items — Empty Types Needing Content
-
-These ITEM_IDX types exist in Constants.h but have zero items in Items.txt:
-
-| Type | Status | Design Notes |
+| Flag | Gap | Action |
 |---|---|---|
-| ITEM_IDX_FOOD | Empty | Eat (E) command. No items defined. |
-| ITEM_IDX_ARROW | Empty | Ammo for ITEM_IDX_BOW. |
-| ITEM_IDX_BOLT | Empty | Ammo for ITEM_IDX_XBOW. |
-| ITEM_IDX_MONEY | Empty | Gold pieces, gems, etc. |
-| ITEM_IDX_CHEST | Empty | Container item (ITEM_FLAG_HOLDING). |
-| ITEM_IDX_BELT | Empty | Waist slot. Hill Giant Strength belt referenced (#128). |
-| ITEM_IDX_AMULET | Empty | Neck slot. Amulet of the Magi (#128), Amulet of Sensing (#243) referenced. |
-| ITEM_IDX_BOOK | Empty | 4 progressively rare books per spellcaster class (#239). Books 1-2 purchasable in town, 3-4 dungeon-only. |
+| PARALYZE | ~~Nothing uses PARALYZE as a positive player-usable item~~ | Staff of Paralysis (Mass Paralyze AoE) |
+| SLEEP | ~~Nothing uses SLEEP as a positive player-usable item~~ | Staff of Mass Sleep + Scroll of Mass Sleep |
+| CONFUSE | Only a negative-effect potion exists | Skipped — Wand of Confusion sufficient |
+| STONE_TO_MUD | ~~Wand only; no staff or ring~~ | Ring of Tunneling (permanent intrinsic) |
+| AFRAID | ~~Potion of Courage confirmed (Item §12); no wand/staff yet~~ | Staff of Fear (Mass Fear AoE) |
+| AC | ~~Scroll of Blessing confirmed (Item §12); no staff or ring~~ | Staff of Protection (Timed Blessing) |
+| XP | One potion only; no staff | Skipped — niche, Staff of Enlightenment name reserved |
+| FREE_ACTION | Ring only; no scroll or staff | Skipped — Ascension Kit intrinsic, ring-only by design |
 
-## A2. Consumables — Not Yet In Items.txt
+- [ ] Resistance stacking formula: 50% + 25% = 62.5%? — deferred to intrinsics deep-dive (Effects §8)
 
-### Potions
-| Item | Effect Line(s) | Blocked By | Source |
-|---|---|---|---|
-| Potion of Gain Strength | GAIN + STAT | Stats #197 | #77 comment, #197 |
-| Potion of Restore Strength | RESTORE + STAT | Stats #197 | #77 comment, #197 |
-| Potion of Weakness | LOSE + STAT | Stats #197 | #77 comment |
-| Potion of Heroism | TIMED + STAT, TIMED + HP | Stats #197 | #77 comment |
-| Potion of Flames | HIT + FIRE, (2nd: WEAK + COLD) | — | #77 comment |
-| Potion of See Invisible | TIMED + INVISIBLE + SEE | MON_FLAG_INVISIBLE | #77 comment |
-| Potion of Gain CON/DEX/INT/WIS/CHA | GAIN + STAT (per stat) | Stats #197 | #197 comment |
-| Potion of Restore CON/DEX/INT/WIS/CHA | RESTORE + STAT (per stat) | Stats #197 | #197 comment |
-| Potion of Apple Juice | (flavor, always identified) | — | #121 comment |
+### Open Design Questions
 
-### Scrolls
-| Item | Effect Line(s) | Blocked By | Source |
-|---|---|---|---|
-| Scroll of Blessing | TIMED + AC | — | #77 comment |
-| Scroll of Door/Stair Location | SEE + DOOR | EFFECT_TYPE_SEE handler | #77 comment, #117 |
-| Scroll of Trap Detection | SEE + TRAP | EFFECT_TYPE_SEE handler | #77 comment, #117 |
-| Scroll of Trap Creation | CREATE + TRAP | Trap system | #77 comment |
-| Scroll of Detect Monsters | SEE + MONSTERS | EFFECT_TYPE_SEE handler | #270 |
-| Scroll of Enchant Weapon to Hit | GAIN + TOHIT + ENCHANT | Enchant system | #128 |
-| Scroll of Enchant Weapon Damage | GAIN + TODAM + ENCHANT | Enchant system | #128 |
-| Scroll of Enchant Armor | GAIN + AC + ENCHANT | Enchant system | #128 |
-| Scroll of *Enchant Weapon* | GAIN + TOHIT + TODAM + ENCHANT (+1d3 both) | Enchant system | #128 |
-| Scroll of *Enchant Armor* | GAIN + AC + ENCHANT (+1d3 + random intrinsic) | Enchant system | #128 |
-| Scroll of *Identify* | Full lore reveal | Ego/unique item system | #114, #128 |
-| Scroll of Curse Object | INTRINSIC + CURSED(?) | Cursed system | #128 |
-| Scroll of Recharging | RESTORE + charges | Recharge risk curve | #121 |
-| Scroll of Restoration | (stat restore, Temple sells) | Stats #197 | #243 |
-| Scroll of Darkness | (Vampire PC town access) | Day/night system | #243 comment |
-| Scroll of Create Traps | CREATE + TRAP | Trap system | #114 comment |
-
-### Wands
-| Item | Effect Line(s) | Blocked By | Source |
-|---|---|---|---|
-| Wand of Heal Monster | HIT + HP (on monster) | Monster targeting | #114 comment |
-| Wand of Probing | HIT + IDENTIFY (on monster: HP, attacks, etc.) | — | Design notes |
-| Wand of Teleport Away | HIT + TELEPORT (sends target away from player) | — | Design notes |
-
-### Staves
-| Item | Effect Line(s) | Blocked By | Source |
-|---|---|---|---|
-| Staff of Light | CREATE + LIGHT + AREA, radius 15 | — | #72, #270 |
-| Staff of Starlight | HIT + LIGHT + LINE (all directions) + CREATE + LIGHT + AREA | — | #72, #270 |
-| Staff of Word of Recall | CREATE + RECALL | Town system #243 | #243 |
-| Staff of Perception | RESTORE + IDENTIFY (identifies an item) | — | Design notes |
-| Staff of Teleportation | CREATE + TELEPORT (teleports the user) | — | Design notes |
-
-## A3. Equipment — Not Yet In Items.txt
-
-### Rings
-| Item | Effect Line(s) | Blocked By | Source |
-|---|---|---|---|
-| Ring of Searching | INTRINSIC + SEARCHING (Flag2) | — (done) | #117 |
-| Ring of Fate | (unknown, Magic Shop great item) | — | #243 comment |
-| Sustain [Stat] Ring | INTRINSIC + STAT + sustain modifier | Stats #197 | #197, #244 |
-
-### Armor / Equipment
-| Item | Effect Line(s) | Blocked By | Source |
-|---|---|---|---|
-| Boots of Speed | INTRINSIC + SPEED (permanent) | — | #244 |
-| Cloak of Protection | AC bonus (e.g., Cloak of Protection (1, +10) = 11 AC) | — | #114 comment |
-| Gloves of Dexterity | (adds % search, DEX bonus) | Stats #197 | #117 |
-| Helmet of Lordly Protection | INTRINSIC + FIRE + IMMUNE | — | #77 comment, #270 |
-| Holy Symbol | (Priest class equipment) | Classes #239 | #239 |
-| Nature Focus | (Druid class equipment) | Classes #239 | #239 |
-| Ki Focus | (Monk class equipment) | Classes #239 | #239 |
-| Sustain [Stat] Armor | INTRINSIC + STAT + sustain modifier | Stats #197 | #244 |
-
-## A4. Item Quality Tiers (#128)
-
-Six tiers of item quality, from the item spawn process:
-
-1. **Normal** (+0, +0) — mundane, no bonuses
-2. **Cursed** (-N, -N) — negative bonuses, can't remove without ?Remove Curse
-3. **Magic** (+N, +N) — positive bonuses, very common (1-2 per dungeon level)
-4. **Ego** (named suffix) — has intrinsics, semi-rare (1-3 per 40-level run, ~1% spawn chance). Type-restricted (e.g., "of Levitation" only on BOOTS)
-5. **Legendary** (fixed constellation) — very rare (<0.01%, dungeon level 20+), type-restricted
-6. **Unique** (named, one per game) — carried by specific mobs, always a specific base item (e.g., Excalibur is always a Bastard Sword). Needs Uniques.txt data file.
-
-### Item Spawn Probability Chain (#128 comment)
-```
-1) spawn a thing
-2) is it a weapon/armor?
-3) magical? (% based on dungeon level, item level, luck)
-4) if magical, cursed? (random)
-5) if not cursed, ego? (~1%)
-6) if ego, legendary? (~0.01%, depth 20+)
-7) if legendary, unique? (mob-carried, per Uniques.txt)
-```
-
-### Unique Item Persistence (#128 comment)
-- Singleton per character save
-- Standard Mode: not found before leaving level = gone forever
-- Hardcore Mode: can respawn if not collected
-
-## A5. Ego Items — Named Suffixes (#128)
-
-### Weapon Egos
-| Ego | Code | Intrinsic | Source |
-|---|---|---|---|
-| Flametongue | [FT] | 2x damage vs fire-weak | #128, WORKLIST.txt |
-| Frost Brand | [FB] | (cold damage / resist) | #128, WORKLIST.txt |
-| Demon Bane | [DB] | (bonus vs demons) | #128, WORKLIST.txt |
-| Slay Dragon | [SD] | (bonus vs dragons) | #128 |
-| Slay Beast | — | x2 vs beasts | #114 comment |
-| Slay Demon | — | (bonus vs demons) | #243 comment |
-| Extra Attacks | — | additional attacks per round | #128 |
-| Hill Giant Strength | — | STR bonus (belt only) | #128 |
-
-### Armor Egos
-| Ego | Code | Intrinsic | Source |
-|---|---|---|---|
-| Resist Lightning | [RL] | electricity resistance | #128 |
-| Telepathy | — | ESP (helmet only) | #128 |
-
-### Enchant Scrolls (#128)
-- ?Enchant Weapon to Hit: +1 to-hit
-- ?Enchant Weapon Damage: +1 to-dam
-- ?Enchant Armor: +1 AC or small intrinsic
-- ?*Enchant Weapon*: +1d3 to both at once
-- ?*Enchant Armor*: +1d3 AC + random intrinsic
-- Enchanting past +10 has a chance to fail
-
-## A6. Legendary Items — Fixed Constellations (#128)
-
-| Item | Code | Base Type | Intrinsics | Source |
-|---|---|---|---|---|
-| Westernesse | [WB] | Weapon (any) | (constellation TBD) | #128, WORKLIST.txt |
-| Amulet of the Magi | — | Amulet | (constellation TBD) | #128 |
-| Holy Avenger | [HA] | Mace | (constellation TBD) | #128, WORKLIST.txt |
-| Defender | [DF] | Halberd | (constellation TBD) | #128, WORKLIST.txt |
-| Morgul Blade | [MB] | Weapon (any) | holy weakness, life drain, enhanced ?RCurse needed | #128 (cursed legendary) |
-
-## A7. Unique Items — One Per Game (#128, #43)
-
-| Item | Base Type | Intrinsics | Carrier | Source |
-|---|---|---|---|---|
-| Sting | Dagger | +2 speed, See Invisible, orc warning, orc glow, 2x orc damage | (floor drop?) | #128, #114 |
-| Menthir | Helm | (TBD) | (TBD) | #128 |
-| Excalibur | Bastard Sword | (TBD) | King Arthur | #128 |
-| Lady Teldra | Blade (unique type) | spell absorption, peaceful creature refusal, personality/flavor text | (unique spawn rules) | #43 |
+- [ ] Ring of Fate — design and intrinsics unknown (Item §12)
+- [ ] Ego data file format: type restrictions, intrinsic list, rarity, min depth (Item §8)
+- [ ] Legendary constellations: Westernesse, Holy Avenger, Defender, Amulet of the Magi, Morgul Blade — intrinsic sets TBD (Item §9)
+- [ ] Unique item details: Menthir intrinsics and carrier; Excalibur intrinsics (Item §10)
+- [ ] Uniques.txt data file format (Item §10)
+- [ ] Food content: item list for ITEM_IDX_FOOD (Item §12)
+- [ ] Book content: spell lists per caster class — deferred until enough spell effects exist as scrolls/wands/staves (Item §12)
 
 ---
 
-# B. Code Logic Enhancements
+## Ready to Implement
 
-## B1. New Effect Handlers
+No blockers. Start any of these.
 
-| Enhancement | Details | Blocking | Source |
-|---|---|---|---|
-| **EFFECT_TYPE_SEE handler** | "SEE changes what you know, CREATE changes the world." Handles: detect doors/traps/monsters, magic mapping (alternate), identify. | Detection scrolls, Ring of Searching | #77 Phase 3 roadmap |
-| **Elemental DoHitEffects** | ✅ Fire/cold/acid/elec hit damage from items. | — | #77 comment |
-| **IMMUNE vs RESIST in combat** | ✅ Resistance = 50% reduction. Immunity = 0 damage. Checks EFFECT_MOD_IMMUNE vs EFFECT_MOD_RESIST during damage calculation. | — | #77 comment, #244 |
-| **Timed AC (CEffect deep copy)** | ✅ Deep copy fixed. Scroll of Blessing etc. can use timed effects. | — | Phase 3 roadmap |
-| **Sustain [Stat] mechanics** | Restore stat to max achieved + prevent stat damage. "The feeling passes." | Sustain rings/armor | #244 comment |
+### Items.txt Entries
 
-## B2. Item Systems
+*All items from the initial catalog are now in Items.txt. See Item-Design.md §12 for full status.*
 
-| Enhancement | Details | Blocking | Source |
-|---|---|---|---|
-| ~~**Item spawn quality chain**~~ | ✅ Normal/Cursed/Magic implemented via `Imbue(depth)`: magic chance 5%-85% over depths 0-80, weapon pool 1-7 (depth/10) split to-hit/to-dam, ranged to-hit only, ammo to-dam only, armor 1-4 (depth/15) AC, 5% cursed. Uses `EquipType()` + item index for category. Tuning via `#define IMBUE_*` constants. Ego/Legendary/Unique tiers deferred. | Ego/Legendary/Unique items | #128 comment |
-| **Fuel/recharge system** | F)ill lantern with Flask of Oil (+5000 turns, max 15000). Scroll of Recharging for wands (risk of explosion). | Lantern refueling, wand economy | #121 |
-| **Item destruction from elemental attacks** | Inventory scan on monster elemental hit. Fire: scrolls/potions/leather. Cold: potions. Acid: scrolls/potions/leather/metal. | — (postponed post-PR #235) | #271 |
-| **Enchantment system** | ?Enchant scrolls modify to-hit/to-dam/AC bonuses on equipment. Failure chance above +10. Star-enchant for bulk bonuses. | Enchant scrolls, item quality | #128 |
-| **Cursed/uncursed/blessed three-state** | Items have three blessed states with bonuses/penalties between versions of the same item. | Blessed items, Temple shop | #114 |
+### Effects.txt Entries
 
-## B3. Identification Enhancements (#114)
+*All 98 named effects are now in Effects.txt. See Effects-Design.md §9 for full catalog.*
 
-| Enhancement | Status | Details | Source |
-|---|---|---|---|
-| m_dwKnownProps + FormatProperties | ✅ Done | Per-instance bitmask, type-aware display strings | Phase 3 |
-| Unidentified names / flavors | ✅ Done | FileParse randomized names + {tried} marking | Phase 3 |
-| Cursed discovery via failed remove | ✅ Done | RevealProperty(KNOWN_CURSED) | Phase 3 |
-| **Feeling tiers** | Not started | Passive discovery: "magical" / "excellent" / "special". Low chance per turn. | #114 |
-| **Class-specific feelings** | Not started | Warriors sense weapons, Mages sense magic, Priests sense curses. Blocked by classes #239. | #114 comment |
-| **?*Identify* (star-identify)** | Not started | Full lore reveal for unique/ego items. Scroll level 30+, Mage spell level 37. | #114, #128 |
-| **Shopkeeper pricing as identification** | Not started | Selling reveals item identity (bad price=good item, good price=cursed). Blocked by town #243. | #114 |
-| **Blind-use identification** | Not started | Using item without knowing: noticeable effects auto-ID, non-noticeable mark as {tried}. | #114 comment |
+### Code Logic
 
-## B4. Inventory & Equipment
+- [ ] Recharge risk curve: explosion risk = f(charges, lifetime, depth); lower risk at greater depth (Item §6, §16)
+- [ ] Enchantment system: +1/+1d3 per scroll, failure chance above +10, scroll wasted on failure (Item §11, §16)
+- [ ] Blessed three-state system: cursed / uncursed / blessed behavior differences (Item §3, §16)
+- [ ] Stacking identity check — ITEM_FLAG_STACKS exists; complete per-category rules (Item §5, §16)
+- [ ] Partial stack split: "How many? (1-n)" prompt on drop/sell; arrows fire one at a time (Item §5, §16)
+- [ ] Ground stacking + loot explosion to adjacent open tiles on overflow (Item §5, §16)
+- [ ] Feeling tiers: passive per-turn chance of {magical}, {excellent}, {special} discovery (Item §4, §16)
+- [ ] Blind-use identification: noticeable effect → auto-ID; no noticeable effect → {tried} marking (Item §4, §16)
+- [ ] Item spawn quality chain: Ego → Legendary → Unique tiers (builds on existing Normal/Cursed/Magic) (Item §3, §16)
 
-| Enhancement | Details | Source |
-|---|---|---|
-| **ITEM_FLAG_EQUIPMENT data-driven equip** | Replace hardcoded CPlayer::Wield with flag-based equipment slot assignment | WORKLIST.txt |
-| **Paginated inventory** | Inventory display pagination for large item counts | WORKLIST.txt |
-| **Two rings** | Player can equip two rings (enhancement over current one-per-slot) | WORKLIST.txt |
-| **Monsters carry treasure** | Monsters drop items on death | WORKLIST.txt |
+### Data Model
 
-## B5. Visibility / Light Code
-
-| Enhancement | Details | Status | Source |
-|---|---|---|---|
-| **Infravision race assignment** | Racial intrinsic, radius 8, warm-blooded only | Partially working (effect exists, no race system) | #72 |
-| **ESP race assignment** | Racial intrinsic, radius 8, brains only | Partially working (effect exists, no race system) | #72 |
-| **MON_FLAG_INVISIBLE system** | Invisible monsters, See Invisible reveals them | Not started | #72, #270 |
-| **Spell of Light Area** | Mage spell (not scroll). Requires magic/spell system. | Blocked by #239 | #72 |
+- [ ] Ego/legendary/unique identity field on CItem (Item §1, §8–§10)
+- [ ] Remove dead field: CItemDef::m_dwBaseHP — initialized to 0, never populated by parser (Item §1)
+- [ ] EFFECT_MOD_SUSTAIN define + string table entry in Constants.cpp (Effects §11)
 
 ---
 
-# C. Constants.h / Data Model Updates
+## Blocked
 
-## C1. New Defines Needed
+Do not start until the blocker is resolved.
 
-| Define | Value | Purpose | Blocking | Source |
-|---|---|---|---|---|
-| **EFFECT_TYPE_SEE** | 0x100 (reserved as comment) | Detection/reveal handler | Detection items | Phase 3 roadmap |
-| **MON_FLAG_INVISIBLE** | (new bit) | Monster property: invisible | Potion of See Invisible, Ring of See Invisible | #72, #270 |
-| **ITEM_FLAG_EQUIPMENT** | (new bit) | Data-driven equipment slot assignment | Equipment refactor | WORKLIST.txt |
-| **ITEM_FLAG_BLESSED** | (new bit, if needed) | Three-state: cursed/uncursed/blessed | Blessed items | #114 |
+### Blocked by Stats #197
+- [ ] All STAT-flag items: Gain/Restore/Weakness potions, Heroism, Sustain rings, Sustain armor, Gloves of Dexterity (Item §12)
+- [ ] Sustain stat mechanics in code: restore stat to max achieved + prevent stat damage (Item §16)
+- [ ] Encumbrance system (Item §13)
+- [ ] CHA modifier on shopkeeper prices (Item §14)
 
-## C2. Data Structures TBD
+### Blocked by Classes #239
+- [ ] Spell books: 4 per caster class (ITEM_IDX_BOOK) (Item §12)
+- [ ] Class equipment: Holy Symbol (Priest), Nature Focus (Druid), Ki Focus (Monk) (Item §12)
+- [ ] Class-specific item feelings: Warriors sense weapons, Mages sense magic, Priests sense curses (Item §4)
+- [ ] Mage ID spell, level 37 (Item §4)
 
-| Structure | Purpose | Source |
-|---|---|---|
-| **Ego definition format** | Which ego types can apply to which item types, with intrinsic lists | #128 |
-| **Uniques.txt data file** | One entry per unique item: base type, intrinsics, carrier mob, lore text | #128, #43 |
-| **Intrinsic tracking array** | No hard cap, per-character, tracks active buffs/debuffs with timers | #244 |
-| **Stat system (6 stats)** | STR/DEX/CON/INT/WIS/CHA, 3-18/100 range, buff/damage/restore | #197 |
+### Blocked by Town #243
+- [ ] Staff of Word of Recall (full round-trip loop requires town) (Item §12)
+- [ ] Scroll of Restoration, Scroll of Darkness (Item §12)
+- [ ] Shopkeeper pricing as identification method (Item §4)
 
-## C3. String Table Additions
+### Blocked by PR #235 (Ranged Attacks)
+- [ ] Item destruction from elemental attacks: inventory scan, material vulnerability (Item §7, §16)
 
-Any new EFFECT_TYPE, EFFECT_FLAG, EFFECT_MOD, ITEM_FLAG, or MON_FLAG defines must be added to the string table Init() in Constants.h and increment the corresponding NUM_ count.
+### Blocked by Trap system #117
+- [ ] Scroll of Trap Creation (CREATE + TRAP) (Item §12)
 
----
+### Blocked by MON_FLAG_INVISIBLE
+- [ ] Potion of See Invisible (TIMED + INVISIBLE + SEE), Ring of See Invisible (Item §12)
 
-# D. Economy & Shop Items (#243)
+### Blocked by Enchant system
+- [ ] Scroll of Enchant Weapon to Hit, Scroll of Enchant Weapon Damage, Scroll of Enchant Armor (Item §12)
+- [ ] Scroll of *Enchant Weapon*, Scroll of *Enchant Armor* (Item §12)
 
-| Topic | Details | Source |
-|---|---|---|
-| **Shop types** | General Store, Weaponsmith/Armorer, Temple, Magic Shop, Player Home | #243 |
-| **Shop item distribution** | General 90/10, Weaponsmith 95/3/2, Magic Shop 60/30/10, Temple healing+restoration, Bazaar 2x, Black Market ego+ (level 20+) | #243 comment |
-| **Items NEVER in shops** | Spell books 3-4, unique items, some quest rewards | #243 |
-| **Always-identified items** | Flask of Oil, Potion of Apple Juice | #121 comment |
-| **Player House storage** | Persist between visits. Strategic: ?Recall, Staff of Identify, !Remove Curse | #243 comment |
-| **Thief item theft** | Lightweight only (potions, scrolls), NOT books/staves/equipment | #197 comment, #243 comment |
-| **Shopkeeper pricing** | Base × Markup × Shopkeeper × Race modifier. CHA affects prices. | #243 comment |
-
----
-
-# E. Cross-Cutting Concerns
-
-## E1. Class/Item Synergies (#239)
-- Warrior + Heavy Armor + Melee Weapons + Shield
-- Rogue + Light Armor + Dual-Wield
-- Ranger + Ranged Weapons + Light Armor
-- Mage + Light Armor + Spell Books + Wands/Staves
-- Priest + Medium Armor + Spell Books + Holy Symbol
-- Druid + Medium Armor + Spell Books + Nature Focus
-- Shaman + Medium Armor + Spell Books + Elemental Items
-- Monk + No Armor + Unarmed Combat + Ki Focus
-
-## E2. Intrinsics Grid UI (#244)
-Equipment × intrinsic matrix showing resist/immune/weak/no-effect per item.
-4 variants per effect: perm buff (equipment), temp buff (potion), perm debuff (cursed), temp debuff (monster/trap).
-
-## E3. Elemental Resistance Values (#244)
-- Resist = 50% damage reduction
-- Immune = 0 damage
-- Weak = increased damage (×2?)
-- Stacking TBD (50% + 25% = 62.5%?)
-
----
-
-# F. Dependency Map
-
-| System | Blocks | Issue |
-|---|---|---|
-| **Stats (#197)** | Gain/Restore/Weakness potions, Heroism, Sustain rings, Gloves of Dexterity, class feelings, CHA shop prices | #197 |
-| **Classes (#239)** | Spell books, class-specific feelings, class equipment (Holy Symbol, etc.), Mage ID spell | #239 |
-| **Town (#243)** | Shop system, shopkeeper ID, Player House storage, Word of Recall (full loop) | #243 |
-| **Ranged Attacks (PR #235)** | Item destruction from elemental attacks | #271 |
-| **EFFECT_TYPE_SEE** | ✅ Detection scrolls work, Ring of Searching works | #77 / Phase 3 |
-| **MON_FLAG_INVISIBLE** | Potion/Ring of See Invisible, Sting unique | #72 |
-| **Trap system** | Scroll of Trap Detection/Creation, trap-triggered intrinsics | #117, #244 |
-
----
+### Blocked by Ego/Unique system
+- [ ] Scroll of *Identify* (full lore reveal for ego/unique items) (Item §12)
 
 ---
 

@@ -140,7 +140,7 @@ Item <Boots of Speed>
 {
 Plural      <Pairs of Boots of Speed>
 Type        <ITEM_IDX_BOOTS>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_SPEED>
+Effect      <Speed>
 Value       5000.0
 Level       30
 AC          2.0
@@ -224,7 +224,7 @@ Item <Helm of Infravision>
 {
 Plural      <Helms of Infravision>
 Type        <ITEM_IDX_HELMET>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_INFRA>
+Effect      <Infravision>
 Value       500.0
 Level       15
 AC          4.0
@@ -237,7 +237,7 @@ Item <Helm of Telepathy>
 {
 Plural      <Helms of Telepathy>
 Type        <ITEM_IDX_HELMET>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ESP>
+Effect      <ESP>
 Value       2000.0
 Level       25
 AC          4.0
@@ -246,12 +246,25 @@ Color       <150,150,255,255>
 Flags       <ITEM_FLAG_MAGIC>
 }
 
+Item <Helmet of Lordly Protection>
+{
+Plural      <Helmets of Lordly Protection>
+Type        <ITEM_IDX_HELMET>
+Effect      <Immune Fire>
+Value       3000.0
+Level       30
+AC          6.0
+Weight      3.0
+Color       <255,150,50,255>
+Flags       <ITEM_FLAG_MAGIC>
+}
+
 # Light Sources
 Item <Torch>
 {
 Plural      <Torches>
 Type        <ITEM_IDX_TORCH>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LIGHT>
+Effect      <Light>
 Value       10.0
 Level       1
 Weight      1.0
@@ -264,7 +277,7 @@ Item <Brass Lantern>
 {
 Plural        <Brass Lanterns>
 Type        <ITEM_IDX_TORCH>
-Effect       <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LIGHT>
+Effect       <Light>
 Value       10.0
 Flags       <ITEM_FLAG_NEEDSAMMO>
 Level       5
@@ -278,7 +291,7 @@ Item <Flask of Oil>
 {
 Plural      <Flasks of Oil>
 Type        <ITEM_IDX_FUEL>
-Effect      <EFFECT_TYPE_GAIN>,<EFFECT_FLAG_FUEL>
+Effect      <Gain Fuel>
 Value       10.0
 Level       4
 Weight      0.5
@@ -292,7 +305,7 @@ Item <Ring of Invisibility>
 {
     Plural        <Rings of Invisibility>
     Type        <ITEM_IDX_RING>
-    Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_INVISIBLE>
+    Effect      <Invisibility>
     Value       1000.0
     Level       20
     Weight      0.2
@@ -304,9 +317,9 @@ Item <Potion of Minor Healing>
 {
     Plural      <Potions of Minor Healing>
     Type        <ITEM_IDX_POTION>
-    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>
-    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
-    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
+    Effect      <Minor Healing>
+    Effect      <Cure Poison>
+    Effect      <Cure Blindness>
     Damage      1d20 #  "healing" damage
     Value       100.0
     Level       2
@@ -318,7 +331,7 @@ Item <Potion of Resist Fire>
 {
 Plural      <Potions of Resist Fire>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FIRE>,<EFFECT_MOD_RESIST>
+Effect      <Timed Resist Fire>
 Value       200.0
 Level       4
 Weight      0.2
@@ -330,7 +343,7 @@ Item <Potion of Infravision>
 {
 Plural      <Potions of Infravision>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_INFRA>
+Effect      <Timed Infravision>
 Value       80.0
 Level       4
 Weight      0.2
@@ -342,7 +355,7 @@ Item <Potion of Resist Cold>
 {
 Plural      <Potions of Resist Cold>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_COLD>,<EFFECT_MOD_RESIST>
+Effect      <Timed Resist Cold>
 Value       200.0
 Level       4
 Weight      0.2
@@ -354,7 +367,7 @@ Item <Potion of Resist Acid>
 {
 Plural      <Potions of Resist Acid>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ACID>,<EFFECT_MOD_RESIST>
+Effect      <Timed Resist Acid>
 Value       200.0
 Level       6
 Weight      0.2
@@ -366,7 +379,7 @@ Item <Potion of Resist Electricity>
 {
 Plural      <Potions of Resist Electricity>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ELECTRICITY>,<EFFECT_MOD_RESIST>
+Effect      <Timed Resist Electricity>
 Value       200.0
 Level       6
 Weight      0.2
@@ -378,7 +391,7 @@ Item <Potion of Invisibility>
 {
 Plural      <Potions of Invisibility>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_INVISIBLE>
+Effect      <Timed Invisibility>
 Value       250.0
 Level       8
 Weight      0.2
@@ -390,7 +403,7 @@ Item <Potion of Speed>
 {
 Plural      <Potions of Speed>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_SPEED>
+Effect      <Timed Speed>
 Value       300.0
 Level       10
 Weight      0.2
@@ -402,7 +415,7 @@ Item <Potion of Levitation>
 {
 Plural      <Potions of Levitation>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LEVITATE>
+Effect      <Timed Levitation>
 Value       150.0
 Level       6
 Weight      0.2
@@ -414,7 +427,7 @@ Item <Potion of Blindness>
 {
 Plural      <Potions of Blindness>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_BLIND>
+Effect      <Cause Blindness>
 Value       0.0
 Level       1
 Weight      0.2
@@ -426,7 +439,7 @@ Item <Potion of Confusion>
 {
 Plural      <Potions of Confusion>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>
+Effect      <Inflict Confusion>
 Value       0.0
 Level       1
 Weight      0.2
@@ -438,7 +451,7 @@ Item <Potion of Poison>
 {
 Plural      <Potions of Poison>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>
+Effect      <Inflict Poison>
 Value       0.0
 Level       3
 Weight      0.2
@@ -450,7 +463,7 @@ Item <Potion of Cure Poison>
 {
 Plural      <Potions of Cure Poison>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+Effect      <Cure Poison>
 Value       75.0
 Level       3
 Weight      0.2
@@ -461,7 +474,7 @@ Item <Potion of Slow Poison>
 {
 Plural      <Potions of Slow Poison>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,<EFFECT_MOD_RESIST>
+Effect      <Resist Poison>
 Duration    100.0
 Value       50.0
 Level       2
@@ -473,8 +486,8 @@ Item <Potion of Neutralize Poison>
 {
 Plural      <Potions of Neutralize Poison>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
-Effect      <EFFECT_TYPE_DESTROY>,<EFFECT_FLAG_POISON>
+Effect      <Cure Poison>
+Effect      <Destroy Poison>
 Value       150.0
 Level       6
 Weight      0.2
@@ -485,8 +498,8 @@ Item <Potion of Courage>
 {
 Plural      <Potions of Courage>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_AFRAID>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_AFRAID>,<EFFECT_MOD_RESIST>
+Effect      <Cure Fear>
+Effect      <Resist Fear>
 Duration    50.0
 Value       100.0
 Level       5
@@ -498,9 +511,9 @@ Item <Potion of Cure Light Wounds>
 {
 Plural      <Potions of Cure Light Wounds>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
+Effect      <Cure Light Wounds>
+Effect      <Cure Poison>
+Effect      <Cure Blindness>
 Damage      8d8
 Value       200.0
 Level       20
@@ -512,10 +525,10 @@ Item <Potion of Cure Serious Wounds>
 {
 Plural      <Potions of Cure Serious Wounds>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_CONFUSE>
+Effect      <Cure Serious Wounds>
+Effect      <Cure Poison>
+Effect      <Cure Blindness>
+Effect      <Cure Confusion>
 Damage      16d8
 Value       400.0
 Level       40
@@ -527,11 +540,11 @@ Item <Potion of Cure Critical Wounds>
 {
 Plural      <Potions of Cure Critical Wounds>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_CONFUSE>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_AFRAID>
+Effect      <Major Healing>
+Effect      <Cure Poison>
+Effect      <Cure Blindness>
+Effect      <Cure Confusion>
+Effect      <Cure Fear>
 Damage      24d8
 Value       600.0
 Level       60
@@ -543,13 +556,13 @@ Item <Potion of Healing>
 {
 Plural      <Potions of Healing>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_CONFUSE>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_AFRAID>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_PARALYZE>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_SLEEP>
+Effect      <Greater Healing>
+Effect      <Cure Poison>
+Effect      <Cure Blindness>
+Effect      <Cure Confusion>
+Effect      <Cure Fear>
+Effect      <Cure Paralysis>
+Effect      <Cure Sleep>
 Damage      32d8
 Value       1000.0
 Level       80
@@ -561,13 +574,13 @@ Item <Potion of *Healing*>
 {
 Plural      <Potions of *Healing*>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_CONFUSE>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_AFRAID>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_PARALYZE>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_SLEEP>
+Effect      <Massive Healing>
+Effect      <Cure Poison>
+Effect      <Cure Blindness>
+Effect      <Cure Confusion>
+Effect      <Cure Fear>
+Effect      <Cure Paralysis>
+Effect      <Cure Sleep>
 Damage      100d8
 Value       2500.0
 Level       80
@@ -579,7 +592,7 @@ Item <Potion of Sleep>
 {
 Plural      <Potions of Sleep>
 Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_SLEEP>
+Effect      <Inflict Sleep>
 Duration    30.0
 Value       10.0
 Level       1
@@ -597,11 +610,22 @@ Weight      0.2
 Flags       <ITEM_FLAG_STACKS,ITEM_FLAG_IDENTIFIED>
 }
 
+Item <Potion of Flames>
+{
+Plural      <Potions of Flames>
+Type        <ITEM_IDX_POTION>
+Effect      <Inflict Fire>
+Value       0.0
+Level       3
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+
 Item <Ring of Levitation>
 {
 Plural        <Rings of Levitation>
 Type        <ITEM_IDX_RING>
-Effect       <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LEVITATE>
+Effect       <Levitation>
 Value       300.0
 Level       20
 Weight      0.2
@@ -612,7 +636,7 @@ Item <Ring of Telepathy>
 {
 Plural        <Rings of Telepathy>
 Type        <ITEM_IDX_RING>
-Effect       <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ESP>
+Effect       <ESP>
 Value       300.0
 Level       20
 Weight      0.2
@@ -625,7 +649,7 @@ Plural        <Rings of Fire Resistance>
 Type        <ITEM_IDX_RING>
 Value       300.0
 Level       10
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FIRE>,<EFFECT_MOD_RESIST>
+Effect      <Resist Fire>
 Weight      0.2
 Color        <225,225,50,255>
 }
@@ -645,7 +669,7 @@ Item <Ring of Cold Resistance>
 {
 Plural      <Rings of Cold Resistance>
 Type        <ITEM_IDX_RING>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_COLD>,<EFFECT_MOD_RESIST>
+Effect      <Resist Cold>
 Value       300.0
 Level       10
 Weight      0.2
@@ -656,7 +680,7 @@ Item <Ring of Acid Resistance>
 {
 Plural      <Rings of Acid Resistance>
 Type        <ITEM_IDX_RING>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ACID>,<EFFECT_MOD_RESIST>
+Effect      <Resist Acid>
 Value       300.0
 Level       12
 Weight      0.2
@@ -667,7 +691,7 @@ Item <Ring of Electricity Resistance>
 {
 Plural      <Rings of Electricity Resistance>
 Type        <ITEM_IDX_RING>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ELECTRICITY>,<EFFECT_MOD_RESIST>
+Effect      <Resist Electricity>
 Value       300.0
 Level       12
 Weight      0.2
@@ -678,7 +702,7 @@ Item <Ring of Free Action>
 {
 Plural      <Rings of Free Action>
 Type        <ITEM_IDX_RING>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FREE_ACTION>
+Effect      <Free Action>
 Value       500.0
 Level       15
 Weight      0.2
@@ -689,7 +713,7 @@ Item <Ring of Sensing>
 {
 Plural      <Rings of Sensing>
 Type        <ITEM_IDX_RING>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_TREASURE>
+Effect      <Treasure Sense>
 Value       800.0
 Level       15
 Weight      0.2
@@ -700,7 +724,7 @@ Item <Ring of Speed>
 {
 Plural      <Rings of Speed>
 Type        <ITEM_IDX_RING>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_SPEED>
+Effect      <Speed>
 Value       3000.0
 Level       30
 Weight      0.2
@@ -711,11 +735,33 @@ Item <Ring of Searching>
 {
 Plural      <Rings of Searching>
 Type        <ITEM_IDX_RING>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_SEARCHING>
+Effect      <Searching>
 Value       1000.0
 Level       10
 Weight      0.2
 Color       <200,255,200,255>
+}
+
+Item <Ring of Greed>
+{
+Plural      <Rings of Greed>
+Type        <ITEM_IDX_RING>
+Effect      <Treasure Sense>
+Value       500.0
+Level       10
+Weight      0.2
+Color       <255,200,0,255>
+}
+
+Item <Ring of Tunneling>
+{
+Plural      <Rings of Tunneling>
+Type        <ITEM_IDX_RING>
+Effect      <Tunneling>
+Value       300.0
+Level       5
+Weight      0.2
+Color       <180,140,100,255>
 }
 
 # Scrolls
@@ -723,7 +769,7 @@ Item <Scroll of Light>
 {
 Plural      <Scrolls of Light>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_LIGHT>
+Effect      <Light Area>
 Value       20.0
 Level       1
 Weight      2.0
@@ -735,7 +781,7 @@ Item <Scroll of Telepathy>
 {
 Plural      <Scrolls of Telepathy>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ESP>
+Effect      <Timed ESP>
 Value       80.0
 Level       4
 Weight      0.2
@@ -748,7 +794,7 @@ Item <Scroll of Remove Curse>
 {
 Plural      <Scrolls of Remove Curse>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_DESTROY>,<EFFECT_FLAG_CURSE>
+Effect      <Remove Curse>
 Value       100.0
 Level       1
 Weight      2.0
@@ -760,7 +806,7 @@ Item <Scroll of Identify>
 {
 Plural      <Scrolls of Identify>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_RESTORE>,<EFFECT_FLAG_IDENTIFY>
+Effect      <Identify>
 Value       50.0
 Level       1
 Weight      0.2
@@ -772,7 +818,7 @@ Item <Scroll of Phase Door>
 {
 Plural      <Scrolls of Phase Door>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_TELEPORT>,<EFFECT_MOD_AREA>
+Effect      <Phase Door>
 Value       80.0
 Level       2
 Weight      0.2
@@ -784,7 +830,7 @@ Item <Scroll of Teleportation>
 {
 Plural      <Scrolls of Teleportation>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_TELEPORT>
+Effect      <Teleport Self>
 Value       200.0
 Level       10
 Weight      0.2
@@ -796,7 +842,7 @@ Item <Scroll of Magic Mapping>
 {
 Plural      <Scrolls of Magic Mapping>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_MAPPING>,<EFFECT_MOD_AREA>
+Effect      <Partial Mapping>
 Value       150.0
 Level       8
 Weight      0.2
@@ -808,7 +854,7 @@ Item <Scroll of *Magic Mapping*>
 {
 Plural      <Scrolls of *Magic Mapping*>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_MAPPING>
+Effect      <Full Mapping>
 Value       500.0
 Level       25
 Weight      0.2
@@ -820,7 +866,7 @@ Item <Scroll of Word of Recall>
 {
 Plural      <Scrolls of Word of Recall>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_RECALL>
+Effect      <Recall>
 Value       200.0
 Level       8
 Weight      0.2
@@ -832,7 +878,7 @@ Item <Scroll of Door/Stair Location>
 {
 Plural      <Scrolls of Door/Stair Location>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_SEE>,<EFFECT_FLAG_DOOR>
+Effect      <Detect Doors>
 Value       40.0
 Level       1
 Weight      0.2
@@ -844,7 +890,7 @@ Item <Scroll of Detect Traps>
 {
 Plural      <Scrolls of Detect Traps>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_SEE>,<EFFECT_FLAG_TRAP>
+Effect      <Detect Traps>
 Value       50.0
 Level       3
 Weight      0.2
@@ -856,7 +902,7 @@ Item <Scroll of Detect Monsters>
 {
 Plural      <Scrolls of Detect Monsters>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_SEE>,<EFFECT_FLAG_MONSTERS>
+Effect      <Detect Monsters>
 Value       60.0
 Level       3
 Weight      0.2
@@ -868,7 +914,7 @@ Item <Scroll of Summon Monsters>
 {
 Plural      <Scrolls of Summon Monsters>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_SUMMON>
+Effect      <Summon Monsters>
 Value       10.0
 Level       3
 Weight      0.2
@@ -880,7 +926,7 @@ Item <Scroll of Scare Monster>
 {
 Plural      <Scrolls of Scare Monster>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_AFRAID>
+Effect      <Cause Fear>
 Value       80.0
 Level       5
 Weight      0.2
@@ -892,11 +938,132 @@ Item <Scroll of Treasure Detection>
 {
 Plural      <Scrolls of Treasure Detection>
 Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_SEE>,<EFFECT_FLAG_TREASURE>
+Effect      <Detect Treasure>
 Value       60.0
 Level       3
 Weight      0.2
 Color       <255,215,0,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of Blessing>
+{
+Plural      <Scrolls of Blessing>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Timed Blessing>
+Duration    50.0
+Value       80.0
+Level       5
+Weight      0.2
+Color       <255,215,100,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of Curse Object>
+{
+Plural      <Scrolls of Curse Object>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Curse Object>
+Value       0.0
+Level       5
+Weight      0.2
+Color       <150,50,150,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of Recharging>
+{
+Plural      <Scrolls of Recharging>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Recharge>
+Value       200.0
+Level       8
+Weight      0.2
+Color       <100,200,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of *Recharging*>
+{
+Plural      <Scrolls of *Recharging*>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Star-Recharge>
+Value       600.0
+Level       20
+Weight      0.2
+Color       <50,255,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of Enchant Weapon to Hit>
+{
+Plural      <Scrolls of Enchant Weapon to Hit>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Enchant to Hit>
+Value       200.0
+Level       10
+Weight      0.2
+Color       <200,200,220,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of Enchant Weapon Damage>
+{
+Plural      <Scrolls of Enchant Weapon Damage>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Enchant to Damage>
+Value       200.0
+Level       10
+Weight      0.2
+Color       <200,200,220,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of Enchant Armor>
+{
+Plural      <Scrolls of Enchant Armor>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Enchant Armor>
+Value       200.0
+Level       10
+Weight      0.2
+Color       <200,200,220,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of *Enchant Weapon*>
+{
+Plural      <Scrolls of *Enchant Weapon*>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Star-Enchant Weapon>
+Value       600.0
+Level       20
+Weight      0.2
+Color       <255,255,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of *Enchant Armor*>
+{
+Plural      <Scrolls of *Enchant Armor*>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Star-Enchant Armor>
+Value       600.0
+Level       20
+Weight      0.2
+Color       <255,255,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+Item <Scroll of Mass Sleep>
+{
+Plural      <Scrolls of Mass Sleep>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Mass Sleep>
+Value       150.0
+Level       10
+Weight      0.2
+Color       <150,150,255,255>
 Flags       <ITEM_FLAG_STACKS>
 }
 
@@ -1054,7 +1221,7 @@ Item <Wand of Sleep>
 {
 Plural      <Wands of Sleep>
 Type        <ITEM_IDX_WAND>
-Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_SLEEP>
+Effect      <Cause Sleep>
 Charges     <2d6>
 Value       250.0
 Level       5
@@ -1067,7 +1234,7 @@ Item <Wand of Confusion>
 {
 Plural      <Wands of Confusion>
 Type        <ITEM_IDX_WAND>
-Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_CONFUSE>
+Effect      <Cause Confusion>
 Charges     <2d6>
 Value       250.0
 Level       5
@@ -1080,7 +1247,7 @@ Item <Wand of Paralyze>
 {
 Plural      <Wands of Paralyze>
 Type        <ITEM_IDX_WAND>
-Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_PARALYZE>
+Effect      <Cause Paralysis>
 Charges     <2d6>
 Value       300.0
 Level       8
@@ -1093,7 +1260,7 @@ Item <Wand of Stone to Mud>
 {
 Plural      <Wands of Stone to Mud>
 Type        <ITEM_IDX_WAND>
-Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_STONE_TO_MUD>
+Effect      <Stone to Mud>
 Charges     <2d4>
 Value       200.0
 Level       5
@@ -1106,7 +1273,7 @@ Item <Wand of Summoning>
 {
 Plural      <Wands of Summoning>
 Type        <ITEM_IDX_WAND>
-Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_SUMMON>
+Effect      <Summon Monsters>
 Charges     <1d6>
 Value       200.0
 Level       10
@@ -1171,7 +1338,7 @@ Item <Wand of Heal Monster>
 {
 Plural      <Wands of Heal Monster>
 Type        <ITEM_IDX_WAND>
-Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_HP>
+Effect      <Heal Monster>
 Charges     <2d6>
 Value       50.0
 Level       3
@@ -1184,7 +1351,7 @@ Item <Wand of Probing>
 {
 Plural      <Wands of Probing>
 Type        <ITEM_IDX_WAND>
-Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_IDENTIFY>
+Effect      <Probe>
 Charges     <2d6>
 Value       400.0
 Level       8
@@ -1197,7 +1364,7 @@ Item <Wand of Fear>
 {
 Plural      <Wands of Fear>
 Type        <ITEM_IDX_WAND>
-Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_AFRAID>
+Effect      <Cause Fear>
 Charges     <2d6>
 Value       300.0
 Level       5
@@ -1219,12 +1386,25 @@ Weight      6.0
 Color       <255,255,200,255>
 }
 
+Item <Staff of Starlight>
+{
+Plural      <Staves of Starlight>
+Type        <ITEM_IDX_STAFF>
+Effect      <Light Ray>
+Effect      <Light Area>
+Charges     <2d4>
+Value       600.0
+Level       10
+Weight      6.0
+Color       <255,255,255,255>
+}
+
 Item <Staff of Healing>
 {
 Plural      <Staves of Healing>
 Type        <ITEM_IDX_STAFF>
 Effect      <Minor Healing>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
+Effect      <Cure Poison>
 Charges     <2d6>
 Value       500.0
 Level       8
@@ -1237,8 +1417,8 @@ Item <Staff of Cure Light Wounds>
 Plural      <Staves of Cure Light Wounds>
 Type        <ITEM_IDX_STAFF>
 Effect      <Cure Light Wounds>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
+Effect      <Cure Poison>
+Effect      <Cure Blindness>
 Charges     <2d4>
 Value       800.0
 Level       20
@@ -1251,9 +1431,9 @@ Item <Staff of Cure Serious Wounds>
 Plural      <Staves of Cure Serious Wounds>
 Type        <ITEM_IDX_STAFF>
 Effect      <Cure Serious Wounds>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_CONFUSE>
+Effect      <Cure Poison>
+Effect      <Cure Blindness>
+Effect      <Cure Confusion>
 Charges     <2d4>
 Value       1200.0
 Level       40
@@ -1266,10 +1446,10 @@ Item <Staff of Greater Healing>
 Plural      <Staves of Greater Healing>
 Type        <ITEM_IDX_STAFF>
 Effect      <Greater Healing>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_CONFUSE>
-Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_AFRAID>
+Effect      <Cure Poison>
+Effect      <Cure Blindness>
+Effect      <Cure Confusion>
+Effect      <Cure Fear>
 Charges     <1d4>
 Value       2000.0
 Level       60
@@ -1281,7 +1461,7 @@ Item <Staff of Fire Resistance>
 {
 Plural      <Staves of Fire Resistance>
 Type        <ITEM_IDX_STAFF>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FIRE>,<EFFECT_MOD_RESIST>
+Effect      <Timed Resist Fire>
 Charges     <2d4>
 Duration    100.0
 Value       400.0
@@ -1294,7 +1474,7 @@ Item <Staff of Cold Resistance>
 {
 Plural      <Staves of Cold Resistance>
 Type        <ITEM_IDX_STAFF>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_COLD>,<EFFECT_MOD_RESIST>
+Effect      <Timed Resist Cold>
 Charges     <2d4>
 Duration    100.0
 Value       400.0
@@ -1307,7 +1487,7 @@ Item <Staff of Electricity Resistance>
 {
 Plural      <Staves of Electricity Resistance>
 Type        <ITEM_IDX_STAFF>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ELECTRICITY>,<EFFECT_MOD_RESIST>
+Effect      <Timed Resist Electricity>
 Charges     <2d4>
 Duration    100.0
 Value       400.0
@@ -1320,7 +1500,7 @@ Item <Staff of Acid Resistance>
 {
 Plural      <Staves of Acid Resistance>
 Type        <ITEM_IDX_STAFF>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ACID>,<EFFECT_MOD_RESIST>
+Effect      <Timed Resist Acid>
 Charges     <2d4>
 Duration    100.0
 Value       400.0
@@ -1333,10 +1513,10 @@ Item <Staff of Resistance>
 {
 Plural      <Staves of Resistance>
 Type        <ITEM_IDX_STAFF>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FIRE>,<EFFECT_MOD_RESIST>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_COLD>,<EFFECT_MOD_RESIST>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ELECTRICITY>,<EFFECT_MOD_RESIST>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ACID>,<EFFECT_MOD_RESIST>
+Effect      <Timed Resist Fire>
+Effect      <Timed Resist Cold>
+Effect      <Timed Resist Electricity>
+Effect      <Timed Resist Acid>
 Charges     <1d4>
 Duration    80.0
 Value       1200.0
@@ -1345,11 +1525,27 @@ Weight      6.0
 Color       <200,200,255,255>
 }
 
+Item <Staff of *Resistance*>
+{
+Plural      <Staves of *Resistance*>
+Type        <ITEM_IDX_STAFF>
+Effect      <Timed Immune Fire>
+Effect      <Timed Immune Cold>
+Effect      <Timed Immune Electricity>
+Effect      <Timed Immune Acid>
+Charges     <1d2>
+Duration    60.0
+Value       5000.0
+Level       40
+Weight      6.0
+Color       <255,215,0,255>
+}
+
 Item <Staff of Perception>
 {
 Plural      <Staves of Perception>
 Type        <ITEM_IDX_STAFF>
-Effect      <EFFECT_TYPE_RESTORE>,<EFFECT_FLAG_IDENTIFY>
+Effect      <Identify>
 Charges     <2d6>
 Value       400.0
 Level       8
@@ -1361,7 +1557,7 @@ Item <Staff of Teleportation>
 {
 Plural      <Staves of Teleportation>
 Type        <ITEM_IDX_STAFF>
-Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_TELEPORT>
+Effect      <Teleport Self>
 Charges     <2d6>
 Value       300.0
 Level       5
@@ -1373,7 +1569,7 @@ Item <Staff of Word of Recall>
 {
 Plural      <Staves of Word of Recall>
 Type        <ITEM_IDX_STAFF>
-Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_RECALL>
+Effect      <Recall>
 Charges     <1d4>
 Value       500.0
 Level       15
@@ -1385,7 +1581,7 @@ Item <Staff of Mapping>
 {
 Plural      <Staves of Mapping>
 Type        <ITEM_IDX_STAFF>
-Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_MAPPING>,<EFFECT_MOD_AREA>
+Effect      <Partial Mapping>
 Charges     <2d4>
 Value       400.0
 Level       10
@@ -1397,7 +1593,7 @@ Item <Staff of Telepathy>
 {
 Plural      <Staves of Telepathy>
 Type        <ITEM_IDX_STAFF>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ESP>
+Effect      <Timed ESP>
 Charges     <2d4>
 Duration    80.0
 Value       500.0
@@ -1410,7 +1606,7 @@ Item <Staff of Treasure Detection>
 {
 Plural      <Staves of Treasure Detection>
 Type        <ITEM_IDX_STAFF>
-Effect      <EFFECT_TYPE_SEE>,<EFFECT_FLAG_TREASURE>
+Effect      <Detect Treasure>
 Charges     <2d6>
 Value       300.0
 Level       5
@@ -1422,7 +1618,7 @@ Item <Staff of Summoning>
 {
 Plural      <Staves of Summoning>
 Type        <ITEM_IDX_STAFF>
-Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_SUMMON>
+Effect      <Summon Monsters>
 Charges     <1d4>
 Value       300.0
 Level       15
@@ -1434,12 +1630,61 @@ Item <Staff of Sleep>
 {
 Plural      <Staves of Sleep>
 Type        <ITEM_IDX_STAFF>
-Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_SLEEP>
+Effect      <Cause Sleep>
 Charges     <2d4>
 Value       300.0
 Level       8
 Weight      6.0
 Color       <150,150,255,255>
+}
+
+Item <Staff of Mass Sleep>
+{
+Plural      <Staves of Mass Sleep>
+Type        <ITEM_IDX_STAFF>
+Effect      <Mass Sleep>
+Charges     <2d4>
+Value       400.0
+Level       12
+Weight      6.0
+Color       <150,150,255,255>
+}
+
+Item <Staff of Fear>
+{
+Plural      <Staves of Fear>
+Type        <ITEM_IDX_STAFF>
+Effect      <Mass Fear>
+Charges     <2d4>
+Value       400.0
+Level       10
+Weight      6.0
+Color       <200,150,255,255>
+}
+
+Item <Staff of Paralysis>
+{
+Plural      <Staves of Paralysis>
+Type        <ITEM_IDX_STAFF>
+Effect      <Mass Paralyze>
+Charges     <1d4>
+Value       600.0
+Level       15
+Weight      6.0
+Color       <255,255,100,255>
+}
+
+Item <Staff of Protection>
+{
+Plural      <Staves of Protection>
+Type        <ITEM_IDX_STAFF>
+Effect      <Timed Blessing>
+Charges     <2d4>
+Duration    80.0
+Value       500.0
+Level       10
+Weight      6.0
+Color       <200,200,255,255>
 }
 
 # Weapons

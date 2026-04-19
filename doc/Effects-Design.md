@@ -199,7 +199,7 @@ NO_COLLIDE is a property of the *effect*, not the item. A light ray passes throu
 
 ---
 
-## 7. Adverbs (EFFECT_MOD, 9 modifiers)
+## 7. Adverbs (EFFECT_MOD, 10 modifiers)
 
 | Define | Meaning | Example |
 |---|---|---|
@@ -212,6 +212,7 @@ NO_COLLIDE is a property of the *effect*, not the item. A light ray passes throu
 | LINE | Affects a line from source | Wand of Light |
 | BALL | Affects a radius from impact point | Fireball |
 | ENCHANT | Modifies item bonuses | Scroll of Enchant Weapon |
+| SUSTAIN | Prevent stat loss | Ring of Sustain CHA |
 
 ### Modifier Combinations
 
@@ -256,97 +257,169 @@ The intrinsics grid on the player's character sheet shows which resistances are 
 
 ## 9. Named Effect Catalog
 
-### Currently Defined (in Effects.txt)
+### Effects in Effects.txt
+
+All 98 named effects are defined in [Resources/Effects.txt](../Resources/Effects.txt). Summary by category:
+
+#### Damage / Projectile Effects
 
 | Name | Verb | Noun | Adverb | Amount | Range | Radius | Used By |
 |---|---|---|---|---|---|---|---|
-| Light Ray | HIT | LIGHT | LINE | 1d5 | 15 | — | Wand of Light |
-| Light Area | CREATE | LIGHT | AREA | — | — | 15 | Wand of Light, Scroll of Light |
+| Light Ray | HIT | LIGHT + NO_COLLIDE | LINE | 1d5 | 15 | — | Wand of Light, Staff of Starlight |
+| Light Area | CREATE | LIGHT | AREA | — | — | 15 | Scroll of Light, Staff of Light |
 | Firebolt | HIT | FIRE | LINE | 2d8 | 15 | — | Wand of Firebolts |
 | Fireball | HIT | FIRE | BALL | 6d8 | 20 | 3 | Wand of Fireballs |
-| Frost Bolt | HIT | COLD | LINE | 2d8 | 15 | — | Wand of Frost Bolts |
-| Lightning Bolt | HIT | ELECTRICITY | LINE | 3d6 | 20 | — | Wand of Lightning |
+| Frost Bolt | HIT | COLD | LINE | 2d8 | 15 | — | Wand of Frost |
+| Frost Ball | HIT | COLD | BALL | 6d8 | 20 | 3 | Wand of Frost Balls |
+| Lightning Bolt | HIT | ELECTRICITY + NO_COLLIDE | LINE | 3d6 | 20 | — | Wand of Lightning |
+| Lightning Ball | HIT | ELECTRICITY | BALL | 6d6 | 20 | 3 | Wand of Lightning Balls |
+| Acid Bolt | HIT | ACID | LINE | 2d8 | 15 | — | Wand of Acid |
+| Acid Ball | HIT | ACID | BALL | 6d8 | 20 | 3 | Wand of Acid Balls |
+| Poison Sting | HIT | POISON | — | 1d4 | 1 | — | Monster attacks |
+| Stone to Mud | HIT | STONE_TO_MUD | — | — | 15 | — | Wand of Stone to Mud |
 | Teleport Away | HIT | TELEPORT | — | — | 15 | — | Wand of Teleport Away |
-| Minor Healing | HEAL | HP | — | 4d4 | — | — | Potion of Minor Healing |
+| Inflict Fire | HIT | FIRE | — | 2d8 | — | — | Potion of Flames |
 
-### Planned Effects (not yet in Effects.txt)
+#### Healing / Curing Effects (5-step HP ramp + status cures)
 
-These are the reusable LEGO pieces needed to build planned items, monsters, and spells. Each entry here will become an Effects.txt block.
-
-#### Damage Effects
-
-| Name | Verb | Noun | Adverb | Amount | Notes |
-|---|---|---|---|---|---|
-| Acid Bolt | HIT | ACID | LINE | 2d8 | Wand of Acid Bolts |
-| Poison Sting | HIT | POISON | — | 1d4 | Spider/snake/scorpion attacks |
-| Stone to Mud | HIT | STONE_TO_MUD | — | — | Wand of Stone to Mud |
-
-#### Healing / Restoration Effects
-
-| Name | Verb | Noun | Adverb | Amount | Notes |
-|---|---|---|---|---|---|
-| Major Healing | HEAL | HP | — | 8d8 | Potion of Major Healing |
-| Cure Poison | HEAL | POISON | — | — | Potion of Cure Poison |
-| Cure Blindness | HEAL | BLIND | — | — | Potion of Cure Blindness |
-| Cure Fear | HEAL | AFRAID | — | — | Potion of Heroism (component) |
-| Restore Strength | RESTORE | STAT | — | — | Potion of Restore Strength (needs stat ID) |
-
-#### Intrinsic Effects (permanent while source active)
-
-| Name | Verb | Noun | Adverb | Notes |
+| Name | Verb | Noun | Amount | Used By |
 |---|---|---|---|---|
-| Resist Fire | INTRINSIC | FIRE | RESIST | Ring of Resist Fire, Armor of Resist Fire |
-| Resist Cold | INTRINSIC | COLD | RESIST | Ring of Resist Cold |
-| Resist Acid | INTRINSIC | ACID | RESIST | Helm of Lordly Protection (component) |
-| Resist Electricity | INTRINSIC | ELECTRICITY | RESIST | Armor ego |
-| Immune Fire | INTRINSIC | FIRE | IMMUNE | Very rare equipment |
+| Minor Healing | HEAL | HP | 4d4 | Potion of Minor Healing |
+| Cure Light Wounds | HEAL | HP | 8d8 | Staff of Cure Light Wounds |
+| Cure Serious Wounds | HEAL | HP | 16d8 | Staff of Cure Serious Wounds |
+| Major Healing | HEAL | HP | 24d8 | Potion of Cure Critical Wounds |
+| Greater Healing | HEAL | HP | 32d8 | Staff of Greater Healing |
+| Massive Healing | HEAL | HP | 100d8 | Potion of *Healing* |
+| Cure Poison | HEAL | POISON | — | Potion of Cure Poison |
+| Destroy Poison | DESTROY | POISON | — | Potion of Neutralize Poison |
+| Cure Blindness | HEAL | BLIND | — | Healing staves |
+| Cure Fear | HEAL | AFRAID | — | Potion of Courage |
+| Cure Confusion | HEAL | CONFUSE | — | Healing potions |
+| Cure Paralysis | HEAL | PARALYZE | — | Healing potions |
+| Cure Sleep | HEAL | SLEEP | — | Healing potions |
+
+#### Permanent Intrinsic Effects (while equipped)
+
+| Name | Verb | Noun | Adverb | Used By |
+|---|---|---|---|---|
+| Resist Fire | INTRINSIC | FIRE | RESIST | Ring of Fire Resistance |
+| Resist Cold | INTRINSIC | COLD | RESIST | Ring of Cold Resistance |
+| Resist Acid | INTRINSIC | ACID | RESIST | Ring of Acid Resistance |
+| Resist Electricity | INTRINSIC | ELECTRICITY | RESIST | Ring of Electricity Resistance |
+| Immune Fire | INTRINSIC | FIRE | IMMUNE | Helmet of Lordly Protection |
 | Free Action | INTRINSIC | FREE_ACTION | — | Ring of Free Action |
-| See Invisible | INTRINSIC | INVISIBLE | SEE | Ring of See Invisible, Sting |
-| Levitation | INTRINSIC | LEVITATE | — | Ring of Levitation, Boots of Levitation |
-| Speed | INTRINSIC | SPEED | — | Boots of Speed, Sting (+2 speed) |
-| Sustain CHA | INTRINSIC | STAT | SUSTAIN | Ring/armor; needs SUSTAIN modifier (TBD) |
-| Infravision | INTRINSIC | INFRA | — | Racial intrinsic, Ring of Infravision |
-| ESP | INTRINSIC | ESP | — | Helmet of Telepathy |
+| See Invisible | SEE | INVISIBLE | — | Ring of See Invisible |
+| Levitation | INTRINSIC | LEVITATE | — | Ring of Levitation |
+| Speed | INTRINSIC | SPEED | — | Ring of Speed, Boots of Speed |
+| Infravision | INTRINSIC | INFRA | — | Helm of Infravision |
+| ESP | INTRINSIC | ESP | — | Helm of Telepathy, Ring of Telepathy |
+| Invisibility | INTRINSIC | INVISIBLE | — | Ring of Invisibility |
+| Sustain CHA | INTRINSIC | STAT | SUSTAIN | (future rings/armor) |
+| Light | INTRINSIC | LIGHT | — | Torch, Brass Lantern |
+| Searching | INTRINSIC | SEARCHING | — | Ring of Searching |
+| Treasure Sense | INTRINSIC | TREASURE | — | Ring of Sensing, Ring of Greed |
+| Tunneling | INTRINSIC | STONE_TO_MUD | — | Ring of Tunneling |
+
+#### Timed Intrinsic Effects
+
+| Name | Verb | Noun | Adverb | Duration | Used By |
+|---|---|---|---|---|---|
+| Timed Resist Fire | INTRINSIC | FIRE | RESIST | 150 | Potion/Staff of Resist Fire |
+| Timed Resist Cold | INTRINSIC | COLD | RESIST | 150 | Potion/Staff of Resist Cold |
+| Timed Resist Acid | INTRINSIC | ACID | RESIST | 150 | Potion/Staff of Resist Acid |
+| Timed Resist Electricity | INTRINSIC | ELECTRICITY | RESIST | 150 | Potion/Staff of Resist Electricity |
+| Timed Immune Fire | INTRINSIC | FIRE | IMMUNE | 80 | Staff of *Resistance* |
+| Timed Immune Cold | INTRINSIC | COLD | IMMUNE | 80 | Staff of *Resistance* |
+| Timed Immune Electricity | INTRINSIC | ELECTRICITY | IMMUNE | 80 | Staff of *Resistance* |
+| Timed Immune Acid | INTRINSIC | ACID | IMMUNE | 80 | Staff of *Resistance* |
+| Timed See Invisible | SEE | INVISIBLE | — | 100 | Potion of See Invisible |
+| Timed Speed | INTRINSIC | SPEED | — | 80 | Potion of Speed |
+| Timed Heroism | INTRINSIC | HP + STAT | — | 50 | Potion of Heroism |
+| Timed Blessing | HIT | AC | — | 50 | Scroll of Blessing, Staff of Protection |
+| Timed Infravision | INTRINSIC | INFRA | — | 100 | Potion of Infravision |
+| Timed Invisibility | INTRINSIC | INVISIBLE | — | 100 | Potion of Invisibility |
+| Timed Levitation | INTRINSIC | LEVITATE | — | 100 | Potion of Levitation |
+| Timed ESP | INTRINSIC | ESP | — | 100 | Scroll of Telepathy, Staff of Telepathy |
+| Resist Fear | INTRINSIC | AFRAID | RESIST | 50 | Potion of Courage |
+| Resist Poison | INTRINSIC | POISON | RESIST | 100 | Potion of Slow Poison |
+
+#### Negative Status Effects (inflicted on player)
+
+| Name | Verb | Noun | Duration | Used By |
+|---|---|---|---|---|
+| Cause Blindness | INTRINSIC | BLIND | 50 | Potion of Blindness |
+| Inflict Confusion | INTRINSIC | CONFUSE | 30 | Potion of Confusion |
+| Inflict Poison | INTRINSIC | POISON | 80 | Potion of Poison |
+| Inflict Sleep | INTRINSIC | SLEEP | 30 | Potion of Sleep |
+| Inflict Fire | HIT | FIRE | — | Potion of Flames |
+
+#### Offensive Targeted Effects
+
+| Name | Verb | Noun | Adverb | Range/Radius | Used By |
+|---|---|---|---|---|---|
+| Cause Sleep | HIT | SLEEP | — | Range 15 | Wand/Staff of Sleep |
+| Cause Fear | HIT | AFRAID | — | Range 15 | Wand of Fear, Scroll of Scare Monster |
+| Cause Confusion | HIT | CONFUSE | — | Range 15 | Wand of Confusion |
+| Cause Paralysis | HIT | PARALYZE | — | Range 15 | Wand of Paralyze |
+| Mass Sleep | HIT | SLEEP | AREA | Radius 10 | Staff/Scroll of Mass Sleep |
+| Mass Fear | HIT | AFRAID | AREA | Radius 10 | Staff of Fear |
+| Mass Paralyze | HIT | PARALYZE | AREA | Radius 8 | Staff of Paralysis |
+| Heal Monster | HIT | HP | — | Range 15 | Wand of Heal Monster |
+| Probe | HIT | IDENTIFY | — | Range 15 | Wand of Probing |
 
 #### Detection Effects
 
-| Name | Verb | Noun | Adverb | Notes |
+| Name | Verb | Noun | Used By |
+|---|---|---|---|
+| Detect Doors | SEE | DOOR | Scroll of Door/Stair Location |
+| Detect Traps | SEE | TRAP | Scroll of Detect Traps |
+| Detect Monsters | SEE | MONSTERS | Scroll of Detect Monsters |
+| Detect Treasure | SEE | TREASURE | Scroll/Staff of Treasure Detection |
+| Magic Mapping | SEE | MAPPING | (reserved) |
+
+#### Creation / World Effects
+
+| Name | Verb | Noun | Adverb | Used By |
 |---|---|---|---|---|
-| Detect Doors | SEE | DOOR | — | Scroll of Door/Stair Location |
-| Detect Traps | SEE | TRAP | — | Scroll of Trap Detection |
-| Detect Monsters | SEE | MONSTERS | — | Scroll of Detect Monsters |
-| Detect Treasure | SEE | TREASURE | — | (future) |
-| Magic Mapping | SEE | MAPPING | — | Scroll of Magic Mapping (reveals dungeon layout) |
+| Create Trap | CREATE | TRAP | — | (future) |
+| Recall | CREATE | RECALL | — | Scroll/Staff of Word of Recall |
+| Teleport Self | CREATE | TELEPORT | — | Scroll of Teleportation, Staff of Teleportation |
+| Phase Door | CREATE | TELEPORT | AREA | Scroll of Phase Door |
+| Summon Monsters | CREATE | SUMMON | — | Scroll/Staff of Summoning |
+| Partial Mapping | CREATE | MAPPING | AREA | Scroll of Magic Mapping, Staff of Mapping |
+| Full Mapping | CREATE | MAPPING | — | Scroll of *Magic Mapping* |
+| Curse Object | CREATE | CURSE | — | Scroll of Curse Object |
 
-#### Creation Effects
+#### Destruction Effects
 
-| Name | Verb | Noun | Adverb | Notes |
-|---|---|---|---|---|
-| Create Trap | CREATE | TRAP | — | Scroll of Trap Creation |
-| Create Light (self) | CREATE | LIGHT | — | Different from Light Area (self-only radius) |
-| Recall | CREATE | RECALL | — | Staff of Word of Recall |
-| Teleport Self | CREATE | TELEPORT | — | Staff of Teleportation, Scroll of Teleportation |
-| Summon Monsters | CREATE | SUMMON | — | Monster ability, cursed scroll |
-
-#### Timed Effects
-
-| Name | Verb | Noun | Adverb | Duration | Notes |
-|---|---|---|---|---|---|
-| Timed Resist Fire | INTRINSIC | FIRE | RESIST + TIMED | varies | Potion of Resist Fire |
-| Timed See Invisible | HIT | INVISIBLE | TIMED + SEE | varies | Potion of See Invisible |
-| Timed Heroism | INTRINSIC | HP + STAT | TIMED | varies | Potion of Heroism |
-| Timed Blessing | HIT | AC | TIMED | varies | Scroll of Blessing |
-| Timed Speed | INTRINSIC | SPEED | TIMED | varies | Potion of Speed |
+| Name | Verb | Noun | Used By |
+|---|---|---|---|
+| Remove Curse | DESTROY | CURSE | Scroll of Remove Curse |
+| Destroy Poison | DESTROY | POISON | Potion of Neutralize Poison |
 
 #### Enchantment / Modification Effects
 
-| Name | Verb | Noun | Adverb | Amount | Notes |
+| Name | Verb | Noun | Adverb | Amount | Used By |
 |---|---|---|---|---|---|
-| Enchant to Hit | GAIN | TOHIT | ENCHANT | +1 | Scroll of Enchant Weapon to Hit |
-| Enchant to Damage | GAIN | TODAM | ENCHANT | +1 | Scroll of Enchant Weapon Damage |
-| Enchant Armor | GAIN | AC | ENCHANT | +1 | Scroll of Enchant Armor |
-| Star Enchant Weapon | GAIN | TOHIT + TODAM | ENCHANT | +1d3 | Scroll of *Enchant Weapon* |
-| Star Enchant Armor | GAIN | AC | ENCHANT | +1d3 | Scroll of *Enchant Armor* (+ random intrinsic) |
+| Enchant to Hit | GAIN | TOHIT | ENCHANT | 1 | Scroll of Enchant Weapon to Hit |
+| Enchant to Damage | GAIN | TODAM | ENCHANT | 1 | Scroll of Enchant Weapon Damage |
+| Enchant Armor | GAIN | AC | ENCHANT | 1 | Scroll of Enchant Armor |
+| Star-Enchant Weapon | GAIN | TOHIT + TODAM | ENCHANT | 1d3 | Scroll of *Enchant Weapon* |
+| Star-Enchant Armor | GAIN | AC | ENCHANT | 1d3 | Scroll of *Enchant Armor* |
+
+#### Resource Effects
+
+| Name | Verb | Noun | Amount | Used By |
+|---|---|---|---|---|
+| Gain Fuel | GAIN | FUEL | — | Flask of Oil |
+| Recharge | RESTORE | FUEL | 1d4 | Scroll of Recharging |
+| Star-Recharge | RESTORE | FUEL | 2d4 | Scroll of *Recharging* |
+
+#### Planned Effects (not yet in Effects.txt)
+
+| Name | Verb | Noun | Adverb | Blocked By |
+|---|---|---|---|---|
+| Restore Strength | RESTORE | STAT | — | Stats #197 |
 
 ### Example: Composing an Item from Effects
 
@@ -372,26 +445,19 @@ Each of those effects is independently defined in Effects.txt. `<Resist Acid>` i
 
 ## 10. Effect Handler Status
 
-Code handlers in CPlayer that dispatch effect verbs. Effect-specific tracking — item system tracking is in [Item-Design.md](Item-Design.md).
+Code handlers in CPlayer that dispatch effect verbs. Item system code logic is in [Item-Design.md](Item-Design.md) §16.
 
-| Handler | Verb | Status | Notes |
-|---|---|---|---|
-| DoHealEffects | HEAL | Working | HP healing, poison/blind/fear/confuse/sleep cure |
-| DoHitEffects | HIT | Partial | LIGHT works. Elemental damage (FIRE, COLD, etc.) not yet dispatched to player-side damage calc |
-| DoCreateEffects | CREATE | Working | LIGHT area, RECALL, TELEPORT |
-| DoDestroyEffects | DESTROY | Partial | Uses ITEM_FLAG_CURSED instead of EFFECT_FLAG — design smell |
-| DoIntrinsicEffects | INTRINSIC | Working | Sets intrinsic flag on player. Duration=0 → permanent. |
-| DoRestoreEffects | RESTORE | Working | Restore HP/stat to max |
-| DoGainEffects | GAIN | Working | Permanent increase |
-| DoLoseEffects | LOSE | Working | Permanent decrease |
-| (EFFECT_TYPE_SEE) | SEE | Not started | "SEE changes what you know." Detection/reveal for doors, traps, monsters |
-
-### Known Handler Issues
-
-- **Elemental DoHitEffects**: Fire, Cold, Electricity, Acid damage from items is not yet dispatched on the player side. Effects.txt defines the amounts (e.g., Firebolt 2d8) but DoHitEffects doesn't roll `m_szAmount` for elemental nouns — only LIGHT is handled.
-- **CEffect deep copy**: When a timed effect is applied, the CEffect is shallow-copied. `m_szAmount` (a `char*`) is not deep-copied, so the rolled value may be lost. Blocks Scroll of Blessing (timed AC).
-- **DESTROY handler**: Uses `ITEM_FLAG_CURSED` check instead of `EFFECT_FLAG`. Intent unclear — should the effect noun specify what to destroy?
-- **IMMUNE vs RESIST**: The combat math (§8 above) is designed but not implemented. Damage calculation doesn't check `EFFECT_MOD_IMMUNE` vs `EFFECT_MOD_RESIST` yet.
+| Handler | Verb | Notes |
+|---|---|---|
+| DoHealEffects | HEAL | HP healing; cures poison, blindness, fear, confusion, sleep |
+| DoHitEffects | HIT | Elemental damage (FIRE, COLD, ACID, ELECTRICITY) via DoElementalHit; LIGHT works |
+| DoCreateEffects | CREATE | LIGHT area, RECALL (Word of Recall), TELEPORT |
+| DoDestroyEffects | DESTROY | Uses EFFECT_FLAG_CURSE via HasFlag |
+| DoIntrinsicEffects | INTRINSIC | Sets intrinsic on player. Duration=0 → permanent; Duration>0 → timed. |
+| DoRestoreEffects | RESTORE | Restore HP/stat to max |
+| DoGainEffects | GAIN | Permanently increase a value |
+| DoLoseEffects | LOSE | Permanently decrease a value |
+| DoSeeEffects | SEE | DOOR/TRAP: permanent reveal, range-bounded. MONSTERS: one-turn m_bDetected flag, range-bounded. |
 
 ---
 
@@ -409,15 +475,15 @@ All 32 bits allocated. See §5 for the full list.
 
 DOOR, TRAP, MONSTERS, NO_COLLIDE. 28 bits free.
 
-### EFFECT_MOD (9 modifiers)
+### EFFECT_MOD (10 modifiers)
 
-RESIST, SEE, IMMUNE, WEAK, TIMED, AREA, LINE, BALL, ENCHANT. Plus STAR (reserved for star-enchantment delivery).
+RESIST, SEE, IMMUNE, WEAK, TIMED, AREA, LINE, BALL, ENCHANT, SUSTAIN.
 
-### Pending Defines
+### ~~Pending Defines~~
 
-| Define | Type | Purpose | Blocks |
-|---|---|---|---|
-| EFFECT_MOD_SUSTAIN | EFFECT_MOD | Prevent stat loss | Sustain rings/armor |
+| Define | Type | Status |
+|---|---|---|
+| ~~EFFECT_MOD_SUSTAIN~~ | EFFECT_MOD | Done — 0x200, NUM_EFFECT_MODIFIERS=10, string table entry added |
 
 ---
 
@@ -428,9 +494,6 @@ Effect system dependencies — what blocks effect work.
 | System | Blocks These Effects | Issue |
 |---|---|---|
 | **Stats (#197)** | GAIN/RESTORE/LOSE STAT effects, Sustain, Heroism | #197 |
-| **Elemental DoHitEffects** | All elemental damage effects (Firebolt, Fireball, etc.) | Phase 3 |
-| **CEffect deep copy** | All timed effects (Blessing, timed Resist, timed Speed) | Phase 3 |
-| **EFFECT_TYPE_SEE handler** | Detection effects (doors, traps, monsters) | Phase 3 |
 | **MON_FLAG_INVISIBLE** | See Invisible effect | #72 |
 | **Trap system** | Detect Traps, Create Traps | #117 |
 | **CAttack → CEffect unification** | Monster attacks referencing shared effects | Phase 3 |

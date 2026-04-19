@@ -76,21 +76,55 @@ Wands and staves share the same effect nouns and adverbs but use different verbs
 
 ### Known Wand Types
 
-| Wand | Effect | Source |
+| Wand | Effect | Status |
 |---|---|---|
-| Wand of Heal Monster | HIT + HP (heals monster) | #114 |
-| Wand of Probing | HIT + IDENTIFY (show monster HP, attacks, etc.) | Design |
-| Wand of Teleport Away | HIT + TELEPORT (send target to random location) | Design |
+| Wand of Light | Light Ray + Light Area | In Items.txt |
+| Wand of Firebolts | Firebolt | In Items.txt |
+| Wand of Fireballs | Fireball | In Items.txt |
+| Wand of Frost | Frost Bolt | In Items.txt |
+| Wand of Frost Balls | Frost Ball | In Items.txt |
+| Wand of Lightning | Lightning Bolt | In Items.txt |
+| Wand of Lightning Balls | Lightning Ball | In Items.txt |
+| Wand of Acid | Acid Bolt | In Items.txt |
+| Wand of Acid Balls | Acid Ball | In Items.txt |
+| Wand of Sleep | Cause Sleep | In Items.txt |
+| Wand of Confusion | Cause Confusion | In Items.txt |
+| Wand of Paralyze | Cause Paralysis | In Items.txt |
+| Wand of Stone to Mud | Stone to Mud | In Items.txt |
+| Wand of Summoning | Summon Monsters | In Items.txt |
+| Wand of Teleport Away | Teleport Away | In Items.txt |
+| Wand of Heal Monster | Heal Monster | In Items.txt |
+| Wand of Probing | Probe | In Items.txt |
+| Wand of Fear | Cause Fear | In Items.txt |
 
 ### Known Staff Types
 
-| Staff | Effect | Source |
+| Staff | Effect | Status |
 |---|---|---|
-| Staff of Light | CREATE + LIGHT + AREA (radius 15, lights room) | #72, #270 |
-| Staff of Starlight | HIT + LIGHT + LINE (all directions) + CREATE + LIGHT + AREA | #72, #270 |
-| Staff of Word of Recall | CREATE + RECALL (return to town / re-enter dungeon) | #243 |
-| Staff of Perception | RESTORE + IDENTIFY (identify an item in inventory) | Design |
-| Staff of Teleportation | CREATE + TELEPORT (teleport self to random location) | Design |
+| Staff of Light | Light Area | In Items.txt |
+| Staff of Starlight | Light Ray + Light Area | In Items.txt |
+| Staff of Healing | Minor Healing + Cure Poison | In Items.txt |
+| Staff of Cure Light Wounds | CLW + Cure Poison + Cure Blindness | In Items.txt |
+| Staff of Cure Serious Wounds | CSW + Cure Poison + Cure Blindness + Cure Confusion | In Items.txt |
+| Staff of Greater Healing | Greater Healing + Cure Poison + Cure Blindness + Cure Confusion + Cure Fear | In Items.txt |
+| Staff of Fire Resistance | Timed Resist Fire | In Items.txt |
+| Staff of Cold Resistance | Timed Resist Cold | In Items.txt |
+| Staff of Electricity Resistance | Timed Resist Electricity | In Items.txt |
+| Staff of Acid Resistance | Timed Resist Acid | In Items.txt |
+| Staff of Resistance | All 4 timed elemental resistances | In Items.txt |
+| Staff of *Resistance* | All 4 timed elemental immunities | In Items.txt |
+| Staff of Perception | Identify | In Items.txt |
+| Staff of Teleportation | Teleport Self | In Items.txt |
+| Staff of Word of Recall | Recall | In Items.txt |
+| Staff of Mapping | Partial Mapping | In Items.txt |
+| Staff of Telepathy | Timed ESP | In Items.txt |
+| Staff of Treasure Detection | Detect Treasure | In Items.txt |
+| Staff of Summoning | Summon Monsters | In Items.txt |
+| Staff of Sleep | Cause Sleep | In Items.txt |
+| Staff of Mass Sleep | Mass Sleep | In Items.txt |
+| Staff of Fear | Mass Fear | In Items.txt |
+| Staff of Paralysis | Mass Paralyze | In Items.txt |
+| Staff of Protection | Timed Blessing | In Items.txt |
 
 ---
 
@@ -144,16 +178,16 @@ All items have one of three blessed states. Two versions of the same item can be
 
 ### Identification Methods
 
-| Method | What It Reveals | Status |
-|---|---|---|
-| **Scroll of Identify (?ID)** | Base name, bonuses, charges, cursed status | Planned |
-| **Scroll of *Identify* (?*ID*)** | Full lore: ego name, intrinsics, all properties | Planned (level 30+ scroll) |
-| **Failed remove** | KNOWN_CURSED | Done |
-| **Feeling tiers** (passive) | Per-turn low chance: {magical}, {excellent}, {special} | Planned |
-| **Class feelings** | Warriors sense weapons, Mages sense magic, Priests sense curses | Blocked by #239 |
-| **Blind use** | Noticeable effects → auto-ID; non-noticeable → {tried} | Planned |
-| **Shopkeeper pricing** | Selling reveals identity (good price = cursed, bad price = valuable) | Blocked by #243 |
-| **Mage spell (level 37)** | Equivalent to ?*ID* | Blocked by #239 |
+| Method | What It Reveals |
+|---|---|
+| **Scroll of Identify (?ID)** | Base name, bonuses, charges, cursed status |
+| **Scroll of *Identify* (?*ID*)** | Full lore: ego name, intrinsics, all properties (level 30+ scroll) |
+| **Failed remove** | KNOWN_CURSED |
+| **Feeling tiers** (passive) | Per-turn low chance: {magical}, {excellent}, {special} |
+| **Class feelings** | Warriors sense weapons, Mages sense magic, Priests sense curses |
+| **Blind use** | Noticeable effects → auto-ID; non-noticeable → {tried} |
+| **Shopkeeper pricing** | Selling reveals identity (good price = cursed, bad price = valuable) |
+| **Mage spell (level 37)** | Equivalent to ?*ID* |
 
 ### Unidentified Display
 
@@ -276,7 +310,7 @@ When a monster hits the player with an elemental attack, an inventory scan check
 | **Cold** | Potions |
 | **Acid** | Scrolls, Potions, Leather armor, Metal items |
 
-*Blocked by: ranged attack system (PR #235) must land first. Postponed post-#235.*
+*Requires ranged attack system (PR #235) to be in place before inventory scan can trigger.*
 
 ### Item Type to Material Mapping (TBD)
 
@@ -403,76 +437,161 @@ All items mentioned in design discussions not yet in Items.txt, organized by typ
 
 ### Potions (ITEM_IDX_POTION)
 
-| Item | Effect Line | Blocked By |
+| Item | Effect Line | Status |
 |---|---|---|
-| Potion of Gain Strength | GAIN + STAT | Stats #197 |
-| Potion of Restore Strength | RESTORE + STAT | Stats #197 |
-| Potion of Weakness | LOSE + STAT | Stats #197 |
-| Potion of Heroism | TIMED + STAT, TIMED + HP | Stats #197 |
-| Potion of Flames | HIT + FIRE | — |
-| Potion of See Invisible | TIMED + INVISIBLE + SEE | MON_FLAG_INVISIBLE |
-| Potion of Gain CON/DEX/INT/WIS/CHA | GAIN + STAT (per stat) | Stats #197 |
-| Potion of Restore CON/DEX/INT/WIS/CHA | RESTORE + STAT (per stat) | Stats #197 |
-| Potion of Apple Juice | (flavor, always pre-identified) | — |
+| Potion of Minor Healing | HEAL + HP | In Items.txt |
+| Potion of Cure Light Wounds | HEAL + HP | In Items.txt |
+| Potion of Cure Serious Wounds | HEAL + HP | In Items.txt |
+| Potion of Cure Critical Wounds | HEAL + HP (multiple) | In Items.txt |
+| Potion of Healing | HEAL + HP (multiple) | In Items.txt |
+| Potion of *Healing* | HEAL + HP (Massive) | In Items.txt |
+| Potion of Resist Fire | Timed Resist Fire | In Items.txt |
+| Potion of Resist Cold | Timed Resist Cold | In Items.txt |
+| Potion of Resist Acid | Timed Resist Acid | In Items.txt |
+| Potion of Resist Electricity | Timed Resist Electricity | In Items.txt |
+| Potion of Speed | Timed Speed | In Items.txt |
+| Potion of Infravision | Timed Infravision | In Items.txt |
+| Potion of Invisibility | Timed Invisibility | In Items.txt |
+| Potion of Levitation | Timed Levitation | In Items.txt |
+| Potion of Courage | Cure Fear + Resist Fear | In Items.txt |
+| Potion of Cure Poison | Cure Poison | In Items.txt |
+| Potion of Slow Poison | Resist Poison | In Items.txt |
+| Potion of Neutralize Poison | Cure Poison + Destroy Poison | In Items.txt |
+| Potion of Blindness | Cause Blindness | In Items.txt |
+| Potion of Confusion | Inflict Confusion | In Items.txt |
+| Potion of Poison | Inflict Poison | In Items.txt |
+| Potion of Sleep | Inflict Sleep | In Items.txt |
+| Potion of Flames | Inflict Fire | In Items.txt |
+| Potion of Apple Juice | (flavor, always pre-identified) | In Items.txt |
+| Potion of Gain Strength | GAIN + STAT | Blocked: Stats #197 |
+| Potion of Restore Strength | RESTORE + STAT | Blocked: Stats #197 |
+| Potion of Weakness | LOSE + STAT | Blocked: Stats #197 |
+| Potion of Heroism | TIMED + STAT, TIMED + HP | Blocked: Stats #197 |
+| Potion of See Invisible | Timed See Invisible | Blocked: MON_FLAG_INVISIBLE |
+| Potion of Gain CON/DEX/INT/WIS/CHA | GAIN + STAT (per stat) | Blocked: Stats #197 |
+| Potion of Restore CON/DEX/INT/WIS/CHA | RESTORE + STAT (per stat) | Blocked: Stats #197 |
 
 ### Scrolls (ITEM_IDX_SCROLL)
 
-| Item | Effect Line | Blocked By |
+| Item | Effect Line | Status |
 |---|---|---|
-| Scroll of Blessing | HIT + AC + TIMED | — |
-| Scroll of Door/Stair Location | SEE + DOOR | EFFECT_TYPE_SEE |
-| Scroll of Trap Detection | SEE + TRAP | EFFECT_TYPE_SEE |
-| Scroll of Trap Creation | CREATE + TRAP | Trap system |
-| Scroll of Detect Monsters | SEE + MONSTERS | EFFECT_TYPE_SEE |
-| Scroll of Enchant Weapon to Hit | GAIN + TOHIT + ENCHANT | Enchant system |
-| Scroll of Enchant Weapon Damage | GAIN + TODAM + ENCHANT | Enchant system |
-| Scroll of Enchant Armor | GAIN + AC + ENCHANT | Enchant system |
-| Scroll of *Enchant Weapon* | GAIN + TOHIT + TODAM + ENCHANT | Enchant system |
-| Scroll of *Enchant Armor* | GAIN + AC + ENCHANT (+intrinsic) | Enchant system |
-| Scroll of *Identify* | Full lore reveal | Ego/unique system |
-| Scroll of Curse Object | INTRINSIC + CURSED | — |
-| Scroll of Recharging | RESTORE + charges | Recharge risk curve |
-| Scroll of Restoration | (stat restore) | Stats #197 |
-| Scroll of Darkness | (Vampire PC town access) | Day/night |
+| Scroll of Light | Light Area | In Items.txt |
+| Scroll of Telepathy | Timed ESP | In Items.txt |
+| Scroll of Remove Curse | Remove Curse | In Items.txt |
+| Scroll of Identify | Identify | In Items.txt |
+| Scroll of Phase Door | Phase Door | In Items.txt |
+| Scroll of Teleportation | Teleport Self | In Items.txt |
+| Scroll of Magic Mapping | Partial Mapping | In Items.txt |
+| Scroll of *Magic Mapping* | Full Mapping | In Items.txt |
+| Scroll of Word of Recall | Recall | In Items.txt |
+| Scroll of Door/Stair Location | Detect Doors | In Items.txt |
+| Scroll of Detect Traps | Detect Traps | In Items.txt |
+| Scroll of Detect Monsters | Detect Monsters | In Items.txt |
+| Scroll of Treasure Detection | Detect Treasure | In Items.txt |
+| Scroll of Summon Monsters | Summon Monsters | In Items.txt |
+| Scroll of Scare Monster | Cause Fear | In Items.txt |
+| Scroll of Mass Sleep | Mass Sleep | In Items.txt |
+| Scroll of Blessing | Timed Blessing | In Items.txt |
+| Scroll of Curse Object | Curse Object | In Items.txt |
+| Scroll of Recharging | Recharge | In Items.txt |
+| Scroll of *Recharging* | Star-Recharge | In Items.txt |
+| Scroll of Enchant Weapon to Hit | Enchant to Hit | In Items.txt |
+| Scroll of Enchant Weapon Damage | Enchant to Damage | In Items.txt |
+| Scroll of Enchant Armor | Enchant Armor | In Items.txt |
+| Scroll of *Enchant Weapon* | Star-Enchant Weapon | In Items.txt |
+| Scroll of *Enchant Armor* | Star-Enchant Armor | In Items.txt |
+| Scroll of Trap Creation | CREATE + TRAP | Blocked: Trap system |
+| Scroll of *Identify* | Full lore reveal | Blocked: Ego/unique system |
+| Scroll of Restoration | (stat restore) | Blocked: Stats #197 |
+| Scroll of Darkness | (Vampire PC town access) | Blocked: Day/night |
 
 ### Wands (ITEM_IDX_WAND)
 
-| Item | Effect Line | Blocked By |
+| Item | Effect Line | Status |
 |---|---|---|
-| Wand of Heal Monster | HIT + HP (on monster) | — |
-| Wand of Probing | HIT + IDENTIFY (monster info) | — |
-| Wand of Teleport Away | HIT + TELEPORT | — |
+| Wand of Light | Light Ray + Light Area | In Items.txt |
+| Wand of Firebolts | Firebolt | In Items.txt |
+| Wand of Fireballs | Fireball | In Items.txt |
+| Wand of Frost | Frost Bolt | In Items.txt |
+| Wand of Frost Balls | Frost Ball | In Items.txt |
+| Wand of Lightning | Lightning Bolt | In Items.txt |
+| Wand of Lightning Balls | Lightning Ball | In Items.txt |
+| Wand of Acid | Acid Bolt | In Items.txt |
+| Wand of Acid Balls | Acid Ball | In Items.txt |
+| Wand of Sleep | Cause Sleep | In Items.txt |
+| Wand of Confusion | Cause Confusion | In Items.txt |
+| Wand of Paralyze | Cause Paralysis | In Items.txt |
+| Wand of Stone to Mud | Stone to Mud | In Items.txt |
+| Wand of Summoning | Summon Monsters | In Items.txt |
+| Wand of Teleport Away | Teleport Away | In Items.txt |
+| Wand of Heal Monster | Heal Monster | In Items.txt |
+| Wand of Probing | Probe | In Items.txt |
+| Wand of Fear | Cause Fear | In Items.txt |
 
 ### Staves (ITEM_IDX_STAFF)
 
-| Item | Effect Line | Blocked By |
+| Item | Effect Line | Status |
 |---|---|---|
-| Staff of Light | CREATE + LIGHT + AREA | — |
-| Staff of Starlight | HIT + LIGHT + LINE + CREATE + LIGHT + AREA | — |
-| Staff of Word of Recall | CREATE + RECALL | Town #243 |
-| Staff of Perception | RESTORE + IDENTIFY | — |
-| Staff of Teleportation | CREATE + TELEPORT | — |
+| Staff of Light | Light Area | In Items.txt |
+| Staff of Starlight | Light Ray + Light Area | In Items.txt |
+| Staff of Healing | Minor Healing + Cure Poison | In Items.txt |
+| Staff of Cure Light Wounds | CLW + cures | In Items.txt |
+| Staff of Cure Serious Wounds | CSW + cures | In Items.txt |
+| Staff of Greater Healing | Greater Healing + cures | In Items.txt |
+| Staff of Fire Resistance | Timed Resist Fire | In Items.txt |
+| Staff of Cold Resistance | Timed Resist Cold | In Items.txt |
+| Staff of Electricity Resistance | Timed Resist Electricity | In Items.txt |
+| Staff of Acid Resistance | Timed Resist Acid | In Items.txt |
+| Staff of Resistance | All 4 timed resistances | In Items.txt |
+| Staff of *Resistance* | All 4 timed immunities | In Items.txt |
+| Staff of Perception | Identify | In Items.txt |
+| Staff of Teleportation | Teleport Self | In Items.txt |
+| Staff of Word of Recall | Recall | In Items.txt |
+| Staff of Mapping | Partial Mapping | In Items.txt |
+| Staff of Telepathy | Timed ESP | In Items.txt |
+| Staff of Treasure Detection | Detect Treasure | In Items.txt |
+| Staff of Summoning | Summon Monsters | In Items.txt |
+| Staff of Sleep | Cause Sleep | In Items.txt |
+| Staff of Mass Sleep | Mass Sleep | In Items.txt |
+| Staff of Fear | Mass Fear | In Items.txt |
+| Staff of Paralysis | Mass Paralyze | In Items.txt |
+| Staff of Protection | Timed Blessing | In Items.txt |
 
 ### Rings (ITEM_IDX_RING)
 
-| Item | Effect Line | Blocked By |
+| Item | Effect Line | Status |
 |---|---|---|
-| Ring of Searching | INTRINSIC + SEARCHING (Flag2) | — (done) |
-| Ring of Fate | (unknown great item) | — |
-| Sustain [Stat] Ring | INTRINSIC + STAT + sustain | Stats #197 |
+| Ring of Invisibility | Invisibility | In Items.txt |
+| Ring of Levitation | Levitation | In Items.txt |
+| Ring of Telepathy | ESP | In Items.txt |
+| Ring of Fire Resistance | Resist Fire | In Items.txt |
+| Ring of Cold Resistance | Resist Cold | In Items.txt |
+| Ring of Acid Resistance | Resist Acid | In Items.txt |
+| Ring of Electricity Resistance | Resist Electricity | In Items.txt |
+| Ring of Protection | (AC bonus) | In Items.txt |
+| Ring of Free Action | Free Action | In Items.txt |
+| Ring of Sensing | Treasure Sense | In Items.txt |
+| Ring of Speed | Speed | In Items.txt |
+| Ring of Searching | Searching | In Items.txt |
+| Ring of Greed | Treasure Sense | In Items.txt |
+| Ring of Tunneling | Tunneling | In Items.txt |
+| Ring of Fate | (unknown great item) | Blocked: Design TBD |
+| Sustain [Stat] Ring | INTRINSIC + STAT + sustain | Blocked: Stats #197 |
 
 ### Equipment
 
-| Item | Type | Effect | Blocked By |
+| Item | Type | Effect | Status |
 |---|---|---|---|
-| Boots of Speed | BOOTS | INTRINSIC + SPEED | — |
-| Cloak of Protection | CLOAK | AC bonus (e.g., +10) | — |
-| Gloves of Dexterity | GLOVES | DEX bonus, search bonus | Stats #197 |
-| Helmet of Lordly Protection | HELMET | INTRINSIC + FIRE + IMMUNE | — |
-| Holy Symbol | (class equip) | Priest item | Classes #239 |
-| Nature Focus | (class equip) | Druid item | Classes #239 |
-| Ki Focus | (class equip) | Monk item | Classes #239 |
-| Sustain [Stat] Armor | ARMOR | INTRINSIC + STAT + sustain | Stats #197 |
+| Boots of Speed | BOOTS | Speed | In Items.txt |
+| Cloak of Protection | CLOAK | AC bonus (+10) | In Items.txt |
+| Helmet of Lordly Protection | HELMET | Immune Fire | In Items.txt |
+| Helm of Infravision | HELMET | Infravision | In Items.txt |
+| Helm of Telepathy | HELMET | ESP | In Items.txt |
+| Gloves of Dexterity | GLOVES | DEX bonus, search bonus | Blocked: Stats #197 |
+| Holy Symbol | (class equip) | Priest item | Blocked: Classes #239 |
+| Nature Focus | (class equip) | Druid item | Blocked: Classes #239 |
+| Ki Focus | (class equip) | Monk item | Blocked: Classes #239 |
+| Sustain [Stat] Armor | ARMOR | INTRINSIC + STAT + sustain | Blocked: Stats #197 |
 
 ### Empty Types — Content TBD
 
@@ -544,20 +663,19 @@ Effect system dependencies (EFFECT_TYPE_SEE, CEffect deep copy, elemental DoHitE
 
 Enhancements needed in C++ code, tracked separately from item data. Effect handler tracking is in [Effects-Design.md](Effects-Design.md) §10.
 
-| Enhancement | Description | Status |
-|---|---|---|
-| Sustain stat mechanics | Restore stat to max achieved + prevent stat damage. "The feeling passes." | Not started (blocked #197) |
-| Item spawn quality chain | Normal → Cursed → Magic → Ego → Legendary → Unique probability cascade. | Not started |
-| Charges system | NdM initial charges, lifetime limit, recharge, explosion risk. | Not started |
-| Recharge risk curve | Explosion risk = f(current charges, lifetime limit, dungeon depth). Lower risk at depth. | Not started |
-| Item destruction scan | Inventory scan on elemental monster hit. Material vulnerability table. | Not started (blocked #271) |
-| Enchantment system | ?Enchant scrolls modify bonuses. Failure above +10. | Not started |
-| Blessed three-state | Cursed / uncursed / blessed with per-state bonuses. | Not started |
-| Stacking identity check | Potions/scrolls always stack by appearance. Wands/staves/rings/amulets: flavor-learn on first ID, stack when same flavor + same instance properties. Books/food/ammo always stack. Torches by duration. Mundane-ID'd weapons/armor. Magical weapons/armor never stack. | Partial (ITEM_FLAG_STACKS exists) |
-| Partial stack split | "How many? (1-n)" on drop/sell. Fire ammo one at a time. | Not started |
-| Ground stacking | Same stacking rules on floor tiles. Loot explosion to nearby tiles. | Not started |
-| Feeling tiers | Passive per-turn chance: {magical}, {excellent}, {special}. | Not started |
-| Blind-use identification | Noticeable effect → auto-ID; non-noticeable → {tried}. | Not started |
+| Enhancement | Description |
+|---|---|
+| Sustain stat mechanics | Restore stat to max achieved + prevent stat damage. "The feeling passes." |
+| Recharge risk curve | Explosion risk = f(current charges, lifetime limit, dungeon depth). Lower risk at depth. |
+| Item destruction scan | Inventory scan on elemental monster hit. Material vulnerability table. |
+| Enchantment system | ?Enchant scrolls modify bonuses. Failure above +10. |
+| Blessed three-state | Cursed / uncursed / blessed with per-state bonuses. |
+| Stacking identity check | Potions/scrolls always stack by appearance. Wands/staves/rings/amulets: flavor-learn on first ID, stack when same flavor + same instance properties. Books/food/ammo always stack. Torches by duration. Mundane-ID'd weapons/armor. Magical weapons/armor never stack. |
+| Partial stack split | "How many? (1-n)" on drop/sell. Fire ammo one at a time. |
+| Ground stacking | Same stacking rules on floor tiles. Loot explosion to nearby tiles. |
+| Feeling tiers | Passive per-turn chance: {magical}, {excellent}, {special}. |
+| Blind-use identification | Noticeable effect → auto-ID; non-noticeable → {tried}. |
+| Item spawn quality chain | Ego → Legendary → Unique spawn tiers (Ego ≈1%, Legendary <0.01% depth 20+, Unique mob-carried). |
 
 ---
 
@@ -565,11 +683,11 @@ Enhancements needed in C++ code, tracked separately from item data. Effect handl
 
 New defines and string table entries needed. Effect constants (EFFECT_TYPE, EFFECT_FLAG, EFFECT_FLAG2, EFFECT_MOD) are in [Effects-Design.md](Effects-Design.md) §11.
 
-| Define | Type | Purpose | Status |
-|---|---|---|---|
-| MON_FLAG_INVISIBLE (0x100000) | MON_FLAG | Invisible monster property | Done |
-| ~~ITEM_FLAG_EQUIPMENT~~ | — | Not needed; EquipTypes[] already maps ITEM_IDX→slot | N/A |
-| ITEM_FLAG_BLESSED (0x4000) | ITEM_FLAG | Three-state blessed system | Done (NUM_ITEM_FLAGS=12) |
+| Define | Type | Purpose |
+|---|---|---|
+| MON_FLAG_INVISIBLE (0x100000) | MON_FLAG | Invisible monster property |
+| ~~ITEM_FLAG_EQUIPMENT~~ | — | Not needed; EquipTypes[] already maps ITEM_IDX→slot |
+| ITEM_FLAG_BLESSED (0x4000) | ITEM_FLAG | Three-state blessed system |
 
 ### String Table
 
@@ -587,7 +705,7 @@ Every new EFFECT_TYPE, EFFECT_FLAG, EFFECT_MOD, ITEM_FLAG, or MON_FLAG must be a
 
 ## 18. Class/Item Synergies (#239)
 
-Reference only — this drives book content and class equipment, blocked by #239.
+Reference only — this drives book content and class equipment. See Classes system (#239) for full implementation.
 
 | Class | Armor | Weapons | Special |
 |---|---|---|---|

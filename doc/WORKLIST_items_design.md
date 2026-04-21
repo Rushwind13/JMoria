@@ -19,22 +19,6 @@ Section keys — Effects-Design.md: §1 Data Model, §2 Effects.txt Format, §3 
 
 Need explicit answers before these can be implemented.
 
-### Effect Coverage Gaps — Items Still Needed
-
-All flags below have no player-usable item that delivers them as a primary positive effect.
-Confirmed designs are documented in Item-Design.md §12.
-
-| Flag | Resolution |
-|---|---|
-| PARALYZE | Staff of Paralysis (Mass Paralyze AoE) — added |
-| SLEEP | Staff of Mass Sleep + Scroll of Mass Sleep — added |
-| CONFUSE | Skipped — Wand of Confusion sufficient |
-| STONE_TO_MUD | Ring of Tunneling (permanent intrinsic) — added |
-| AFRAID | Staff of Fear (Mass Fear AoE) — added |
-| AC | Staff of Protection (Timed Blessing) — added |
-| XP | Skipped — niche, Staff of Enlightenment name reserved |
-| FREE_ACTION | Skipped — Ascension Kit intrinsic, ring-only by design |
-
 - [ ] Resistance stacking formula: 50% + 25% = 62.5%? — deferred to intrinsics deep-dive (Effects §8)
 
 ### Open Design Questions

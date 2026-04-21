@@ -46,6 +46,16 @@ Effect <Light Area>
     Radius      15
 }
 
+# Fire Touch — a searing touch that burns a target.
+# Used by: Red worm masses, fire elementals (melee)
+Effect <Fire Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_FIRE>
+    Amount      <1d5>
+    Range       1
+}
+
 # Firebolt — a bolt of fire that damages a target.
 # Used by: Wand of Firebolts, dragon breath (baby), fire traps
 Effect <Firebolt>
@@ -69,6 +79,16 @@ Effect <Fireball>
     Radius      3
 }
 
+# Cold Touch — a freezing touch that chills a target.
+# Used by: Blue worm masses, cold elementals (melee)
+Effect <Cold Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_COLD>
+    Amount      <1d5>
+    Range       1
+}
+
 # Frost Bolt — a bolt of cold that damages a target.
 Effect <Frost Bolt>
 {
@@ -88,6 +108,16 @@ Effect <Frost Ball>
     Amount      <6d8>
     Range       20
     Radius      3
+}
+
+# Lightning Touch — a shocking touch that electrifies a target.
+# Used by: Electricity elementals, storm creatures (melee)
+Effect <Lightning Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_ELECTRICITY>
+    Amount      <2d6>
+    Range       1
 }
 
 # Lightning Bolt — a bolt of electricity.
@@ -110,6 +140,16 @@ Effect <Lightning Ball>
     Amount      <6d6>
     Range       20
     Radius      3
+}
+
+# Acid Touch — a caustic touch that corrodes a target.
+# Used by: Black worm masses, acid creatures (melee)
+Effect <Acid Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_ACID>
+    Amount      <2d6>
+    Range       1
 }
 
 # Acid Bolt — a bolt of acid that damages a target.
@@ -140,6 +180,15 @@ Effect <Teleport Away>
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_TELEPORT>
     Range       15
+}
+
+# Poison Touch — a toxic touch that infects a target with poison.
+# Used by: Poison creatures, toxic monsters (melee, no physical damage)
+Effect <Poison Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_POISON>
+    Range       1
 }
 
 # Poison Sting — a venomous attack that inflicts poison.
@@ -924,4 +973,68 @@ Effect <Star-Recharge>
     Type        <EFFECT_TYPE_RESTORE>
     Flag        <EFFECT_FLAG_FUEL>
     Amount      <2d4>
+}
+
+# --- Touch effects for status conditions ---
+
+# Blindness Touch — a touch that blinds the target.
+# Used by: Blinding creatures, dark entities (melee)
+Effect <Blindness Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_BLIND>
+    Duration    50.0
+    Range       1
+}
+
+# Confusion Touch — a bewildering touch that confuses the target.
+# Used by: Chaos creatures, mind-benders (melee)
+Effect <Confusion Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_CONFUSE>
+    Duration    7.0
+    Range       1
+}
+
+# Fear Touch — a terrifying touch that fills target with dread.
+# Used by: Terror creatures, shadow beings (melee)
+Effect <Fear Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_AFRAID>
+    Duration    5.0
+    Range       1
+}
+
+# Sleep Touch — a touch that induces magical sleep.
+# Used by: Sleeping creatures, rest entities (melee, can be awakened by damage)
+Effect <Sleep Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_SLEEP>
+    Duration    5.0
+    Range       1
+}
+
+# Paralysis Touch — a touch that freezes target in place.
+# Used by: Paralytic creatures, wraiths (melee)
+Effect <Paralysis Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_PARALYZE>
+    Duration    1d4
+    Range       1
+}
+
+# --- Life/XP drain effects ---
+
+# XP Drain Touch — a touch that drains experience from target.
+# Used by: Ghosts, vampires, liches (configurable per monster level)
+Effect <XP Drain Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_XP>
+    Amount      <1d10>
+    Range       1
 }

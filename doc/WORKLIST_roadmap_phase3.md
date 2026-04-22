@@ -86,7 +86,7 @@ These are ordered by "unblocks the most other work" and "most visible gameplay i
 
 ### Tier 2 — Identification Depth
 6. **Feeling tiers** (#114) — Per-turn passive chance: `{magical}` / `{excellent}` / `{special}` display.
-7. **Blind-use identification** — Noticeable effect → auto-ID; no noticeable effect → `{tried}` mark.
+7. ~~**Blind-use identification**~~ ✅ — Implemented in `CPlayer::Quaff` / `CPlayer::Read`: noticeable effect → auto-ID + name reveal; no noticeable effect → `m_bTried = true`; `{tried}` shown in item display.
 8. **Stacking identity check** — Complete per-category rules; partial-stack split prompt on drop.
 
 ### Tier 3 — Monster Combat Depth ✅ (content complete, code TBD)

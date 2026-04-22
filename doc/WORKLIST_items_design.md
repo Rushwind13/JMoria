@@ -70,7 +70,7 @@ No blockers. Start any of these.
 - [ ] Partial stack split: "How many? (1-n)" prompt on drop/sell; arrows fire one at a time (Item §5, §16)
 - [ ] Ground stacking + loot explosion to adjacent open tiles on overflow (Item §5, §16)
 - [ ] Feeling tiers: passive per-turn chance of {magical}, {excellent}, {special} discovery (Item §4, §16)
-- [ ] Blind-use identification: noticeable effect → auto-ID; no noticeable effect → {tried} marking (Item §4, §16)
+- [x] Blind-use identification: noticeable effect → auto-ID; no noticeable effect → {tried} marking — **done** (`CPlayer::Quaff`/`Read` + `m_bTried` + `{tried}` display in `Item.cpp`)
 - [ ] Item spawn quality chain: Ego → Legendary → Unique tiers (builds on existing Normal/Cursed/Magic) (Item §3, §16)
 
 ### Data Model

@@ -55,7 +55,7 @@ No blockers. Start any of these.
   - [ ] Stat drain dispatch (requires stats-system story)
 - [ ] Recharge risk curve: explosion risk = f(charges, lifetime, depth); lower risk at greater depth (Item §6, §16)
 - [ ] Enchantment system: +1/+1d3 per scroll, failure chance above +10, scroll wasted on failure (Item §11, §16)
-- [ ] Blessed three-state system: cursed / uncursed / blessed behavior differences (Item §3, §16)
+
 - [ ] Stacking identity check — ITEM_FLAG_STACKS exists; complete per-category rules (Item §5, §16)
 - [ ] Partial stack split: "How many? (1-n)" prompt on drop/sell; arrows fire one at a time (Item §5, §16)
 - [ ] Ground stacking + loot explosion to adjacent open tiles on overflow (Item §5, §16)
@@ -247,7 +247,7 @@ Potions, scrolls, wands, and staves get randomized unidentified names at load ti
 | ITEM_FLAG_MAINHAND | Equips to main hand |
 | ITEM_FLAG_NEEDSAMMO | Ranged weapon needs ammo |
 | ITEM_FLAG_HOLDING | Container item |
-| ITEM_FLAG_BLESSED | Item is blessed |
+
 | ITEM_COLOR_MULTI | Multi-color cycling |
 
 ### Effect Types (EFFECT_TYPE — verbs)
@@ -422,24 +422,24 @@ started with monsters, they now have flavored attacks instead of "hits" all the 
 | Ring of Levitation | EFFECT_FLAG_LEVITATE | | EFFECT_TYPE_INTRINSIC | Provides intrinsic levitation |
 | Ring of Fire Resistance | EFFECT_FLAG_FIRE | EFFECT_MOD_RESIST | EFFECT_TYPE_INTRINSIC | Provides intrinsic resist fire |
 | Ring of Cold Resistance | EFFECT_FLAG_COLD | EFFECT_MOD_RESIST | EFFECT_TYPE_INTRINSIC | Provides intrinsic resist cold |
-| Potion of Fire Resistance | EFFECT_FLAG_FIRE | EFFECT_MOD_RESIST | EFFECT_TYPE_TIMED | Provides temporary resist fire |
+| Potion of Fire Resistance | EFFECT_FLAG_FIRE | EFFECT_MOD_RESIST | EFFECT_MOD_TIMED | Provides temporary resist fire |
 | Potion of Flames | EFFECT_FLAG_FIRE | | EFFECT_TYPE_HIT | Does NdM fire damage when quaffed or thrown |
 | (second CEffect on !Flames) | EFFECT_FLAG_COLD | EFFECT_MOD_WEAK | | Potions can shatter if user takes cold damage |
 | Scroll of Magic Mapping | EFFECT_FLAG_MAPPING | | EFFECT_TYPE_CAUSE | Oh, this scroll has a map on it |
 | Helmet of Lordly Protection (F) | EFFECT_FLAG_FIRE | EFFECT_MOD_IMMUNE | EFFECT_TYPE_INTRINSIC | Lordly protection means "immune" |
-| Potion of Invisibility | EFFECT_FLAG_INVISIBLE | | EFFECT_TYPE_TIMED | Provides temporary Invisibility |
+| Potion of Invisibility | EFFECT_FLAG_INVISIBLE | | EFFECT_MOD_TIMED | Provides temporary Invisibility |
 | Ring of Invisibility | EFFECT_FLAG_INVISIBLE | | EFFECT_TYPE_INTRINSIC | Provides intrinsic invisibility |
-| Potion of See Invisible | EFFECT_FLAG_INVISIBLE | EFFECT_MOD_SEE | EFFECT_TYPE_TIMED | Provides temporary ability to see invisible things |
-| Potion of Blindness | EFFECT_FLAG_BLIND | | EFFECT_TYPE_TIMED | Temporary Blindness |
+| Potion of See Invisible | EFFECT_FLAG_INVISIBLE | EFFECT_MOD_SEE | EFFECT_MOD_TIMED | Provides temporary ability to see invisible things |
+| Potion of Blindness | EFFECT_FLAG_BLIND | | EFFECT_MOD_TIMED | Temporary Blindness |
 | Potion of Minor Healing | EFFECT_FLAG_HP | | EFFECT_TYPE_GAIN | Potion of healing grants HP, cures blind and confuse |
 | (2nd effect) | EFFECT_FLAG_BLIND | | EFFECT_TYPE_HEAL | |
 | (3rd effect) | EFFECT_FLAG_CONFUSE | | EFFECT_TYPE_HEAL | |
 | Potion of Gain Strength | EFFECT_FLAG_STAT | | EFFECT_TYPE_GAIN | Potion grants permanent stat gain to strength stat |
 | Potion of Restore Strength | EFFECT_FLAG_STAT | | EFFECT_TYPE_RESTORE | Potion restores lost strength (due to combat) |
 | Potion of Weakness | EFFECT_FLAG_STAT | | EFFECT_TYPE_LOSE | Potion grants permanent stat loss to strength stat |
-| Potion of Heroism | EFFECT_FLAG_STAT | | EFFECT_TYPE_TIMED | Potion grants temporary stat bonus to strength stat |
-| (2nd effect) | EFFECT_FLAG_HP | | EFFECT_TYPE_TIMED | ... and some temporary HP |
-| Scroll of Blessing | EFFECT_FLAG_AC | | EFFECT_TYPE_TIMED | Scroll grants temporary AC bonus |
+| Potion of Heroism | EFFECT_FLAG_STAT | | EFFECT_MOD_TIMED | Potion grants temporary stat bonus to strength stat |
+| (2nd effect) | EFFECT_FLAG_HP | | EFFECT_MOD_TIMED | ... and some temporary HP |
+| Scroll of Blessing | EFFECT_FLAG_AC | | EFFECT_MOD_TIMED | Scroll grants temporary AC bonus |
 | Scroll of Summon Monsters | EFFECT_FLAG_SUMMON | | | summons high level monsters surrounding the character |
 | Scroll of Door/Stair Location | EFFECT_FLAG_DOOR | EFFECT_MOD_SEE | EFFECT_TYPE_CAUSE | shows doors and stairs within large radius of user |
 | Scroll of Trap Detection | EFFECT_FLAG_TRAP | EFFECT_MOD_SEE | EFFECT_TYPE_CAUSE | shows traps within large radius of user |
@@ -450,7 +450,7 @@ started with monsters, they now have flavored attacks instead of "hits" all the 
 | Monster | monster flag | effect flag | effect modifier | effect type | Notes |
 |---|---|---|---|---|---|
 | White Worm Mass | MON_FLAG_CRAWL | EFFECT_FLAG_HP | | EFFECT_TYPE_HIT | normal attack (crawls on you) |
-| | MON_FLAG_TOUCH | EFFECT_FLAG_POISON | | EFFECT_TYPE_TIMED | poison touch |
+| | MON_FLAG_TOUCH | EFFECT_FLAG_POISON | | EFFECT_MOD_TIMED | poison touch |
 | Red Worm Mass | MON_FLAG_CRAWL | EFFECT_FLAG_HP | | EFFECT_TYPE_HIT | normal attack (crawls on you) |
 | | MON_FLAG_TOUCH | EFFECT_FLAG_FIRE | | EFFECT_TYPE_HIT | fire touch (possible to burn scrolls and potions and leather items) |
 | Blue Worm Mass | MON_FLAG_CRAWL | EFFECT_FLAG_HP | | EFFECT_TYPE_HIT | normal attack (crawls on you) |
@@ -476,7 +476,7 @@ started with monsters, they now have flavored attacks instead of "hits" all the 
 | | MON_FLAG_CLAW | EFFECT_FLAG_HP | | EFFECT_TYPE_HIT | normal attack (claws you twice) |
 | | MON_FLAG_BITE | EFFECT_FLAG_HP | | EFFECT_TYPE_HIT | normal attack (bites you) |
 | | MON_FLAG_BREATHE | EFFECT_FLAG_POISON | | EFFECT_TYPE_HIT | breathes poison gas |
-| Ghost | MON_FLAG_TOUCH | EFFECT_FLAG_PARALYZE | | EFFECT_TYPE_TIMED | ghost touch paralyzes |
+| Ghost | MON_FLAG_TOUCH | EFFECT_FLAG_PARALYZE | | EFFECT_MOD_TIMED | ghost touch paralyzes |
 | Greater Demon | MON_FLAG_CLAW | EFFECT_FLAG_HP | | EFFECT_TYPE_HIT | normal attack (claws you) |
 | | MON_FLAG_CLAW | EFFECT_FLAG_HP | | EFFECT_TYPE_HIT | normal attack (claws you twice) |
 | | MON_FLAG_BITE | EFFECT_FLAG_HP | | EFFECT_TYPE_HIT | normal attack (bites you) |
@@ -526,8 +526,7 @@ AC
   * priests will eventually "feel" blessings and curses, know about items by handling them
 * scroll of identify (#114): read a scroll, choose an item. the item's properties are revealed.
 * the scroll's type (scroll of identify) becomes known
-* item's state should be one of cursed, uncursed, blessed (three state, not two)
-* a blessed item has bonuses between versions of the same item, a cursed item has penalties
+
 ```
 
 ### Comment (2024-11-21): Known Cursed Truth Table
@@ -580,7 +579,7 @@ Class identity should extend to how quickly each class intuits item properties, 
 - **Priests** (high WIS): Quickly sense blessings and holy properties; fast on curses
 - **Druids** (high WIS): Quickly sense nature-aligned properties and poisons
 - **Shamans** (high WIS): Quickly sense elemental properties and spirit ties
-- **Monks** (high WIS): Quickly sense cursed/blessed status and spiritual properties
+
 
 This creates **passive knowledge discovery** beyond just "try to remove" or "use it". Longer you hold an item, faster your class learns its secrets.
 ```
@@ -599,7 +598,7 @@ A: Identification is critical to success in the game. There is "I know nothing a
 normal item: just a thing. (Dagger). Dagger has +0/+0 to-hit/to-dam bonus.
 cursed item: item has negative bonuses. Dagger(-3, -5). Player cannot remove a cursed item without ?Remove Curse
 magical item: item has positive bonuses. Dagger(+3, +5). Very common, player should find at least 1-2 per level.
-ego item: this item has one or more intrinsics, giving it either a name or a suffix. Flametongue(+3,+3) [FT] has intrinsic: does 2x damage to creatures weak against fire. These are semi-rare, player should find 1 to 3 over the course of a 40-level run. Some are cursed: Morgul Blade(+4, +4) [MB] gives weakness to holy damage and drains life each level, cannot be removed without Remove Curse, and the ?Remove Curse must be blessed/enhanced.
+ego item: this item has one or more intrinsics, giving it either a name or a suffix. Flametongue(+3,+3) [FT] has intrinsic: does 2x damage to creatures weak against fire. These are semi-rare, player should find 1 to 3 over the course of a 40-level run. Some are cursed: Morgul Blade(+4, +4) [MB] gives weakness to holy damage and drains life each level, cannot be removed without Remove Curse.
 unique item: this is a named weapon (or other item) that has many different intrinsics and also some lore text. only one of each unique per game. "Sting" is a Dagger with intrinsics: gives +2 speed, gives See Invisible, warns when orcs are nearby, glows blue when orcs are nearby, and does 2x damage to orcs.
 
 ego items: Flametongue [FT], Frost Brand [FB], Demon Bane [DB], Slay Dragon [SD], Resist Lightning [RL]
@@ -810,7 +809,7 @@ No Multi-Classing — The magic system follows a Moria model (fixed, disciplined
 Shop Types (Always Present):
 1. General Store — misc items (rope, torches, potions, scrolls)
 2. Weaponsmith/Armorer — weapons, armor, shields
-3. Temple — healing potions, scrolls of Restoration, blessed items
+3. Temple — healing potions, scrolls of Restoration
 4. Magic Shop — magic items, wands, staves, some scrolls (but not spell books 3-4)
 5. Player Home — storage/rest area (free healing, safe save point)
 
@@ -839,7 +838,7 @@ Shop Item Distribution:
   - 60% good items (Cure Wounds, Identify, Magic Missile)
   - 30% meh items (Darkness, Amulet of Sensing)
   - 10% great items (Ring of Fate, Teleport Level, *Identify*)
-- Temple: Healing potions, Restoration scrolls, blessed items
+- Temple: Healing potions, Restoration scrolls
 - Bazaar: Rare high-value items from other shops at 2x prices (appears randomly)
 - Black Market: Ego and Artifact-tier weapons only (locked until character level 20+)
 
@@ -1118,8 +1117,8 @@ Postponed until after ranged attack implementation
 - Potion of Gain Strength (EFFECT_FLAG_STAT + EFFECT_TYPE_GAIN) — #77 comment, #197 comment
 - Potion of Restore Strength (EFFECT_FLAG_STAT + EFFECT_TYPE_RESTORE) — #77 comment, #197 comment
 - Potion of Weakness (EFFECT_FLAG_STAT + EFFECT_TYPE_LOSE) — #77 comment
-- Potion of Heroism (EFFECT_FLAG_STAT + EFFECT_TYPE_TIMED, EFFECT_FLAG_HP + EFFECT_TYPE_TIMED) — #77 comment
-- Potion of See Invisible (EFFECT_FLAG_INVISIBLE + EFFECT_MOD_SEE + EFFECT_TYPE_TIMED) — #77 comment
+- Potion of Heroism (EFFECT_FLAG_STAT + EFFECT_MOD_TIMED, EFFECT_FLAG_HP + EFFECT_MOD_TIMED) — #77 comment
+- Potion of See Invisible (EFFECT_FLAG_INVISIBLE + EFFECT_MOD_SEE + EFFECT_MOD_TIMED) — #77 comment
 - Potion of Flames (EFFECT_FLAG_FIRE + EFFECT_TYPE_HIT, EFFECT_FLAG_COLD + EFFECT_MOD_WEAK) — #77 comment
 - Potion of Gain CON/DEX/INT/WIS/CHA — #197 comment (all 6 stats)
 - Potion of Restore CON/DEX/INT/WIS/CHA — #197 comment (all 6 stats)
@@ -1127,7 +1126,7 @@ Postponed until after ranged attack implementation
 - Potion of Remove Curse — #243 comment (Town: "Potions of Remove Curse" in Player House storage)
 
 **Scrolls (not yet in Items.txt)**:
-- Scroll of Blessing (EFFECT_FLAG_AC + EFFECT_TYPE_TIMED) — #77 comment
+- Scroll of Blessing (EFFECT_FLAG_AC + EFFECT_MOD_TIMED) — #77 comment
 - Scroll of Door/Stair Location (EFFECT_FLAG_DOOR + EFFECT_MOD_SEE + EFFECT_TYPE_CAUSE) — #77 comment, #117
 - Scroll of Trap Detection (EFFECT_FLAG_TRAP + EFFECT_MOD_SEE + EFFECT_TYPE_CAUSE) — #77 comment, #117
 - Scroll of Trap Creation (EFFECT_FLAG_TRAP + EFFECT_TYPE_CAUSE) — #77 comment
@@ -1180,7 +1179,7 @@ Postponed until after ranged attack implementation
 - Westernesse [WB] — #128, WORKLIST.txt (weapon legendary constellation)
 - Holy Avenger [HA] — #128, WORKLIST.txt (mace legendary)
 - Defender [DF] — #128, WORKLIST.txt (halberd legendary)
-- Morgul Blade [MB] — #128 (cursed ego: weakness to holy, drains life, ?Remove Curse must be blessed)
+- Morgul Blade [MB] — #128 (cursed ego: weakness to holy, drains life)
 - Longsword of Slay Demon — #243 comment (Weaponsmith Ego weapon example)
 
 **Weapons — Unique Items (not yet in Items.txt)**:

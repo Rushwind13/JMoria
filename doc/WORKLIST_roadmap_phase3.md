@@ -12,7 +12,6 @@ Foundation commit landed — this tracks what's left before Phase 3 is done.
 #### Core (Acceptance Criteria)
 - [ ] **Feeling tiers** — passive discovery over time: "magical" (has bonuses), "excellent" (ego item like Slay Beast), "special" (unique like "Sting"). Displayed as "a Dagger {excellent}" before full ID
 - [ ] **Class-specific feelings** — Warriors sense weapon curses fast, Mages sense magic fast, Priests sense blessings/curses, Rogues sense traps/AC. Low chance per turn like passive searching. Requires class/stat system.
-- [ ] **Cursed/uncursed/blessed states** — three-state system with bonuses/penalties between versions of the same item
 
 #### Advanced
 - [ ] **`?*Identify*` (star-identify)** — full lore reveal for unique/ego items. Scroll of *Identify* at level 30+. Mage spell at level 37.
@@ -34,7 +33,7 @@ Foundation commit landed — this tracks what's left before Phase 3 is done.
 
 ### Remaining — Item Effect Types
 - [x] **`EFFECT_MOD_TIMED`** (0x10) — temporary effect duration
-- [ ] **Effect dispatch for `EFFECT_TYPE_TIMED` / `EFFECT_MOD_TIMED`** — already resolved in design (use INTRINSIC + MOD_TIMED); needs code implementation routing, and round-trip
+- [ ] **Effect dispatch for `EFFECT_MOD_TIMED` / `EFFECT_MOD_TIMED`** — already resolved in design (use INTRINSIC + MOD_TIMED); needs code implementation routing, and round-trip
 
 #### Flags Blocked by Other Systems
 - [ ] **`EFFECT_FLAG_STAT`** — exists in word 1, but stat gain/restore/lose requires stats system (#197)
@@ -82,13 +81,11 @@ These are ordered by "unblocks the most other work" and "most visible gameplay i
 
 
 ### Tier 3 — Monster Combat Depth ✅ (content complete, code TBD)
-10. **Elemental resistances in combat** (#77) — Fire/cold/acid/poison resist/immune checks. Potion of Fire Resistance exists; extend to all elemental types.
 11. **Item destruction from attacks** — See [#271](https://github.com/Rushwind13/JMoria/issues/271). Postponed until after Ranged Attacks (PR #235).
 
 ### Tier 4 — Light Economy Integration
 12. **Light radius extends visibility** (#72, #121) — UpdateVisibility() uses torch Radius to extend sight range
 13. **Light source items** (#270) — Staff of Light, Staff of Starlight in Items.txt; need light source code integration. Flask of Oil not yet added.
-14. **Infravision/ESP integration** (#72) — UpdateVisibility() checks for EFFECT_FLAG_INFRA/ESP on player
 
 ### Tier 5 — Advanced Systems (Require Stats, Classes, Spells)
 15. **`EFFECT_FLAG_STAT`** (#77) — Requires stat system (STR/DEX/CON/INT/WIS/CHA) to exist first

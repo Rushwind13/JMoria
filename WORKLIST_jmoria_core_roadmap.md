@@ -12,6 +12,37 @@ The core roadmap prioritizes:
 
 ---
 
+## 📋 Recent Updates (Integration of Issues #242-275)
+
+**Latest Integration (Issues #242-275)**:
+- **Priority 4 (Major Post-Phase-3 Systems)**: 8 new issues integrated:
+  - #242 (Speed System) — action economy & Balrog difficulty lever
+  - #243 (Town System) — shop economy, NPC interaction, safe hub
+  - #244 (Intrinsics & Status Effects) — unified 70+ effect framework
+  - #245 (Monster Color Effects) — standardized threat recognition
+  - #246 (Item Durability) — elemental destruction, inventory strategy
+  - #247 (XP & Level Progression) — character 1-40 levels, depth scaling
+  - #248 (Guard Timer UI) — crime system display
+  - #249 (Loot Tables) — monster drops, shop economy calibration
+
+- **Priority 5 (Advanced Systems & Polish)**: 7 new issues + 2 known issues:
+  - #264 (EFFECT_MOD_MAX) — dice roll modifier
+  - #265 (Breath Weapon Scaling) — damage based on current HP
+  - #268 (Unique Monsters) — named one-per-game encounters
+  - #269 (Shrieker Mushroom) — aggravate/sleep mechanic
+  - #272 (Visible Monsters UI) — detect monsters display
+  - #274 (Trap System) — dungeon traps, search, disarm
+  - #275 (Pickpocket Monsters) — thief-type monster content
+  - #267 (GetMonsterDef shadowing) — known limitation
+  - #266 (Town spawn warnings) — minor console warnings
+
+- **Phase 3 Status Updates**:
+  - #72 (Fog of War) — foundation complete, light items TBD
+  - #77 (Item Effects) — 150 items, 98 effects, all monster attacks migrated
+  - #114 (Item ID) — core system done, feeling tiers TBD
+
+---
+
 ## 🎯 Priority 1: Core Mechanics & Foundation
 
 ### #121 - Fuel for Lanterns & Wand Charges
@@ -92,40 +123,57 @@ The core roadmap prioritizes:
 ## 🔧 Priority 2: Major Systems
 
 ### #114 - Identify Spell & Item Knowledge System
-**Status**: Not started
+**Status**: 🚧 In Progress (Phase 3)
 **Description**: Implement item identification mechanics with learned properties and class-specific "feelings."
+- ✅ Item property knowledge system complete (m_dwKnownProps, FormatProperties with type-aware display)
+- ✅ Unidentified names/flavors working (randomized names, {tried} marking)
+- ✅ Scroll of Identify reveals properties
+- ✅ Cursed discovery via failed equipment remove
+- ⚠️ Remaining: Feeling tiers (magical/excellent/special), class-specific feelings, Scroll of *Identify*
 - Players learn item properties through: trying to remove, using, time-based discovery
 - Scroll of Identify reveals most properties; Scroll of *Identify* reveals all
 - Class feelings: Warriors sense weapon curses; Mages sense magic items; Priests sense blessings
 - Known intrinsics display in inventory; unknown ones remain hidden
 **Impact**: Enables strategic item management and knowledge-based gameplay.
-**Dependencies**: None blocking (but pairs with #128)
+**Dependencies**: #239 (Classes) for class-specific feelings; Pairs with #128 (Magic Items)
 **Effort**: Medium
+**See Also**: [doc/WORKLIST_roadmap_phase3.md](doc/WORKLIST_roadmap_phase3.md)
 
 ### #72 - Fog of War & Sight Distance Expansion
-**Status**: Partially done (some features in)
+**Status**: 🚧 In Progress (Phase 3)
 **Description**: Expand visibility/lighting systems with depth-based darkness, multiple light sources, and special sight modes.
+- ✅ DUNG_FLAG_VISIBLE flag implemented
+- ✅ UpdateVisibility() with line-of-sight working
+- ✅ FOW rendering (dim grey for seen-not-visible)
 - Rooms spawn lit/dark based on depth (lit chance → 0 at depth 50)
 - Torches: 3000-turn fuel, radius 3
-- Lanterns: refueling with oil (+5000 per can), radius 5, max 15000 turns
-- Infravision: race intrinsic, sees warm creatures in dark, radius 8
-- ESP: race intrinsic, detects brains in dark, radius 8 (not undead/worms)
+- Lanterns: refueling with oil (+5000 per can), radius 5, max 15000 turns (integrate with UpdateVisibility)
+- Infravision: race intrinsic, sees warm creatures in dark, radius 8 (blocked: #112 Races)
+- ESP: race intrinsic, detects brains in dark, radius 8 (blocked: #112 Races)
 - Scroll of Light: light current room radius 10
 - Wand of Light: shoot line of light, damage light-weak creatures (blue light hurts orcs, vampires, worm masses)
 **Impact**: Emergent light economy, depth-based atmosphere, utility item variety.
-**Dependencies**: None blocking
+**Dependencies**: #112 (Races) for Infravision/ESP; Pairs with #72, #121 (light economy)
 **Effort**: High
+**See Also**: [doc/WORKLIST_roadmap_phase3.md](doc/WORKLIST_roadmap_phase3.md)
 
 ### #77 - Item Effects System
-**Status**: Not started
+**Status**: 🚧 In Progress (Phase 3)
 **Description**: Implement comprehensive effect system for items and spells:
+- ✅ Effect system vocabulary complete (types, modifiers, flags, second bitmask)
+- ✅ Multi-effect items working (Potion of Minor Healing = 3 effects)
+- ✅ 150 items in Items.txt with named effect references
+- ✅ 98 named effects in Effects.txt
+- ✅ All monster attack definitions complete (Monsters.txt with attack lines)
 - EFFECT_FLAG: fire, cold, acid, lightning, poison, identify, AC, etc.
 - EFFECT_MOD: weak/resistant/immune/gain/lose/restore for each effect
 - EFFECT_TYPE: determines target and persistence (instant, timed, permanent)
+- ⚠️ Remaining: Item destruction from elemental attacks (#271), elemental resistances in combat
 **Impact**: Unified system for all magical item/spell effects, enables complex interactions.
-**Documentation**: /doc/ItemEffectSystem.md (proposed)
-**Dependencies**: None blocking
+**Documentation**: [doc/WORKLIST_roadmap_phase3.md](doc/WORKLIST_roadmap_phase3.md) | [doc/Effects-Design.md](doc/Effects-Design.md)
+**Dependencies**: None blocking; Pairs with #271 (Item Destruction), #77 (effects dispatch)
 **Effort**: High
+**Phase 3 Content**: ✅ Data complete (150 items, 98 effects, 31 monsters added)
 
 
 ---
@@ -213,7 +261,222 @@ The core roadmap prioritizes:
 
 ---
 
-## 🐛 Known Blocking Issues
+## � Priority 4: Major Post-Phase-3 Systems
+
+### #242 - Speed System & Difficulty Tuning (Action Economy Mechanic)
+**Status**: Not started (Design Complete)
+**Description**: Implement speed/action economy system that creates difficulty scaling and high-level character differentiation. Speed is the **primary difficulty lever**.
+- **Base Speed**: 10 (normal speed = 1 action per turn)
+- **Modifiers**: Equipment rings (+1 to +20), boots (+10), Potion of Speed (+10 temp), DEX stat
+- **Monster Speed Calibration**: Bats 2 → Balrog 4-5 creates difficulty progression
+- **Balrog Tuning**: Unwinnable at player speed ~15, winnable at ~30+
+**Impact**: Core difficulty lever, enables Balrog as achievable endgame goal, creates speed-focused builds
+**Dependencies**: #197 (Stats) for DEX; Enables #42 (Balrog)
+**Effort**: High
+**See Also**: GitHub issue #242 for full speed table and monster calibration
+
+### #243 - Town System (Shop Infrastructure & NPC Interaction)
+**Status**: Not started (Design Complete)
+**Description**: Implement Moria-style single town hub with shops, NPCs, and safe rest area.
+- **5 Shop Types**: General Store, Weaponsmith/Armorer, Temple, Magic Shop, Player Home
+- **Shop Economics**: Base markup formula, CHA modifier, item generation by type
+- **NPCs**: Thieves steal coins, Guards patrol with decay timer, Quest-givers (future), flavor NPCs
+- **Word of Recall**: Consumable scroll + treasure Staff for teleporting to/from town
+- **Day/Night Cycle**: Foundation for future Vampire PCs and stealth gameplay
+**Impact**: Enables shop economy, character progression via loot flow, NPC interaction
+**Dependencies**: #197 (Stats) for CHA-based pricing; #114 (Item ID) for shop learning; #128 (Magic Items) for loot
+**Effort**: Very High
+**See Also**: GitHub issue #243 for full design, shop economics, NPC behaviors
+
+### #244 - Intrinsics & Status Effects System (Temp/Perm Buffs/Debuffs)
+**Status**: Not started (Design Complete)
+**Description**: Unified framework for character buffs/debuffs (70+ potential effects) covering temporary effects, permanent effects, and negative effects.
+- **4 Variants per Effect**: Perm buff (equipment), temp buff (potion), perm debuff (curse), temp debuff (trap/monster)
+- **No Hard Cap**: Characters can stack unlimited positive intrinsics if obtained
+- **Display**: Character Stats screen (active temp buffs) + Intrinsics Grid (equipment × effect matrix)
+- **Trap Integration**: Traps trigger intrinsic-related effects (fire trap, teleport trap, summon trap, etc.)
+- **Sustain Mechanics**: Sustain [Stat] restores stat to max achieved + prevents damage to that stat
+- **70+ Effects**: Resistances (RF, RC, RL, RA, RP), Immunities (Hold Life, Free Action, Sustain), Abilities (Regen, Telepathy, ESP), Status (Afraid, Confused, Blind, Hold), Stat Modifiers
+**Impact**: Unified effect system, enables complex interactions, support for Sustain mechanic
+**Dependencies**: #77 (Effects Framework) defines types; #197 (Stats); #242 (Speed intrinsics); #246 (item durability intrinsics)
+**Effort**: High
+**See Also**: GitHub issue #244 for comprehensive effect categories and data model
+
+### #245 - Monster Color Effects & Standardized Threat Recognition
+**Status**: Not started (Design Complete)
+**Description**: Standardized system where monster color → threat type (stat damage, elemental, status) for player learning.
+- **Color → Threat Mapping**: Yellow=Wisdom drain, Red=CON/Fire, Blue=All-stats/Cold, Green=Poison, Brown=Fear, Black=Sleep, White=Paralyze, etc.
+- **13 Standardized Colors**: Consistent mapping across all monsters
+- **Threat Progression**: Shallow levels = stat drain only; Deep levels = stat drain + elemental + status effects
+- **Learning Curve**: Players recognize threats by color after repeated encounters
+**Impact**: Enables threat recognition at-a-glance, improves player learning curve, supports difficulty scaling
+**Dependencies**: #77 (Effects Framework); #244 (Intrinsics); #242 (Speed affects evasion)
+**Effort**: Medium
+**See Also**: GitHub issue #245 for color mappings and depth-based threat progression
+
+### #246 - Item Durability & Elemental Weakness Mechanics
+**Status**: Not started (Design Complete)
+**Description**: Item degradation/destruction when exposed to elemental hazards (fire, cold, acid, lightning).
+- **Vulnerability by Type**: Scrolls (50-100%), Potions (50-100%), Books (15-50%), Equipment (5-20%), Rings (1-5%)
+- **Elemental Threats**: Fire damages scrolls/potions, Cold shatters potions, Acid destroys all, Lightning damages equipment
+- **Unique Items**: Degrade with penalties but never permanently destroyed
+- **Dungeon Hazards**: Fire-themed levels destroy scrolls; Cold levels freeze potions; forces strategic inventory planning
+**Impact**: Risk/reward in inventory choices, economic sink, realism, strategic planning
+**Dependencies**: #77 (Item Effects); #128 (Magic Items); #245 (Monster Color attacks); #242 (Speed affects evasion)
+**Effort**: High
+**See Also**: GitHub issue #246 for damage models and dungeon level threats
+
+### #247 - XP & Level Progression System
+**Status**: Not started (Design Complete)
+**Description**: Formalized XP progression and leveling system tying character progression to dungeon depth.
+- **AD&D 1e Extended**: Levels 1-30 standard XP progression, Levels 31-40 capped at +200k per level
+- **Depth Multipliers**: Base 1.0x at shallow depths → 2.0x at deep depths (2000'+ )
+- **Stat Unlock Gating**: CON (L1), STR (L1), DEX (L5), INT/WIS (L10), CHA (L20)
+- **Level 40 Cap**: Character reaches max level at 3,500,000 total XP
+- **Balrog Victory**: Massive XP bonus triggers when Balrog defeated
+**Impact**: Core progression mechanic, enables character power curve, stat gating system
+**Dependencies**: #197 (Stats) for HP/stat bonuses; #42 (Scoring) XP factors into score
+**Effort**: Medium
+**See Also**: GitHub issue #247 for XP table and depth scaling
+
+### #248 - Guard Timer UI & Crime System Display
+**Status**: Not started (Design Complete)
+**Description**: Clear UI display for town crime system's guard timer status.
+- **Wanted Status Display**: RED text on stats screen showing hours remaining (0-24 range)
+- **Escalating Messages**: Narrative feedback as timer decreases (12+ hrs → 6-12 hrs → <1 hr)
+- **Town Entry Messages**: "The guards are watching you closely!" when wanted status active
+- **Guard Behavior**: Guards spawn and attack during day if player wanted
+- **Timer Decay**: ~5-7 in-game days to clear wanted status
+**Impact**: Transparency of crime consequences, gameplay tension, NPC interaction feedback
+**Dependencies**: #243 (Town System) crime system; #242 (Day/Night); #197 (Stats) for display
+**Effort**: Low-Medium
+**See Also**: GitHub issue #248 for UI mockups and decay logic
+
+### #249 - Loot Tables & Monster Item Drops
+**Status**: Not started (Design Complete)
+**Description**: Comprehensive loot table system correlating monster difficulty/level to item/coin rewards.
+- **5 Tier System**: Weak (L1-10), Minor (L11-20), Major (L21-40), Elite (L41-60), Boss (L70+)
+- **Item Scaling**: Normal → Cursed → Magic → Ego → Legendary → Unique by tier
+- **Special Drops**: Stat-damaging monsters drop Restoratives; Elemental monsters drop Resistances
+- **Coin Economy**: ~20,000-50,000 gp per 40-level run maintains shop economy
+- **Drop Rates**: Normal items ~40-60, Magic ~20-30, Ego ~2-3, Legendary ~0-1, Unique ~0-1 per run
+**Impact**: Loot meaningfulness, economic progression, incentivizes deeper exploration
+**Dependencies**: #197 (Stats), #128 (Magic Items), #245 (Monster Color level correlation)
+**Effort**: High
+**See Also**: GitHub issue #249 for full loot tier table and coin economy
+
+---
+
+## 🎪 Priority 5: Advanced Systems & Polish
+
+### #264 - EFFECT_MOD_MAX Flag (Modifier for Max Dice Rolls)
+**Status**: Not started (Design Complete)
+**Description**: New EFFECT_MOD flag where dice rolls always return maximum value.
+- **Usage**: 3d6 → 18, 1d100 → 100, 1d20 → 20
+- **Applies To**: Monster HD (Ancient Dragons = 100d8 max), breath weapon damage (damage = HP)
+- **Integration**: Balrog uses this for deterministic high damage
+**Impact**: Enables high-level monster threat tuning, clear damage expectations
+**Dependencies**: None blocking
+**Effort**: Low
+**See Also**: GitHub issue #264 in Issues
+
+### #265 - Breath Weapon Damage Scales with Monster HP
+**Status**: Not started (Design Complete)
+**Description**: Breath attacks do current damage based on monster current HP (not max HP).
+- **Scaling**: As monsters get hurt, breath becomes less deadly
+- **Examples**: Dragon at 100% HP does 8d8 fire; at 50% HP does 4d8 fire
+- **Design Rationale**: Makes monsters seem to weaken as they're damaged, increases survival chances
+**Impact**: Improves perceived difficulty curve, allows more comeback scenarios
+**Dependencies**: #77 (Item Effects); Combat system updates needed
+**Effort**: Medium
+**See Also**: GitHub issue #265 in Issues
+
+### #268 - Unique Monster System
+**Status**: Not started (Design Complete)
+**Description**: System for named, one-of-a-kind monsters beyond normal spawn tables.
+- **One-Per-Game**: Only one instance should exist at a time
+- **Special Properties**: Unkillable, respawns, or special death events; loot tables; flavor text
+- **Fixed Depth**: Always appears on specific level or range
+- **Example**: Sethra Lavode (HP 30d8, Speed 2, Confuse + Paralyze attacks, Level 95)
+**Impact**: Memorable encounters, story elements, unique boss fights
+**Dependencies**: None blocking (pairs with #128, #245)
+**Effort**: High
+**See Also**: GitHub issue #268 for Sethra Lavode stats and design questions
+
+### #269 - Shrieker Mushroom Patch Monster (Sleep & Aggravate Mechanic)
+**Status**: Not started (Design Complete)
+**Description**: Stationary monster that wakes sleeping monsters in range when triggered.
+- **Type**: Shrieker (`,` tile, camouflage as food)
+- **Behavior**: When player adjacent, wails to wake sleeping monsters and aggravate them
+- **Effects**: Aggravate mechanic for area-of-effect monster state change
+- **Blocked By**: Monster sleep state system needs implementation
+**Impact**: Emergent monster interaction, risk/reward for careless exploration
+**Dependencies**: Monster sleep state (#244 Intrinsics); Aggravate mechanic
+**Effort**: Medium
+**See Also**: GitHub issue #269 for sleep/aggravate system design
+
+### #272 - Visible Monsters UI Pane (Detect Monsters Targeting)
+**Status**: Not started (Design Complete)
+**Description**: Dedicated UI pane for listing detected monsters from Scroll of Detect Monsters.
+- **Display**: Similar to Inv/Equip sidebars, lists detected monsters by name and distance
+- **Functionality**: Show detected monsters during scroll effect, revert to normal-visible monsters next turn
+- **Integration**: m_llVisibleMonsters already tracks; add DisplayText region
+**Impact**: Clear visual feedback for detection effects, improved targeting UX
+**Dependencies**: None blocking; integrates with existing visibility system
+**Effort**: Low-Medium
+**See Also**: GitHub issue #272 for UI design and implementation notes
+
+### #274 - Trap System (Dungeon Traps, Search, Disarm, Trap Scrolls)
+**Status**: Not started (Design Complete)
+**Description**: Complete trap system for dungeon exploration with invisible placement, search detection, and disarm mechanics.
+- **Trap Types**: Siren, Flashbang, Confuse, Paralyze (early); Fire, Cold, Lightning, Acid, Water, Teleport, Trap Door, Chute, Spiked Pit, Summon, Cave-In (later/deep)
+- **Mechanics**: Invisible when created (`.` tile), revealed as `^` on search, triggered on step (doesn't disarm), disarm removes trap
+- **Search/Disarm**: `s)earch` reveals traps (same mechanics as secret doors), `d)isarm` removes traps with XP reward
+- **Scrolls**: Scroll of Detect Traps (done), Scroll of Destroy Doors/Traps (planned), Scroll of Create Traps/Create Traps * (planned)
+**Impact**: Core dungeon hazard, incentivizes Detect Traps items, risk/reward in exploration
+**Dependencies**: Elemental trap types use #77 (Effects); Stats for stat damage traps; Trap system state (DUNG_FLAG_TRAP)
+**Effort**: Very High
+**See Also**: GitHub issue #274 for full trap type table and implementation notes
+
+### #275 - Create Pickpocket Monsters (Steal Effect)
+**Status**: Not started (Design Complete)
+**Description**: Add thief-type monsters with Pickpocket/Steal effect.
+- **Effect**: Named EFFECT_FLAG_STEAL / MON_FLAG_PICKPOCKET on touch
+- **Monsters**: Novice Rogue, Hobbit, Singing Happy Drunk, etc. (previously noted in WORKLIST)
+- **Behavior**: Steal coins from player on hit
+- **Integration**: Requires named Steal effect in Effects.txt
+**Impact**: Thief-themed monsters, economic consequence in combat
+**Dependencies**: #77 (Effects System) for named Steal effect
+**Effort**: Low
+**See Also**: GitHub issue #275 in Issues | See Monster-Design.md for Rogue line progression
+
+### #267 - GetMonsterDef(name) Shadows Duplicate Monster Names
+**Status**: Known Issue (Low Priority)
+**Description**: By-name monster lookup returns first match, shadowing duplicates with same name.
+- **Affected**: Wizard mode `^s` summon-by-name, cucumber tests using GetMonsterDef(name)
+- **Not Affected**: Normal gameplay uses index-based lookup
+- **Current Duplicates**: Teckla (rat + person), Lyorn (canine + person), Tiassa (fly + person)
+- **Decision**: Accept as known limitation; fix if name-based lookup becomes important
+**Impact**: Low - wizard mode only, gameplay unaffected
+**Dependencies**: None blocking
+**Effort**: Low (fix: add GetMonsterDef(name, type) overload)
+**See Also**: GitHub issue #267 for duplicate name details
+
+### #266 - Town Level Spawn Warnings (Word of Recall from Town)
+**Status**: Known Issue (Minor)
+**Description**: Warnings when spawning items/monsters at depth 0 (town level).
+- **Scenario**: Reading Word of Recall from town takes player to dungeon
+- **Warning**: "Couldn't find a suitable item for this depth. got an invalid item: -1"
+- **Root Cause**: Loot table generation expects dungeon depth > 0
+- **Fix**: Add town-specific loot tables or skip for depth 0
+**Impact**: Minor - doesn't break gameplay, just console warnings
+**Dependencies**: #249 (Loot Tables)
+**Effort**: Low
+**See Also**: GitHub issue #266 in Issues
+
+---
+
+## �🐛 Known Blocking Issues
 
 ### #214 - Dungeon Gen: Isolated Hallway Segments (Blocked by #117)
 **Status**: Not started
@@ -309,6 +572,55 @@ The core roadmap prioritizes:
    ├─ #128 (Magic Items) — unique item mechanics
    ├─ #245 (Monster Color) — elemental attacks from colors
    └─ #242 (Speed System) — affects evade of elemental attacks
+
+#247 (XP & Level Progression)
+   ├─ #197 (Stats) — HP/stat bonuses per level
+   ├─ #42 (Scoring) — XP factors into score
+   └─ Enables character progression arc
+
+#248 (Guard Timer UI)
+   ├─ #243 (Town System) — crime system, guard NPC behavior
+   ├─ #242 (Day/Night cycle) — when guards are active
+   └─ #197 (Stats pane) — display integration
+
+#249 (Loot Tables)
+   ├─ #197 (Stats) — stat potion drops
+   ├─ #128 (Magic Items) — item tier spawning
+   ├─ #245 (Monster Color) — level correlation via color
+   └─ Enables #243 (Town shop economy)
+
+#264 (EFFECT_MOD_MAX)
+   └─ No hard deps; integrates with #77 (Effects)
+
+#265 (Breath Damage Scales)
+   ├─ #77 (Item Effects) — combat system updates
+   └─ Combat refactoring needed
+
+#268 (Unique Monsters)
+   ├─ #128 (Magic Items) — loot tables for uniques
+   └─ #245 (Monster Color) — threat recognition
+
+#269 (Shrieker Mushroom)
+   ├─ #244 (Intrinsics) — monster sleep state
+   └─ Aggravate mechanic (new)
+
+#272 (Visible Monsters UI)
+   └─ Integrates with existing #114 (Item ID); visibility system
+
+#274 (Trap System)
+   ├─ #77 (Item Effects) — elemental trap types
+   ├─ #197 (Stats) — stat damage traps
+   ├─ #117 (Search) — search also detects traps
+   └─ Scroll interactions (#114, #249)
+
+#275 (Pickpocket Monsters)
+   └─ #77 (Item Effects) — named Steal effect; #245 (threat type)
+
+#267 (GetMonsterDef duplicate names)
+   └─ Low priority; wizard mode only
+
+#266 (Town spawn warnings)
+   └─ #249 (Loot Tables) — town-specific tables needed
 ```
 
 ---
@@ -330,41 +642,41 @@ Core P1 features that extend playstyle and unlock dungeon accessibility:
 - ✅ #121 (Lantern fuel) — branch: phase2-gameplay-expansion (wand recharging TBD)
 - ✅ #45 (MON_AI_SEEK target positions) — branch: phase2-gameplay-expansion (foundation)
 
-### **Phase 3: Deep Systems Foundation** (Weeks/Sprint)
+### **Phase 3: Deep Systems Foundation** ✅ MOSTLY COMPLETE
 Complex P2 systems that enable everything downstream:
-- #72 (Fog of War & lighting) — atmosphere, depth progression
-- #77 (Item Effects system) — foundation for all magical interactions
-- #114 (Item Identification) — strategic knowledge, enables item tiers
+- ✅ #72 (Fog of War & lighting) — atmosphere, depth progression (foundation done, some light items TBD)
+- ✅ #77 (Item Effects system) — foundation complete; 150 items, 98 effects, all monster attacks migrated
+- 🚧 #114 (Item Identification) — core system done, feeling tiers and class-specific feelings TBD
 
-### **Phase 3b: Difficulty & Progression** (Concurrent/Early P4)
-Major mechanics that define end-to-end player experience:
-- **#242 (Speed System & Difficulty Tuning)** — ACTION ECONOMY, **primary Balrog difficulty lever**, equipment goals (speed rings/boots)
-  - Equipment limits: 2 rings, 1 boots, 1 gloves = +40 base speed ceiling
-  - Monster speed calibration: Bats 2 → Balrog 4-5 creates difficulty curve
-  - Success metric: Balrog unwinnable at ~15 speed, winnable at ~30+ speed
-- Ties together: Monster design (speed ratings), Equipment rewards, Stat synergy
+### **Phase 4: Progression & Economy** (Starting)
+Major mechanics that define end-to-end player experience and enable late-game systems:
 
-### **Phase 4: Town & Shop Hub** (Early P4)
-Enables all mid-to-late-game systems:
-- **#243 (Town System)** — SAFE HUB, shop economy, NPC interaction, Word of Recall
-  - 5 shop types with unified markup formula
-  - Thieves steal coins, Guards patrol with decay timer, Quest-givers for flavor
-  - Player House: persistent storage for item management
-  - WoR: 30-50 turn delay enables frequent town visits without soft-locking
-- Prerequisites: Item ID (#114), Stats (#197), Magic Items (#128)
-- Enables: Quest givers (#241), Class flavor, Gold sink for economy
+**Core Progressions** (Do first, enables others):
+- **#247 (XP & Level Progression)** — Character level system 1-40; AD&D 1e progression; depth multipliers
+- **#242 (Speed System & Difficulty Tuning)** — ACTION ECONOMY, primary Balrog difficulty lever; speed rings/boots +10 to +20
+- **#249 (Loot Tables)** — Monster item drops by tier; 80/20 dungeon/shop loot split; coin economy calibration
 
-### **Phase 4b: Item & Effect Systems** (Concurrent P4)
-- **#246 (Item Durability & Elemental Weakness)** — Strategic inventory management
-  - Scrolls/Potions destroyed by elemental hazards; Equipment degraded
-  - Forces thoughtful item carrying (e.g., fewer scrolls in fire-themed levels)
-  - Unique items degrade but never destroyed (no save-scumming)
-- **#245 (Monster Color Effects)** — Standardized threat recognition
-  - Yellow = WIS/Confusion, Red = CON/Fire, Blue = All-stats/Cold, etc.
-  - Creates learning curve for recognizing monster threat types
-  - 80+ monsters mapped to 13 standardized colors
+**Town & NPC Hub** (Enables economy, quests, NPC interaction):
+- **#243 (Town System)** — 5 shop types, NPCs, Word of Recall, day/night cycle
+- **#248 (Guard Timer UI)** — Crime system display, wanted status tracking
 
-### **Phase 5: Character Progression & Replayability** (Later P5)
+**Item & Monster Enhancement** (Supports difficulty):
+- **#245 (Monster Color Effects)** — Standardized color → threat mapping (Yellow=WIS, Red=CON/Fire, Blue=All/Cold, etc.)
+- **#246 (Item Durability & Elemental Weakness)** — Item destruction by elemental attacks, strategic inventory planning
+- **#244 (Intrinsics & Status Effects)** — 70+ effects system, Sustain mechanics, resistance stacking
+
+**Monster Content**:
+- **#268 (Unique Monster System)** — Named one-per-game uniques (e.g., Sethra Lavode)
+- **#269 (Shrieker Mushroom)** — Monster aggravate/waking mechanic; sleep state system
+- **#275 (Pickpocket Monsters)** — Thief-type monsters with Steal effect
+- **#274 (Trap System)** — Dungeon traps with detect/disarm; trap scrolls
+
+**UI & Polish** (Support features):
+- **#272 (Visible Monsters UI)** — Show detected monsters when using Detect Monsters scroll
+- **#264 (EFFECT_MOD_MAX)** — Dice roll modifier for max values (Balrog HP, breath damage)
+- **#265 (Breath Weapon Damage Scales)** — Breath damage based on current HP (not max)
+
+### **Phase 5: Character Progression & Replayability** (Later)
 P3 character building systems, phased to unlock incrementally:
 
 **Stat Progression** (existing from start, enhanced by this phase):
@@ -397,25 +709,38 @@ P3 character building systems, phased to unlock incrementally:
 
 The roadmap is designed so systems reinforce each other:
 
+**Foundation (Phases 1-3)**:
 - **Stats (#197) + Speed (#242) + Equipment**: High-level character requires high stats (Gain potions) + speed gear (rings, boots) to survive Balrog's damage output and action rate
 - **Speed (#242) + Monster Colors (#245)**: Monster speed determines encounter danger; Player speed creates progression arc; Color coding enables threat recognition
 - **Town (#243) + Items (#128) + Shops**: Players gather magical items and speed equipment from shops, creating equipment progression arc
 - **Stat Damage (monsters) + Restoration (potions + town temples)**: Stat damage becomes meaningful challenge; town provides access to Restoration potions
 - **Classes (#239) + Stats (#197) + Town (#243)**: Each class has different stat priorities; town shops provide class-specific equipment (Mage seeks +INT, Rogue seeks +DEX or AC, etc.)
+
+**Advanced (Phase 4+)**:
 - **Item Durability (#246) + Elemental Hazards**: Fire-themed levels destroy scrolls; Cold levels freeze potions; forces strategic inventory planning
 - **Speed (#242) + Item Durability (#246)**: High-speed character also needs defensive intrinsics (fire/cold resistance) to protect items; speed alone insufficient for survival
 - **Town (#243) + Item Durability (#246)**: Player House storage becomes critical for protecting valuable items between levels; encourages frequent town visits
+- **Loot Tables (#249) + Town Economy (#243)**: Monster drops calibrate to maintain shop economy; 80/20 dungeon/shop loot split
+- **XP Progression (#247) + Monster Level (#245) + Loot Drops (#249)**: Higher-level monsters (colored by threat) give more XP and drop better loot; incentivizes descending deeper
+- **Intrinsics (#244) + Status Effects**: Unified framework for buffs/debuffs; supports Sustain mechanics and resistances stacking
+- **Color Threats (#245) + Intrinsics (#244)**: Monsters' threat type (color) matches intrinsics needed to survive (Fire resistance for Red, etc.)
+- **Trap System (#274) + Search (#117)**: Traps found via search; Detect Traps scrolls enable exploration
+- **Trap Effects (#274) + Intrinsics (#244)**: Traps trigger intrinsic effects (fire trap = temp weak to fire)
 
 ---
 
 ## Metrics & Success Criteria
 
-- **Replayability**: 8 classes × (6 stats configurations) × (100+ item combinations) should yield ~500+ distinct viable builds
-- **Win Rate**: Competent player should have ~40-60% first-character win rate (depends on Balrog tuning)
-- **Score Variance**: High-score list should have 50%+ turnover per 10 games (indicates balance tuning needed)
+- **Replayability**: 8 classes × (6 stats configurations) × (100+ item combinations) × (multiple unique monsters) should yield ~500+ distinct viable builds
+- **Win Rate**: Competent player should have ~40-60% first-character win rate (depends on Balrog tuning via #242)
+- **Speed Tuning**: Balrog should be impossible without speed ~25-30; achievable with speed ~30-40 (achieves endgame goal)
+- **Score Variance**: High-score list should have 50%+ turnover per 10 games (indicates balance tuning)
 - **Bot Benchmark**: Reference bot should reach depth 20 with consistent survival rate (pairs with bot roadmap)
-- **Class Balance**: No single class should dominate win rates; victory distribution relatively even across classes
-- **Speed Tuning**: Balrog should be impossible without speed ~25-30; achievable with speed ~30-40
+- **Class Balance**: No single class should dominate win rates; victory distribution relatively even across 8 classes
+- **Economy**: 20,000-50,000 gp per 40-level run maintains sustainable shop economy (#249)
+- **Loot Satisfaction**: Players find meaningful loot progression without feeling flooded or starved (#249)
+- **Trap Challenge**: Traps present meaningful risk (~10-15% character death rate from traps on deep levels) (#274)
+- **Color Learning**: New players intuitively recognize threats by color after 3-5 encounters (#245)
 
 ---
 

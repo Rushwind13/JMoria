@@ -47,6 +47,12 @@ No blockers. Start any of these.
 
 ### Code Logic
 
+- [ ] **Monster Effects — Phase 5 dispatch** (separate stories):
+  - [ ] Player.cpp: `EFFECT_TYPE_INTRINSIC` dispatch for status effects (Paralyze/Confuse/Sleep/Fear/Blind/Poison)
+  - [ ] XP drain scaling in code
+  - [ ] Steal/Pick Pocket mechanic (Issue #275)
+  - [ ] Dragon breath damage scaling (current HP)
+  - [ ] Stat drain dispatch (requires stats-system story)
 - [ ] Recharge risk curve: explosion risk = f(charges, lifetime, depth); lower risk at greater depth (Item §6, §16)
 - [ ] Enchantment system: +1/+1d3 per scroll, failure chance above +10, scroll wasted on failure (Item §11, §16)
 - [ ] Blessed three-state system: cursed / uncursed / blessed behavior differences (Item §3, §16)
@@ -74,6 +80,7 @@ Do not start until the blocker is resolved.
 - [ ] Sustain stat mechanics in code: restore stat to max achieved + prevent stat damage (Item §16)
 - [ ] Encumbrance system (Item §13)
 - [ ] CHA modifier on shopkeeper prices (Item §14)
+- [ ] **Worm mass stat drain assignments** — See [WORKLIST_monster_effects.md](WORKLIST_monster_effects.md) for table (Yellow=WIS, Green=DEX, Black=CHA). Note: contradicts WORKLIST_items_design.md table dated 2026-04-16 (Yellow=-DEX, Green=acid+CHA). Will resolve in stats-system story.
 
 ### Blocked by Classes #239
 - [ ] Spell books: 4 per caster class (ITEM_IDX_BOOK) (Item §12)

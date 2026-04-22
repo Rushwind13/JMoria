@@ -5,4 +5,4 @@ else
 	MONSTER="$1"
 fi
 
-./scripts/find_resource.sh Monster "${MONSTER}"
+./util/find_resource.sh Monster "${MONSTER}"

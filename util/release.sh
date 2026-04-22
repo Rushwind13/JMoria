@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# scripts/release.sh — JMoria release helper
-# Usage: ./scripts/release.sh <version>
-# Example: ./scripts/release.sh 0.61
+# util/release.sh — JMoria release helper
+# Usage: ./util/release.sh <version>
+# Example: ./util/release.sh 0.61
 #
 # Steps this script handles:
 #   1. Validate preconditions (clean tree, on develop, up to date)
@@ -14,7 +14,7 @@
 #   - Create PR from release/<version> → main on GitHub
 #   - Squash-merge the PR
 #   - Create a Release on GitHub (which creates the tag)
-#   - Run: ./scripts/release.sh --finish <version>
+#   - Run: ./util/release.sh --finish <version>
 
 set -euo pipefail
 
@@ -191,4 +191,4 @@ echo "     - Tag: $VERSION  (create new tag)"
 echo "     - Target: main"
 echo "     - Title: <your release title>"
 echo "     - Paste release notes from doc/RELEASE-${VERSION/0./0.}.md"
-echo "  4. Run: ./scripts/release.sh --finish $VERSION"
+echo "  4. Run: ./util/release.sh --finish $VERSION"

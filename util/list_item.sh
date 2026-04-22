@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./scripts/list_resource.sh Item
+./util/list_resource.sh Item

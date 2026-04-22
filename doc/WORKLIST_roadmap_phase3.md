@@ -5,6 +5,17 @@ Foundation commit landed — this tracks what's left before Phase 3 is done.
 
 ---
 
+## Completed Session (2026-04-22)
+
+### Monster Content ✅ DONE
+
+- [x] **31 new monsters added** — Full implementation of planned lines: EYE (Radiation Eye, Beholder, Greater Beholder), HUMANOID tiers (Hobgoblin/Gnoll/Bugbear warrior/shaman/chieftain), ORC chieftain/shaman, PERSON ranks (Novice through Paladin Lord), Quasit. Monsters.txt: 296 → 327 entries.
+- [x] **Monster test infrastructure** — Test dungeon now correctly loads Effects.txt before parsing monsters. Named effect resolution works. All 2 test scenarios pass (10 steps).
+- [x] **Effect catalog gap filled** — "Life Drain" effect added to Effects.txt (115 total).
+- [x] **Code quality** — sort_resources.py cleaned up (em-dash → hyphen for linting).
+
+---
+
 ## Issue #114 — Item Identification
 
 ### Remaining

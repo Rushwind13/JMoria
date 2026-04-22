@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
-sort_resources.py — Sort Items.txt, Effects.txt, and Monsters.txt
+sort_resources.py - Sort Items.txt, Effects.txt, and Monsters.txt
 by their primary type index, then Level, then name alphabetically.
 Inserts section-boundary comments between type groups.
 """
 
 import re
-import sys
 
 # ──────────────────────────────────────────────────────────────────────────────
 # Ordered type lists (define sort order and section header labels)
@@ -52,22 +51,22 @@ MON_IDX_ORDER = [
     ("MON_IDX_BAT",              "BATS (b)"),
     ("MON_IDX_CENTIPEDE",        "CENTIPEDES (c)"),
     ("MON_IDX_DRAGON",           "DRAGONS (d)"),
-    ("MON_IDX_HYDRA",            "HYDRAS (d) — shares tile with DRAGON"),
+    ("MON_IDX_HYDRA",            "HYDRAS (d) - shares tile with DRAGON"),
     ("MON_IDX_EYE",              "EYES (e)"),
     ("MON_IDX_FLY",              "FLIES (f)"),
-    ("MON_IDX_DRAGON_FLY",       "DRAGON FLIES (f) — shares tile with FLY"),
-    ("MON_IDX_FAERIE_DRAGON",    "FAERIE DRAGONS (f) — shares tile with FLY"),
+    ("MON_IDX_DRAGON_FLY",       "DRAGON FLIES (f) - shares tile with FLY"),
+    ("MON_IDX_FAERIE_DRAGON",    "FAERIE DRAGONS (f) - shares tile with FLY"),
     ("MON_IDX_GOLEM",            "GOLEMS (g)"),
     ("MON_IDX_HUMANOID",         "HUMANOIDS (h)"),
     ("MON_IDX_ICKY",             "ICKY THINGS (i)"),
     ("MON_IDX_OOZE",             "OOZES (j)"),
     ("MON_IDX_KOBOLD",           "KOBOLDS (k)"),
     ("MON_IDX_LOUSE",            "LICE (l)"),
-    ("MON_IDX_LEECH",            "LEECHES (l) — shares tile with LOUSE"),
+    ("MON_IDX_LEECH",            "LEECHES (l) - shares tile with LOUSE"),
     ("MON_IDX_MOLD",             "MOLDS (m)"),
     ("MON_IDX_NAGA",             "NAGAS (n)"),
     ("MON_IDX_ORC",              "ORCS (o)"),
-    ("MON_IDX_PERSON",           "PERSONS (p) — class spread"),
+    ("MON_IDX_PERSON",           "PERSONS (p) - class spread"),
     ("MON_IDX_RAT",              "RATS (r)"),
     ("MON_IDX_SKELETON",         "SKELETONS (s)"),
     ("MON_IDX_TOWNSFOLK",        "TOWNSFOLK (t)"),
@@ -81,28 +80,28 @@ MON_IDX_ORDER = [
     ("MON_IDX_BALROG",           "BALROGS (B)"),
     ("MON_IDX_DOG",              "DOGS / HOUNDS (C)"),
     ("MON_IDX_ANCIENT_DRAGON",   "ANCIENT DRAGONS (D)"),
-    ("MON_IDX_DINOSAUR",         "DINOSAURS (D) — shares tile with ANCIENT_DRAGON"),
+    ("MON_IDX_DINOSAUR",         "DINOSAURS (D) - shares tile with ANCIENT_DRAGON"),
     ("MON_IDX_ELEMENTAL",        "ELEMENTALS (E)"),
     ("MON_IDX_BIRD",             "BIRDS (F)"),
     ("MON_IDX_GHOUL",            "GHOULS (G)"),
-    ("MON_IDX_GHOST",            "GHOSTS (G) — shares tile with GHOUL"),
+    ("MON_IDX_GHOST",            "GHOSTS (G) - shares tile with GHOUL"),
     ("MON_IDX_HARPY",            "HARPIES (H)"),
     ("MON_IDX_INSECT",           "INSECTS (I)"),
     ("MON_IDX_JELLY",            "JELLIES (J)"),
     ("MON_IDX_BEETLE",           "BEETLES (K)"),
     ("MON_IDX_LICH",             "LICHES (L)"),
     ("MON_IDX_MAMMAL",           "MAMMALS (M)"),
-    ("MON_IDX_CAT",              "CATS (M) — shares tile with MAMMAL"),
+    ("MON_IDX_CAT",              "CATS (M) - shares tile with MAMMAL"),
     ("MON_IDX_OGRE",             "OGRES (O)"),
     ("MON_IDX_GIANT",            "GIANTS (P)"),
-    ("MON_IDX_L_PERSON",         "LEGENDARY PERSONS (P) — shares tile with GIANT"),
+    ("MON_IDX_L_PERSON",         "LEGENDARY PERSONS (P) - shares tile with GIANT"),
     ("MON_IDX_REPTILE",          "REPTILES (R)"),
     ("MON_IDX_SNAKE",            "SNAKES (S)"),
     ("MON_IDX_TROLL",            "TROLLS (T)"),
     ("MON_IDX_MAJOR_DEMON",      "MAJOR DEMONS (U)"),
     ("MON_IDX_VAMPIRE",          "VAMPIRES (V)"),
     ("MON_IDX_WIGHT",            "WIGHTS (W)"),
-    ("MON_IDX_WRAITH",           "WRAITHS (W) — shares tile with WIGHT"),
+    ("MON_IDX_WRAITH",           "WRAITHS (W) - shares tile with WIGHT"),
     ("MON_IDX_XORN",             "XORN (X)"),
     ("MON_IDX_YETI",             "YETI (Y)"),
     # special tiles
@@ -115,15 +114,15 @@ MON_IDX_ORDER = [
 
 # EFFECT_TYPE ordering (by constant value, ascending)
 EFFECT_TYPE_ORDER = [
-    ("EFFECT_TYPE_HIT",       "HIT — damage / status attacks"),
-    ("EFFECT_TYPE_HEAL",      "HEAL — restore HP and cure status"),
-    ("EFFECT_TYPE_CREATE",    "CREATE — summon, teleport, recall, mapping"),
-    ("EFFECT_TYPE_DESTROY",   "DESTROY — remove curses, poison, etc."),
-    ("EFFECT_TYPE_INTRINSIC", "INTRINSIC — permanent and timed intrinsics"),
-    ("EFFECT_TYPE_RESTORE",   "RESTORE — identify, recharge"),
-    ("EFFECT_TYPE_GAIN",      "GAIN — enchant weapons/armor"),
-    ("EFFECT_TYPE_LOSE",      "LOSE — drain / de-enchant"),
-    ("EFFECT_TYPE_SEE",       "SEE — detect and reveal"),
+    ("EFFECT_TYPE_HIT",       "HIT - damage / status attacks"),
+    ("EFFECT_TYPE_HEAL",      "HEAL - restore HP and cure status"),
+    ("EFFECT_TYPE_CREATE",    "CREATE - summon, teleport, recall, mapping"),
+    ("EFFECT_TYPE_DESTROY",   "DESTROY - remove curses, poison, etc."),
+    ("EFFECT_TYPE_INTRINSIC", "INTRINSIC - permanent and timed intrinsics"),
+    ("EFFECT_TYPE_RESTORE",   "RESTORE - identify, recharge"),
+    ("EFFECT_TYPE_GAIN",      "GAIN - enchant weapons/armor"),
+    ("EFFECT_TYPE_LOSE",      "LOSE - drain / de-enchant"),
+    ("EFFECT_TYPE_SEE",       "SEE - detect and reveal"),
 ]
 
 # Within EFFECT_TYPE_HIT, secondary sort by Flag value (bit order from Constants.h)
@@ -166,7 +165,6 @@ EFFECT_FLAG_ORDER = [
     "EFFECT_FLAG_MONSTERS",
     "EFFECT_FLAG_NO_COLLIDE",
     "EFFECT_FLAG_CURSE",
-    "EFFECT_FLAG_SEARCHING",
 ]
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -217,7 +215,7 @@ def parse_blocks(text):
                         break
                 i += 1
             body = '\n'.join(block_lines)
-            # extract fields — anchor to line start so MoveType doesn't match
+            # extract fields - anchor to line start so MoveType doesn't match
             type_m = re.search(r'^\s*Type\s+<([^>]+)>', body, re.MULTILINE)
             flag_m = re.search(r'^\s+Flag\s+<([^>]+)>', body, re.MULTILINE)
             level_m = re.search(r'Level\s+(\d+)', body)
@@ -277,7 +275,7 @@ def sort_key_effect(b):
 # File-header extractor (everything before the first keyword block)
 # ──────────────────────────────────────────────────────────────────────────────
 
-# All section labels ever emitted by this script — used to strip stale lines
+# All section labels ever emitted by this script - used to strip stale lines
 _ALL_SECTION_LABELS = (
     {label for _, label in ITEM_IDX_ORDER}
     | {label for _, label in MON_IDX_ORDER}
@@ -297,11 +295,11 @@ def extract_header_and_entries(blocks):
                 # Generated boundary: # --- ... --- or # ═══...
                 if re.match(r'^#\s*(---|\u2550)', s):
                     continue
-                # Bare type-label line:  # HIT — damage / status attacks
+                # Bare type-label line:  # HIT - damage / status attacks
                 m = re.match(r'^#\s+(.+)', s)
                 if m and m.group(1) in _ALL_SECTION_LABELS:
                     continue
-                # Orphaned per-entry comment (contains em-dash — not used in the format spec)
+                # Orphaned per-entry comment (contains em-dash - not used in the format spec)
                 if '\u2014' in s and s.startswith('#'):
                     continue
                 # Orphaned "Used by:" comment line

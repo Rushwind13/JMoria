@@ -23,7 +23,7 @@
 # Range       float     max range in tiles (0 = self only)
 # Radius      float     AoE radius (0 = single target)
 
-# --- HIT — damage / status attacks ---
+# --- HIT - damage / status attacks ---
 
 # --- EFFECT_FLAG_FIRE ---
 
@@ -325,6 +325,13 @@ Effect <Heal Monster>
     Flag        <EFFECT_FLAG_HP>
     Range       15
 }
+Effect <Life Drain>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <1d10>
+    Range       1
+}
 # --- EFFECT_FLAG_TELEPORT ---
 
 Effect <Teleport Away>
@@ -340,7 +347,7 @@ Effect <Physical Hit>
     Range       1
 }
 
-# --- HEAL — restore HP and cure status ---
+# --- HEAL - restore HP and cure status ---
 
 Effect <Cure Poison>
 {
@@ -409,7 +416,7 @@ Effect <Minor Healing>
     Amount      <4d4>
 }
 
-# --- CREATE — summon, teleport, recall, mapping ---
+# --- CREATE - summon, teleport, recall, mapping ---
 
 Effect <Light Area>
 {
@@ -461,7 +468,7 @@ Effect <Curse Object>
     Flag        <EFFECT_FLAG_CURSE>
 }
 
-# --- DESTROY — remove curses, poison, etc. ---
+# --- DESTROY - remove curses, poison, etc. ---
 
 Effect <Destroy Poison>
 {
@@ -474,7 +481,7 @@ Effect <Remove Curse>
     Flag        <EFFECT_FLAG_CURSE>
 }
 
-# --- INTRINSIC — permanent and timed intrinsics ---
+# --- INTRINSIC - permanent and timed intrinsics ---
 
 Effect <Immune Fire>
 {
@@ -694,7 +701,7 @@ Effect <Searching>
     Flag        <EFFECT_FLAG_SEARCHING>
 }
 
-# --- RESTORE — identify, recharge ---
+# --- RESTORE - identify, recharge ---
 
 Effect <Recharge>
 {
@@ -714,7 +721,7 @@ Effect <Identify>
     Flag        <EFFECT_FLAG_IDENTIFY>
 }
 
-# --- GAIN — enchant weapons/armor ---
+# --- GAIN - enchant weapons/armor ---
 
 Effect <Gain Fuel>
 {
@@ -758,7 +765,7 @@ Effect <Star-Enchant Armor>
     Amount      <1d3>
 }
 
-# --- SEE — detect and reveal ---
+# --- SEE - detect and reveal ---
 
 Effect <Detect Treasure>
 {

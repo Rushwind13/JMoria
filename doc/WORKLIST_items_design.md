@@ -40,6 +40,10 @@ Need explicit answers before these can be implemented.
 - [x] **`LevelSigma` field** — Added to `CItemDef` and `CMonsterDef`. Parsed by `FileParse.cpp` (prefix collision fix: `levelsigma` checked before `level`). Default 10.0.
 - [x] **Bell-curve spawn window** — `ChooseItemForDepth` and `ChooseMonsterForDepth` replaced with `Util::windowed_bell` weighted selection (no hard cutoff, no retry loop). `LevelSigma` drives spread per-entry. `Dungeon.h` signature updated: `range` int → `sigma` float.
 - [x] **`Util::windowed_bell`** — Added to `Util.h`/`Util.cpp`. Polynomial bell curve `(1-x²)²`, zero outside `|delta| >= sigma`. No `<cmath>` dependency.
+- [x] **31 new monsters added** — Full EYE family (Radiation Eye, Beholder, Greater Beholder), HUMANOID warrior/shaman/chieftain tiers (Hobgoblin, Gnoll, Bugbear), ORC warrior/shaman/chieftain, PERSON class ranks (Novice through Paladin Lord), Quasit. Monsters.txt: 296 → 327 entries.
+- [x] **Monster test infrastructure fixed** — Test dungeon now loads effect definitions before parsing monsters. Tests can resolve named effects correctly. All 2 scenarios pass (10 steps).
+- [x] **"Life Drain" effect added** — Missing effect used by 3 Beholder variants now in Effects.txt (115 total).
+- [x] **Code cleanup** — sort_resources.py: removed em-dash characters for better linting.
 
 ---
 

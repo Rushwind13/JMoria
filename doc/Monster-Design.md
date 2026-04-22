@@ -90,7 +90,8 @@ This is the master reference for all monsters in JMoria. Monsters.txt is built f
 
 These creature concepts are subfamilies within existing types — no new MON_IDX needed:
 
-- **Goblin** → ORC `o` (Skaven, Goblin, Cave/Hill/Black Orc, Uruk-hai)
+- **Goblin** → ORC `o` (Skaven, Goblin, Goblin Warrior/Shaman/Chieftain, then Orc through Uruk-hai)
+- **Hobbit** → HUMANOID `h` (Hobbit, Hobbit Burglar, Hobbit Thief-Acrobat — pickpocket line)
 - **Pudding** → JELLY `J` (stationary) or OOZE `j` (mobile)
 - **Mummy** → ZOMBIE `z` (themed variants: Mummified Orc, etc.)
 - **Mind Flayer** → HUMANOID `h`
@@ -209,7 +210,11 @@ Color progression by depth: White → Black → Green → Blue → Red
 
 | Monster | Level | Status | Notes |
 |---------|-------|--------|-------|
-| Floating Eye | 1 | EXISTS |
+| Floating Eye | 1 | EXISTS | Paralyze gaze |
+| Gas Spore | 5 | planned | "Fake beholder" — explodes for large damage when killed |
+| Radiation Eye | 8 | planned | Stat-draining gaze |
+| Beholder | 25 | planned | Multiple eye stalks; various gaze effects |
+| Greater Beholder | 40 | planned | Boss-tier beholder |
 
 ### `f` — Flies / Dragon Flies / Faerie Dragons (MON_IDX_FLY, DRAGON_FLY, FAERIE_DRAGON)
 
@@ -256,18 +261,61 @@ Color progression by depth: White → Black → Green → Blue → Red
 
 ### `h` — Small Humanoids (MON_IDX_HUMANOID)
 
+Sub-families: Hobbit (pickpocket line), Hobgoblin line, Gnoll line, Bugbear line, Dark Elf line, Mind Flayer line. Each sub-family should be as fully realized as the Orc or Dark Elf families.
+
+**Hobbit line** (pickpocket sub-family — blocked on #275 PICKPOCKET effect):
+
+| Monster | Level | Status | Notes |
+|---------|-------|--------|-------|
+| Hobbit | 2 | planned | Pickpocket + flee; peaceful until triggered |
+| Hobbit Burglar | 8 | planned | Skilled pickpocket; higher carry rate |
+| Hobbit Thief-Acrobat | 15 | planned | Fast escape; very hard to catch |
+
+**Hobgoblin line**:
+
 | Monster | Level | Status |
 |---------|-------|--------|
 | Hobgoblin | 3 | EXISTS |
+| Hobgoblin Warrior | 6 | planned |
+| Hobgoblin Shaman | 8 | planned |
+| Hobgoblin Chieftain | 10 | planned |
+
+**Gnoll line**:
+
+| Monster | Level | Status |
+|---------|-------|--------|
 | Gnoll | 5 | EXISTS |
+| Gnoll Warrior | 8 | planned |
+| Gnoll Shaman | 10 | planned |
+| Gnoll Chieftain | 12 | planned |
+
+**Bugbear line**:
+
+| Monster | Level | Status |
+|---------|-------|--------|
 | Bugbear | 7 | EXISTS |
+| Bugbear Warrior | 10 | planned |
+| Bugbear Shaman | 12 | planned |
+| Bugbear Chieftain | 15 | planned |
+
+**Dark Elf line**:
+
+| Monster | Level | Status |
+|---------|-------|--------|
 | Dark Elf | 10 | EXISTS |
 | Dark Elven Warrior | 15 | EXISTS |
 | Dark Elven Mage | 18 | EXISTS |
 | Dark Elven Priest | 20 | EXISTS |
 | Dark Elven Ranger | 22 | EXISTS |
 | Dark Elven Lord | 28 | EXISTS |
+
+**Mind Flayer line**:
+
+| Monster | Level | Status |
+|---------|-------|--------|
 | Mind Flayer | 30 | EXISTS |
+| Elder Mind Flayer | 45 | planned |
+| Mind Flayer Lich | 60 | planned |
 
 ### `i` — Icky Things (MON_IDX_ICKY)
 
@@ -329,12 +377,22 @@ Mobile counterpart to stationary JELLY `J`. Oozes and slimes move; jellies don't
 
 ### `o` — Orcs (MON_IDX_ORC)
 
-Includes goblins as subfamily (Skaven, Goblin progression).
+Includes goblins as a distinct sub-family (Skaven → Goblin Chieftain) followed by the proper orc line (Orc → Uruk-hai). Goblin and orc level ranges intentionally interleave.
+
+**Goblin sub-family**:
 
 | Monster | Level | Status |
 |---------|-------|--------|
 | Skaven | 1 | EXISTS |
 | Goblin | 2 | EXISTS |
+| Goblin Warrior | 3 | planned |
+| Goblin Shaman | 4 | planned |
+| Goblin Chieftain | 6 | planned |
+
+**Orc line**:
+
+| Monster | Level | Status |
+|---------|-------|--------|
 | Orc | 5 | EXISTS |
 | Cave Orc | 7 | EXISTS |
 | Orc Shaman | 8 | EXISTS |
@@ -346,20 +404,62 @@ Includes goblins as subfamily (Skaven, Goblin progression).
 
 ### `p` — Persons (MON_IDX_PERSON)
 
+Four ranks per class line. All lines except Paladin have at least partial EXISTS coverage. Paladin line is entirely new (from WORKLIST.txt). Rogue line low-end variants are partly blocked on #275 (PICKPOCKET effect).
+
+**Warrior line**:
+
+| Monster | Level | Status |
+|---------|-------|--------|
+| Novice Warrior | 1 | planned |
+| Warrior | 8 | EXISTS |
+| Veteran Warrior | 20 | EXISTS |
+| Champion | 30 | EXISTS |
+
+**Mage line**:
+
+| Monster | Level | Status |
+|---------|-------|--------|
+| Apprentice Mage | 6 | EXISTS |
+| Mage | 10 | EXISTS |
+| Wizard | 25 | planned |
+| Archmage | 40 | EXISTS |
+
+**Rogue line**:
+
+| Monster | Level | Status | Notes |
+|---------|-------|--------|-------|
+| Novice Rogue | 2 | planned | Pickpocket; blocked on #275 |
+| Rogue | 5 | EXISTS | |
+| Cutpurse | 10 | planned | |
+| Bandit | 18 | planned | |
+| Bandit King | 30 | planned | |
+
+**Priest line**:
+
 | Monster | Level | Status |
 |---------|-------|--------|
 | Acolyte | 3 | EXISTS |
-| Rogue | 5 | EXISTS |
-| Apprentice Mage | 6 | EXISTS |
-| Warrior | 8 | EXISTS |
-| Mage | 10 | EXISTS |
+| Deacon | 7 | planned |
 | Priest | 12 | EXISTS |
-| Ranger | 15 | EXISTS |
-| Veteran Warrior | 20 | EXISTS |
-| Master Ranger | 25 | EXISTS |
-| Champion | 30 | EXISTS |
 | High Priest | 35 | EXISTS |
-| Archmage | 40 | EXISTS |
+
+**Ranger line**:
+
+| Monster | Level | Status |
+|---------|-------|--------|
+| Novice Ranger | 3 | planned |
+| Scout | 8 | planned |
+| Ranger | 15 | EXISTS |
+| Master Ranger | 25 | EXISTS |
+
+**Paladin line** (new — from WORKLIST.txt):
+
+| Monster | Level | Status |
+|---------|-------|--------|
+| Novice Paladin | 2 | planned |
+| Paladin | 12 | planned |
+| Knight | 22 | planned |
+| Paladin Lord | 35 | planned |
 
 ### `r` — Rats (MON_IDX_RAT)
 
@@ -390,6 +490,7 @@ Brust: Teckla (rat), Norska (rabbit).
 
 | Monster | Level | Status |
 |---------|-------|--------|
+| Quasit | 3 | planned |
 | Imp | 5 | EXISTS |
 | Lesser Demon | 15 | EXISTS |
 
@@ -729,11 +830,43 @@ Brust: Snakes renamed to Yendi.
 | Creeping Silver Coins | 10 | EXISTS |
 | Creeping Gold Coins | 18 | EXISTS |
 
-### `t` — Townsfolk (NPC_IDX_TOURIST)
+### `t` — Townsfolk (MON_IDX_TOWNSFOLK)
 
-| Monster | Level | Status |
-|---------|-------|--------|
-| Tourist | 1 | EXISTS (NPC) |
+Town-level atmosphere monsters. Most are **peaceful** (random movement, no attack, player gets `Are you sure? (y/N)` prompt before attacking). A few hostile NPCs create "mostly safe but not entirely safe" feel. Blocked on Town system (#243).
+
+**Design notes:**
+- Level 0 town mobs do not spawn in the dungeon (they'd be killed almost immediately by dungeon creatures)
+- Tourist (level > 0) and dungeon-stray variants (Trapped Adventurer, Lost Merchant) can appear in the dungeon — peaceful or very weak (1d1 damage)
+- Shopkeepers never leave their shops; they are not spawned as wandering mobs
+- Town Guards are peaceful by default; turn hostile only if player attacks another NPC in sight
+
+**Peaceful town atmosphere** (level 0 — town only):
+
+| Monster | Level | Status | Notes |
+|---------|-------|--------|-------|
+| Norska | 0 | EXISTS (RAT) | Rabbit wandering through town |
+| Teckla | 1 | EXISTS (RAT) | Rat/commoner — RAT type handles this |
+| Stray Dog | 1 | EXISTS (DOG) | DOG type handles this |
+| Mangy-looking Leper | 0 | planned | Peaceful atmosphere; very slow |
+| Singing Happy Drunk | 0 | planned | Peaceful; random move; pickpocket-bait |
+| Village Teckla | 0 | planned | Dragaeran commoner; peaceful |
+
+**Town NPCs** (town level, peaceful-default):
+
+| Monster | Level | Status | Notes |
+|---------|-------|--------|-------|
+| Tourist | 1 | planned | Also appears in dungeon; marked NPC in Monsters.txt but entry missing |
+| Woodsman | 2 | planned | Rare dungeon visitor at low levels |
+| Novice Mage | 2 | planned | Rare; see also `p` Persons for dungeon variant |
+| Town Guard | 3 | planned | Peaceful; hostile if player attacks NPC in sight |
+| Trapped Adventurer | 3 | planned | Dungeon-spawn; peaceful, drops basic gear |
+| Lost Merchant | 4 | planned | Dungeon-spawn; peaceful, carries random items |
+
+**Town hostile**:
+
+| Monster | Level | Status | Notes |
+|---------|-------|--------|-------|
+| Town Thief | 3 | planned | Always hostile; pickpocket + flee; complements Hobbit (h) |
 
 ### `|` — Animated Weapons (MON_IDX_ANIMATED_WEAPON)
 

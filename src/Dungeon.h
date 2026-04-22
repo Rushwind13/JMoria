@@ -34,12 +34,12 @@ public:
     JLinkList<CMonster> *m_llMonsters;
     JLinkList<CItem> *m_llItems;
     JLinkList<JIVector> *m_llOpenArea;
+    JLinkList<CEffectDef> *m_llEffectDefs;
 
 protected:
     CDungeonTileDef *m_dtdlist;
     JLinkList<CMonsterDef> *m_llMonsterDefs;
     JLinkList<CItemDef> *m_llItemDefs;
-    JLinkList<CEffectDef> *m_llEffectDefs;
     JVector m_vLookPos;
     JVector m_vProjectilePos;
     JLinkList<JIVector> *m_llLOSLine;

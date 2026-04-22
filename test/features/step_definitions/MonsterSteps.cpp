@@ -6,11 +6,28 @@ GIVEN( "^A map with a single level$" )
     ScenarioScope<TestCtx> context;
     g_Constants.Init();
     context->map.CreateDungeon( 1 );
+
+    // Create dungeon and set up effect definitions
+    context->dungeon = new CDungeon();
+    context->dungeon->m_llEffectDefs = new JLinkList<CEffectDef>;
+
+    // Load Effects.txt
+    CDataFile dfEffects;
+    dfEffects.Open( "../../JMoria/Resources/Effects.txt" );
+
+    CEffectDef *ped = new CEffectDef;
+    while( dfEffects.ReadEffect( *ped ) )
+    {
+        context->dungeon->m_llEffectDefs->Add( ped );
+        ped = new CEffectDef;
+    }
+    delete ped;
 }
 GIVEN( "^The monster configuration file$" )
 {
     ScenarioScope<TestCtx> context;
     context->dfMonsters.Open( "../../JMoria/Resources/Monsters.txt" );
+    context->dfMonsters.SetDungeon( context->dungeon );
 }
 WHEN( "^I read a monster from the config file$" )
 {
@@ -31,7 +48,7 @@ WHEN( "^I create a monster$" )
 THEN( "^I can see the monster name$" )
 {
     ScenarioScope<TestCtx> context;
-    EXPECT_EQ( std::string( "Giant Frog" ), context->monster->GetName() );
+    EXPECT_EQ( std::string( "Giant Ant" ), context->monster->GetName() );
 }
 GIVEN( "^I read all the monsters from the config file$" )
 {

@@ -678,7 +678,7 @@ Monster <Red Dragon>
     Color		<255,0,0,255>
 }
 
-# --- HYDRAS (d) — shares tile with DRAGON ---
+# --- HYDRAS (d) - shares tile with DRAGON ---
 
 Monster <5-Headed Hydra>
 {
@@ -758,6 +758,72 @@ Monster <Floating Eye>
     Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d20
     Color		<255,100,0,255>
 }
+Monster <Gas Spore>
+{
+    Plural		<Gas Spores>
+    Appear		<1d4>
+    Speed		0.5
+    MoveType	<MON_AI_100RANDOMMOVE>
+    HD          <1d1>
+    AC          5.0
+    Level       8
+    ExpValue	8.0
+    Type		<MON_IDX_EYE>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d10
+    Color		<180,200,100,255>
+}
+Monster <Radiation Eye>
+{
+    Plural		<Radiation Eyes>
+    Appear		<1d1>
+    Speed		0.25
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <3d6>
+    AC          25.0
+    Level       15
+    ExpValue	40.0
+    Type		<MON_IDX_EYE>
+    Flags		<MON_FLAG_HURT_BY_LIGHT>
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 1d8
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d6
+    Color		<200,80,200,255>
+}
+Monster <Beholder>
+{
+    Plural		<Beholders>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          70.0
+    Level       45
+    ExpValue	1500.0
+    Type		<MON_IDX_EYE>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 2d12
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 2d8
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 3d8
+    Color		<0,150,200,255>
+}
+Monster <Greater Beholder>
+{
+    Plural		<Greater Beholders>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <16d8>
+    AC          90.0
+    Level       65
+    ExpValue	3000.0
+    Type		<MON_IDX_EYE>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 3d12
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 3d8
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_TOUCH>, <Life Drain>, 2d8
+    Color		<0,100,180,255>
+}
 
 # --- FLIES (f) ---
 
@@ -823,7 +889,7 @@ Monster <Tiassa>
     Color		<0,191,255,255>
 }
 
-# --- DRAGON FLIES (f) — shares tile with FLY ---
+# --- DRAGON FLIES (f) - shares tile with FLY ---
 
 Monster <White Dragon Fly>
 {
@@ -901,7 +967,7 @@ Monster <Red Dragon Fly>
     Color		<255,0,0,255>
 }
 
-# --- FAERIE DRAGONS (f) — shares tile with FLY ---
+# --- FAERIE DRAGONS (f) - shares tile with FLY ---
 
 Monster <Jhereg>
 {
@@ -1117,6 +1183,22 @@ Monster <Hobgoblin>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Color		<140,100,60,255>
 }
+Monster <Hobgoblin Warrior>
+{
+    Plural		<Hobgoblin Warriors>
+    Appear		<1d2>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          35.0
+    Level       10
+    ExpValue	22.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Color		<150,110,65,255>
+}
 Monster <Gnoll>
 {
     Plural		<Gnolls>
@@ -1132,6 +1214,22 @@ Monster <Gnoll>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d4
     Color		<160,120,60,255>
+}
+Monster <Hobgoblin Shaman>
+{
+    Plural		<Hobgoblin Shamans>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          32.0
+    Level       13
+    ExpValue	30.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_SPORE>, <Fire Touch>, 2d4
+    Color		<170,120,55,255>
 }
 Monster <Dark Elven Warrior>
 {
@@ -1149,6 +1247,22 @@ Monster <Dark Elven Warrior>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Color		<100,0,140,255>
 }
+Monster <Hobgoblin Chieftain>
+{
+    Plural		<Hobgoblin Chieftains>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          42.0
+    Level       16
+    ExpValue	50.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
+    Color		<180,130,60,255>
+}
 Monster <Bugbear>
 {
     Plural		<Bugbears>
@@ -1164,6 +1278,87 @@ Monster <Bugbear>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<120,80,40,255>
+}
+Monster <Gnoll Warrior>
+{
+    Plural		<Gnoll Warriors>
+    Appear		<1d2>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          42.0
+    Level       18
+    ExpValue	45.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
+    Color		<165,125,62,255>
+}
+Monster <Gnoll Shaman>
+{
+    Plural		<Gnoll Shamans>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <5d8>
+    AC          40.0
+    Level       22
+    ExpValue	60.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
+    Attack             <MON_FLAG_SPORE>, <Poison Touch>, 2d4
+    Color		<175,135,55,255>
+}
+Monster <Bugbear Warrior>
+{
+    Plural		<Bugbear Warriors>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          48.0
+    Level       24
+    ExpValue	80.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d8
+    Color		<130,85,42,255>
+}
+Monster <Gnoll Chieftain>
+{
+    Plural		<Gnoll Chieftains>
+    Appear		<1d1>
+    Speed		1.1
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          52.0
+    Level       26
+    ExpValue	90.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Color		<175,140,58,255>
+}
+Monster <Bugbear Shaman>
+{
+    Plural		<Bugbear Shamans>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          45.0
+    Level       28
+    ExpValue	100.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
+    Attack             <MON_FLAG_SPORE>, <Cold Touch>, 2d6
+    Color		<140,90,44,255>
 }
 Monster <Dark Elf>
 {
@@ -1197,6 +1392,23 @@ Monster <Dark Elven Mage>
     Attack             <MON_FLAG_SPORE>, <Fire Touch>, 3d6
     Attack             <MON_FLAG_SPORE>, <Cold Touch>, 3d6
     Color		<120,0,180,255>
+}
+Monster <Bugbear Chieftain>
+{
+    Plural		<Bugbear Chieftains>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <8d8>
+    AC          58.0
+    Level       32
+    ExpValue	140.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
+    Color		<125,80,38,255>
 }
 Monster <Dark Elven Priest>
 {
@@ -1264,6 +1476,42 @@ Monster <Mind Flayer>
     Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d20
     Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 1d15
     Color		<120,0,160,255>
+}
+Monster <Elder Mind Flayer>
+{
+    Plural		<Elder Mind Flayers>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <20d8>
+    AC          110.0
+    Level       80
+    ExpValue	5000.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 2d20
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 2d15
+    Attack             <MON_FLAG_TOUCH>, <Life Drain>, 2d8
+    Color		<140,0,180,255>
+}
+Monster <Mind Flayer Lich>
+{
+    Plural		<Mind Flayer Liches>
+    Appear		<1d1>
+    Speed		1.1
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <25d8>
+    AC          130.0
+    Level       92
+    ExpValue	10000.0
+    Type		<MON_IDX_HUMANOID>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_EMPTY_MIND>
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 3d20
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 3d15
+    Attack             <MON_FLAG_TOUCH>, <Life Drain>, 3d10
+    Color		<160,0,200,255>
 }
 
 # --- ICKY THINGS (i) ---
@@ -1519,7 +1767,7 @@ Monster <Louse>
     Color		<170,170,170,255>
 }
 
-# --- LEECHES (l) — shares tile with LOUSE ---
+# --- LEECHES (l) - shares tile with LOUSE ---
 
 Monster <Giant Leech>
 {
@@ -1681,6 +1929,38 @@ Monster <Goblin>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Color		<60,100,40,255>
 }
+Monster <Goblin Warrior>
+{
+    Plural		<Goblin Warriors>
+    Appear		<1d3>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          30.0
+    Level       8
+    ExpValue	18.0
+    Type		<MON_IDX_ORC>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d4
+    Color		<55,95,35,255>
+}
+Monster <Goblin Shaman>
+{
+    Plural		<Goblin Shamans>
+    Appear		<1d2>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          28.0
+    Level       10
+    ExpValue	24.0
+    Type		<MON_IDX_ORC>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_SPORE>, <Poison Touch>, 1d6
+    Color		<50,90,30,255>
+}
 Monster <Skaven>
 {
     Plural		<Skaven>
@@ -1695,6 +1975,22 @@ Monster <Skaven>
     Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Color		<100,100,80,255>
+}
+Monster <Goblin Chieftain>
+{
+    Plural		<Goblin Chieftains>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <4d8>
+    AC          38.0
+    Level       14
+    ExpValue	40.0
+    Type		<MON_IDX_ORC>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Color		<65,105,42,255>
 }
 Monster <Orc>
 {
@@ -1826,8 +2122,86 @@ Monster <Orc Chieftain>
     Color		<20,40,10,255>
 }
 
-# --- PERSONS (p) — class spread ---
+# --- PERSONS (p) - class spread ---
 
+Monster <Novice Paladin>
+{
+    Plural		<Novice Paladins>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <2d8>
+    AC          20.0
+    Level       5
+    ExpValue	6.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_SPORE>, <Light Touch>, 1d2
+    Color		<220,220,150,255>
+}
+Monster <Novice Ranger>
+{
+    Plural		<Novice Rangers>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <2d8>
+    AC          18.0
+    Level       5
+    ExpValue	6.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Color		<40,80,40,255>
+}
+Monster <Novice Warrior>
+{
+    Plural		<Novice Warriors>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <2d8>
+    AC          18.0
+    Level       5
+    ExpValue	6.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Color		<130,130,130,255>
+}
+Monster <Deacon>
+{
+    Plural		<Deacons>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          24.0
+    Level       8
+    ExpValue	14.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_SPORE>, <Light Touch>, 1d4
+    Color		<240,240,180,255>
+}
+Monster <Scout>
+{
+    Plural		<Scouts>
+    Appear		<1d1>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          26.0
+    Level       10
+    ExpValue	18.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Color		<30,70,30,255>
+}
 Monster <Acolyte>
 {
     Plural		<Acolytes>
@@ -1860,6 +2234,22 @@ Monster <Apprentice Mage>
     Attack             <MON_FLAG_SPORE>, <Fire Touch>, 1d6
     Color		<0,0,200,255>
 }
+Monster <Paladin>
+{
+    Plural		<Paladins>
+    Appear		<1d1>
+    Speed		1.0
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <6d8>
+    AC          52.0
+    Level       18
+    ExpValue	90.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_SPORE>, <Light Touch>, 2d4
+    Color		<200,200,100,255>
+}
 Monster <Warrior>
 {
     Plural		<Warriors>
@@ -1875,6 +2265,22 @@ Monster <Warrior>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Color		<160,160,160,255>
+}
+Monster <Knight>
+{
+    Plural		<Knights>
+    Appear		<1d1>
+    Speed		0.9
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <7d8>
+    AC          58.0
+    Level       23
+    ExpValue	120.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Color		<190,190,190,255>
 }
 Monster <Ranger>
 {
@@ -1907,6 +2313,22 @@ Monster <Rogue>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Color		<40,40,40,255>
+}
+Monster <Cutpurse>
+{
+    Plural		<Cutpurses>
+    Appear		<1d1>
+    Speed		1.4
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <9d8>
+    AC          55.0
+    Level       36
+    ExpValue	220.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Color		<50,50,50,255>
 }
 Monster <Veteran Warrior>
 {
@@ -1941,6 +2363,22 @@ Monster <Mage>
     Attack             <MON_FLAG_SPORE>, <Cold Touch>, 3d8
     Color		<0,0,180,255>
 }
+Monster <Bandit>
+{
+    Plural		<Bandits>
+    Appear		<1d2>
+    Speed		1.2
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <10d8>
+    AC          60.0
+    Level       43
+    ExpValue	400.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Color		<70,70,70,255>
+}
 Monster <Priest>
 {
     Plural		<Priests>
@@ -1973,6 +2411,40 @@ Monster <Master Ranger>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Color		<0,80,0,255>
 }
+Monster <Wizard>
+{
+    Plural		<Wizards>
+    Appear		<1d1>
+    Speed		1.1
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <12d8>
+    AC          65.0
+    Level       50
+    ExpValue	600.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
+    Attack             <MON_FLAG_SPORE>, <Fire Touch>, 4d8
+    Attack             <MON_FLAG_SPORE>, <Cold Touch>, 4d8
+    Color		<0,0,160,255>
+}
+Monster <Paladin Lord>
+{
+    Plural		<Paladin Lords>
+    Appear		<1d1>
+    Speed		1.1
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <14d8>
+    AC          78.0
+    Level       52
+    ExpValue	700.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_SPORE>, <Light Touch>, 3d6
+    Color		<220,220,80,255>
+}
 Monster <Champion>
 {
     Plural		<Champions>
@@ -1988,6 +2460,23 @@ Monster <Champion>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Color		<200,200,200,255>
+}
+Monster <Bandit King>
+{
+    Plural		<Bandit Kings>
+    Appear		<1d1>
+    Speed		1.3
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <16d8>
+    AC          85.0
+    Level       60
+    ExpValue	1200.0
+    Type		<MON_IDX_PERSON>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_BITE>, <Poison Touch>, 2d6
+    Color		<80,30,30,255>
 }
 Monster <High Priest>
 {
@@ -2232,6 +2721,22 @@ Monster <Dragon Skeleton>
 
 # --- MINOR DEMONS (u) ---
 
+Monster <Quasit>
+{
+    Plural		<Quasits>
+    Appear		<1d2>
+    Speed		1.5
+    MoveType	<MON_AI_SEEKPLAYER>
+    HD          <3d8>
+    AC          28.0
+    Level       12
+    ExpValue	18.0
+    Type		<MON_IDX_MINOR_DEMON>
+    Flags		<MON_FLAG_WARM>
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_BITE>, <Fire Touch>, 1d4
+    Color		<220,80,80,255>
+}
 Monster <Lesser Demon>
 {
     Plural		<Lesser Demons>
@@ -2922,7 +3427,7 @@ Monster <Ancient Multi-hued Dragon>
     Color		<<255,0,0,255>;<255,123,0,255>;<255,233,0,255>;<12,255,0,255>;<0,59,255,255>;<152,0,255,255>>
 }
 
-# --- DINOSAURS (D) — shares tile with ANCIENT_DRAGON ---
+# --- DINOSAURS (D) - shares tile with ANCIENT_DRAGON ---
 
 Monster <Brontosaurus>
 {
@@ -3157,7 +3662,7 @@ Monster <Ghast>
     Color		<120,120,150,255>
 }
 
-# --- GHOSTS (G) — shares tile with GHOUL ---
+# --- GHOSTS (G) - shares tile with GHOUL ---
 
 Monster <Ghost>
 {
@@ -3657,7 +4162,7 @@ Monster <Tsalmoth>
     Color		<139,90,43,255>
 }
 
-# --- CATS (M) — shares tile with MAMMAL ---
+# --- CATS (M) - shares tile with MAMMAL ---
 
 Monster <Wild Cat>
 {
@@ -3931,7 +4436,7 @@ Monster <Titan>
     Color		<255,215,0,255>
 }
 
-# --- LEGENDARY PERSONS (P) — shares tile with GIANT ---
+# --- LEGENDARY PERSONS (P) - shares tile with GIANT ---
 
 Monster <Teckla>
 {
@@ -4585,7 +5090,7 @@ Monster <Wight>
     Color		<160,160,180,255>
 }
 
-# --- WRAITHS (W) — shares tile with WIGHT ---
+# --- WRAITHS (W) - shares tile with WIGHT ---
 
 Monster <Wraith>
 {

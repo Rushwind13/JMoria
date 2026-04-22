@@ -63,6 +63,9 @@ struct TestCtx
     CDungeonCreationStep *pStep;
     CRoom *pRoom;
 
+    // Dungeon (for effect definitions and resource loading)
+    CDungeon *dungeon = NULL;
+
     // Fixture / Regression testing
     std::string fixture_filename;
     CDungeonMap imported_map;

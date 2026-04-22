@@ -20,42 +20,31 @@ Assumptions:
 
 ---
 
-## PHASE 1 — Effects.txt additions *(data-only, no code blocker, do now)*
-
-| # | Task | Notes |
-|---|---|---|
-| 1 | ~~Add **"Physical Hit"** effect~~ ✅ DONE 2026-04-21 | `HIT`, no element, Amount=1d6, Range=1. Default for all pure physical attacks |
-| 2 | ~~Add **"Pick Pocket"** effect~~ ✅ DONE 2026-04-21 | `HIT`, TREASURE, Range=1. Not assigned to any monster — placeholder for Issue #275 |
-| 3 | ~~Add **"Poison Bolt"** effect~~ ✅ DONE 2026-04-21 | `HIT`, POISON, line MOD, Amount=2d8, Range=8 — for young/mid green/poison dragons breath |
-| 4 | ~~Add **"Poison Ball"** effect~~ ✅ DONE 2026-04-21 | `HIT`, POISON, ball MOD, Amount=6d8, Radius=3, Range=5 — for ancient green/poison dragons breath |
+## PHASE 1 — Effects.txt additions COMPLETE
 
 ---
 
-## PHASE 2 — Code: parser prerequisite *(blocks all Monsters.txt migration)*
-
-| # | Task | File | Notes |
-|---|---|---|---|
-| 5 | ~~Add `m_ed` pointer to `CAttack`~~ ✅ DONE 2026-04-21 | `src/Monster.h` | **Superseded same session** — `CAttack` reshaped: dropped `m_dwEffect`/`m_dwEffectFlags`/`m_ed`; added owned `CEffect *m_pEffect`; delivery stays on `m_dwType` |
-| 6 | ~~Extend Attack parser~~ ✅ DONE 2026-04-21 | `src/FileParse.cpp` | New format: delivery→`m_dwType`, `EffectFromName()`→`m_pEffect`; old inline format now also allocates a `CEffect` into `m_pEffect`; `EffectFromName()` extracted as private `CDataFile` helper (same call site as item `Effect` named-ref path) |
-
+## PHASE 2 — Code: parser prerequisite COMPLETE
 ---
 
-## PHASE 3 — Monsters.txt migration *(blocked on Phase 2)*
+## PHASE 3 — Monsters.txt migration ✅ DONE 2026-04-21
 
 | # | Task | Count | Notes |
 |---|---|---|---|
-| 7 | Pure physical attacks | ~430 | `<DELIVERY>, <Physical Hit>, <dice>` |
-| 8 | Elemental melee (bite/claw/touch/crawl/spore + element) | ~55 | `<DELIVERY>, <Element Touch>, <dice>` |
-| 9 | Status INTRINSIC attacks (paralyze/confuse/sleep/afraid/blind) | ~73 | `<MON_FLAG_TOUCH>, <Status Touch>[, dice]` — dice = duration for poison; status infliction deferred to Phase 5 code |
-| 10 | INTRINSIC+POISON attacks | ~21 | `<MON_FLAG_TOUCH>, <Poison Touch>, <dice>` — dice = damage+duration |
-| 11 | XP drain bites | 6 | `<MON_FLAG_BITE>, <XP Drain Touch>, <dice>` — drain scaling deferred |
-| 12 | Breathe attacks — young (bolts) | ~20 | `<MON_FLAG_BREATHE>, <Firebolt/Frost Bolt/etc>, <dice>, <range>` |
-| 13 | Breathe attacks — old/ancient (balls) | ~25 | `<MON_FLAG_BREATHE>, <Fireball/Frost Ball/etc>, <dice>, <range>` |
-| 14 | Creeping Coins TREASURE → Poison Touch | 3 | `<MON_FLAG_CRAWL>, <Poison Touch>` |
-| 15 | Worm mass stat drain | ~8 | **Deferred to stats-system story** — leave inline with `EFFECT_FLAG_STAT` |
-| 16 | Fix 12 malformed Attack lines (bad indent/prefix) | 12 | Straighten prefix whitespace to match standard indent |
-| 17 | Tourist buggy attacks | 2 | Leave as-is — design not formed |
-| 18 | Stray Dog 0d0 bite | 1 | Leave as-is — Town placeholder |
+| 7 | Pure physical attacks | ~430 | ✅ `<DELIVERY>, <Physical Hit>, <dice>` |
+| 8 | Elemental melee (bite/claw/touch/crawl/spore + element) | ~55 | ✅ `<DELIVERY>, <Element Touch>, <dice>` — added `Light Touch` to Effects.txt for Acolyte/High Priest spore attacks |
+| 9 | Status INTRINSIC attacks (paralyze/confuse/sleep/afraid/blind) | ~73 | ✅ `<MON_FLAG_TOUCH>, <Status Touch>[, dice]` — includes AFRAID (Fear Touch) |
+| 10 | INTRINSIC+POISON attacks | ~21 | ✅ `<MON_FLAG_TOUCH>, <Poison Touch>, <dice>` — dice = poison duration |
+| 11 | XP drain bites | 13 | ✅ `<DELIVERY>, <XP Drain Touch>, <dice>` — actual count 13 (bites + touches; INTRINSIC XP on Vampire Bat → MON_FLAG_BITE) |
+| 12 | Breathe attacks — young (bolts) | ~21 | ✅ `<MON_FLAG_BREATHE>, <Bolt>, <dice>, <range>` — Baby/Young/Adult dragons, Drakes, Water Naga, Yeti |
+| 13 | Breathe attacks — old/ancient (balls) | ~24 | ✅ `<MON_FLAG_BREATHE>, <Ball>, <dice>, <range>` — Mature/Ancient dragons, Balrog, Giants, Demon Lords, Titan, Guardian Naga |
+| 14 | Creeping Coins TREASURE → Poison Touch | 3 | ✅ `<MON_FLAG_CRAWL>, <Poison Touch>` |
+| 15 | Worm mass stat drain | ~8 | **Deferred to stats-system story** — left inline with `EFFECT_FLAG_STAT` |
+| 16 | Fix 12 malformed Attack lines (bad indent/prefix) | 12 | ✅ Normalized to standard 19-char key+pad format by migration script |
+| 17 | Tourist buggy attacks | 2 | Left as-is — design not formed |
+| 18 | Stray Dog 0d0 bite | 1 | Left as-is — Town placeholder |
+
+Total lines migrated: **630** (via `util/migrate_attacks.py`).
 
 ### Worm Mass stat drain assignments (for future reference when stats-system story is done)
 

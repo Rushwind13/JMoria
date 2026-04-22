@@ -59,7 +59,7 @@ Monster <Giant Frog>
     ExpValue	35.0
     Type		<MON_IDX_FROG>
     Flags       <MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
     Color		<71,165,0,255>
 }
 
@@ -75,7 +75,7 @@ Monster <Death Slaad>
     ExpValue	100.0
     Type		<MON_IDX_FROG>
     Flags       <MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d4
+    Attack             <MON_FLAG_BITE>, <Fire Touch>, 2d4
     Color		<71,165,0,255>
 }
 
@@ -91,7 +91,7 @@ Monster <Flaming Bat>
     ExpValue	100.0
     Type		<MON_IDX_BAT>
     Flags       <MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d8
+    Attack             <MON_FLAG_BITE>, <Fire Touch>, 2d8
     Color		<255,100,0,255>
 }
 
@@ -107,7 +107,7 @@ Monster <Floating Eye>
     ExpValue	5.0
     Type		<MON_IDX_EYE>
     Flags		<MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d20
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d20
     Color		<255,100,0,255>
 }
 
@@ -123,7 +123,7 @@ Monster <Shadow Mastiff>
     ExpValue	100.0
     Type		<MON_IDX_DOG>
     Flags       <MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
     Color		<<255,255,255,32>;<0,0,0,255>>
 }
 
@@ -139,7 +139,7 @@ Monster <White Harpy>
     ExpValue	100.0
     Type		<MON_IDX_HARPY>
     Flags       <MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Color		<255,255,255,255>
 }
 
@@ -155,7 +155,7 @@ Monster <Brontosaurus>
     ExpValue	100.0
     Type		<MON_IDX_DINOSAUR>
     Flags       <MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,3d6
+    Attack             <MON_FLAG_TRAMPLE>, <Physical Hit>, 3d6
     Color		<0,81,4,255>
 }
 
@@ -171,9 +171,9 @@ Monster <Tyrannosaurus Rex>
     ExpValue	100.0
     Type		<MON_IDX_DINOSAUR>
     Flags       <MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,5d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 5d8
     Color		<206,91,24,255>
 }
 
@@ -188,8 +188,8 @@ Monster <White Worm Mass>
     Level       1
     ExpValue	5.0
     Type		<MON_IDX_WORM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d5
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d2
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 1d5
     Color		<255,255,255,255>
     Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
 }
@@ -205,8 +205,8 @@ Monster <Red Worm Mass>
     Level       3
     ExpValue	10.0
     Type		<MON_IDX_WORM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d3
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CRAWL>,<EFFECT_FLAG_FIRE>,1d5
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d3
+    Attack             <MON_FLAG_CRAWL>, <Fire Touch>, 1d5
     Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_STAT>,1d2
     Color		<255,0,0,255>
     Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
@@ -223,8 +223,8 @@ Monster <Blue Worm Mass>
     Level       3
     ExpValue	10.0
     Type		<MON_IDX_WORM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d3
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CRAWL>,<EFFECT_FLAG_COLD>,1d5
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d3
+    Attack             <MON_FLAG_CRAWL>, <Cold Touch>, 1d5
     Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_STAT>,1d2
     Color		<0,0,255,255>
     Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
@@ -241,7 +241,7 @@ Monster <Yellow Worm Mass>
     Level       5
     ExpValue	18.0
     Type		<MON_IDX_WORM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d4
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d4
     Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_STAT>,1d3
     Color		<214,201,17,255>
     Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
@@ -258,7 +258,7 @@ Monster <Green Worm Mass>
     Level       5
     ExpValue	18.0
     Type		<MON_IDX_WORM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d4
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d4
     Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_STAT>,1d3
     Color		<0,255,0,255>
     Flags       <MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
@@ -276,7 +276,7 @@ Monster <Huge Creotha>
     ExpValue	100.0
     Type		<MON_IDX_SPIDER>
     Flags       <MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<0,0,0,255>
 }
 
@@ -292,14 +292,14 @@ Monster <Ancient Multi-hued Dragon>
     ExpValue	9000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
     Flags       <MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,15d8,5
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,15d8,5
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,15d8,5
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ACID>,15d8,5
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_POISON>,15d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BREATHE>, <Fireball>, 15d8, 5
+    Attack             <MON_FLAG_BREATHE>, <Frost Ball>, 15d8, 5
+    Attack             <MON_FLAG_BREATHE>, <Lightning Ball>, 15d8, 5
+    Attack             <MON_FLAG_BREATHE>, <Acid Ball>, 15d8, 5
+    Attack             <MON_FLAG_BREATHE>, <Poison Ball>, 15d8, 5
     Color		<<255,0,0,255>;<255,123,0,255>;<255,233,0,255>;<12,255,0,255>;<0,59,255,255>;<152,0,255,255>>
 }
 
@@ -315,7 +315,7 @@ Monster <Kobold>
     ExpValue	10.0
     Type		<MON_IDX_KOBOLD>
     Flags       <MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d4
     Color		<170,170,170,255>
 }
 
@@ -330,10 +330,10 @@ Monster <White Dragon>
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Flags       <MON_FLAG_WARM>
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,3d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BREATHE>, <Frost Ball>, 3d8, 5
     Color		<255,255,255,255>
 }
 
@@ -348,10 +348,10 @@ Monster <Black Dragon>
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Flags       <MON_FLAG_WARM>
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ACID>,4d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_BREATHE>, <Acid Ball>, 4d8, 5
     Color		<0,0,0,255>
 }
 
@@ -366,10 +366,10 @@ Monster <Green Dragon>
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Flags       <MON_FLAG_WARM>
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d10
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_POISON>,5d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d10
+    Attack             <MON_FLAG_BREATHE>, <Poison Ball>, 5d8, 5
     Color		<12,255,0,255>
 }
 
@@ -384,10 +384,10 @@ Monster <Blue Dragon>
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Flags       <MON_FLAG_WARM>
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,6d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_BREATHE>, <Lightning Ball>, 6d8, 5
     Color		<13,7,81,255>
 }
 
@@ -402,10 +402,10 @@ Monster <Red Dragon>
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Flags       <MON_FLAG_WARM>
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d8
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d8
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d10
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,7d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d10
+    Attack             <MON_FLAG_BREATHE>, <Fireball>, 7d8, 5
     Color		<255,0,0,255>
 }
 
@@ -420,7 +420,7 @@ Monster <Giant Yendi>
     ExpValue	3.0
     Type		<MON_IDX_SNAKE>
     Flags       <MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<198,142,0,255>
 }
 
@@ -435,8 +435,8 @@ Monster <Red Jelly>
     ExpValue	5.0
     Type		<MON_IDX_JELLY>
     Flags       <MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,1d5
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d2
+    Attack             <MON_FLAG_SPORE>, <Fire Touch>, 1d5
     Color		<255,0,0,255>
 }
 
@@ -451,8 +451,8 @@ Monster <Green Jelly>
     ExpValue	5.0
     Type		<MON_IDX_JELLY>
     Flags       <MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
-    Attack      <EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_ACID>,1d5
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d2
+    Attack             <MON_FLAG_SPORE>, <Acid Touch>, 1d5
     Color		<12,255,0,255>
 }
 
@@ -467,8 +467,8 @@ Monster <Yellow Mushroom Patch>
     ExpValue	2.0
     Type		<MON_IDX_SHROOM>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,1d1
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d5
+    Attack             <MON_FLAG_SPORE>, <Physical Hit>, 1d1
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 1d5
     Color		<255,255,0,255>
 }
 
@@ -482,7 +482,7 @@ Monster <Blue Icky Thing>
     Level		1
     ExpValue	4.0
     Type		<MON_IDX_ICKY>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d2
     Color		<0,0,255,255>
 }
 
@@ -496,7 +496,7 @@ Monster <Clear Icky Thing>
     Level		3
     ExpValue	4.0
     Type		<MON_IDX_ICKY>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d2
     Color		<255,255,255,32>
 }
 
@@ -510,7 +510,7 @@ Monster <Opal Icky Thing>
     Level		1
     ExpValue	4.0
     Type		<MON_IDX_ICKY>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d2
     Color		<<240,240,240,255>;<135,201,190,255>;<236,161,180,255>;<205,235,238,255>;<238,203,179,255>>
 }
 
@@ -524,7 +524,7 @@ Monster <Red Icky Thing>
     Level		1
     ExpValue	4.0
     Type		<MON_IDX_ICKY>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d2
     Color		<255,0,0,255>
 }
 
@@ -538,7 +538,7 @@ Monster <Green Icky Thing>
     Level		1
     ExpValue	4.0
     Type		<MON_IDX_ICKY>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d2
     Color		<0,255,0,255>
 }
 
@@ -552,7 +552,7 @@ Monster <White Icky Thing>
     Level		1
     ExpValue	4.0
     Type		<MON_IDX_ICKY>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d2
     Color		<255,255,255,255>
 }
 
@@ -566,7 +566,7 @@ Monster <Yellow Icky Thing>
     Level		1
     ExpValue	4.0
     Type		<MON_IDX_ICKY>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d2
     Color		<241,244,66,255>
 }
 
@@ -581,7 +581,7 @@ Monster <Giant Ant>
     ExpValue	4.0
     Type		<MON_IDX_ANT>
     Flags       <MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d3
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d3
     Color		<140,96,1,255>
 }
 
@@ -613,8 +613,8 @@ Monster <Fire Drake>
     ExpValue	200.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,1d10
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BREATHE>, <Firebolt>, 1d10
     Color		<255,69,0,255>
 }
 
@@ -630,8 +630,8 @@ Monster <Frost Drake>
     ExpValue	200.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,1d10
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BREATHE>, <Frost Bolt>, 1d10
     Color		<0,69,255,255>
 }
 
@@ -647,8 +647,8 @@ Monster <Storm Drake>
     ExpValue	200.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,1d10
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BREATHE>, <Lightning Bolt>, 1d10
     Color		<255,255,69,255>
 }
 
@@ -664,8 +664,8 @@ Monster <Acid Drake>
     ExpValue	200.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ACID>,1d10
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BREATHE>, <Acid Bolt>, 1d10
     Color		<69,69,69,255>
 }
 
@@ -681,8 +681,8 @@ Monster <Venomous Creotha>
     ExpValue	180.0
     Type		<MON_IDX_SPIDER>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 1d6
     Color		<0,128,0,255>
 }
 
@@ -698,8 +698,8 @@ Monster <Cursed Skeleton>
     ExpValue	150.0
     Type		<MON_IDX_SKELETON>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_AFRAID>,1d10
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_TOUCH>, <Fear Touch>, 1d10
     Color		<192,192,192,255>
 }
 
@@ -715,8 +715,8 @@ Monster <Troll Berserker>
     ExpValue	210.0
     Type		<MON_IDX_TROLL>
     Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,2d10
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_TRAMPLE>, <Physical Hit>, 2d10
     Color		<34,139,34,255>
 }
 
@@ -742,8 +742,8 @@ Monster <Baby White Dragon>
     ExpValue	60.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,2d8,8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_BREATHE>, <Frost Bolt>, 2d8, 8
     Color		<255,255,255,255>
 }
 
@@ -759,10 +759,10 @@ Monster <Young White Dragon>
     ExpValue	150.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,2d8,6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d3
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d3
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d8
+    Attack             <MON_FLAG_BREATHE>, <Frost Bolt>, 2d8, 6
     Color		<255,255,255,255>
 }
 
@@ -778,10 +778,10 @@ Monster <Adult White Dragon>
     ExpValue	250.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,3d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BREATHE>, <Frost Bolt>, 3d8, 5
     Color		<255,255,255,255>
 }
 
@@ -797,10 +797,10 @@ Monster <Ancient White Dragon>
     ExpValue	1500.0
     Type		<MON_IDX_ANCIENT_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,8d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_BREATHE>, <Frost Ball>, 8d8, 5
     Color		<255,255,255,255>
 }
 
@@ -818,8 +818,8 @@ Monster <Baby Black Dragon>
     ExpValue	80.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ACID>,2d8,8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_BREATHE>, <Acid Bolt>, 2d8, 8
     Color		<0,0,0,255>
 }
 
@@ -835,10 +835,10 @@ Monster <Young Black Dragon>
     ExpValue	180.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ACID>,3d8,6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d3
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d3
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BREATHE>, <Acid Bolt>, 3d8, 6
     Color		<0,0,0,255>
 }
 
@@ -854,10 +854,10 @@ Monster <Adult Black Dragon>
     ExpValue	280.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ACID>,3d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BREATHE>, <Acid Bolt>, 3d8, 5
     Color		<0,0,0,255>
 }
 
@@ -873,10 +873,10 @@ Monster <Ancient Black Dragon>
     ExpValue	2000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ACID>,9d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d6
+    Attack             <MON_FLAG_BREATHE>, <Acid Ball>, 9d8, 5
     Color		<0,0,0,255>
 }
 
@@ -894,8 +894,8 @@ Monster <Baby Green Dragon>
     ExpValue	100.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_POISON>,2d8,8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_BREATHE>, <Poison Bolt>, 2d8, 8
     Color		<12,255,0,255>
 }
 
@@ -911,10 +911,10 @@ Monster <Young Green Dragon>
     ExpValue	200.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_POISON>,3d8,6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BREATHE>, <Poison Bolt>, 3d8, 6
     Color		<12,255,0,255>
 }
 
@@ -930,10 +930,10 @@ Monster <Adult Green Dragon>
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_POISON>,4d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BREATHE>, <Poison Bolt>, 4d8, 5
     Color		<12,255,0,255>
 }
 
@@ -949,10 +949,10 @@ Monster <Ancient Green Dragon>
     ExpValue	2500.0
     Type		<MON_IDX_ANCIENT_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d10
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_POISON>,10d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d10
+    Attack             <MON_FLAG_BREATHE>, <Poison Ball>, 10d8, 5
     Color		<12,255,0,255>
 }
 
@@ -970,8 +970,8 @@ Monster <Baby Blue Dragon>
     ExpValue	120.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,3d8,8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BREATHE>, <Lightning Bolt>, 3d8, 8
     Color		<13,7,81,255>
 }
 
@@ -987,10 +987,10 @@ Monster <Young Blue Dragon>
     ExpValue	250.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,4d8,6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BREATHE>, <Lightning Bolt>, 4d8, 6
     Color		<13,7,81,255>
 }
 
@@ -1006,10 +1006,10 @@ Monster <Adult Blue Dragon>
     ExpValue	350.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d10
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,5d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d10
+    Attack             <MON_FLAG_BREATHE>, <Lightning Bolt>, 5d8, 5
     Color		<13,7,81,255>
 }
 
@@ -1025,10 +1025,10 @@ Monster <Ancient Blue Dragon>
     ExpValue	3000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,11d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_BREATHE>, <Lightning Ball>, 11d8, 5
     Color		<13,7,81,255>
 }
 
@@ -1046,8 +1046,8 @@ Monster <Baby Red Dragon>
     ExpValue	150.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,3d8,8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BREATHE>, <Firebolt>, 3d8, 8
     Color		<255,0,0,255>
 }
 
@@ -1063,10 +1063,10 @@ Monster <Young Red Dragon>
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,4d8,6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BREATHE>, <Firebolt>, 4d8, 6
     Color		<255,0,0,255>
 }
 
@@ -1082,10 +1082,10 @@ Monster <Adult Red Dragon>
     ExpValue	400.0
     Type		<MON_IDX_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,6d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_BREATHE>, <Firebolt>, 6d8, 5
     Color		<255,0,0,255>
 }
 
@@ -1101,10 +1101,10 @@ Monster <Ancient Red Dragon>
     ExpValue	4000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d10
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,12d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d10
+    Attack             <MON_FLAG_BREATHE>, <Fireball>, 12d8, 5
     Color		<255,0,0,255>
 }
 
@@ -1144,7 +1144,7 @@ Monster <Jackal>
     ExpValue	6.0
     Type		<MON_IDX_DOG>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d4
     Color		<194,178,128,255>
 }
 
@@ -1160,7 +1160,7 @@ Monster <Wild Dog>
     ExpValue	15.0
     Type		<MON_IDX_DOG>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<160,120,80,255>
 }
 
@@ -1178,7 +1178,7 @@ Monster <Teckla>
     ExpValue	1.0
     Type		<MON_IDX_RAT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d2
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d2
     Color		<128,128,128,255>
 }
 
@@ -1194,7 +1194,7 @@ Monster <Large Teckla>
     ExpValue	5.0
     Type		<MON_IDX_RAT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d4
     Color		<139,90,43,255>
 }
 
@@ -1210,8 +1210,8 @@ Monster <Giant Teckla>
     ExpValue	12.0
     Type		<MON_IDX_RAT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 1d4
     Color		<101,67,33,255>
 }
 
@@ -1229,7 +1229,7 @@ Monster <Fruit Bat>
     ExpValue	2.0
     Type		<MON_IDX_BAT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d2
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d2
     Color		<139,90,43,255>
 }
 
@@ -1246,7 +1246,7 @@ Monster <White Centipede>
     Level       2
     ExpValue	2.0
     Type		<MON_IDX_CENTIPEDE>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d3
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d3
     Color		<255,255,255,255>
 }
 
@@ -1261,8 +1261,8 @@ Monster <Yellow Centipede>
     Level       4
     ExpValue	6.0
     Type		<MON_IDX_CENTIPEDE>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d3
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 1d3
     Color		<214,201,17,255>
 }
 
@@ -1277,8 +1277,8 @@ Monster <Giant Centipede>
     Level       7
     ExpValue	25.0
     Type		<MON_IDX_CENTIPEDE>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 1d6
     Color		<200,50,0,255>
 }
 
@@ -1295,7 +1295,7 @@ Monster <White Mold>
     ExpValue	2.0
     Type		<MON_IDX_MOLD>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,1d2
+    Attack             <MON_FLAG_SPORE>, <Physical Hit>, 1d2
     Color		<255,255,255,255>
 }
 
@@ -1310,7 +1310,7 @@ Monster <Brown Mold>
     ExpValue	5.0
     Type		<MON_IDX_MOLD>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,1d3
+    Attack             <MON_FLAG_SPORE>, <Cold Touch>, 1d3
     Color		<139,90,43,255>
 }
 
@@ -1325,7 +1325,7 @@ Monster <Green Mold>
     ExpValue	10.0
     Type		<MON_IDX_MOLD>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_ACID>,1d4
+    Attack             <MON_FLAG_SPORE>, <Acid Touch>, 1d4
     Color		<0,128,0,255>
 }
 
@@ -1343,7 +1343,7 @@ Monster <Louse>
     ExpValue	1.0
     Type		<MON_IDX_LOUSE>
     Flags		<MON_FLAG_BREED,MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d1
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d1
     Color		<170,170,170,255>
 }
 
@@ -1358,7 +1358,7 @@ Monster <Giant Leech>
     Level       5
     ExpValue	15.0
     Type		<MON_IDX_LEECH>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<0,80,0,255>
 }
 
@@ -1376,7 +1376,7 @@ Monster <Yeek>
     ExpValue	2.0
     Type		<MON_IDX_YEEK>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d3
     Color		<200,150,80,255>
 }
 
@@ -1392,7 +1392,7 @@ Monster <Blue Yeek>
     ExpValue	8.0
     Type		<MON_IDX_YEEK>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Color		<0,0,255,255>
 }
 
@@ -1410,7 +1410,7 @@ Monster <Small Kobold>
     ExpValue	2.0
     Type		<MON_IDX_KOBOLD>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d2
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d2
     Color		<150,150,150,255>
 }
 
@@ -1426,8 +1426,8 @@ Monster <Kobold Shaman>
     ExpValue	20.0
     Type		<MON_IDX_KOBOLD>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d3
+    Attack             <MON_FLAG_SPORE>, <Fire Touch>, 1d4
     Color		<128,0,128,255>
 }
 
@@ -1445,7 +1445,7 @@ Monster <Kobold Zombie>
     ExpValue	5.0
     Type		<MON_IDX_ZOMBIE>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d3
     Color		<128,140,100,255>
 }
 
@@ -1461,7 +1461,7 @@ Monster <Orc Zombie>
     ExpValue	20.0
     Type		<MON_IDX_ZOMBIE>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Color		<100,120,80,255>
 }
 
@@ -1478,7 +1478,7 @@ Monster <Grey Ooze>
     ExpValue	10.0
     Type		<MON_IDX_OOZE>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d4
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d4
     Color		<128,128,128,255>
 }
 
@@ -1493,7 +1493,7 @@ Monster <Green Slime>
     ExpValue	20.0
     Type		<MON_IDX_OOZE>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_ACID>,1d6
+    Attack             <MON_FLAG_TOUCH>, <Acid Touch>, 1d6
     Color		<0,200,0,255>
 }
 
@@ -1510,7 +1510,7 @@ Monster <Red Mushroom Patch>
     ExpValue	3.0
     Type		<MON_IDX_SHROOM>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,1d3
+    Attack             <MON_FLAG_SPORE>, <Fire Touch>, 1d3
     Color		<255,0,0,255>
 }
 
@@ -1534,7 +1534,7 @@ Monster <Lyorn>
     ExpValue	30.0
     Type		<MON_IDX_DOG>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d4
     Color		<180,160,120,255>
 }
 
@@ -1550,7 +1550,7 @@ Monster <Wolf>
     ExpValue	60.0
     Type		<MON_IDX_DOG>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
     Color		<128,128,128,255>
 }
 
@@ -1566,7 +1566,7 @@ Monster <Dire Wolf>
     ExpValue	120.0
     Type		<MON_IDX_DOG>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d6
     Color		<80,80,80,255>
 }
 
@@ -1582,7 +1582,7 @@ Monster <Warg>
     ExpValue	200.0
     Type		<MON_IDX_DOG>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
     Color		<40,40,40,255>
 }
 
@@ -1600,7 +1600,7 @@ Monster <Skaven>
     ExpValue	25.0
     Type		<MON_IDX_ORC>
     Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Color		<100,100,80,255>
 }
 
@@ -1616,7 +1616,7 @@ Monster <Orc>
     ExpValue	50.0
     Type		<MON_IDX_ORC>
     Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Color		<80,120,40,255>
 }
 
@@ -1632,8 +1632,8 @@ Monster <Uruk-hai>
     ExpValue	120.0
     Type		<MON_IDX_ORC>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<50,80,30,255>
 }
 
@@ -1649,8 +1649,8 @@ Monster <Orc Shaman>
     ExpValue	160.0
     Type		<MON_IDX_ORC>
     Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_SPORE>, <Fire Touch>, 2d6
     Color		<80,40,80,255>
 }
 
@@ -1668,8 +1668,8 @@ Monster <Hill Troll>
     ExpValue	100.0
     Type		<MON_IDX_TROLL>
     Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d8
     Color		<34,139,34,255>
 }
 
@@ -1685,8 +1685,8 @@ Monster <Stone Troll>
     ExpValue	180.0
     Type		<MON_IDX_TROLL>
     Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,2d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_TRAMPLE>, <Physical Hit>, 2d8
     Color		<128,128,128,255>
 }
 
@@ -1702,9 +1702,9 @@ Monster <War Troll>
     ExpValue	300.0
     Type		<MON_IDX_TROLL>
     Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
     Color		<60,60,60,255>
 }
 
@@ -1722,8 +1722,8 @@ Monster <Giant Bee>
     ExpValue	40.0
     Type		<MON_IDX_INSECT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 1d4
     Color		<255,200,0,255>
 }
 
@@ -1739,10 +1739,10 @@ Monster <Giant Scorpion>
     ExpValue	140.0
     Type		<MON_IDX_INSECT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 2d6
     Color		<100,60,20,255>
 }
 
@@ -1760,8 +1760,8 @@ Monster <Ghoul>
     ExpValue	50.0
     Type		<MON_IDX_GHOUL>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d10
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d10
     Color		<150,150,170,255>
 }
 
@@ -1777,9 +1777,9 @@ Monster <Ghast>
     ExpValue	120.0
     Type		<MON_IDX_GHOUL>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d15
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d15
     Color		<120,120,150,255>
 }
 
@@ -1797,7 +1797,7 @@ Monster <Giant Fly>
     ExpValue	30.0
     Type		<MON_IDX_FLY>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<0,100,0,255>
 }
 
@@ -1814,8 +1814,8 @@ Monster <Poison Yendi>
     ExpValue	60.0
     Type		<MON_IDX_SNAKE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,2d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d8
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 2d4
     Color		<0,180,0,255>
 }
 
@@ -1833,7 +1833,7 @@ Monster <Ogre>
     ExpValue	80.0
     Type		<MON_IDX_OGRE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Color		<139,119,101,255>
 }
 
@@ -1850,8 +1850,8 @@ Monster <Blue Jelly>
     ExpValue	15.0
     Type		<MON_IDX_JELLY>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d3
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,2d4
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d3
+    Attack             <MON_FLAG_SPORE>, <Cold Touch>, 2d4
     Color		<0,0,255,255>
 }
 
@@ -1866,8 +1866,8 @@ Monster <Ochre Jelly>
     ExpValue	40.0
     Type		<MON_IDX_JELLY>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_ACID>,2d6
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_SPORE>, <Acid Touch>, 2d6
     Color		<204,153,0,255>
 }
 
@@ -1884,7 +1884,7 @@ Monster <Black Mold>
     ExpValue	30.0
     Type		<MON_IDX_MOLD>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_POISON>,2d6
+    Attack             <MON_FLAG_SPORE>, <Poison Sting>, 2d6
     Color		<0,0,0,255>
 }
 
@@ -1902,8 +1902,8 @@ Monster <Master Yeek>
     ExpValue	50.0
     Type		<MON_IDX_YEEK>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Color		<255,200,0,255>
 }
 
@@ -1921,8 +1921,8 @@ Monster <Human Zombie>
     ExpValue	60.0
     Type		<MON_IDX_ZOMBIE>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<140,130,100,255>
 }
 
@@ -1938,8 +1938,8 @@ Monster <Mummified Orc>
     ExpValue	100.0
     Type		<MON_IDX_ZOMBIE>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_AFRAID>,1d10
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_TOUCH>, <Fear Touch>, 1d10
     Color		<180,160,100,255>
 }
 
@@ -1957,8 +1957,8 @@ Monster <Cave Creotha>
     ExpValue	80.0
     Type		<MON_IDX_SPIDER>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 1d8
     Color		<80,60,40,255>
 }
 
@@ -1976,8 +1976,8 @@ Monster <Naga>
     ExpValue	100.0
     Type		<MON_IDX_NAGA>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 1d8
     Color		<0,180,100,255>
 }
 
@@ -1993,8 +1993,8 @@ Monster <Water Naga>
     ExpValue	180.0
     Type		<MON_IDX_NAGA>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,2d8,6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_BREATHE>, <Frost Bolt>, 2d8, 6
     Color		<0,100,200,255>
 }
 
@@ -2012,8 +2012,8 @@ Monster <Green Harpy>
     ExpValue	140.0
     Type		<MON_IDX_HARPY>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Color		<12,255,0,255>
 }
 
@@ -2031,7 +2031,7 @@ Monster <Giant Beetle>
     ExpValue	120.0
     Type		<MON_IDX_BEETLE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d6
     Color		<60,30,0,255>
 }
 
@@ -2049,8 +2049,8 @@ Monster <Lizardman>
     ExpValue	100.0
     Type		<MON_IDX_REPTILE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d8
     Color		<0,120,60,255>
 }
 
@@ -2068,8 +2068,8 @@ Monster <Dark Elf>
     ExpValue	200.0
     Type		<MON_IDX_HUMANOID>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_SPORE>, <Cold Touch>, 2d6
     Color		<80,0,120,255>
 }
 
@@ -2087,9 +2087,9 @@ Monster <Wight>
     ExpValue	200.0
     Type		<MON_IDX_WIGHT>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_XP>,1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 2d6
+    Attack             <MON_FLAG_TOUCH>, <XP Drain Touch>, 1d4
     Color		<160,160,180,255>
 }
 
@@ -2106,8 +2106,8 @@ Monster <Black Pudding>
     ExpValue	150.0
     Type		<MON_IDX_OOZE>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_ACID>,2d8
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_TOUCH>, <Acid Touch>, 2d8
     Color		<20,20,20,255>
 }
 
@@ -2131,7 +2131,7 @@ Monster <Hill Giant>
     ExpValue	250.0
     Type		<MON_IDX_GIANT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d6
     Color		<139,119,101,255>
 }
 
@@ -2147,8 +2147,8 @@ Monster <Stone Giant>
     ExpValue	400.0
     Type		<MON_IDX_GIANT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,2d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_TRAMPLE>, <Physical Hit>, 2d8
     Color		<128,128,128,255>
 }
 
@@ -2164,9 +2164,9 @@ Monster <Frost Giant>
     ExpValue	500.0
     Type		<MON_IDX_GIANT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,3d8,6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_BREATHE>, <Frost Ball>, 3d8, 6
     Color		<150,200,255,255>
 }
 
@@ -2182,9 +2182,9 @@ Monster <Fire Giant>
     ExpValue	600.0
     Type		<MON_IDX_GIANT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,4d8,6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_BREATHE>, <Fireball>, 4d8, 6
     Color		<255,80,0,255>
 }
 
@@ -2200,9 +2200,9 @@ Monster <Cloud Giant>
     ExpValue	800.0
     Type		<MON_IDX_GIANT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,4d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_BREATHE>, <Lightning Ball>, 4d8, 5
     Color		<200,200,255,255>
 }
 
@@ -2218,9 +2218,9 @@ Monster <Storm Giant>
     ExpValue	1200.0
     Type		<MON_IDX_GIANT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d10
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d10
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,6d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d10
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d10
+    Attack             <MON_FLAG_BREATHE>, <Lightning Ball>, 6d8, 5
     Color		<100,100,200,255>
 }
 
@@ -2238,8 +2238,8 @@ Monster <Vampire>
     ExpValue	350.0
     Type		<MON_IDX_VAMPIRE>
     Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_XP>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack             <MON_FLAG_BITE>, <XP Drain Touch>, 2d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Color		<150,0,0,255>
 }
 
@@ -2255,9 +2255,9 @@ Monster <Greater Vampire>
     ExpValue	600.0
     Type		<MON_IDX_VAMPIRE>
     Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_XP>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack             <MON_FLAG_BITE>, <XP Drain Touch>, 3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Color		<120,0,0,255>
 }
 
@@ -2273,10 +2273,10 @@ Monster <Master Vampire>
     ExpValue	1000.0
     Type		<MON_IDX_VAMPIRE>
     Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_XP>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d15
+    Attack             <MON_FLAG_BITE>, <XP Drain Touch>, 4d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d15
     Color		<80,0,0,255>
 }
 
@@ -2294,7 +2294,7 @@ Monster <Fire Elemental>
     ExpValue	300.0
     Type		<MON_IDX_ELEMENTAL>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_FIRE>,3d8
+    Attack             <MON_FLAG_TOUCH>, <Fire Touch>, 3d8
     Color		<255,100,0,255>
 }
 
@@ -2310,7 +2310,7 @@ Monster <Ice Elemental>
     ExpValue	350.0
     Type		<MON_IDX_ELEMENTAL>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,3d8
+    Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 3d8
     Color		<150,200,255,255>
 }
 
@@ -2326,7 +2326,7 @@ Monster <Lightning Elemental>
     ExpValue	400.0
     Type		<MON_IDX_ELEMENTAL>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_ELECTRICITY>,4d8
+    Attack             <MON_FLAG_TOUCH>, <Lightning Touch>, 4d8
     Color		<255,255,100,255>
 }
 
@@ -2342,8 +2342,8 @@ Monster <Earth Elemental>
     ExpValue	500.0
     Type		<MON_IDX_ELEMENTAL>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
+    Attack             <MON_FLAG_TRAMPLE>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Color		<120,80,40,255>
 }
 
@@ -2359,8 +2359,8 @@ Monster <Air Elemental>
     ExpValue	600.0
     Type		<MON_IDX_ELEMENTAL>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d8
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 3d8
     Color		<200,220,255,128>
 }
 
@@ -2378,7 +2378,7 @@ Monster <Clay Golem>
     ExpValue	250.0
     Type		<MON_IDX_GOLEM>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Color		<180,140,100,255>
 }
 
@@ -2394,7 +2394,7 @@ Monster <Stone Golem>
     ExpValue	450.0
     Type		<MON_IDX_GOLEM>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Color		<128,128,128,255>
 }
 
@@ -2410,8 +2410,8 @@ Monster <Iron Golem>
     ExpValue	800.0
     Type		<MON_IDX_GOLEM>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,5d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,3d10
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 5d8
+    Attack             <MON_FLAG_TRAMPLE>, <Physical Hit>, 3d10
     Color		<160,160,180,255>
 }
 
@@ -2429,9 +2429,9 @@ Monster <Cave Bear>
     ExpValue	60.0
     Type		<MON_IDX_MAMMAL>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<100,60,20,255>
 }
 
@@ -2447,9 +2447,9 @@ Monster <Young Dzur>
     ExpValue	55.0
     Type		<MON_IDX_CAT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
     Color		<20,20,20,255>
 }
 
@@ -2465,9 +2465,9 @@ Monster <Tsalmoth>
     ExpValue	120.0
     Type		<MON_IDX_MAMMAL>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
     Color		<139,90,43,255>
 }
 
@@ -2485,8 +2485,8 @@ Monster <Hawk>
     ExpValue	15.0
     Type		<MON_IDX_BIRD>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Color		<139,90,43,255>
 }
 
@@ -2502,9 +2502,9 @@ Monster <Giant Eagle>
     ExpValue	100.0
     Type		<MON_IDX_BIRD>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
     Color		<180,140,60,255>
 }
 
@@ -2522,8 +2522,8 @@ Monster <Rogue>
     ExpValue	200.0
     Type		<MON_IDX_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Color		<40,40,40,255>
 }
 
@@ -2539,9 +2539,9 @@ Monster <Mage>
     ExpValue	350.0
     Type		<MON_IDX_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_SPORE>, <Fire Touch>, 3d8
+    Attack             <MON_FLAG_SPORE>, <Cold Touch>, 3d8
     Color		<0,0,180,255>
 }
 
@@ -2557,8 +2557,8 @@ Monster <Priest>
     ExpValue	450.0
     Type		<MON_IDX_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,2d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_SPORE>, <Fire Touch>, 2d8
     Color		<255,255,200,255>
 }
 
@@ -2576,9 +2576,9 @@ Monster <Lesser Demon>
     ExpValue	300.0
     Type		<MON_IDX_MINOR_DEMON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Fire Touch>, 2d6
     Color		<200,50,50,255>
 }
 
@@ -2594,8 +2594,8 @@ Monster <Imp>
     ExpValue	200.0
     Type		<MON_IDX_MINOR_DEMON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,1d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_BITE>, <Fire Touch>, 1d8
     Color		<255,80,0,255>
 }
 
@@ -2613,9 +2613,9 @@ Monster <Greater Demon>
     ExpValue	700.0
     Type		<MON_IDX_MAJOR_DEMON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_BITE>, <Fire Touch>, 3d8
     Color		<180,0,0,255>
 }
 
@@ -2633,8 +2633,8 @@ Monster <Lich>
     ExpValue	600.0
     Type		<MON_IDX_LICH>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,3d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d15
+    Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 3d8
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d15
     Color		<200,200,220,255>
 }
 
@@ -2650,9 +2650,9 @@ Monster <Greater Lich>
     ExpValue	1200.0
     Type		<MON_IDX_LICH>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,4d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d20
+    Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 4d8
+    Attack             <MON_FLAG_SPORE>, <Fire Touch>, 4d8
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d20
     Color		<150,150,200,255>
 }
 
@@ -2670,10 +2670,10 @@ Monster <Xorn>
     ExpValue	350.0
     Type		<MON_IDX_XORN>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d6
     Color		<160,140,100,255>
 }
 
@@ -2691,9 +2691,9 @@ Monster <Wraith>
     ExpValue	450.0
     Type		<MON_IDX_WRAITH>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_XP>,1d6
+    Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_TOUCH>, <XP Drain Touch>, 1d6
     Color		<100,100,120,255>
 }
 
@@ -2710,8 +2710,8 @@ Monster <King Yendi>
     ExpValue	250.0
     Type		<MON_IDX_SNAKE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,3d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 3d6
     Color		<0,120,0,255>
 }
 
@@ -2729,8 +2729,8 @@ Monster <Troll Shaman>
     ExpValue	400.0
     Type		<MON_IDX_TROLL>
     Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_SPORE>, <Fire Touch>, 3d8
     Color		<34,100,34,255>
 }
 
@@ -2748,8 +2748,8 @@ Monster <Troll Zombie>
     ExpValue	250.0
     Type		<MON_IDX_ZOMBIE>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_REGENERATE>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Color		<80,100,60,255>
 }
 
@@ -2765,9 +2765,9 @@ Monster <Zombie Dragon>
     ExpValue	800.0
     Type		<MON_IDX_ZOMBIE>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d8
     Color		<100,110,80,255>
 }
 
@@ -2785,9 +2785,9 @@ Monster <Black Harpy>
     ExpValue	250.0
     Type		<MON_IDX_HARPY>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
     Color		<0,0,0,255>
 }
 
@@ -2805,8 +2805,8 @@ Monster <Ogre Mage>
     ExpValue	350.0
     Type		<MON_IDX_OGRE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_SPORE>, <Cold Touch>, 3d6
     Color		<100,80,140,255>
 }
 
@@ -2824,8 +2824,8 @@ Monster <Death Watch Beetle>
     ExpValue	450.0
     Type		<MON_IDX_BEETLE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,2d10
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_TRAMPLE>, <Physical Hit>, 2d10
     Color		<40,20,0,255>
 }
 
@@ -2843,9 +2843,9 @@ Monster <Spirit Naga>
     ExpValue	500.0
     Type		<MON_IDX_NAGA>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_POISON>,3d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d10
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_SPORE>, <Poison Sting>, 3d6
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d10
     Color		<150,200,255,128>
 }
 
@@ -2863,9 +2863,9 @@ Monster <Ghost>
     ExpValue	300.0
     Type		<MON_IDX_GHOST>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,2d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_AFRAID>,1d15
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_XP>,1d6
+    Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 2d8
+    Attack             <MON_FLAG_TOUCH>, <Fear Touch>, 1d15
+    Attack             <MON_FLAG_TOUCH>, <XP Drain Touch>, 1d6
     Color		<200,200,220,128>
 }
 
@@ -2883,8 +2883,8 @@ Monster <Giant Creotha>
     ExpValue	300.0
     Type		<MON_IDX_SPIDER>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,2d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 2d8
     Color		<0,0,0,255>
 }
 
@@ -2902,8 +2902,8 @@ Monster <Basilisk>
     ExpValue	500.0
     Type		<MON_IDX_REPTILE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d20
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d20
     Color		<0,100,40,255>
 }
 
@@ -2921,9 +2921,9 @@ Monster <Yeti>
     ExpValue	200.0
     Type		<MON_IDX_YETI>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_COLD>,2d8,8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BREATHE>, <Frost Bolt>, 2d8, 8
     Color		<240,240,255,255>
 }
 
@@ -2940,8 +2940,8 @@ Monster <Ochre Ooze>
     ExpValue	200.0
     Type		<MON_IDX_OOZE>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_ACID>,3d6
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_TOUCH>, <Acid Touch>, 3d6
     Color		<204,153,0,255>
 }
 
@@ -2966,10 +2966,10 @@ Monster <Balrog>
     ExpValue	15000.0
     Type		<MON_IDX_BALROG>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d10
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d10
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,5d10
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,15d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d10
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d10
+    Attack             <MON_FLAG_BITE>, <Fire Touch>, 5d10
+    Attack             <MON_FLAG_BREATHE>, <Fireball>, 15d8, 5
     Color		<<255,60,0,255>;<255,200,0,255>>
 }
 
@@ -2987,10 +2987,10 @@ Monster <Lordly Vampire>
     ExpValue	1800.0
     Type		<MON_IDX_VAMPIRE>
     Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_XP>,4d10
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d20
+    Attack             <MON_FLAG_BITE>, <XP Drain Touch>, 4d10
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d20
     Color		<100,0,0,255>
 }
 
@@ -3006,10 +3006,10 @@ Monster <Emperor Vampire>
     ExpValue	5000.0
     Type		<MON_IDX_VAMPIRE>
     Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_XP>,5d10
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d25
+    Attack             <MON_FLAG_BITE>, <XP Drain Touch>, 5d10
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d25
     Color		<60,0,0,255>
 }
 
@@ -3027,9 +3027,9 @@ Monster <Master Lich>
     ExpValue	2500.0
     Type		<MON_IDX_LICH>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,5d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,5d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d25
+    Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 5d8
+    Attack             <MON_FLAG_SPORE>, <Fire Touch>, 5d8
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d25
     Color		<100,100,180,255>
 }
 
@@ -3045,10 +3045,10 @@ Monster <Emperor Lich>
     ExpValue	8000.0
     Type		<MON_IDX_LICH>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,6d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,6d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,6d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d30
+    Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 6d8
+    Attack             <MON_FLAG_SPORE>, <Fire Touch>, 6d8
+    Attack             <MON_FLAG_SPORE>, <Cold Touch>, 6d8
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d30
     Color		<60,60,160,255>
 }
 
@@ -3066,10 +3066,10 @@ Monster <Demon Lord>
     ExpValue	2000.0
     Type		<MON_IDX_MAJOR_DEMON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,6d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_BITE>, <Fire Touch>, 4d8
+    Attack             <MON_FLAG_BREATHE>, <Fireball>, 6d8, 5
     Color		<140,0,0,255>
 }
 
@@ -3085,10 +3085,10 @@ Monster <Greater Demon Lord>
     ExpValue	6000.0
     Type		<MON_IDX_MAJOR_DEMON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,5d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,5d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,5d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,10d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 5d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 5d8
+    Attack             <MON_FLAG_BITE>, <Fire Touch>, 5d8
+    Attack             <MON_FLAG_BREATHE>, <Fireball>, 10d8, 5
     Color		<100,0,0,255>
 }
 
@@ -3106,10 +3106,10 @@ Monster <Ettin>
     ExpValue	1200.0
     Type		<MON_IDX_GIANT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Color		<120,100,80,255>
 }
 
@@ -3125,9 +3125,9 @@ Monster <Titan>
     ExpValue	5000.0
     Type		<MON_IDX_GIANT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,5d10
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,5d10
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_ELECTRICITY>,8d8,5
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 5d10
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 5d10
+    Attack             <MON_FLAG_BREATHE>, <Lightning Ball>, 8d8, 5
     Color		<255,215,0,255>
 }
 
@@ -3145,10 +3145,10 @@ Monster <Spectre>
     ExpValue	1500.0
     Type		<MON_IDX_WRAITH>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,4d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d20
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_XP>,2d6
+    Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 4d8
+    Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 4d8
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d20
+    Attack             <MON_FLAG_TOUCH>, <XP Drain Touch>, 2d6
     Color		<140,140,180,128>
 }
 
@@ -3164,11 +3164,11 @@ Monster <Emperor Wraith>
     ExpValue	4000.0
     Type		<MON_IDX_WRAITH>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,5d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,5d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d25
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_XP>,2d8
+    Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 5d8
+    Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 5d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d25
+    Attack             <MON_FLAG_TOUCH>, <XP Drain Touch>, 2d8
     Color		<80,80,140,128>
 }
 
@@ -3186,11 +3186,11 @@ Monster <5-Headed Hydra>
     ExpValue	400.0
     Type		<MON_IDX_HYDRA>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
     Color		<0,140,0,255>
 }
 
@@ -3206,13 +3206,13 @@ Monster <7-Headed Hydra>
     ExpValue	800.0
     Type		<MON_IDX_HYDRA>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
     Color		<0,120,60,255>
 }
 
@@ -3228,12 +3228,12 @@ Monster <11-Headed Hydra>
     ExpValue	3000.0
     Type		<MON_IDX_HYDRA>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
     Color		<0,80,40,255>
 }
 
@@ -3251,9 +3251,9 @@ Monster <Mind Flayer>
     ExpValue	2000.0
     Type		<MON_IDX_HUMANOID>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d20
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,1d15
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d20
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 1d15
     Color		<120,0,160,255>
 }
 
@@ -3271,8 +3271,8 @@ Monster <Purple Worm>
     ExpValue	3000.0
     Type		<MON_IDX_WORM>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,5d10
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,4d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 5d10
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 4d8
     Color		<128,0,255,255>
 }
 
@@ -3290,7 +3290,7 @@ Monster <Animated Sword>
     ExpValue	400.0
     Type		<MON_IDX_ANIMATED_WEAPON>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d6
     Color		<192,192,192,255>
 }
 
@@ -3306,7 +3306,7 @@ Monster <Animated Spear>
     ExpValue	500.0
     Type		<MON_IDX_ANIMATED_WEAPON>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,5d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 5d6
     Color		<180,140,100,255>
 }
 
@@ -3322,7 +3322,7 @@ Monster <Animated Axe>
     ExpValue	700.0
     Type		<MON_IDX_ANIMATED_WEAPON>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,5d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 5d8
     Color		<160,160,170,255>
 }
 
@@ -3340,9 +3340,9 @@ Monster <Olog-hai>
     ExpValue	1500.0
     Type		<MON_IDX_TROLL>
     Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
     Color		<30,30,30,255>
 }
 
@@ -3360,10 +3360,10 @@ Monster <Shelob>
     ExpValue	3500.0
     Type		<MON_IDX_SPIDER>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,5d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,4d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 5d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 4d8
     Color		<20,20,20,255>
 }
 
@@ -3381,10 +3381,10 @@ Monster <Phantom>
     ExpValue	1500.0
     Type		<MON_IDX_GHOST>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,4d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_AFRAID>,1d20
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d15
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_XP>,2d6
+    Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 4d8
+    Attack             <MON_FLAG_TOUCH>, <Fear Touch>, 1d20
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d15
+    Attack             <MON_FLAG_TOUCH>, <XP Drain Touch>, 2d6
     Color		<180,180,220,64>
 }
 
@@ -3402,8 +3402,8 @@ Monster <Ogre Chieftain>
     ExpValue	1000.0
     Type		<MON_IDX_OGRE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Color		<120,100,80,255>
 }
 
@@ -3421,9 +3421,9 @@ Monster <Orc Captain>
     ExpValue	200.0
     Type		<MON_IDX_ORC>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<40,60,20,255>
 }
 
@@ -3441,8 +3441,8 @@ Monster <Giant Wasp>
     ExpValue	800.0
     Type		<MON_IDX_INSECT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,3d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 3d8
     Color		<200,200,0,255>
 }
 
@@ -3460,9 +3460,9 @@ Monster <Elemental Lord>
     ExpValue	4000.0
     Type		<MON_IDX_ELEMENTAL>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_FIRE>,5d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,5d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_ELECTRICITY>,5d8
+    Attack             <MON_FLAG_TOUCH>, <Fire Touch>, 5d8
+    Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 5d8
+    Attack             <MON_FLAG_TOUCH>, <Lightning Touch>, 5d8
     Color		<255,200,100,255>
 }
 
@@ -3480,9 +3480,9 @@ Monster <Guardian Naga>
     ExpValue	2000.0
     Type		<MON_IDX_NAGA>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_POISON>,4d8,5
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d15
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_BREATHE>, <Poison Ball>, 4d8, 5
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d15
     Color		<0,200,150,255>
 }
 
@@ -3500,10 +3500,10 @@ Monster <Archmage>
     ExpValue	2000.0
     Type		<MON_IDX_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,5d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,5d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_ELECTRICITY>,5d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_SPORE>, <Fire Touch>, 5d8
+    Attack             <MON_FLAG_SPORE>, <Cold Touch>, 5d8
+    Attack             <MON_FLAG_SPORE>, <Lightning Touch>, 5d8
     Color		<0,0,120,255>
 }
 
@@ -3520,8 +3520,8 @@ Monster <Gelatinous Cube>
     ExpValue	1200.0
     Type		<MON_IDX_JELLY>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_ACID>,4d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d15
+    Attack             <MON_FLAG_TOUCH>, <Acid Touch>, 4d8
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d15
     Color		<200,255,200,64>
 }
 
@@ -3543,7 +3543,7 @@ Monster <White Jelly>
     ExpValue	8.0
     Type		<MON_IDX_JELLY>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,1d4
+    Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 1d4
     Color		<220,220,255,255>
 }
 
@@ -3558,7 +3558,7 @@ Monster <Black Jelly>
     ExpValue	40.0
     Type		<MON_IDX_JELLY>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_ACID>,2d6
+    Attack             <MON_FLAG_TOUCH>, <Acid Touch>, 2d6
     Color		<20,20,20,255>
 }
 
@@ -3573,8 +3573,8 @@ Monster <Grape Jelly>
     ExpValue	200.0
     Type		<MON_IDX_JELLY>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_XP>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
+    Attack             <MON_FLAG_TOUCH>, <XP Drain Touch>, 3d6
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d6
     Color		<128,0,255,255>
 }
 
@@ -3589,7 +3589,7 @@ Monster <Yellow Jelly>
     ExpValue	250.0
     Type		<MON_IDX_JELLY>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_ELECTRICITY>,3d8
+    Attack             <MON_FLAG_TOUCH>, <Lightning Touch>, 3d8
     Color		<255,255,0,255>
 }
 
@@ -3607,7 +3607,7 @@ Monster <Red Centipede>
     ExpValue	10.0
     Type		<MON_IDX_CENTIPEDE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d4
     Color		<255,0,0,255>
 }
 
@@ -3623,7 +3623,7 @@ Monster <Blue Centipede>
     ExpValue	15.0
     Type		<MON_IDX_CENTIPEDE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<0,100,255,255>
 }
 
@@ -3639,7 +3639,7 @@ Monster <Green Centipede>
     ExpValue	30.0
     Type		<MON_IDX_CENTIPEDE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d8
     Color		<0,200,0,255>
 }
 
@@ -3655,7 +3655,7 @@ Monster <Cyan Centipede>
     ExpValue	50.0
     Type		<MON_IDX_CENTIPEDE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
     Color		<0,255,255,255>
 }
 
@@ -3671,8 +3671,8 @@ Monster <Magenta Centipede>
     ExpValue	80.0
     Type		<MON_IDX_CENTIPEDE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 1d8
     Color		<255,0,255,255>
 }
 
@@ -3690,7 +3690,7 @@ Monster <Hobgoblin>
     ExpValue	15.0
     Type		<MON_IDX_HUMANOID>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Color		<140,100,60,255>
 }
 
@@ -3706,8 +3706,8 @@ Monster <Gnoll>
     ExpValue	30.0
     Type		<MON_IDX_HUMANOID>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d4
     Color		<160,120,60,255>
 }
 
@@ -3723,8 +3723,8 @@ Monster <Dark Elven Warrior>
     ExpValue	60.0
     Type		<MON_IDX_HUMANOID>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Color		<100,0,140,255>
 }
 
@@ -3740,8 +3740,8 @@ Monster <Bugbear>
     ExpValue	65.0
     Type		<MON_IDX_HUMANOID>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<120,80,40,255>
 }
 
@@ -3757,9 +3757,9 @@ Monster <Dark Elven Mage>
     ExpValue	250.0
     Type		<MON_IDX_HUMANOID>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_SPORE>, <Fire Touch>, 3d6
+    Attack             <MON_FLAG_SPORE>, <Cold Touch>, 3d6
     Color		<120,0,180,255>
 }
 
@@ -3775,9 +3775,9 @@ Monster <Dark Elven Priest>
     ExpValue	350.0
     Type		<MON_IDX_HUMANOID>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,3d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d10
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_SPORE>, <Cold Touch>, 3d6
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d10
     Color		<100,0,160,255>
 }
 
@@ -3793,8 +3793,8 @@ Monster <Dark Elven Ranger>
     ExpValue	400.0
     Type		<MON_IDX_HUMANOID>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Color		<90,0,140,255>
 }
 
@@ -3810,9 +3810,9 @@ Monster <Dark Elven Lord>
     ExpValue	800.0
     Type		<MON_IDX_HUMANOID>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_COLD>,4d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_SPORE>, <Cold Touch>, 4d6
     Color		<60,0,100,255>
 }
 
@@ -3830,7 +3830,7 @@ Monster <Goblin>
     ExpValue	10.0
     Type		<MON_IDX_ORC>
     Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Color		<60,100,40,255>
 }
 
@@ -3846,8 +3846,8 @@ Monster <Cave Orc>
     ExpValue	60.0
     Type		<MON_IDX_ORC>
     Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d4
     Color		<70,90,50,255>
 }
 
@@ -3863,8 +3863,8 @@ Monster <Hill Orc>
     ExpValue	80.0
     Type		<MON_IDX_ORC>
     Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Color		<90,100,40,255>
 }
 
@@ -3880,8 +3880,8 @@ Monster <Black Orc>
     ExpValue	150.0
     Type		<MON_IDX_ORC>
     Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Color		<30,30,30,255>
 }
 
@@ -3897,9 +3897,9 @@ Monster <Orc Chieftain>
     ExpValue	1200.0
     Type		<MON_IDX_ORC>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
     Color		<20,40,10,255>
 }
 
@@ -3917,8 +3917,8 @@ Monster <Acolyte>
     ExpValue	25.0
     Type		<MON_IDX_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_LIGHT>,1d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_SPORE>, <Light Touch>, 1d4
     Color		<255,255,200,255>
 }
 
@@ -3934,8 +3934,8 @@ Monster <Apprentice Mage>
     ExpValue	30.0
     Type		<MON_IDX_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
+    Attack             <MON_FLAG_SPORE>, <Fire Touch>, 1d6
     Color		<0,0,200,255>
 }
 
@@ -3951,8 +3951,8 @@ Monster <Warrior>
     ExpValue	70.0
     Type		<MON_IDX_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Color		<160,160,160,255>
 }
 
@@ -3968,8 +3968,8 @@ Monster <Ranger>
     ExpValue	80.0
     Type		<MON_IDX_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Color		<0,100,0,255>
 }
 
@@ -3985,8 +3985,8 @@ Monster <Veteran Warrior>
     ExpValue	250.0
     Type		<MON_IDX_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Color		<180,180,180,255>
 }
 
@@ -4002,8 +4002,8 @@ Monster <Master Ranger>
     ExpValue	500.0
     Type		<MON_IDX_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Color		<0,80,0,255>
 }
 
@@ -4019,8 +4019,8 @@ Monster <Champion>
     ExpValue	700.0
     Type		<MON_IDX_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Color		<200,200,200,255>
 }
 
@@ -4036,9 +4036,9 @@ Monster <High Priest>
     ExpValue	1000.0
     Type		<MON_IDX_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_LIGHT>,4d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_SPORE>,<EFFECT_FLAG_FIRE>,3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_SPORE>, <Light Touch>, 4d6
+    Attack             <MON_FLAG_SPORE>, <Fire Touch>, 3d6
     Color		<255,255,100,255>
 }
 
@@ -4056,8 +4056,8 @@ Monster <Wild Cat>
     ExpValue	5.0
     Type		<MON_IDX_CAT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d3
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d3
     Color		<160,120,80,255>
 }
 
@@ -4073,7 +4073,7 @@ Monster <Wild Boar>
     ExpValue	15.0
     Type		<MON_IDX_MAMMAL>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d4
     Color		<100,80,40,255>
 }
 
@@ -4089,9 +4089,9 @@ Monster <Wolverine>
     ExpValue	40.0
     Type		<MON_IDX_MAMMAL>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<80,60,30,255>
 }
 
@@ -4107,9 +4107,9 @@ Monster <Lion>
     ExpValue	100.0
     Type		<MON_IDX_MAMMAL>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
     Color		<200,160,60,255>
 }
 
@@ -4127,7 +4127,7 @@ Monster <Raven>
     ExpValue	4.0
     Type		<MON_IDX_BIRD>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,1d3
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d3
     Color		<20,20,30,255>
 }
 
@@ -4149,7 +4149,7 @@ Monster <Bat>
     ExpValue	1.0
     Type		<MON_IDX_BAT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d2
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d2
     Color		<100,80,60,255>
 }
 
@@ -4165,7 +4165,7 @@ Monster <Large Bat>
     ExpValue	4.0
     Type		<MON_IDX_BAT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d4
     Color		<80,60,40,255>
 }
 
@@ -4181,8 +4181,8 @@ Monster <Vampire Bat>
     ExpValue	30.0
     Type		<MON_IDX_BAT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_XP>,1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_BITE>, <XP Drain Touch>, 1d4
     Color		<139,0,0,255>
 }
 
@@ -4200,7 +4200,7 @@ Monster <Fruit Fly>
     ExpValue	1.0
     Type		<MON_IDX_FLY>
     Flags		<MON_FLAG_BREED,MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d1
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d1
     Color		<139,90,43,255>
 }
 
@@ -4216,7 +4216,7 @@ Monster <Fire Fly>
     ExpValue	6.0
     Type		<MON_IDX_FLY>
     Flags		<MON_FLAG_BREED,MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,1d4
+    Attack             <MON_FLAG_BITE>, <Fire Touch>, 1d4
     Color		<255,140,0,255>
 }
 
@@ -4234,7 +4234,7 @@ Monster <White Dragon Fly>
     ExpValue	40.0
     Type		<MON_IDX_DRAGON_FLY>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_COLD>,2d4
+    Attack             <MON_FLAG_BITE>, <Cold Touch>, 2d4
     Color		<255,255,255,255>
 }
 
@@ -4250,7 +4250,7 @@ Monster <Black Dragon Fly>
     ExpValue	60.0
     Type		<MON_IDX_DRAGON_FLY>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_ACID>,2d6
+    Attack             <MON_FLAG_BITE>, <Acid Touch>, 2d6
     Color		<30,30,30,255>
 }
 
@@ -4266,7 +4266,7 @@ Monster <Green Dragon Fly>
     ExpValue	80.0
     Type		<MON_IDX_DRAGON_FLY>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_POISON>,2d8
+    Attack             <MON_FLAG_BITE>, <Poison Sting>, 2d8
     Color		<0,200,0,255>
 }
 
@@ -4282,7 +4282,7 @@ Monster <Blue Dragon Fly>
     ExpValue	100.0
     Type		<MON_IDX_DRAGON_FLY>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_ELECTRICITY>,3d6
+    Attack             <MON_FLAG_BITE>, <Lightning Touch>, 3d6
     Color		<0,100,255,255>
 }
 
@@ -4298,7 +4298,7 @@ Monster <Red Dragon Fly>
     ExpValue	130.0
     Type		<MON_IDX_DRAGON_FLY>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,3d8
+    Attack             <MON_FLAG_BITE>, <Fire Touch>, 3d8
     Color		<255,0,0,255>
 }
 
@@ -4316,8 +4316,8 @@ Monster <Pink Baby Faerie Dragon>
     ExpValue	100.0
     Type		<MON_IDX_FAERIE_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 1d4
     Color		<255,182,193,255>
 }
 
@@ -4333,8 +4333,8 @@ Monster <Cyan Young Faerie Dragon>
     ExpValue	160.0
     Type		<MON_IDX_FAERIE_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 1d6
     Color		<0,255,255,255>
 }
 
@@ -4350,8 +4350,8 @@ Monster <Violet Immature Faerie Dragon>
     ExpValue	250.0
     Type		<MON_IDX_FAERIE_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,2d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 2d4
     Color		<148,0,211,255>
 }
 
@@ -4367,8 +4367,8 @@ Monster <Indigo Faerie Dragon>
     ExpValue	380.0
     Type		<MON_IDX_FAERIE_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d6
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 2d6
     Color		<75,0,130,255>
 }
 
@@ -4384,9 +4384,9 @@ Monster <Purple Lordly Faerie Dragon>
     ExpValue	550.0
     Type		<MON_IDX_FAERIE_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,2d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 2d8
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d4
     Color		<128,0,128,255>
 }
 
@@ -4402,9 +4402,9 @@ Monster <Platinum Duke Faerie Dragon>
     ExpValue	800.0
     Type		<MON_IDX_FAERIE_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,5d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,3d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 5d8
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 3d6
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d6
     Color		<220,220,220,255>
 }
 
@@ -4420,9 +4420,9 @@ Monster <Prismatic Emperor Faerie Dragon>
     ExpValue	1200.0
     Type		<MON_IDX_FAERIE_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,6d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,3d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 6d8
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 3d8
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 2d6
     Color		<255,255,255,255>
 }
 
@@ -4440,7 +4440,7 @@ Monster <White Mushroom Patch>
     ExpValue	1.0
     Type		<MON_IDX_SHROOM>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d2
     Color		<255,255,255,255>
 }
 
@@ -4456,8 +4456,8 @@ Monster <Black Mushroom Patch>
     ExpValue	3.0
     Type		<MON_IDX_SHROOM>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d3
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,1d3
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d3
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 1d3
     Color		<30,30,30,255>
 }
 
@@ -4473,8 +4473,8 @@ Monster <Clear Mushroom Patch>
     ExpValue	4.0
     Type		<MON_IDX_SHROOM>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d3
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,1d4
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d3
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 1d4
     Color		<200,200,200,128>
 }
 
@@ -4490,7 +4490,7 @@ Monster <Blue Mushroom Patch>
     ExpValue	6.0
     Type		<MON_IDX_SHROOM>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d4
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d4
     Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_STAT>,1d3
     Color		<0,0,255,255>
 }
@@ -4509,7 +4509,7 @@ Monster <Kobold Warrior>
     ExpValue	8.0
     Type		<MON_IDX_KOBOLD>
     Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d6
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d6
     Color		<139,90,43,255>
 }
 
@@ -4525,8 +4525,8 @@ Monster <Kobold Chieftain>
     ExpValue	25.0
     Type		<MON_IDX_KOBOLD>
     Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d4
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d4
     Color		<180,120,60,255>
 }
 
@@ -4544,7 +4544,7 @@ Monster <Kobold Skeleton>
     ExpValue	6.0
     Type		<MON_IDX_SKELETON>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d4
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d4
     Color		<200,200,200,255>
 }
 
@@ -4560,7 +4560,7 @@ Monster <Orc Skeleton>
     ExpValue	20.0
     Type		<MON_IDX_SKELETON>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d4
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d4
     Color		<200,200,200,255>
 }
 
@@ -4576,7 +4576,7 @@ Monster <Yendi Skeleton>
     ExpValue	25.0
     Type		<MON_IDX_SKELETON>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
     Color		<200,200,200,255>
 }
 
@@ -4592,7 +4592,7 @@ Monster <Human Skeleton>
     ExpValue	40.0
     Type		<MON_IDX_SKELETON>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d6
     Color		<220,220,220,255>
 }
 
@@ -4608,7 +4608,7 @@ Monster <Elf Skeleton>
     ExpValue	70.0
     Type		<MON_IDX_SKELETON>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d8
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d8
     Color		<230,230,230,255>
 }
 
@@ -4624,8 +4624,8 @@ Monster <Troll Skeleton>
     ExpValue	120.0
     Type		<MON_IDX_SKELETON>
     Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_REGENERATE>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Color		<180,180,180,255>
 }
 
@@ -4641,8 +4641,8 @@ Monster <Dragon Skeleton>
     ExpValue	350.0
     Type		<MON_IDX_SKELETON>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Color		<160,160,160,255>
 }
 
@@ -4660,8 +4660,8 @@ Monster <Troll>
     ExpValue	35.0
     Type		<MON_IDX_TROLL>
     Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<0,128,0,255>
 }
 
@@ -4677,8 +4677,8 @@ Monster <Ice Troll>
     ExpValue	80.0
     Type		<MON_IDX_TROLL>
     Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,<EFFECT_FLAG_COLD>,2d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d4
+    Attack             <MON_FLAG_CLAW>, <Cold Touch>, 2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d4
     Color		<173,216,230,255>
 }
 
@@ -4694,8 +4694,8 @@ Monster <Fire Troll>
     ExpValue	200.0
     Type		<MON_IDX_TROLL>
     Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,<EFFECT_FLAG_FIRE>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack             <MON_FLAG_CLAW>, <Fire Touch>, 3d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
     Color		<255,69,0,255>
 }
 
@@ -4713,8 +4713,8 @@ Monster <Creeping Copper Coins>
     ExpValue	25.0
     Type		<MON_IDX_COIN>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d4
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_TREASURE>,1d1
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_CRAWL>, <Poison Touch>
     Color		<184,115,51,255>
 }
 
@@ -4730,8 +4730,8 @@ Monster <Creeping Silver Coins>
     ExpValue	70.0
     Type		<MON_IDX_COIN>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d4
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_TREASURE>,1d1
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 3d4
+    Attack             <MON_FLAG_CRAWL>, <Poison Touch>
     Color		<192,192,192,255>
 }
 
@@ -4747,8 +4747,8 @@ Monster <Creeping Gold Coins>
     ExpValue	150.0
     Type		<MON_IDX_COIN>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,4d4
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_TREASURE>,1d1
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d4
+    Attack             <MON_FLAG_CRAWL>, <Poison Touch>
     Color		<255,215,0,255>
 }
 
@@ -4766,8 +4766,8 @@ Monster <Lurker>
     ExpValue	45.0
     Type		<MON_IDX_LURKER>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d4
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d4
     Color		<128,128,128,255>
 }
 
@@ -4783,8 +4783,8 @@ Monster <Trapper>
     ExpValue	150.0
     Type		<MON_IDX_LURKER>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,2d4
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 2d4
     Color		<100,100,100,255>
 }
 
@@ -4802,8 +4802,8 @@ Monster <Mimic>
     ExpValue	100.0
     Type		<MON_IDX_MIMIC>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,1d6
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d6
     Color		<180,140,60,255>
 }
 
@@ -4819,8 +4819,8 @@ Monster <Chest Mimic>
     ExpValue	280.0
     Type		<MON_IDX_MIMIC>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,4d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_PARALYZE>,2d6
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d6
+    Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 2d6
     Color		<139,90,43,255>
 }
 
@@ -4838,7 +4838,7 @@ Monster <Newt>
     ExpValue	1.0
     Type		<MON_IDX_REPTILE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d2
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d2
     Color		<0,128,0,255>
 }
 
@@ -4854,7 +4854,7 @@ Monster <Salamander>
     ExpValue	12.0
     Type		<MON_IDX_REPTILE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<255,140,0,255>
 }
 
@@ -4870,7 +4870,7 @@ Monster <Fire Salamander>
     ExpValue	40.0
     Type		<MON_IDX_REPTILE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,<EFFECT_FLAG_FIRE>,2d6
+    Attack             <MON_FLAG_BITE>, <Fire Touch>, 2d6
     Color		<255,69,0,255>
 }
 
@@ -4886,7 +4886,7 @@ Monster <Crocodile>
     ExpValue	80.0
     Type		<MON_IDX_REPTILE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d6
     Color		<0,100,0,255>
 }
 
@@ -4902,8 +4902,8 @@ Monster <Emperor Crocodile>
     ExpValue	280.0
     Type		<MON_IDX_REPTILE>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Color		<34,100,34,255>
 }
 
@@ -4921,8 +4921,8 @@ Monster <Black Bear>
     ExpValue	30.0
     Type		<MON_IDX_MAMMAL>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<30,30,30,255>
 }
 
@@ -4938,8 +4938,8 @@ Monster <Hippo>
     ExpValue	80.0
     Type		<MON_IDX_MAMMAL>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TRAMPLE>,2d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_TRAMPLE>, <Physical Hit>, 2d8
     Color		<128,128,128,255>
 }
 
@@ -4955,9 +4955,9 @@ Monster <Tiger>
     ExpValue	150.0
     Type		<MON_IDX_CAT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d4
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d6
     Color		<255,140,0,255>
 }
 
@@ -4974,7 +4974,7 @@ Monster <Clear Worm Mass>
     Level       3
     ExpValue	10.0
     Type		<MON_IDX_WORM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d3
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d3
     Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_STAT>,1d2
     Color		<200,200,200,128>
     Flags		<MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
@@ -4991,8 +4991,8 @@ Monster <Black Worm Mass>
     Level       10
     ExpValue	35.0
     Type		<MON_IDX_WORM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d4
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CRAWL>,<EFFECT_FLAG_ACID>,2d6
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d4
+    Attack             <MON_FLAG_CRAWL>, <Acid Touch>, 2d6
     Color		<30,30,30,255>
     Flags		<MON_FLAG_BREED,MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
 }
@@ -5011,7 +5011,7 @@ Monster <Norska>
     ExpValue	1.0
     Type		<MON_IDX_RAT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d2
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d2
     Color		<200,200,200,255>
 }
 
@@ -5027,7 +5027,7 @@ Monster <Large Norska>
     ExpValue	5.0
     Type		<MON_IDX_RAT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d4
     Color		<180,180,180,255>
 }
 
@@ -5043,8 +5043,8 @@ Monster <Jhereg>
     ExpValue	25.0
     Type		<MON_IDX_FAERIE_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,1d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,2d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 2d4
     Color		<128,0,128,255>
 }
 
@@ -5060,8 +5060,8 @@ Monster <Greater Jhereg>
     ExpValue	100.0
     Type		<MON_IDX_FAERIE_DRAGON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,3d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 3d6
     Color		<160,0,160,255>
 }
 
@@ -5077,8 +5077,8 @@ Monster <Tiassa>
     ExpValue	55.0
     Type		<MON_IDX_FLY>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,1d4
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 1d4
     Color		<0,191,255,255>
 }
 
@@ -5094,8 +5094,8 @@ Monster <Athyra>
     ExpValue	65.0
     Type		<MON_IDX_BIRD>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,2d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,1d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 1d6
     Color		<75,0,130,255>
 }
 
@@ -5111,9 +5111,9 @@ Monster <Dzur>
     ExpValue	200.0
     Type		<MON_IDX_CAT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
     Color		<10,10,10,255>
 }
 
@@ -5129,9 +5129,9 @@ Monster <Elder Dzur>
     ExpValue	550.0
     Type		<MON_IDX_CAT>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,4d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,4d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d8
     Color		<5,5,5,255>
 }
 
@@ -5147,7 +5147,7 @@ Monster <Teckla>
     ExpValue	5.0
     Type		<MON_IDX_L_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d4
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d4
     Color		<139,119,101,255>
 }
 
@@ -5163,7 +5163,7 @@ Monster <Lyorn>
     ExpValue	40.0
     Type		<MON_IDX_L_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d6
     Color		<180,160,120,255>
 }
 
@@ -5179,8 +5179,8 @@ Monster <Tiassa>
     ExpValue	55.0
     Type		<MON_IDX_L_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,1d4
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 1d4
     Color		<0,191,255,255>
 }
 
@@ -5196,8 +5196,8 @@ Monster <Hawklord>
     ExpValue	70.0
     Type		<MON_IDX_L_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d8
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_CONFUSE>,1d6
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d8
+    Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 1d6
     Color		<200,200,220,255>
 }
 
@@ -5213,8 +5213,8 @@ Monster <Yendi>
     ExpValue	80.0
     Type		<MON_IDX_L_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
-    Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_POISON>,2d4
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d6
+    Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 2d4
     Color		<0,128,0,255>
 }
 
@@ -5230,9 +5230,9 @@ Monster <Dzurlord>
     ExpValue	200.0
     Type		<MON_IDX_L_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
     Color		<10,10,10,255>
 }
 
@@ -5248,8 +5248,8 @@ Monster <Dragonlord>
     ExpValue	300.0
     Type		<MON_IDX_L_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_FIRE>,2d8
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_TOUCH>, <Fire Touch>, 2d8
     Color		<200,0,0,255>
 }
 
@@ -5265,9 +5265,9 @@ Monster <Cat-centaur>
     ExpValue	300.0
     Type		<MON_IDX_L_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_CLAW>,3d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_BITE>,2d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
+    Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
     Color		<180,140,100,255>
 }
 
@@ -5283,8 +5283,8 @@ Monster <Phoenix Guard>
     ExpValue	500.0
     Type		<MON_IDX_L_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,4d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,3d6
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d6
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 3d6
     Color		<255,140,0,255>
 }
 
@@ -5300,9 +5300,9 @@ Monster <Guard Captain>
     ExpValue	800.0
     Type		<MON_IDX_L_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,4d6
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_FIRE>,2d6
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d6
+    Attack             <MON_FLAG_TOUCH>, <Fire Touch>, 2d6
     Color		<255,200,0,255>
 }
 
@@ -5318,9 +5318,9 @@ Monster <Lavode>
     ExpValue	1500.0
     Type		<MON_IDX_L_PERSON>
     Flags		<MON_FLAG_WARM>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,5d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,4d8
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,<EFFECT_FLAG_COLD>,3d8
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 5d8
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d8
+    Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 3d8
     Color		<100,0,200,255>
 }
 
@@ -5338,6 +5338,6 @@ Monster <Animated Club>
     ExpValue	18.0
     Type		<MON_IDX_ANIMATED_WEAPON>
     Flags		<MON_FLAG_EMPTY_MIND>
-    Attack		<EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,2d6
+    Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d6
     Color		<139,90,43,255>
 }

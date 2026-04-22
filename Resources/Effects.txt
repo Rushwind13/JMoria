@@ -33,6 +33,16 @@ Effect <Physical Hit>
     Range       1
 }
 
+# Light Touch — a holy touch that deals light damage in melee.
+# Used by: Acolytes, High Priests (spore attacks)
+Effect <Light Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_LIGHT>
+    Amount      <1d4>
+    Range       1
+}
+
 # Light Ray — a beam of bright light that damages light-sensitive monsters.
 # Used by: Wand of Light, Staff of Starlight (line component)
 Effect <Light Ray>

@@ -33,18 +33,6 @@ Need explicit answers before these can be implemented.
 
 ---
 
-## Completed This Session (2026-04-22)
-
-- [x] **Item level redesign** — All 153 items releveled: cheap tier at L1–4, natural mid-game progression, deep-dungeon gatekeeping for top-tier armor/weapons/consumables. `Level` field now means peak spawn depth (bell curve center). Reserved L90+ for Ego/Legendary/Unique.
-- [x] **New items added** — Leather Cap (L1), Short Sword (L5), Short Bow (L3).
-- [x] **`LevelSigma` field** — Added to `CItemDef` and `CMonsterDef`. Parsed by `FileParse.cpp` (prefix collision fix: `levelsigma` checked before `level`). Default 10.0.
-- [x] **Bell-curve spawn window** — `ChooseItemForDepth` and `ChooseMonsterForDepth` replaced with `Util::windowed_bell` weighted selection (no hard cutoff, no retry loop). `LevelSigma` drives spread per-entry. `Dungeon.h` signature updated: `range` int → `sigma` float.
-- [x] **`Util::windowed_bell`** — Added to `Util.h`/`Util.cpp`. Polynomial bell curve `(1-x²)²`, zero outside `|delta| >= sigma`. No `<cmath>` dependency.
-- [x] **31 new monsters added** — Full EYE family (Radiation Eye, Beholder, Greater Beholder), HUMANOID warrior/shaman/chieftain tiers (Hobgoblin, Gnoll, Bugbear), ORC warrior/shaman/chieftain, PERSON class ranks (Novice through Paladin Lord), Quasit. Monsters.txt: 296 → 327 entries.
-- [x] **Monster test infrastructure fixed** — Test dungeon now loads effect definitions before parsing monsters. Tests can resolve named effects correctly. All 2 scenarios pass (10 steps).
-- [x] **"Life Drain" effect added** — Missing effect used by 3 Beholder variants now in Effects.txt (115 total).
-- [x] **Code cleanup** — sort_resources.py: removed em-dash characters for better linting.
-
 ---
 
 ## Ready to Implement
@@ -74,7 +62,6 @@ No blockers. Start any of these.
 - [ ] Partial stack split: "How many? (1-n)" prompt on drop/sell; arrows fire one at a time (Item §5, §16)
 - [ ] Ground stacking + loot explosion to adjacent open tiles on overflow (Item §5, §16)
 - [ ] Feeling tiers: passive per-turn chance of {magical}, {excellent}, {special} discovery (Item §4, §16)
-- [x] Blind-use identification: noticeable effect → auto-ID; no noticeable effect → {tried} marking — **done** (`CPlayer::Quaff`/`Read` + `m_bTried` + `{tried}` display in `Item.cpp`)
 - [ ] Item spawn quality chain: Ego → Legendary → Unique tiers (builds on existing Normal/Cursed/Magic) (Item §3, §16)
 
 ### Data Model
@@ -965,17 +952,14 @@ Remaining Work:
 Tier 1 — Light Source Items:
 - Wand of Light, Staff of Light, Staff of Starlight, Flask of Oil
 
-Tier 2 — Detection Items (Blocked by EFFECT_TYPE_SEE):
-- Scroll of Detect Doors, Scroll of Detect Traps, Scroll of Detect Monsters, Ring of Searching
-
-Tier 3 — Stat-Based Items (Blocked by Stats #197):
+Tier 2 — Stat-Based Items (Blocked by Stats #197):
 - Potion of Gain STR/CON/DEX/INT/WIS/CHA, Potion of Restore STR/CON/DEX/INT/WIS/CHA, Potion of Heroism
 
-Tier 4 — Elemental & Status Items:
-- Potion of Flames, Potion of See Invisible, All Effect/Resistance combinations
+Tier 3 — Elemental & Status Items:
+- Potion of Flames, Potion of See Invisible
 
-Tier 5 — Advanced Properties (Post-Phase 3):
-- Magical/Cursed/Ego/Unique item tiers, Shopkeeper pricing as identification
+Tier 4 — Advanced Properties (Post-Phase 3):
+- Ego/Legendary/Unique item tiers, Shopkeeper pricing as identification
 ```
 
 ---
@@ -1017,109 +1001,7 @@ Postponed until after ranged attack implementation
 
 ---
 
-## Source: Items.txt — Complete Current Inventory (76 items)
-
-### Armor (6)
-1. Chain Mail — ITEM_IDX_ARMOR, AC 22, Level 26
-2. Leather Armor — ITEM_IDX_ARMOR, AC 8, Level 2
-3. Padded Armor — ITEM_IDX_ARMOR, AC 15, Level 7
-4. Plate Mail Armor — ITEM_IDX_ARMOR, AC 38, Level 48
-5. Robe — ITEM_IDX_ARMOR, AC 1, Level 1
-6. Splint Mail — ITEM_IDX_ARMOR, AC 25, Level 24
-
-### Boots (2)
-7. Pair of Leather Boots — ITEM_IDX_BOOTS, AC 2, Level 1
-8. Pair of Steel Boots — ITEM_IDX_BOOTS, AC 5, Level 1
-
-### Cloaks (1)
-9. Cloak — ITEM_IDX_CLOAK, AC 1, Level 1
-
-### Gloves (2)
-10. Pair of Leather Gloves — ITEM_IDX_GLOVES, AC 2, Level 1
-11. Set of Gauntlets — ITEM_IDX_GLOVES, AC 4, Level 1
-
-### Helmets (4)
-12. Steel Cap — ITEM_IDX_HELMET, AC 3, Level 7
-13. Steel Helm — ITEM_IDX_HELMET, AC 5, Level 10
-14. Helm of Infravision — ITEM_IDX_HELMET, AC 4, Level 15, EFFECT_TYPE_INTRINSIC+EFFECT_FLAG_INFRA, ITEM_FLAG_MAGIC
-15. Helm of Telepathy — ITEM_IDX_HELMET, AC 4, Level 25, EFFECT_TYPE_INTRINSIC+EFFECT_FLAG_ESP, ITEM_FLAG_MAGIC
-
-### Light Sources (3)
-16. Torch — ITEM_IDX_TORCH, Radius 3, Duration 3000, EFFECT_TYPE_INTRINSIC+EFFECT_FLAG_LIGHT
-17. Brass Lantern — ITEM_IDX_TORCH, Radius 5, Duration 7500, EFFECT_TYPE_INTRINSIC+EFFECT_FLAG_LIGHT, ITEM_FLAG_NEEDSAMMO
-18. Flask of Oil — ITEM_IDX_FUEL, Duration 5000, EFFECT_TYPE_GAIN+EFFECT_FLAG_FUEL, ITEM_FLAG_STACKS
-
-### Rings (10)
-19. Ring of Invisibility — ITEM_IDX_RING, Level 20, EFFECT_TYPE_INTRINSIC+EFFECT_FLAG_INVISIBLE
-20. Ring of Levitation — ITEM_IDX_RING, Level 20, EFFECT_TYPE_INTRINSIC+EFFECT_FLAG_LEVITATE
-21. Ring of Telepathy — ITEM_IDX_RING, Level 20, EFFECT_TYPE_INTRINSIC+EFFECT_FLAG_ESP
-22. Ring of Fire Resistance — ITEM_IDX_RING, Level 10, EFFECT_TYPE_INTRINSIC+EFFECT_FLAG_FIRE+EFFECT_MOD_RESIST
-23. Ring of Protection — ITEM_IDX_RING, Level 20, ACBonus 1d20
-24. Ring of Cold Resistance — ITEM_IDX_RING, Level 10, EFFECT_TYPE_INTRINSIC+EFFECT_FLAG_COLD+EFFECT_MOD_RESIST
-25. Ring of Acid Resistance — ITEM_IDX_RING, Level 12, EFFECT_TYPE_INTRINSIC+EFFECT_FLAG_ACID+EFFECT_MOD_RESIST
-26. Ring of Electricity Resistance — ITEM_IDX_RING, Level 12, EFFECT_TYPE_INTRINSIC+EFFECT_FLAG_ELECTRICITY+EFFECT_MOD_RESIST
-27. Ring of Free Action — ITEM_IDX_RING, Level 15, EFFECT_TYPE_INTRINSIC+EFFECT_FLAG_FREE_ACTION
-28. Ring of Speed — ITEM_IDX_RING, Level 30, EFFECT_TYPE_INTRINSIC+EFFECT_FLAG_SPEED
-
-### Potions (12)
-29. Potion of Minor Healing — ITEM_IDX_POTION, Level 2, HEAL+HP / HEAL+POISON / HEAL+BLIND, Damage 1d20
-30. Potion of Resist Fire — ITEM_IDX_POTION, Level 4, INTRINSIC+FIRE+RESIST, Duration 150
-31. Potion of Infravision — ITEM_IDX_POTION, Level 4, INTRINSIC+INFRA, Duration 100
-32. Potion of Resist Cold — ITEM_IDX_POTION, Level 4, INTRINSIC+COLD+RESIST, Duration 150
-33. Potion of Resist Acid — ITEM_IDX_POTION, Level 6, INTRINSIC+ACID+RESIST, Duration 150
-34. Potion of Resist Electricity — ITEM_IDX_POTION, Level 6, INTRINSIC+ELECTRICITY+RESIST, Duration 150
-35. Potion of Invisibility — ITEM_IDX_POTION, Level 8, INTRINSIC+INVISIBLE, Duration 100
-36. Potion of Speed — ITEM_IDX_POTION, Level 10, INTRINSIC+SPEED, Duration 80
-37. Potion of Levitation — ITEM_IDX_POTION, Level 6, INTRINSIC+LEVITATE, Duration 100
-38. Potion of Blindness — ITEM_IDX_POTION, Level 1, INTRINSIC+BLIND, Duration 50
-39. Potion of Confusion — ITEM_IDX_POTION, Level 1, INTRINSIC+CONFUSE, Duration 30
-40. Potion of Poison — ITEM_IDX_POTION, Level 3, INTRINSIC+POISON, Duration 80
-41. Potion of Cure Poison — ITEM_IDX_POTION, Level 3, HEAL+POISON
-
-### Scrolls (10)
-42. Scroll of Light — ITEM_IDX_SCROLL, Level 1, CREATE+LIGHT
-43. Scroll of Telepathy — ITEM_IDX_SCROLL, Level 4, INTRINSIC+ESP, Duration 100
-44. Scroll of Remove Curse — ITEM_IDX_SCROLL, Level 1, DESTROY+ITEM_FLAG_CURSED
-45. Scroll of Identify — ITEM_IDX_SCROLL, Level 1, RESTORE+IDENTIFY
-46. Scroll of Phase Door — ITEM_IDX_SCROLL, Level 2, CREATE+TELEPORT+AREA
-47. Scroll of Teleportation — ITEM_IDX_SCROLL, Level 10, CREATE+TELEPORT
-48. Scroll of Magic Mapping — ITEM_IDX_SCROLL, Level 8, CREATE+MAPPING+AREA
-49. Scroll of *Magic Mapping* — ITEM_IDX_SCROLL, Level 25, CREATE+MAPPING
-50. Scroll of Word of Recall — ITEM_IDX_SCROLL, Level 8, CREATE+RECALL
-51. Scroll of Summon Monsters — ITEM_IDX_SCROLL, Level 3, CREATE+SUMMON
-
-### Shields (4)
-52. Large Steel Shield — ITEM_IDX_SHIELD, AC 6, Level 2, ITEM_FLAG_OFFHAND
-53. Small Steel Shield — ITEM_IDX_SHIELD, AC 4, Level 2, ITEM_FLAG_OFFHAND
-54. Small Wooden Shield — ITEM_IDX_SHIELD, AC 2, Level 1, ITEM_FLAG_OFFHAND
-55. Steel Shield — ITEM_IDX_SHIELD, AC 5, Level 2, ITEM_FLAG_OFFHAND
-
-### Tools (2)
-56. Shovel — ITEM_IDX_SHOVEL, Level 1
-57. Pickaxe — ITEM_IDX_SHOVEL, Level 1
-
-### Wands (1)
-58. Wand of Light — ITEM_IDX_WAND, Level 1, Effect <Light Ray> / Effect <Light Area>, Charges <3d8>, ITEM_FLAG_STACKS
-
-### Weapons (18)
-59. Bastard Sword — ITEM_IDX_SWORD, Level 5, Damage 2d8
-60. Battle Axe — ITEM_IDX_AXE, Level 10, Damage 2d4, ITEM_FLAG_2HANDED
-61. Battle Mace — ITEM_IDX_MACE, Level 110(!), Damage 2d3, ITEM_FLAG_2HANDED
-62. Club — ITEM_IDX_MACE, Level 10, Damage 2d3
-63. Dagger — ITEM_IDX_DAGGER, Level 1, Damage 1d4
-64. Glaive — ITEM_IDX_POLEARM, Level 10, Damage 2d5, ITEM_FLAG_2HANDED
-65. Halberd — ITEM_IDX_POLEARM, Level 10, Damage 2d5, ITEM_FLAG_2HANDED
-66. Hand Axe — ITEM_IDX_AXE, Level 7, Damage 2d4
-67. Lance — ITEM_IDX_SPEAR, Level 10, Damage 3d6
-68. Long Bow — ITEM_IDX_BOW, Level 5, Damage 1d8, ITEM_FLAG_NEEDSAMMO
-69. Long Sword — ITEM_IDX_SWORD, Level 1, Damage 1d10
-70. Mace — ITEM_IDX_MACE, Level 10, Damage 1d8
-71. Morning Star — ITEM_IDX_MACE, Level 10, Damage 2d4
-72. Quarter Staff — ITEM_IDX_POLEARM, Level 10, Damage 1d6, ITEM_FLAG_2HANDED
-73. Scimitar — ITEM_IDX_SWORD, Level 10, Damage 1d8
-74. Spear — ITEM_IDX_SPEAR, Level 10, Damage 2d4
-75. Trident — ITEM_IDX_POLEARM, Level 10(?), Damage 3d4, ITEM_FLAG_2HANDED
-76. War Hammer — ITEM_IDX_MACE, Level 10, Damage 1d5, ITEM_FLAG_2HANDED
+## Source: Items.txt — see Resources/Items.txt for Complete Current Inventory 
 
 ---
 
@@ -1137,7 +1019,6 @@ Postponed until after ranged attack implementation
 - Potion of Gain CON/DEX/INT/WIS/CHA — #197 comment (all 6 stats)
 - Potion of Restore CON/DEX/INT/WIS/CHA — #197 comment (all 6 stats)
 - Potion of Apple Juice — #121 comment (always identified, flavor)
-- Potion of Remove Curse — #243 comment (Town: "Potions of Remove Curse" in Player House storage)
 
 **Scrolls (not yet in Items.txt)**:
 - Scroll of Blessing (EFFECT_FLAG_AC + EFFECT_MOD_TIMED) — #77 comment

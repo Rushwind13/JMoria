@@ -5,17 +5,6 @@ Foundation commit landed — this tracks what's left before Phase 3 is done.
 
 ---
 
-## Completed Session (2026-04-22)
-
-### Monster Content ✅ DONE
-
-- [x] **31 new monsters added** — Full implementation of planned lines: EYE (Radiation Eye, Beholder, Greater Beholder), HUMANOID tiers (Hobgoblin/Gnoll/Bugbear warrior/shaman/chieftain), ORC chieftain/shaman, PERSON ranks (Novice through Paladin Lord), Quasit. Monsters.txt: 296 → 327 entries.
-- [x] **Monster test infrastructure** — Test dungeon now correctly loads Effects.txt before parsing monsters. Named effect resolution works. All 2 test scenarios pass (10 steps).
-- [x] **Effect catalog gap filled** — "Life Drain" effect added to Effects.txt (115 total).
-- [x] **Code quality** — sort_resources.py cleaned up (em-dash → hyphen for linting).
-
----
-
 ## Issue #114 — Item Identification
 
 ### Remaining
@@ -43,7 +32,6 @@ Foundation commit landed — this tracks what's left before Phase 3 is done.
 ## Issue #77 — Item Effects
 
 ### Remaining — Item Effect Types
-- [x] **`EFFECT_MOD_TIMED`** (0x10) — temporary effect duration
 - [ ] **Effect dispatch for `EFFECT_MOD_TIMED` / `EFFECT_MOD_TIMED`** — already resolved in design (use INTRINSIC + MOD_TIMED); needs code implementation routing, and round-trip
 
 #### Flags Blocked by Other Systems
@@ -97,43 +85,18 @@ These are ordered by "unblocks the most other work" and "most visible gameplay i
 
 ### Tier 2 — Identification Depth
 6. **Feeling tiers** (#114) — Per-turn passive chance: `{magical}` / `{excellent}` / `{special}` display.
-7. ~~**Blind-use identification**~~ ✅ — Implemented in `CPlayer::Quaff` / `CPlayer::Read`: noticeable effect → auto-ID + name reveal; no noticeable effect → `m_bTried = true`; `{tried}` shown in item display.
-8. **Stacking identity check** — Complete per-category rules; partial-stack split prompt on drop.
+7. **Stacking identity check** — Complete per-category rules; partial-stack split prompt on drop.
 
 ### Tier 3 — Monster Combat Depth ✅ (content complete, code TBD)
-9. **Item destruction from attacks** — See [#271](https://github.com/Rushwind13/JMoria/issues/271). Postponed until after Ranged Attacks (PR #235).
+8. **Item destruction from attacks** — See [#271](https://github.com/Rushwind13/JMoria/issues/271). Postponed until after Ranged Attacks (PR #235).
 
 ### Tier 4 — Light Economy Integration
-10. **Light source items** (#270) — Staff of Light, Staff of Starlight in Items.txt; need light source code integration. Flask of Oil not yet added.
+9. **Light radius extends visibility** (#72, #121) — UpdateVisibility() uses torch Radius to extend sight range
 
 ### Tier 5 — Advanced Systems (Require Stats, Classes, Spells)
-11. **`EFFECT_FLAG_STAT`** (#77) — Requires stat system (STR/DEX/CON/INT/WIS/CHA)
-12. **Class-specific feelings** (#114) — Requires class system with stat priorities
-13. **Spell of Light Area / Mage ID spell** (#72, #114) — Requires spell/magic system
-14. **`?*Identify*`** (#114) — Requires ego/unique item system
-
----
-
-## Completed This Session (2026-04-22)
-
-- [x] **Item level redesign** — All 153 items releveled with natural progression; `Level` = peak bell-curve depth. Reserved L90+ for Ego/Legendary/Unique.
-- [x] **New items** — Leather Cap (L1), Short Sword (L5), Short Bow (L3).
-- [x] **`LevelSigma` data field** — `CItemDef` + `CMonsterDef` structs; parsed in `FileParse.cpp` (prefix-collision fix). Default 10.0.
-- [x] **Bell-curve spawn window** — `ChooseItemForDepth` / `ChooseMonsterForDepth` replaced with `Util::windowed_bell` weighted selection. Hard cutoff and retry loop removed. `Dungeon.h` signature: `range` int → `sigma` float.
-- [x] **`Util::windowed_bell`** — Polynomial `(1-x²)²` bell, zero outside `|delta| >= sigma`. No `<cmath>` dependency.
+10. **`EFFECT_FLAG_STAT`** (#77) — Requires stat system (STR/DEX/CON/INT/WIS/CHA)
+11. **Class-specific feelings** (#114) — Requires class system with stat priorities
+12. **Spell of Light Area / Mage ID spell** (#72, #114) — Requires spell/magic system
+13. **`?*Identify*`** (#114) — Requires ego/unique item system
 
 
-
-
-### Tier 3 — Monster Combat Depth ✅ (content complete, code TBD)
-11. **Item destruction from attacks** — See [#271](https://github.com/Rushwind13/JMoria/issues/271). Postponed until after Ranged Attacks (PR #235).
-
-### Tier 4 — Light Economy Integration
-12. **Light radius extends visibility** (#72, #121) — UpdateVisibility() uses torch Radius to extend sight range
-13. **Light source items** (#270) — Staff of Light, Staff of Starlight in Items.txt; need light source code integration. Flask of Oil not yet added.
-
-### Tier 5 — Advanced Systems (Require Stats, Classes, Spells)
-15. **`EFFECT_FLAG_STAT`** (#77) — Requires stat system (STR/DEX/CON/INT/WIS/CHA) to exist first
-16. **Class-specific feelings** (#114) — Requires class system with stat priorities
-17. **Spell of Light Area / Mage ID spell** (#72, #114) — Requires spell/magic system
-18. **`?*Identify*`** (#114) — Requires ego/unique item system

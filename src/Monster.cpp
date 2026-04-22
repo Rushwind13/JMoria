@@ -204,9 +204,9 @@ float CMonster::Attack()
 
 const char *CMonster::AttackEffect()
 {
-    if( m_pCurrentAttack == NULL )
+    if( m_pCurrentAttack == NULL || m_pCurrentAttack->m_pEffect == NULL )
         return "thoughts and prayers";
-    switch( m_pCurrentAttack->m_dwEffectFlags )
+    switch( m_pCurrentAttack->m_pEffect->m_dwFlags )
     {
     case EFFECT_FLAG_ACID:
         return "acid";

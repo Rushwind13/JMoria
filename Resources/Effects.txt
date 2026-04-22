@@ -24,6 +24,15 @@
 # Range       float     max range in tiles (0 = self only)
 # Radius      float     AoE radius (0 = single target)
 
+# Physical Hit — a basic physical blow with no elemental component.
+# Used by: all pure melee attacks (claw, bite, punch, trample, etc.)
+Effect <Physical Hit>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Amount      <1d6>
+    Range       1
+}
+
 # Light Ray — a beam of bright light that damages light-sensitive monsters.
 # Used by: Wand of Light, Staff of Starlight (line component)
 Effect <Light Ray>
@@ -201,6 +210,29 @@ Effect <Poison Sting>
     Range       1
 }
 
+# Poison Bolt — a line of venom that damages and poisons a target.
+# Used by: young/mid green dragon breath, poison dragon breath
+Effect <Poison Bolt>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_POISON>
+    Modifier    <EFFECT_MOD_LINE>
+    Amount      <2d8>
+    Range       8
+}
+
+# Poison Ball — an explosion of venom at a target location.
+# Used by: ancient green dragon breath, ancient poison dragon breath
+Effect <Poison Ball>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_POISON>
+    Modifier    <EFFECT_MOD_BALL>
+    Amount      <6d8>
+    Range       5
+    Radius      3
+}
+
 # Stone to Mud — dissolves rock into mud, destroying a wall tile.
 # Used by: Wand of Stone to Mud
 Effect <Stone to Mud>
@@ -208,6 +240,15 @@ Effect <Stone to Mud>
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_STONE_TO_MUD>
     Range       15
+}
+
+# Pick Pocket — a theft attempt that steals treasure from the target.
+# Not assigned to any monster yet — placeholder for Issue #275
+Effect <Pick Pocket>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_TREASURE>
+    Range       1
 }
 
 # --- Healing and Curing ---

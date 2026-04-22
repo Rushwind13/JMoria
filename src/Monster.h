@@ -2,6 +2,7 @@
 #define __MONSTER_H__
 
 #include "AIMgr.h"
+#include "Effect.h"
 #include "JLinkList.h"
 #include "JMDefs.h"
 
@@ -12,7 +13,7 @@
 class CAttack
 {
 public:
-    CAttack() : m_dwType( -1 ), m_dwEffect( -1 ), m_dwEffectFlags( -1 ), m_szDamage( NULL ) {}
+    CAttack() : m_dwType( -1 ), m_szDamage( NULL ), m_pEffect( NULL ) {}
     ~CAttack()
     {
         if( m_szDamage )
@@ -20,11 +21,15 @@ public:
             delete[] m_szDamage;
             m_szDamage = NULL;
         }
+        if( m_pEffect )
+        {
+            delete m_pEffect;
+            m_pEffect = NULL;
+        }
     }
-    int m_dwType;
-    int m_dwEffect;
-    int m_dwEffectFlags;
-    char *m_szDamage;
+    int m_dwType;       // MON_FLAG_BITE/CLAW/etc — delivery flavor for AttackFlavorText()
+    char *m_szDamage;   // NdM dice string (inline attacks, or effect Amount copy)
+    CEffect *m_pEffect; // owned; NULL for legacy inline attacks
 };
 
 // There will be 1 instance of CMonsterTileDef for each line in Monsters.dat

@@ -24,10 +24,10 @@ Assumptions:
 
 | # | Task | Notes |
 |---|---|---|
-| 1 | Add **"Physical Hit"** effect | `HIT`, no element, Amount=1d6, Range=1. Default for all pure physical attacks |
-| 2 | Add **"Pick Pocket"** effect | `HIT`, TREASURE, no amount. Not assigned to any monster — placeholder for Issue #275 |
-| 3 | Add **"Poison Bolt"** effect | `HIT`, POISON, line MOD, Range~8 — for young/mid green/poison dragons breath |
-| 4 | Add **"Poison Ball"** effect | `HIT`, POISON, ball MOD, Radius~3, Range~5 — for ancient green/poison dragons breath |
+| 1 | ~~Add **"Physical Hit"** effect~~ ✅ DONE 2026-04-21 | `HIT`, no element, Amount=1d6, Range=1. Default for all pure physical attacks |
+| 2 | ~~Add **"Pick Pocket"** effect~~ ✅ DONE 2026-04-21 | `HIT`, TREASURE, Range=1. Not assigned to any monster — placeholder for Issue #275 |
+| 3 | ~~Add **"Poison Bolt"** effect~~ ✅ DONE 2026-04-21 | `HIT`, POISON, line MOD, Amount=2d8, Range=8 — for young/mid green/poison dragons breath |
+| 4 | ~~Add **"Poison Ball"** effect~~ ✅ DONE 2026-04-21 | `HIT`, POISON, ball MOD, Amount=6d8, Radius=3, Range=5 — for ancient green/poison dragons breath |
 
 ---
 
@@ -35,8 +35,8 @@ Assumptions:
 
 | # | Task | File | Notes |
 |---|---|---|---|
-| 5 | Add `m_ed` pointer to `CAttack` | `src/Monster.h` | Mirror how `CEffect.m_ed` holds the `CEffectDef*` reference |
-| 6 | Extend Attack parser | `src/FileParse.cpp` | Detect `<DELIVERY>, <EffectName>[, dice[, range]]` format; call `GetEffectDef()`; populate `m_ed`, plus copy effect fields same as item parser does |
+| 5 | ~~Add `m_ed` pointer to `CAttack`~~ ✅ DONE 2026-04-21 | `src/Monster.h` | **Superseded same session** — `CAttack` reshaped: dropped `m_dwEffect`/`m_dwEffectFlags`/`m_ed`; added owned `CEffect *m_pEffect`; delivery stays on `m_dwType` |
+| 6 | ~~Extend Attack parser~~ ✅ DONE 2026-04-21 | `src/FileParse.cpp` | New format: delivery→`m_dwType`, `EffectFromName()`→`m_pEffect`; old inline format now also allocates a `CEffect` into `m_pEffect`; `EffectFromName()` extracted as private `CDataFile` helper (same call site as item `Effect` named-ref path) |
 
 ---
 

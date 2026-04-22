@@ -1,12 +1,12 @@
 #ifndef __FILEPARSE_H__
 #define __FILEPARSE_H__
+#include "Effect.h"
 #include "JColor.h"
 #include "JLinkList.h"
 #include "TextEntry.h"
 
 class CMonsterDef;
 class CItemDef;
-class CEffectDef;
 class CDungeon;
 class CScore;
 class CDataFile
@@ -35,6 +35,7 @@ protected:
     int GetValue( char *szLine, int &dwIn );
     int GetValue( char *szLine, long &dwIn );
     float GetValue( char *szLine, float &fIn );
+    CEffect *EffectFromName( const char *szName );
 
 private:
     FILE *m_fp;

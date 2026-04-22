@@ -4,6 +4,30 @@
 #include "Item.h"
 #include "Monster.h"
 
+CEffect *CDataFile::EffectFromName( const char *szName )
+{
+    if( m_pDungeon == NULL || szName == NULL || *szName == '\0' )
+        return NULL;
+
+    CEffectDef *pFound = m_pDungeon->GetEffectDef( szName );
+    if( pFound == NULL )
+    {
+        JLog( LOG_LEVEL_WARN, true, "EffectFromName: unknown effect '%s'\n", szName );
+        return NULL;
+    }
+
+    CEffect *pEffect = new CEffect;
+    pEffect->m_ed = pFound;
+    pEffect->m_dwEffect = pFound->m_dwEffect;
+    pEffect->m_dwFlags = pFound->m_dwFlags;
+    pEffect->m_dwFlags2 = pFound->m_dwFlags2;
+    pEffect->m_dwModifier = pFound->m_dwModifier;
+    pEffect->m_fDuration = pFound->m_fDuration;
+    pEffect->SetAmount( pFound->m_szAmount );
+    JLog( LOG_LEVEL_NOISE, true, "EffectFromName: resolved '%s'\n", szName );
+    return pEffect;
+}
+
 bool CDataFile::Open( const char *szFilename )
 {
     m_fp = fopen( szFilename, "r" );
@@ -182,72 +206,142 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 char *begin;
                 char *end;
                 char *cur;
-                bool bDone = false;
-                // Attack <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2 -or-
-                // Attack <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,15d8,5
-                // effect type
+
+                // Two supported formats:
+                //   Old inline: Attack <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+                //               Attack
+                //               <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,15d8,5
+                //   New named:  Attack <MON_FLAG_BITE>,<Physical Hit>,2d6
+                //               Attack <MON_FLAG_BREATHE>,<Firebolt>,2d8,15
+                // Detect by checking whether the first token starts with "EFFECT_TYPE_".
+
+                // first token
                 begin = strchr( szLine, '<' );
                 end = strchr( szLine, '>' );
                 if( begin == NULL || end == NULL )
                 {
-                    JLog( LOG_LEVEL_ERROR, true, "error parsing attack: effect type not found %s\n",
-                          cur );
+                    JLog( LOG_LEVEL_ERROR, true,
+                          "error parsing attack: first token not found: %s\n", szLine );
+                    delete curAttack;
                     continue;
                 }
                 *end++ = NULL;
                 begin++;
-                // if( g_Constants.CompareType( "EFFECT_TYPE", begin ) )
-                {
-                    curAttack->m_dwEffect = g_Constants.LookupString( begin );
-                }
                 cur = end;
 
-                // attack type
-                begin = strchr( cur, '<' );
-                end = strchr( cur, '>' );
-                if( begin == NULL || end == NULL )
+                if( strncasecmp( begin, "EFFECT_TYPE_", 12 ) == 0 )
                 {
-                    JLog( LOG_LEVEL_ERROR, true, "error parsing attack: attack type not found %s\n",
-                          cur );
-                    continue;
-                }
-                *end++ = NULL;
-                begin++;
-                // if( g_Constants.CompareType( "MON_FLAG", begin ) ||
-                //     g_Constants.CompareType( "EFFECT_FLAG", begin ) )
-                // {
-                curAttack->m_dwType = g_Constants.LookupString( begin );
-                // }
-                cur = end;
+                    // --- Old inline format ---
+                    CEffect *pEffect = new CEffect;
+                    pEffect->m_dwEffect = g_Constants.LookupString( begin );
 
-                // effect flag (optional)
-                begin = strchr( cur, '<' );
-                end = strchr( cur, '>' );
-                if( begin != NULL && end != NULL )
-                {
+                    // attack type (MON_FLAG_*)
+                    begin = strchr( cur, '<' );
+                    end = strchr( cur, '>' );
+                    if( begin == NULL || end == NULL )
+                    {
+                        JLog( LOG_LEVEL_ERROR, true,
+                              "error parsing attack: attack type not found: %s\n", cur );
+                        delete pEffect;
+                        delete curAttack;
+                        continue;
+                    }
                     *end++ = NULL;
                     begin++;
-                    // if( g_Constants.CompareType( "EFFECT_FLAG", begin ) )
-                    {
-                        curAttack->m_dwEffectFlags = g_Constants.LookupString( begin );
-                        JLog( LOG_LEVEL_NOISE, true, "Found an Effect Flag: %s\n", begin );
-                    }
+                    curAttack->m_dwType = g_Constants.LookupString( begin );
                     cur = end;
-                }
 
-                // damage
-                begin = strchr( cur, ',' );
-                if( begin == NULL )
+                    // effect flag (optional)
+                    begin = strchr( cur, '<' );
+                    end = strchr( cur, '>' );
+                    if( begin != NULL && end != NULL )
+                    {
+                        *end++ = NULL;
+                        begin++;
+                        pEffect->m_dwFlags = g_Constants.LookupString( begin );
+                        JLog( LOG_LEVEL_NOISE, true, "Found an Effect Flag: %s\n", begin );
+                        cur = end;
+                    }
+
+                    curAttack->m_pEffect = pEffect;
+
+                    // damage
+                    begin = strchr( cur, ',' );
+                    if( begin == NULL )
+                    {
+                        JLog( LOG_LEVEL_ERROR, true, "error parsing attack: damage not found: %s\n",
+                              cur );
+                        delete curAttack;
+                        continue;
+                    }
+                    begin++;
+                    cur = Strip( begin );
+                    curAttack->m_szDamage = new char[Util::jstrlen( cur ) + 1];
+                    Util::jstrcpy( curAttack->m_szDamage, cur );
+                }
+                else if( m_pDungeon != NULL )
                 {
-                    JLog( LOG_LEVEL_ERROR, true, "error parsing attack: damage not found %s\n",
-                          cur );
+                    // --- New named-effect format ---
+                    // first token is delivery type (MON_FLAG_*)
+                    curAttack->m_dwType = g_Constants.LookupString( begin );
+
+                    // second token: named effect
+                    begin = strchr( cur, '<' );
+                    end = strchr( cur, '>' );
+                    if( begin == NULL || end == NULL )
+                    {
+                        JLog( LOG_LEVEL_ERROR, true,
+                              "error parsing attack: effect name not found: %s\n", cur );
+                        delete curAttack;
+                        continue;
+                    }
+                    char nameBuf[128];
+                    int nameLen = (int)( end - begin - 1 );
+                    if( nameLen > 0 && nameLen < (int)sizeof( nameBuf ) )
+                    {
+                        memcpy( nameBuf, begin + 1, nameLen );
+                        nameBuf[nameLen] = '\0';
+                    }
+                    else
+                    {
+                        nameBuf[0] = '\0';
+                    }
+                    *end++ = NULL;
+                    cur = end;
+
+                    CEffect *pEffect = EffectFromName( nameBuf );
+                    if( pEffect != NULL )
+                    {
+                        curAttack->m_pEffect = pEffect;
+
+                        // optional dice override
+                        begin = strchr( cur, ',' );
+                        if( begin != NULL )
+                        {
+                            begin++;
+                            cur = Strip( begin );
+                            if( cur != NULL && *cur != '\0' )
+                            {
+                                curAttack->m_szDamage = new char[Util::jstrlen( cur ) + 1];
+                                Util::jstrcpy( curAttack->m_szDamage, cur );
+                            }
+                        }
+                        else if( pEffect->m_ed != NULL && pEffect->m_ed->m_szAmount != NULL )
+                        {
+                            // no dice override — fall back to effect's default amount
+                            curAttack->m_szDamage =
+                                new char[Util::jstrlen( pEffect->m_ed->m_szAmount ) + 1];
+                            Util::jstrcpy( curAttack->m_szDamage, pEffect->m_ed->m_szAmount );
+                        }
+                    }
+                }
+                else
+                {
+                    JLog( LOG_LEVEL_WARN, true,
+                          "Attack uses named effect but dungeon not set: %s\n", szLine );
+                    delete curAttack;
                     continue;
                 }
-                begin++;
-                // from here on out, you've got enough info to do this.
-                cur = Strip( begin );
-                curAttack->m_szDamage = new char[Util::jstrlen( cur ) + 1];
-                Util::jstrcpy( curAttack->m_szDamage, cur );
 
                 // store it
                 mdIn.m_llAttacks->Add( curAttack );
@@ -539,7 +633,6 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
 
                 if( bIsNamed && m_pDungeon != NULL )
                 {
-                    // Named reference — look up in effect catalog
                     char nameBuf[128];
                     int nameLen = (int)( end - begin - 1 );
                     if( nameLen > 0 && nameLen < (int)sizeof( nameBuf ) )
@@ -552,25 +645,10 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                         nameBuf[0] = '\0';
                     }
 
-                    CEffectDef *pFound = m_pDungeon->GetEffectDef( nameBuf );
-
-                    if( pFound != NULL )
-                    {
-                        JLog( LOG_LEVEL_NOISE, true, "Effect ref: %s\n", nameBuf );
-                        curEffect->m_ed = pFound;
-                        curEffect->m_dwEffect = pFound->m_dwEffect;
-                        curEffect->m_dwFlags = pFound->m_dwFlags;
-                        curEffect->m_dwFlags2 = pFound->m_dwFlags2;
-                        curEffect->m_dwModifier = pFound->m_dwModifier;
-                        curEffect->m_fDuration = pFound->m_fDuration;
-                        curEffect->SetAmount( pFound->m_szAmount );
+                    delete curEffect; // EffectFromName allocates its own
+                    curEffect = EffectFromName( nameBuf );
+                    if( curEffect != NULL )
                         idIn.m_llEffects->Add( curEffect );
-                    }
-                    else
-                    {
-                        JLog( LOG_LEVEL_WARN, true, "Unknown effect: %s\n", nameBuf );
-                        delete curEffect;
-                    }
                 }
                 else
                 {

@@ -168,6 +168,10 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
             {
                 mdIn.m_fBaseAC = GetValue( szLine, mdIn.m_fBaseAC );
             }
+            else if( strncasecmp( szLine, "levelsigma", 10 ) == 0 )
+            {
+                mdIn.m_fLevelSigma = GetValue( szLine, mdIn.m_fLevelSigma );
+            }
             else if( strncasecmp( szLine, "level", 5 ) == 0 )
             {
                 GetValue( szLine, mdIn.m_dwLevel );
@@ -456,6 +460,10 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
             else if( strncasecmp( szLine, "charges", 7 ) == 0 )
             {
                 idIn.m_szCharges = GetValue( szLine, idIn.m_szCharges );
+            }
+            else if( strncasecmp( szLine, "levelsigma", 10 ) == 0 )
+            {
+                idIn.m_fLevelSigma = GetValue( szLine, idIn.m_fLevelSigma );
             }
             else if( strncasecmp( szLine, "level", 5 ) == 0 )
             {

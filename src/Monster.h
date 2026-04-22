@@ -42,6 +42,8 @@ public:
           m_dwType( 0 ),
           m_dwIndex( 0 ),
           m_dwLevel( 0 ),
+          m_fLevelSigma( 10.0f ),
+          m_fSpawnWeight( 0.0f ),
           m_fExpValue( 0 ),
           m_dwMoveType( 0 ),
           m_fBaseHP( 0.0f ),
@@ -107,7 +109,9 @@ public:
     char *m_szAppear;                // how many copies of this monster show up at first
     char *m_szHD;                    // NdM form of this monster's hit dice.
     JLinkList<CAttack> *m_llAttacks; // this monster's attacks
-    int m_dwLevel;                   // earliest dungeon level to place this monster
+    int m_dwLevel;                   // peak dungeon depth (center of bell curve)
+    float m_fLevelSigma;             // spread of bell curve (default 10.0)
+    float m_fSpawnWeight;            // scratch: Gaussian weight computed by ChooseMonsterForDepth
     float m_fExpValue;               // how much XP do you get for killing this monster
 protected:
 private:

@@ -33,6 +33,16 @@ Need explicit answers before these can be implemented.
 
 ---
 
+## Completed This Session (2026-04-22)
+
+- [x] **Item level redesign** — All 153 items releveled: cheap tier at L1–4, natural mid-game progression, deep-dungeon gatekeeping for top-tier armor/weapons/consumables. `Level` field now means peak spawn depth (bell curve center). Reserved L90+ for Ego/Legendary/Unique.
+- [x] **New items added** — Leather Cap (L1), Short Sword (L5), Short Bow (L3).
+- [x] **`LevelSigma` field** — Added to `CItemDef` and `CMonsterDef`. Parsed by `FileParse.cpp` (prefix collision fix: `levelsigma` checked before `level`). Default 10.0.
+- [x] **Bell-curve spawn window** — `ChooseItemForDepth` and `ChooseMonsterForDepth` replaced with `Util::windowed_bell` weighted selection (no hard cutoff, no retry loop). `LevelSigma` drives spread per-entry. `Dungeon.h` signature updated: `range` int → `sigma` float.
+- [x] **`Util::windowed_bell`** — Added to `Util.h`/`Util.cpp`. Polynomial bell curve `(1-x²)²`, zero outside `|delta| >= sigma`. No `<cmath>` dependency.
+
+---
+
 ## Ready to Implement
 
 No blockers. Start any of these.

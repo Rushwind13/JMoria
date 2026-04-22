@@ -69,6 +69,20 @@ JIVector GetRandomPoint( const JRect rcIn )
     return vPoint;
 }
 
+float windowed_bell( float delta, float sigma )
+{
+    // Normalize delta to a 0-1 range based on sigma
+    float x = delta / sigma;
+    float abs_x = ( x < 0 ) ? -x : x;
+
+    if( abs_x >= 1.0f )
+        return 0.0f;
+
+    // A simple smooth polynomial: (1 - x^2)^2
+    float v = 1.0f - abs_x * abs_x;
+    return v * v;
+}
+
 // Roll some dice
 float Roll( int dice, int sides )
 {

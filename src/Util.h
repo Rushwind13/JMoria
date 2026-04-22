@@ -18,6 +18,7 @@ void SeedRandomFromClock();
 float GetRandom( float lo, float hi );
 int GetRandom( int lo, int hi );
 JIVector GetRandomPoint( const JRect rcIn );
+float windowed_bell( float delta, float sigma );
 float Roll( int dice, int sides );
 float Roll( const char *szFormat );
 

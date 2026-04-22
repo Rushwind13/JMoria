@@ -1,6 +1,5 @@
 # Effects.txt
 #
-# Named effect catalog — the single source of truth for what an effect does.
 # Items, monsters, and spells all reference these by name.
 #
 # Each Effect entry is of the following form:
@@ -24,49 +23,10 @@
 # Range       float     max range in tiles (0 = self only)
 # Radius      float     AoE radius (0 = single target)
 
-# Physical Hit — a basic physical blow with no elemental component.
-# Used by: all pure melee attacks (claw, bite, punch, trample, etc.)
-Effect <Physical Hit>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Amount      <1d6>
-    Range       1
-}
+# --- HIT — damage / status attacks ---
 
-# Light Touch — a holy touch that deals light damage in melee.
-# Used by: Acolytes, High Priests (spore attacks)
-Effect <Light Touch>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_LIGHT>
-    Amount      <1d4>
-    Range       1
-}
+# --- EFFECT_FLAG_FIRE ---
 
-# Light Ray — a beam of bright light that damages light-sensitive monsters.
-# Used by: Wand of Light, Staff of Starlight (line component)
-Effect <Light Ray>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_LIGHT>
-    Flag2       <EFFECT_FLAG_NO_COLLIDE>
-    Modifier    <EFFECT_MOD_LINE>
-    Amount      <1d5>
-    Range       15
-}
-
-# Light Area — illuminate the surrounding area.
-# Used by: Scroll of Light, Staff of Light, Wand of Light (area component)
-Effect <Light Area>
-{
-    Type        <EFFECT_TYPE_CREATE>
-    Flag        <EFFECT_FLAG_LIGHT>
-    Modifier    <EFFECT_MOD_AREA>
-    Radius      15
-}
-
-# Fire Touch — a searing touch that burns a target.
-# Used by: Red worm masses, fire elementals (melee)
 Effect <Fire Touch>
 {
     Type        <EFFECT_TYPE_HIT>
@@ -74,20 +34,6 @@ Effect <Fire Touch>
     Amount      <1d5>
     Range       1
 }
-
-# Firebolt — a bolt of fire that damages a target.
-# Used by: Wand of Firebolts, dragon breath (baby), fire traps
-Effect <Firebolt>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_FIRE>
-    Modifier    <EFFECT_MOD_LINE>
-    Amount      <2d8>
-    Range       15
-}
-
-# Fireball — an explosion of fire at a target location.
-# Used by: Wand of Fireballs, dragon breath (mature)
 Effect <Fireball>
 {
     Type        <EFFECT_TYPE_HIT>
@@ -97,9 +43,22 @@ Effect <Fireball>
     Range       20
     Radius      3
 }
+Effect <Firebolt>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_FIRE>
+    Modifier    <EFFECT_MOD_LINE>
+    Amount      <2d8>
+    Range       15
+}
+Effect <Inflict Fire>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_FIRE>
+    Amount      <2d8>
+}
+# --- EFFECT_FLAG_COLD ---
 
-# Cold Touch — a freezing touch that chills a target.
-# Used by: Blue worm masses, cold elementals (melee)
 Effect <Cold Touch>
 {
     Type        <EFFECT_TYPE_HIT>
@@ -107,18 +66,6 @@ Effect <Cold Touch>
     Amount      <1d5>
     Range       1
 }
-
-# Frost Bolt — a bolt of cold that damages a target.
-Effect <Frost Bolt>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_COLD>
-    Modifier    <EFFECT_MOD_LINE>
-    Amount      <2d8>
-    Range       15
-}
-
-# Frost Ball — an explosion of cold at a target location.
 Effect <Frost Ball>
 {
     Type        <EFFECT_TYPE_HIT>
@@ -128,29 +75,16 @@ Effect <Frost Ball>
     Range       20
     Radius      3
 }
-
-# Lightning Touch — a shocking touch that electrifies a target.
-# Used by: Electricity elementals, storm creatures (melee)
-Effect <Lightning Touch>
+Effect <Frost Bolt>
 {
     Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_ELECTRICITY>
-    Amount      <2d6>
-    Range       1
-}
-
-# Lightning Bolt — a bolt of electricity.
-Effect <Lightning Bolt>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_ELECTRICITY>
-    Flag2       <EFFECT_FLAG_NO_COLLIDE>
+    Flag        <EFFECT_FLAG_COLD>
     Modifier    <EFFECT_MOD_LINE>
-    Amount      <3d6>
-    Range       20
+    Amount      <2d8>
+    Range       15
 }
+# --- EFFECT_FLAG_ELECTRICITY ---
 
-# Lightning Ball — an explosion of electricity at a target location.
 Effect <Lightning Ball>
 {
     Type        <EFFECT_TYPE_HIT>
@@ -160,28 +94,24 @@ Effect <Lightning Ball>
     Range       20
     Radius      3
 }
-
-# Acid Touch — a caustic touch that corrodes a target.
-# Used by: Black worm masses, acid creatures (melee)
-Effect <Acid Touch>
+Effect <Lightning Bolt>
 {
     Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_ACID>
+    Flag        <EFFECT_FLAG_ELECTRICITY>
+    Flag2       <EFFECT_FLAG_NO_COLLIDE>
+    Modifier    <EFFECT_MOD_LINE>
+    Amount      <3d6>
+    Range       20
+}
+Effect <Lightning Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_ELECTRICITY>
     Amount      <2d6>
     Range       1
 }
+# --- EFFECT_FLAG_ACID ---
 
-# Acid Bolt — a bolt of acid that damages a target.
-Effect <Acid Bolt>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_ACID>
-    Modifier    <EFFECT_MOD_LINE>
-    Amount      <2d8>
-    Range       15
-}
-
-# Acid Ball — an explosion of acid at a target location.
 Effect <Acid Ball>
 {
     Type        <EFFECT_TYPE_HIT>
@@ -191,48 +121,23 @@ Effect <Acid Ball>
     Range       20
     Radius      3
 }
-
-# Teleport Away — sends the target to a random location.
-# Used by: Wand of Teleport Away
-Effect <Teleport Away>
+Effect <Acid Bolt>
 {
     Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_TELEPORT>
-    Range       15
-}
-
-# Poison Touch — a toxic touch that infects a target with poison.
-# Used by: Poison creatures, toxic monsters (melee, no physical damage)
-Effect <Poison Touch>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_POISON>
-    Range       1
-}
-
-# Poison Sting — a venomous attack that inflicts poison.
-# Used by: Spider/snake/scorpion monster attacks
-Effect <Poison Sting>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_POISON>
-    Amount      <1d4>
-    Range       1
-}
-
-# Poison Bolt — a line of venom that damages and poisons a target.
-# Used by: young/mid green dragon breath, poison dragon breath
-Effect <Poison Bolt>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_POISON>
+    Flag        <EFFECT_FLAG_ACID>
     Modifier    <EFFECT_MOD_LINE>
     Amount      <2d8>
-    Range       8
+    Range       15
 }
+Effect <Acid Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_ACID>
+    Amount      <2d6>
+    Range       1
+}
+# --- EFFECT_FLAG_POISON ---
 
-# Poison Ball — an explosion of venom at a target location.
-# Used by: ancient green dragon breath, ancient poison dragon breath
 Effect <Poison Ball>
 {
     Type        <EFFECT_TYPE_HIT>
@@ -242,29 +147,261 @@ Effect <Poison Ball>
     Range       5
     Radius      3
 }
-
-# Stone to Mud — dissolves rock into mud, destroying a wall tile.
-# Used by: Wand of Stone to Mud
-Effect <Stone to Mud>
+Effect <Poison Bolt>
 {
     Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_STONE_TO_MUD>
+    Flag        <EFFECT_FLAG_POISON>
+    Modifier    <EFFECT_MOD_LINE>
+    Amount      <2d8>
+    Range       8
+}
+Effect <Poison Sting>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_POISON>
+    Amount      <1d4>
+    Range       1
+}
+Effect <Poison Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_POISON>
+    Range       1
+}
+# --- EFFECT_FLAG_LIGHT ---
+
+Effect <Light Ray>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_LIGHT>
+    Flag2       <EFFECT_FLAG_NO_COLLIDE>
+    Modifier    <EFFECT_MOD_LINE>
+    Amount      <1d5>
     Range       15
 }
+Effect <Light Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_LIGHT>
+    Amount      <1d4>
+    Range       1
+}
+# --- EFFECT_FLAG_PARALYZE ---
 
-# Pick Pocket — a theft attempt that steals treasure from the target.
-# Not assigned to any monster yet — placeholder for Issue #275
+Effect <Cause Paralysis>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_PARALYZE>
+    Range       15
+}
+Effect <Mass Paralyze>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_PARALYZE>
+    Modifier    <EFFECT_MOD_AREA>
+    Radius      8
+}
+Effect <Paralysis Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_PARALYZE>
+    Duration    1d4
+    Range       1
+}
+# --- EFFECT_FLAG_TREASURE ---
+
 Effect <Pick Pocket>
 {
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_TREASURE>
     Range       1
 }
+# --- EFFECT_FLAG_AFRAID ---
 
-# --- Healing and Curing ---
+Effect <Cause Fear>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_AFRAID>
+    Range       15
+}
+Effect <Fear Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_AFRAID>
+    Duration    5.0
+    Range       1
+}
+Effect <Mass Fear>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_AFRAID>
+    Modifier    <EFFECT_MOD_AREA>
+    Radius      10
+}
+# --- EFFECT_FLAG_BLIND ---
 
-# Minor Healing — restores a small amount of HP and cures poison/blindness.
-# Used by: Potion of Minor Healing
+Effect <Blindness Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_BLIND>
+    Duration    50.0
+    Range       1
+}
+# --- EFFECT_FLAG_SLEEP ---
+
+Effect <Cause Sleep>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_SLEEP>
+    Range       15
+}
+Effect <Mass Sleep>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_SLEEP>
+    Modifier    <EFFECT_MOD_AREA>
+    Radius      10
+}
+Effect <Sleep Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_SLEEP>
+    Duration    5.0
+    Range       1
+}
+# --- EFFECT_FLAG_CONFUSE ---
+
+Effect <Cause Confusion>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_CONFUSE>
+    Range       15
+}
+Effect <Confusion Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_CONFUSE>
+    Duration    7.0
+    Range       1
+}
+# --- EFFECT_FLAG_STONE_TO_MUD ---
+
+Effect <Stone to Mud>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_STONE_TO_MUD>
+    Range       15
+}
+# --- EFFECT_FLAG_IDENTIFY ---
+
+Effect <Probe>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_IDENTIFY>
+    Range       15
+}
+# --- EFFECT_FLAG_AC ---
+
+Effect <Timed Blessing>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_AC>
+    Duration    50.0
+}
+# --- EFFECT_FLAG_XP ---
+
+Effect <XP Drain Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_XP>
+    Amount      <1d10>
+    Range       1
+}
+# --- EFFECT_FLAG_HP ---
+
+Effect <Heal Monster>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_HP>
+    Range       15
+}
+# --- EFFECT_FLAG_TELEPORT ---
+
+Effect <Teleport Away>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_TELEPORT>
+    Range       15
+}
+Effect <Physical Hit>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Amount      <1d6>
+    Range       1
+}
+
+# --- HEAL — restore HP and cure status ---
+
+Effect <Cure Poison>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_POISON>
+}
+Effect <Cure Paralysis>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_PARALYZE>
+}
+Effect <Cure Fear>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_AFRAID>
+}
+Effect <Cure Blindness>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_BLIND>
+}
+Effect <Cure Sleep>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_SLEEP>
+}
+Effect <Cure Confusion>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_CONFUSE>
+}
+Effect <Cure Light Wounds>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <8d8>
+}
+Effect <Cure Serious Wounds>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <16d8>
+}
+Effect <Greater Healing>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <32d8>
+}
+Effect <Major Healing>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <24d8>
+}
+Effect <Massive Healing>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <100d8>
+}
 Effect <Minor Healing>
 {
     Type        <EFFECT_TYPE_HEAL>
@@ -272,190 +409,85 @@ Effect <Minor Healing>
     Amount      <4d4>
 }
 
-# Cure Light Wounds — restores a moderate amount of HP.
-# Used by: Staff of Cure Light Wounds
-Effect <Cure Light Wounds>
+# --- CREATE — summon, teleport, recall, mapping ---
+
+Effect <Light Area>
 {
-    Type        <EFFECT_TYPE_HEAL>
-    Flag        <EFFECT_FLAG_HP>
-    Amount      <8d8>
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_LIGHT>
+    Modifier    <EFFECT_MOD_AREA>
+    Radius      15
+}
+Effect <Recall>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_RECALL>
+}
+Effect <Full Mapping>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_MAPPING>
+}
+Effect <Partial Mapping>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_MAPPING>
+    Modifier    <EFFECT_MOD_AREA>
+}
+Effect <Summon Monsters>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_SUMMON>
+}
+Effect <Phase Door>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_TELEPORT>
+    Modifier    <EFFECT_MOD_AREA>
+}
+Effect <Teleport Self>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_TELEPORT>
+}
+Effect <Create Trap>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_TRAP>
+}
+Effect <Curse Object>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_CURSE>
 }
 
-# Cure Serious Wounds — restores a substantial amount of HP.
-# Used by: Staff of Cure Serious Wounds
-Effect <Cure Serious Wounds>
-{
-    Type        <EFFECT_TYPE_HEAL>
-    Flag        <EFFECT_FLAG_HP>
-    Amount      <16d8>
-}
+# --- DESTROY — remove curses, poison, etc. ---
 
-# Major Healing — restores a large amount of HP.
-# Used by: Potion of Cure Critical Wounds (component)
-Effect <Major Healing>
-{
-    Type        <EFFECT_TYPE_HEAL>
-    Flag        <EFFECT_FLAG_HP>
-    Amount      <24d8>
-}
-
-# Greater Healing — restores a large amount of HP.
-# Used by: Staff of Greater Healing
-Effect <Greater Healing>
-{
-    Type        <EFFECT_TYPE_HEAL>
-    Flag        <EFFECT_FLAG_HP>
-    Amount      <32d8>
-}
-
-# Massive Healing — maximum healing potency.
-# Used by: Potion of *Healing*
-Effect <Massive Healing>
-{
-    Type        <EFFECT_TYPE_HEAL>
-    Flag        <EFFECT_FLAG_HP>
-    Amount      <100d8>
-}
-
-# Cure Poison — removes poison status.
-# Used by: Potion of Cure Poison, healing potions (component)
-Effect <Cure Poison>
-{
-    Type        <EFFECT_TYPE_HEAL>
-    Flag        <EFFECT_FLAG_POISON>
-}
-
-# Destroy Poison — removes poison from the body entirely.
-# Used by: Potion of Neutralize Poison (component)
 Effect <Destroy Poison>
 {
     Type        <EFFECT_TYPE_DESTROY>
     Flag        <EFFECT_FLAG_POISON>
 }
-
-# Cure Blindness — removes blindness status.
-# Used by: Potion of Minor Healing (component), healing staves
-Effect <Cure Blindness>
+Effect <Remove Curse>
 {
-    Type        <EFFECT_TYPE_HEAL>
-    Flag        <EFFECT_FLAG_BLIND>
+    Type        <EFFECT_TYPE_DESTROY>
+    Flag        <EFFECT_FLAG_CURSE>
 }
 
-# Cure Fear — removes fear status.
-# Used by: Potion of Courage (component), Potion of Cure Critical Wounds
-Effect <Cure Fear>
-{
-    Type        <EFFECT_TYPE_HEAL>
-    Flag        <EFFECT_FLAG_AFRAID>
-}
+# --- INTRINSIC — permanent and timed intrinsics ---
 
-# Cure Confusion — removes confusion status.
-Effect <Cure Confusion>
-{
-    Type        <EFFECT_TYPE_HEAL>
-    Flag        <EFFECT_FLAG_CONFUSE>
-}
-
-# Cure Paralysis — removes paralysis status.
-Effect <Cure Paralysis>
-{
-    Type        <EFFECT_TYPE_HEAL>
-    Flag        <EFFECT_FLAG_PARALYZE>
-}
-
-# Cure Sleep — wakes the target from magical sleep.
-Effect <Cure Sleep>
-{
-    Type        <EFFECT_TYPE_HEAL>
-    Flag        <EFFECT_FLAG_SLEEP>
-}
-
-# Resist Fire — permanent fire resistance.
-# Used by: Ring of Fire Resistance
-Effect <Resist Fire>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_FIRE>
-    Modifier    <EFFECT_MOD_RESIST>
-}
-
-# Resist Cold — permanent cold resistance.
-# Used by: Ring of Cold Resistance
-Effect <Resist Cold>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_COLD>
-    Modifier    <EFFECT_MOD_RESIST>
-}
-
-# Resist Acid — permanent acid resistance.
-# Used by: Ring of Acid Resistance
-Effect <Resist Acid>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_ACID>
-    Modifier    <EFFECT_MOD_RESIST>
-}
-
-# Resist Electricity — permanent electricity resistance.
-# Used by: Ring of Electricity Resistance
-Effect <Resist Electricity>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_ELECTRICITY>
-    Modifier    <EFFECT_MOD_RESIST>
-}
-
-# Immune Fire — permanent fire immunity (very rare equipment).
 Effect <Immune Fire>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_FIRE>
     Modifier    <EFFECT_MOD_IMMUNE>
 }
-
-# Timed Resist Fire — temporary fire resistance.
-# Used by: Potion of Resist Fire, Staff of Fire Resistance
-Effect <Timed Resist Fire>
+Effect <Resist Fire>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_FIRE>
     Modifier    <EFFECT_MOD_RESIST>
-    Duration    150.0
 }
-
-# Timed Resist Cold — temporary cold resistance.
-# Used by: Potion of Resist Cold, Staff of Cold Resistance
-Effect <Timed Resist Cold>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_COLD>
-    Modifier    <EFFECT_MOD_RESIST>
-    Duration    150.0
-}
-
-# Timed Resist Acid — temporary acid resistance.
-# Used by: Potion of Resist Acid, Staff of Acid Resistance
-Effect <Timed Resist Acid>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_ACID>
-    Modifier    <EFFECT_MOD_RESIST>
-    Duration    150.0
-}
-
-# Timed Resist Electricity — temporary electricity resistance.
-# Used by: Potion of Resist Electricity, Staff of Electricity Resistance
-Effect <Timed Resist Electricity>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_ELECTRICITY>
-    Modifier    <EFFECT_MOD_RESIST>
-    Duration    150.0
-}
-
-# Timed Immune Fire — temporary fire immunity.
-# Used by: Staff of *Resistance*
 Effect <Timed Immune Fire>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
@@ -463,9 +495,19 @@ Effect <Timed Immune Fire>
     Modifier    <EFFECT_MOD_IMMUNE>
     Duration    80.0
 }
-
-# Timed Immune Cold — temporary cold immunity.
-# Used by: Staff of *Resistance*
+Effect <Timed Resist Fire>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_FIRE>
+    Modifier    <EFFECT_MOD_RESIST>
+    Duration    150.0
+}
+Effect <Resist Cold>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_COLD>
+    Modifier    <EFFECT_MOD_RESIST>
+}
 Effect <Timed Immune Cold>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
@@ -473,9 +515,19 @@ Effect <Timed Immune Cold>
     Modifier    <EFFECT_MOD_IMMUNE>
     Duration    80.0
 }
-
-# Timed Immune Electricity — temporary electricity immunity.
-# Used by: Staff of *Resistance*
+Effect <Timed Resist Cold>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_COLD>
+    Modifier    <EFFECT_MOD_RESIST>
+    Duration    150.0
+}
+Effect <Resist Electricity>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_ELECTRICITY>
+    Modifier    <EFFECT_MOD_RESIST>
+}
 Effect <Timed Immune Electricity>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
@@ -483,9 +535,19 @@ Effect <Timed Immune Electricity>
     Modifier    <EFFECT_MOD_IMMUNE>
     Duration    80.0
 }
-
-# Timed Immune Acid — temporary acid immunity.
-# Used by: Staff of *Resistance*
+Effect <Timed Resist Electricity>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_ELECTRICITY>
+    Modifier    <EFFECT_MOD_RESIST>
+    Duration    150.0
+}
+Effect <Resist Acid>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_ACID>
+    Modifier    <EFFECT_MOD_RESIST>
+}
 Effect <Timed Immune Acid>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
@@ -493,154 +555,94 @@ Effect <Timed Immune Acid>
     Modifier    <EFFECT_MOD_IMMUNE>
     Duration    80.0
 }
-
-# Free Action — immunity to paralysis and slowing.
-# Used by: Ring of Free Action
-Effect <Free Action>
+Effect <Timed Resist Acid>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_FREE_ACTION>
+    Flag        <EFFECT_FLAG_ACID>
+    Modifier    <EFFECT_MOD_RESIST>
+    Duration    150.0
 }
-
-# See Invisible — can see invisible creatures.
-# Used by: Ring of See Invisible (permanent)
-Effect <See Invisible>
-{
-    Type        <EFFECT_TYPE_SEE>
-    Flag        <EFFECT_FLAG_INVISIBLE>
-}
-
-# Timed See Invisible — temporary see invisible.
-# Used by: Potion of See Invisible
-Effect <Timed See Invisible>
-{
-    Type        <EFFECT_TYPE_SEE>
-    Flag        <EFFECT_FLAG_INVISIBLE>
-    Duration    100.0
-}
-
-# Levitation — float above floor traps and pits.
-# Used by: Ring of Levitation, Potion of Levitation
-Effect <Levitation>
+Effect <Inflict Poison>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_LEVITATE>
-}
-
-# Speed — permanent speed increase.
-# Used by: Ring of Speed, Boots of Speed
-Effect <Speed>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_SPEED>
-}
-
-# Timed Speed — temporary speed boost.
-# Used by: Potion of Speed
-Effect <Timed Speed>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_SPEED>
+    Flag        <EFFECT_FLAG_POISON>
     Duration    80.0
 }
-
-# Infravision — see warm-blooded creatures in the dark.
-# Used by: Helm of Infravision, Potion of Infravision
+Effect <Resist Poison>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_POISON>
+    Modifier    <EFFECT_MOD_RESIST>
+    Duration    100.0
+}
+Effect <Light>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_LIGHT>
+}
+Effect <Treasure Sense>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_TREASURE>
+}
+Effect <Resist Fear>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_AFRAID>
+    Modifier    <EFFECT_MOD_RESIST>
+    Duration    50.0
+}
+Effect <Cause Blindness>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_BLIND>
+    Duration    50.0
+}
+Effect <Inflict Sleep>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_SLEEP>
+    Duration    30.0
+}
+Effect <Inflict Confusion>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_CONFUSE>
+    Duration    30.0
+}
+Effect <Tunneling>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_STONE_TO_MUD>
+}
 Effect <Infravision>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_INFRA>
 }
-
-# ESP — detect all creatures through walls.
-# Used by: Helm of Telepathy, Ring of Telepathy
+Effect <Timed Infravision>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_INFRA>
+    Duration    100.0
+}
 Effect <ESP>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_ESP>
 }
-
-# Sustain CHA — prevent charisma from being drained.
+Effect <Timed ESP>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_ESP>
+    Duration    100.0
+}
 Effect <Sustain CHA>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_STAT>
     Modifier    <EFFECT_MOD_SUSTAIN>
 }
-
-# Detect Doors — reveal nearby doors and stairs.
-# Used by: Scroll of Door/Stair Location
-Effect <Detect Doors>
-{
-    Type        <EFFECT_TYPE_SEE>
-    Flag        <EFFECT_FLAG_DOOR>
-}
-
-# Detect Traps — reveal nearby traps.
-# Used by: Scroll of Detect Traps
-Effect <Detect Traps>
-{
-    Type        <EFFECT_TYPE_SEE>
-    Flag        <EFFECT_FLAG_TRAP>
-}
-
-# Detect Monsters — reveal nearby creatures.
-# Used by: Scroll of Detect Monsters
-Effect <Detect Monsters>
-{
-    Type        <EFFECT_TYPE_SEE>
-    Flag        <EFFECT_FLAG_MONSTERS>
-}
-
-# Detect Treasure — reveal nearby items and gold.
-# Used by: Scroll of Treasure Detection, Staff of Treasure Detection
-Effect <Detect Treasure>
-{
-    Type        <EFFECT_TYPE_SEE>
-    Flag        <EFFECT_FLAG_TREASURE>
-}
-
-# Magic Mapping — reveal dungeon layout.
-# Used by: Scroll of Magic Mapping
-Effect <Magic Mapping>
-{
-    Type        <EFFECT_TYPE_SEE>
-    Flag        <EFFECT_FLAG_MAPPING>
-}
-
-# Create Trap — places a trap at the target location.
-Effect <Create Trap>
-{
-    Type        <EFFECT_TYPE_CREATE>
-    Flag        <EFFECT_FLAG_TRAP>
-}
-
-# Recall — teleport between town and dungeon.
-# Used by: Scroll of Word of Recall, Staff of Word of Recall
-Effect <Recall>
-{
-    Type        <EFFECT_TYPE_CREATE>
-    Flag        <EFFECT_FLAG_RECALL>
-}
-
-# Teleport Self — teleport to a random location on the level.
-# Used by: Scroll of Teleportation, Staff of Teleportation
-Effect <Teleport Self>
-{
-    Type        <EFFECT_TYPE_CREATE>
-    Flag        <EFFECT_FLAG_TELEPORT>
-}
-
-# Summon Monsters — summons hostile creatures nearby.
-# Used by: Scroll of Summon Monsters, Staff of Summoning, Wand of Summoning
-Effect <Summon Monsters>
-{
-    Type        <EFFECT_TYPE_CREATE>
-    Flag        <EFFECT_FLAG_SUMMON>
-}
-
-# Timed Heroism — temporary boost to HP and stats.
-# Used by: Potion of Heroism
 Effect <Timed Heroism>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
@@ -648,18 +650,77 @@ Effect <Timed Heroism>
     Flag        <EFFECT_FLAG_STAT>
     Duration    50.0
 }
-
-# Timed Blessing — temporary boost to AC and to-hit.
-# Used by: Scroll of Blessing
-Effect <Timed Blessing>
+Effect <Free Action>
 {
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_AC>
-    Duration    50.0
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_FREE_ACTION>
+}
+Effect <Invisibility>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_INVISIBLE>
+}
+Effect <Timed Invisibility>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_INVISIBLE>
+    Duration    100.0
+}
+Effect <Levitation>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_LEVITATE>
+}
+Effect <Timed Levitation>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_LEVITATE>
+    Duration    100.0
+}
+Effect <Speed>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_SPEED>
+}
+Effect <Timed Speed>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_SPEED>
+    Duration    80.0
+}
+Effect <Searching>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_SEARCHING>
 }
 
-# Enchant to Hit — magically improve weapon accuracy.
-# Used by: Scroll of Enchant Weapon to Hit
+# --- RESTORE — identify, recharge ---
+
+Effect <Recharge>
+{
+    Type        <EFFECT_TYPE_RESTORE>
+    Flag        <EFFECT_FLAG_FUEL>
+    Amount      <1d4>
+}
+Effect <Star-Recharge>
+{
+    Type        <EFFECT_TYPE_RESTORE>
+    Flag        <EFFECT_FLAG_FUEL>
+    Amount      <2d4>
+}
+Effect <Identify>
+{
+    Type        <EFFECT_TYPE_RESTORE>
+    Flag        <EFFECT_FLAG_IDENTIFY>
+}
+
+# --- GAIN — enchant weapons/armor ---
+
+Effect <Gain Fuel>
+{
+    Type        <EFFECT_TYPE_GAIN>
+    Flag        <EFFECT_FLAG_FUEL>
+}
 Effect <Enchant to Hit>
 {
     Type        <EFFECT_TYPE_GAIN>
@@ -667,29 +728,6 @@ Effect <Enchant to Hit>
     Modifier    <EFFECT_MOD_ENCHANT>
     Amount      <1>
 }
-
-# Enchant to Damage — magically improve weapon damage.
-# Used by: Scroll of Enchant Weapon Damage
-Effect <Enchant to Damage>
-{
-    Type        <EFFECT_TYPE_GAIN>
-    Flag        <EFFECT_FLAG_TODAM>
-    Modifier    <EFFECT_MOD_ENCHANT>
-    Amount      <1>
-}
-
-# Enchant Armor — magically improve armor protection.
-# Used by: Scroll of Enchant Armor
-Effect <Enchant Armor>
-{
-    Type        <EFFECT_TYPE_GAIN>
-    Flag        <EFFECT_FLAG_AC>
-    Modifier    <EFFECT_MOD_ENCHANT>
-    Amount      <1>
-}
-
-# Star-Enchant Weapon — powerful weapon enchantment.
-# Used by: Scroll of *Enchant Weapon*
 Effect <Star-Enchant Weapon>
 {
     Type        <EFFECT_TYPE_GAIN>
@@ -698,9 +736,20 @@ Effect <Star-Enchant Weapon>
     Modifier    <EFFECT_MOD_ENCHANT>
     Amount      <1d3>
 }
-
-# Star-Enchant Armor — powerful armor enchantment.
-# Used by: Scroll of *Enchant Armor*
+Effect <Enchant to Damage>
+{
+    Type        <EFFECT_TYPE_GAIN>
+    Flag        <EFFECT_FLAG_TODAM>
+    Modifier    <EFFECT_MOD_ENCHANT>
+    Amount      <1>
+}
+Effect <Enchant Armor>
+{
+    Type        <EFFECT_TYPE_GAIN>
+    Flag        <EFFECT_FLAG_AC>
+    Modifier    <EFFECT_MOD_ENCHANT>
+    Amount      <1>
+}
 Effect <Star-Enchant Armor>
 {
     Type        <EFFECT_TYPE_GAIN>
@@ -709,383 +758,41 @@ Effect <Star-Enchant Armor>
     Amount      <1d3>
 }
 
-# --- Offensive targeted effects ---
+# --- SEE — detect and reveal ---
 
-# Cause Sleep — puts a creature to sleep.
-# Used by: Wand of Sleep, Staff of Sleep
-Effect <Cause Sleep>
+Effect <Detect Treasure>
 {
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_SLEEP>
-    Range       15
-}
-
-# Cause Fear — terrifies a creature.
-# Used by: Wand of Fear, Scroll of Scare Monster
-Effect <Cause Fear>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_AFRAID>
-    Range       15
-}
-
-# Cause Confusion — confuses a creature.
-# Used by: Wand of Confusion
-Effect <Cause Confusion>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_CONFUSE>
-    Range       15
-}
-
-# Cause Paralysis — paralyzes a creature.
-# Used by: Wand of Paralyze
-Effect <Cause Paralysis>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_PARALYZE>
-    Range       15
-}
-
-# Mass Sleep — puts all nearby creatures to sleep.
-# Used by: Staff of Mass Sleep, Scroll of Mass Sleep
-Effect <Mass Sleep>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_SLEEP>
-    Modifier    <EFFECT_MOD_AREA>
-    Radius      10
-}
-
-# Mass Fear — terrifies all nearby creatures.
-# Used by: Staff of Fear
-Effect <Mass Fear>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_AFRAID>
-    Modifier    <EFFECT_MOD_AREA>
-    Radius      10
-}
-
-# Mass Paralyze — paralyzes all nearby creatures.
-# Used by: Staff of Paralysis
-Effect <Mass Paralyze>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_PARALYZE>
-    Modifier    <EFFECT_MOD_AREA>
-    Radius      8
-}
-
-# --- Utility effects ---
-
-# Identify — reveals an item's true nature.
-# Used by: Scroll of Identify, Staff of Perception
-Effect <Identify>
-{
-    Type        <EFFECT_TYPE_RESTORE>
-    Flag        <EFFECT_FLAG_IDENTIFY>
-}
-
-# Heal Monster — restores HP to a monster.
-# Used by: Wand of Heal Monster
-Effect <Heal Monster>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_HP>
-    Range       15
-}
-
-# Probe — reveals a monster's stats.
-# Used by: Wand of Probing
-Effect <Probe>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_IDENTIFY>
-    Range       15
-}
-
-# Remove Curse — lifts a curse from an item.
-# Used by: Scroll of Remove Curse
-Effect <Remove Curse>
-{
-    Type        <EFFECT_TYPE_DESTROY>
-    Flag        <EFFECT_FLAG_CURSE>
-}
-
-# Curse Object — places a curse on an equipped item.
-# Used by: Scroll of Curse Object
-Effect <Curse Object>
-{
-    Type        <EFFECT_TYPE_CREATE>
-    Flag        <EFFECT_FLAG_CURSE>
-}
-
-# Phase Door — short-range teleport.
-# Used by: Scroll of Phase Door
-Effect <Phase Door>
-{
-    Type        <EFFECT_TYPE_CREATE>
-    Flag        <EFFECT_FLAG_TELEPORT>
-    Modifier    <EFFECT_MOD_AREA>
-}
-
-# Partial Mapping — reveals nearby dungeon layout.
-# Used by: Scroll of Magic Mapping, Staff of Mapping
-Effect <Partial Mapping>
-{
-    Type        <EFFECT_TYPE_CREATE>
-    Flag        <EFFECT_FLAG_MAPPING>
-    Modifier    <EFFECT_MOD_AREA>
-}
-
-# Full Mapping — reveals entire dungeon layout.
-# Used by: Scroll of *Magic Mapping*
-Effect <Full Mapping>
-{
-    Type        <EFFECT_TYPE_CREATE>
-    Flag        <EFFECT_FLAG_MAPPING>
-}
-
-# Invisibility — permanent invisible intrinsic.
-# Used by: Ring of Invisibility
-Effect <Invisibility>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_INVISIBLE>
-}
-
-# Timed ESP — temporary telepathy.
-# Used by: Scroll of Telepathy
-Effect <Timed ESP>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_ESP>
-    Duration    100.0
-}
-
-# --- Staff-duration resistance effects removed ---
-# Staves use the same Timed Resist * effects as potions;
-# item-level Duration overrides the effect's default duration.
-
-# --- Negative status intrinsics (inflicted on player) ---
-
-# Cause Blindness — inflicts blindness.
-# Used by: Potion of Blindness, monster attacks
-Effect <Cause Blindness>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_BLIND>
-    Duration    50.0
-}
-
-# Cause Confusion (self) — inflicts confusion.
-# Used by: Potion of Confusion
-Effect <Inflict Confusion>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_CONFUSE>
-    Duration    30.0
-}
-
-# Cause Poison — inflicts poison.
-# Used by: Potion of Poison
-Effect <Inflict Poison>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_POISON>
-    Duration    80.0
-}
-
-# Cause Sleep (self) — inflicts sleep.
-# Used by: Potion of Sleep
-Effect <Inflict Sleep>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_SLEEP>
-    Duration    30.0
-}
-
-# Inflict Fire — deals fire damage to the drinker.
-# Used by: Potion of Flames
-Effect <Inflict Fire>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_FIRE>
-    Amount      <2d8>
-}
-
-# --- Timed positive intrinsics ---
-
-# Timed Infravision — temporary infravision.
-# Used by: Potion of Infravision
-Effect <Timed Infravision>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_INFRA>
-    Duration    100.0
-}
-
-# Timed Invisibility — temporary invisibility.
-# Used by: Potion of Invisibility
-Effect <Timed Invisibility>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_INVISIBLE>
-    Duration    100.0
-}
-
-# Timed Levitation — temporary levitation.
-# Used by: Potion of Levitation
-Effect <Timed Levitation>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_LEVITATE>
-    Duration    100.0
-}
-
-# Resist Fear — temporary fear resistance.
-# Used by: Potion of Courage (component)
-Effect <Resist Fear>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_AFRAID>
-    Modifier    <EFFECT_MOD_RESIST>
-    Duration    50.0
-}
-
-# Resist Poison — temporary poison resistance.
-# Used by: Potion of Slow Poison
-Effect <Resist Poison>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_POISON>
-    Modifier    <EFFECT_MOD_RESIST>
-    Duration    100.0
-}
-
-# --- Staff-duration resistance effects removed ---
-
-# Light — permanent light source.
-# Used by: Torch, Brass Lantern
-Effect <Light>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_LIGHT>
-}
-
-# Searching — improved trap/door detection while moving.
-# Used by: Ring of Searching
-Effect <Searching>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_SEARCHING>
-}
-
-# Treasure Sense — permanent treasure detection aura.
-# Used by: Ring of Sensing
-Effect <Treasure Sense>
-{
-    Type        <EFFECT_TYPE_INTRINSIC>
+    Type        <EFFECT_TYPE_SEE>
     Flag        <EFFECT_FLAG_TREASURE>
 }
-
-# Tunneling — enhanced ability to dig through rock.
-# Used by: Ring of Tunneling
-Effect <Tunneling>
+Effect <Magic Mapping>
 {
-    Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_STONE_TO_MUD>
+    Type        <EFFECT_TYPE_SEE>
+    Flag        <EFFECT_FLAG_MAPPING>
 }
-
-# --- Resource effects ---
-
-# Gain Fuel — refills a lantern.
-# Used by: Flask of Oil
-Effect <Gain Fuel>
+Effect <See Invisible>
 {
-    Type        <EFFECT_TYPE_GAIN>
-    Flag        <EFFECT_FLAG_FUEL>
+    Type        <EFFECT_TYPE_SEE>
+    Flag        <EFFECT_FLAG_INVISIBLE>
 }
-
-# Recharge — restore charges to a wand or staff.
-# Used by: Scroll of Recharging
-Effect <Recharge>
+Effect <Timed See Invisible>
 {
-    Type        <EFFECT_TYPE_RESTORE>
-    Flag        <EFFECT_FLAG_FUEL>
-    Amount      <1d4>
+    Type        <EFFECT_TYPE_SEE>
+    Flag        <EFFECT_FLAG_INVISIBLE>
+    Duration    100.0
 }
-
-# Star-Recharge — powerful recharging with lower explosion risk.
-# Used by: Scroll of *Recharging*
-Effect <Star-Recharge>
+Effect <Detect Doors>
 {
-    Type        <EFFECT_TYPE_RESTORE>
-    Flag        <EFFECT_FLAG_FUEL>
-    Amount      <2d4>
+    Type        <EFFECT_TYPE_SEE>
+    Flag        <EFFECT_FLAG_DOOR>
 }
-
-# --- Touch effects for status conditions ---
-
-# Blindness Touch — a touch that blinds the target.
-# Used by: Blinding creatures, dark entities (melee)
-Effect <Blindness Touch>
+Effect <Detect Traps>
 {
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_BLIND>
-    Duration    50.0
-    Range       1
+    Type        <EFFECT_TYPE_SEE>
+    Flag        <EFFECT_FLAG_TRAP>
 }
-
-# Confusion Touch — a bewildering touch that confuses the target.
-# Used by: Chaos creatures, mind-benders (melee)
-Effect <Confusion Touch>
+Effect <Detect Monsters>
 {
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_CONFUSE>
-    Duration    7.0
-    Range       1
-}
-
-# Fear Touch — a terrifying touch that fills target with dread.
-# Used by: Terror creatures, shadow beings (melee)
-Effect <Fear Touch>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_AFRAID>
-    Duration    5.0
-    Range       1
-}
-
-# Sleep Touch — a touch that induces magical sleep.
-# Used by: Sleeping creatures, rest entities (melee, can be awakened by damage)
-Effect <Sleep Touch>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_SLEEP>
-    Duration    5.0
-    Range       1
-}
-
-# Paralysis Touch — a touch that freezes target in place.
-# Used by: Paralytic creatures, wraiths (melee)
-Effect <Paralysis Touch>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_PARALYZE>
-    Duration    1d4
-    Range       1
-}
-
-# --- Life/XP drain effects ---
-
-# XP Drain Touch — a touch that drains experience from target.
-# Used by: Ghosts, vampires, liches (configurable per monster level)
-Effect <XP Drain Touch>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_XP>
-    Amount      <1d10>
-    Range       1
+    Type        <EFFECT_TYPE_SEE>
+    Flag        <EFFECT_FLAG_MONSTERS>
 }

@@ -1469,7 +1469,7 @@ JResult CPlayer::DoSummonMonsters()
 
     for( int i = 0; i < count; i++ )
     {
-        int which = pDungeon->ChooseMonsterForDepth( effectiveDepth, 15 );
+        int which = pDungeon->ChooseMonsterForDepth( effectiveDepth, 15.0f );
         if( which == MON_IDX_INVALID )
             continue;
         CMonsterDef *pDef = pDungeon->GetMonsterDef( which );

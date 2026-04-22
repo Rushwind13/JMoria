@@ -708,50 +708,80 @@ CEffectDef *CDungeon::GetEffectDef( const char *szEffectName )
 
 int CDungeon::ChooseItemForDepth( const int depth )
 {
-    int which_item = ITEM_IDX_INVALID;
-    int count = 0;
-    while( count < DUNG_CFG_MAX_SPAWN_TRIES )
+    // Build Gaussian weights: w = exp(-0.5 * ((depth - peak) / sigma)^2)
+    // Level field is the peak depth; LevelSigma controls the spread (default 10).
+    int n = m_llItemDefs->length();
+    float total = 0.0f;
+
+    CLink<CItemDef> *pLink = m_llItemDefs->GetHead();
+    while( pLink != NULL )
     {
-        int try_item = Util::GetRandom( 0, m_llItemDefs->length() - 1 );
-        CItemDef *chosen_item = GetItemDef( try_item );
-        if( abs( depth - chosen_item->m_dwLevel ) < 5 )
-        {
-            which_item = try_item;
-            break;
-        }
-        count++;
+        CItemDef *id = pLink->m_lpData;
+        float delta = (float)( depth - id->m_dwLevel );
+        float sigma = id->m_fLevelSigma;
+        id->m_fSpawnWeight = Util::windowed_bell( delta, sigma );
+        total += id->m_fSpawnWeight;
+        pLink = pLink->next;
     }
 
-    if( which_item == ITEM_IDX_INVALID )
+    if( total <= 0.0f )
     {
-        JLog( LOG_LEVEL_WARN, true, "Couldn't find a suitable item for this depth.\n" );
+        JLog( LOG_LEVEL_WARN, true, "No items available at depth %d\n", depth );
+        return ITEM_IDX_INVALID;
     }
 
-    return which_item;
+    float r = Util::GetRandom( 0.0f, total );
+    float cumulative = 0.0f;
+    pLink = m_llItemDefs->GetHead();
+    int idx = 0;
+    while( pLink != NULL )
+    {
+        cumulative += pLink->m_lpData->m_fSpawnWeight;
+        if( r <= cumulative )
+            return idx;
+        pLink = pLink->next;
+        idx++;
+    }
+    return n - 1; // fallback
 }
 
-int CDungeon::ChooseMonsterForDepth( const int depth, const int range )
+int CDungeon::ChooseMonsterForDepth( const int depth, const float sigma )
 {
-    int which_monster = MON_IDX_INVALID;
-    int count = 0;
-    while( count < DUNG_CFG_MAX_SPAWN_TRIES )
+    // Build Gaussian weights: w = exp(-0.5 * ((depth - peak) / effective_sigma)^2)
+    // The sigma parameter overrides the per-monster LevelSigma when non-zero.
+    int n = m_llMonsterDefs->length();
+    float total = 0.0f;
+
+    CLink<CMonsterDef> *pLink = m_llMonsterDefs->GetHead();
+    while( pLink != NULL )
     {
-        int try_monster = Util::GetRandom( 0, m_llMonsterDefs->length() - 1 );
-        CMonsterDef *chosen_monster = GetMonsterDef( try_monster );
-        if( abs( depth - chosen_monster->m_dwLevel ) < range )
-        {
-            which_monster = try_monster;
-            break;
-        }
-        count++;
+        CMonsterDef *md = pLink->m_lpData;
+        float effective_sigma = ( sigma > 0.0f ) ? sigma : md->m_fLevelSigma;
+        float delta = (float)( depth - md->m_dwLevel );
+        md->m_fSpawnWeight = Util::windowed_bell( delta, effective_sigma );
+        total += md->m_fSpawnWeight;
+        pLink = pLink->next;
     }
 
-    if( which_monster == MON_IDX_INVALID )
+    if( total <= 0.0f )
     {
-        JLog( LOG_LEVEL_WARN, true, "Couldn't find a suitable monster for this depth.\n" );
+        JLog( LOG_LEVEL_WARN, true, "No monsters available at depth %d\n", depth );
+        return MON_IDX_INVALID;
     }
 
-    return which_monster;
+    float r = Util::GetRandom( 0.0f, total );
+    float cumulative = 0.0f;
+    pLink = m_llMonsterDefs->GetHead();
+    int idx = 0;
+    while( pLink != NULL )
+    {
+        cumulative += pLink->m_lpData->m_fSpawnWeight;
+        if( r <= cumulative )
+            return idx;
+        pLink = pLink->next;
+        idx++;
+    }
+    return n - 1; // fallback
 }
 
 JResult CDungeon::OnChangeLevel( const int delta )

@@ -186,7 +186,7 @@ protected:
     JResult SpawnMonsters( const int depth );
 
 public:
-    int ChooseMonsterForDepth( const int depth, const int range = 5 );
+    int ChooseMonsterForDepth( const int depth, const float sigma = 0.0f );
 
 protected:
     int ChooseItemForDepth( const int depth );

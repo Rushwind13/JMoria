@@ -77,6 +77,40 @@ All monster attacks migrated from inline effect format to named effects. See [WO
 
 These are ordered by "unblocks the most other work" and "most visible gameplay impact":
 
+### Tier 1 — Visible Gameplay Impact (No Blockers)
+1. **Timed AC bonus** (`EFFECT_FLAG_AC` + `EFFECT_MOD_TIMED`) — Scroll of Blessing, Staff of Protection. Implement `DoIntrinsicEffects` AC path + round-down timer.
+2. **Phase 5 monster effect dispatch** — `EFFECT_TYPE_INTRINSIC` status effects in `Player.cpp`: Paralyze, Confuse, Sleep, Fear, Blind, Poison. Each needs a timed intrinsic bit and per-turn handler.
+3. **Enchantment system** — `+1/+1d3` per scroll, failure risk above +10; scaffolds Ego items.
+4. **Item spawn quality chain** — Ego → Legendary → Unique tiers on top of Normal/Cursed/Magic path.
+5. **Light radius visibility** (#72, #121) — Extend `UpdateVisibility()` to use torch/lantern radius; integrate Staff of Light / Staff of Starlight.
+
+### Tier 2 — Identification Depth
+6. **Feeling tiers** (#114) — Per-turn passive chance: `{magical}` / `{excellent}` / `{special}` display.
+7. **Blind-use identification** — Noticeable effect → auto-ID; no noticeable effect → `{tried}` mark.
+8. **Stacking identity check** — Complete per-category rules; partial-stack split prompt on drop.
+
+### Tier 3 — Monster Combat Depth ✅ (content complete, code TBD)
+9. **Item destruction from attacks** — See [#271](https://github.com/Rushwind13/JMoria/issues/271). Postponed until after Ranged Attacks (PR #235).
+
+### Tier 4 — Light Economy Integration
+10. **Light source items** (#270) — Staff of Light, Staff of Starlight in Items.txt; need light source code integration. Flask of Oil not yet added.
+
+### Tier 5 — Advanced Systems (Require Stats, Classes, Spells)
+11. **`EFFECT_FLAG_STAT`** (#77) — Requires stat system (STR/DEX/CON/INT/WIS/CHA)
+12. **Class-specific feelings** (#114) — Requires class system with stat priorities
+13. **Spell of Light Area / Mage ID spell** (#72, #114) — Requires spell/magic system
+14. **`?*Identify*`** (#114) — Requires ego/unique item system
+
+---
+
+## Completed This Session (2026-04-22)
+
+- [x] **Item level redesign** — All 153 items releveled with natural progression; `Level` = peak bell-curve depth. Reserved L90+ for Ego/Legendary/Unique.
+- [x] **New items** — Leather Cap (L1), Short Sword (L5), Short Bow (L3).
+- [x] **`LevelSigma` data field** — `CItemDef` + `CMonsterDef` structs; parsed in `FileParse.cpp` (prefix-collision fix). Default 10.0.
+- [x] **Bell-curve spawn window** — `ChooseItemForDepth` / `ChooseMonsterForDepth` replaced with `Util::windowed_bell` weighted selection. Hard cutoff and retry loop removed. `Dungeon.h` signature: `range` int → `sigma` float.
+- [x] **`Util::windowed_bell`** — Polynomial `(1-x²)²` bell, zero outside `|delta| >= sigma`. No `<cmath>` dependency.
+
 
 
 

@@ -424,8 +424,8 @@ The roadmap is designed so systems reinforce each other:
 ### Unique Items & Hardcore Mode
 **Decision**: Each unique item is a **singleton per character save**.
 - **Setting**: Hardcore Mode is a character creation choice, saved to save file
-- **Standard Mode**: Unique items not found before leaving a level are gone forever
-- **Hardcore Mode**: Unique items respawn on dungeon levels if not collected before leaving (increases challenge)
+- **Standard Mode**: Unique items respawn on dungeon levels if not collected before leaving 
+- **Hardcore Mode**: Unique items not found before leaving a level are gone forever (increases challenge)
 - **Future**: Once character save serialization works, players can enable/disable Hardcore for their next character
 - See #43 and #128 for implementation details
 

@@ -29,6 +29,8 @@ protected:
     char m_cCommand;
     int m_dwSelected;
     CLink<CItem> *m_pSelected;
+    int m_dwQuantityPrompt; // For stack splitting: -1 = no prompt, 0+ = awaiting quantity input
+    char m_szQuantityBuffer[32]; // Buffer for numeric input
 
 private:
     // Member Functions
@@ -77,6 +79,8 @@ private:
 
     bool TestFuel();
     bool DoFuel();
+
+    int OnHandleQuantityPrompt( JKeysym *keysym );
 
     void ResetToState( int newstate );
 };

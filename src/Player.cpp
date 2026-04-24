@@ -966,6 +966,26 @@ bool CPlayer::Drop( CItem *pItem )
     return true;
 }
 
+bool CPlayer::Drop( CItem *pItem, int quantity )
+{
+    // If dropping the entire stack, use normal Drop
+    if( quantity >= pItem->m_dwCount )
+    {
+        return Drop( pItem );
+    }
+
+    // Dropping a partial stack: create a copy with the specified quantity
+    CItem *pDropped = pItem->Copy( quantity );
+
+    // Reduce the carried stack
+    pItem->m_dwCount -= quantity;
+
+    // Drop the item
+    g_pGame->GetDungeon()->Drop( pDropped, m_vPos );
+
+    return true;
+}
+
 bool CPlayer::CanDropHere()
 {
     if( g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurItem != NULL )
@@ -1045,6 +1065,17 @@ JResult CPlayer::Fire( CLink<CItem> *pLink )
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
+
+    // Consume one arrow/bolt at a time (not the whole stack)
+    if( pItem->IsStackable() && pItem->m_dwCount > 1 )
+    {
+        pItem->m_dwCount--;
+    }
+    else
+    {
+        m_llInventory->Remove( pItem->m_pllLink, false ); // Arrows/bolts are consumable
+    }
+
     return retval;
 }
 

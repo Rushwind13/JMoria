@@ -10,7 +10,7 @@
 
 extern CGame *g_pGame;
 
-CUseState::CUseState() : m_cCommand( 0 )
+CUseState::CUseState() : m_cCommand( 0 ), m_dwQuantityPrompt( -1 )
 {
     m_pKeyHandlers[USE_INIT] = &CUseState::OnHandleInit;
     m_pKeyHandlers[USE_WIELD] = &CUseState::OnHandleWield;
@@ -23,6 +23,7 @@ CUseState::CUseState() : m_cCommand( 0 )
 
     m_eCurModifier = USE_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
+    memset( m_szQuantityBuffer, 0, sizeof( m_szQuantityBuffer ) );
 }
 
 int CUseState::OnHandleKey( JKeysym *keysym )
@@ -132,6 +133,13 @@ int CUseState::OnHandleDrop( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling DROP \n" );
+
+    // If we're in quantity prompt mode, handle that instead
+    if( m_dwQuantityPrompt >= 0 )
+    {
+        return OnHandleQuantityPrompt( keysym );
+    }
+
     retval = OnBaseHandleKey( keysym, USE_DROP );
 
     if( retval == JRESETSTATE )
@@ -147,10 +155,22 @@ int CUseState::OnHandleDrop( JKeysym *keysym )
         return 0;
     }
 
-    // We got a alpha key; do a "drop" of that item
-    JLog( LOG_LEVEL_NOISE, true, "DROP  got a selection\n" );
+    // We got an alpha key; check if this is a stackable item with multiple items
+    JLog( LOG_LEVEL_NOISE, true, "DROP got a selection\n" );
     if( TestDrop() )
     {
+        CItem *pItem = m_pSelected->m_lpData;
+
+        // If stackable with count > 1, prompt for quantity
+        if( pItem->IsStackable() && pItem->m_dwCount > 1 )
+        {
+            m_dwQuantityPrompt = 0; // Start quantity prompt mode
+            memset( m_szQuantityBuffer, 0, sizeof( m_szQuantityBuffer ) );
+            g_pGame->GetMsgs()->Printf( "How many? (1-%d, * for all): ", pItem->m_dwCount );
+            return JSUCCESS;
+        }
+
+        // Non-stackable or single item: drop normally
         if( DoDrop() )
         {
             g_pGame->GetMsgs()->Printf( "You dropped the %s.\n", m_pSelected->m_lpData->GetName() );
@@ -379,6 +399,109 @@ int CUseState::OnHandleIdentify( JKeysym *keysym )
     JLog( LOG_LEVEL_DEBUG, true, "IDENTIFY resetting game state to COMMAND, USE state to INIT\n" );
     ResetToState( STATE_COMMAND );
     return 0;
+}
+
+int CUseState::OnHandleQuantityPrompt( JKeysym *keysym )
+{
+    CItem *pItem = m_pSelected->m_lpData;
+
+    // Handle Enter key to confirm quantity
+    if( keysym->sym == JKEY_RETURN )
+    {
+        int quantity = 0;
+
+        // If empty/blank, cancelled
+        if( m_szQuantityBuffer[0] == 0 )
+        {
+            g_pGame->GetMsgs()->Printf( "Cancelled.\n" );
+            m_dwQuantityPrompt = -1;
+            m_pSelected = NULL;
+            ResetToState( STATE_COMMAND );
+            return 0;
+        }
+
+        // Check for * or all
+        if( m_szQuantityBuffer[0] == '*' || Util::jstrcmp( m_szQuantityBuffer, "all" ) == 0 )
+        {
+            quantity = pItem->m_dwCount;
+        }
+        else
+        {
+            quantity = atoi( m_szQuantityBuffer );
+        }
+
+        if( quantity <= 0 || quantity > pItem->m_dwCount )
+        {
+            g_pGame->GetMsgs()->Printf( "Invalid quantity.\n" );
+            m_dwQuantityPrompt = -1;
+            m_pSelected = NULL;
+            ResetToState( STATE_COMMAND );
+            return 0;
+        }
+
+        // Execute the drop with the specified quantity
+        if( g_pGame->GetPlayer()->Drop( pItem, quantity ) )
+        {
+            g_pGame->GetMsgs()->Printf( "You dropped %d.\n", quantity );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "Could not drop items.\n" );
+        }
+
+        m_dwQuantityPrompt = -1;
+        m_pSelected = NULL;
+        ResetToState( STATE_COMMAND );
+        return 0;
+    }
+
+    // Handle Escape to cancel
+    if( keysym->sym == JKEY_ESCAPE )
+    {
+        g_pGame->GetMsgs()->Printf( "Cancelled.\n" );
+        m_dwQuantityPrompt = -1;
+        m_pSelected = NULL;
+        ResetToState( STATE_COMMAND );
+        return 0;
+    }
+
+    // Handle backspace to delete last character
+    if( keysym->sym == JKEY_BACKSPACE )
+    {
+        int len = Util::jstrlen( m_szQuantityBuffer );
+        if( len > 0 )
+        {
+            m_szQuantityBuffer[len - 1] = 0;
+        }
+        return JSUCCESS;
+    }
+
+    // Handle numeric input (0-9)
+    if( keysym->sym >= JKEY_0 && keysym->sym <= JKEY_9 )
+    {
+        int len = Util::jstrlen( m_szQuantityBuffer );
+        if( len < sizeof( m_szQuantityBuffer ) - 1 )
+        {
+            m_szQuantityBuffer[len] = '0' + ( keysym->sym - JKEY_0 );
+            m_szQuantityBuffer[len + 1] = 0;
+        }
+        return JSUCCESS;
+    }
+
+    // Handle * (Shift+8) for "all"
+    if( keysym->sym == JKEY_8 && keysym->mod & JMOD_SHIFT )
+    {
+        int len = Util::jstrlen( m_szQuantityBuffer );
+        if( len < sizeof( m_szQuantityBuffer ) - 1 )
+        {
+            m_szQuantityBuffer[len] = '*';
+            m_szQuantityBuffer[len + 1] = 0;
+        }
+        return JSUCCESS;
+    }
+
+    // Ignore other keys
+    return JSUCCESS;
 }
 
 void CUseState::ResetToState( int newstate )

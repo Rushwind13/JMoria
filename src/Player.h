@@ -216,6 +216,7 @@ public:
     void DisplayEquipment( uint8 dwPlacement, eInvFilter filter = INV_COMPLETE );
     void PickUp( JVector &vPickupPos );
     bool Drop( CItem *pItem );
+    bool Drop( CItem *pItem, int quantity ); // Drop a partial stack
 
     bool CanDropHere();
 

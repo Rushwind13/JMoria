@@ -226,6 +226,8 @@ public:
     static JResult CreateItem( CItemDef *pid, JVector vSpawnPoint = JVector( -1, -1 ),
                                bool bNear = false );
     void Imbue( int depth );
+    CItem *
+    Copy( int quantity = 0 ); // Create a copy of this item with specified quantity (0 = full stack)
     JResult SpawnItem( JVector vSpawnPoint = JVector( -1, -1 ) );
     JResult SpawnAt( JVector vSpawnPoint );
 

@@ -98,6 +98,24 @@ void CItem::Init( CItemDef *pid )
     }
 }
 
+CItem *CItem::Copy( int quantity )
+{
+    CItem *pCopy = new CItem();
+    pCopy->Init( m_id );
+    pCopy->m_dwCount = ( quantity > 0 ) ? quantity : m_dwCount;
+
+    // Copy all instance state
+    pCopy->m_dwKnownProps = m_dwKnownProps;
+    pCopy->m_dwFlags = m_dwFlags;
+    pCopy->m_fACBonus = m_fACBonus;
+    pCopy->m_fBonusToHit = m_fBonusToHit;
+    pCopy->m_fBonusToDamage = m_fBonusToDamage;
+    pCopy->m_dwCharges = m_dwCharges;
+    pCopy->m_dwMaxCharges = m_dwMaxCharges;
+
+    return pCopy;
+}
+
 void CItem::SetCursed( bool bCursed )
 {
     if( bCursed )
@@ -320,6 +338,7 @@ void CItemDef::FormatProperties( char *szOut, int maxLen, uint32 knownProps, uin
             else if( fACBonus != 0.0f )
                 pos += snprintf( szOut + pos, maxLen - pos, " [%+.0f]", fACBonus );
             break;
+
         default:
             break;
         }

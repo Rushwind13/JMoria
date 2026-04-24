@@ -1627,7 +1627,47 @@ CItem *CDungeon::PickUp( JVector &vPickupPos )
 
 void CDungeon::Drop( CItem *pItem, JVector &vDropPos )
 {
-    GetTile( vDropPos )->m_pCurItem = pItem;
-    pItem->m_vPos = vDropPos;
+    JVector vFinalPos = vDropPos;
+
+    // If the drop position already has an item, try adjacent tiles
+    if( GetTile( vDropPos )->m_pCurItem != NULL )
+    {
+        bool bFoundSpot = false;
+
+        // Use Util::Nearby to get all adjacent tiles
+        JRect rcNearby = Util::Nearby( JIVector( (int)vDropPos.x, (int)vDropPos.y ), 1 );
+
+        for( int x = rcNearby.Left(); x <= rcNearby.Right() && !bFoundSpot; x++ )
+        {
+            for( int y = rcNearby.Top(); y <= rcNearby.Bottom() && !bFoundSpot; y++ )
+            {
+                // Skip the original position
+                if( x == (int)vDropPos.x && y == (int)vDropPos.y )
+                    continue;
+
+                JVector vTry( (float)x, (float)y );
+
+                // Check if this position is valid and empty
+                CDungeonTile *pTile = GetTile( vTry );
+                if( pTile != NULL && pTile->m_pCurItem == NULL &&
+                    IsWalkableFor( vTry, false ) == DUNG_COLL_NO_COLLISION )
+                {
+                    vFinalPos = vTry;
+                    bFoundSpot = true;
+                }
+            }
+        }
+
+        if( !bFoundSpot )
+        {
+            // No adjacent spot found; cannot drop here
+            g_pGame->GetMsgs()->Printf( "There is no room to drop the item here.\n" );
+            // Item stays in caller's possession; don't add to dungeon
+            return;
+        }
+    }
+
+    GetTile( vFinalPos )->m_pCurItem = pItem;
+    pItem->m_vPos = vFinalPos;
     pItem->m_pllLink = m_llItems->Add( pItem, pItem->m_id->m_dwIndex, pItem->GetInstanceId() );
 }

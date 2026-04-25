@@ -6,12 +6,12 @@ These are targeted improvements and one major system that were floating without 
 
 ## Prioritized Work
 
-### P1 — #273: Messages Scrollback (Quick Win, ~1–2 hrs)
+### ✅ P1 — #273: Messages Scrollback (COMPLETE — commit b22288d)
 
-1. **Suppress empty-result messages**: Don't print anything to the Msgs window when a detect/search effect finds nothing (e.g., Scroll of Detect Monsters with no monsters in range).
-2. **Expand Msgs window to 5 rows**: Change the Messages `DisplayText` region height from 2 rows to 5 rows and verify layout still fits on all renderers.
-3. **Make Msgs window height configurable**: Expose a constant or setting (e.g., `MSGS_ROWS` in `Constants.h`) so window height can be tuned without code edits. Consider whether other flyout panes should be similarly configurable.
-4. Make sure that there are no blank lines in the display when it's full. (bounding box offsets are buggy)
+1. ✅ **Suppress empty-result messages**: Silent when detect/search finds nothing (doors, traps, monsters).
+2. ✅ **Expand Msgs window to 5 rows**: Both renderers derive from `MSGS_ROWS 5` in `Constants.h`; OpenGL rect was previously hardcoded to 40px.
+3. ✅ **Make Msgs window height configurable**: `#define MSGS_ROWS 5` in `Constants.h` is the single source of truth.
+4. ✅ **No blank lines when full**: Fixed `Paginate()` off-by-one — `dwAddLinesMax = usedLines + 1 + m_dwFreeLines`.
 
 ---
 

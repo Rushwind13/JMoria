@@ -2,7 +2,7 @@
 
 Repo: Rushwind13/JMoria
 
-These are targeted improvements and one major system that were floating without a dedicated implementation plan. Issues #265, #272, #273, and #242. Smallest wins first; biggest system last.
+These are targeted improvements and one major system that were floating without a dedicated implementation plan. Issues #265, #264, #272, #273, and #242. Smallest wins first; biggest system last.
 
 ---
 
@@ -22,6 +22,14 @@ These are targeted improvements and one major system that were floating without 
 1. ✅ **Implement HP-proportional breath damage for dragons**: In `CMonster::Damage()`, when `m_pCurrentAttack->m_dwType & MON_FLAG_BREATHE`, damage is `m_fCurHP * fDamageMult` instead of a dice roll. Applies to all breath-weapon monsters automatically.
 2. ✅ **Apply the same scaling rule to all breath-weapon monsters**: The `MON_FLAG_BREATHE` check in `Damage()` covers all 45+ breath-weapon monsters in `Monsters.txt` with no per-monster changes needed.
 3. ✅ **Validate weakening behavior**: Two BDD scenarios added to `monsters.feature`: one verifies breath damage equals current HP at full health; the second deals 10 damage and re-verifies the proportional reduction. All 140 tests pass.
+
+---
+
+### P2 - #264: EFFECT_MOD_MAX (Low, ~1-2 hrs)
+
+1. ** Examine Issue #264 **
+2. ** Replace this TODO list with the actionable items from the issue **
+3. ** Complete the Issue #264 TODO list **
 
 ---
 

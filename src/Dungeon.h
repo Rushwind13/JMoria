@@ -34,6 +34,7 @@ public:
     JLinkList<CMonster> *m_llMonsters;
     JLinkList<CItem> *m_llItems;
     JLinkList<JIVector> *m_llOpenArea;
+    JLinkList<CEffectDef> *m_llEffectDefs;
 
 protected:
     CDungeonTileDef *m_dtdlist;
@@ -63,11 +64,13 @@ public:
           m_llMonsters( NULL ),
           m_llOpenArea( NULL ),
           m_llItemDefs( NULL ),
+          m_llEffectDefs( NULL ),
           m_llMonsterDefs( NULL ),
           m_llLOSLine( NULL ),
           m_dmCurLevel( NULL ) {};
     ~CDungeon() { Term(); }
     char *DumpMap();
+    void RevealMap( int xMin, int yMin, int xMax, int yMax );
     void PreDraw();
     void Draw();
     void DrawDungeon();
@@ -154,6 +157,7 @@ public:
     CMonsterDef *GetMonsterDef( int which_monster );
     CItemDef *GetItemDef( const char *szItemName );
     CItemDef *GetItemDef( int which_item );
+    CEffectDef *GetEffectDef( const char *szEffectName );
     bool SpawnMonster( int which_monster );
     void RemoveMonster( CMonster *pMon );
 
@@ -162,6 +166,7 @@ public:
     void Drop( CItem *pItem, JVector &vDropPos );
     void PopulateLevel( const int depth ); // Place scenery, items, and monsters
     void SetDrawFlag( bool bDraw ) { m_bDraw = bDraw; }
+    void UpdateVisibility();
 
 protected:
     JRect m_Rect;
@@ -179,7 +184,11 @@ protected:
     JResult PlaceStairs( const int desired, const int type );
     JResult PlaceItems( const int depth );
     JResult SpawnMonsters( const int depth );
-    int ChooseMonsterForDepth( const int depth );
+
+public:
+    int ChooseMonsterForDepth( const int depth, const float sigma = 0.0f );
+
+protected:
     int ChooseItemForDepth( const int depth );
 
     JResult TerminateLevel();

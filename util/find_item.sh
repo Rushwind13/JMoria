@@ -5,4 +5,4 @@ else
 	ITEM="$1"
 fi
 
-./scripts/find_resource.sh Item "${ITEM}"
+./util/find_resource.sh Item "${ITEM}"

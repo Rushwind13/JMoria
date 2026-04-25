@@ -6,4 +6,4 @@ Feature: StringTable
 
     Scenario: lookup strings
         Given I initialize my Constants
-        Then I get a StringTable with <MON_IDX_BALROG> in it with index 26
+        Then I get a StringTable with <MON_IDX_BALROG> in it with index 28

@@ -13,6 +13,25 @@
 // Simple instance id generator for items
 static uint32 s_nextItemInstanceId = 1;
 
+// --- Magic item spawn tuning ---
+#define IMBUE_CHANCE_MIN 5    // % magic chance at depth 0
+#define IMBUE_CHANCE_MAX 85   // % magic chance at depth 80
+#define IMBUE_CHANCE_DEPTH 80 // depth at which max chance is reached
+#define IMBUE_WEAPON_MAX 7    // max weapon bonus pool
+#define IMBUE_WEAPON_SCALE 10 // depth divisor for weapon pool
+#define IMBUE_ARMOR_MAX 4     // max armor AC bonus
+#define IMBUE_ARMOR_SCALE 15  // depth divisor for armor pool
+#define IMBUE_CURSED_CHANCE 5 // % chance a magic item spawns cursed
+
+// Roll a bonus from 1..(1 + depth/scale), capped at cap
+static int BonusForDepth( int depth, int scale, int cap )
+{
+    int maxVal = 1 + depth / scale;
+    if( maxVal > cap )
+        maxVal = cap;
+    return Util::GetRandom( 1, maxVal );
+}
+
 JResult CItem::CreateItem( CItemDef *pid, JVector vSpawnPoint, bool bNear )
 {
     //    int desired = Util::Roll(pid->m_szAppear);
@@ -24,8 +43,10 @@ JResult CItem::CreateItem( CItemDef *pid, JVector vSpawnPoint, bool bNear )
         // Initialize the Item from the ItemDef
         pItem->Init( pid );
 
-        // Apply cursed flag
-        pItem->SetCursed( 5 );
+        // Imbue weapons/armor with magic bonuses based on dungeon depth
+        int depth =
+            ( g_pGame && g_pGame->GetDungeon() ) ? g_pGame->GetDungeon()->depth : pid->m_dwLevel;
+        pItem->Imbue( depth );
 
         if( g_pGame )
         {
@@ -49,6 +70,12 @@ void CItem::Init( CItemDef *pid )
         m_dwInstanceId = s_nextItemInstanceId++;
     }
     m_Color.SetColor( m_id->m_Color );
+
+    // Roll per-instance bonuses from CItemDef NdM dice strings
+    m_fACBonus = m_id->m_szACBonus ? Util::Roll( m_id->m_szACBonus ) : 0.0f;
+    m_fBonusToHit = m_id->m_szBonusToHit ? Util::Roll( m_id->m_szBonusToHit ) : 0.0f;
+    m_fBonusToDamage = m_id->m_szBonusToDamage ? Util::Roll( m_id->m_szBonusToDamage ) : 0.0f;
+
     switch( m_id->m_dwIndex )
     {
     case ITEM_IDX_POTION:
@@ -58,9 +85,35 @@ void CItem::Init( CItemDef *pid )
         break;
     case ITEM_IDX_STAFF:
     case ITEM_IDX_WAND:
-        m_dwCharges = Util::Roll( "1d20" );
+        if( m_id->m_szCharges )
+        {
+            m_dwCharges = (uint32)Util::Roll( m_id->m_szCharges );
+        }
+        else
+        {
+            m_dwCharges = (uint32)Util::Roll( "1d20" );
+        }
+        m_dwMaxCharges = m_dwCharges * 2;
         break;
     }
+}
+
+CItem *CItem::Copy( int quantity )
+{
+    CItem *pCopy = new CItem();
+    pCopy->Init( m_id );
+    pCopy->m_dwCount = ( quantity > 0 ) ? quantity : m_dwCount;
+
+    // Copy all instance state
+    pCopy->m_dwKnownProps = m_dwKnownProps;
+    pCopy->m_dwFlags = m_dwFlags;
+    pCopy->m_fACBonus = m_fACBonus;
+    pCopy->m_fBonusToHit = m_fBonusToHit;
+    pCopy->m_fBonusToDamage = m_fBonusToDamage;
+    pCopy->m_dwCharges = m_dwCharges;
+    pCopy->m_dwMaxCharges = m_dwMaxCharges;
+
+    return pCopy;
 }
 
 void CItem::SetCursed( bool bCursed )
@@ -82,6 +135,72 @@ void CItem::SetCursed( int likelihood )
 {
     int rolled = (int)Util::GetRandom( 1.0f, 100.0f );
     SetCursed( rolled < likelihood );
+}
+
+void CItem::Imbue( int depth )
+{
+    // Items already flagged MAGIC in their definition (e.g., Helm of Infravision)
+    // keep their data-defined bonuses — skip the random magic roll
+    if( m_id->m_dwFlags & ITEM_FLAG_MAGIC )
+        return;
+
+    // Only equipment slots that benefit from magic bonuses
+    int slot = EquipType();
+    bool isRanged = ( m_id->m_dwIndex == ITEM_IDX_BOW || m_id->m_dwIndex == ITEM_IDX_XBOW );
+    bool isWeapon = ( slot == EQUIP_IDX_MAIN_HAND ) && !isRanged;
+    bool isAmmo = ( slot == EQUIP_IDX_AMMO );
+    bool isArmor =
+        ( slot == EQUIP_IDX_ARMOR || slot == EQUIP_IDX_OFF_HAND || slot == EQUIP_IDX_HELMET ||
+          slot == EQUIP_IDX_CLOAK || slot == EQUIP_IDX_GLOVES || slot == EQUIP_IDX_BOOTS );
+
+    if( !isWeapon && !isRanged && !isAmmo && !isArmor )
+        return;
+
+    // Magic chance scales with depth: 5% at depth 0, up to 85% at depth 80
+    int magicChance =
+        IMBUE_CHANCE_MIN + ( depth * ( IMBUE_CHANCE_MAX - IMBUE_CHANCE_MIN ) ) / IMBUE_CHANCE_DEPTH;
+    if( magicChance > IMBUE_CHANCE_MAX )
+        magicChance = IMBUE_CHANCE_MAX;
+
+    int roll = Util::GetRandom( 1, 100 );
+    if( roll > magicChance )
+        return; // mundane: +0, +0
+
+    // -- This item is magical --
+    m_dwFlags |= ITEM_FLAG_MAGIC;
+
+    if( isWeapon )
+    {
+        int pool = BonusForDepth( depth, IMBUE_WEAPON_SCALE, IMBUE_WEAPON_MAX );
+        // Split pool between to-hit and to-damage
+        int toHit = Util::GetRandom( 0, pool );
+        int toDam = pool - toHit;
+        m_fBonusToHit = (float)toHit;
+        m_fBonusToDamage = (float)toDam;
+    }
+    else if( isRanged )
+    {
+        // Ranged weapons (bows/xbows) get to-hit only
+        m_fBonusToHit = (float)BonusForDepth( depth, IMBUE_WEAPON_SCALE, IMBUE_WEAPON_MAX );
+    }
+    else if( isAmmo )
+    {
+        // Ammo (arrows/bolts) get to-dam only
+        m_fBonusToDamage = (float)BonusForDepth( depth, IMBUE_WEAPON_SCALE, IMBUE_WEAPON_MAX );
+    }
+    else if( isArmor )
+    {
+        m_fACBonus = (float)BonusForDepth( depth, IMBUE_ARMOR_SCALE, IMBUE_ARMOR_MAX );
+    }
+
+    // ~5% chance the magic item is cursed — bonuses become penalties
+    if( Util::GetRandom( 1, 100 ) <= IMBUE_CURSED_CHANCE )
+    {
+        SetCursed( true );
+        m_fBonusToHit = -m_fBonusToHit;
+        m_fBonusToDamage = -m_fBonusToDamage;
+        m_fACBonus = -m_fACBonus;
+    }
 }
 
 JResult CItem::SpawnItem( JVector vSpawnPoint )
@@ -182,28 +301,109 @@ int CItem::EquipType()
     return EquipTypes[item_type];
 }
 
+void CItemDef::FormatProperties( char *szOut, int maxLen, uint32 knownProps, uint32 itemFlags,
+                                 uint32 charges, float fACBonus, float fBonusToHit,
+                                 float fBonusToDamage )
+{
+    int pos = 0;
+    if( knownProps & KNOWN_BONUSES )
+    {
+        switch( m_dwIndex )
+        {
+        case ITEM_IDX_SWORD:
+        case ITEM_IDX_DAGGER:
+        case ITEM_IDX_MACE:
+        case ITEM_IDX_SPEAR:
+        case ITEM_IDX_AXE:
+        case ITEM_IDX_POLEARM:
+        case ITEM_IDX_2H_SWORD:
+            if( fBonusToHit != 0.0f || fBonusToDamage != 0.0f )
+                pos += snprintf( szOut + pos, maxLen - pos, " (%+.0f, %+.0f)", fBonusToHit,
+                                 fBonusToDamage );
+            break;
+        case ITEM_IDX_ARMOR:
+        case ITEM_IDX_SHIELD:
+        case ITEM_IDX_HELMET:
+        case ITEM_IDX_CLOAK:
+        case ITEM_IDX_GLOVES:
+        case ITEM_IDX_BOOTS:
+            if( fACBonus != 0.0f )
+                pos += snprintf( szOut + pos, maxLen - pos, " [%+.0f]", fACBonus );
+            break;
+        case ITEM_IDX_RING:
+        case ITEM_IDX_AMULET:
+            if( fBonusToHit != 0.0f || fBonusToDamage != 0.0f )
+                pos += snprintf( szOut + pos, maxLen - pos, " (%+.0f, %+.0f)", fBonusToHit,
+                                 fBonusToDamage );
+            else if( fACBonus != 0.0f )
+                pos += snprintf( szOut + pos, maxLen - pos, " [%+.0f]", fACBonus );
+            break;
+
+        default:
+            break;
+        }
+    }
+    if( ( knownProps & KNOWN_CHARGES ) &&
+        ( m_dwIndex == ITEM_IDX_WAND || m_dwIndex == ITEM_IDX_STAFF ) )
+    {
+        pos += snprintf( szOut + pos, maxLen - pos, " (%d charges)", charges );
+    }
+    if( ( knownProps & KNOWN_CURSED ) && ( itemFlags & ITEM_FLAG_CURSED ) )
+    {
+        pos += snprintf( szOut + pos, maxLen - pos, " {cursed}" );
+    }
+}
+
 const char *CItem::GetName()
 {
-    if( false ) // IsIdentified() ) // TODO: MIKE: ID goes here
+    static char szDisplay[128];
+    const char *baseName;
+    if( IsIdentified() )
     {
-        return const_cast<const char *>( m_id->m_szName );
+        baseName = m_id->m_szName;
     }
     else
     {
-        return m_id->m_szUnidentifiedName;
+        baseName = m_id->m_szUnidentifiedName;
+        if( m_id->m_bTried )
+        {
+            snprintf( szDisplay, sizeof( szDisplay ), "%s {tried}", baseName );
+            return szDisplay;
+        }
+        return baseName;
     }
+
+    snprintf( szDisplay, sizeof( szDisplay ), "%s", baseName );
+    int baseLen = strlen( szDisplay );
+    m_id->FormatProperties( szDisplay + baseLen, sizeof( szDisplay ) - baseLen, m_dwKnownProps,
+                            m_dwFlags, m_dwCharges, m_fACBonus, m_fBonusToHit, m_fBonusToDamage );
+    return szDisplay;
 }
 
 const char *CItem::GetPlural()
 {
-    if( false ) // IsIdentified() )// TODO: MIKE: ID goes here
+    static char szDisplay[128];
+    const char *baseName;
+    if( IsIdentified() )
     {
-        return const_cast<const char *>( m_id->m_szPlural );
+        baseName = m_id->m_szPlural;
     }
     else
     {
-        return m_id->m_szUnidentifiedPlural;
+        baseName = m_id->m_szUnidentifiedPlural;
+        if( m_id->m_bTried )
+        {
+            snprintf( szDisplay, sizeof( szDisplay ), "%s {tried}", baseName );
+            return szDisplay;
+        }
+        return baseName;
     }
+
+    snprintf( szDisplay, sizeof( szDisplay ), "%s", baseName );
+    int baseLen = strlen( szDisplay );
+    m_id->FormatProperties( szDisplay + baseLen, sizeof( szDisplay ) - baseLen, m_dwKnownProps,
+                            m_dwFlags, m_dwCharges, m_fACBonus, m_fBonusToHit, m_fBonusToDamage );
+    return szDisplay;
 }
 
 void CItem::Draw()

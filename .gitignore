@@ -28,6 +28,10 @@ bin/
 test/vendor/
 test/.bundle/
 test/Gemfile.lock
+
+# iCloud sync conflict duplicates
+*\ 2.*
+*\ 3.*
 .goo.swp
 
 # Bot local learning state (optional per-user alternates)

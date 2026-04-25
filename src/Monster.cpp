@@ -266,6 +266,17 @@ const char *CMonster::AttackFlavorText()
 
 float CMonster::Damage( float fDamageMult )
 {
+    // Breath weapons scale with the monster's current HP — the weaker the monster,
+    // the less damage its breath deals.
+    if( m_pCurrentAttack->m_dwType & MON_FLAG_BREATHE )
+    {
+        float fDamage = m_fCurHP * fDamageMult;
+        JLog( LOG_LEVEL_INFO, true,
+              "%s breathed for %.2f damage (current HP: %.2f)(damagemult: %.2f). ", GetName(),
+              fDamage, m_fCurHP, fDamageMult );
+        return fDamage;
+    }
+
     char *szDamage = m_pCurrentAttack->m_szDamage;
     float fDamageModifier = 0.0f;
 

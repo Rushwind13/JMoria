@@ -17,3 +17,16 @@ Feature: Render All Monsters
         When I read all the monsters from the config file
         When I create a monster for each configuration
         Then I can see all the monster names
+
+    Scenario: Breath weapon damage equals monster current HP
+        Given A map with a single level
+        Given The monster configuration file
+        When I find a breath weapon monster
+        Then its breath damage equals its current HP
+
+    Scenario: Breath weapon weakens as monster takes damage
+        Given A map with a single level
+        Given The monster configuration file
+        When I find a breath weapon monster
+        When I deal 10 damage to the breath monster
+        Then its breath damage equals its current HP

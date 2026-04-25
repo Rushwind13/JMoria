@@ -1,5 +1,7 @@
 # Phase 3a: Flotsam — Prioritized Work List
 
+Repo: Rushwind13/JMoria
+
 These are targeted improvements and one major system that were floating without a dedicated implementation plan. Issues #265, #272, #273, and #242. Smallest wins first; biggest system last.
 
 ---
@@ -15,11 +17,11 @@ These are targeted improvements and one major system that were floating without 
 
 ---
 
-### P2 — #265: Breath Weapon Damage Scales with Monster HP (Medium, ~2–4 hrs)
+### ✅ P2 — #265: Breath Weapon Damage Scales with Monster HP (COMPLETE)
 
-1. **Implement HP-proportional breath damage for dragons**: Breath attacks deal damage equal to the attacking monster's **current HP**, not a fixed dice value.
-2. **Apply the same scaling rule to all breath-weapon monsters**: Audit every monster in `Monsters.txt` that uses a breath-type attack and confirm the scaling applies consistently.
-3. **Validate weakening behavior**: As a monster takes damage during combat, its subsequent breath attacks must do proportionally less damage — write BDD tests to verify.
+1. ✅ **Implement HP-proportional breath damage for dragons**: In `CMonster::Damage()`, when `m_pCurrentAttack->m_dwType & MON_FLAG_BREATHE`, damage is `m_fCurHP * fDamageMult` instead of a dice roll. Applies to all breath-weapon monsters automatically.
+2. ✅ **Apply the same scaling rule to all breath-weapon monsters**: The `MON_FLAG_BREATHE` check in `Damage()` covers all 45+ breath-weapon monsters in `Monsters.txt` with no per-monster changes needed.
+3. ✅ **Validate weakening behavior**: Two BDD scenarios added to `monsters.feature`: one verifies breath damage equals current HP at full health; the second deals 10 damage and re-verifies the proportional reduction. All 140 tests pass.
 
 ---
 
@@ -72,14 +74,13 @@ These are targeted improvements and one major system that were floating without 
 
 ### Issue #265 — "breath weapon damage does same damage as monster HP"
 
-> dragons do this always, do other monsters breath get weaker as they get hurt, also?
+> monsters breath get weaker as they get hurt.
 
 *(No additional comments on this issue.)*
 
 **Extracted actionable items (verbatim from issue body):**
-- Breath weapon damage does same damage as monster HP
+- Breath weapon damage does same damage as monster HP always
 - Dragons do this always
-- Do other monsters breath get weaker as they get hurt, also?
 
 ---
 

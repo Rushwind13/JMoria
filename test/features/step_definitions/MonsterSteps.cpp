@@ -84,3 +84,62 @@ THEN( "^I can see all the monster names$" )
         pLink = context->m_llMonsters->GetNext( pLink );
     }
 }
+
+WHEN( "^I find a breath weapon monster$" )
+{
+    ScenarioScope<TestCtx> context;
+    CMonsterDef *pmd = new CMonsterDef;
+    while( context->dfMonsters.ReadMonster( *pmd ) )
+    {
+        CLink<CAttack> *pLink = pmd->m_llAttacks->GetHead();
+        while( pLink != NULL )
+        {
+            if( pLink->m_lpData->m_dwType & MON_FLAG_BREATHE )
+            {
+                context->monsterDef = pmd;
+                CMonster *pMon = new CMonster;
+                pMon->Init( pmd );
+                context->monster = pMon;
+                return;
+            }
+            pLink = pmd->m_llAttacks->GetNext( pLink );
+        }
+        delete pmd;
+        pmd = new CMonsterDef;
+    }
+    delete pmd;
+    FAIL() << "No breath weapon monster found in Monsters.txt";
+}
+
+THEN( "^its breath damage equals its current HP$" )
+{
+    ScenarioScope<TestCtx> context;
+    CMonster *pMon = context->monster;
+
+    // Find and select the breath attack
+    CLink<CAttack> *pLink = context->monsterDef->m_llAttacks->GetHead();
+    while( pLink != NULL )
+    {
+        if( pLink->m_lpData->m_dwType & MON_FLAG_BREATHE )
+        {
+            pMon->m_pCurrentAttack = pLink->m_lpData;
+            break;
+        }
+        pLink = context->monsterDef->m_llAttacks->GetNext( pLink );
+    }
+    ASSERT_NE( pMon->m_pCurrentAttack, nullptr ) << "Monster has no breath attack";
+
+    float fExpected = pMon->m_fCurHP;
+    float fDamage = pMon->Damage( 1.0f );
+    EXPECT_FLOAT_EQ( fDamage, fExpected );
+}
+
+WHEN( "^I deal (\\d+) damage to the breath monster$" )
+{
+    ScenarioScope<TestCtx> context;
+    REGEX_PARAM( int, damage );
+    CMonster *pMon = context->monster;
+    ASSERT_GT( pMon->m_fCurHP, (float)damage )
+        << "Damage would kill the monster; choose a smaller value";
+    pMon->TakeDamage( (float)damage );
+}

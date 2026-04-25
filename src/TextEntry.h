@@ -7,7 +7,7 @@ class TextEntry
 {
     // Member variables
 public:
-    TextEntry() : m_szString( 0 ), m_dwValue( 0 ) {}
+    TextEntry() : m_szString( 0 ), m_dwValue( 0 ), m_dwFlagSet( 0 ) {}
     TextEntry( const char *szIn, int dwIn ) { Init( szIn, dwIn ); }
 
     ~TextEntry()
@@ -22,10 +22,18 @@ public:
         m_szString = new char[Util::jstrlen( szIn ) + 1];
         Util::jstrcpy( m_szString, szIn );
         m_dwValue = dwIn;
+        m_dwFlagSet = 0;
+    };
+
+    void Init( const char *szIn, int dwIn, int dwFlagSet )
+    {
+        Init( szIn, dwIn );
+        m_dwFlagSet = dwFlagSet;
     };
 
     char *m_szString;
     int m_dwValue;
+    int m_dwFlagSet;
 
 protected:
 private:

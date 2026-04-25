@@ -4,7 +4,13 @@
 #include "JMDefs.h"
 #include "Player.h"
 
-CAIBrain::CAIBrain() : m_dwMoveType( 0 ), m_fSpeed( 0.0f ), m_eBrainState( BRAINSTATE_INVALID ) {}
+CAIBrain::CAIBrain()
+    : m_dwMoveType( 0 ),
+      m_fSpeed( 0.0f ),
+      m_eBrainState( BRAINSTATE_INVALID ),
+      m_vTargetPos( 0, 0 )
+{
+}
 
 CAIMgr::~CAIMgr()
 {
@@ -126,6 +132,7 @@ bool CAIBrain::UpdateSeek( float fCurTime )
     case MON_AI_SEEKPLAYER:
     {
         JLog( LOG_LEVEL_NOISE, true, "seek player\n" );
+        m_vTargetPos = g_pGame->GetPlayer()->m_vPos;
         WalkSeek( fCurTime );
     }
     break;
@@ -227,7 +234,9 @@ void CAIBrain::CollideWithPlayer()
         }
 
         float fDamage = m_pParent->Damage( fDamageMult );
-        g_pGame->GetPlayer()->TakeDamage( fDamage, m_pParent->GetName() );
+        CAttack *pAtk = m_pParent->m_pCurrentAttack;
+        uint32 dwElement = ( pAtk && pAtk->m_pEffect ) ? pAtk->m_pEffect->m_dwFlags : 0;
+        g_pGame->GetPlayer()->TakeDamage( fDamage, m_pParent->GetName(), dwElement );
         m_pParent->AttackDone();
     }
 }
@@ -268,10 +277,9 @@ bool CAIBrain::SetRandomDest( float fCurTime )
 bool CAIBrain::WalkSeek( float fCurTime )
 {
     JVector delta( 0, 0 ), dest( 0, 0 );
-    JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
 
-    float x_delta = vPlayerPos.x - m_vPos.x;
-    float y_delta = vPlayerPos.y - m_vPos.y;
+    float x_delta = m_vTargetPos.x - m_vPos.x;
+    float y_delta = m_vTargetPos.y - m_vPos.y;
 
     if( x_delta > 1 )
         x_delta = 1;

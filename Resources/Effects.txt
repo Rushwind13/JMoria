@@ -1,0 +1,805 @@
+# Effects.txt
+#
+# Items, monsters, and spells all reference these by name.
+#
+# Each Effect entry is of the following form:
+#
+# Effect <effect-name>
+# {
+#    variable-name    value
+#     ...
+# }
+#
+# Note: delimit <string> values with angle brackets <>
+# Where variable-name/value are name/value pairs
+# from the following list:
+#
+# Type        string    EFFECT_TYPE_* verb (HIT, HEAL, CREATE, DESTROY, INTRINSIC, etc.)
+# Flag        string    EFFECT_FLAG_* noun (FIRE, COLD, LIGHT, HP, etc.)
+# Flag2       string    EFFECT_FLAG_* noun word 2 (DOOR, TRAP, MONSTERS)
+# Modifier    string    EFFECT_MOD_* adverb (LINE, BALL, AREA, RESIST, TIMED, etc.)
+# Amount      XdY       damage/healing dice rolled per use
+# Duration    float     for timed effects, how long (in game turns)
+# Range       float     max range in tiles (0 = self only)
+# Radius      float     AoE radius (0 = single target)
+
+# --- HIT - damage / status attacks ---
+
+# --- EFFECT_FLAG_FIRE ---
+
+Effect <Fire Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_FIRE>
+    Amount      <1d5>
+    Range       1
+}
+Effect <Fireball>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_FIRE>
+    Modifier    <EFFECT_MOD_BALL>
+    Amount      <6d8>
+    Range       20
+    Radius      3
+}
+Effect <Firebolt>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_FIRE>
+    Modifier    <EFFECT_MOD_LINE>
+    Amount      <2d8>
+    Range       15
+}
+Effect <Inflict Fire>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_FIRE>
+    Amount      <2d8>
+}
+# --- EFFECT_FLAG_COLD ---
+
+Effect <Cold Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_COLD>
+    Amount      <1d5>
+    Range       1
+}
+Effect <Frost Ball>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_COLD>
+    Modifier    <EFFECT_MOD_BALL>
+    Amount      <6d8>
+    Range       20
+    Radius      3
+}
+Effect <Frost Bolt>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_COLD>
+    Modifier    <EFFECT_MOD_LINE>
+    Amount      <2d8>
+    Range       15
+}
+# --- EFFECT_FLAG_ELECTRICITY ---
+
+Effect <Lightning Ball>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_ELECTRICITY>
+    Modifier    <EFFECT_MOD_BALL>
+    Amount      <6d6>
+    Range       20
+    Radius      3
+}
+Effect <Lightning Bolt>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_ELECTRICITY>
+    Flag2       <EFFECT_FLAG_NO_COLLIDE>
+    Modifier    <EFFECT_MOD_LINE>
+    Amount      <3d6>
+    Range       20
+}
+Effect <Lightning Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_ELECTRICITY>
+    Amount      <2d6>
+    Range       1
+}
+# --- EFFECT_FLAG_ACID ---
+
+Effect <Acid Ball>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_ACID>
+    Modifier    <EFFECT_MOD_BALL>
+    Amount      <6d8>
+    Range       20
+    Radius      3
+}
+Effect <Acid Bolt>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_ACID>
+    Modifier    <EFFECT_MOD_LINE>
+    Amount      <2d8>
+    Range       15
+}
+Effect <Acid Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_ACID>
+    Amount      <2d6>
+    Range       1
+}
+# --- EFFECT_FLAG_POISON ---
+
+Effect <Poison Ball>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_POISON>
+    Modifier    <EFFECT_MOD_BALL>
+    Amount      <6d8>
+    Range       5
+    Radius      3
+}
+Effect <Poison Bolt>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_POISON>
+    Modifier    <EFFECT_MOD_LINE>
+    Amount      <2d8>
+    Range       8
+}
+Effect <Poison Sting>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_POISON>
+    Amount      <1d4>
+    Range       1
+}
+Effect <Poison Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_POISON>
+    Range       1
+}
+# --- EFFECT_FLAG_LIGHT ---
+
+Effect <Light Ray>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_LIGHT>
+    Flag2       <EFFECT_FLAG_NO_COLLIDE>
+    Modifier    <EFFECT_MOD_LINE>
+    Amount      <1d5>
+    Range       15
+}
+Effect <Light Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_LIGHT>
+    Amount      <1d4>
+    Range       1
+}
+# --- EFFECT_FLAG_PARALYZE ---
+
+Effect <Cause Paralysis>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_PARALYZE>
+    Range       15
+}
+Effect <Mass Paralyze>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_PARALYZE>
+    Modifier    <EFFECT_MOD_AREA>
+    Radius      8
+}
+Effect <Paralysis Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_PARALYZE>
+    Duration    1d4
+    Range       1
+}
+# --- EFFECT_FLAG_TREASURE ---
+
+Effect <Pick Pocket>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_TREASURE>
+    Range       1
+}
+# --- EFFECT_FLAG_AFRAID ---
+
+Effect <Cause Fear>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_AFRAID>
+    Range       15
+}
+Effect <Fear Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_AFRAID>
+    Duration    5.0
+    Range       1
+}
+Effect <Mass Fear>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_AFRAID>
+    Modifier    <EFFECT_MOD_AREA>
+    Radius      10
+}
+# --- EFFECT_FLAG_BLIND ---
+
+Effect <Blindness Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_BLIND>
+    Duration    50.0
+    Range       1
+}
+# --- EFFECT_FLAG_SLEEP ---
+
+Effect <Cause Sleep>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_SLEEP>
+    Range       15
+}
+Effect <Mass Sleep>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_SLEEP>
+    Modifier    <EFFECT_MOD_AREA>
+    Radius      10
+}
+Effect <Sleep Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_SLEEP>
+    Duration    5.0
+    Range       1
+}
+# --- EFFECT_FLAG_CONFUSE ---
+
+Effect <Cause Confusion>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_CONFUSE>
+    Range       15
+}
+Effect <Confusion Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_CONFUSE>
+    Duration    7.0
+    Range       1
+}
+# --- EFFECT_FLAG_STONE_TO_MUD ---
+
+Effect <Stone to Mud>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_STONE_TO_MUD>
+    Range       15
+}
+# --- EFFECT_FLAG_IDENTIFY ---
+
+Effect <Probe>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_IDENTIFY>
+    Range       15
+}
+# --- EFFECT_FLAG_AC ---
+
+Effect <Timed Blessing>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_AC>
+    Duration    50.0
+}
+# --- EFFECT_FLAG_XP ---
+
+Effect <XP Drain Touch>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_XP>
+    Amount      <1d10>
+    Range       1
+}
+# --- EFFECT_FLAG_HP ---
+
+Effect <Heal Monster>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_HP>
+    Range       15
+}
+Effect <Life Drain>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <1d10>
+    Range       1
+}
+# --- EFFECT_FLAG_TELEPORT ---
+
+Effect <Teleport Away>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_TELEPORT>
+    Range       15
+}
+Effect <Physical Hit>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Amount      <1d6>
+    Range       1
+}
+
+# --- HEAL - restore HP and cure status ---
+
+Effect <Cure Poison>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_POISON>
+}
+Effect <Cure Paralysis>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_PARALYZE>
+}
+Effect <Cure Fear>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_AFRAID>
+}
+Effect <Cure Blindness>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_BLIND>
+}
+Effect <Cure Sleep>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_SLEEP>
+}
+Effect <Cure Confusion>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_CONFUSE>
+}
+Effect <Cure Light Wounds>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <8d8>
+}
+Effect <Cure Serious Wounds>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <16d8>
+}
+Effect <Greater Healing>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <32d8>
+}
+Effect <Major Healing>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <24d8>
+}
+Effect <Massive Healing>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <100d8>
+}
+Effect <Minor Healing>
+{
+    Type        <EFFECT_TYPE_HEAL>
+    Flag        <EFFECT_FLAG_HP>
+    Amount      <4d4>
+}
+
+# --- CREATE - summon, teleport, recall, mapping ---
+
+Effect <Light Area>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_LIGHT>
+    Modifier    <EFFECT_MOD_AREA>
+    Radius      15
+}
+Effect <Recall>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_RECALL>
+}
+Effect <Full Mapping>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_MAPPING>
+}
+Effect <Partial Mapping>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_MAPPING>
+    Modifier    <EFFECT_MOD_AREA>
+}
+Effect <Summon Monsters>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_SUMMON>
+}
+Effect <Phase Door>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_TELEPORT>
+    Modifier    <EFFECT_MOD_AREA>
+}
+Effect <Teleport Self>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_TELEPORT>
+}
+Effect <Create Trap>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_TRAP>
+}
+Effect <Curse Object>
+{
+    Type        <EFFECT_TYPE_CREATE>
+    Flag        <EFFECT_FLAG_CURSE>
+}
+
+# --- DESTROY - remove curses, poison, etc. ---
+
+Effect <Destroy Poison>
+{
+    Type        <EFFECT_TYPE_DESTROY>
+    Flag        <EFFECT_FLAG_POISON>
+}
+Effect <Remove Curse>
+{
+    Type        <EFFECT_TYPE_DESTROY>
+    Flag        <EFFECT_FLAG_CURSE>
+}
+
+# --- INTRINSIC - permanent and timed intrinsics ---
+
+Effect <Immune Fire>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_FIRE>
+    Modifier    <EFFECT_MOD_IMMUNE>
+}
+Effect <Resist Fire>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_FIRE>
+    Modifier    <EFFECT_MOD_RESIST>
+}
+Effect <Timed Immune Fire>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_FIRE>
+    Modifier    <EFFECT_MOD_IMMUNE>
+    Duration    80.0
+}
+Effect <Timed Resist Fire>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_FIRE>
+    Modifier    <EFFECT_MOD_RESIST>
+    Duration    150.0
+}
+Effect <Resist Cold>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_COLD>
+    Modifier    <EFFECT_MOD_RESIST>
+}
+Effect <Timed Immune Cold>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_COLD>
+    Modifier    <EFFECT_MOD_IMMUNE>
+    Duration    80.0
+}
+Effect <Timed Resist Cold>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_COLD>
+    Modifier    <EFFECT_MOD_RESIST>
+    Duration    150.0
+}
+Effect <Resist Electricity>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_ELECTRICITY>
+    Modifier    <EFFECT_MOD_RESIST>
+}
+Effect <Timed Immune Electricity>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_ELECTRICITY>
+    Modifier    <EFFECT_MOD_IMMUNE>
+    Duration    80.0
+}
+Effect <Timed Resist Electricity>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_ELECTRICITY>
+    Modifier    <EFFECT_MOD_RESIST>
+    Duration    150.0
+}
+Effect <Resist Acid>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_ACID>
+    Modifier    <EFFECT_MOD_RESIST>
+}
+Effect <Timed Immune Acid>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_ACID>
+    Modifier    <EFFECT_MOD_IMMUNE>
+    Duration    80.0
+}
+Effect <Timed Resist Acid>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_ACID>
+    Modifier    <EFFECT_MOD_RESIST>
+    Duration    150.0
+}
+Effect <Inflict Poison>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_POISON>
+    Duration    80.0
+}
+Effect <Resist Poison>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_POISON>
+    Modifier    <EFFECT_MOD_RESIST>
+    Duration    100.0
+}
+Effect <Light>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_LIGHT>
+}
+Effect <Treasure Sense>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_TREASURE>
+}
+Effect <Resist Fear>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_AFRAID>
+    Modifier    <EFFECT_MOD_RESIST>
+    Duration    50.0
+}
+Effect <Cause Blindness>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_BLIND>
+    Duration    50.0
+}
+Effect <Inflict Sleep>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_SLEEP>
+    Duration    30.0
+}
+Effect <Inflict Confusion>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_CONFUSE>
+    Duration    30.0
+}
+Effect <Tunneling>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_STONE_TO_MUD>
+}
+Effect <Infravision>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_INFRA>
+}
+Effect <Timed Infravision>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_INFRA>
+    Duration    100.0
+}
+Effect <ESP>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_ESP>
+}
+Effect <Timed ESP>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_ESP>
+    Duration    100.0
+}
+Effect <Sustain CHA>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_STAT>
+    Modifier    <EFFECT_MOD_SUSTAIN>
+}
+Effect <Timed Heroism>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_HP>
+    Flag        <EFFECT_FLAG_STAT>
+    Duration    50.0
+}
+Effect <Free Action>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_FREE_ACTION>
+}
+Effect <Invisibility>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_INVISIBLE>
+}
+Effect <Timed Invisibility>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_INVISIBLE>
+    Duration    100.0
+}
+Effect <Levitation>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_LEVITATE>
+}
+Effect <Timed Levitation>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_LEVITATE>
+    Duration    100.0
+}
+Effect <Speed>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_SPEED>
+}
+Effect <Timed Speed>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_SPEED>
+    Duration    80.0
+}
+Effect <Searching>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_SEARCHING>
+}
+
+# --- RESTORE - identify, recharge ---
+
+Effect <Recharge>
+{
+    Type        <EFFECT_TYPE_RESTORE>
+    Flag        <EFFECT_FLAG_FUEL>
+    Amount      <1d4>
+}
+Effect <Star-Recharge>
+{
+    Type        <EFFECT_TYPE_RESTORE>
+    Flag        <EFFECT_FLAG_FUEL>
+    Amount      <2d4>
+}
+Effect <Identify>
+{
+    Type        <EFFECT_TYPE_RESTORE>
+    Flag        <EFFECT_FLAG_IDENTIFY>
+}
+
+# --- GAIN - enchant weapons/armor ---
+
+Effect <Gain Fuel>
+{
+    Type        <EFFECT_TYPE_GAIN>
+    Flag        <EFFECT_FLAG_FUEL>
+}
+Effect <Enchant to Hit>
+{
+    Type        <EFFECT_TYPE_GAIN>
+    Flag        <EFFECT_FLAG_TOHIT>
+    Modifier    <EFFECT_MOD_ENCHANT>
+    Amount      <1>
+}
+Effect <Star-Enchant Weapon>
+{
+    Type        <EFFECT_TYPE_GAIN>
+    Flag        <EFFECT_FLAG_TOHIT>
+    Flag        <EFFECT_FLAG_TODAM>
+    Modifier    <EFFECT_MOD_ENCHANT>
+    Amount      <1d3>
+}
+Effect <Enchant to Damage>
+{
+    Type        <EFFECT_TYPE_GAIN>
+    Flag        <EFFECT_FLAG_TODAM>
+    Modifier    <EFFECT_MOD_ENCHANT>
+    Amount      <1>
+}
+Effect <Enchant Armor>
+{
+    Type        <EFFECT_TYPE_GAIN>
+    Flag        <EFFECT_FLAG_AC>
+    Modifier    <EFFECT_MOD_ENCHANT>
+    Amount      <1>
+}
+Effect <Star-Enchant Armor>
+{
+    Type        <EFFECT_TYPE_GAIN>
+    Flag        <EFFECT_FLAG_AC>
+    Modifier    <EFFECT_MOD_ENCHANT>
+    Amount      <1d3>
+}
+
+# --- SEE - detect and reveal ---
+
+Effect <Detect Treasure>
+{
+    Type        <EFFECT_TYPE_SEE>
+    Flag        <EFFECT_FLAG_TREASURE>
+}
+Effect <Magic Mapping>
+{
+    Type        <EFFECT_TYPE_SEE>
+    Flag        <EFFECT_FLAG_MAPPING>
+}
+Effect <See Invisible>
+{
+    Type        <EFFECT_TYPE_SEE>
+    Flag        <EFFECT_FLAG_INVISIBLE>
+}
+Effect <Timed See Invisible>
+{
+    Type        <EFFECT_TYPE_SEE>
+    Flag        <EFFECT_FLAG_INVISIBLE>
+    Duration    100.0
+}
+Effect <Detect Doors>
+{
+    Type        <EFFECT_TYPE_SEE>
+    Flag        <EFFECT_FLAG_DOOR>
+}
+Effect <Detect Traps>
+{
+    Type        <EFFECT_TYPE_SEE>
+    Flag        <EFFECT_FLAG_TRAP>
+}
+Effect <Detect Monsters>
+{
+    Type        <EFFECT_TYPE_SEE>
+    Flag        <EFFECT_FLAG_MONSTERS>
+}

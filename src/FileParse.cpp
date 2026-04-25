@@ -1,7 +1,32 @@
 #include "FileParse.h"
+#include "Dungeon.h"
 #include "EndGameState.h"
 #include "Item.h"
 #include "Monster.h"
+
+CEffect *CDataFile::EffectFromName( const char *szName )
+{
+    if( m_pDungeon == NULL || szName == NULL || *szName == '\0' )
+        return NULL;
+
+    CEffectDef *pFound = m_pDungeon->GetEffectDef( szName );
+    if( pFound == NULL )
+    {
+        JLog( LOG_LEVEL_WARN, true, "EffectFromName: unknown effect '%s'\n", szName );
+        return NULL;
+    }
+
+    CEffect *pEffect = new CEffect;
+    pEffect->m_ed = pFound;
+    pEffect->m_dwEffect = pFound->m_dwEffect;
+    pEffect->m_dwFlags = pFound->m_dwFlags;
+    pEffect->m_dwFlags2 = pFound->m_dwFlags2;
+    pEffect->m_dwModifier = pFound->m_dwModifier;
+    pEffect->m_fDuration = pFound->m_fDuration;
+    pEffect->SetAmount( pFound->m_szAmount );
+    JLog( LOG_LEVEL_NOISE, true, "EffectFromName: resolved '%s'\n", szName );
+    return pEffect;
+}
 
 bool CDataFile::Open( const char *szFilename )
 {
@@ -143,6 +168,10 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
             {
                 mdIn.m_fBaseAC = GetValue( szLine, mdIn.m_fBaseAC );
             }
+            else if( strncasecmp( szLine, "levelsigma", 10 ) == 0 )
+            {
+                mdIn.m_fLevelSigma = GetValue( szLine, mdIn.m_fLevelSigma );
+            }
             else if( strncasecmp( szLine, "level", 5 ) == 0 )
             {
                 GetValue( szLine, mdIn.m_dwLevel );
@@ -181,72 +210,142 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 char *begin;
                 char *end;
                 char *cur;
-                bool bDone = false;
-                // Attack <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2 -or-
-                // Attack <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,15d8,5
-                // effect type
+
+                // Two supported formats:
+                //   Old inline: Attack <EFFECT_TYPE_HIT>,<MON_FLAG_TOUCH>,1d2
+                //               Attack
+                //               <EFFECT_TYPE_HIT>,<MON_FLAG_BREATHE>,<EFFECT_FLAG_FIRE>,15d8,5
+                //   New named:  Attack <MON_FLAG_BITE>,<Physical Hit>,2d6
+                //               Attack <MON_FLAG_BREATHE>,<Firebolt>,2d8,15
+                // Detect by checking whether the first token starts with "EFFECT_TYPE_".
+
+                // first token
                 begin = strchr( szLine, '<' );
                 end = strchr( szLine, '>' );
                 if( begin == NULL || end == NULL )
                 {
-                    JLog( LOG_LEVEL_ERROR, true, "error parsing attack: effect type not found %s\n",
-                          cur );
+                    JLog( LOG_LEVEL_ERROR, true,
+                          "error parsing attack: first token not found: %s\n", szLine );
+                    delete curAttack;
                     continue;
                 }
                 *end++ = NULL;
                 begin++;
-                // if( g_Constants.CompareType( "EFFECT_TYPE", begin ) )
-                {
-                    curAttack->m_dwEffect = g_Constants.LookupString( begin );
-                }
                 cur = end;
 
-                // attack type
-                begin = strchr( cur, '<' );
-                end = strchr( cur, '>' );
-                if( begin == NULL || end == NULL )
+                if( strncasecmp( begin, "EFFECT_TYPE_", 12 ) == 0 )
                 {
-                    JLog( LOG_LEVEL_ERROR, true, "error parsing attack: attack type not found %s\n",
-                          cur );
-                    continue;
-                }
-                *end++ = NULL;
-                begin++;
-                // if( g_Constants.CompareType( "MON_FLAG", begin ) ||
-                //     g_Constants.CompareType( "EFFECT_FLAG", begin ) )
-                // {
-                curAttack->m_dwType = g_Constants.LookupString( begin );
-                // }
-                cur = end;
+                    // --- Old inline format ---
+                    CEffect *pEffect = new CEffect;
+                    pEffect->m_dwEffect = g_Constants.LookupString( begin );
 
-                // effect flag (optional)
-                begin = strchr( cur, '<' );
-                end = strchr( cur, '>' );
-                if( begin != NULL && end != NULL )
-                {
+                    // attack type (MON_FLAG_*)
+                    begin = strchr( cur, '<' );
+                    end = strchr( cur, '>' );
+                    if( begin == NULL || end == NULL )
+                    {
+                        JLog( LOG_LEVEL_ERROR, true,
+                              "error parsing attack: attack type not found: %s\n", cur );
+                        delete pEffect;
+                        delete curAttack;
+                        continue;
+                    }
                     *end++ = NULL;
                     begin++;
-                    // if( g_Constants.CompareType( "EFFECT_FLAG", begin ) )
-                    {
-                        curAttack->m_dwEffectFlags = g_Constants.LookupString( begin );
-                        JLog( LOG_LEVEL_NOISE, true, "Found an Effect Flag: %s\n", begin );
-                    }
+                    curAttack->m_dwType = g_Constants.LookupString( begin );
                     cur = end;
-                }
 
-                // damage
-                begin = strchr( cur, ',' );
-                if( begin == NULL )
+                    // effect flag (optional)
+                    begin = strchr( cur, '<' );
+                    end = strchr( cur, '>' );
+                    if( begin != NULL && end != NULL )
+                    {
+                        *end++ = NULL;
+                        begin++;
+                        pEffect->m_dwFlags = g_Constants.LookupString( begin );
+                        JLog( LOG_LEVEL_NOISE, true, "Found an Effect Flag: %s\n", begin );
+                        cur = end;
+                    }
+
+                    curAttack->m_pEffect = pEffect;
+
+                    // damage
+                    begin = strchr( cur, ',' );
+                    if( begin == NULL )
+                    {
+                        JLog( LOG_LEVEL_ERROR, true, "error parsing attack: damage not found: %s\n",
+                              cur );
+                        delete curAttack;
+                        continue;
+                    }
+                    begin++;
+                    cur = Strip( begin );
+                    curAttack->m_szDamage = new char[Util::jstrlen( cur ) + 1];
+                    Util::jstrcpy( curAttack->m_szDamage, cur );
+                }
+                else if( m_pDungeon != NULL )
                 {
-                    JLog( LOG_LEVEL_ERROR, true, "error parsing attack: damage not found %s\n",
-                          cur );
+                    // --- New named-effect format ---
+                    // first token is delivery type (MON_FLAG_*)
+                    curAttack->m_dwType = g_Constants.LookupString( begin );
+
+                    // second token: named effect
+                    begin = strchr( cur, '<' );
+                    end = strchr( cur, '>' );
+                    if( begin == NULL || end == NULL )
+                    {
+                        JLog( LOG_LEVEL_ERROR, true,
+                              "error parsing attack: effect name not found: %s\n", cur );
+                        delete curAttack;
+                        continue;
+                    }
+                    char nameBuf[128];
+                    int nameLen = (int)( end - begin - 1 );
+                    if( nameLen > 0 && nameLen < (int)sizeof( nameBuf ) )
+                    {
+                        memcpy( nameBuf, begin + 1, nameLen );
+                        nameBuf[nameLen] = '\0';
+                    }
+                    else
+                    {
+                        nameBuf[0] = '\0';
+                    }
+                    *end++ = NULL;
+                    cur = end;
+
+                    CEffect *pEffect = EffectFromName( nameBuf );
+                    if( pEffect != NULL )
+                    {
+                        curAttack->m_pEffect = pEffect;
+
+                        // optional dice override
+                        begin = strchr( cur, ',' );
+                        if( begin != NULL )
+                        {
+                            begin++;
+                            cur = Strip( begin );
+                            if( cur != NULL && *cur != '\0' )
+                            {
+                                curAttack->m_szDamage = new char[Util::jstrlen( cur ) + 1];
+                                Util::jstrcpy( curAttack->m_szDamage, cur );
+                            }
+                        }
+                        else if( pEffect->m_ed != NULL && pEffect->m_ed->m_szAmount != NULL )
+                        {
+                            // no dice override — fall back to effect's default amount
+                            curAttack->m_szDamage =
+                                new char[Util::jstrlen( pEffect->m_ed->m_szAmount ) + 1];
+                            Util::jstrcpy( curAttack->m_szDamage, pEffect->m_ed->m_szAmount );
+                        }
+                    }
+                }
+                else
+                {
+                    JLog( LOG_LEVEL_WARN, true,
+                          "Attack uses named effect but dungeon not set: %s\n", szLine );
+                    delete curAttack;
                     continue;
                 }
-                begin++;
-                // from here on out, you've got enough info to do this.
-                cur = Strip( begin );
-                curAttack->m_szDamage = new char[Util::jstrlen( cur ) + 1];
-                Util::jstrcpy( curAttack->m_szDamage, cur );
 
                 // store it
                 mdIn.m_llAttacks->Add( curAttack );
@@ -340,7 +439,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
             }
             else if( strncasecmp( szLine, "acbonus", 7 ) == 0 )
             {
-                idIn.m_fACBonus = GetValue( szLine, idIn.m_fACBonus );
+                idIn.m_szACBonus = GetValue( szLine, idIn.m_szACBonus );
             }
             else if( strncasecmp( szLine, "ac", 2 ) == 0 )
             {
@@ -352,11 +451,19 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
             }
             else if( strncasecmp( szLine, "to-hitbonus", 11 ) == 0 )
             {
-                idIn.m_fBonusToHit = GetValue( szLine, idIn.m_fBonusToHit );
+                idIn.m_szBonusToHit = GetValue( szLine, idIn.m_szBonusToHit );
             }
             else if( strncasecmp( szLine, "to-dambonus", 11 ) == 0 )
             {
-                idIn.m_fBonusToDamage = GetValue( szLine, idIn.m_fBonusToDamage );
+                idIn.m_szBonusToDamage = GetValue( szLine, idIn.m_szBonusToDamage );
+            }
+            else if( strncasecmp( szLine, "charges", 7 ) == 0 )
+            {
+                idIn.m_szCharges = GetValue( szLine, idIn.m_szCharges );
+            }
+            else if( strncasecmp( szLine, "levelsigma", 10 ) == 0 )
+            {
+                idIn.m_fLevelSigma = GetValue( szLine, idIn.m_fLevelSigma );
             }
             else if( strncasecmp( szLine, "level", 5 ) == 0 )
             {
@@ -515,87 +622,106 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 char *end;
                 char *cur;
 
-                // Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>
-                // Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
-                // Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_INVISIBLE>
-                // Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FIRE>,<EFFECT_MOD_RESIST>
-                // Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FIRE>,<EFFECT_MOD_RESIST>
-                // Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LIGHT>
-                // Effect      <EFFECT_TYPE_GAIN>,<EFFECT_FLAG_FUEL>
-                // Effect      <EFFECT_TYPE_HEAL>,<ITEM_FLAG_CURSED>
-                // type
+                // Named reference: Effect <Firebolt>
+                // Inline:          Effect <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>
+                // Detect by checking for comma after the first <...> pair
                 begin = strchr( szLine, '<' );
                 end = strchr( szLine, '>' );
                 if( begin == NULL || end == NULL )
                 {
                     JLog( LOG_LEVEL_ERROR, true, "Error parsing effect: type not found\n" );
+                    delete curEffect;
                     continue;
                 }
-                *end++ = NULL;
-                begin++;
-                // if( g_Constants.CompareType( "EFFECT_TYPE", begin ) )
+
+                // Check if there's a comma after the first <...> — inline vs named
+                char *comma = strchr( end + 1, ',' );
+                char *nextAngle = strchr( end + 1, '<' );
+                bool bIsNamed = ( comma == NULL && nextAngle == NULL );
+
+                if( bIsNamed && m_pDungeon != NULL )
                 {
-                    JLog( LOG_LEVEL_NOISE, true, "%s ", begin );
-                    curEffect->m_dwEffect = g_Constants.LookupString( begin );
+                    char nameBuf[128];
+                    int nameLen = (int)( end - begin - 1 );
+                    if( nameLen > 0 && nameLen < (int)sizeof( nameBuf ) )
+                    {
+                        memcpy( nameBuf, begin + 1, nameLen );
+                        nameBuf[nameLen] = '\0';
+                    }
+                    else
+                    {
+                        nameBuf[0] = '\0';
+                    }
+
+                    delete curEffect; // EffectFromName allocates its own
+                    curEffect = EffectFromName( nameBuf );
+                    if( curEffect != NULL )
+                        idIn.m_llEffects->Add( curEffect );
                 }
-                cur = end;
-
-                // flag
-                begin = strchr( cur, '<' );
-                end = strchr( cur, '>' );
-                if( begin == NULL || end == NULL )
+                else
                 {
-                    JLog( LOG_LEVEL_ERROR, true, "Error parsing effect: flag not found\n" );
-                    continue;
-                }
-                *end++ = NULL;
-                begin++;
-                // if( g_Constants.CompareType( "EFFECT_FLAG", begin ) ||
-                //     g_Constants.CompareType( "ITEM_FLAG", begin ) )
-                // {
-
-                JLog( LOG_LEVEL_NOISE, false, "%s ", begin );
-                curEffect->m_dwFlags = g_Constants.LookupString( begin );
-                // }
-                cur = end;
-
-                // modifier (optional)
-                begin = strchr( cur, '<' );
-                end = strchr( cur, '>' );
-                if( begin != NULL && end != NULL )
-                {
-                    JLog( LOG_LEVEL_NOISE, true, "Found effect modifier\n" );
+                    // Inline format: <EFFECT_TYPE>,<EFFECT_FLAG>[,<EFFECT_MOD>][,<amount>]
                     *end++ = NULL;
                     begin++;
-                    // if( g_Constants.CompareType( "EFFECT_MOD", begin ) )
                     {
-
-                        JLog( LOG_LEVEL_NOISE, false, "%s ", begin );
-                        curEffect->m_dwModifier = g_Constants.LookupString( begin );
+                        JLog( LOG_LEVEL_NOISE, true, "%s ", begin );
+                        curEffect->m_dwEffect = g_Constants.LookupString( begin );
                     }
                     cur = end;
+
+                    // flag
+                    begin = strchr( cur, '<' );
+                    end = strchr( cur, '>' );
+                    if( begin == NULL || end == NULL )
+                    {
+                        JLog( LOG_LEVEL_ERROR, true, "Error parsing effect: flag not found\n" );
+                        delete curEffect;
+                        continue;
+                    }
+                    *end++ = NULL;
+                    begin++;
+
+                    JLog( LOG_LEVEL_NOISE, false, "%s ", begin );
+                    g_Constants.LookupEffectFlag( begin, curEffect->m_dwFlags,
+                                                  curEffect->m_dwFlags2 );
+                    cur = end;
+
+                    // modifier (optional)
+                    begin = strchr( cur, '<' );
+                    end = strchr( cur, '>' );
+                    if( begin != NULL && end != NULL )
+                    {
+                        JLog( LOG_LEVEL_NOISE, true, "Found effect modifier\n" );
+                        *end++ = NULL;
+                        begin++;
+                        {
+                            JLog( LOG_LEVEL_NOISE, false, "%s ", begin );
+                            curEffect->m_dwModifier = g_Constants.LookupString( begin );
+                        }
+                        cur = end;
+                    }
+
+                    // amount (optional — 4th comma-separated <NdM> field)
+                    begin = strchr( cur, ',' );
+                    if( begin != NULL )
+                    {
+                        begin++;
+                        cur = Strip( begin );
+                        begin = strchr( cur, '<' );
+                        end = strchr( cur, '>' );
+                        if( begin != NULL && end != NULL )
+                        {
+                            *end = NULL;
+                            begin++;
+                            curEffect->SetAmount( begin );
+                            JLog( LOG_LEVEL_NOISE, false, "amount=%s ", curEffect->m_szAmount );
+                        }
+                    }
+
+                    JLog( LOG_LEVEL_NOISE, false, "\n" );
+                    // store it
+                    idIn.m_llEffects->Add( curEffect );
                 }
-
-                // // amount
-                // begin = strchr( cur, ',' );
-                // if( begin == NULL )
-                //     continue;
-                // begin++;
-                // cur = Strip( begin );
-                // begin = strchr( cur, '<' );
-                // end = strchr( cur, '>' );
-                // if( begin == NULL || end == NULL )
-                // {
-                //     continue;
-                // }
-                // *end = NULL;
-                // begin++;
-                // curEffect->m_szAmount = new char[Util::jstrlen( begin ) + 1];
-                // Util::jstrcpy( curEffect->m_szAmount, begin );
-
-                JLog( LOG_LEVEL_NOISE, false, "\n" );
-                // store it
-                idIn.m_llEffects->Add( curEffect );
             }
             else if( *szLine == '}' )
             {
@@ -613,6 +739,98 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
     }
 
     return &idIn;
+}
+
+CEffectDef *CDataFile::ReadEffect( CEffectDef &edIn )
+{
+    char szRaw[1024];
+    char *szLine;
+    char *szValue = NULL;
+    bool bFoundEffect = false;
+    bool bStartEffect = false;
+    bool bEndEffect = false;
+
+    while( !bEndEffect && fgets( szRaw, 1024, m_fp ) != NULL )
+    {
+        szLine = Strip( szRaw );
+        if( szLine == NULL )
+        {
+            continue;
+        }
+        if( !bFoundEffect )
+        {
+            if( strncasecmp( szLine, "effect", 6 ) == 0 )
+            {
+                bFoundEffect = true;
+                edIn.m_szName = GetValue( szLine, edIn.m_szName );
+                JLog( LOG_LEVEL_NOISE, true, "Found effect: %s\n", edIn.m_szName );
+            }
+            continue;
+        }
+
+        if( !bStartEffect )
+        {
+            if( *szLine == '{' )
+            {
+                bStartEffect = true;
+            }
+            continue;
+        }
+
+        if( !bEndEffect )
+        {
+            if( strncasecmp( szLine, "type", 4 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwEffect = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "flag2", 5 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                g_Constants.LookupEffectFlag( szValue, edIn.m_dwFlags, edIn.m_dwFlags2 );
+            }
+            else if( strncasecmp( szLine, "flag", 4 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                g_Constants.LookupEffectFlag( szValue, edIn.m_dwFlags, edIn.m_dwFlags2 );
+            }
+            else if( strncasecmp( szLine, "modifier", 8 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwModifier = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "amount", 6 ) == 0 )
+            {
+                edIn.m_szAmount = GetValue( szLine, edIn.m_szAmount );
+            }
+            else if( strncasecmp( szLine, "duration", 8 ) == 0 )
+            {
+                edIn.m_fDuration = GetValue( szLine, edIn.m_fDuration );
+            }
+            else if( strncasecmp( szLine, "range", 5 ) == 0 )
+            {
+                edIn.m_fRange = GetValue( szLine, edIn.m_fRange );
+            }
+            else if( strncasecmp( szLine, "radius", 6 ) == 0 )
+            {
+                edIn.m_fRadius = GetValue( szLine, edIn.m_fRadius );
+            }
+            else if( *szLine == '}' )
+            {
+                bEndEffect = true;
+            }
+            else
+            {
+                JLog( LOG_LEVEL_WARN, true, "Unparseable line:%s\n", szLine );
+            }
+        }
+    }
+    if( !bEndEffect )
+    {
+        return NULL;
+    }
+
+    return &edIn;
 }
 
 CScore *CDataFile::ReadScore( CScore &sIn )

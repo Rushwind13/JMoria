@@ -6,6 +6,7 @@
 #include "BrainSteps.cpp"
 #include "BresenhamSteps.cpp"
 #include "DungeonMapSteps.cpp"
+#include "EffectSteps.cpp"
 #include "EquipmentSteps.cpp"
 #include "GameSteps.cpp"
 #include "ItemSteps.cpp"

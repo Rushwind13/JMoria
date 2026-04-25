@@ -14,7 +14,8 @@ CMonster::CMonster()
       m_pBrain( NULL ),
       m_fColorChangeInterval( COLOR_CHANGE_TIMEOUT + 1 ),
       m_fLastBreed( BREED_INTERVAL ),
-      m_dwInstanceId( 0 )
+      m_dwInstanceId( 0 ),
+      m_bDetected( false )
 {
     m_pBrain = new CAIBrain;
 }
@@ -203,9 +204,9 @@ float CMonster::Attack()
 
 const char *CMonster::AttackEffect()
 {
-    if( m_pCurrentAttack == NULL )
+    if( m_pCurrentAttack == NULL || m_pCurrentAttack->m_pEffect == NULL )
         return "thoughts and prayers";
-    switch( m_pCurrentAttack->m_dwEffectFlags )
+    switch( m_pCurrentAttack->m_pEffect->m_dwFlags )
     {
     case EFFECT_FLAG_ACID:
         return "acid";
@@ -344,7 +345,12 @@ void CMonster::SetColor()
     m_fColorChangeInterval = 0.0f;
 }
 
-unsigned char MonIDs[MON_IDX_MAX + 1] = "abcddefghhikllmnoprsuwxyzABCDFFFGGHIJKLOPRSTUVWWXY&.,$t";
+// MonIDs: index → tile character, alphabetical within each group
+// lowercase: a b c d d e f f f g h i j k l l m n o p r s u w x y z
+// uppercase: A B C D D E F G G H I J K L M M O P P R S T U V W W X Y
+// special:   & . , $ t |
+unsigned char MonIDs[MON_IDX_MAX + 1] =
+    "abcddefffghijkllmnoprsuwxyzABCDDEFGGHIJKLMMOPPRSTUVWWXY&.,$t|";
 void CMonster::Draw()
 {
     char monster_char = MonIDs[m_md->m_dwIndex];

@@ -1,330 +1,268 @@
-# Phase 3a: Flotsam — Post-Foundation Polish & Difficulty Tuning
+# Phase 3a: Flotsam — Prioritized Work List
 
-**Repository:** `Rushwind13/JMoria`  
-**Branch:** `feat/phase3a_flotsam`  
-**Status:** Planning Phase  
-**Created:** April 24, 2026
-
-## Overview
-
-Phase 3a: Flotsam covers small-to-medium post-Phase-3 systems that enhance difficulty tuning, UI polish, and combat mechanics. These are **not blocking** other features but significantly improve player experience and enable final Phase 4 preparation.
-
-**Focus Areas:**
-1. **Speed System & Difficulty Tuning** (#242) — Action economy, primary difficulty lever for Balrog
-2. **Combat Enhancements** (#265) — Breath weapon scaling by monster HP
-3. **Effect System Polish** (#264) — EFFECT_MOD_MAX flag for dice roll control
-4. **UI Improvements** (#272) — Visible Monsters pane for detection spells
+These are targeted improvements and one major system that were floating without a dedicated implementation plan. Issues #265, #272, #273, and #242. Smallest wins first; biggest system last.
 
 ---
 
-## Phase 3a Issues
+## Prioritized Work
 
-### #242 — Speed System & Difficulty Tuning (Action Economy Mechanic)
+### P1 — #273: Messages Scrollback (Quick Win, ~1–2 hrs)
 
-**Priority**: 🔴 CRITICAL (Primary difficulty lever)  
-**Status**: Not started (Design Complete)  
-**Effort**: High  
-**Dependency Chain**: Enables #42 (Balrog endgame goal)
-
-**Description**: 
-Implement speed/action economy system that creates difficulty scaling and character differentiation. Speed is the **primary difficulty lever** for the entire game—determines survivability against Balrog and other threats.
-
-**Design Specification**:
-- **Base Speed**: 10 (represents normal speed = 1 action per turn)
-- **Speed Formula**: Base 10 + Equipment mods + Stat mods + Temporary effects
-- **Equipment Modifiers**:
-  - Rings: +1 to +20 per ring (2 ring slots) → max +40 from rings
-  - Boots: +10 (1 boot slot)
-  - Gloves: +5 (1 glove slot)
-  - **Equipment Cap**: 2 rings + 1 boots + 1 gloves = +55 max base speed
-- **Stat Modifiers**: DEX contributes to speed (details from #197)
-- **Potion Effects**: Potion of Speed grants +10 temporary (stacks, tracked with duration)
-- **Monster Speed Calibration**:
-  - Slow (1-2): Bats, Rats, Ants
-  - Normal (2-3): Most dungeon monsters
-  - Fast (3-4): Vampire Lords, Shamans, Dragons
-  - **Balrog (4-5)**: Moves 4-5 times per player turn; deadly if out-sped
-- **Balrog Tuning (Critical)**:
-  - **Unwinnable**: Player speed ~15 or lower
-  - **Winnable**: Player speed ~25-30 with optimization
-  - **Comfortable**: Player speed ~35+
-  - **Design Intent**: Balrog speed advantage forces character to stack speed gear + potions
-
-**Implementation Strategy**:
-1. Add `m_nSpeed` field to `CPlayer` (base 10)
-2. Modify combat loop: Actions per turn = Speed / 10 (rounded down, min 1)
-3. Monster speed affects AI action frequency (same scaling)
-4. Equipment speed bonuses applied during item equip
-5. Timed speed from potions tracked with duration
-6. Combat queue/turn system updated to respect speed differences
-
-**Related Issues**:
-- #197 (Player Stats) — DEX affects speed
-- #242 specifically connects to #42 (Balrog)
-- Balrog designed as speed check: gear/potion grind required
-
-**Success Criteria**:
-- [ ] Balrog is unbeatable below speed 25
-- [ ] Balrog is winnable but challenging at speed 30
-- [ ] Ring/boots/gloves speed bonuses distributed in loot tables (#249)
-- [ ] Potion of Speed crafted at Level 35+ (#247 XP progression)
-- [ ] Combat loop respects speed differences (actions per turn scale correctly)
+1. **Suppress empty-result messages**: Don't print anything to the Msgs window when a detect/search effect finds nothing (e.g., Scroll of Detect Monsters with no monsters in range).
+2. **Expand Msgs window to 5 rows**: Change the Messages `DisplayText` region height from 2 rows to 5 rows and verify layout still fits on all renderers.
+3. **Make Msgs window height configurable**: Expose a constant or setting (e.g., `MSGS_ROWS` in `Constants.h`) so window height can be tuned without code edits. Consider whether other flyout panes should be similarly configurable.
+4. Make sure that there are no blank lines in the display when it's full. (bounding box offsets are buggy)
 
 ---
 
-### #265 — Breath Weapon Damage Scales with Monster HP
+### P2 — #265: Breath Weapon Damage Scales with Monster HP (Medium, ~2–4 hrs)
 
-**Priority**: 🟡 HIGH (Improves monster difficulty curve)  
-**Status**: Not started (Design Complete)  
-**Effort**: Medium  
-**Dependency Chain**: Integrates with #77 (Item Effects) combat system
-
-**Description**: 
-Breath attacks do damage based on monster **current HP** (not max HP). As monsters get hurt, their breath becomes progressively less deadly, allowing player comeback scenarios and improving perceived difficulty curve.
-
-**Design Specification**:
-- **Current Mechanic**: Breath damage is typically `XdY` (e.g., Red Dragon: 8d8 fire)
-- **New Mechanic**: Breath damage scales by `(current_HP / max_HP)` ratio
-- **Example**:
-  - Red Dragon at 100% HP: 8d8 fire damage
-  - Red Dragon at 50% HP: 4d8 fire damage
-  - Red Dragon at 25% HP: 2d8 fire damage
-- **Calculation**: `damage = base_damage * (current_HP / max_HP)`, rounded down (min 1d2)
-- **Combat Psychology**: Players perceive victory is possible if they can chip away at breath damage
-- **Balance Interaction**: Pairs with #242 (Speed System) — high-speed character can survive initial breath, then whittle down monster
-
-**Implementation Strategy**:
-1. Modify breath attack effect calculation in combat
-2. Add monster current HP to breath damage formula
-3. Ensure minimum damage (1d2 or 1d3) to prevent 0 damage
-4. Apply to all breath-capable monsters (Dragons, Balorag, Demons, etc.)
-5. Test scaling at various breakpoints (100%, 75%, 50%, 25%, <10% HP)
-
-**Related Issues**:
-- #77 (Item Effects) — combat system integration
-- #245 (Monster Color Effects) — breath monsters are high-threat (Red)
-- #246 (Item Durability) — breath attacks destroy items; scaling affects item danger
-
-**Success Criteria**:
-- [ ] Dragon breath damage reduces proportionally as HP decreases
-- [ ] Damage never goes below 1d2 (always meaningful threat)
-- [ ] Balrog breath damage scales with HP (enhances comeback opportunity)
-- [ ] Combat feels fairer: "I can win if I don't get one-shot"
+1. **Implement HP-proportional breath damage for dragons**: Breath attacks deal damage equal to the attacking monster's **current HP**, not a fixed dice value.
+2. **Apply the same scaling rule to all breath-weapon monsters**: Audit every monster in `Monsters.txt` that uses a breath-type attack and confirm the scaling applies consistently.
+3. **Validate weakening behavior**: As a monster takes damage during combat, its subsequent breath attacks must do proportionally less damage — write BDD tests to verify.
 
 ---
 
-### #272 — Visible Monsters UI Pane (Detect Monsters Targeting)
+### P3 — #272: Visible Monsters UI Pane (Medium, ~4–8 hrs)
 
-**Priority**: 🟢 MEDIUM (Improves detection spell UX)  
-**Status**: Not started (Design Complete)  
-**Effort**: Low-Medium  
-**Dependency Chain**: No hard blockers; integrates with existing #114 (Item ID) visibility system
-
-**Description**: 
-Dedicated UI pane for listing detected monsters from Scroll of Detect Monsters. Shows monster names and distances during detection effect, improving targeting clarity and spell feedback.
-
-**Design Specification**:
-- **Display Region**: Similar to Inv/Equip sidebars (DisplayText pane)
-- **Trigger**: When Scroll of Detect Monsters or spell cast
-- **Content**:
-  - Monster name (unidentified format if applicable)
-  - Direction (N, NE, E, etc. or numeric offset)
-  - Distance in tiles (or "far" for long range)
-- **Duration**: Shows detected monsters for effect duration, then reverts
-- **Example Output**:
-  ```
-  DETECTED MONSTERS
-  - Orc (E, 3 tiles)
-  - Giant Spider (SW, 8 tiles)
-  - Vampire Lord (far N, 25+ tiles)
-  ```
-- **Integration**: `m_llVisibleMonsters` already tracks detected monsters in code; UI just needs to surface it
-
-**Implementation Strategy**:
-1. Add `CDisplayText` region for detected monsters (similar to Msgs/Stats/Inv)
-2. During detection effect: populate visible monsters list
-3. Display monsters with direction + distance calculation
-4. Revert to normal visibility next turn or when effect expires
-5. Handle unidentified monster names (use generic types)
-
-**Related Issues**:
-- #114 (Item Identification) — uses visibility system; unidentified names
-- #77 (Item Effects) — Detect Monsters effect framework
-- #243 (Town System) — future detection-based NPC interaction
-
-**Success Criteria**:
-- [ ] Detect Monsters scroll shows list of nearby monsters
-- [ ] List persists for effect duration
-- [ ] Distances and directions accurate
-- [ ] UI doesn't break existing Inv/Equip display
-- [ ] Works with multiple detected monsters (scaling UI)
+1. **Add a new `DisplayText` region for "Visible Monsters"**: Model it on the existing Inv/Equip sidebar regions.
+2. **Populate pane during normal play**: Show all monsters currently in the player's line-of-sight, listed by name and distance, updated each turn.
+3. **Populate pane after Detect Monsters fires**: After `EFFECT_FLAG_SEE` / `EFFECT_MOD_MONSTERS` resolves, display all detected monsters (using the existing `m_bDetected` flag and `m_llVisibleMonsters` list) by name and distance.
+4. **Auto-expire detected entries**: Pane reverts to line-of-sight–only monsters on the turn after detection expires. (this should happen automatically with UpdateVisibleMonsters())
+5. **Wire Scroll of Detect Monsters to the pane**: The item is already in `Items.txt` (`EFFECT_FLAG_SEE` / `EFFECT_MOD_MONSTERS`); ensure its effect triggers the pane display.
+6. **Future / deferred — `*` targeting from pane**: Player can cycle through the Visible Monsters list with `*` to set targeting cursor. Defer to a follow-on issue; do not block the pane display work.
+7. **Toggleable pane** - ask user which key to use to toggle this view (let user know which lowercase and uppercase keys are available)
 
 ---
 
-### #264 — EFFECT_MOD_MAX Flag (Modifier for Max Dice Rolls)
+### P4 — #242: Speed System & Action Economy (Major, ~2–3 days)
 
-**Priority**: 🟢 MEDIUM (Balrog tuning tool)  
-**Status**: Not started (Design Complete)  
-**Effort**: Low  
-**Dependency Chain**: Integrates with #77 (Item Effects) framework
+#### Foundation: Action Economy Engine
+1. **Add `m_nAccumulatedSpeed` to each entity** (player + monsters): Each game tick adds the entity's speed value; when the accumulator reaches the action threshold (10), the entity acts and the accumulator resets.
+2. **Set base player speed to 10**: One action per AIMgr update at base. Confirm existing turn loop is compatible or refactor loop to accumulate-then-act.
+3. **Set base speed on all existing monsters**: Audit `Monsters.txt` speed fields; calibrate per the design table (see Appendix A §242). Priority calibration targets: Flaming Bats 2, Vampire Lords 3–4, Major Demons 2–3, Ancient Dragons 2, Balrog 4–5.
 
-**Description**: 
-New EFFECT_MOD flag where dice rolls always return maximum value. Enables deterministic high damage and tuning for boss-level threats (primarily Balrog).
+#### Equipment Speed Bonuses
+4. **Implement Ring of Speed item effect**: Ring grants +1 to +10 permanent speed bonus while worn. Two-ring equipment slot limit applies.
+5. **Implement Boots of Speed item effect**: Boots grant +10 permanent speed bonus while worn.
+6. **Implement Gloves of Elvenkind speed bonus**: Gloves grant +10 or variable speed bonus while worn.
+7. **Implement Potion of Speed temporary effect**: +10 speed for the duration of the current dungeon level (or combat duration — confirm design choice and add `Constants.h` constant). Stacks with equipment bonuses.
 
-**Design Specification**:
-- **Effect Modifier**: `EFFECT_MOD_MAX`
-- **Behavior**: When flag set, dice rolls return max value
-- **Examples**:
-  - `3d6` → 18
-  - `1d100` → 100
-  - `1d20` → 20
-  - `8d8` → 64
-- **Use Cases**:
-  - Monster HD (Ancient Dragons: 100d8 max → 800 HP guaranteed)
-  - Breath weapon damage (predictable high damage)
-  - Balrog attacks (ensures one-shot threat)
-  - Boss-level guaranteed minimum damage
+#### Stat Interactions (requires #197 foundation)
+8. **DEX → base speed modifier**: High DEX grants +1 speed; low DEX gives −1 speed. Wire to player stat sheet once #197 is active.
+9. **STR → encumbrance penalty modifier**: High STR reduces the speed penalty from heavy armor/items. Wire once #197 is active.
+10. **Encumbrance speed penalty**: Heavy armor and overloaded inventory reduce speed. Define encumbrance threshold constants in `Constants.h`.
 
-**Implementation Strategy**:
-1. Add `EFFECT_MOD_MAX` to Effect system vocabulary (Constants.h)
-2. Modify dice roller: check for EFFECT_MOD_MAX flag
-3. If flag set: return `num_dice * dice_sides` (skip random)
-4. Apply to Balrog and other boss monsters
-5. Use in high-threat monster definitions (Monsters.txt)
+#### Display
+11. **Show player speed on the Stats pane**: Display current effective speed (e.g., `Slow(-2)` or nothing for speed 10 or `Fast(+10)`) on the character stats sidebar.
+12. **Show speed modifier breakdown**: When applicable, show a breakdown annotation (e.g., `Speed: 15 (+3 boots, +5 ring)`) so the player understands what is contributing.
+13. **Show Haste/Slow modifiers separately**: Temporary Haste/Slow effects displayed distinctly from permanent equipment speed.
+14. **Wizard-mode monster speed display**: Optionally render monster speed values in wizard mode for tuning and testing.
+15. **Hide speed display until first speed modifier is applied**: Only begin showing the speed field on the stats screen after the player equips or drinks a speed item (to reduce early-game UI noise). Confirm this UX decision; make it a `Constants.h` toggle if preferred.
 
-**Related Issues**:
-- #77 (Item Effects) — effect system integration
-- #42 (Balrog) — uses EFFECT_MOD_MAX for guaranteed damage
-- #265 (Breath Scaling) — pairs with this for tuning
-
-**Success Criteria**:
-- [ ] EFFECT_MOD_MAX dice rolls deterministic (no RNG)
-- [ ] Balrog uses MAX for at least 1 attack type
-- [ ] No dice rolls accidentally hit MAX when not intended
-- [ ] Works with multi-dice (3d6, 100d8, etc.)
+#### Balancing
+16. **Define speed cap constant (optional)**: Speed is soft-limited by item availability. Document this decision in `Constants.h` with a comment.
+17. **Confirm Potion of Speed duration semantics**: It is a normal duration timer? Record this decision in `Constants.h` as `SPEED_POTION_DURATION`.
 
 ---
 
-### #273 — [Issue Not Found in Roadmap]
-
-**Status**: ⚠️ NOT IN CURRENT ROADMAP  
-**Note**: Issue #273 is referenced but not present in `WORKLIST_jmoria_core_roadmap.md`. Please clarify:
-- Is this a new issue to create?
-- Is it a known issue that should be added to Phase 3a scope?
-- Should it replace one of the above issues?
+## Appendix A — Verbatim Actionable Items from GitHub Issues
 
 ---
 
-## Phase 3a Execution Priority
+### Issue #265 — "breath weapon damage does same damage as monster HP"
 
-### Tier 1: Difficulty Infrastructure (Must do first)
-1. **#242 (Speed System)** — Primary difficulty lever; enables Balrog tuning
-   - Estimated effort: 5-7 days
-   - Blocks: Balrog difficulty calibration
-   - Unblocks: Entire Phase 4 difficulty progression
+> dragons do this always, do other monsters breath get weaker as they get hurt, also?
 
-### Tier 2: Combat Polish (Do after speed is working)
-2. **#265 (Breath Scaling)** — Improves monster combat balance
-   - Estimated effort: 2-3 days
-   - Enhances: #242 speed system (stacking HP-based damage reduction)
-   - Pairs with: Balrog combat feel
+*(No additional comments on this issue.)*
 
-3. **#264 (EFFECT_MOD_MAX)** — Boss monster tuning
-   - Estimated effort: 1 day
-   - Dependency: #77 (Item Effects) framework
-   - Usage: Balrog, Ancient Dragons, unique monsters
-
-### Tier 3: UI/UX Polish (Parallel or after Tier 2)
-4. **#272 (Visible Monsters UI)** — Detection spell clarity
-   - Estimated effort: 2-3 days
-   - Non-blocking: Can start parallel to Tier 1
-   - Enhances: #114 (Item ID) detection mechanics
+**Extracted actionable items (verbatim from issue body):**
+- Breath weapon damage does same damage as monster HP
+- Dragons do this always
+- Do other monsters breath get weaker as they get hurt, also?
 
 ---
 
-## Phase 3a Dependencies & Blockers
+### Issue #272 — "Add 'Visible Monsters' UI pane for Detect Monsters targeting"
 
-**No hard blockers** — Phase 3a is designed to work independently after Phase 3 foundation.
+**Issue body:**
 
-**Soft dependencies**:
-- **#242 requires**: #197 (Stats) for DEX-to-speed, or can hardcode DEX contribution
-- **#265 requires**: #77 (Item Effects) combat integration, or can patch directly into breath calculation
-- **#264 requires**: #77 (Item Effects) vocabulary (or add to existing)
-- **#272 requires**: Existing visibility tracking (`m_llVisibleMonsters`)
+> When the player reads a Scroll of Detect Monsters (EFFECT_TYPE_SEE + EFFECT_FLAG2_MONSTERS), all monsters within detection range appear on screen for one turn. Currently the player can target them with `*`, but there is no dedicated UI pane listing what was detected.
+>
+> **Desired behavior:**
+> - After Detect Monsters fires, show a "Visible Monsters" pane (similar to Inv/Equip sidebars) listing the detected monsters by name and distance
+> - The pane should also display during normal play for monsters in line-of-sight
+> - Player should be able to target from this list (future: `*` integration)
+> - Pane clears when detection expires (next turn) and reverts to showing only normally-visible monsters
+>
+> **Context:**
+> - `m_llVisibleMonsters` already tracks which monsters the player can see (used by targeting)
+> - `m_bDetected` flag on CMonster enables one-turn detection rendering
+> - DisplayText regions already exist for Msgs, Stats, Inv, Equip, Use — this would be an additional region. Ask user about location and size.
+>
+> **Related code:**
+> - `CPlayer::UpdateVisibleMonsters()` in Player.cpp
+> - `CDungeon::DrawMonsters()` in Dungeon.cpp
+> - `CDisplayText` region system in DisplayText.cpp
 
-**Enables downstream**:
-- #242 enables #42 (Balrog) difficulty tuning
-- #265 + #264 enable Balrog as achievable goal
-- #272 enhances #243 (Town System) detection feedback
+**Comment by Rushwind13:**
 
----
-
-## Suggested Implementation Order
-
-### Week 1: Speed System (#242)
-- [ ] Add `m_nSpeed` to CPlayer (base 10)
-- [ ] Equipment speed modifiers (rings +1-20, boots +10, gloves +5)
-- [ ] Combat loop: actions per turn = Speed / 10
-- [ ] Potion of Speed (+10 timed)
-- [ ] Monster speed calibration (Bats 1-2, Balrog 4-5)
-- [ ] Test: Confirm Balrog unwinnable at speed 15, winnable at 30+
-
-### Week 2: Combat Polish (#265, #264)
-- [ ] Breath damage scales by current HP (Dragon: 100% → 50% → 25% progression)
-- [ ] Add EFFECT_MOD_MAX to effect vocabulary
-- [ ] Balrog uses EFFECT_MOD_MAX for guaranteed damage
-- [ ] Test: Breath damage reduces as monster HP decreases
-- [ ] Test: Balrog damage is deterministic and threatening
-
-### Week 2 (Parallel): Visible Monsters UI (#272)
-- [ ] Create DisplayText pane for detected monsters
-- [ ] Populate with `m_llVisibleMonsters` list
-- [ ] Calculate distance + direction
-- [ ] Revert UI after effect expires
-- [ ] Test: Detect Monsters shows list, clearing works
-
-### Week 3: Integration & Testing
-- [ ] Speed + Breath scaling interact correctly (faster player avoids more breath damage over time)
-- [ ] Balrog uses all three systems (#242 + #265 + #264)
-- [ ] UI doesn't break with large monster counts
-- [ ] Commit to `feat/phase3a_flotsam`
+> ## Detect Monsters Item (from #77)
+>
+> | Item | Effect Flag | Effect Modifier | Effect Type | Notes |
+> |------|-------------|-----------------|-------------|-------|
+> | Scroll of Detect Monsters | EFFECT_FLAG_SEE | EFFECT_MOD_MONSTERS | — | Reveals all monsters in radius 30 |
+>
+> This item is already in Items.txt and should be integrated with the Visible Monsters UI pane.
 
 ---
 
-## Success Metrics
+### Issue #273 — "Scrollback space in Messages DisplayText window is limited"
 
-- **Speed System**: Balrog tuning achieved; 30+ speed feels challenging but winnable
-- **Breath Scaling**: Monster HP → damage scaling provides comeback opportunity
-- **EFFECT_MOD_MAX**: Balrog guaranteed damage creates one-shot threat at low speed
-- **Visible Monsters**: Detection spell feedback clear; monster list readable
-- **Integration**: All three systems work together (speed allows survival, breath scales down, Balrog still threatening)
+**Issue body:**
 
----
+> * save scrollback space by not outputting anything if nothing is detected.
+> * make the window larger always? 5 lines?
+> * make the window configurable in size? (how about other flyouts)
+> * do not leave bottom line blank (bug with bounding box offsets)
 
-## Known Issues & Caveats
-
-### Missing #273
-- #273 referenced but not in roadmap
-- Clarification needed before Phase 3a scope finalization
-
-### Speed System Complexity
-- Action economy (Speed / 10) affects entire combat system
-- Requires comprehensive testing with monster AI
-- May need balance tuning post-Phase-3a
-
-### Breath Damage Minimum
-- Scaling can produce very low damage late-fight
-- Need minimum threshold (1d2?) to keep threat meaningful
-
-### Visible Monsters Performance
-- Large dungeons with many detected monsters could cause UI lag
-- May need pagination or scrolling UI
+*(No comments on this issue.)*
 
 ---
 
-## References
+### Issue #242 — "Speed System & Difficulty Tuning (Action Economy Mechanic)"
 
-- **Core Roadmap**: [WORKLIST_jmoria_core_roadmap.md](WORKLIST_jmoria_core_roadmap.md)
-- **Phase 3 Completion**: [doc/WORKLIST_roadmap_phase3.md](doc/WORKLIST_roadmap_phase3.md)
-- **Item Effects Framework**: [doc/Effects-Design.md](doc/Effects-Design.md)
-- **Balrog Design**: [doc/WORKLIST_jmoria_core_roadmap.md](doc/WORKLIST_jmoria_core_roadmap.md#42---jmoria-scoring-and-boss-encounter-balrog)
+**Issue body:**
+
+> ## Summary
+>
+> Implement a speed/action economy system that creates difficulty scaling and high-level character differentiation. Speed is the **primary difficulty lever** in a turn-based roguelike and directly affects whether players can fight the Balrog.
+>
+> ## Mechanics
+>
+> ### Character Speed Base
+> - **Base**: 10 (represents normal speed, move once per AIMgr update)
+> - **Speed Rating**: 10 ÷ base = action multiplier
+>   - Speed 10 = 10/10 = 1 action per turn (baseline)
+>   - Speed 20 = 20/10 =  2 actions per turn
+>   - Speed 50 = 50/10 =  5 actions per turn
+>
+> ### Speed Modifiers (Stacking)
+>
+> **Encumbrance (Negative)**:
+> - Carrying heavy items or armor reduces speed
+> - E.g., "Slow (-2)" means speed rating goes from 10 → 8/10 = 0.8x normal speed
+> - Heavy armor should penalize; light armor minimal
+>
+> **Potions & Abilities (Temporary +10)**:
+> - Potion of Speed: +10 speed (speed 20 = 2x normal rate), wears off
+> - Other utility potions for different effects
+>
+> **Equipment (Permanent Bonuses)**:
+> - Ring of Speed (+1 to +20): "Ring +9" gives +9 speed (10 → 19)
+> - Boots of Speed, Gloves of Elvenkind, etc.: +10 or variable speed bonuses
+> - These are treasure goals for late-game character enhancement
+>
+> **Base Stats**:
+> - DEX affects initial speed (high DEX = +1 speed, low DEX = -1 speed)
+> - STR affects encumbrance speed penalty (high STR = less penalty)
+>
+> ### Monster Speed Ratings (Calibration)
+>
+> **Current Monsters** (reference points):
+> - Flaming Bats: Speed 2
+> - Small monsters: Speed 1-2
+>
+> **High-Level Monsters** (design goals):
+> - Vampire Lords: Speed 3-4 (extremely dangerous)
+> - Major Demons: Speed 2-3 (brutal)
+> - Ancient Dragons: Speed 2 (lethal)
+> - **Balrog (Boss)**: Speed 4-5 (appears as blur to low-speed characters)
+>
+> **Difficulty Scaling**:
+> - Level 1 character (speed ~10) vs Balrog (speed 45-50): Balrog acts 4-5 times per player action
+>   - Player gets one attack; Balrog gets 4-5 attacks + breathe + special ability
+>   - Completely unfair, player dies immediately
+> - Level 40 character (speed 10 base + 15 from ring +5 from boots): speed 30
+>   - vs Balrog speed 45: Balrog still acts 1.5x per player action (challenging but winnable)
+>   - vs average monsters (speed 2): Player now acts much faster (1.5x their speed)
+>
+> ## Implementation Notes
+>
+> ### Turn Timing
+> - Track "accumulated speed" per entity (already done: m_fSpeed)
+> - When accumulated_speed >= action_threshold, entity acts and resets (should already be integral part of the Update() mechanism)
+> - This avoids "discrete turns" and allows fluid action economy (game is intended to be turn-based: everything only moves (a grid space amount of movement) when it has passed an integer amount of "update time")
+>
+> ### Display
+> - Show player speed prominently on stats screen (no display for regular speed. only display + or - offsets to normal e.g. `Slow(-2)` or `Fast(+8)` (same character after !Speed))
+> - Show encumbrance indicator (is it hurting speed? AC? both?) hurts speed, encumbrance and AC are not linked, the "indicator" is as above.
+> - Optionally show monster speeds in wizard mode (for testing/learning) this is interesting, maybe in wizard mode, the monsters could be colored by speed instead of their usual color (targeting does something similar to show current target)
+>
+> ### Balancing Levers
+> 1. **Monster speed values**: Tune per creature (Balrog may start at 4, adjust if too easy/hard)
+> 2. **Available speed items**: Ring of Speed (+9), Boots (+10), other accessories
+> 3. **Encumbrance penalties**: How much does armor slow down? up to Padded, 0. Leather -2, studded -4, chain -6, plate mail -8, plate armor -10 (but magical armor is lighter and has reduced/minimal/zero? encumbrance penalty)
+> 4. **Player base speed**: Adjust DEX formula if needed
+> 5. **Potion of Speed duration**: How long does +10 last? (standard potion duration, ndm turns, about the same amount of time it would take to rest and regain 1hp)
+>
+> ## Dependencies
+>
+> - Requires #197 (Player Stats) for DEX/STR/encumbrance mechanics
+> - Affects #42 (Balrog difficulty) — Balrog must have tuned speed to be defeatable
+> - Pairs with equipment system (rings, boots, items with speed bonuses)
+> - Pairs with monster definitions (speed intrinsic)
+>
+> ## Future Considerations
+>
+> - **Multiplayer Scaling** (see #240): Should difficulty increase with party size? Or monster speed + count?
+> - **Monster Speed Ranges** per depth: Could spawn deeper/faster monsters earlier for multiplayer challenge
+> - **Haste/Slow Spells** (future magic system): Temporarily modify speed via magic
+> - **Speed Diminishing Returns**: Cap at some max speed (so not all endgame is just speed-stacking)?
+>
+> ## Success Criteria
+>
+> - Balrog feels appropriately dangerous when under-geared (speed ~15-20)
+> - Balrog feels defeatable when properly equipped (speed ~30)
+> - Speed rings/boots become desirable treasure
+> - Character build variety emerges around speed optimization
+> - Low-speed character vs high-speed monster creates tension/gameplay variation
+
+**Comment 1 by Rushwind13:**
+
+> **Major System Issue** — Speed/Action Economy is the **primary difficulty tuning lever** in JMoria's turn-based system.
+>
+> **Directly blocks/enables**:
+> - #42 (Balrog) — Balrog speed 4-5 requires high-speed player to fight on fair terms; this creates the difficulty curve
+> - #197 (Stats) — DEX affects base speed; STR affects encumbrance penalties
+> - Equipment system — Rings of Speed, Boots of Speed become desirable treasure
+>
+> **Related to**:
+> - #128 (Magic Items) — Speed rings/boots are magical equipment rewards
+> - #72 (Fog of War) — Light sources don't affect speed, but both affect survival
+>
+> See WORKLIST_jmoria_core_roadmap.md for design notes on monster speed calibration (Flaming Bats speed 2, Balrog speed 4-5, etc.)
+
+**Comment 2 by Rushwind13:**
+
+> ## Equipment Slot Limits & Speed Stacking
+>
+> **Confirmed Design:**
+> - **2 Rings** (each can grant +0 to +10 speed): Max +20 from rings
+> - **1 Boots** (grants +0 to +10 speed or other effects)
+> - **1 Gloves** (grants +0 to +10 speed or other intrinsics)
+> - **Other equipment** (weapon, armor, helm, amulet) can also have speed bonuses
+> - **Potion of Speed**: +10 temporary, stacks with equipment (e.g., speed 30 from gear + 10 from potion = 40 temporary)
+>
+> **Maximum Realistic Speed**: ~40-50 (multiple +10 items + potion buff)
+> - No hard cap, but equipment availability limits stacking naturally
+>
+> **UI Display**:
+> - Hide speed value until items/buffs change it (e.g., equip first speed ring = "Speed displayed now")
+> - Show on stats screen as "Speed: 15 (+3 from boots, +5 from ring)" (there is going to be a character data screen that includes all of this type of modifier in a huge table with all the intrinsics)
+> - Show Haste/Slow modifiers separately -- no, they cancel each other out
+>
+> **Power Fantasy**: Speed is primary but not only power fantasy
+> - **Intrinsic Management** is bigger win driver — Free Action + Levitation + Resistances (both are needed)
+> - **Stat Optimization** — max stats enable different builds
+> - **Equipment Synergy** — combining items (e.g., Holy Avenger + AC gear + Regeneration ring)

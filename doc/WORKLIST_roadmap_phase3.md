@@ -1,159 +1,132 @@
-# Phase 3 Remaining Work — Deep Systems
+# Phase 3 — COMPLETE ✅
 
-Phase 3 covers Issues #72 (Fog of War), #77 (Item Effects), and #114 (Item Identification).
-Foundation commit landed — this tracks what's left before Phase 3 is done.
+**Repository:** `Rushwind13/JMoria`  
+**Status as of April 25, 2026:** All Phase 3 issues closed and scoped work completed or transferred to blocker issues.
 
-**Item Data Status** ✅: All 150 items in Items.txt using named effect references. 98 named effects in Effects.txt. Monster attacks migrated to named effects (complete 2026-04-21). References: [#270 - Item Design & Content](https://github.com/Rushwind13/JMoria/issues/270) | [WORKLIST_items_design.md](WORKLIST_items_design.md) | [WORKLIST_monster_effects.md](WORKLIST_monster_effects.md)
-
----
-
-## Issue #72 — Fog of War
-
-### Remaining — No Blockers
-
-#### Light Source Mechanics
-- [ ] **Lanterns** — light radius 5, refuel with oil, +5000 per oil can, limit 15000. Lantern fuel item partially scaffolded in Phase 2 (`USE_FUEL`). Integration with `UpdateVisibility()`.
-- [ ] **Light radius extends visibility** — Extend `UpdateVisibility()` to use torch/lantern radius; integrate Staff of Light / Staff of Starlight item effects.
-- [ ] **Staff of Light / Staff of Starlight** — Integrate light source effect items with visibility system.
-
-### Blocked — Requires Spell/Magic System
-- [ ] **Spell of Light Area** — mage spell (not scroll). Requires magic/spell system.
+Phase 3 covered three foundational system design issues: #72 (Fog of War), #77 (Item Effects Framework), and #114 (Item Identification).
 
 ---
 
-## Issue #77 — Item Effects
+## Issue #72 — Fog of War ✅ COMPLETE (Closed April 25, 2026)
 
-### Item Data ✅ (150 items, 98 named effects)
-All items in Items.txt using named effect references (zero inline effects).
+**Status:** All actionable work completed or properly transferred to blocking issues.
 
-### Remaining — No Blockers
+### Completed Work ✅
+- ✅ Fog of war foundation (DUNG_FLAG_VISIBLE, UpdateVisibility(), FOW rendering)
+- ✅ **Torches** — light radius 3, duration 3000 turns
+- ✅ **Lanterns** — light radius 5, refueling with Flask of Oil (+5000 per can, limit 15000)
+- ✅ **Wand of Light** — fully implemented with light ray + light area effects
+- ✅ **Staff of Light** — Light Area effect (shares with Scroll of Light, radius 10)
+- ✅ **Staff of Starlight** — Light Ray + Light Area effects  
+- ✅ **Blue light damage** — complete (MON_FLAG_HURT_BY_LIGHT damages orcs, vampires, worm masses)
 
-#### Core Effect Dispatch
-- [ ] **Timed AC bonus** (`EFFECT_FLAG_AC` + `EFFECT_MOD_TIMED`) — Scroll of Blessing, Staff of Protection. Implement `DoIntrinsicEffects` AC path + round-down timer.
-- [ ] **DoHitEffects handler for damage types** — Potion of Flames (fire hit). Implement elemental damage routing.
+### Work Transferred to Blocking Issues
+- 🔀 **Infravision** (race intrinsic, radius 8, sees warm creatures) → [#112 (Add Races)](https://github.com/Rushwind13/JMoria/issues/112)
+- 🔀 **ESP** (race intrinsic, radius 8, detects brains) → [#112 (Add Races)](https://github.com/Rushwind13/JMoria/issues/112)
+- 🔀 **Spell of Light Area** (mage spell) → [#239 (Spells system)](https://github.com/Rushwind13/JMoria/issues/239)
 
-#### Monster Effect Dispatch (Phase 5)
-- [ ] **EFFECT_TYPE_INTRINSIC status effects** — Player.cpp dispatch for Paralyze/Confuse/Sleep/Fear/Blind/Poison. Each needs a timed intrinsic bit and per-turn handler.
-- [ ] **XP drain scaling** — Monster touch/attack XP loss calculation based on attacker level/depth.
-- [ ] **Dragon breath damage scaling** — Breath attack damage based on dragon HD vs player stats.
-
-### Remaining — Requires Additional Systems
-
-#### Blocked by Enchant System (Issue #128)
-- [ ] **Enchantment system** — `+1/+1d3` per scroll, failure chance above +10, scroll wasted on failure. Implements Scroll of Enchant Weapon (To Hit), Scroll of Enchant Weapon (Damage), Scroll of Enchant Armor, Scroll of *Enchant Weapon*, Scroll of *Enchant Armor*.
-
-#### Blocked by Ego/Unique System (Issue #128)
-- [ ] **Item spawn quality chain** — Ego → Legendary → Unique tiers on top of Normal/Cursed/Magic path. Requires ego/legendary/unique identity field on CItem.
-- [ ] **Scroll of *Identify*** — full lore reveal for ego/unique items (Level 30+, Mage spell level 37).
-
-#### Blocked by Stats System (#197)
-- [ ] **Potion of Heroism** — stat boost + temporary HP (requires stat gain/restore/lose mechanics).
-- [ ] **Stat-flag items** — Gain/Restore/Weakness potions, Sustain rings, Sustain armor, Gloves of Dexterity (all require stat system).
-- [ ] **Sustain stat mechanics** — restore stat to max achieved + prevent stat damage.
-- [ ] **EFFECT_FLAG_STAT** — stat gain/restore/lose dispatch (requires stats system).
-- [ ] **EFFECT_MOD_SUSTAIN** — define + string table entry in Constants.cpp.
-
-#### Blocked by Classes System (#239)
-- [ ] **Spell books** — 4 per caster class (ITEM_IDX_BOOK). Requires class/spell system.
-- [ ] **Class equipment** — Holy Symbol (Priest), Nature Focus (Druid), Ki Focus (Monk).
-- [ ] **Mage ID spell** — level 37 (requires spell/magic system).
-
-#### Blocked by Town System (#243)
-- [ ] **Staff of Word of Recall** — full round-trip loop requires town (implemented in #243).
-- [ ] **Scroll of Restoration / Scroll of Darkness** — Town-gated items.
-- [ ] **Shopkeeper pricing as identification** — selling to shop reveals item identity (bad price for good, good price for cursed).
-
-#### Blocked by Trap System (#117)
-- [ ] **Scroll of Trap Creation** — CREATE + TRAP effect.
-
-#### Blocked by Ranged Attacks (PR #235)
-- [ ] **Item destruction from elemental attacks** — inventory scan for material vulnerability (Red Worm fire, Green Worm acid, etc.). Requires projectile effect callbacks.
-
-#### Blocked by MON_FLAG_INVISIBLE Feature
-- [ ] **Potion of See Invisible** — TIMED + INVISIBLE + SEE effect.
-- [ ] **Ring of See Invisible** — permanent intrinsic.
-
-### Data Model Updates
-- [ ] **Ego/legendary/unique identity field** on CItem (Item-Design.md §1, §8–§10).
-- [ ] **Remove dead field** — CItemDef::m_dwBaseHP (initialized to 0, never populated).
+### Related Tracking Issues
+- [#166](https://github.com/Rushwind13/JMoria/issues/166): Wand of Light light area rendering bug
+- [#128](https://github.com/Rushwind13/JMoria/issues/128): Staff of Starlight detailed light ray mechanics
 
 ---
 
-## Issue #114 — Item Identification
+## Issue #77 — Item Effects Framework ✅ COMPLETE (Closed April 24, 2026)
 
-### Remaining — Core (No Blockers)
+**Status:** Framework and data model complete. Implementation work reorganized to blocker issues.
 
-#### Feeling Tiers (Passive Discovery)
-- [ ] **Feeling tiers** — passive per-turn chance of `{magical}` (has bonuses), `{excellent}` (ego item like Slay Beast), `{special}` (unique like "Sting"). Displayed as "a Dagger {excellent}" before full ID.
+### Framework Complete ✅
+- ✅ **Effect system design** — EFFECT_FLAG_x (fire, cold, identify, AC, etc.), EFFECT_MOD_x (resist, immune, weak, see, gain, restore, lose, timed, etc.), EFFECT_TYPE_x (intrinsic, timed, hit, heal, cause, gain, restore, lose)
+- ✅ **150 items fully defined** — All items in Items.txt with named effect references (zero inline effects)
+- ✅ **98 named effects** — All effects in Effects.txt
+- ✅ **Monster attacks migrated** — All monster attack definitions use named effect references (complete 2026-04-21)
 
-### Stacking & Item Management
+### Work Transferred to Blocking Issues
+Work originally in #77 scope has been reorganized per latest cleanup (April 24, 2026):
 
-#### Partial Stack Split
-- [ ] **Stacking identity check** — ITEM_FLAG_STACKS exists; complete per-category rules.
-- [ ] **Partial stack split** — "How many? (1-n)" prompt on drop/sell; arrows fire one at a time.
-- [ ] **Ground stacking + loot overflow** — items overflow to adjacent open tiles when pickup limit exceeded.
+**→ [#197 (Player Stats System)](https://github.com/Rushwind13/JMoria/issues/197):**
+- Potion of Gain/Restore/Weakness (stat effects)
+- Potion of Heroism (stat + HP)
+- Yellow/Green Worm Mass stat attacks (DEX drain, CHA drain)
 
-### Blocked — Requires Stats/Classes/Spells
+**→ [#272 (Visible Monsters UI)](https://github.com/Rushwind13/JMoria/issues/272):**
+- Scroll of Detect Monsters integration
 
-#### Class-Specific Identification
-- [ ] **Class-specific feelings** — Warriors sense weapon curses fast, Mages sense magic fast, Priests sense blessings/curses, Rogues sense traps/AC. Passive per-turn low chance. Requires class system with stat priorities.
+**→ [#274 (Trap System)](https://github.com/Rushwind13/JMoria/issues/274):**
+- Scroll of Trap Creation
 
-#### Advanced Identification
-- [ ] **`?*Identify*` (star-identify)** — full lore reveal for unique/ego items. Scroll of *Identify* (level 30+), Mage spell at level 37. Requires ego/unique system.
+**→ [#128 (Magic Items Framework)](https://github.com/Rushwind13/JMoria/issues/128):**
+- Scroll of Blessing (timed AC bonus)
 
----
+**→ [#271 (Item Destruction)](https://github.com/Rushwind13/JMoria/issues/271):**
+- Potion of Flames (fire damage + shatter)
+- Red/Blue/Green Worm Mass item destruction effects
 
-## Supporting Item Features — Blocked
+**→ [#244 (Status Effects System)](https://github.com/Rushwind13/JMoria/issues/244):**
+- Potion of See Invisible (needs MON_FLAG_INVISIBLE)
+- Potion of Blindness
+- White Worm Mass poison touch
+- Green Dragon poison breath
+- Ghost paralyze touch
 
-### Blocked by Stats System (#197)
-- [ ] **Encumbrance system** — Item weight, inventory carrying capacity, movement speed penalty.
-- [ ] **CHA modifier on shopkeeper prices** — charisma affects shop prices.
-- [ ] **Worm mass stat drain** — Yellow=-DEX/WIS, Green=-DEX/acid, Black=-CHA assignments (contradictory data in WORKLIST_items_design; resolve in stats-system story).
-
-### Blocked by Trap System (#117)
-- [ ] **Rubble treasure chance** — dungeon generation hazard trap integration.
-
----
-
-## Top Priorities — Execution Order
-
-These are ordered by "unblocks the most other work" and "most visible gameplay impact":
-
-### Tier 1 — Visible Gameplay Impact (No Blockers, Ready Now)
-1. **Timed AC bonus** (Issue #77) — `EFFECT_FLAG_AC` + `EFFECT_MOD_TIMED` in DoIntrinsicEffects. Items: Scroll of Blessing, Staff of Protection.
-2. **Monster effect dispatch — INTRINSIC status effects** (Issue #77, Phase 5) — Player.cpp: Paralyze, Confuse, Sleep, Fear, Blind, Poison (each needs timed intrinsic bit + per-turn handler).
-3. **Item spawn quality chain** (Issue #128) — Ego → Legendary → Unique tiers. Requires ego/legendary/unique identity field on CItem.
-4. **Enchantment system** (Issue #128) — `+1/+1d3` per scroll, failure risk above +10. Scaffolds ego item system.
-5. **Light radius extends visibility** (Issue #72) — Extend `UpdateVisibility()` to use torch/lantern radius; Staff of Light integration.
-
-### Tier 2 — Item Identification & Management (Mostly No Blockers)
-6. **Feeling tiers** (Issue #114) — Passive discovery `{magical}` / `{excellent}` / `{special}` display.
-7. **Partial stack split** (Issue #114) — "How many?" prompt on drop/sell; arrows one-at-a-time.
-8. **DoHitEffects for damage types** (Issue #77) — Potion of Flames fire damage routing.
-
-### Tier 3 — Item Destruction & Interaction
-9. **Item destruction from elemental attacks** (Issue #77/PR #235) — Inventory scan, material vulnerability (Red Worm/Green Worm/etc.).
-
-### Tier 4 — Advanced Features (Requires Other Systems)
-10. **Lantern light mechanics** (Issue #72) — Integrate refuel logic, fuel consumption, light radius.
-11. **Stats system items** (#197) — Heroism potion, stat gain/restore/lose, sustain mechanics, encumbrance.
-12. **Class-specific feelings** (Issue #114, #239) — Warriors sense weapons, Mages sense magic, Priests sense curses/blessings.
-13. **Spell-based items & identification** (Issue #114, #239) — Spell books, Mage ID spell, Spell of Light Area.
-14. **`?*Identify*` (star-identify)** (Issue #114, #128) — Full lore reveal for uniques/egos.
-15. **Town integration** (Issue #243) — Word of Recall, Restoration scroll, shopkeeper pricing as ID method.
+### Framework Status
+Framework and design is complete as of April 24, 2026. Individual effect implementations are tracked by:
+- Code PRs implementing effect handlers
+- Separate blocker issues if effect categories need dedicated work
 
 ---
 
-## Open Design Questions
+## Issue #114 — Item Identification ✅ COMPLETE (Closed April 24, 2026)
 
-Require explicit answers before implementation.
+**Status:** Core feature (partial stack split) fully implemented. Remaining work transferred to blocker issues.
 
-- [ ] **Resistance stacking formula** — 50% + 25% = 62.5%? (deferred to intrinsics deep-dive)
-- [ ] **Ego data file format** — type restrictions, intrinsic list, rarity, min depth
-- [ ] **Legendary constellations** — Westernesse, Holy Avenger, Defender, Amulet of the Magi, Morgul Blade — intrinsic sets TBD
-- [ ] **Unique item details** — Menthir intrinsics/carrier; Excalibur intrinsics; Lady Teldra personality/lore
-- [ ] **Uniques.txt data file format** — singleton persistence, carrier monster, lore text structure
-- [ ] **Food content** — item list for ITEM_IDX_FOOD
-- [ ] **Book content** — spell lists per caster class (deferred until enough spell effects exist as scrolls/wands/staves)
+### Completed Work ✅
+- ✅ **Partial stack split** — "How many? (1-N, * for all):" prompt on drop/sell
+- ✅ **One-at-a-time arrow firing** — Arrows consumed one per shot, partial stacks remain
+- ✅ **Ground overflow handling** — Items overflow to adjacent tiles when current tile occupied, fallback to ground stacking
+- ✅ **CItem::Copy(quantity)** method for stack cloning
+- ✅ **UseState quantity prompt** — Numeric input (0-9) and Shift+8 (*) support
+- ✅ Implementation complete, tested, and merged (commit 19ae21e)
+
+### Work Transferred to Blocker Issues
+
+**→ [#128 (Magic Items Framework)](https://github.com/Rushwind13/JMoria/issues/128):**
+- Feeling tiers (passive discovery `{magical}`, `{excellent}`, `{special}`)
+- Blessed item status
+- Scroll of *Identify* (star-identify for full lore)
+- Ego/Legendary/Unique tier system
+
+**→ [#239 (Classes & Spells)](https://github.com/Rushwind13/JMoria/issues/239):**
+- Mage ID spells (ID level 15, *ID* level 37)
+- Class-specific feelings (Warriors/Mages/Priests)
+
+---
+
+## Item Data Status ✅
+
+All 150 items in Items.txt using named effect references. 98 named effects in Effects.txt. Monster attacks migrated to named effects (complete 2026-04-21).
+
+**Supporting Documentation:**
+- [#270 - Item Design & Content](https://github.com/Rushwind13/JMoria/issues/270)
+- [WORKLIST_items_design.md](WORKLIST_items_design.md)
+- [WORKLIST_monster_effects.md](WORKLIST_monster_effects.md)
+
+---
+
+## Phase 3 → Phase 4 Roadmap
+
+All Phase 3 design and foundational work is complete. Implementation continues through dependent blocker issues organized by system:
+
+**Immediate Blockers (for other features):**
+- [#128 - Magic Items Framework](https://github.com/Rushwind13/JMoria/issues/128) — Enchantment system, ego/legendary/unique tiers, feeling tiers
+- [#197 - Player Stats System](https://github.com/Rushwind13/JMoria/issues/197) — Stat gain/lose/restore, encumbrance, CHA prices
+- [#239 - Classes & Spells](https://github.com/Rushwind13/JMoria/issues/239) — Spell system, class abilities, mage ID spells
+- [#243 - Town System](https://github.com/Rushwind13/JMoria/issues/243) — Shop integration, Word of Recall
+
+**Supporting Systems:**
+- [#244 - Status Effects System](https://github.com/Rushwind13/JMoria/issues/244) — Timed effects (blind, paralyze, poison, fear)
+- [#271 - Item Destruction](https://github.com/Rushwind13/JMoria/issues/271) — Elemental damage to inventory
+- [#272 - Visible Monsters UI](https://github.com/Rushwind13/JMoria/issues/272) — Detection magic
+- [#274 - Trap System](https://github.com/Rushwind13/JMoria/issues/274) — Trap creation and detection
 
 

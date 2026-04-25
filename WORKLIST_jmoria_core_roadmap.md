@@ -123,57 +123,67 @@ The core roadmap prioritizes:
 ## 🔧 Priority 2: Major Systems
 
 ### #114 - Identify Spell & Item Knowledge System
-**Status**: 🚧 In Progress (Phase 3)
+**Status**: ✅ COMPLETE (Phase 3, Closed April 24, 2026)
 **Description**: Implement item identification mechanics with learned properties and class-specific "feelings."
 - ✅ Item property knowledge system complete (m_dwKnownProps, FormatProperties with type-aware display)
 - ✅ Unidentified names/flavors working (randomized names, {tried} marking)
 - ✅ Scroll of Identify reveals properties
 - ✅ Cursed discovery via failed equipment remove
-- ⚠️ Remaining: Feeling tiers (magical/excellent/special), class-specific feelings, Scroll of *Identify*
-- Players learn item properties through: trying to remove, using, time-based discovery
-- Scroll of Identify reveals most properties; Scroll of *Identify* reveals all
-- Class feelings: Warriors sense weapon curses; Mages sense magic items; Priests sense blessings
-- Known intrinsics display in inventory; unknown ones remain hidden
+- ✅ **Partial stack split** — "How many? (1-N, * for all)" prompt on drop/sell
+- ✅ One-at-a-time arrow firing — arrows consumed one per shot
+- ✅ Ground overflow handling — items overflow to adjacent tiles
+- 🔀 Feeling tiers → #128 (Magic Items) — passive discovery system
+- 🔀 Class-specific feelings → #239 (Classes) — Warriors/Mages/Priests sense items
+- 🔀 Scroll of *Identify* → #128 (Magic Items) — star-identify for full lore
 **Impact**: Enables strategic item management and knowledge-based gameplay.
 **Dependencies**: #239 (Classes) for class-specific feelings; Pairs with #128 (Magic Items)
-**Effort**: Medium
+**Effort**: ✅ Complete
 **See Also**: [doc/WORKLIST_roadmap_phase3.md](doc/WORKLIST_roadmap_phase3.md)
 
 ### #72 - Fog of War & Sight Distance Expansion
-**Status**: 🚧 In Progress (Phase 3)
+**Status**: ✅ COMPLETE (Phase 3, Closed April 25, 2026)
 **Description**: Expand visibility/lighting systems with depth-based darkness, multiple light sources, and special sight modes.
 - ✅ DUNG_FLAG_VISIBLE flag implemented
 - ✅ UpdateVisibility() with line-of-sight working
 - ✅ FOW rendering (dim grey for seen-not-visible)
-- Rooms spawn lit/dark based on depth (lit chance → 0 at depth 50)
-- Torches: 3000-turn fuel, radius 3
-- Lanterns: refueling with oil (+5000 per can), radius 5, max 15000 turns (integrate with UpdateVisibility)
-- Infravision: race intrinsic, sees warm creatures in dark, radius 8 (blocked: #112 Races)
-- ESP: race intrinsic, detects brains in dark, radius 8 (blocked: #112 Races)
-- Scroll of Light: light current room radius 10
-- Wand of Light: shoot line of light, damage light-weak creatures (blue light hurts orcs, vampires, worm masses)
+- ✅ Rooms spawn lit/dark based on depth (lit chance → 0 at depth 50)
+- ✅ Torches: 3000-turn fuel, radius 3
+- ✅ Lanterns: refueling with oil (+5000 per can), radius 5, max 15000 turns
+- ✅ Scroll of Light: light current room radius 10
+- ✅ Wand of Light: shoot line of light + light area, damages light-weak creatures
+- ✅ Staff of Light: Light Area effect (radius 10)
+- ✅ Staff of Starlight: Light Ray + Light Area effects
+- ✅ Blue light damage: working (MON_FLAG_HURT_BY_LIGHT damages orcs, vampires, worm masses)
+- 🔀 Infravision → #112 (Add Races) — race intrinsic, sees warm creatures, radius 8
+- 🔀 ESP → #112 (Add Races) — race intrinsic, detects brains, radius 8
+- 🔀 Spell of Light Area → #239 (Spells) — mage spell implementation
 **Impact**: Emergent light economy, depth-based atmosphere, utility item variety.
-**Dependencies**: #112 (Races) for Infravision/ESP; Pairs with #72, #121 (light economy)
-**Effort**: High
+**Dependencies**: #112 (Races) for Infravision/ESP; #239 (Spells) for Light spell
+**Effort**: ✅ Complete
 **See Also**: [doc/WORKLIST_roadmap_phase3.md](doc/WORKLIST_roadmap_phase3.md)
 
 ### #77 - Item Effects System
-**Status**: 🚧 In Progress (Phase 3)
+**Status**: ✅ COMPLETE (Phase 3, Closed April 24, 2026)
 **Description**: Implement comprehensive effect system for items and spells:
-- ✅ Effect system vocabulary complete (types, modifiers, flags, second bitmask)
+- ✅ Effect system vocabulary complete (EFFECT_FLAG_x, EFFECT_MOD_x, EFFECT_TYPE_x)
 - ✅ Multi-effect items working (Potion of Minor Healing = 3 effects)
-- ✅ 150 items in Items.txt with named effect references
+- ✅ 150 items in Items.txt with named effect references (zero inline effects)
 - ✅ 98 named effects in Effects.txt
-- ✅ All monster attack definitions complete (Monsters.txt with attack lines)
-- EFFECT_FLAG: fire, cold, acid, lightning, poison, identify, AC, etc.
-- EFFECT_MOD: weak/resistant/immune/gain/lose/restore for each effect
-- EFFECT_TYPE: determines target and persistence (instant, timed, permanent)
-- ⚠️ Remaining: Item destruction from elemental attacks (#271), elemental resistances in combat
+- ✅ All monster attack definitions migrated to named effects (complete 2026-04-21)
+- EFFECT_FLAG: fire, cold, acid, lightning, poison, identify, AC, levitate, invisible, etc.
+- EFFECT_MOD: weak/resistant/immune/gain/lose/restore/see/timed for each effect
+- EFFECT_TYPE: determines target and persistence (intrinsic, timed, hit, heal, cause, gain, restore, lose)
+- 🔀 Item destruction from elemental attacks → #271 (Item Destruction)
+- 🔀 Status effects dispatch (blind, paralyze, poison, fear) → #244 (Status Effects)
+- 🔀 Stat effects (gain, restore, lose) → #197 (Player Stats)
+- 🔀 Spell books → #239 (Classes)
+- 🔀 Scroll of Trap Creation → #274 (Trap System)
+- 🔀 Detect Monsters integration → #272 (Visible Monsters UI)
 **Impact**: Unified system for all magical item/spell effects, enables complex interactions.
 **Documentation**: [doc/WORKLIST_roadmap_phase3.md](doc/WORKLIST_roadmap_phase3.md) | [doc/Effects-Design.md](doc/Effects-Design.md)
-**Dependencies**: None blocking; Pairs with #271 (Item Destruction), #77 (effects dispatch)
-**Effort**: High
-**Phase 3 Content**: ✅ Data complete (150 items, 98 effects, 31 monsters added)
+**Dependencies**: Blocker issues (#197, #239, #244, #271, #272, #274)
+**Effort**: ✅ Complete (Framework & Design)
+**Phase 3 Content**: ✅ Complete (150 items, 98 effects, monster attacks migrated)
 
 
 ---
@@ -331,7 +341,6 @@ The core roadmap prioritizes:
 **Description**: Formalized XP progression and leveling system tying character progression to dungeon depth.
 - **AD&D 1e Extended**: Levels 1-30 standard XP progression, Levels 31-40 capped at +200k per level
 - **Depth Multipliers**: Base 1.0x at shallow depths → 2.0x at deep depths (2000'+ )
-- **Stat Unlock Gating**: CON (L1), STR (L1), DEX (L5), INT/WIS (L10), CHA (L20)
 - **Level 40 Cap**: Character reaches max level at 3,500,000 total XP
 - **Balrog Victory**: Massive XP bonus triggers when Balrog defeated
 **Impact**: Core progression mechanic, enables character power curve, stat gating system
@@ -642,11 +651,11 @@ Core P1 features that extend playstyle and unlock dungeon accessibility:
 - ✅ #121 (Lantern fuel) — branch: phase2-gameplay-expansion (wand recharging TBD)
 - ✅ #45 (MON_AI_SEEK target positions) — branch: phase2-gameplay-expansion (foundation)
 
-### **Phase 3: Deep Systems Foundation** ✅ MOSTLY COMPLETE
+### **Phase 3: Deep Systems Foundation** ✅ COMPLETE
 Complex P2 systems that enable everything downstream:
-- ✅ #72 (Fog of War & lighting) — atmosphere, depth progression (foundation done, some light items TBD)
+- ✅ #72 (Fog of War & lighting) — atmosphere, depth progression (foundation done, some light items moved to Phase 4)
 - ✅ #77 (Item Effects system) — foundation complete; 150 items, 98 effects, all monster attacks migrated
-- 🚧 #114 (Item Identification) — core system done, feeling tiers and class-specific feelings TBD
+- 🚧 #114 (Item Identification) — core system done, feeling tiers and class-specific feelings moved to Phase 4
 
 ### **Phase 4: Progression & Economy** (Starting)
 Major mechanics that define end-to-end player experience and enable late-game systems:

@@ -89,6 +89,9 @@
 #define CHANCE_FIND_SECRET_BUMP 20
 #define CHANCE_SEARCH_ACTIVE 25
 #define CHANCE_SEARCH_PASSIVE 5
+
+// UI / Display constants
+#define MSGS_ROWS 5 // height of the Messages pane in text rows (8px each)
 // #define DUNG_FLAG_x  0x00000080
 
 // Dungeon Flags

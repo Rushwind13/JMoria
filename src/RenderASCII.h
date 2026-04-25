@@ -6,6 +6,7 @@
 #define __RENDERASCII_H__
 
 #include "RenderBase.h"
+#include "Constants.h"
 #include <curses.h>
 
 // ASCII renderer screen layouts
@@ -40,7 +41,7 @@ struct ASCIILayout
     static constexpr int INV_AUTO_WIDTH = 100;
     static constexpr int STATS_WIDTH = 25;
     static constexpr int INV_WIDTH = 25;
-    static constexpr int MSG_HEIGHT = 5;
+    static constexpr int MSG_HEIGHT = MSGS_ROWS;
 };
 
 class CRenderASCII : public IRenderBackend

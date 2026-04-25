@@ -200,7 +200,10 @@ void CDisplayText::Paginate()
     if( usedLines < 1 )
         usedLines = 1;
 
-    dwAddLinesMax = usedLines + m_dwFreeLines;
+    // +1 so that counting N newlines from the end positions ptr at the START
+    // of the Nth-from-last line (not the (N-1)th), eliminating the blank-bottom-
+    // row that appeared when the window was full.
+    dwAddLinesMax = usedLines + 1 + m_dwFreeLines;
 
     ptr = strchr( m_szText, nul );
     while( ptr > m_szText )

@@ -1830,8 +1830,6 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
             g_pGame->GetMsgs()->Printf( "You sense the presence of doors!\n" );
         if( bFoundStairs )
             g_pGame->GetMsgs()->Printf( "You sense the presence of stairs!\n" );
-        if( !bFoundDoors && !bFoundStairs )
-            g_pGame->GetMsgs()->Printf( "You sense no doors or stairs.\n" );
         m_bLastEffectNoticed = true;
     }
 
@@ -1854,8 +1852,6 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
         }
         if( bFound )
             g_pGame->GetMsgs()->Printf( "You sense traps.\n" );
-        else
-            g_pGame->GetMsgs()->Printf( "You sense no traps.\n" );
         m_bLastEffectNoticed = true;
     }
 
@@ -1886,8 +1882,6 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
         }
         if( bFound )
             g_pGame->GetMsgs()->Printf( "You sense the presence of monsters!\n" );
-        else
-            g_pGame->GetMsgs()->Printf( "You sense no monsters.\n" );
         m_bLastEffectNoticed = true;
     }
 

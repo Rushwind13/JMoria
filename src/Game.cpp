@@ -115,7 +115,7 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
         return result;
     }
 
-    m_pMsgsDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, 40 ), 255 );
+    m_pMsgsDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, MSGS_ROWS * 8 ), 255 );
     m_pMsgsDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE );
 
     m_pStatsDT = new CDisplayText( szBasedir, JRect( 0, 50, 150, 480 ), 220 );

@@ -2,7 +2,7 @@
 
 Repo: Rushwind13/JMoria
 
-These are targeted improvements and one major system that were floating without a dedicated implementation plan. Issues #265, #264, #272, #273, and #242. Smallest wins first; biggest system last.
+These are targeted improvements and one major system that were floating without a dedicated implementation plan. Issues #265, #264, #172, #234, #272, #273, and #242. Smallest wins first; biggest system last.
 
 ---
 
@@ -38,6 +38,14 @@ These are targeted improvements and one major system that were floating without 
 1. **Examine Issue #172**
 2. **Replace this TODO list with the actionable items from the issue**
 3. **Complete the Issue #172 TODO list**
+
+---
+
+### P2 - #234: ASCII DisplayText bugs (Low, ~1-2 hrs)
+
+1. **Examine Issue #234**
+2. **Replace this TODO list with the actionable items from the issue**
+3. **Complete the Issue #234 TODO list**
 
 ---
 

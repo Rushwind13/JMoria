@@ -27,9 +27,17 @@ These are targeted improvements and one major system that were floating without 
 
 ### P2 - #264: EFFECT_MOD_MAX (Low, ~1-2 hrs)
 
-1. ** Examine Issue #264 **
-2. ** Replace this TODO list with the actionable items from the issue **
-3. ** Complete the Issue #264 TODO list **
+1. **Examine Issue #264**
+2. **Replace this TODO list with the actionable items from the issue**
+3. **Complete the Issue #264 TODO list**
+
+---
+
+### P2 - #172: Tombstone UI fix (Low, ~1-2 hrs)
+
+1. **Examine Issue #172**
+2. **Replace this TODO list with the actionable items from the issue**
+3. **Complete the Issue #172 TODO list**
 
 ---
 

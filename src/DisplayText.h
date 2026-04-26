@@ -21,6 +21,7 @@
 #define FLAG_TEXT_INVERSE 0x2
 #define FLAG_TEXT_IGNORE_WHITESPACE 0x4
 #define FLAG_TEXT_WRAP_WHITESPACE 0x8
+#define FLAG_TEXT_TRIM_TAIL 0x10
 class CItem;
 class CScore;
 

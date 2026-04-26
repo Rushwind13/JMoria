@@ -184,6 +184,13 @@ void CDisplayText::DrawBoundingBox()
 
 void CDisplayText::Paginate()
 {
+    // Tail-trim: always show from the beginning; DrawStr clips at the bottom.
+    if( m_dwFlags & FLAG_TEXT_TRIM_TAIL )
+    {
+        m_szDrawPtr = m_szText;
+        return;
+    }
+
     int dwAddLines = 0;
     int dwAddLinesMax;
     char *ptr;

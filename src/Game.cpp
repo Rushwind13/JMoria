@@ -125,7 +125,8 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     m_pInvDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
 
     m_pEquipDT = new CDisplayText( szBasedir, JRect( 440, 345, 640, 480 ), 180 );
-    m_pEquipDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
+    m_pEquipDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
+                          FLAG_TEXT_TRIM_TAIL );
 
     m_pUseDT = new CDisplayText( szBasedir, JRect( 200, 40, 440, 480 ), 200 );
     m_pUseDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );

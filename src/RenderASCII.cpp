@@ -410,6 +410,12 @@ int CRenderASCII::GetColorPair( JColor color, attr_t &outAttr )
     int pair = Nearest16( r, g, b, bold );
     if( bold )
         outAttr = A_BOLD;
+
+    // Dark foreground colours are barely visible on a black terminal background.
+    // Apply A_BOLD so the terminal renders the bright variant of the colour pair.
+    if( (int)r + (int)g + (int)b < 300 )
+        outAttr |= A_BOLD;
+
     return pair;
 }
 

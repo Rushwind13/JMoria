@@ -91,34 +91,30 @@ These are targeted improvements and one major system that were floating without 
 
 ---
 
-### P4 — #242: Speed System & Action Economy (Major, ~2–3 days)
+### ✅ P4 — #242: Speed System & Action Economy (COMPLETE — commit 33dccfb)
 
 #### Foundation: Action Economy Engine
-1. **Add `m_nAccumulatedSpeed` to each entity** (player + monsters): Each game tick adds the entity's speed value; when the accumulator reaches the action threshold (10), the entity acts and the accumulator resets.
-2. **Set base player speed to 10**: One action per AIMgr update at base. Confirm existing turn loop is compatible or refactor loop to accumulate-then-act.
-3. **Set base speed on all existing monsters**: Audit `Monsters.txt` speed fields; calibrate per the design table (see Appendix A §242). Priority calibration targets: Flaming Bats 2, Vampire Lords 3–4, Major Demons 2–3, Ancient Dragons 2, Balrog 4–5.
+1. ✅ **Add `m_fSpeed` to CPlayer**: Base 1.0f (= "speed 10"). `GetSpeed()` accessor added. AIMgr scaled by `1.0f / player_speed` on each player action — fast player means monsters accumulate time more slowly.
+2. ✅ **Base player speed set to 1.0f**: Confirmed compatible with existing turn loop; no loop refactor needed.
+3. ✅ **Calibrate monster speeds in `Monsters.txt`**: Flaming Bats 2.0 (unchanged), Ancient Dragons 2.0, Greater Demon 2.0, Demon Lord 2.5, Greater Demon Lord 3.0, Master Vampire 3.0, Lordly Vampire 3.5, Balrog 4.5.
 
 #### Equipment Speed Bonuses
-4. **Implement Ring of Speed item effect**: Ring grants +1 to +10 permanent speed bonus while worn. Two-ring equipment slot limit applies.
-5. **Implement Boots of Speed item effect**: Boots grant +10 permanent speed bonus while worn.
-6. **Implement Gloves of Elvenkind speed bonus**: Gloves grant +10 or variable speed bonus while worn.
-7. **Implement Potion of Speed temporary effect**: +10 speed for the duration of the current dungeon level (or combat duration — confirm design choice and add `Constants.h` constant). Stacks with equipment bonuses.
+4. ✅ **Ring of Speed**: Random +0.1 to +1.0 per-spawn (= speed +1 to +10) via `EFFECT_FLAG_SPEED` check in `CItem::Init()`.
+5. ✅ **Boots of Speed**: Fixed `Speed 1.0` in `Items.txt`; `m_fSpeedBonus` applied via `Wield()`/`RemoveEquipment()`.
+6. ✅ **Gloves of Elvenkind**: New item added to `Items.txt` with `Speed 1.0`.
+7. ✅ **Potion of Speed temporary effect**: `+1.0f` via `DoIntrinsicEffects(EFFECT_FLAG_SPEED)`; expires via `EFFECT_MOD_TIMED` added to `Effects.txt`.
 
-#### Stat Interactions (requires #197 foundation)
-8. **DEX → base speed modifier**: High DEX grants +1 speed; low DEX gives −1 speed. Wire to player stat sheet once #197 is active.
-9. **STR → encumbrance penalty modifier**: High STR reduces the speed penalty from heavy armor/items. Wire once #197 is active.
-10. **Encumbrance speed penalty**: Heavy armor and overloaded inventory reduce speed. Define encumbrance threshold constants in `Constants.h`.
+#### Stat Interactions (deferred)
+8. ⬜ **DEX → base speed modifier**: Deferred to #197 (Stats).
+9. ⬜ **STR → encumbrance penalty**: Deferred to #197 (Stats).
+10. ⬜ **Encumbrance speed penalty**: Deferred to #197 (Stats).
 
 #### Display
-11. **Show player speed on the Stats pane**: Display current effective speed (e.g., `Slow(-2)` or nothing for speed 10 or `Fast(+10)`) on the character stats sidebar.
-12. **Show speed modifier breakdown**: When applicable, show a breakdown annotation (e.g., `Speed: 15 (+3 boots, +5 ring)`) so the player understands what is contributing.
-13. **Show Haste/Slow modifiers separately**: Temporary Haste/Slow effects displayed distinctly from permanent equipment speed.
-14. **Wizard-mode monster speed display**: Optionally render monster speed values in wizard mode for tuning and testing.
-15. **Hide speed display until first speed modifier is applied**: Only begin showing the speed field on the stats screen after the player equips or drinks a speed item (to reduce early-game UI noise). Confirm this UX decision; make it a `Constants.h` toggle if preferred.
+11. ✅ **Show player speed on Stats pane**: `Fast(+N)` / `Slow(-N)` shown; hidden at base speed (no UI noise for new players).
+12–15. ⬜ **Breakdown annotation, Haste/Slow display, wizard-mode display**: Deferred.
 
-#### Balancing
-16. **Define speed cap constant (optional)**: Speed is soft-limited by item availability. Document this decision in `Constants.h` with a comment.
-17. **Confirm Potion of Speed duration semantics**: It is a normal duration timer? Record this decision in `Constants.h` as `SPEED_POTION_DURATION`.
+#### Testing
+✅ **5 BDD scenarios** in `test/features/speed.feature` + `SpeedSteps.cpp`: base speed, equip boots, remove boots, drink potion, equip ring.
 
 ---
 

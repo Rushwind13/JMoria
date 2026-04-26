@@ -9,7 +9,7 @@
 #define __CONSTANTS_H__
 #include "Util.h"
 
-#define VERSION "0.61"
+#define VERSION "0.70"
 #define COPYRIGHT "2002-2026"
 #define AUTHOR "Jimbo S. Harris"
 

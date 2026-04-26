@@ -113,6 +113,7 @@ enum eEndGameModifier
     ENDGAME_INVALID = -1,
     ENDGAME_INIT = 0,
     ENDGAME_TOMB = 1,
+    ENDGAME_MAP,
     ENDGAME_SCORES,
     ENDGAME_MAX
 };
@@ -130,7 +131,6 @@ protected:
 
 private:
     char *m_szTombstone;
-    CScore *m_pScore;
 
     // Member Functions
 public:
@@ -144,12 +144,22 @@ public:
 protected:
 private:
     int OnHandleTomb( JKeysym *keysym );
+    int OnHandleMap( JKeysym *keysym );
     int OnHandleScores( JKeysym *keysym );
     int OnHandleInit( JKeysym *keysym );
 
     void ResetToState( int newstate );
 
+#ifdef UNIT_TEST
+public:
+#else
+private:
+#endif
     bool DoTomb();
+    CScore *m_pScore;
+
+private:
+    bool DoMap();
     bool InitScores();
     bool DoScores();
 };

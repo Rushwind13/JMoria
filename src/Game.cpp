@@ -57,7 +57,8 @@ CGame::CGame()
       m_eRenderMode( RenderMode::None ),
       m_bShowStats( true ),
       m_bShowInv( false ),
-      m_bShowEquip( false )
+      m_bShowEquip( false ),
+      m_bShowMonsters( false )
 {
     m_pClockStepState = new CClockStepState;
     m_pCmdState = new CCmdState;
@@ -115,7 +116,7 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
         return result;
     }
 
-    m_pMsgsDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, 40 ), 255 );
+    m_pMsgsDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, MSGS_ROWS * 8 ), 255 );
     m_pMsgsDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE );
 
     m_pStatsDT = new CDisplayText( szBasedir, JRect( 0, 50, 150, 480 ), 220 );
@@ -125,7 +126,12 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     m_pInvDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
 
     m_pEquipDT = new CDisplayText( szBasedir, JRect( 440, 345, 640, 480 ), 180 );
-    m_pEquipDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
+    m_pEquipDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
+                          FLAG_TEXT_TRIM_TAIL );
+
+    m_pMonstersDT = new CDisplayText( szBasedir, JRect( 0, 50, 150, 480 ), 180 );
+    m_pMonstersDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
+                             FLAG_TEXT_TRIM_TAIL );
 
     m_pUseDT = new CDisplayText( szBasedir, JRect( 200, 40, 440, 480 ), 200 );
     m_pUseDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
@@ -135,10 +141,11 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
 
     // Let the renderer configure display region rects for its coordinate system
     m_pRender->ConfigureDisplayRegions( m_pMsgsDT, m_pStatsDT, m_pInvDT, m_pEquipDT, m_pUseDT,
-                                        m_pEndGameDT );
+                                        m_pEndGameDT, m_pMonstersDT );
 
     m_bShowInv = m_pRender->ShouldAutoShowInventory();
     m_bShowEquip = m_pRender->ShouldAutoShowEquipment();
+    m_bShowMonsters = m_pRender->ShouldAutoShowMonsters();
 
     m_pAIMgr = new CAIMgr;
     m_pAIMgr->Init();
@@ -297,6 +304,12 @@ void CGame::Term()
     {
         delete m_pEquipDT;
         m_pEquipDT = NULL;
+    }
+
+    if( m_pMonstersDT )
+    {
+        delete m_pMonstersDT;
+        m_pMonstersDT = NULL;
     }
 
     if( m_pUseDT )
@@ -481,11 +494,14 @@ bool CGame::Update()
     if( m_bReadyForUpdate )
     {
         m_fGameTime++;
-        // fCurTime = 1.0f;
         m_bReadyForUpdate = false;
-        // TODO: Why does the AI require 2 ticks to move the monster?
-        GetAIMgr()->Update( fCurTime );
-        // GetAIMgr()->Update( fCurTime );
+        // Scale AI time by inverse of player speed:
+        // fast player (1.5) -> monsters get 0.67 per action (player acts 1.5x more)
+        // slow player (0.8) -> monsters get 1.25 per action (player acts 0.8x)
+        float fPlayerSpeed = m_pPlayer ? m_pPlayer->GetSpeed() : 1.0f;
+        if( fPlayerSpeed <= 0.0f )
+            fPlayerSpeed = 1.0f;
+        GetAIMgr()->Update( fCurTime / fPlayerSpeed );
     }
 //    else
 //    {
@@ -495,8 +511,14 @@ bool CGame::Update()
 bool CGame::Update( float fCurTime )
 {
     m_fGameTime += fCurTime;
-    // Update the AI
-    GetAIMgr()->Update( fCurTime );
+    // Don't update AI during use commands or ranged item selection
+    if( m_eCurState != STATE_USE && m_eCurState != STATE_RANGED )
+    {
+        float fPlayerSpeed = m_pPlayer ? m_pPlayer->GetSpeed() : 1.0f;
+        if( fPlayerSpeed <= 0.0f )
+            fPlayerSpeed = 1.0f;
+        GetAIMgr()->Update( fCurTime / fPlayerSpeed );
+    }
 #endif // TURN_BASED
 
 #ifdef CLOCKSTEP
@@ -530,13 +552,30 @@ bool CGame::Update( float fCurTime )
     GetEquip()->Update( fCurTime );
     if( m_eCurState == STATE_USE )
     {
-        switch( reinterpret_cast<CUseState *>( m_pCurState )->GetModifier() )
+        eUseModifier mod = reinterpret_cast<CUseState *>( m_pCurState )->GetModifier();
+        eInvFilter filter = INV_COMPLETE;
+        switch( mod )
+        {
+        case USE_QUAFF:
+            filter = INV_QUAFF;
+            break;
+        case USE_READ:
+            filter = INV_READ;
+            break;
+        case USE_WIELD:
+            filter = INV_WIELD;
+            break;
+        default:
+            break;
+        }
+        switch( mod )
         {
         case USE_WIELD:
         case USE_DROP:
         case USE_READ:
         case USE_QUAFF:
-            GetPlayer()->DisplayInventory( PLACEMENT_USE );
+        case USE_FUEL:
+            GetPlayer()->DisplayInventory( PLACEMENT_USE, filter );
             break;
         case USE_REMOVE:
             GetPlayer()->DisplayEquipment( PLACEMENT_USE );
@@ -549,13 +588,13 @@ bool CGame::Update( float fCurTime )
     }
     else if( m_eCurState == STATE_RANGED )
     {
-        switch( reinterpret_cast<CRangedState *>( m_pCurState )->GetCommand() )
+        switch( reinterpret_cast<CRangedState *>( m_pCurState )->GetModifier() )
         {
-        case JKEY_f:
-            GetPlayer()->DisplayEquipment( PLACEMENT_USE );
+        case RANGED_FIRE:
+            GetPlayer()->DisplayEquipment( PLACEMENT_USE, INV_FIRE );
             break;
-        case JKEY_z:
-            GetPlayer()->DisplayInventory( PLACEMENT_USE );
+        case RANGED_ZAP:
+            GetPlayer()->DisplayInventory( PLACEMENT_USE, INV_ZAP );
             break;
         default:
             JLog( LOG_LEVEL_DEBUG, true, "Nothing to display for command\n" );
@@ -587,7 +626,7 @@ void CGame::Draw()
     if( bResized )
     {
         GetRender()->ConfigureDisplayRegions( m_pMsgsDT, m_pStatsDT, m_pInvDT, m_pEquipDT, m_pUseDT,
-                                              m_pEndGameDT );
+                                              m_pEndGameDT, m_pMonstersDT );
         if( bASCII )
             m_bShowInv = GetRender()->ShouldAutoShowInventory();
     }
@@ -606,13 +645,15 @@ void CGame::Draw()
 
         GetMsgs()->Draw();
 
-        // Panel visibility toggled by i/e/C keys
+        // Panel visibility toggled by i/e/C/v keys
         if( m_bShowStats )
             GetStats()->Draw();
         if( m_bShowInv )
             GetInv()->Draw();
         if( m_bShowEquip )
             GetEquip()->Draw();
+        if( m_bShowMonsters )
+            GetMonsters()->Draw();
     }
 
     if( m_eCurState == STATE_USE )

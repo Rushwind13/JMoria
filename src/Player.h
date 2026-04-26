@@ -15,10 +15,23 @@ class CMonster;
 #define PLAYER_MAX_LEVEL 11
 #include "DungeonConstants.h"
 
+enum eInvFilter
+{
+    INV_COMPLETE = 0,
+    INV_QUAFF,
+    INV_READ,
+    INV_WIELD,
+    INV_ZAP,
+    INV_FIRE,
+};
+
 #define SIGHT_DISTANCE_PLAYER 5
 #define SIGHT_DISTANCE_LIT DUNG_ROOM_MAX_DIAGONAL
 #define SIGHT_DISTANCE_INFRA 10
 #define SIGHT_DISTANCE_ESP 15
+
+#define PHASE_DOOR_RANGE 20
+#define MAGIC_MAPPING_RANGE 25
 
 class CClass
 {
@@ -97,9 +110,12 @@ public:
           m_szKilledBy( NULL ),
           m_bIsRested( true ),
           m_bIsDisturbed( false ),
+          m_bPendingIdentify( false ),
+          m_bLastEffectNoticed( false ),
           m_fDamageModifier( 0.0f ),
           m_fToHitModifier( 0.0f ),
           m_fArmorClass( 1.0f ),
+          m_fSpeed( 1.0f ),
           m_fHitPoints( 0.0f ),
           m_fLastHPTime( 0.0f ),
           m_fLastMPTime( 0.0f ),
@@ -108,6 +124,7 @@ public:
           m_fExperience( 0.0f ),
           m_fLevel( 1.0f ),
           m_dwIntrinsics( 0 ),
+          m_dwRecallDepth( 1 ),
           m_bWizardMode( false ),
           m_pClass( NULL ),
           m_pTarget( NULL ),
@@ -196,10 +213,12 @@ public:
     void Draw();
     void PostDraw();
     void DisplayStats();
-    void DisplayInventory( uint8 dwPlacement );
-    void DisplayEquipment( uint8 dwPlacement );
+    void DisplayInventory( uint8 dwPlacement, eInvFilter filter = INV_COMPLETE );
+    void DisplayEquipment( uint8 dwPlacement, eInvFilter filter = INV_COMPLETE );
+    void DisplayVisibleMonsters();
     void PickUp( JVector &vPickupPos );
     bool Drop( CItem *pItem );
+    bool Drop( CItem *pItem, int quantity ); // Drop a partial stack
 
     bool CanDropHere();
 
@@ -228,7 +247,14 @@ public:
     bool IsCastable( CLink<CItem> *pLink );
     JResult Magic( CLink<CItem> *pLink );
 
+    bool IsFuel( CLink<CItem> *pLink );
+    JResult Fuel( CLink<CItem> *pLink );
+
+    void Search();
+    void PassiveSearch();
+
     float LightSource();
+    float LightRadius();
     void UpdateLight( float fValue, bool bReset = false );
 
     JResult DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwFlags );
@@ -236,6 +262,7 @@ public:
     JResult DoHealHP( CEffect *pEffect );
     JResult DoHitEffects( CEffect *pEffect );
     JResult DoLightRay( CEffect *pEffect );
+    JResult DoElementalHit( CEffect *pEffect );
     JResult DoCreateEffects( CEffect *pEffect );
     JResult DoLightArea();
     JResult DoDestroyEffects( CEffect *pEffect, int dwFlags );
@@ -244,8 +271,14 @@ public:
     JResult UndoIntrinsicEffects( CEffect *pEffect );
     JResult DoApplyCurse();
     JResult DoRestoreEffects( CEffect *pEffect );
+    JResult DoIdentify();
     JResult DoGainEffects( CEffect *pEffect );
     JResult DoLoseEffects( CEffect *pEffect );
+    JResult DoSeeEffects( CEffect *pEffect );
+    JResult DoTeleport( CEffect *pEffect );
+    JResult DoMagicMapping( CEffect *pEffect );
+    JResult DoRecall();
+    JResult DoSummonMonsters();
 
     bool SetName( const char *szName );
 
@@ -273,9 +306,11 @@ public:
     float Damage( float fDamageMult );
 
     bool Hit( float &fRoll );
-    int TakeDamage( float fDamage, const char *szMon );
+    int TakeDamage( float fDamage, const char *szMon, uint32 dwElement = 0 );
+    float Resist( uint32 dwElement );
 
     void OnKillMonster( CMonster *pMon );
+    bool DamageMonster( CMonster *pMon, float fDamage );
 
     void SetWizard();
     void ClearWizard();
@@ -294,11 +329,18 @@ public:
     char *m_szDamage;
     float m_fDamageModifier;
     float m_fToHitModifier;
+    float m_fSpeed; // action economy: 1.0 = base (10), 2.0 = fast (20), 0.8 = slow (8)
 
     char *m_szKilledBy;
 
     bool m_bIsRested;
     bool m_bIsDisturbed;
+    bool m_bPendingIdentify;
+    bool m_bLastEffectNoticed;
+
+    bool HasPendingIdentify() { return m_bPendingIdentify; }
+    void ClearPendingIdentify() { m_bPendingIdentify = false; }
+    float GetSpeed() { return m_fSpeed; }
 
 protected:
     void GainLevel();
@@ -314,6 +356,7 @@ protected:
     float m_fLevel;
 
     uint32 m_dwIntrinsics;
+    uint8 m_dwRecallDepth;
     JLinkList<CEffect> *m_llActiveEffects;
 
     CClass *m_pClass;
@@ -329,6 +372,5 @@ public:
     void UpdateVisibleMonsters();
     void ClearVisibleMonsters();
     JLinkList<CMonster> *GetVisibleMonsters();
-
 };
 #endif // __PLAYER_H__

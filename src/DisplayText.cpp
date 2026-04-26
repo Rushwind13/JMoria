@@ -18,7 +18,9 @@ class CGame;
 #define FONT_DRAW_W 6
 #define FONT_DRAW_H 8
 
-#define TEXT_MAXCHARS 2048
+// 12288 = ~12KB, enough for the 100x100 dungeon map on the death screen
+// (worst case ~100 rows * ~102 chars/row ≈ 10200, plus header/margin)
+#define TEXT_MAXCHARS 12288
 // Constructor
 CDisplayText::CDisplayText( const char *szBasedir, JRect in, uint8 inAlpha )
     : m_Rect( in ),
@@ -112,6 +114,10 @@ void CDisplayText::Draw()
     int insetY = inset * FONT_DRAW_H;
     int maxH = g_pGame->GetRender()->GetMaxTextHeight();
     int drawBottom = m_Rect.Bottom() - insetY;
+    // When the panel has a bounding box, leave one extra row of clearance so
+    // text doesn't render on top of the bottom border character.
+    if( m_dwFlags & FLAG_TEXT_BOUNDING_BOX )
+        drawBottom -= insetY;
     if( drawBottom > maxH - insetY )
         drawBottom = maxH - insetY;
     DrawStr( m_Rect.Left() + insetX + m_dwMarginLeft, m_Rect.Top() + insetY + m_dwMarginTop, true,
@@ -182,6 +188,13 @@ void CDisplayText::DrawBoundingBox()
 
 void CDisplayText::Paginate()
 {
+    // Tail-trim: always show from the beginning; DrawStr clips at the bottom.
+    if( m_dwFlags & FLAG_TEXT_TRIM_TAIL )
+    {
+        m_szDrawPtr = m_szText;
+        return;
+    }
+
     int dwAddLines = 0;
     int dwAddLinesMax;
     char *ptr;
@@ -198,7 +211,10 @@ void CDisplayText::Paginate()
     if( usedLines < 1 )
         usedLines = 1;
 
-    dwAddLinesMax = usedLines + m_dwFreeLines;
+    // +1 so that counting N newlines from the end positions ptr at the START
+    // of the Nth-from-last line (not the (N-1)th), eliminating the blank-bottom-
+    // row that appeared when the window was full.
+    dwAddLinesMax = usedLines + 1 + m_dwFreeLines;
 
     ptr = strchr( m_szText, nul );
     while( ptr > m_szText )

@@ -92,7 +92,12 @@ protected:
 
     CClockStepState *m_pClockStepState;
     CCmdState *m_pCmdState;
+#ifdef UNIT_TEST
+public:
+#endif
     CEndGameState *m_pEndGameState;
+
+protected:
     CIntroState *m_pIntroState;
     CLookState *m_pLookState;
     CModState *m_pModState;

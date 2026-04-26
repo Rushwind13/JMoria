@@ -90,7 +90,12 @@ private:
     int m_dwHeight;
 
     // Text
+#ifdef UNIT_TEST
+public:
+#endif
     char *m_szText;
+
+private:
     char *m_szDrawPtr;
 
     // Auxiliary

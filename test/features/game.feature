@@ -40,3 +40,10 @@ Feature: Game
         And I update the monster's brain
         When I update the monster's brain again
         And the Red Dragon moves toward the player
+
+    Scenario: Tombstone long killer name wraps without overflowing border
+        Given I have a game
+        And I initialize the game
+        When I set the killer name to "Yellow Mushroom Patch"
+        And I render the tombstone
+        Then no tombstone line has characters past the closing pipe

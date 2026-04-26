@@ -36,36 +36,36 @@ These are targeted improvements and one major system that were floating without 
 
 ---
 
-### P2 - #172: Tombstone UI fix (Low, ~1-2 hrs)
+### ✅ P2 — #172: Tombstone UI fix (COMPLETE — commit a1d2c4c)
 
-1. **Define tombstone field width constant**: Add `#define TOMBSTONE_FIELD_WIDTH 17` in `EndGameState.cpp` (or `Constants.h`) to encode the 17-character inner width of the `|...|` border — this is currently an implicit magic number in `DoTomb()`.
-2. **Expand the tombstone format string for a two-line killer slot**: In the `CEndGameState` constructor, add one extra `|%*s%*s|` + `|                 |` row immediately after the existing killer-name row in the `tombstone[]` char literal. The tombstone becomes one row taller only when the killer name wraps; the second row is always present in the format but will be padded with spaces when the name fits on one line.
-3. **Wrap long names in `CEndGameState::DoTomb()`**: Before computing padding, check if `m_pScore->m_szKilledBy` (or `m_szName`) exceeds `TOMBSTONE_FIELD_WIDTH`. If so, split into two local `char[]` buffers: `szLine1` (first 17 chars) and `szLine2` (remainder, up to 17 chars). Pass both to the `Printf` call — line1 into the existing `%*s%*s` slot, line2 into the new second slot. When the name fits on one line, pass an empty string for line2 so the extra row renders as blank `|                 |`. Do not modify `m_pScore` fields in place.
-4. **Clamp padding to zero**: Guard all padding values with `max(0, ...)` so that an unexpectedly long segment still renders within the border rather than producing a negative `%*s` width.
-5. **Add BDD scenario**: Spawn a game, trigger the end-game state with a killer name longer than 17 chars (e.g., `"Yellow Mushroom Patch"`), and assert that the rendered tombstone output contains no characters past the closing `|` on either killer-name line.
+1. ✅ **Define tombstone field width constant**: Added `#define TOMBSTONE_FIELD_WIDTH 17` in `EndGameState.cpp`.
+2. ✅ **Expand the tombstone format string for a two-line killer slot**: Added second `|%*s%*s|` row immediately after the existing killer-name row.
+3. ✅ **Wrap long names in `CEndGameState::DoTomb()`**: Splits `m_pScore->m_szKilledBy` across two `char[18]` buffers (`szKiller1`, `szKiller2`) when > 17 chars; second row renders blank when name fits on one line.
+4. ✅ **Clamp padding to zero**: All padding values guarded with `MAX(0, ...)`.
+5. ✅ **Add BDD scenario**: `game.feature` — tombstone with killer `"Yellow Mushroom Patch"` asserts no characters past closing `|`. `EndGameState.h`, `Game.h`, `DisplayText.h` all use `#ifdef UNIT_TEST` pattern to expose test-only members.
 
 ---
 
-### P2 - #234: ASCII DisplayText bugs (Low, ~1-2 hrs)
+### ✅ P2 — #234: ASCII DisplayText bugs (COMPLETE — commit 21a0eb7)
 
 **Bug 1 — Equipment window truncates from the wrong end**
-1. **Identify the trim path in `CDisplayText`**: When the equipment list exceeds the window height, the oldest/first line (`a)`) is currently scrolled off the top. Equipment slots should always show from `a)` downward; trim the bottom of the list instead. Locate the scrolling/trim logic in `DisplayText.cpp` (the `Paginate()` or line-overflow path) and add a `FLAG_TEXT_TRIM_TAIL` flag (or equivalent) that trims from the end rather than the top.
-2. **Apply tail-trim flag to `m_pEquipDT`**: In `Game.cpp` where `m_pEquipDT` is constructed and `SetFlags()` is called, add the tail-trim flag alongside the existing `FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX`.
+1. ✅ **Add `FLAG_TEXT_TRIM_TAIL` flag**: Added `#define FLAG_TEXT_TRIM_TAIL 0x10` to `DisplayText.h`; `Paginate()` early-returns with `m_szDrawPtr = m_szText` when set, so `DrawStr`'s bounds-check clips at the bottom showing first N lines.
+2. ✅ **Apply tail-trim flag to `m_pEquipDT`**: `Game.cpp` now sets `FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX | FLAG_TEXT_TRIM_TAIL` on the equipment window.
 
 **Bug 2 — Colors too dark on black ASCII background**
-3. **Audit color palette in `RenderASCII.cpp`**: Identify all `init_pair` / color definitions. Colors that were readable on a light-green background may fall below contrast threshold on black. Either increase the brightness/attribute (e.g., add `A_BOLD`) for dark foreground colors, or remap them to brighter ncurses color constants. Validate each color against `COLOR_BLACK` background.
+3. ✅ **Boost dark colours in `RenderASCII.cpp`**: `GetColorPair()` now applies `A_BOLD` when `r+g+b < 300`, mapping dark foreground colours to their terminal bright variant instead of being invisible on black.
 
 **Bug 3 — Dungeon geometry bleeds through DisplayText stat box**
-4. **Re-render DisplayText boxes after dungeon draw**: In the main render loop (`Render.cpp` or `Game.cpp`), ensure all `CDisplayText` regions (`MsgsDT`, `StatsDT`, `InvDT`, `EquipDT`) are drawn *after* the dungeon tile pass so their background overwrites any dungeon tiles that fall in the same screen region. In the ASCII renderer, explicitly clear (fill with spaces) each DisplayText rect before writing text so the terminal cells are owned by the UI layer.
+4. ✅ **Already handled**: `DrawTextBoundingBox()` fills its interior with spaces before any text is written; `DisplayText::Draw()` is called after the dungeon draw pass. No code change required.
 
 ---
 
-### P2 - #177: RENDER_MODE in linker flags for `make test` (Low, ~1-2 hrs)
+### ✅ P2 — #177: RENDER_MODE in linker flags for `make test` (COMPLETE — commit 84530b6)
 
-1. **Conditionalize macOS `TEST_LD_FLAGS` by `RENDER_MODE`**: The macOS `TEST_LD_FLAGS` (line 46 of `Makefile`) currently always appends to `LOCAL_LIB_PATHS` regardless of renderer mode. Mirror the same `ifeq ($(RENDER_MODE),ascii)` / `else ifeq` / `else` ladder used for `LD_FLAGS` so that `TEST_LD_FLAGS` omits SDL2/OpenGL entries when building ASCII-only. The test-framework libs (`-lcucumber-cpp`, boost, googletest) are renderer-agnostic and remain unconditional.
-2. **Conditionalize Linux `TEST_LD_FLAGS`**: On Linux, `TEST_LD_FLAGS = $(TEST_LD_FLAGS_LINUX)` is set after the `LD_FLAGS` conditional block, so it is currently renderer-agnostic (fine, since SDL2 comes via `LD_FLAGS`). Verify this is still correct once step 1 is done; no change may be needed on Linux.
-3. **Add `make ascii-test` convenience target**: Add a phony target `ascii-test: ; $(MAKE) RENDER_MODE=ascii test` so headless CI or machines without SDL can build and run tests in one step without setting the variable manually.
-4. **Smoke-test on a machine (or CI container) without SDL**: After the Makefile changes, run `make RENDER_MODE=ascii test` and confirm the link succeeds with no unresolved SDL/OpenGL symbols.
+1. ✅ **Conditionalize macOS `TEST_LD_FLAGS` by `RENDER_MODE`**: Full `ifeq`/`else ifeq`/`else` ladder added — ascii omits SDL2/OpenGL; opengl omits ncurses; both includes all three.
+2. ✅ **Conditionalize Linux `TEST_LD_FLAGS`**: Verified unchanged and correct — renderer libs come via `LD_FLAGS` on Linux, no change needed.
+3. ✅ **Add `make ascii-test` convenience target**: `ascii-test: $(MAKE) RENDER_MODE=ascii test` added as phony target.
+4. ✅ **Smoke-tested**: `make ascii-test` links `AllSteps` with only `-lncurses` (no SDL/OpenGL); 142 scenarios pass.
 
 ---
 

@@ -49,6 +49,7 @@ public:
     CDisplayText *GetEquip() { return m_pEquipDT; }
     CDisplayText *GetUse() { return m_pUseDT; }
     CDisplayText *GetEnd() { return m_pEndGameDT; }
+    CDisplayText *GetMonsters() { return m_pMonstersDT; }
     CAIMgr *GetAIMgr() { return m_pAIMgr; }
     void Term();
     void Quit( int returncode );
@@ -59,13 +60,15 @@ public:
     int GetITime() { return (int)m_fGameTime; }
     int GetTime() { return GetITime(); }
 
-    // Panel visibility toggles (i=inventory, e=equipment, C=stats)
+    // Panel visibility toggles (i=inventory, e=equipment, C=stats, v=monsters)
     void ToggleStats() { m_bShowStats = !m_bShowStats; }
     void ToggleInv() { m_bShowInv = !m_bShowInv; }
     void ToggleEquip() { m_bShowEquip = !m_bShowEquip; }
+    void ToggleMonsters() { m_bShowMonsters = !m_bShowMonsters; }
     bool IsShowingStats() const { return m_bShowStats; }
     bool IsShowingInv() const { return m_bShowInv; }
     bool IsShowingEquip() const { return m_bShowEquip; }
+    bool IsShowingMonsters() const { return m_bShowMonsters; }
 
 #ifdef TURN_BASED
     void SetReadyForUpdate( const bool isReady ) { m_bReadyForUpdate = isReady; }
@@ -86,13 +89,19 @@ protected:
     CDisplayText *m_pEquipDT;
     CDisplayText *m_pUseDT;
     CDisplayText *m_pEndGameDT;
+    CDisplayText *m_pMonstersDT;
 
     CStateBase *m_pCurState;
     int m_eCurState;
 
     CClockStepState *m_pClockStepState;
     CCmdState *m_pCmdState;
+#ifdef UNIT_TEST
+public:
+#endif
     CEndGameState *m_pEndGameState;
+
+protected:
     CIntroState *m_pIntroState;
     CLookState *m_pLookState;
     CModState *m_pModState;
@@ -107,10 +116,11 @@ private:
     IRenderBackend *m_pRender;
     RenderMode m_eRenderMode;
 
-    // Panel visibility (toggled by i/e/C keys)
+    // Panel visibility (toggled by i/e/C/v keys)
     bool m_bShowStats;
     bool m_bShowInv;
     bool m_bShowEquip;
+    bool m_bShowMonsters;
 
     int m_dwNextTime;
     float m_fGameTime;

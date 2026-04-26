@@ -5,6 +5,7 @@
 #ifndef __RENDERASCII_H__
 #define __RENDERASCII_H__
 
+#include "Constants.h"
 #include "RenderBase.h"
 #include <curses.h>
 
@@ -30,6 +31,7 @@ struct ASCIILayout
     ASCIILayoutRegion stats;
     ASCIILayoutRegion inventory;
     ASCIILayoutRegion equipment;
+    ASCIILayoutRegion monsters;
     ASCIILayoutRegion use;
     ASCIILayoutRegion endgame;
 
@@ -40,7 +42,8 @@ struct ASCIILayout
     static constexpr int INV_AUTO_WIDTH = 100;
     static constexpr int STATS_WIDTH = 25;
     static constexpr int INV_WIDTH = 25;
-    static constexpr int MSG_HEIGHT = 5;
+    static constexpr int MSG_HEIGHT = MSGS_ROWS;
+    static constexpr int MONSTERS_HEIGHT = 10;
 };
 
 class CRenderASCII : public IRenderBackend
@@ -87,11 +90,12 @@ public:
     }
 
     bool ShouldAutoShowEquipment() const override { return false; }
+    bool ShouldAutoShowMonsters() const override { return false; }
 
     // Set DisplayText rects from ASCII layout (char coords → pixel space)
     void ConfigureDisplayRegions( CDisplayText *pMsgs, CDisplayText *pStats, CDisplayText *pInv,
-                                  CDisplayText *pEquip, CDisplayText *pUse,
-                                  CDisplayText *pEndGame ) override;
+                                  CDisplayText *pEquip, CDisplayText *pUse, CDisplayText *pEndGame,
+                                  CDisplayText *pMonsters ) override;
 
     // Translate ncurses input into renderer-agnostic events
     bool PollEvent( JInputEvent &event ) override;

@@ -115,6 +115,7 @@ public:
           m_fDamageModifier( 0.0f ),
           m_fToHitModifier( 0.0f ),
           m_fArmorClass( 1.0f ),
+          m_fSpeed( 1.0f ),
           m_fHitPoints( 0.0f ),
           m_fLastHPTime( 0.0f ),
           m_fLastMPTime( 0.0f ),
@@ -214,6 +215,7 @@ public:
     void DisplayStats();
     void DisplayInventory( uint8 dwPlacement, eInvFilter filter = INV_COMPLETE );
     void DisplayEquipment( uint8 dwPlacement, eInvFilter filter = INV_COMPLETE );
+    void DisplayVisibleMonsters();
     void PickUp( JVector &vPickupPos );
     bool Drop( CItem *pItem );
     bool Drop( CItem *pItem, int quantity ); // Drop a partial stack
@@ -327,6 +329,7 @@ public:
     char *m_szDamage;
     float m_fDamageModifier;
     float m_fToHitModifier;
+    float m_fSpeed; // action economy: 1.0 = base (10), 2.0 = fast (20), 0.8 = slow (8)
 
     char *m_szKilledBy;
 
@@ -337,6 +340,7 @@ public:
 
     bool HasPendingIdentify() { return m_bPendingIdentify; }
     void ClearPendingIdentify() { m_bPendingIdentify = false; }
+    float GetSpeed() { return m_fSpeed; }
 
 protected:
     void GainLevel();

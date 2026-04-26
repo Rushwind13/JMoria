@@ -76,6 +76,30 @@ void CItem::Init( CItemDef *pid )
     m_fBonusToHit = m_id->m_szBonusToHit ? Util::Roll( m_id->m_szBonusToHit ) : 0.0f;
     m_fBonusToDamage = m_id->m_szBonusToDamage ? Util::Roll( m_id->m_szBonusToDamage ) : 0.0f;
 
+    // Speed bonus: rings randomize 0.1-1.0; other equipment use fixed m_id->m_fSpeed
+    if( m_id->m_dwIndex == ITEM_IDX_RING )
+    {
+        bool hasSpeedEffect = false;
+        if( m_id->m_llEffects )
+        {
+            CLink<CEffect> *pLink = m_id->m_llEffects->GetHead();
+            while( pLink )
+            {
+                if( pLink->m_lpData->m_dwFlags & EFFECT_FLAG_SPEED )
+                {
+                    hasSpeedEffect = true;
+                    break;
+                }
+                pLink = pLink->next;
+            }
+        }
+        m_fSpeedBonus = hasSpeedEffect ? (float)Util::GetRandom( 1, 20 ) / 10.0f : 0.0f;
+    }
+    else
+    {
+        m_fSpeedBonus = m_id->m_fSpeed;
+    }
+
     switch( m_id->m_dwIndex )
     {
     case ITEM_IDX_POTION:
@@ -110,6 +134,7 @@ CItem *CItem::Copy( int quantity )
     pCopy->m_fACBonus = m_fACBonus;
     pCopy->m_fBonusToHit = m_fBonusToHit;
     pCopy->m_fBonusToDamage = m_fBonusToDamage;
+    pCopy->m_fSpeedBonus = m_fSpeedBonus;
     pCopy->m_dwCharges = m_dwCharges;
     pCopy->m_dwMaxCharges = m_dwMaxCharges;
 

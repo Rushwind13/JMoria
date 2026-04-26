@@ -30,11 +30,20 @@ ASCIILayout ASCIILayout::CreateForSize( int w, int h )
     l.messages = { 0, 0, w, msgH };
     l.endgame = { 0, 0, w, h };
 
-    // Stats panel (always on left)
+    // Stats panel (always on left), clipped to leave room for monsters pane
     int statsRight = STATS_WIDTH;
     if( statsRight > w / 3 )
         statsRight = w / 3; // don't take more than 1/3
-    l.stats = { 0, bodyTop, statsRight, bodyBottom };
+
+    // Monsters pane: 10 rows tall at the bottom of the left sidebar
+    int monstersBottom = bodyBottom;
+    int monstersTop = monstersBottom - MONSTERS_HEIGHT;
+    if( monstersTop < bodyTop )
+        monstersTop = bodyTop;
+    l.monsters = { 0, monstersTop, statsRight, monstersBottom };
+
+    // Stats occupies the left column above the monsters pane
+    l.stats = { 0, bodyTop, statsRight, monstersTop };
 
     // Inventory/equipment panel (right side, only when wide enough)
     int invLeft = w;
@@ -116,7 +125,8 @@ bool CRenderASCII::CheckResize()
 
 void CRenderASCII::ConfigureDisplayRegions( CDisplayText *pMsgs, CDisplayText *pStats,
                                             CDisplayText *pInv, CDisplayText *pEquip,
-                                            CDisplayText *pUse, CDisplayText *pEndGame )
+                                            CDisplayText *pUse, CDisplayText *pEndGame,
+                                            CDisplayText *pMonsters )
 {
     auto toPixelRect = []( const ASCIILayoutRegion &r )
     { return JRect( r.left * 6, r.top * 8, r.right * 6, r.bottom * 8 ); };
@@ -128,6 +138,7 @@ void CRenderASCII::ConfigureDisplayRegions( CDisplayText *pMsgs, CDisplayText *p
     pUse->SetRect( toPixelRect( m_layout.use ) );
     pEndGame->SetRect( toPixelRect( m_layout.endgame ) );
     pEndGame->SetContentMargin( 0, 0 );
+    pMonsters->SetRect( toPixelRect( m_layout.monsters ) );
 }
 
 bool CRenderASCII::PollEvent( JInputEvent &event )
@@ -410,6 +421,12 @@ int CRenderASCII::GetColorPair( JColor color, attr_t &outAttr )
     int pair = Nearest16( r, g, b, bold );
     if( bold )
         outAttr = A_BOLD;
+
+    // Dark foreground colours are barely visible on a black terminal background.
+    // Apply A_BOLD so the terminal renders the bright variant of the colour pair.
+    if( (int)r + (int)g + (int)b < 300 )
+        outAttr |= A_BOLD;
+
     return pair;
 }
 

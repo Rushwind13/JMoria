@@ -160,6 +160,7 @@ public:
     float m_fACBonus;       // per-instance rolled magical AC bonus
     float m_fBonusToHit;    // per-instance rolled magical to-hit bonus
     float m_fBonusToDamage; // per-instance rolled magical to-damage bonus
+    float m_fSpeedBonus;    // per-instance speed bonus (rings: random 0.1-1.0; boots/gloves: fixed)
 protected:
     float m_fColorChangeInterval;
     JColor m_Color;
@@ -179,6 +180,7 @@ public:
           m_fACBonus( 0.0f ),
           m_fBonusToHit( 0.0f ),
           m_fBonusToDamage( 0.0f ),
+          m_fSpeedBonus( 0.0f ),
           m_dwCount( 1 ),
           m_pllLink( NULL ),
           m_id( NULL ),

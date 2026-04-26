@@ -102,6 +102,40 @@ float Roll( int dice, int sides )
     return total;
 }
 
+// RollMax: returns the maximum possible roll (dice * sides) with no randomness
+float RollMax( const char *szFormat )
+{
+    if( !szFormat || *szFormat == nul )
+    {
+        return 0.0f;
+    }
+
+    char *szToken;
+    int dice;
+    int sides;
+    char *c;
+    szToken = new char[Util::jstrlen( szFormat ) + 1];
+
+    Util::jstrcpy( szToken, szFormat );
+
+    c = strtok( szToken, "d" );
+    if( c == NULL )
+    {
+        return 0.0f;
+    }
+
+    dice = atoi( c );
+    c = strtok( NULL, "d" );
+    if( c == NULL )
+    {
+        return 0.0f;
+    }
+
+    sides = atoi( c );
+    delete[] szToken;
+    return (float)( dice * sides );
+}
+
 // function overload; pass in "2d5"
 float Roll( const char *szFormat )
 {
@@ -294,7 +328,7 @@ bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 dist
 }
 
 JLinkList<JIVector> *GenerateLine( const JIVector vSource, const JIVector vTarget,
-                                    const uint8 distance )
+                                   const uint8 distance )
 {
     JLinkList<JIVector> *llLine = new JLinkList<JIVector>;
 
@@ -337,7 +371,7 @@ JLinkList<JIVector> *GenerateLine( const JIVector vSource, const JIVector vTarge
 }
 
 bool CheckLineCollision( JLinkList<JIVector> *llLine, const JIVector vSource,
-                          bool ( *isWalkable )( JVector & ) )
+                         bool ( *isWalkable )( JVector & ) )
 {
     JVector vTest;
     CLink<JIVector> *pLink = llLine->GetHead();

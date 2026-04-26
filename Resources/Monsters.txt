@@ -3174,14 +3174,14 @@ Monster <Balrog>
 {
     Plural		<Balrogs>
     Appear		<1d1>
-    Speed		1.2
+    Speed		4.5
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <25d8>
     AC          160.0
     Level       98
     ExpValue	15000.0
     Type		<MON_IDX_BALROG>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d10
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d10
     Attack             <MON_FLAG_BITE>, <Fire Touch>, 5d10
@@ -3318,14 +3318,14 @@ Monster <Ancient White Dragon>
 {
     Plural		<Ancient White Dragons>
     Appear		<1d1>
-    Speed		1.0
+    Speed		2.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <15d8>
     AC          110.0
     Level       70
     ExpValue	1500.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
@@ -3336,14 +3336,14 @@ Monster <Ancient Black Dragon>
 {
     Plural		<Ancient Black Dragons>
     Appear		<1d1>
-    Speed		1.0
+    Speed		2.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <16d8>
     AC          110.0
     Level       75
     ExpValue	2000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d6
@@ -3354,14 +3354,14 @@ Monster <Ancient Green Dragon>
 {
     Plural		<Ancient Green Dragons>
     Appear		<1d1>
-    Speed		1.0
+    Speed		2.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <17d8>
     AC          120.0
     Level       78
     ExpValue	2500.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d10
@@ -3372,14 +3372,14 @@ Monster <Ancient Blue Dragon>
 {
     Plural		<Ancient Blue Dragons>
     Appear		<1d1>
-    Speed		1.0
+    Speed		2.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <18d8>
     AC          120.0
     Level       82
     ExpValue	3000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d8
@@ -3390,14 +3390,14 @@ Monster <Ancient Red Dragon>
 {
     Plural		<Ancient Red Dragons>
     Appear		<1d1>
-    Speed		1.0
+    Speed		2.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <19d8>
     AC          150.0
     Level       85
     ExpValue	4000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d10
@@ -3408,14 +3408,14 @@ Monster <Ancient Multi-hued Dragon>
 {
     Plural		<Ancient Multi-hued Dragons>
     Appear      <1d1>
-    Speed		1.0
+    Speed		2.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD			<15d8>
     AC          110.0
     Level		88
     ExpValue	9000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags       <MON_FLAG_WARM>
+    Flags       <MON_FLAG_WARM, MON_FLAG_MAXHP>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
@@ -4930,7 +4930,7 @@ Monster <Greater Demon>
 {
     Plural		<Greater Demons>
     Appear		<1d1>
-    Speed		1.0
+    Speed		2.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <14d8>
     AC          90.0
@@ -4947,7 +4947,7 @@ Monster <Demon Lord>
 {
     Plural		<Demon Lords>
     Appear		<1d1>
-    Speed		1.2
+    Speed		2.5
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <18d8>
     AC          110.0
@@ -4965,7 +4965,7 @@ Monster <Greater Demon Lord>
 {
     Plural		<Greater Demon Lords>
     Appear		<1d1>
-    Speed		1.3
+    Speed		3.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <22d8>
     AC          140.0
@@ -5019,7 +5019,7 @@ Monster <Master Vampire>
 {
     Plural		<Master Vampires>
     Appear		<1d1>
-    Speed		1.4
+    Speed		3.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <16d8>
     AC          100.0
@@ -5037,7 +5037,7 @@ Monster <Lordly Vampire>
 {
     Plural		<Lordly Vampires>
     Appear		<1d1>
-    Speed		1.5
+    Speed		3.5
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <18d8>
     AC          115.0

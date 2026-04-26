@@ -9,6 +9,7 @@
 #include "JLinkList.h"
 #include "StateBase.h"
 #include "TileSet.h"
+#include <cmath>
 
 extern CGame *g_pGame;
 
@@ -74,6 +75,7 @@ bool CPlayer::Update( float fCurTime )
     DisplayStats();
     DisplayInventory( PLACEMENT_INV );
     DisplayEquipment( PLACEMENT_EQUIP );
+    DisplayVisibleMonsters();
     return true;
 }
 
@@ -254,6 +256,14 @@ void CPlayer::DisplayStats()
     g_pGame->GetStats()->Printf( "Damage: %s\n", m_szDamage );
     g_pGame->GetStats()->Printf( "+to Hit: %d\n", (int)m_fToHitModifier );
     g_pGame->GetStats()->Printf( "+to Dam: %d\n", (int)m_fDamageModifier );
+    {
+        // Speed display: hidden at base (1.0); show Fast(+N) or Slow(-N) as integer offset from 10
+        int nSpeedOffset = (int)roundf( m_fSpeed * 10.0f ) - 10;
+        if( nSpeedOffset > 0 )
+            g_pGame->GetStats()->Printf( "Speed: Fast(+%d)\n", nSpeedOffset );
+        else if( nSpeedOffset < 0 )
+            g_pGame->GetStats()->Printf( "Speed: Slow(%d)\n", nSpeedOffset );
+    }
     g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "Level: %d\n", (int)m_fLevel );
@@ -465,6 +475,55 @@ void CPlayer::DisplayEquipment( uint8 dwPlacement, eInvFilter filter )
     }
 }
 
+void CPlayer::DisplayVisibleMonsters()
+{
+    if( !g_pGame->IsShowingMonsters() )
+        return;
+
+    CDisplayText *pDT = g_pGame->GetMonsters();
+    pDT->Clear();
+    pDT->Printf( "Visible monsters:\n" );
+
+    JLinkList<CMonster> *pList = GetVisibleMonsters();
+
+    // First pass: count each monster type (m_md->m_dwIndex = type slot)
+    int counts[MON_IDX_MAX] = {};
+    CLink<CMonster> *pLink = pList->GetHead();
+    while( pLink != NULL )
+    {
+        CMonster *pMon = pLink->m_lpData;
+        if( pMon && pMon->m_md && pMon->m_md->m_dwIndex >= 0 &&
+            pMon->m_md->m_dwIndex < MON_IDX_MAX )
+        {
+            counts[pMon->m_md->m_dwIndex]++;
+        }
+        pLink = pLink->next;
+    }
+
+    // Second pass: list is sorted by distance (ascending), so the first
+    // occurrence of each type is the closest one — use that ordering.
+    bool seen[MON_IDX_MAX] = {};
+    pLink = pList->GetHead();
+    while( pLink != NULL )
+    {
+        CMonster *pMon = pLink->m_lpData;
+        if( pMon && pMon->m_md && pMon->m_md->m_dwIndex >= 0 &&
+            pMon->m_md->m_dwIndex < MON_IDX_MAX )
+        {
+            int idx = pMon->m_md->m_dwIndex;
+            if( !seen[idx] )
+            {
+                seen[idx] = true;
+                if( counts[idx] > 1 )
+                    pDT->Printf( "%s (%d)\n", pMon->GetName(), counts[idx] );
+                else
+                    pDT->Printf( "%s\n", pMon->GetName() );
+            }
+        }
+        pLink = pLink->next;
+    }
+}
+
 void CPlayer::PickUp( JVector &vPickupPos )
 {
     CItem *pItem = g_pGame->GetDungeon()->PickUp( vPickupPos );
@@ -591,6 +650,7 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
         Util::jstrcpy( m_szDamage, pItem->m_id->m_szBaseDamage );
     m_fDamageModifier += pItem->m_fBonusToDamage;
     m_fToHitModifier += pItem->m_fBonusToHit;
+    m_fSpeed += pItem->m_fSpeedBonus;
 
     // Defensive: if this is a two-handed weapon, ensure off-hand is clear.
     if( pItem->m_id && ( pItem->m_id->m_dwFlags & ITEM_FLAG_2HANDED ) )
@@ -654,6 +714,7 @@ bool CPlayer::RemoveEquipment( CLink<CItem> *pLink )
         Util::jstrcpy( m_szDamage, PLAYER_BASE_DAMAGE );
     m_fDamageModifier -= pItem->m_fBonusToDamage;
     m_fToHitModifier -= pItem->m_fBonusToHit;
+    m_fSpeed -= pItem->m_fSpeedBonus;
 
     return true;
 }
@@ -1625,6 +1686,7 @@ JResult CPlayer::DoIntrinsicEffects( CEffect *pEffect, float fDuration )
         break;
     case EFFECT_FLAG_SPEED:
         g_pGame->GetMsgs()->Printf( "You feel yourself moving faster.\n" );
+        m_fSpeed += 1.0f;
         break;
     case EFFECT_FLAG_LIGHT:
         break;
@@ -1684,6 +1746,7 @@ JResult CPlayer::UndoIntrinsicEffects( CEffect *pEffect )
         break;
     case EFFECT_FLAG_SPEED:
         g_pGame->GetMsgs()->Printf( "You feel yourself slowing down.\n" );
+        m_fSpeed -= 1.0f;
         break;
     case EFFECT_FLAG_LIGHT:
         break;
@@ -1830,8 +1893,6 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
             g_pGame->GetMsgs()->Printf( "You sense the presence of doors!\n" );
         if( bFoundStairs )
             g_pGame->GetMsgs()->Printf( "You sense the presence of stairs!\n" );
-        if( !bFoundDoors && !bFoundStairs )
-            g_pGame->GetMsgs()->Printf( "You sense no doors or stairs.\n" );
         m_bLastEffectNoticed = true;
     }
 
@@ -1854,8 +1915,6 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
         }
         if( bFound )
             g_pGame->GetMsgs()->Printf( "You sense traps.\n" );
-        else
-            g_pGame->GetMsgs()->Printf( "You sense no traps.\n" );
         m_bLastEffectNoticed = true;
     }
 
@@ -1886,8 +1945,6 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
         }
         if( bFound )
             g_pGame->GetMsgs()->Printf( "You sense the presence of monsters!\n" );
-        else
-            g_pGame->GetMsgs()->Printf( "You sense no monsters.\n" );
         m_bLastEffectNoticed = true;
     }
 

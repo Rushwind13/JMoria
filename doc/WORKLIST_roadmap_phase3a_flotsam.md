@@ -25,14 +25,14 @@ These are targeted improvements and one major system that were floating without 
 
 ---
 
-### P2 - #264: EFFECT_MOD_MAX (Low, ~1-2 hrs)
+### ✅ P2 — #264: EFFECT_MOD_MAX (COMPLETE)
 
-1. **Define `EFFECT_MOD_MAX` in `Constants.h`**: Add `#define EFFECT_MOD_MAX 0x000000400` (next available bit after `EFFECT_MOD_SUSTAIN`); also register it in the `StringTable` initializer block alongside the other `EFFECT_MOD_*` entries.
-2. **Implement `RollMax(const char *szFormat)` in `Util.cpp`/`Util.h`**: Parses the NdM string and returns `dice * sides` (maximum possible roll) without randomness. Mirror the signature of the existing `Roll(const char *)` overload.
-3. **Implement `MON_FLAG_MAXHP` in `CMonster::Init()`**: `MON_FLAG_MAXHP` is already defined in `Constants.h` at `0x00800000` but never consumed. In the `Init()` HP block, when `pmd->m_dwFlags & MON_FLAG_MAXHP`, call `RollMax(pmd->m_szHD)` instead of `Roll(pmd->m_szHD)` to give the monster max HP at spawn.
-4. **Apply `EFFECT_MOD_MAX` to damage rolls in `CMonster::Damage()`**: When the current attack's effect modifier includes `EFFECT_MOD_MAX`, call `RollMax(szDamage)` instead of `Roll(szDamage)` for the damage roll.
-5. **Tag applicable monsters in `Monsters.txt`**: Audit Ancient Dragons and Balrog entries; add `MON_FLAG_MAXHP` to their `Flags` field if not already present. Cross-check any other monsters that should always roll max (boss-tier creatures).
-6. **Add BDD scenario**: Verify that a monster spawned with `MON_FLAG_MAXHP` always has `curHP == maxHP` at the start of combat (no randomized HP).
+1. ✅ **Define `EFFECT_MOD_MAX` in `Constants.h`**: Added `#define EFFECT_MOD_MAX 0x000000400`; incremented `NUM_EFFECT_MODIFIERS` to 11; registered in `StringTable` alongside other `EFFECT_MOD_*` entries.
+2. ✅ **Implement `RollMax(const char *szFormat)` in `Util.cpp`/`Util.h`**: Parses NdM string and returns `dice * sides` (maximum possible roll) without randomness. Mirrors signature of existing `Roll(const char *)` overload.
+3. ✅ **Implement `MON_FLAG_MAXHP` in `CMonster::Init()`**: When `pmd->m_dwFlags & MON_FLAG_MAXHP`, calls `RollMax(pmd->m_szHD)` instead of `Roll(pmd->m_szHD)` to give the monster max HP at spawn.
+4. ✅ **Apply `EFFECT_MOD_MAX` to damage rolls in `CMonster::Damage()`**: When the current attack's effect modifier includes `EFFECT_MOD_MAX`, calls `RollMax(szDamage)` instead of `Roll(szDamage)`.
+5. ✅ **Tag applicable monsters in `Monsters.txt`**: Balrog and all six Ancient Dragons tagged with `MON_FLAG_WARM, MON_FLAG_MAXHP`.
+6. ✅ **Add BDD scenario**: Verifies that a monster spawned with `MON_FLAG_MAXHP` always has `curHP == maxHP`. Also fixed `FileParse.cpp` flags-loop to trim leading whitespace from comma-separated flag tokens.
 
 ---
 

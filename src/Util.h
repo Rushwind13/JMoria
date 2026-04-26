@@ -21,6 +21,7 @@ JIVector GetRandomPoint( const JRect rcIn );
 float windowed_bell( float delta, float sigma );
 float Roll( int dice, int sides );
 float Roll( const char *szFormat );
+float RollMax( const char *szFormat );
 
 void Shuffle( int *array, const uint32 size );
 

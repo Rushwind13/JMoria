@@ -30,3 +30,9 @@ Feature: Render All Monsters
         When I find a breath weapon monster
         When I deal 10 damage to the breath monster
         Then its breath damage equals its current HP
+
+    Scenario: A monster with MON_FLAG_MAXHP spawns with maximum HP
+        Given A map with a single level
+        Given The monster configuration file
+        When I find a monster with MON_FLAG_MAXHP
+        Then its current HP equals its maximum HP

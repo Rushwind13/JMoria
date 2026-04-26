@@ -280,10 +280,10 @@
 
 #define EFFECT_MOD_ENCHANT 0x000000100
 #define EFFECT_MOD_SUSTAIN 0x000000200
-// #define EFFECT_MOD_x 0x000000400
+#define EFFECT_MOD_MAX 0x000000400
 // #define EFFECT_MOD_x 0x000000800
 
-#define NUM_EFFECT_MODIFIERS 10
+#define NUM_EFFECT_MODIFIERS 11
 
 // Effect Types
 #define EFFECT_TYPE_HEAL 0x00000001
@@ -579,6 +579,7 @@ public:
 
         m_StringTable[i++].Init( "EFFECT_MOD_ENCHANT", EFFECT_MOD_ENCHANT );
         m_StringTable[i++].Init( "EFFECT_MOD_SUSTAIN", EFFECT_MOD_SUSTAIN );
+        m_StringTable[i++].Init( "EFFECT_MOD_MAX", EFFECT_MOD_MAX );
 
         // Effect types
         m_StringTable[i++].Init( "EFFECT_TYPE_HEAL", EFFECT_TYPE_HEAL );

@@ -195,6 +195,8 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                 char *c = strtok( szValue, "," );
                 while( c != NULL )
                 {
+                    while( *c == ' ' || *c == '\t' )
+                        c++;
                     // if( g_Constants.CompareType( "MON_FLAG", c ) )
                     {
                         JLog( LOG_LEVEL_NOISE, true, "found flag: %s\n", c );

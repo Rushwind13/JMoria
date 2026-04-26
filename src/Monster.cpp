@@ -35,6 +35,10 @@ void CMonster::Init( CMonsterDef *pmd )
     {
         m_fHP = pmd->m_fBaseHP;
     }
+    else if( pmd->m_dwFlags & MON_FLAG_MAXHP )
+    {
+        m_fHP = Util::RollMax( pmd->m_szHD );
+    }
     else
     {
         m_fHP = Util::Roll( pmd->m_szHD );
@@ -280,7 +284,11 @@ float CMonster::Damage( float fDamageMult )
     char *szDamage = m_pCurrentAttack->m_szDamage;
     float fDamageModifier = 0.0f;
 
-    float fDamage = ( Util::Roll( szDamage ) + fDamageModifier ) * fDamageMult;
+    bool bMaxRoll = ( m_pCurrentAttack->m_pEffect != NULL &&
+                      ( m_pCurrentAttack->m_pEffect->m_dwModifier & EFFECT_MOD_MAX ) );
+    float fDamage =
+        ( ( bMaxRoll ? Util::RollMax( szDamage ) : Util::Roll( szDamage ) ) + fDamageModifier ) *
+        fDamageMult;
     JLog( LOG_LEVEL_INFO, true, "%s did %.2f damage (rolled %s)(damagemult: %.2f). ", GetName(),
           fDamage, szDamage, fDamageMult );
 

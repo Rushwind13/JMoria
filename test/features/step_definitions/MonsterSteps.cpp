@@ -143,3 +143,31 @@ WHEN( "^I deal (\\d+) damage to the breath monster$" )
         << "Damage would kill the monster; choose a smaller value";
     pMon->TakeDamage( (float)damage );
 }
+
+WHEN( "^I find a monster with MON_FLAG_MAXHP$" )
+{
+    ScenarioScope<TestCtx> context;
+    CMonsterDef *pmd = new CMonsterDef;
+    while( context->dfMonsters.ReadMonster( *pmd ) )
+    {
+        if( pmd->m_dwFlags & MON_FLAG_MAXHP )
+        {
+            context->monsterDef = pmd;
+            CMonster *pMon = new CMonster;
+            pMon->Init( pmd );
+            context->monster = pMon;
+            return;
+        }
+        delete pmd;
+        pmd = new CMonsterDef;
+    }
+    delete pmd;
+    FAIL() << "No MON_FLAG_MAXHP monster found in Monsters.txt";
+}
+
+THEN( "^its current HP equals its maximum HP$" )
+{
+    ScenarioScope<TestCtx> context;
+    CMonster *pMon = context->monster;
+    EXPECT_FLOAT_EQ( pMon->m_fCurHP, pMon->m_fHP );
+}

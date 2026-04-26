@@ -3181,7 +3181,7 @@ Monster <Balrog>
     Level       98
     ExpValue	15000.0
     Type		<MON_IDX_BALROG>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d10
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d10
     Attack             <MON_FLAG_BITE>, <Fire Touch>, 5d10
@@ -3325,7 +3325,7 @@ Monster <Ancient White Dragon>
     Level       70
     ExpValue	1500.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
@@ -3343,7 +3343,7 @@ Monster <Ancient Black Dragon>
     Level       75
     ExpValue	2000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d6
@@ -3361,7 +3361,7 @@ Monster <Ancient Green Dragon>
     Level       78
     ExpValue	2500.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d10
@@ -3379,7 +3379,7 @@ Monster <Ancient Blue Dragon>
     Level       82
     ExpValue	3000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d8
@@ -3397,7 +3397,7 @@ Monster <Ancient Red Dragon>
     Level       85
     ExpValue	4000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d10
@@ -3415,7 +3415,7 @@ Monster <Ancient Multi-hued Dragon>
     Level		88
     ExpValue	9000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags       <MON_FLAG_WARM>
+    Flags       <MON_FLAG_WARM, MON_FLAG_MAXHP>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8

@@ -87,7 +87,11 @@ void CDungeon::Init( const char *szBasedir )
     CDataFile dfEffects;
     char szEffectFilename[256];
     sprintf( szEffectFilename, "%s%s", szBasedir, "Resources/Effects.txt" );
-    dfEffects.Open( szEffectFilename );
+    if( !dfEffects.Open( szEffectFilename ) )
+    {
+        JLog( LOG_LEVEL_ERROR, true, "FATAL: Cannot open Effects.txt at: %s\n", szEffectFilename );
+        exit( 1 );
+    }
 
     ped = new CEffectDef;
     while( dfEffects.ReadEffect( *ped ) )
@@ -105,7 +109,11 @@ void CDungeon::Init( const char *szBasedir )
     CDataFile dfMonsters;
     char szMonsterFile[256];
     sprintf( szMonsterFile, "%s%s", szBasedir, "Resources/Monsters.txt" );
-    dfMonsters.Open( szMonsterFile );
+    if( !dfMonsters.Open( szMonsterFile ) )
+    {
+        JLog( LOG_LEVEL_ERROR, true, "FATAL: Cannot open Monsters.txt at: %s\n", szMonsterFile );
+        exit( 1 );
+    }
     dfMonsters.SetDungeon( this );
 
     pmd = new CMonsterDef;
@@ -125,7 +133,11 @@ void CDungeon::Init( const char *szBasedir )
     CDataFile dfItems;
     char szItemFilename[256];
     sprintf( szItemFilename, "%s%s", szBasedir, "Resources/Items.txt" );
-    dfItems.Open( szItemFilename );
+    if( !dfItems.Open( szItemFilename ) )
+    {
+        JLog( LOG_LEVEL_ERROR, true, "FATAL: Cannot open Items.txt at: %s\n", szItemFilename );
+        exit( 1 );
+    }
     dfItems.SetDungeon( this );
 
     pid = new CItemDef;

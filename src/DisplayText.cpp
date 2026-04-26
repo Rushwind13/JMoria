@@ -114,6 +114,10 @@ void CDisplayText::Draw()
     int insetY = inset * FONT_DRAW_H;
     int maxH = g_pGame->GetRender()->GetMaxTextHeight();
     int drawBottom = m_Rect.Bottom() - insetY;
+    // When the panel has a bounding box, leave one extra row of clearance so
+    // text doesn't render on top of the bottom border character.
+    if( m_dwFlags & FLAG_TEXT_BOUNDING_BOX )
+        drawBottom -= insetY;
     if( drawBottom > maxH - insetY )
         drawBottom = maxH - insetY;
     DrawStr( m_Rect.Left() + insetX + m_dwMarginLeft, m_Rect.Top() + insetY + m_dwMarginTop, true,

@@ -57,7 +57,8 @@ CGame::CGame()
       m_eRenderMode( RenderMode::None ),
       m_bShowStats( true ),
       m_bShowInv( false ),
-      m_bShowEquip( false )
+      m_bShowEquip( false ),
+      m_bShowMonsters( false )
 {
     m_pClockStepState = new CClockStepState;
     m_pCmdState = new CCmdState;
@@ -128,6 +129,10 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     m_pEquipDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
                           FLAG_TEXT_TRIM_TAIL );
 
+    m_pMonstersDT = new CDisplayText( szBasedir, JRect( 0, 50, 150, 480 ), 180 );
+    m_pMonstersDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
+                             FLAG_TEXT_TRIM_TAIL );
+
     m_pUseDT = new CDisplayText( szBasedir, JRect( 200, 40, 440, 480 ), 200 );
     m_pUseDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
 
@@ -136,10 +141,11 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
 
     // Let the renderer configure display region rects for its coordinate system
     m_pRender->ConfigureDisplayRegions( m_pMsgsDT, m_pStatsDT, m_pInvDT, m_pEquipDT, m_pUseDT,
-                                        m_pEndGameDT );
+                                        m_pEndGameDT, m_pMonstersDT );
 
     m_bShowInv = m_pRender->ShouldAutoShowInventory();
     m_bShowEquip = m_pRender->ShouldAutoShowEquipment();
+    m_bShowMonsters = m_pRender->ShouldAutoShowMonsters();
 
     m_pAIMgr = new CAIMgr;
     m_pAIMgr->Init();
@@ -298,6 +304,12 @@ void CGame::Term()
     {
         delete m_pEquipDT;
         m_pEquipDT = NULL;
+    }
+
+    if( m_pMonstersDT )
+    {
+        delete m_pMonstersDT;
+        m_pMonstersDT = NULL;
     }
 
     if( m_pUseDT )
@@ -608,7 +620,7 @@ void CGame::Draw()
     if( bResized )
     {
         GetRender()->ConfigureDisplayRegions( m_pMsgsDT, m_pStatsDT, m_pInvDT, m_pEquipDT, m_pUseDT,
-                                              m_pEndGameDT );
+                                              m_pEndGameDT, m_pMonstersDT );
         if( bASCII )
             m_bShowInv = GetRender()->ShouldAutoShowInventory();
     }
@@ -627,13 +639,15 @@ void CGame::Draw()
 
         GetMsgs()->Draw();
 
-        // Panel visibility toggled by i/e/C keys
+        // Panel visibility toggled by i/e/C/v keys
         if( m_bShowStats )
             GetStats()->Draw();
         if( m_bShowInv )
             GetInv()->Draw();
         if( m_bShowEquip )
             GetEquip()->Draw();
+        if( m_bShowMonsters )
+            GetMonsters()->Draw();
     }
 
     if( m_eCurState == STATE_USE )

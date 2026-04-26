@@ -69,7 +69,7 @@ These are targeted improvements and one major system that were floating without 
 
 ---
 
-### P3 — #272: Visible Monsters UI Pane (Medium, ~4–8 hrs)
+### ✅ P3 — #272: Visible Monsters UI Pane (COMPLETE)
 
 1. **Add a new `DisplayText` region for "Visible Monsters"**: Model it on the existing Inv/Equip sidebar regions.
 2. **Populate pane during normal play**: Show all monsters currently in the player's line-of-sight, listed by name and distance, updated each turn.
@@ -77,7 +77,17 @@ These are targeted improvements and one major system that were floating without 
 4. **Auto-expire detected entries**: Pane reverts to line-of-sight–only monsters on the turn after detection expires. (this should happen automatically with UpdateVisibleMonsters())
 5. **Wire Scroll of Detect Monsters to the pane**: The item is already in `Items.txt` (`EFFECT_FLAG_SEE` / `EFFECT_MOD_MONSTERS`); ensure its effect triggers the pane display.
 6. **Future / deferred — `*` targeting from pane**: Player can cycle through the Visible Monsters list with `*` to set targeting cursor. Defer to a follow-on issue; do not block the pane display work.
-7. **Toggleable pane** - ask user which key to use to toggle this view (let user know which lowercase and uppercase keys are available)
+7. ✅ **Toggleable pane**: `v` key toggles the pane. Available lowercase keys were presented to user; `v` ("visible") selected.
+
+**Implementation notes:**
+- `m_pMonstersDT` / `m_bShowMonsters` added to `CGame`; `GetMonsters()`, `ToggleMonsters()`, `IsShowingMonsters()` public accessors
+- `ASCIILayout::monsters` region: 10 rows tall at the bottom of the left sidebar; `l.stats` bottom clamped to `monstersTop` so borders don't overlap
+- `CPlayer::DisplayVisibleMonsters()`: two-pass walk of `m_llVisibleMonsters` (already distance-sorted); first pass counts by `m_md->m_dwIndex`; second pass prints in distance order, skipping already-seen types. Count shown as `Name (N)` when N > 1
+- `DrawStr` bounding-box fix: `drawBottom` reduced by an extra `insetY` when `FLAG_TEXT_BOUNDING_BOX` is set, preventing text from rendering on top of the bottom border character
+- `IRenderBackend::ShouldAutoShowMonsters()` returns `false` (hidden by default, toggleable by user)
+- 5 BDD scenarios added to `test/features/visible_monsters.feature`; 147 scenarios pass
+
+✅ **COMPLETE** — commits on `feat/phase3a_flotsam`
 
 ---
 

@@ -74,6 +74,7 @@ bool CPlayer::Update( float fCurTime )
     DisplayStats();
     DisplayInventory( PLACEMENT_INV );
     DisplayEquipment( PLACEMENT_EQUIP );
+    DisplayVisibleMonsters();
     return true;
 }
 
@@ -462,6 +463,55 @@ void CPlayer::DisplayEquipment( uint8 dwPlacement, eInvFilter filter )
             pLink = m_llEquipment->GetNext( pLink );
         }
         cListId++;
+    }
+}
+
+void CPlayer::DisplayVisibleMonsters()
+{
+    if( !g_pGame->IsShowingMonsters() )
+        return;
+
+    CDisplayText *pDT = g_pGame->GetMonsters();
+    pDT->Clear();
+    pDT->Printf( "Visible monsters:\n" );
+
+    JLinkList<CMonster> *pList = GetVisibleMonsters();
+
+    // First pass: count each monster type (m_md->m_dwIndex = type slot)
+    int counts[MON_IDX_MAX] = {};
+    CLink<CMonster> *pLink = pList->GetHead();
+    while( pLink != NULL )
+    {
+        CMonster *pMon = pLink->m_lpData;
+        if( pMon && pMon->m_md && pMon->m_md->m_dwIndex >= 0 &&
+            pMon->m_md->m_dwIndex < MON_IDX_MAX )
+        {
+            counts[pMon->m_md->m_dwIndex]++;
+        }
+        pLink = pLink->next;
+    }
+
+    // Second pass: list is sorted by distance (ascending), so the first
+    // occurrence of each type is the closest one — use that ordering.
+    bool seen[MON_IDX_MAX] = {};
+    pLink = pList->GetHead();
+    while( pLink != NULL )
+    {
+        CMonster *pMon = pLink->m_lpData;
+        if( pMon && pMon->m_md && pMon->m_md->m_dwIndex >= 0 &&
+            pMon->m_md->m_dwIndex < MON_IDX_MAX )
+        {
+            int idx = pMon->m_md->m_dwIndex;
+            if( !seen[idx] )
+            {
+                seen[idx] = true;
+                if( counts[idx] > 1 )
+                    pDT->Printf( "%s (%d)\n", pMon->GetName(), counts[idx] );
+                else
+                    pDT->Printf( "%s\n", pMon->GetName() );
+            }
+        }
+        pLink = pLink->next;
     }
 }
 

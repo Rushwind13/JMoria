@@ -484,6 +484,11 @@ bool CCmdState::IsToggleCommand( JKeysym *keysym )
         g_pGame->ToggleStats();
         return true;
     }
+    if( keysym->sym == JKEY_v && keysym->mod == JMOD_NONE )
+    {
+        g_pGame->ToggleMonsters();
+        return true;
+    }
     return false;
 }
 

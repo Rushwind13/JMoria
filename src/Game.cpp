@@ -494,11 +494,14 @@ bool CGame::Update()
     if( m_bReadyForUpdate )
     {
         m_fGameTime++;
-        // fCurTime = 1.0f;
         m_bReadyForUpdate = false;
-        // TODO: Why does the AI require 2 ticks to move the monster?
-        GetAIMgr()->Update( fCurTime );
-        // GetAIMgr()->Update( fCurTime );
+        // Scale AI time by inverse of player speed:
+        // fast player (1.5) -> monsters get 0.67 per action (player acts 1.5x more)
+        // slow player (0.8) -> monsters get 1.25 per action (player acts 0.8x)
+        float fPlayerSpeed = m_pPlayer ? m_pPlayer->GetSpeed() : 1.0f;
+        if( fPlayerSpeed <= 0.0f )
+            fPlayerSpeed = 1.0f;
+        GetAIMgr()->Update( fCurTime / fPlayerSpeed );
     }
 //    else
 //    {
@@ -511,7 +514,10 @@ bool CGame::Update( float fCurTime )
     // Don't update AI during use commands or ranged item selection
     if( m_eCurState != STATE_USE && m_eCurState != STATE_RANGED )
     {
-        GetAIMgr()->Update( fCurTime );
+        float fPlayerSpeed = m_pPlayer ? m_pPlayer->GetSpeed() : 1.0f;
+        if( fPlayerSpeed <= 0.0f )
+            fPlayerSpeed = 1.0f;
+        GetAIMgr()->Update( fCurTime / fPlayerSpeed );
     }
 #endif // TURN_BASED
 

@@ -14,6 +14,7 @@
 #include "MonsterSteps.cpp"
 #include "RangedSteps.cpp"
 #include "RectSteps.cpp"
+#include "SpeedSteps.cpp"
 #include "StringTableSteps.cpp"
 #include "TargetSteps.cpp"
 #include "TextEntrySteps.cpp"

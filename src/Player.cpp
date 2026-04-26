@@ -9,6 +9,7 @@
 #include "JLinkList.h"
 #include "StateBase.h"
 #include "TileSet.h"
+#include <cmath>
 
 extern CGame *g_pGame;
 
@@ -255,6 +256,14 @@ void CPlayer::DisplayStats()
     g_pGame->GetStats()->Printf( "Damage: %s\n", m_szDamage );
     g_pGame->GetStats()->Printf( "+to Hit: %d\n", (int)m_fToHitModifier );
     g_pGame->GetStats()->Printf( "+to Dam: %d\n", (int)m_fDamageModifier );
+    {
+        // Speed display: hidden at base (1.0); show Fast(+N) or Slow(-N) as integer offset from 10
+        int nSpeedOffset = (int)roundf( m_fSpeed * 10.0f ) - 10;
+        if( nSpeedOffset > 0 )
+            g_pGame->GetStats()->Printf( "Speed: Fast(+%d)\n", nSpeedOffset );
+        else if( nSpeedOffset < 0 )
+            g_pGame->GetStats()->Printf( "Speed: Slow(%d)\n", nSpeedOffset );
+    }
     g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "Level: %d\n", (int)m_fLevel );
@@ -641,6 +650,7 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
         Util::jstrcpy( m_szDamage, pItem->m_id->m_szBaseDamage );
     m_fDamageModifier += pItem->m_fBonusToDamage;
     m_fToHitModifier += pItem->m_fBonusToHit;
+    m_fSpeed += pItem->m_fSpeedBonus;
 
     // Defensive: if this is a two-handed weapon, ensure off-hand is clear.
     if( pItem->m_id && ( pItem->m_id->m_dwFlags & ITEM_FLAG_2HANDED ) )
@@ -704,6 +714,7 @@ bool CPlayer::RemoveEquipment( CLink<CItem> *pLink )
         Util::jstrcpy( m_szDamage, PLAYER_BASE_DAMAGE );
     m_fDamageModifier -= pItem->m_fBonusToDamage;
     m_fToHitModifier -= pItem->m_fBonusToHit;
+    m_fSpeed -= pItem->m_fSpeedBonus;
 
     return true;
 }
@@ -1675,6 +1686,7 @@ JResult CPlayer::DoIntrinsicEffects( CEffect *pEffect, float fDuration )
         break;
     case EFFECT_FLAG_SPEED:
         g_pGame->GetMsgs()->Printf( "You feel yourself moving faster.\n" );
+        m_fSpeed += 1.0f;
         break;
     case EFFECT_FLAG_LIGHT:
         break;
@@ -1734,6 +1746,7 @@ JResult CPlayer::UndoIntrinsicEffects( CEffect *pEffect )
         break;
     case EFFECT_FLAG_SPEED:
         g_pGame->GetMsgs()->Printf( "You feel yourself slowing down.\n" );
+        m_fSpeed -= 1.0f;
         break;
     case EFFECT_FLAG_LIGHT:
         break;

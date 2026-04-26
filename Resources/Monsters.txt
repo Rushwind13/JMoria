@@ -3174,7 +3174,7 @@ Monster <Balrog>
 {
     Plural		<Balrogs>
     Appear		<1d1>
-    Speed		1.2
+    Speed		4.5
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <25d8>
     AC          160.0
@@ -3318,7 +3318,7 @@ Monster <Ancient White Dragon>
 {
     Plural		<Ancient White Dragons>
     Appear		<1d1>
-    Speed		1.0
+    Speed		2.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <15d8>
     AC          110.0
@@ -3336,7 +3336,7 @@ Monster <Ancient Black Dragon>
 {
     Plural		<Ancient Black Dragons>
     Appear		<1d1>
-    Speed		1.0
+    Speed		2.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <16d8>
     AC          110.0
@@ -3354,7 +3354,7 @@ Monster <Ancient Green Dragon>
 {
     Plural		<Ancient Green Dragons>
     Appear		<1d1>
-    Speed		1.0
+    Speed		2.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <17d8>
     AC          120.0
@@ -3372,7 +3372,7 @@ Monster <Ancient Blue Dragon>
 {
     Plural		<Ancient Blue Dragons>
     Appear		<1d1>
-    Speed		1.0
+    Speed		2.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <18d8>
     AC          120.0
@@ -3390,7 +3390,7 @@ Monster <Ancient Red Dragon>
 {
     Plural		<Ancient Red Dragons>
     Appear		<1d1>
-    Speed		1.0
+    Speed		2.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <19d8>
     AC          150.0
@@ -3408,7 +3408,7 @@ Monster <Ancient Multi-hued Dragon>
 {
     Plural		<Ancient Multi-hued Dragons>
     Appear      <1d1>
-    Speed		1.0
+    Speed		2.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD			<15d8>
     AC          110.0
@@ -4930,7 +4930,7 @@ Monster <Greater Demon>
 {
     Plural		<Greater Demons>
     Appear		<1d1>
-    Speed		1.0
+    Speed		2.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <14d8>
     AC          90.0
@@ -4947,7 +4947,7 @@ Monster <Demon Lord>
 {
     Plural		<Demon Lords>
     Appear		<1d1>
-    Speed		1.2
+    Speed		2.5
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <18d8>
     AC          110.0
@@ -4965,7 +4965,7 @@ Monster <Greater Demon Lord>
 {
     Plural		<Greater Demon Lords>
     Appear		<1d1>
-    Speed		1.3
+    Speed		3.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <22d8>
     AC          140.0
@@ -5019,7 +5019,7 @@ Monster <Master Vampire>
 {
     Plural		<Master Vampires>
     Appear		<1d1>
-    Speed		1.4
+    Speed		3.0
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <16d8>
     AC          100.0
@@ -5037,7 +5037,7 @@ Monster <Lordly Vampire>
 {
     Plural		<Lordly Vampires>
     Appear		<1d1>
-    Speed		1.5
+    Speed		3.5
     MoveType	<MON_AI_SEEKPLAYER>
     HD          <18d8>
     AC          115.0

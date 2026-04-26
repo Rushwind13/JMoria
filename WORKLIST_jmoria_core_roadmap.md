@@ -274,12 +274,14 @@ The core roadmap prioritizes:
 ## � Priority 4: Major Post-Phase-3 Systems
 
 ### #242 - Speed System & Difficulty Tuning (Action Economy Mechanic)
-**Status**: Not started (Design Complete)
+**Status**: ✅ Complete
 **Description**: Implement speed/action economy system that creates difficulty scaling and high-level character differentiation. Speed is the **primary difficulty lever**.
 - **Base Speed**: 10 (normal speed = 1 action per turn)
-- **Modifiers**: Equipment rings (+1 to +20), boots (+10), Potion of Speed (+10 temp), DEX stat
-- **Monster Speed Calibration**: Bats 2 → Balrog 4-5 creates difficulty progression
-- **Balrog Tuning**: Unwinnable at player speed ~15, winnable at ~30+
+- **Modifiers**: Equipment rings (+1 to +10 random), boots (+10), Gloves of Elvenkind (+10), Potion of Speed (+10 temp)
+- **Monster Speed Calibration**: Bats 2.0 → Ancient Dragons 2.0 → Greater Demon Lord 3.0 → Lordly Vampire 3.5 → Balrog 4.5
+- **Action Economy Engine**: AIMgr scaled by `1/player_speed` on each player action; fast player = slower monsters
+- **Display**: `Fast(+N)` / `Slow(-N)` shown in Stats pane at non-base speed
+**Implemented**: `m_fSpeed` on CPlayer, `m_fSpeedBonus` on CItem, Wield/Remove wiring, timed potion via EFFECT_MOD_TIMED, Game.cpp AIMgr scaling, BDD tests (5 scenarios)
 **Impact**: Core difficulty lever, enables Balrog as achievable endgame goal, creates speed-focused builds
 **Dependencies**: #197 (Stats) for DEX; Enables #42 (Balrog)
 **Effort**: High

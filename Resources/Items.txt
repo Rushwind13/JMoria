@@ -600,6 +600,19 @@ AC          4.0
 Weight      2.0
 Color        <225,225,50,255>
 }
+Item <Gloves of Elvenkind>
+{
+Plural      <Pairs of Gloves of Elvenkind>
+Type        <ITEM_IDX_GLOVES>
+Effect      <Speed>
+Speed       1.0
+Value       4000.0
+Level       44
+AC          2.0
+Weight      1.0
+Color       <150,255,150,255>
+Flags       <ITEM_FLAG_MAGIC>
+}
 
 # --- Boots ---
 
@@ -628,6 +641,7 @@ Item <Boots of Speed>
 Plural      <Pairs of Boots of Speed>
 Type        <ITEM_IDX_BOOTS>
 Effect      <Speed>
+Speed       1.0
 Value       5000.0
 Level       48
 AC          2.0

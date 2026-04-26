@@ -115,6 +115,7 @@ public:
           m_fDamageModifier( 0.0f ),
           m_fToHitModifier( 0.0f ),
           m_fArmorClass( 1.0f ),
+          m_fSpeed( 1.0f ),
           m_fHitPoints( 0.0f ),
           m_fLastHPTime( 0.0f ),
           m_fLastMPTime( 0.0f ),
@@ -328,6 +329,7 @@ public:
     char *m_szDamage;
     float m_fDamageModifier;
     float m_fToHitModifier;
+    float m_fSpeed; // action economy: 1.0 = base (10), 2.0 = fast (20), 0.8 = slow (8)
 
     char *m_szKilledBy;
 
@@ -338,6 +340,7 @@ public:
 
     bool HasPendingIdentify() { return m_bPendingIdentify; }
     void ClearPendingIdentify() { m_bPendingIdentify = false; }
+    float GetSpeed() { return m_fSpeed; }
 
 protected:
     void GainLevel();

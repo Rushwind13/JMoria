@@ -14,6 +14,16 @@ The core roadmap prioritizes:
 
 ## 📋 Recent Updates (Integration of Issues #242-275)
 
+**Phase 3a Flotsam — All Complete (April 26, 2026)**:
+- ✅ #273 (Messages Scrollback) — 5-row msgs window, no blank lines, suppress empty results (commit b22288d)
+- ✅ #265 (Breath Weapon Scaling) — damage = current HP (commit on feat/phase3a_flotsam)
+- ✅ #264 (EFFECT_MOD_MAX) — `RollMax()`, `MON_FLAG_MAXHP`, Balrog/Ancient Dragons use it
+- ✅ #172 (Tombstone UI fix) — two-line killer slot, long name wrapping (commit a1d2c4c)
+- ✅ #234 (ASCII DisplayText bugs) — `FLAG_TEXT_TRIM_TAIL`, dark color boost, bounding box fix (commit 21a0eb7)
+- ✅ #177 (RENDER_MODE linker flags) — `make ascii-test` target, per-renderer `TEST_LD_FLAGS` (commit 84530b6)
+- ✅ #272 (Visible Monsters UI) — `v`-toggle pane, LOS + Detect Monsters, 5 BDD scenarios
+- ✅ #242 (Speed System) — action economy, monster calibration, equipment bonuses, 5 BDD scenarios (commit 33dccfb)
+
 **Latest Integration (Issues #242-275)**:
 - **Priority 4 (Major Post-Phase-3 Systems)**: 8 new issues integrated:
   - #242 (Speed System) — action economy & Balrog difficulty lever
@@ -381,22 +391,25 @@ The core roadmap prioritizes:
 ## 🎪 Priority 5: Advanced Systems & Polish
 
 ### #264 - EFFECT_MOD_MAX Flag (Modifier for Max Dice Rolls)
-**Status**: Not started (Design Complete)
+**Status**: ✅ COMPLETE (Phase 3a Flotsam, Closed April 26, 2026)
 **Description**: New EFFECT_MOD flag where dice rolls always return maximum value.
-- **Usage**: 3d6 → 18, 1d100 → 100, 1d20 → 20
-- **Applies To**: Monster HD (Ancient Dragons = 100d8 max), breath weapon damage (damage = HP)
-- **Integration**: Balrog uses this for deterministic high damage
+- ✅ `EFFECT_MOD_MAX` defined in `Constants.h`; `NUM_EFFECT_MODIFIERS` incremented to 11
+- ✅ `Util::RollMax(const char *)` parses NdM and returns `dice * sides`
+- ✅ `MON_FLAG_MAXHP` in `CMonster::Init()` calls `RollMax(pmd->m_szHD)` for max HP at spawn
+- ✅ `EFFECT_MOD_MAX` in `CMonster::Damage()` calls `RollMax(szDamage)` for max damage rolls
+- ✅ Balrog + all six Ancient Dragons tagged `MON_FLAG_WARM, MON_FLAG_MAXHP` in `Monsters.txt`
+- ✅ BDD scenario verifies spawned `MON_FLAG_MAXHP` monster has `curHP == maxHP`
 **Impact**: Enables high-level monster threat tuning, clear damage expectations
 **Dependencies**: None blocking
 **Effort**: Low
 **See Also**: GitHub issue #264 in Issues
 
 ### #265 - Breath Weapon Damage Scales with Monster HP
-**Status**: Not started (Design Complete)
+**Status**: ✅ COMPLETE (Phase 3a Flotsam, Closed April 26, 2026)
 **Description**: Breath attacks do current damage based on monster current HP (not max HP).
-- **Scaling**: As monsters get hurt, breath becomes less deadly
-- **Examples**: Dragon at 100% HP does 8d8 fire; at 50% HP does 4d8 fire
-- **Design Rationale**: Makes monsters seem to weaken as they're damaged, increases survival chances
+- ✅ In `CMonster::Damage()`, when `MON_FLAG_BREATHE`, damage = `m_fCurHP * fDamageMult` (no dice roll)
+- ✅ Applies to all 45+ breath-weapon monsters automatically via the single flag check
+- ✅ Two BDD scenarios: full-HP breath = current HP; post-damage breath proportionally reduced
 **Impact**: Improves perceived difficulty curve, allows more comeback scenarios
 **Dependencies**: #77 (Item Effects); Combat system updates needed
 **Effort**: Medium
@@ -427,11 +440,14 @@ The core roadmap prioritizes:
 **See Also**: GitHub issue #269 for sleep/aggravate system design
 
 ### #272 - Visible Monsters UI Pane (Detect Monsters Targeting)
-**Status**: Not started (Design Complete)
+**Status**: ✅ COMPLETE (Phase 3a Flotsam, Closed April 26, 2026)
 **Description**: Dedicated UI pane for listing detected monsters from Scroll of Detect Monsters.
-- **Display**: Similar to Inv/Equip sidebars, lists detected monsters by name and distance
-- **Functionality**: Show detected monsters during scroll effect, revert to normal-visible monsters next turn
-- **Integration**: m_llVisibleMonsters already tracks; add DisplayText region
+- ✅ `m_pMonstersDT` `DisplayText` region: 10-row sidebar at bottom of left column
+- ✅ `v` key toggles pane; hidden by default (`ShouldAutoShowMonsters()` returns false)
+- ✅ `CPlayer::DisplayVisibleMonsters()` walks `m_llVisibleMonsters` each turn; groups duplicates as `Name (N)`
+- ✅ `m_bDetected` monsters appear post-Detect Monsters scroll; pane reverts to LOS-only when expired
+- ✅ `DrawStr` bounding-box fix: bottom inset prevents text overlapping border
+- ✅ 5 BDD scenarios in `test/features/visible_monsters.feature`
 **Impact**: Clear visual feedback for detection effects, improved targeting UX
 **Dependencies**: None blocking; integrates with existing visibility system
 **Effort**: Low-Medium

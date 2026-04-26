@@ -74,6 +74,18 @@ The bot roadmap prioritizes:
 **Effort**: Low-Medium
 **Related**: goal-stack ordering (#213 in #218 epic)
 
+### Room Exploration & Navigation (Supporting #200 & #218)
+
+**Strategic exploration patterns:**
+
+- [ ] **Room-loop-then-exit strategy** — When wall-follow enters a room, complete one full perimeter loop, then take the first unvisited hallway/door exit. Prevents premature room abandonment.
+
+- [ ] **Room interior fill ("paint stripes")** — After room perimeter is mapped, walk horizontal stripes across the interior to reveal every floor tile. Track fill status per room to ensure 100% coverage.
+
+- [ ] **Restore core survival behaviors** — Pick up loot near the path, auto-equip best gear, flee from dangerous monsters at low HP, pathfind to staircases after room is explored, descend when ready.
+
+- [ ] **Level 2+ readiness** — Track XP and player level from stats panel. Don't descend until character reaches level 2. Reset exploration state (wall-follow phase, lap tracking) on depth change.
+
 ### #224 - Player Bot: Stepwise Turn-Based Mode for Debugging
 **Status**: Not started
 **Description**: Add `--think` or similar flag to pause bot after each turn, showing parsed state, decision logic, and chosen action before pressing forward.
@@ -179,16 +191,39 @@ for i in {1..100}; do ./scripts/crawl_metric.sh; done
 python3 scripts/crawler.py --verbose --think
 ```
 
+### Milestones (Target Criteria)
+
+| Milestone | Criteria | Current Status |
+|-----------|----------|----------------|
+| 1. Survive the Floor | Bot navigates level 1 without dying | Mostly done (still dies to early monsters) |
+| 2. Survival AI | Bot survives to level 3 | Not started |
+| 3. Strategic Play | Bot reaches level 10 | Not started |
+| 4. LLM Integration | LLM bot reaches level 5 | Not started |
+| 5. Batch Testing | 100 consecutive runs, no hang/crash | Not started |
+| Stretch Goal | Bot reaches level 100 (5000 ft) | Not started |
+
 ---
 
 ## 🎬 Future Phases
 
 ### Phase 4: Advanced Learning (Post-#218)
+
+**Persistent knowledge expansion:**
+
 - **Per-depth map memory**: 100×100 explored map per level, persisted to knowledge.json
 - **Threat assessment**: time-to-kill by monster type, expected damage vs HP
 - **Combat items**: auto-quaff potions at low HP, cast scrolls for crowd control
 - **Equipment outcome memory**: stat delta tracking (AC improvements, to-hit gains)
 - **Consumable management**: auto-restock from known item locations
+
+**Specialized memory systems:**
+
+- **Item slot semantics** — track equip compatibility (what can be worn/wielded where)
+- **Light economy memory** — torch/lantern uptime, low-light risk windows
+- **Time-to-kill memory by monster** — track damage and difficulty per monster type
+- **Equipment stat deltas** — remember AC/To-hit/To-dam impact from equipping specific items
+- **Per-depth map notes** — record chokes, dead-ends, stair positions, danger zones
+- **Weapon ranking refinement** — use real item damage metadata from `Resources/Items.txt` for auto-wield decisions
 
 ### Phase 5: Strategic Play (Post-multievel work from #218)
 - Level 10+ survival

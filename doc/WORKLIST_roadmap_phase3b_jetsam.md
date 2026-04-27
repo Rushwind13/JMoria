@@ -133,7 +133,7 @@ BDD coverage added in `test/features/elemental_item_destruction.feature` with 6 
 1. **#176, #175** (code cleanup, 30 min) — ✅ Done
 2. **#165, #166** (bug fixes, 1-2 hours) — ✅ Done
 3. **#226 Phase 1** (spawn filter, 1-2 hours) — ✅ Done (pre-existing)
-4. **#271** (item destruction, 2-3 days) — Requires coordination with combat refactor
+4. **#271** (item destruction, 2-3 days) — ✅ Done
 5. **#236** (monster recall, 2-3 days) — Ambitious but high flavor/engagement value
 
 ---

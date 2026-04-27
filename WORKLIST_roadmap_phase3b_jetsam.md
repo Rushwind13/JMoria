@@ -111,25 +111,6 @@
 **Blocking**: Lays groundwork for Item Recall (#114 extension) and Bestiary systems  
 **Files**: New `src/MonsterRecall.cpp`, `src/DisplayText.cpp` (new pane), `Player.cpp` (encounter tracking)
 
----
-
-### Dungeon Generation (1 Issue)
-
-#### #226 - Monster Spawn Control: Filter-First Selection, Themed Levels, Room-Specific Spawns
-**Status**: Phase 1 ✅ Already Complete (pre-existing); Phases 2-3 Not started  
-**Type**: Enhancement (Dungeon Generation)  
-**Description**: Improve monster spawn selection from current retry-loop model to filter-first approach, enabling themed levels and room-specific spawns.
-- **Current Problem**: `ChooseMonsterForDepth()` picks random index, checks level, retries up to 10 times. Fragile to list ordering.
-- **Phase 1 (filter-first)**: Collect all eligible monsters first, then pick random from pool. Eliminates retry logic.
-- **Phase 2 (themed levels)**: Assign themes (Sewer, Icebox, Zoo, Crypt, Inferno) to dungeon levels; restrict spawn pool to thematic creatures
-- **Phase 3 (room-specific)**: Individual rooms carry spawn override metadata; e.g., lava room spawns fire creatures only
-
-**Impact**: Better dungeon cohesion, improved spawn distribution independence from file order, enables specialized encounters  
-**Dependencies**: Dungeon generation system (already functional)  
-**Effort**: Medium-High (phase 1 low, phase 2-3 require generation system extension)  
-**Blocking**: Enables monster encounter balance testing  
-**Files**: `src/Dungeon.cpp` (ChooseMonsterForDepth), `src/DungeonMap.cpp` (spawn metadata)
-**Resolution (Phase 1)**: `ChooseMonsterForDepth()` already used Gaussian-weighted single-pass weighted random selection — no retry loop. Confirmed and commented on issue #226.
 
 ---
 
@@ -142,7 +123,6 @@
 3. **#226 Phase 1** (spawn filter, 1-2 hours) — ✅ Done (pre-existing)
 4. **#271** (item destruction, 2-3 days) — Requires coordination with combat refactor
 5. **#236** (monster recall, 2-3 days) — Ambitious but high flavor/engagement value
-6. **#226 Phase 2-3** (themed levels, 1-2 days after Phase 1) — Polish dungeon generation
 
 ---
 
@@ -150,7 +130,6 @@
 
 - **#176, #175**: Compile-test only (no behavioral change)
 - **#165, #166**: BDD scenarios for potion duration, wand lighting, combat logging
-- **#226**: Test spawn distribution across 100 dungeons; verify filter-first matches old random selection (deterministic comparison with same seed)
 - **#271**: Unit tests for item vulnerability types; integration tests with monster elemental attacks
 - **#236**: Manual testing with repeated monster encounters; verify knowledge.txt persistence
 
@@ -160,7 +139,6 @@
 
 - These 8 issues represent "overflow" from the main Priority 1-5 roadmap
 - #271 and #236 are significant gameplay additions; rest are bugs/polish
-- #226 Phase 1 is low-risk refactor; Phases 2-3 add thematic depth
 - All issues are independent except #271 (depends on ongoing combat refactor coordination)
 
 ---
@@ -169,4 +147,4 @@
 
 - [Core Roadmap](WORKLIST_jmoria_core_roadmap.md) — main Priority 1-5 systems
 - [Bot Roadmap](WORKLIST_bot_roadmap.md) — AI testing infrastructure
-- [GitHub Issues #165, #166, #226, #176, #175, #271, #236](https://github.com/Rushwind13/JMoria/issues) — detailed specs
+- [GitHub Issues #165, #166, #176, #175, #271, #236](https://github.com/Rushwind13/JMoria/issues) — detailed specs

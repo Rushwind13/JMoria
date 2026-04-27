@@ -263,6 +263,8 @@ public:
     JResult DoHitEffects( CEffect *pEffect );
     JResult DoLightRay( CEffect *pEffect );
     JResult DoElementalHit( CEffect *pEffect );
+    JResult DoDamageInventory( uint32 dwElement );
+    JResult DoDamageEquipment( uint32 dwElement );
     JResult DoCreateEffects( CEffect *pEffect );
     JResult DoLightArea();
     JResult DoDestroyEffects( CEffect *pEffect, int dwFlags );

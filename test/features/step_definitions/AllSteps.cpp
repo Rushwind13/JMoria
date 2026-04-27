@@ -22,3 +22,4 @@
 #include "UtilSteps.cpp"
 #include "VectorSteps.cpp"
 #include "VisibleMonstersSteps.cpp"
+#include "ElementalDestructionSteps.cpp"

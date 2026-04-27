@@ -1,7 +1,9 @@
 # Phase 3b: Jetsam — Cleanup, Bugs, and Overflow Features
 
 **Repo**: `Rushwind13/JMoria`
-**Branch**: `phase3b_jetsam`  
+**Branch**: `phase3b_jetsam`
+**Build command**: `make clean ascii test`
+**Test command**: `cd test; ./runtests.sh`
 **Date Started**: April 26, 2026  
 **Description**: This phase tackles uncovered issues from the previous analysis: minor bugs, code cleanup tasks, dungeon generation improvements, and post-phase-3 gameplay systems that don't fit neatly into the main Priority 1-5 roadmap.
 
@@ -79,20 +81,30 @@
 
 ### Gameplay Systems (2 Issues)
 
-#### #271 - Item Destruction from Elemental Attacks
-**Status**: Not started  
+#### #271 - Item Destruction and Equipment Degradation from Elemental Attacks
+**Status**: ✅ Complete (April 26, 2026)  
 **Type**: Gameplay  
-**Description**: When monsters deal elemental damage (fire, cold, acid), items in player's inventory should take damage/be destroyed.
-- **Fire Damage**: Destroys scrolls (50-100%), potions (50-100%), leather items (25-50%)
-- **Cold Damage**: Shatters potions (100%), reduces movement speed
-- **Acid Damage**: Destroys scrolls (100%), potions (100%), metal items heavily damaged (75-100%)
-- **Interactions**: Fire resistance potions / items can reduce/negate damage; acid resistance same
+**Description**: When monsters deal elemental damage (fire, cold, acid, lightning), items in the player's inventory are destroyed and equipped items are degraded.
 
-**Impact**: Adds inventory risk/reward, creates item economy depth, forces strategic loot choices per level  
-**Dependencies**: #77 (Item Effects) — elemental damage pipeline; #246 (Item Durability) — durability system framework; PR #235 (Ranged Attacks) — coordinate with combat refactor  
-**Effort**: High  
-**Blocking**: Pairs with item durability system; enables dungeon threats to matter  
-**Files**: `src/Player.cpp` (monster hit handler), `src/Item.cpp` (destruction logic), `Resources/Items.txt` (item vulnerability metadata)
+**Resolution**:
+
+**Inventory destruction** — `CPlayer::DoDamageInventory(uint32 dwElement)` called from `TakeDamage()`. Scans inventory on every elemental hit with a 3% base chance per slot (1.5% when resisting; 0% when immune):
+- **Fire**: paper (scrolls, books), wood (arrows, bolts, wands, staves) — "catch fire!"
+- **Cold**: glass (potions) — "shatter in the cold!"
+- **Acid**: paper and wood, same as fire — "are dissolved by acid!"
+- **Lightning**: wands, staves, potions — "are blasted by lightning!"
+
+**Equipment degradation** — `CPlayer::DoDamageEquipment(uint32 dwElement)` called from `TakeDamage()` after inventory damage. Same 3%/1.5% chance. Only fire and acid trigger degradation:
+- **Weapons** (`EQUIP_IDX_MAIN_HAND`): acid reduces `m_fBonusToHit` or `m_fBonusToDamage` randomly — "Your Long Sword is pitted by acid!"
+- **Armor/clothing**: fire or acid reduces `m_fACBonus` — "Your Leather Cap is damaged by acid!" — floored at `-(m_id->m_fBaseAC)` so total AC contribution never goes negative
+
+**Design** — Item weakness expressed as `EFFECT_FLAG_*` bitmask in `CItem::IsWeakTo(uint32 dwElement)`. The weakness table `kItemVuln[ITEM_IDX_MAX]` lives in `src/Item.cpp` next to `EquipTypes[]`. Both damage functions call `pItem->IsWeakTo(element)` — the Player owns the inventory/equipment loops, the Item owns whether it cares about an element. No new constants needed; the existing `EFFECT_FLAG_FIRE/COLD/ACID/ELECTRICITY` vocabulary covers everything.
+
+BDD coverage added in `test/features/elemental_item_destruction.feature` with 6 scenarios (destruction per element, non-vulnerable item safety, physical damage safety).
+
+**Impact**: Adds inventory risk/reward, equipment attrition, creates item economy depth, forces strategic loot choices  
+**Dependencies**: #77 (Item Effects) — elemental damage pipeline  
+**Files**: `src/Item.cpp`, `src/Item.h`, `src/Player.cpp`, `src/Player.h`, `test/features/elemental_item_destruction.feature`, `test/features/step_definitions/ElementalDestructionSteps.cpp`
 
 ---
 

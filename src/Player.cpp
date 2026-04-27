@@ -995,6 +995,10 @@ int CPlayer::TakeDamage( float fDamage, const char *szMon, uint32 dwElement )
         fDamage *= fMult;
     }
 
+    // Elemental attacks may destroy vulnerable inventory items or degrade equipment
+    DoDamageInventory( dwElement );
+    DoDamageEquipment( dwElement );
+
     if( (int)fDamage < (int)m_fCurHitPoints )
     {
         m_fCurHitPoints -= fDamage;
@@ -1430,6 +1434,110 @@ JResult CPlayer::DoElementalHit( CEffect *pEffect )
         g_pGame->GetMsgs()->Printf( "The %s is hit.\n", pMon->GetName() );
     }
 
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoDamageInventory( uint32 dwElement )
+{
+    uint32 elementMask =
+        EFFECT_FLAG_FIRE | EFFECT_FLAG_COLD | EFFECT_FLAG_ELECTRICITY | EFFECT_FLAG_ACID;
+    uint32 element = dwElement & elementMask;
+    if( element == 0 )
+        return JBOGUSKEY;
+
+    float fResistMult = Resist( dwElement );
+    // Immunity protects items
+    if( fResistMult == 0.0f )
+        return JBOGUSKEY;
+
+    // Base 3% chance per inventory slot; halved when player resists
+    float fChance = ( fResistMult < 1.0f ) ? 0.015f : 0.03f;
+
+    const char *szVerb = "are destroyed";
+    if( element == EFFECT_FLAG_FIRE )
+        szVerb = "catch fire";
+    else if( element == EFFECT_FLAG_COLD )
+        szVerb = "shatter in the cold";
+    else if( element == EFFECT_FLAG_ACID )
+        szVerb = "are dissolved by acid";
+    else if( element == EFFECT_FLAG_ELECTRICITY )
+        szVerb = "are blasted by lightning";
+
+    CLink<CItem> *pLink = m_llInventory->GetHead();
+    while( pLink != NULL )
+    {
+        CLink<CItem> *pNext = pLink->next;
+        CItem *pItem = pLink->m_lpData;
+
+        if( pItem->IsWeakTo( element ) && Util::GetRandom( 0.0f, 1.0f ) < fChance )
+        {
+            g_pGame->GetMsgs()->Printf( "Your %s %s!\n", pItem->GetPlural(), szVerb );
+            if( pItem->m_dwCount > 1 )
+                pItem->m_dwCount--;
+            else
+                m_llInventory->Remove( pLink, false );
+        }
+
+        pLink = pNext;
+    }
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoDamageEquipment( uint32 dwElement )
+{
+    uint32 elementMask = EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID;
+    uint32 element = dwElement & elementMask;
+    if( element == 0 )
+        return JBOGUSKEY;
+
+    float fResistMult = Resist( dwElement );
+    if( fResistMult == 0.0f )
+        return JBOGUSKEY;
+
+    float fChance = ( fResistMult < 1.0f ) ? 0.015f : 0.03f;
+
+    const char *szElement = ( element == EFFECT_FLAG_FIRE ) ? "fire" : "acid";
+
+    CLink<CItem> *pLink = m_llEquipment->GetHead();
+    while( pLink != NULL )
+    {
+        CItem *pItem = pLink->m_lpData;
+
+        if( pItem->IsWeakTo( element ) && Util::GetRandom( 0.0f, 1.0f ) < fChance )
+        {
+            // Weapons: randomly reduce to-hit or to-damage bonus
+            bool bIsWeapon = ( pItem->EquipType() == EQUIP_IDX_MAIN_HAND );
+            if( bIsWeapon )
+            {
+                bool bReduceToHit = ( Util::GetRandom( 0, 1 ) == 0 );
+                if( bReduceToHit )
+                {
+                    pItem->m_fBonusToHit -= 1.0f;
+                    g_pGame->GetMsgs()->Printf( "Your %s is pitted by %s! (to-hit reduced)\n",
+                                                pItem->GetName(), szElement );
+                }
+                else
+                {
+                    pItem->m_fBonusToDamage -= 1.0f;
+                    g_pGame->GetMsgs()->Printf( "Your %s is pitted by %s! (to-damage reduced)\n",
+                                                pItem->GetName(), szElement );
+                }
+            }
+            else
+            {
+                // Armor/clothing: reduce AC bonus, floor at -(baseAC)
+                float fFloor = -pItem->m_id->m_fBaseAC;
+                if( pItem->m_fACBonus > fFloor )
+                {
+                    pItem->m_fACBonus -= 1.0f;
+                    g_pGame->GetMsgs()->Printf( "Your %s is damaged by %s!\n", pItem->GetName(),
+                                                szElement );
+                }
+            }
+        }
+
+        pLink = pLink->next;
+    }
     return JSUCCESS;
 }
 

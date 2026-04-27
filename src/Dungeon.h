@@ -167,6 +167,7 @@ public:
     void PopulateLevel( const int depth ); // Place scenery, items, and monsters
     void SetDrawFlag( bool bDraw ) { m_bDraw = bDraw; }
     void UpdateVisibility();
+    void LightPosition( const JVector &vPos );
 
 protected:
     JRect m_Rect;

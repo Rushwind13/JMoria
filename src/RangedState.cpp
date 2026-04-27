@@ -507,6 +507,22 @@ bool CRangedState::DoTrajectory()
               "RANGED state updating, projectile moves one step in the direction of the "
               "target.\n" );
         g_pGame->GetDungeon()->SetProjectilePosition( vTest );
+        {
+            // Light each tile the beam passes through if this is a light wand
+            bool bHasLight = false;
+            CLink<CEffect> *plEff = m_pSelected->m_lpData->m_id->m_llEffects->GetHead();
+            while( plEff != NULL )
+            {
+                if( plEff->m_lpData->m_dwFlags & EFFECT_FLAG_LIGHT )
+                {
+                    bHasLight = true;
+                    break;
+                }
+                plEff = plEff->next;
+            }
+            if( bHasLight )
+                g_pGame->GetDungeon()->LightPosition( vTest );
+        }
         break;
     case DUNG_COLL_MONSTER:
         g_pGame->GetPlayer()->SetRangedHitPosition( vTest );

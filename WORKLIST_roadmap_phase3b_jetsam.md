@@ -12,12 +12,13 @@
 ### Critical Bug Fixes (2 Issues)
 
 #### #165 - Telepathy Lasts Forever
-**Status**: Not started  
+**Status**: ✅ Complete (April 26, 2026)  
 **Type**: Bug  
 **Description**: Telepathy potion effect does not expire; lasts indefinitely instead of timing out like other temporary effects.
 - Current: Potion of Telepathy applies EFFECT_FLAG_ESP permanently
 - Expected: Temporary duration (100-200 turns typical for potions)
-- **Root Cause**: Likely missing EFFECT_MOD_TIMED on the effect, or duration tracking not implemented for ESP
+- **Root Cause**: Missing `EFFECT_MOD_TIMED` on all 15 Timed effects in `Effects.txt`; also `FileParse` used `=` instead of `|=` for Modifier so elemental timed effects (which need both `EFFECT_MOD_IMMUNE` and `EFFECT_MOD_TIMED`) could not accumulate both flags.
+**Resolution**: Fixed `FileParse.cpp` to use `|=`; added `Modifier <EFFECT_MOD_TIMED>` to all 15 timed effects in `Effects.txt`.
 
 **Impact**: Gameplay imbalance (permanent detection is overpowered), inconsistent potion behavior  
 **Dependencies**: None blocking  
@@ -27,7 +28,7 @@
 ---
 
 #### #166 - Wand of Light Does Not Light Tiles
-**Status**: Not started  
+**Status**: ✅ Complete (April 26, 2026)  
 **Type**: Bug  
 **Description**: Wand of Light damages light-weak creatures but fails to actually light tiles/rooms.
 - **Expected**: Wand projectile creates light as it passes (line of light), and area effect lights current room
@@ -38,13 +39,14 @@
 **Dependencies**: #72 (Fog of War / Lighting system) already complete  
 **Effort**: Low-Medium (integrate existing lighting logic into wand hit handler)  
 **Files**: `src/Player.cpp` (Wand zap handler), `src/Dungeon.cpp` (LightArea call)
+**Resolution**: Added `CDungeon::LightPosition()` — lights entire room if beam is in a room, or 3×3 tile neighbourhood if in a hallway. `RangedState::DoTrajectory()` calls it for items with `EFFECT_FLAG_LIGHT`. `UpdateVisibility()` extended to treat individually lit tiles like lit-room tiles for beyond-range rendering. Removed `Light Area` effect from Wand of Light (beam-only, intentionally weaker than Staff/Scroll). Also fixed `LightRoom()` to set `DUNG_FLAG_LIT` on tiles (was setting only `DUNG_FLAG_SEEN`). BDD coverage added in `test/features/ranged.feature`.
 
 ---
 
 ### Code Cleanup (2 Issues)
 
 #### #176 - Move srand/time Seed from main.cpp into Game::Init()
-**Status**: Not started  
+**Status**: ✅ Complete (April 26, 2026)  
 **Type**: Enhancement (Code cleanup)  
 **Description**: Remove `srand(time(NULL))` from `main.cpp` and move to `Game::Init()`.
 - **Current**: main.cpp includes `<ctime>` and calls `srand(time(NULL))`
@@ -55,11 +57,12 @@
 **Dependencies**: None blocking  
 **Effort**: Low (3-line move)  
 **Files**: `src/main.cpp`, `src/Game.cpp`
+**Resolution**: Moved `Util::SeedRandomFromClock()` call to top of `CGame::Init()`; removed `#include <cstdlib>` from `main.cpp`.
 
 ---
 
 #### #175 - Replace strcmp with jstrcmp in main.cpp CLI Parsing
-**Status**: Not started  
+**Status**: ✅ Already Complete (pre-existing)  
 **Type**: Enhancement (Code cleanup)  
 **Description**: `main.cpp` uses `strcmp()` for `--renderer=` argument parsing; replace with existing `jstrcmp()`.
 - **Current**: `#include <cstring>` for strcmp
@@ -70,6 +73,7 @@
 **Dependencies**: None blocking  
 **Effort**: Low (1-line replace)  
 **Files**: `src/main.cpp`
+**Resolution**: Already implemented before this phase began — `jstrcmp` was in use throughout `main.cpp`. Issue confirmed closed.
 
 ---
 
@@ -112,7 +116,7 @@
 ### Dungeon Generation (1 Issue)
 
 #### #226 - Monster Spawn Control: Filter-First Selection, Themed Levels, Room-Specific Spawns
-**Status**: Not started  
+**Status**: Phase 1 ✅ Already Complete (pre-existing); Phases 2-3 Not started  
 **Type**: Enhancement (Dungeon Generation)  
 **Description**: Improve monster spawn selection from current retry-loop model to filter-first approach, enabling themed levels and room-specific spawns.
 - **Current Problem**: `ChooseMonsterForDepth()` picks random index, checks level, retries up to 10 times. Fragile to list ordering.
@@ -125,6 +129,7 @@
 **Effort**: Medium-High (phase 1 low, phase 2-3 require generation system extension)  
 **Blocking**: Enables monster encounter balance testing  
 **Files**: `src/Dungeon.cpp` (ChooseMonsterForDepth), `src/DungeonMap.cpp` (spawn metadata)
+**Resolution (Phase 1)**: `ChooseMonsterForDepth()` already used Gaussian-weighted single-pass weighted random selection — no retry loop. Confirmed and commented on issue #226.
 
 ---
 
@@ -132,9 +137,9 @@
 
 **Suggested Order** (by impact and dependency):
 
-1. **#176, #175** (code cleanup, 30 min) — Quick wins, unblock main.cpp
-2. **#165, #166** (bug fixes, 1-2 hours) — High-value low-effort fixes
-3. **#226 Phase 1** (spawn filter, 1-2 hours) — Foundation for dungeon quality
+1. **#176, #175** (code cleanup, 30 min) — ✅ Done
+2. **#165, #166** (bug fixes, 1-2 hours) — ✅ Done
+3. **#226 Phase 1** (spawn filter, 1-2 hours) — ✅ Done (pre-existing)
 4. **#271** (item destruction, 2-3 days) — Requires coordination with combat refactor
 5. **#236** (monster recall, 2-3 days) — Ambitious but high flavor/engagement value
 6. **#226 Phase 2-3** (themed levels, 1-2 days after Phase 1) — Polish dungeon generation

@@ -82,6 +82,8 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     JResult result = JSUCCESS;
     // Initialize all the game stuff, baby.
 
+    Util::SeedRandomFromClock();
+
     g_Constants.Init();
 
     m_eRenderMode = mode;

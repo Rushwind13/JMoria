@@ -799,7 +799,7 @@ CEffectDef *CDataFile::ReadEffect( CEffectDef &edIn )
             else if( strncasecmp( szLine, "modifier", 8 ) == 0 )
             {
                 szValue = GetValue( szLine, szValue );
-                edIn.m_dwModifier = g_Constants.LookupString( szValue );
+                edIn.m_dwModifier |= g_Constants.LookupString( szValue );
             }
             else if( strncasecmp( szLine, "amount", 6 ) == 0 )
             {

@@ -131,11 +131,11 @@ int CLookState::OnBaseHandleKey( JKeysym *keysym )
             g_pGame->GetMsgs()->Printf( "You see here a %s.\nTarget selected.\n",
                                         pTile->m_pCurMonster->GetName() );
             g_pGame->GetPlayer()->SetTarget( pTile->m_pCurMonster );
-            if( g_pGame->GetMonsterRecall() && pTile->m_pCurMonster->m_md )
+            if( g_pGame->RecallMonster() && pTile->m_pCurMonster->m_md )
             {
                 g_pGame->GetMsgs()->Clear();
-                g_pGame->GetMonsterRecall()->PrintRecall( pTile->m_pCurMonster->m_md,
-                                                          g_pGame->GetMsgs() );
+                g_pGame->RecallMonster()->PrintRecall( pTile->m_pCurMonster->m_md,
+                                                       g_pGame->GetMsgs() );
             }
         }
         // item

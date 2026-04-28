@@ -41,7 +41,6 @@ private:
     bool IsSearchCommand( JKeysym *keysym );
     bool IsStringInputCommand( JKeysym *keysym );
     bool IsToggleCommand( JKeysym *keysym );
-    bool IsMonsterRecallCommand( JKeysym *keysym );
     void ResetToState( int newstate ) {}
 
     int OnHandleStairs( JKeysym *keysym );

@@ -779,6 +779,31 @@ public:
         return "(none)";
     }
 
+    // Return a player-facing element name for a single EFFECT_FLAG bit
+    // (e.g. EFFECT_FLAG_FIRE -> "fire"). The string-table lookup returns
+    // the raw macro name ("EFFECT_FLAG_FIRE"), which is fine for log
+    // output but leaks into player-visible text — see issue #294, where
+    // the "strikes the X with %s" message printed "EFFECT_FLAG_FIRE"
+    // instead of "fire".
+    const char *Element( uint32 dwFlag )
+    {
+        switch( dwFlag )
+        {
+        case EFFECT_FLAG_FIRE:        return "fire";
+        case EFFECT_FLAG_COLD:        return "cold";
+        case EFFECT_FLAG_ELECTRICITY: return "electricity";
+        case EFFECT_FLAG_ACID:        return "acid";
+        case EFFECT_FLAG_POISON:      return "poison";
+        case EFFECT_FLAG_LIGHT:       return "light";
+        case EFFECT_FLAG_PARALYZE:    return "paralysis";
+        case EFFECT_FLAG_AFRAID:      return "fear";
+        case EFFECT_FLAG_BLIND:       return "blindness";
+        case EFFECT_FLAG_SLEEP:       return "sleep";
+        case EFFECT_FLAG_CONFUSE:     return "confusion";
+        default:                      return "an unknown force";
+        }
+    }
+
     const char *PotionColor( const uint32 dwIndex )
     {
         if( dwIndex >= NUM_POTION_TYPES )

@@ -1478,11 +1478,14 @@ JResult CPlayer::DoElementalHit( CEffect *pEffect )
     // Save monster name before it's potentially deleted
     const char *szMonName = pMon->GetName();
 
-    // Print effect description message
+    // Print effect description message. szElement above is the raw macro
+    // name ("EFFECT_FLAG_FIRE") which is correct for the JLog line but
+    // would leak into player-visible text — see #294. Use Element() to
+    // get the player-facing element noun ("fire") for the message.
     if( pEffect->m_ed && pEffect->m_ed->m_szName )
     {
         g_pGame->GetMsgs()->Printf( "The %s strikes the %s with %s.\n", pEffect->m_ed->m_szName,
-                                    szMonName, szElement );
+                                    szMonName, g_Constants.Element( pEffect->m_dwFlags ) );
     }
 
     const char *szAmount = pEffect->m_szAmount;

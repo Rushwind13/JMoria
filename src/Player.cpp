@@ -1482,7 +1482,7 @@ JResult CPlayer::DoElementalHit( CEffect *pEffect )
     if( pEffect->m_ed && pEffect->m_ed->m_szName )
     {
         g_pGame->GetMsgs()->Printf( "The %s strikes the %s with %s.\n", pEffect->m_ed->m_szName,
-                                    szMonName, szElement );
+                                    szMonName, Element(szElement) );
     }
 
     const char *szAmount = pEffect->m_szAmount;

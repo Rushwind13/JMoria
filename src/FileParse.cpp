@@ -829,6 +829,30 @@ CEffectDef *CDataFile::ReadEffect( CEffectDef &edIn )
             {
                 edIn.m_fRadius = GetValue( szLine, edIn.m_fRadius );
             }
+            else if( strncasecmp( szLine, "beam", 4 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                if( szValue && szValue[0] != '\0' )
+                {
+                    edIn.m_cBeamChar = szValue[0];
+                }
+            }
+            else if( strncasecmp( szLine, "color", 5 ) == 0 )
+            {
+                char *color = chomp( szLine, szValue );
+                if( strchr( color, '<' ) != NULL )
+                {
+                    JLog( LOG_LEVEL_DEBUG, true, "Found multi-hued effect: %s\n", color );
+                    edIn.m_llColors = ParseColors( color );
+                }
+                else
+                {
+                    JColor col;
+                    col.SetColor( color );
+                    edIn.m_llColors->Add( new JColor( col ) );
+                }
+                delete[] color;
+            }
             else if( *szLine == '}' )
             {
                 bEndEffect = true;

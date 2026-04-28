@@ -219,7 +219,15 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
 #ifdef TURN_BASED
     if( retval != -1 )
     {
-        g_pGame->SetReadyForUpdate( true );
+        // Don't consume a turn for state transitions to selection modes.
+        // These states (RANGED, USE, MODIFY, etc.) manage their own ready-for-update
+        // flag and only consume a turn when the selection is complete.
+        int eNewState = g_pGame->GetGameStateIndex();
+        if( eNewState != STATE_RANGED && eNewState != STATE_USE && eNewState != STATE_MODIFY &&
+            eNewState != STATE_LOOK && eNewState != STATE_TARGET && eNewState != STATE_STRINGINPUT )
+        {
+            g_pGame->SetReadyForUpdate( true );
+        }
     }
 #endif // TURN_BASED
     return retval;

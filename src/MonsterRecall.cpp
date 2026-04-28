@@ -20,6 +20,11 @@ void CMonsterRecall::Init( const char *szBasedir )
 {
     (void)szBasedir;
 
+    // Reset session-local state for fresh init
+    memset( m_bSeenThisSession, 0, sizeof( m_bSeenThisSession ) );
+    memset( m_dwSeenInstances, 0, sizeof( m_dwSeenInstances ) );
+    m_nSeenInstances = 0;
+
     const char *szHome = getenv( "HOME" );
     if( !szHome )
         szHome = ".";
@@ -34,6 +39,14 @@ void CMonsterRecall::Init( const char *szBasedir )
 #endif
 
     snprintf( m_szFilePath, sizeof( m_szFilePath ), "%s/monster_recall.txt", szDir );
+
+    // If basedir is empty, skip file loading (used for tests)
+    if( !szBasedir || szBasedir[0] == '\0' )
+    {
+        JLog( LOG_LEVEL_DEBUG, true,
+              "MonsterRecall: Init with empty basedir, skipping file load\n" );
+        return;
+    }
 
     CDataFile df;
     if( !df.Open( m_szFilePath ) )

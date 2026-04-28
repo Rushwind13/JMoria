@@ -43,6 +43,9 @@ protected:
     JVector m_vLookPos;
     JVector m_vProjectilePos;
     JLinkList<JIVector> *m_llLOSLine;
+    CEffectDef *m_pProjectileEffect;               // for multicolor beam rendering
+    JLinkList<JIVector> *m_llProjectileTrajectory; // full path for beam animation
+    int m_dwProjectileColorIndex;                  // current color in effect's color list
 
 private:
     bool m_bDraw;
@@ -67,6 +70,9 @@ public:
           m_llEffectDefs( NULL ),
           m_llMonsterDefs( NULL ),
           m_llLOSLine( NULL ),
+          m_pProjectileEffect( NULL ),
+          m_llProjectileTrajectory( NULL ),
+          m_dwProjectileColorIndex( 0 ),
           m_dmCurLevel( NULL ) {};
     ~CDungeon() { Term(); }
     char *DumpMap();
@@ -95,6 +101,22 @@ public:
         m_vProjectilePos.Init( VEC_EXPAND( vNewPos ) );
     }
     JVector GetProjectilePosition() { return m_vProjectilePos; }
+
+    void SetProjectileEffect( CEffectDef *pEffect, JLinkList<JIVector> *pTrajectory )
+    {
+        m_pProjectileEffect = pEffect;
+        m_llProjectileTrajectory = pTrajectory;
+        m_dwProjectileColorIndex = 0;
+    }
+    void AdvanceProjectileColor()
+    {
+        // Increment trajectory position for beam animation.
+        // Rendering code will cycle colors based on (position % num_colors)
+        m_dwProjectileColorIndex++;
+    }
+    CEffectDef *GetProjectileEffect() { return m_pProjectileEffect; }
+    JLinkList<JIVector> *GetProjectileTrajectory() { return m_llProjectileTrajectory; }
+    int GetProjectileColorIndex() { return m_dwProjectileColorIndex; }
 
     void SetLOSLine( JLinkList<JIVector> *pLine )
     {

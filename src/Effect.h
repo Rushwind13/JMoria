@@ -4,6 +4,8 @@
 #include "JMDefs.h"
 // clang-format on
 #include "Constants.h"
+#include "JColor.h"
+#include "JLinkList.h"
 #include "Util.h"
 
 // Named effect template — shared catalog entry parsed from Effects.txt.
@@ -20,8 +22,11 @@ public:
           m_szAmount( NULL ),
           m_fDuration( 0 ),
           m_fRange( 0.0f ),
-          m_fRadius( 0.0f )
+          m_fRadius( 0.0f ),
+          m_cBeamChar( '*' ),
+          m_llColors( NULL )
     {
+        m_llColors = new JLinkList<JColor>;
     }
     ~CEffectDef()
     {
@@ -35,16 +40,24 @@ public:
             delete[] m_szAmount;
             m_szAmount = NULL;
         }
+        if( m_llColors )
+        {
+            m_llColors->Terminate();
+            delete m_llColors;
+            m_llColors = NULL;
+        }
     }
-    char *m_szName;    // "Firebolt", "Light Ray", etc.
-    int m_dwEffect;    // EFFECT_TYPE_HIT, EFFECT_TYPE_HEAL, etc.
-    uint32 m_dwFlags;  // EFFECT_FLAG_FIRE, EFFECT_FLAG_LIGHT, etc.
-    uint32 m_dwFlags2; // EFFECT_FLAG_DOOR, EFFECT_FLAG_NO_COLLIDE, etc.
-    int m_dwModifier;  // EFFECT_MOD_LINE, EFFECT_MOD_BALL, etc.
-    char *m_szAmount;  // NdM dice string for damage/healing per use
-    float m_fDuration; // for timed effects
-    float m_fRange;    // max range in tiles
-    float m_fRadius;   // AoE radius (0 = single target)
+    char *m_szName;                // "Firebolt", "Light Ray", etc.
+    int m_dwEffect;                // EFFECT_TYPE_HIT, EFFECT_TYPE_HEAL, etc.
+    uint32 m_dwFlags;              // EFFECT_FLAG_FIRE, EFFECT_FLAG_LIGHT, etc.
+    uint32 m_dwFlags2;             // EFFECT_FLAG_DOOR, EFFECT_FLAG_NO_COLLIDE, etc.
+    int m_dwModifier;              // EFFECT_MOD_LINE, EFFECT_MOD_BALL, etc.
+    char *m_szAmount;              // NdM dice string for damage/healing per use
+    float m_fDuration;             // for timed effects
+    float m_fRange;                // max range in tiles
+    float m_fRadius;               // AoE radius (0 = single target)
+    char m_cBeamChar;              // character for beam rendering (default '*')
+    JLinkList<JColor> *m_llColors; // multicolor beam cycling
 };
 
 class CEffect

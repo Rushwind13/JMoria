@@ -60,7 +60,10 @@ CGame::CGame()
       m_bShowStats( true ),
       m_bShowInv( false ),
       m_bShowEquip( false ),
-      m_bShowMonsters( false )
+      m_bShowMonsters( false ),
+      m_bShowMonRecall( false ),
+      m_bShowItemRecall( false ),
+      m_bShowMap( false )
 {
     m_pClockStepState = new CClockStepState;
     m_pCmdState = new CCmdState;
@@ -133,19 +136,36 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     m_pEquipDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
                           FLAG_TEXT_TRIM_TAIL );
 
-    m_pMonstersDT = new CDisplayText( szBasedir, JRect( 0, 50, 150, 480 ), 180 );
-    m_pMonstersDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
-                             FLAG_TEXT_TRIM_TAIL );
-
     m_pUseDT = new CDisplayText( szBasedir, JRect( 200, 40, 440, 480 ), 200 );
     m_pUseDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
 
     m_pEndGameDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, 480 ), 255 );
     m_pEndGameDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
 
+    // Bottom panels: 4 panels across bottom of screen (70px height each)
+    // Visible Monsters (very narrow, leftmost)
+    m_pMonstersDT = new CDisplayText( szBasedir, JRect( 0, 410, 80, 480 ), 180 );
+    m_pMonstersDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
+                             FLAG_TEXT_TRIM_TAIL );
+
+    // Monster Recall (knowledge, wider)
+    m_pMonRecallDT = new CDisplayText( szBasedir, JRect( 80, 410, 340, 480 ), 180 );
+    m_pMonRecallDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
+                              FLAG_TEXT_TRIM_TAIL );
+
+    // Item Recall (similar width to Monster Recall)
+    m_pItemRecallDT = new CDisplayText( szBasedir, JRect( 340, 410, 490, 480 ), 180 );
+    m_pItemRecallDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
+                               FLAG_TEXT_TRIM_TAIL );
+
+    // Map Overview (right side)
+    m_pMapDT = new CDisplayText( szBasedir, JRect( 490, 410, 640, 480 ), 180 );
+    m_pMapDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX | FLAG_TEXT_TRIM_TAIL );
+
     // Let the renderer configure display region rects for its coordinate system
     m_pRender->ConfigureDisplayRegions( m_pMsgsDT, m_pStatsDT, m_pInvDT, m_pEquipDT, m_pUseDT,
-                                        m_pEndGameDT, m_pMonstersDT );
+                                        m_pEndGameDT, m_pMonstersDT, m_pMonRecallDT,
+                                        m_pItemRecallDT, m_pMapDT );
 
     m_bShowInv = m_pRender->ShouldAutoShowInventory();
     m_bShowEquip = m_pRender->ShouldAutoShowEquipment();
@@ -336,6 +356,24 @@ void CGame::Term()
     {
         delete m_pEndGameDT;
         m_pEndGameDT = NULL;
+    }
+
+    if( m_pMonRecallDT )
+    {
+        delete m_pMonRecallDT;
+        m_pMonRecallDT = NULL;
+    }
+
+    if( m_pItemRecallDT )
+    {
+        delete m_pItemRecallDT;
+        m_pItemRecallDT = NULL;
+    }
+
+    if( m_pMapDT )
+    {
+        delete m_pMapDT;
+        m_pMapDT = NULL;
     }
     JLog( LOG_LEVEL_DEBUG, true, "done.\n" );
 }
@@ -640,7 +678,8 @@ void CGame::Draw()
     if( bResized )
     {
         GetRender()->ConfigureDisplayRegions( m_pMsgsDT, m_pStatsDT, m_pInvDT, m_pEquipDT, m_pUseDT,
-                                              m_pEndGameDT, m_pMonstersDT );
+                                              m_pEndGameDT, m_pMonstersDT, m_pMonRecallDT,
+                                              m_pItemRecallDT, m_pMapDT );
         if( bASCII )
             m_bShowInv = GetRender()->ShouldAutoShowInventory();
     }
@@ -668,6 +707,14 @@ void CGame::Draw()
             GetEquip()->Draw();
         if( m_bShowMonsters )
             GetMonsters()->Draw();
+
+        // Bottom panels (toggleable by V/(/))
+        if( m_bShowMonRecall )
+            GetMonsterRecall()->Draw();
+        if( m_bShowItemRecall )
+            GetItemRecall()->Draw();
+        if( m_bShowMap )
+            GetMap()->Draw();
     }
 
     if( m_eCurState == STATE_USE )

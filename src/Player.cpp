@@ -77,6 +77,9 @@ bool CPlayer::Update( float fCurTime )
     DisplayInventory( PLACEMENT_INV );
     DisplayEquipment( PLACEMENT_EQUIP );
     DisplayVisibleMonsters();
+    DisplayMonsterRecall();
+    DisplayItemRecall();
+    DisplayMap();
     return true;
 }
 
@@ -525,6 +528,50 @@ void CPlayer::DisplayVisibleMonsters()
     }
 }
 
+void CPlayer::DisplayMonsterRecall()
+{
+    if( !g_pGame->IsShowingMonsterRecall() )
+        return;
+
+    CDisplayText *pDT = g_pGame->GetMonsterRecall();
+    pDT->Clear();
+
+    // Display recall info for the currently targeted monster
+    CMonster *pMon = GetTarget();
+    if( pMon && pMon->m_md )
+    {
+        g_pGame->RecallMonster()->PrintRecall( pMon->m_md, pDT );
+    }
+    else
+    {
+        pDT->Printf( "No current target.\n" );
+    }
+}
+
+void CPlayer::DisplayItemRecall()
+{
+    if( !g_pGame->IsShowingItemRecall() )
+        return;
+
+    CDisplayText *pDT = g_pGame->GetItemRecall();
+    pDT->Clear();
+
+    // TODO: Display item recall information
+    pDT->Printf( "[Item Recall]\n" );
+    pDT->Printf( "Not yet implemented\n" );
+}
+
+void CPlayer::DisplayMap()
+{
+    if( !g_pGame->IsShowingMap() )
+        return;
+
+    CDisplayText *pDT = g_pGame->GetMap();
+    pDT->Clear();
+    pDT->Printf( "[Map]\n" );
+    pDT->Printf( "Not yet implemented\n" );
+}
+
 void CPlayer::PickUp( JVector &vPickupPos )
 {
     CItem *pItem = g_pGame->GetDungeon()->PickUp( vPickupPos );
@@ -898,13 +945,13 @@ float CPlayer::Damage( float fDamageMult )
 
 void CPlayer::OnKillMonster( CMonster *pMon, float fKillingBlow )
 {
-    if( g_pGame->GetMonsterRecall() )
+    if( g_pGame->RecallMonster() )
     {
         // The player doesn't know exactly how much HP the monster had —
         // only that fKillingBlow was enough to finish it off.  The estimate
         // is: actual_max_HP minus at most (fKillingBlow - 1) remaining HP.
         float fEstimatedHP = pMon->m_fHP - ( fKillingBlow - 1.0f );
-        g_pGame->GetMonsterRecall()->RecordKill( pMon->m_md->m_szName, fEstimatedHP );
+        g_pGame->RecallMonster()->RecordKill( pMon->m_md->m_szName, fEstimatedHP );
     }
     m_fExperience += pMon->m_md->m_fExpValue / m_fLevel;
     GainLevel();
@@ -2191,11 +2238,11 @@ void CPlayer::UpdateVisibleMonsters()
                 abs( (int)vMonPos.x - (int)m_vPos.x ) + abs( (int)vMonPos.y - (int)m_vPos.y );
             m_llVisibleMonsters->Add( pMon, dist, pMon->GetInstanceId() );
 
-            if( g_pGame->GetMonsterRecall() )
+            if( g_pGame->RecallMonster() )
             {
                 int depthFeet = pDungeon->depth * 50;
-                g_pGame->GetMonsterRecall()->RecordSighting( pMon->m_md->m_szName, depthFeet,
-                                                             pMon->GetInstanceId() );
+                g_pGame->RecallMonster()->RecordSighting( pMon->m_md->m_szName, depthFeet,
+                                                          pMon->GetInstanceId() );
             }
         }
         pLink = pLink->next;

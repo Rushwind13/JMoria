@@ -341,9 +341,9 @@ void CMonster::Breed()
             // Record breeding only if the spawn point is visible to the player
             JVector vSpawnF( (float)vSpawn.x, (float)vSpawn.y );
             uint32 dwSenseFlags = m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND );
-            if( g_pGame->GetMonsterRecall() && m_md &&
+            if( g_pGame->RecallMonster() && m_md &&
                 g_pGame->GetDungeon()->PlayerCanSee( vSpawnF, dwSenseFlags ) )
-                g_pGame->GetMonsterRecall()->RecordObservation( m_md->m_szName, MON_FLAG_BREED );
+                g_pGame->RecallMonster()->RecordObservation( m_md->m_szName, MON_FLAG_BREED );
         }
         JLog( LOG_LEVEL_NOISE, false, "\n" );
         m_dwFecundity--;

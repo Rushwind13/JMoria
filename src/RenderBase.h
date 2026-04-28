@@ -113,7 +113,10 @@ public:
     virtual void ConfigureDisplayRegions( class CDisplayText *pMsgs, class CDisplayText *pStats,
                                           class CDisplayText *pInv, class CDisplayText *pEquip,
                                           class CDisplayText *pUse, class CDisplayText *pEndGame,
-                                          class CDisplayText *pMonsters )
+                                          class CDisplayText *pMonsters,
+                                          class CDisplayText *pMonRecall = nullptr,
+                                          class CDisplayText *pItemRecall = nullptr,
+                                          class CDisplayText *pMap = nullptr )
     {
     }
 

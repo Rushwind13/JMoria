@@ -51,8 +51,12 @@ public:
     CDisplayText *GetUse() { return m_pUseDT; }
     CDisplayText *GetEnd() { return m_pEndGameDT; }
     CDisplayText *GetMonsters() { return m_pMonstersDT; }
+    CDisplayText *GetMonsterRecall() { return m_pMonRecallDT; }
+    CDisplayText *GetItemRecall() { return m_pItemRecallDT; }
+    CDisplayText *GetMap() { return m_pMapDT; }
     CAIMgr *GetAIMgr() { return m_pAIMgr; }
-    CMonsterRecall *GetMonsterRecall() { return m_pMonRecall; }
+    CMonsterRecall *RecallMonster() { return m_pMonRecall; }
+    // LLM: TODO: CItemRecall *RecallItem() { return m_pItemRecall; }
     void Term();
     void Quit( int returncode );
     void SetState( int eNewState );
@@ -62,15 +66,22 @@ public:
     int GetITime() { return (int)m_fGameTime; }
     int GetTime() { return GetITime(); }
 
-    // Panel visibility toggles (i=inventory, e=equipment, C=stats, v=monsters)
+    // Panel visibility toggles (i=inventory, e=equipment, C=stats, v=monsters,
+    // V=monster recall, (=item recall, )=map overview)
     void ToggleStats() { m_bShowStats = !m_bShowStats; }
     void ToggleInv() { m_bShowInv = !m_bShowInv; }
     void ToggleEquip() { m_bShowEquip = !m_bShowEquip; }
     void ToggleMonsters() { m_bShowMonsters = !m_bShowMonsters; }
+    void ToggleMonsterRecall() { m_bShowMonRecall = !m_bShowMonRecall; }
+    void ToggleItemRecall() { m_bShowItemRecall = !m_bShowItemRecall; }
+    void ToggleMap() { m_bShowMap = !m_bShowMap; }
     bool IsShowingStats() const { return m_bShowStats; }
     bool IsShowingInv() const { return m_bShowInv; }
     bool IsShowingEquip() const { return m_bShowEquip; }
     bool IsShowingMonsters() const { return m_bShowMonsters; }
+    bool IsShowingMonsterRecall() const { return m_bShowMonRecall; }
+    bool IsShowingItemRecall() const { return m_bShowItemRecall; }
+    bool IsShowingMap() const { return m_bShowMap; }
 
 #ifdef TURN_BASED
     void SetReadyForUpdate( const bool isReady ) { m_bReadyForUpdate = isReady; }
@@ -93,6 +104,9 @@ protected:
     CDisplayText *m_pUseDT;
     CDisplayText *m_pEndGameDT;
     CDisplayText *m_pMonstersDT;
+    CDisplayText *m_pMonRecallDT;
+    CDisplayText *m_pItemRecallDT;
+    CDisplayText *m_pMapDT;
 
     CStateBase *m_pCurState;
     int m_eCurState;
@@ -119,11 +133,14 @@ private:
     IRenderBackend *m_pRender;
     RenderMode m_eRenderMode;
 
-    // Panel visibility (toggled by i/e/C/v keys)
+    // Panel visibility (toggled by i/e/C/v keys and bottom panel hotkeys)
     bool m_bShowStats;
     bool m_bShowInv;
     bool m_bShowEquip;
     bool m_bShowMonsters;
+    bool m_bShowMonRecall;
+    bool m_bShowItemRecall;
+    bool m_bShowMap;
 
     int m_dwNextTime;
     float m_fGameTime;

@@ -74,6 +74,15 @@ ASCIILayout ASCIILayout::CreateForSize( int w, int h )
     int useRight = 3 * w / 4;
     l.use = { useLeft, bodyTop, useRight, bodyBottom };
 
+    // Bottom panels: 3 panels to the right of the existing Visible Monsters panel
+    // They should have the same height as monsters panel (which is monstersTop to monstersBottom)
+    int panelLeft = statsRight;
+    int panelWidth = ( w - statsRight ) / 3;
+    l.monRecall = { panelLeft, monstersTop, panelLeft + panelWidth, monstersBottom };
+    l.itemRecall = { panelLeft + panelWidth, monstersTop, panelLeft + 2 * panelWidth,
+                     monstersBottom };
+    l.map = { panelLeft + 2 * panelWidth, monstersTop, w, monstersBottom };
+
     return l;
 }
 
@@ -126,7 +135,8 @@ bool CRenderASCII::CheckResize()
 void CRenderASCII::ConfigureDisplayRegions( CDisplayText *pMsgs, CDisplayText *pStats,
                                             CDisplayText *pInv, CDisplayText *pEquip,
                                             CDisplayText *pUse, CDisplayText *pEndGame,
-                                            CDisplayText *pMonsters )
+                                            CDisplayText *pMonsters, CDisplayText *pMonRecall,
+                                            CDisplayText *pItemRecall, CDisplayText *pMap )
 {
     auto toPixelRect = []( const ASCIILayoutRegion &r )
     { return JRect( r.left * 6, r.top * 8, r.right * 6, r.bottom * 8 ); };
@@ -139,6 +149,10 @@ void CRenderASCII::ConfigureDisplayRegions( CDisplayText *pMsgs, CDisplayText *p
     pEndGame->SetRect( toPixelRect( m_layout.endgame ) );
     pEndGame->SetContentMargin( 0, 0 );
     pMonsters->SetRect( toPixelRect( m_layout.monsters ) );
+
+    pMonRecall->SetRect( toPixelRect( m_layout.monRecall ) );
+    pItemRecall->SetRect( toPixelRect( m_layout.itemRecall ) );
+    pMap->SetRect( toPixelRect( m_layout.map ) );
 }
 
 bool CRenderASCII::PollEvent( JInputEvent &event )
@@ -215,6 +229,14 @@ bool CRenderASCII::PollEvent( JInputEvent &event )
         case '*': // Shift+8: target command
             event.keysym.sym = JKEY_8;
             event.keysym.mod = JMOD_SHIFT;
+            break;
+        case '(': // Shift+9: item recall
+            event.keysym.sym = (JKeycode)'(';
+            event.keysym.mod = JMOD_NONE;
+            break;
+        case ')': // Shift+0: map overview
+            event.keysym.sym = (JKeycode)')';
+            event.keysym.mod = JMOD_NONE;
             break;
         case KEY_BACKSPACE:
         case 127: // DEL on some terminals

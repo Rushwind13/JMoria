@@ -172,19 +172,6 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
         retval = 0;
     }
 
-    else if( IsMonsterRecallCommand( keysym ) )
-    {
-        CMonster *pMon = g_pGame->GetPlayer()->GetTarget();
-        if( pMon && pMon->m_md )
-        {
-            g_pGame->GetMsgs()->Clear();
-            g_pGame->GetMonsterRecall()->PrintRecall( pMon->m_md, g_pGame->GetMsgs() );
-        }
-        else
-            g_pGame->GetMsgs()->Printf( "No current target for recall.\n" );
-        retval = JHANDLED_NOTURN;
-    }
-
     /*
     // These commands will bring up a ""
     // Inventory, Equipment
@@ -440,11 +427,6 @@ bool CCmdState::IsCreateItemCommand( JKeysym *keysym )
     return false;
 }
 
-bool CCmdState::IsMonsterRecallCommand( JKeysym *keysym )
-{
-    return ( keysym->sym == JKEY_r && ( keysym->mod & JMOD_CTRL ) );
-}
-
 bool CCmdState::IsSummonMonsterCommand( JKeysym *keysym )
 {
     switch( keysym->sym )
@@ -508,12 +490,28 @@ bool CCmdState::IsToggleCommand( JKeysym *keysym )
         g_pGame->ToggleMonsters();
         return true;
     }
+
+    // Check for Shift+lowercase v - monster recall (any non-zero mod besides caps lock)
+    // When Shift+V is pressed, many systems send lowercase 'v' with a SHIFT modifier
+    if( keysym->sym == JKEY_v && keysym->mod == JMOD_SHIFT )
+    {
+        g_pGame->ToggleMonsterRecall();
+        return true;
+    }
+    // Check for '(' (Item Recall) - Shift+9 produces this character
+    if( keysym->sym == '(' )
+    {
+        g_pGame->ToggleItemRecall();
+        return true;
+    }
+    // Check for ')' (Map Overview) - Shift+0 produces this character
+    if( keysym->sym == ')' )
+    {
+        g_pGame->ToggleMap();
+        return true;
+    }
     return false;
 }
-
-// Handlers
-#define DIR_UP 4
-#define DIR_DOWN 5
 
 int CCmdState::OnHandleStairs( JKeysym *keysym )
 {

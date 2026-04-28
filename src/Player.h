@@ -216,6 +216,9 @@ public:
     void DisplayInventory( uint8 dwPlacement, eInvFilter filter = INV_COMPLETE );
     void DisplayEquipment( uint8 dwPlacement, eInvFilter filter = INV_COMPLETE );
     void DisplayVisibleMonsters();
+    void DisplayMonsterRecall();
+    void DisplayItemRecall();
+    void DisplayMap();
     void PickUp( JVector &vPickupPos );
     bool Drop( CItem *pItem );
     bool Drop( CItem *pItem, int quantity ); // Drop a partial stack

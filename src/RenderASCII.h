@@ -34,6 +34,9 @@ struct ASCIILayout
     ASCIILayoutRegion monsters;
     ASCIILayoutRegion use;
     ASCIILayoutRegion endgame;
+    ASCIILayoutRegion monRecall;
+    ASCIILayoutRegion itemRecall;
+    ASCIILayoutRegion map;
 
     // Dynamically compute layout for any terminal size
     static ASCIILayout CreateForSize( int w, int h );
@@ -95,7 +98,8 @@ public:
     // Set DisplayText rects from ASCII layout (char coords → pixel space)
     void ConfigureDisplayRegions( CDisplayText *pMsgs, CDisplayText *pStats, CDisplayText *pInv,
                                   CDisplayText *pEquip, CDisplayText *pUse, CDisplayText *pEndGame,
-                                  CDisplayText *pMonsters ) override;
+                                  CDisplayText *pMonsters, CDisplayText *pMonRecall,
+                                  CDisplayText *pItemRecall, CDisplayText *pMap ) override;
 
     // Translate ncurses input into renderer-agnostic events
     bool PollEvent( JInputEvent &event ) override;

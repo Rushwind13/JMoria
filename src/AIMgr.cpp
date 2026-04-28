@@ -1,7 +1,9 @@
 #include "AIMgr.h"
 #include "DisplayText.h"
 #include "Dungeon.h"
+#include "Game.h"
 #include "JMDefs.h"
+#include "MonsterRecall.h"
 #include "Player.h"
 
 CAIBrain::CAIBrain()
@@ -237,6 +239,12 @@ void CAIBrain::CollideWithPlayer()
         CAttack *pAtk = m_pParent->m_pCurrentAttack;
         uint32 dwElement = ( pAtk && pAtk->m_pEffect ) ? pAtk->m_pEffect->m_dwFlags : 0;
         g_pGame->GetPlayer()->TakeDamage( fDamage, m_pParent->GetName(), dwElement );
+        if( g_pGame->GetMonsterRecall() && m_pParent->m_md )
+        {
+            const char *szEffect = ( pAtk && pAtk->m_pEffect ) ? m_pParent->AttackEffect() : "";
+            g_pGame->GetMonsterRecall()->RecordAttackObservation(
+                m_pParent->m_md->m_szName, pAtk ? pAtk->m_dwType : 0, fDamage, szEffect );
+        }
         m_pParent->AttackDone();
     }
 }

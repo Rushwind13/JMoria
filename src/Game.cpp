@@ -4,6 +4,7 @@
 
 #include "Game.h"
 #include "Dungeon.h"
+#include "MonsterRecall.h"
 #include "Player.h"
 #include "TileSet.h"
 
@@ -52,6 +53,7 @@ CGame::CGame()
       m_pStringInputState( NULL ),
       m_pTargetState( NULL ),
       m_pUseState( NULL ),
+      m_pMonRecall( NULL ),
       m_eCurState( STATE_INVALID ),
       m_fGameTime( 0.0f ),
       m_eRenderMode( RenderMode::None ),
@@ -81,6 +83,8 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
 {
     JResult result = JSUCCESS;
     // Initialize all the game stuff, baby.
+
+    Util::SeedRandomFromClock();
 
     g_Constants.Init();
 
@@ -150,6 +154,9 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     m_pAIMgr = new CAIMgr;
     m_pAIMgr->Init();
 
+    m_pMonRecall = new CMonsterRecall;
+    m_pMonRecall->Init( szBasedir );
+
     // Init the Player
     m_pPlayer = new CPlayer;
     m_pPlayer->Init( szBasedir );
@@ -206,6 +213,13 @@ void CGame::Term()
     {
         delete m_pAIMgr;
         m_pAIMgr = NULL;
+    }
+
+    if( m_pMonRecall )
+    {
+        m_pMonRecall->Save();
+        delete m_pMonRecall;
+        m_pMonRecall = NULL;
     }
 
     JLog( LOG_LEVEL_DEBUG, true, "States..." );

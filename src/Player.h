@@ -263,6 +263,8 @@ public:
     JResult DoHitEffects( CEffect *pEffect );
     JResult DoLightRay( CEffect *pEffect );
     JResult DoElementalHit( CEffect *pEffect );
+    JResult DoDamageInventory( uint32 dwElement );
+    JResult DoDamageEquipment( uint32 dwElement );
     JResult DoCreateEffects( CEffect *pEffect );
     JResult DoLightArea();
     JResult DoDestroyEffects( CEffect *pEffect, int dwFlags );
@@ -309,7 +311,7 @@ public:
     int TakeDamage( float fDamage, const char *szMon, uint32 dwElement = 0 );
     float Resist( uint32 dwElement );
 
-    void OnKillMonster( CMonster *pMon );
+    void OnKillMonster( CMonster *pMon, float fKillingBlow );
     bool DamageMonster( CMonster *pMon, float fDamage );
 
     void SetWizard();

@@ -318,12 +318,89 @@ const int EquipTypes[ITEM_IDX_MAX + 1] = {
     EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND,
     EQUIP_IDX_MAIN_HAND, EQUIP_IDX_BELT,      EQUIP_IDX_INVALID };
 
+// Item weakness table — one entry per ITEM_IDX_* value.
+// Stores EFFECT_FLAG_* elements the item type is weak against.
+// DoDamageInventory uses this to decide destruction; DoDamageEquipment for
+// degradation. Both check: kItemVuln[idx] & element.
+const uint32 kItemVuln[ITEM_IDX_MAX] = {
+    // ITEM_IDX_SWORD        0: metal
+    EFFECT_FLAG_ACID,
+    // ITEM_IDX_SHIELD       1: metal
+    EFFECT_FLAG_ACID,
+    // ITEM_IDX_ARMOR        2: metal or leather
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
+    // ITEM_IDX_HELMET       3: leather or metal
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
+    // ITEM_IDX_CLOAK        4: cloth/leather
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
+    // ITEM_IDX_GLOVES       5: cloth/leather
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
+    // ITEM_IDX_BOOTS        6: cloth/leather
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
+    // ITEM_IDX_AMULET       7: inert
+    0,
+    // ITEM_IDX_RING         8: inert
+    0,
+    // ITEM_IDX_TORCH        9: fuel system handles this
+    0,
+    // ITEM_IDX_BOW         10: wood
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
+    // ITEM_IDX_ARROW       11: wood shaft
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
+    // ITEM_IDX_XBOW        12: wood frame
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
+    // ITEM_IDX_BOLT        13: wood shaft
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
+    // ITEM_IDX_CHEST       14: on ground, not in backpack
+    0,
+    // ITEM_IDX_SCROLL      15: paper
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
+    // ITEM_IDX_POTION      16: glass vial
+    EFFECT_FLAG_COLD | EFFECT_FLAG_ACID | EFFECT_FLAG_ELECTRICITY,
+    // ITEM_IDX_WAND        17: wood/bone
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID | EFFECT_FLAG_ELECTRICITY,
+    // ITEM_IDX_STAFF       18: wood
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID | EFFECT_FLAG_ELECTRICITY,
+    // ITEM_IDX_BOOK        19: paper
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
+    // ITEM_IDX_MONEY       20: coin
+    0,
+    // ITEM_IDX_FOOD        21: organic
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
+    // ITEM_IDX_SPEAR       22: wood haft with metal tip
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
+    // ITEM_IDX_AXE         23: metal
+    EFFECT_FLAG_ACID,
+    // ITEM_IDX_POLEARM     24: wood haft
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
+    // ITEM_IDX_SHOVEL      25: metal
+    EFFECT_FLAG_ACID,
+    // ITEM_IDX_DAGGER      26: metal
+    EFFECT_FLAG_ACID,
+    // ITEM_IDX_MACE        27: metal
+    EFFECT_FLAG_ACID,
+    // ITEM_IDX_2H_SWORD    28: metal
+    EFFECT_FLAG_ACID,
+    // ITEM_IDX_BELT        29: leather
+    EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
+    // ITEM_IDX_FUEL        30: fuel system handles this
+    0,
+};
+
 int CItem::EquipType()
 {
     int item_type = m_id->m_dwIndex;
     if( item_type <= ITEM_IDX_INVALID || item_type >= ITEM_IDX_MAX )
         return EQUIP_IDX_INVALID;
     return EquipTypes[item_type];
+}
+
+bool CItem::IsWeakTo( uint32 dwElement )
+{
+    int idx = m_id->m_dwIndex;
+    if( idx <= ITEM_IDX_INVALID || idx >= ITEM_IDX_MAX )
+        return false;
+    return ( kItemVuln[idx] & dwElement ) != 0;
 }
 
 void CItemDef::FormatProperties( char *szOut, int maxLen, uint32 knownProps, uint32 itemFlags,

@@ -209,6 +209,7 @@ public:
     bool IsCloseable() { return false; }  // closeable pickup?
     bool IsTunnelable() { return false; } // Tunnelable pickup? unlikely.
     int EquipType();
+    bool IsWeakTo( uint32 dwElement );
 
     float GetDuration() { return m_fRemainingDuration; };
     void ChangeDuration( float fValue, bool bReset = false )

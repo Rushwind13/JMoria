@@ -4,6 +4,7 @@
 #include "DungeonTile.h"
 #include "Game.h"
 #include "JMDefs.h"
+#include "MonsterRecall.h"
 
 #include "Dungeon.h"
 #include "Player.h"
@@ -130,6 +131,12 @@ int CLookState::OnBaseHandleKey( JKeysym *keysym )
             g_pGame->GetMsgs()->Printf( "You see here a %s.\nTarget selected.\n",
                                         pTile->m_pCurMonster->GetName() );
             g_pGame->GetPlayer()->SetTarget( pTile->m_pCurMonster );
+            if( g_pGame->GetMonsterRecall() && pTile->m_pCurMonster->m_md )
+            {
+                g_pGame->GetMsgs()->Clear();
+                g_pGame->GetMonsterRecall()->PrintRecall( pTile->m_pCurMonster->m_md,
+                                                          g_pGame->GetMsgs() );
+            }
         }
         // item
         if( pTile->m_pCurItem )

@@ -1422,7 +1422,6 @@ Item <Wand of Light>
 Plural      <Wands of Light>
 Type        <ITEM_IDX_WAND>
 Effect      <Light Ray>
-Effect      <Light Area>
 Charges     <3d8>
 Value       100.0
 Level       3

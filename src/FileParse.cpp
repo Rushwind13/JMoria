@@ -57,6 +57,18 @@ bool CDataFile::Append( const char *szFilename )
     return true;
 }
 
+bool CDataFile::Write( const char *szFilename )
+{
+    m_fp = fopen( szFilename, "w" );
+
+    if( m_fp == NULL )
+    {
+        return false;
+    }
+
+    return true;
+}
+
 bool CDataFile::Close()
 {
     fclose( m_fp );
@@ -799,7 +811,7 @@ CEffectDef *CDataFile::ReadEffect( CEffectDef &edIn )
             else if( strncasecmp( szLine, "modifier", 8 ) == 0 )
             {
                 szValue = GetValue( szLine, szValue );
-                edIn.m_dwModifier = g_Constants.LookupString( szValue );
+                edIn.m_dwModifier |= g_Constants.LookupString( szValue );
             }
             else if( strncasecmp( szLine, "amount", 6 ) == 0 )
             {
@@ -931,6 +943,148 @@ bool CDataFile::WriteScore( CScore *sIn )
              sIn->m_szName, sIn->m_szClass, sIn->m_szRace, sIn->m_dwLevel, sIn->m_dwDepth,
              sIn->m_szKilledBy, sIn->m_dwScore, sIn->m_dwDate );
     fflush( m_fp );
+    return true;
+}
+
+CRecallEntry *CDataFile::ReadMonsterRecall( CRecallEntry &rIn )
+{
+    char szRaw[1024];
+    char *szLine;
+    bool bFound = false;
+    bool bStarted = false;
+    bool bEnded = false;
+
+    while( !bEnded && fgets( szRaw, 1024, m_fp ) != NULL )
+    {
+        szLine = Strip( szRaw );
+        if( szLine == NULL )
+            continue;
+
+        if( !bFound )
+        {
+            if( strncasecmp( szLine, "MonsterRecall", 13 ) == 0 )
+            {
+                bFound = true;
+                memset( &rIn, 0, sizeof( rIn ) ); // fresh entry for each block
+                char *szName = GetValue( szLine, rIn.szName );
+                if( szName )
+                    Util::jstrcpy( rIn.szName, szName );
+            }
+            continue;
+        }
+
+        if( !bStarted )
+        {
+            if( *szLine == '{' )
+                bStarted = true;
+            continue;
+        }
+
+        if( *szLine == '}' )
+        {
+            bEnded = true;
+        }
+        else if( strncasecmp( szLine, "Encounters", 10 ) == 0 )
+        {
+            GetValue( szLine, rIn.dwEncounters );
+        }
+        else if( strncasecmp( szLine, "Kills", 5 ) == 0 )
+        {
+            GetValue( szLine, rIn.dwKills );
+        }
+        else if( strncasecmp( szLine, "DeepestFeet", 11 ) == 0 )
+        {
+            GetValue( szLine, rIn.dwDeepestFeet );
+        }
+        else if( strncasecmp( szLine, "KnownFlags", 10 ) == 0 )
+        {
+            GetValue( szLine, rIn.dwKnownFlags );
+        }
+        else if( strncasecmp( szLine, "DepthKnown", 10 ) == 0 )
+        {
+            int v = 0;
+            GetValue( szLine, v );
+            rIn.bDepthKnown = ( v != 0 );
+        }
+        else if( strncasecmp( szLine, "XPKnown", 7 ) == 0 )
+        {
+            int v = 0;
+            GetValue( szLine, v );
+            rIn.bXPKnown = ( v != 0 );
+        }
+        else if( strncasecmp( szLine, "HPObsMin", 8 ) == 0 )
+        {
+            GetValue( szLine, rIn.dwHPObsMin );
+        }
+        else if( strncasecmp( szLine, "HPObsMax", 8 ) == 0 )
+        {
+            GetValue( szLine, rIn.dwHPObsMax );
+        }
+        else if( strncasecmp( szLine, "Attack", 6 ) == 0 )
+        {
+            // Format: Attack <type|effect|count|dmgMin|dmgMax|dmgTotal>
+            char szBuf[128] = "";
+            char *szInner = GetValue( szLine, szBuf );
+            if( szInner && rIn.nAttacks < RECALL_MAX_ATTACKS )
+            {
+                CRecallAttack &atk = rIn.attacks[rIn.nAttacks++];
+                memset( &atk, 0, sizeof( atk ) );
+                // split on '|': type|effect|count|dmgMin|dmgMax|dmgTotal
+                char *p[6] = { szInner, NULL, NULL, NULL, NULL, NULL };
+                for( int j = 1; j < 6; j++ )
+                {
+                    p[j] = p[j - 1] ? strchr( p[j - 1], '|' ) : NULL;
+                    if( p[j] )
+                        *p[j]++ = '\0';
+                }
+                atk.dwType = atoi( p[0] );
+                if( p[1] )
+                    strncpy( atk.szEffect, p[1], RECALL_EFFECT_NAME_LEN - 1 );
+                if( p[2] )
+                    atk.dwTimesObserved = atoi( p[2] );
+                if( p[3] )
+                    atk.dwDamageMin = atoi( p[3] );
+                if( p[4] )
+                    atk.dwDamageMax = atoi( p[4] );
+                if( p[5] )
+                    atk.dwDamageTotal = atoi( p[5] );
+                delete[] szInner;
+            }
+        }
+        else
+        {
+            JLog( LOG_LEVEL_WARN, true, "MonsterRecall: unparseable line: %s\n", szLine );
+        }
+    }
+
+    if( !bEnded )
+        return NULL;
+
+    return &rIn;
+}
+
+bool CDataFile::WriteMonsterRecall( const CRecallEntry *rIn )
+{
+    fprintf( m_fp,
+             "MonsterRecall <%s>\n{\n"
+             "\tEncounters\t%d\n"
+             "\tKills\t%d\n"
+             "\tDeepestFeet\t%d\n"
+             "\tKnownFlags\t%d\n"
+             "\tDepthKnown\t%d\n"
+             "\tXPKnown\t%d\n"
+             "\tHPObsMin\t%d\n"
+             "\tHPObsMax\t%d\n",
+             rIn->szName, rIn->dwEncounters, rIn->dwKills, rIn->dwDeepestFeet, rIn->dwKnownFlags,
+             (int)rIn->bDepthKnown, (int)rIn->bXPKnown, rIn->dwHPObsMin, rIn->dwHPObsMax );
+    for( int i = 0; i < rIn->nAttacks; i++ )
+    {
+        const CRecallAttack &atk = rIn->attacks[i];
+        // Format: Attack <type|effect|count|dmgMin|dmgMax|dmgTotal>
+        fprintf( m_fp, "\tAttack\t<%d|%s|%d|%d|%d|%d>\n", atk.dwType, atk.szEffect,
+                 atk.dwTimesObserved, atk.dwDamageMin, atk.dwDamageMax, atk.dwDamageTotal );
+    }
+    fprintf( m_fp, "}\n" );
     return true;
 }
 

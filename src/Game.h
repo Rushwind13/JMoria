@@ -24,6 +24,7 @@ class CStringInputState;
 class CTargetState;
 class CUseState;
 class CAIMgr;
+class CMonsterRecall;
 
 class CGame
 {
@@ -51,6 +52,7 @@ public:
     CDisplayText *GetEnd() { return m_pEndGameDT; }
     CDisplayText *GetMonsters() { return m_pMonstersDT; }
     CAIMgr *GetAIMgr() { return m_pAIMgr; }
+    CMonsterRecall *GetMonsterRecall() { return m_pMonRecall; }
     void Term();
     void Quit( int returncode );
     void SetState( int eNewState );
@@ -82,6 +84,7 @@ protected:
     CDungeon *m_pDungeon;
     CPlayer *m_pPlayer;
     CAIMgr *m_pAIMgr;
+    CMonsterRecall *m_pMonRecall;
 
     CDisplayText *m_pMsgsDT;
     CDisplayText *m_pStatsDT;

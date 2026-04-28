@@ -240,6 +240,10 @@ void CDungeon::PopulateLevel( const int depth )
         m_llMonsters = new JLinkList<CMonster>;
     }
 
+    // Instance IDs from the previous level are no longer valid
+    if( g_pGame->GetMonsterRecall() )
+        g_pGame->GetMonsterRecall()->ResetLevelSightings();
+
     // Spawn the player last — they arrive on a fully populated level
     g_pGame->GetPlayer()->m_bHasSpawned = false;
     g_pGame->GetPlayer()->SpawnPlayer();
@@ -896,10 +900,36 @@ void CDungeon::LightRoom( CRoom *pRoom )
     {
         for( vCurPos.x = rcRoom.left; vCurPos.x <= rcRoom.right; vCurPos.x++ )
         {
-            GetTile( vCurPos )->SetFlags( DUNG_FLAG_SEEN );
+            GetTile( vCurPos )->SetFlags( DUNG_FLAG_LIT | DUNG_FLAG_SEEN );
         }
     }
     pRoom->SetFlags( DUNG_FLAG_SEEN );
+}
+
+void CDungeon::LightPosition( const JVector &vPos )
+{
+    // If the beam crosses a room tile, light the whole room.
+    CRoom *pRoom = InRoom( const_cast<JVector &>( vPos ) );
+    if( pRoom )
+    {
+        pRoom->SetFlags( DUNG_FLAG_LIT );
+        LightRoom( pRoom );
+        return;
+    }
+    // Otherwise (hallway / open area): light the tile itself and all 8 neighbours
+    // so that adjacent walls become visible.
+    JVector vNeighbour;
+    for( int dy = -1; dy <= 1; dy++ )
+    {
+        for( int dx = -1; dx <= 1; dx++ )
+        {
+            vNeighbour.x = vPos.x + dx;
+            vNeighbour.y = vPos.y + dy;
+            CDungeonTile *pTile = GetTile( vNeighbour );
+            if( pTile )
+                pTile->SetFlags( DUNG_FLAG_LIT | DUNG_FLAG_SEEN );
+        }
+    }
 }
 
 bool SightCollisionTest( JVector &vTest );
@@ -955,12 +985,15 @@ void CDungeon::UpdateVisibility()
             int dy = Util::abs( viCheck.y - vPlayer.y );
             int chebyshev = MAX( dx, dy );
 
-            // Tiles beyond base sight range need to be in a lit room to be visible
+            // Tiles beyond base sight range need to be in a lit room, or be
+            // individually lit (e.g. by a Wand of Light beam), to be visible
             if( chebyshev > SIGHT_DISTANCE_PLAYER )
             {
                 JVector vCheckF( viCheck.x, viCheck.y );
                 CRoom *pTargetRoom = InRoom( vCheckF );
-                if( !pTargetRoom || !pTargetRoom->HasFlags( DUNG_FLAG_LIT ) )
+                bool inLitRoom = pTargetRoom && pTargetRoom->HasFlags( DUNG_FLAG_LIT );
+                bool isLitTile = ( pTile->m_dwFlags & DUNG_FLAG_LIT ) != 0;
+                if( !inLitRoom && !isLitTile )
                     continue;
             }
 

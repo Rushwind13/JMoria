@@ -3,12 +3,14 @@
 #include "Effect.h"
 #include "JColor.h"
 #include "JLinkList.h"
+#include "MonsterRecall.h"
 #include "TextEntry.h"
 
 class CMonsterDef;
 class CItemDef;
 class CDungeon;
 class CScore;
+struct CRecallEntry;
 class CDataFile
 {
     // Member variables
@@ -18,6 +20,7 @@ public:
 
     bool Open( const char *szFilename );
     bool Append( const char *szFilename );
+    bool Write( const char *szFilename );
     bool Close();
 
     void SetDungeon( CDungeon *pDungeon ) { m_pDungeon = pDungeon; }
@@ -26,6 +29,8 @@ public:
     CEffectDef *ReadEffect( CEffectDef &edIn );
     CScore *ReadScore( CScore &sIn );
     bool WriteScore( CScore *sIn );
+    CRecallEntry *ReadMonsterRecall( CRecallEntry &rIn );
+    bool WriteMonsterRecall( const CRecallEntry *rIn );
 
 protected:
     char *Strip( char *szLine );

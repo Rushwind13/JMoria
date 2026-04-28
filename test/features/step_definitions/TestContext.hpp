@@ -6,9 +6,11 @@
 
 #include <JMDefs.h>
 
+#include "DisplayText.h"
 #include "FileParse.h"
 #include "Item.h"
 #include "Monster.h"
+#include "MonsterRecall.h"
 #include <AIMgr.h>
 #include <Constants.h>
 #include <Dungeon.h>
@@ -110,6 +112,10 @@ struct TestCtx
     int hi_f;
 
     char szBuffer[1024];
+
+    // MonsterRecall
+    CMonsterRecall *recall = nullptr;
+    CDisplayText *recallDT = nullptr;
 };
 
 #endif // __TEST_CONTEXT__

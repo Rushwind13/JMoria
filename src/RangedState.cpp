@@ -157,6 +157,12 @@ int CRangedState::OnHandleFire( JKeysym *keysym )
     JLog( LOG_LEVEL_NOISE, true, "FIRE got a selection\n" );
     if( TestFire() ) // can fire
     {
+        // Ensure trajectory is built if we have a target
+        if( ReadyToLaunch() && !m_llTrajectory )
+        {
+            BuildTrajectory();
+        }
+
         if( ReadyToLaunch() ) // have target
         {
             if( DoLaunch() ) // have charges
@@ -224,8 +230,16 @@ int CRangedState::OnHandleZap( JKeysym *keysym )
     JLog( LOG_LEVEL_NOISE, true, "ZAP got a selection\n" );
     if( TestZap() ) // can zap
     {
+
         if( ReadyToLaunch() ) // have target
         {
+            // Ensure trajectory is built if we have a target
+
+            if( !m_llTrajectory )
+            {
+                BuildTrajectory();
+            }
+
             if( DoLaunch() ) // have charges
             {
                 m_eCurModifier = RANGED_TRAJECTORY;
@@ -298,7 +312,8 @@ int CRangedState::OnHandleTarget( JKeysym *keysym )
     }
     m_eCurModifier = mod;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
-    HandleKey( keysym );
+    // Don't re-process the keystroke; we've already consumed it getting the target.
+    // The next keypress will be handled by the new modifier.
 
     return JSUCCESS;
 }
@@ -426,7 +441,7 @@ void CRangedState::GosubState( int newstate )
     // target state will bounce back to here
     // do not overwrite m_cCommand nor m_pSelected
     JKeysym newkey;
-    newkey.sym = JKEY_f;
+    newkey.sym = m_cCommand; // Use the actual command (JKEY_f or JKEY_z), not hardcoded JKEY_f
     newkey.mod = 0;
     g_pGame->GetGameState()->HandleKey( &newkey );
     m_eCurModifier = RANGED_INIT;
@@ -448,6 +463,8 @@ void CRangedState::ResetToState( int newstate )
         m_llTrajectory = NULL;
     }
     g_pGame->GetDungeon()->SetProjectilePosition( JVector( -1, -1 ) );
+    g_pGame->GetDungeon()->SetProjectileEffect( NULL,
+                                                NULL ); // Clear beam when exiting RANGED state
     m_dwClock = 0;
     m_fStateTicks = 0.0f;
     m_eCurModifier = RANGED_INIT;
@@ -463,8 +480,34 @@ bool CRangedState::DoLaunch()
     if( m_pSelected->m_lpData->m_dwCharges <= 0 )
         return false;
     JLog( LOG_LEVEL_DEBUG, true, "RANGED state firing projectile...\n" );
-    g_pGame->GetMsgs()->Printf( "The %s emits a ray of %s.\n", m_pSelected->m_lpData->GetName(),
-                                "blinding blue light" );
+
+    // Get effect description from the current effect being used
+    const char *szEffectDesc = NULL;
+    CEffectDef *pEffectDef = NULL;
+    CLink<CEffect> *plEffect = m_pSelected->m_lpData->m_id->m_llEffects->GetHead();
+    if( plEffect && plEffect->m_lpData && plEffect->m_lpData->m_ed &&
+        plEffect->m_lpData->m_ed->m_szName )
+    {
+        szEffectDesc = plEffect->m_lpData->m_ed->m_szName;
+        pEffectDef = plEffect->m_lpData->m_ed;
+    }
+
+    if( szEffectDesc )
+    {
+        g_pGame->GetMsgs()->Printf( "The %s emits a %s.\n", m_pSelected->m_lpData->GetName(),
+                                    szEffectDesc );
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "The %s glows.\n", m_pSelected->m_lpData->GetName() );
+    }
+
+    // Pass effect definition and trajectory to dungeon for multicolor beam rendering
+    if( pEffectDef && m_llTrajectory )
+    {
+        g_pGame->GetDungeon()->SetProjectileEffect( pEffectDef, m_llTrajectory );
+    }
+
     m_pSelected->m_lpData->m_dwCharges--;
     g_pGame->SetReadyForUpdate( false );
     return true;
@@ -494,6 +537,10 @@ bool CRangedState::DoTrajectory()
     JLog( LOG_LEVEL_DEBUG, true, "doing trajectory %d/%d\n", m_dwClock, m_llTrajectory->length() );
     m_vCurrentPosition.Init( VEC_EXPAND( *( m_llTrajectory->GetNthLink( m_dwClock )->m_lpData ) ) );
     m_dwClock++;
+
+    // Advance to next color in beam animation
+    g_pGame->GetDungeon()->AdvanceProjectileColor();
+
     JVector vTest( VEC_EXPAND( m_vCurrentPosition ) );
     JLog( LOG_LEVEL_DEBUG, true, "pos <%d %d>\n", VEC_EXPAND( m_vCurrentPosition ) );
 

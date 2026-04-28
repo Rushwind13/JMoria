@@ -1428,8 +1428,11 @@ JResult CPlayer::DoLightRay( CEffect *pEffect )
 
         return JBOGUSKEY;
     }
-    JLog( LOG_LEVEL_INFO, true, "monster: %s\n", pMon->GetName() );
 
+    // Save monster name before it's potentially deleted
+    const char *szMonName = pMon->GetName();
+
+    JLog( LOG_LEVEL_INFO, true, "monster: %s\n", szMonName );
     // TODO: this should be "weaknesses" and re-use effect_flag_light instead of new "general flag"
     if( ( pMon->m_md->m_dwFlags & MON_FLAG_HURT_BY_LIGHT ) == MON_FLAG_HURT_BY_LIGHT )
     {
@@ -1439,17 +1442,16 @@ JResult CPlayer::DoLightRay( CEffect *pEffect )
 
         if( DamageMonster( pMon, fDamage ) )
         {
-            g_pGame->GetMsgs()->Printf( "The %s shrivels away in the bright light!\n",
-                                        pMon->GetName() );
+            g_pGame->GetMsgs()->Printf( "The %s shrivels away in the bright light!\n", szMonName );
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "The %s screams in agony.\n", pMon->GetName() );
+            g_pGame->GetMsgs()->Printf( "The %s screams in agony.\n", szMonName );
         }
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "The %s is unaffected.\n", pMon->GetName() );
+        g_pGame->GetMsgs()->Printf( "The %s is unaffected.\n", szMonName );
     }
 
     return JSUCCESS;
@@ -1473,6 +1475,16 @@ JResult CPlayer::DoElementalHit( CEffect *pEffect )
     const char *szElement = g_Constants.IndexToString( EFFECT_FLAG, pEffect->m_dwFlags );
     JLog( LOG_LEVEL_INFO, true, "elemental hit (%s) on %s\n", szElement, pMon->GetName() );
 
+    // Save monster name before it's potentially deleted
+    const char *szMonName = pMon->GetName();
+
+    // Print effect description message
+    if( pEffect->m_ed && pEffect->m_ed->m_szName )
+    {
+        g_pGame->GetMsgs()->Printf( "The %s strikes the %s with %s.\n", pEffect->m_ed->m_szName,
+                                    szMonName, szElement );
+    }
+
     const char *szAmount = pEffect->m_szAmount;
     if( !szAmount && pEffect->m_ed )
         szAmount = pEffect->m_ed->m_szAmount;
@@ -1483,11 +1495,11 @@ JResult CPlayer::DoElementalHit( CEffect *pEffect )
 
     if( DamageMonster( pMon, fDamage ) )
     {
-        g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", pMon->GetName() );
+        g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "The %s is hit.\n", pMon->GetName() );
+        g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
     }
 
     return JSUCCESS;

@@ -1079,10 +1079,10 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
 
     // check for "in visible range" before doing the
     // more expensive line-of-sight test
-    // If target is in a lit room, use extended sight distance
-    // (player can see into lit rooms from down the hall through doorways)
+    // Extended sight distance only applies within the same room.
+    // Different rooms must pass line-of-sight check even if both are lit.
     int sight_distance = SIGHT_DISTANCE_PLAYER;
-    if( prTarget && prTarget->HasFlags( DUNG_FLAG_LIT ) )
+    if( prSource && prTarget && prSource == prTarget && prSource->HasFlags( DUNG_FLAG_LIT ) )
         sight_distance = SIGHT_DISTANCE_LIT;
 
     if( !Util::Nearby( vSource, sight_distance ).Contains( vTarget ) )
@@ -1227,38 +1227,93 @@ void CDungeon::DrawDungeon()
             bool isVisible = ( curTile->m_dwFlags & DUNG_FLAG_VISIBLE ) != 0;
 
             // Determine tile color based on game state
+            bool bRangedBeamTile = false;
             if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
             {
                 color = JColor( 100, 0, 100, 255 );
             }
-            else if( g_pGame->GetGameStateIndex() == STATE_RANGED && vScreen == vProjectile )
+            else if( g_pGame->GetGameStateIndex() == STATE_RANGED )
             {
-                color = JColor( 255, 255, 85, 255 );
+                if( !m_llProjectileTrajectory || !m_pProjectileEffect )
+                {
+                    // No trajectory data available
+                }
+                else
+                {
+                    // Check if vScreen is on the trajectory path
+                    int pathIndex = 0;
+                    CLink<JIVector> *plPos = m_llProjectileTrajectory->GetHead();
+                    while( plPos && pathIndex <= m_dwProjectileColorIndex )
+                    {
+                        JIVector curPos = *( plPos->m_lpData );
+                        if( (int)vScreen.x == curPos.x && (int)vScreen.y == curPos.y )
+                        {
+                            bRangedBeamTile = true;
+                            // Get color from effect definition, cycling through colors
+                            if( m_pProjectileEffect->m_llColors &&
+                                m_pProjectileEffect->m_llColors->length() > 0 )
+                            {
+                                int colorIndex =
+                                    pathIndex % m_pProjectileEffect->m_llColors->length();
+                                CLink<JColor> *plColor =
+                                    m_pProjectileEffect->m_llColors->GetNthLink( colorIndex );
+                                if( plColor )
+                                {
+                                    color = *( plColor->m_lpData );
+                                }
+                                else
+                                {
+                                    color = JColor( 255, 255, 85, 255 ); // fallback
+                                }
+                            }
+                            else
+                            {
+                                color = JColor( 255, 255, 85, 255 ); // fallback yellow
+                            }
+                            break;
+                        }
+                        plPos = plPos->next;
+                        pathIndex++;
+                    }
+                }
             }
-            else if( IsOnLOSLine( vScreen ) )
+
+            if( !bRangedBeamTile )
             {
-                color = JColor( 85, 255, 255, 255 );
-            }
-            else if( g_pGame->GetGameStateIndex() == STATE_CLOCKSTEP ||
-                     g_pGame->GetPlayer()->IsWizard() )
-            {
-                color = curTile->m_dtd->m_Color;
-            }
-            else if( !isVisible )
-            {
-                // Fog of War: seen but not currently visible — dim grey
-                color = JColor( 60, 60, 80, 255 );
-            }
-            else if( IsLit( vScreen ) )
-            {
-                color = JColor( 200, 200, 0, 255 );
-            }
-            else
-            {
-                color = curTile->m_dtd->m_Color;
+                // Normal tile coloring logic (for non-beam tiles or when no multicolor effect)
+                if( g_pGame->GetGameStateIndex() == STATE_RANGED && vScreen == vProjectile )
+                {
+                    color = JColor( 255, 255, 85, 255 );
+                    bRangedBeamTile = true; // Draw beam character at current projectile position
+                }
+                else if( IsOnLOSLine( vScreen ) )
+                {
+                    color = JColor( 85, 255, 255, 255 );
+                }
+                else if( g_pGame->GetGameStateIndex() == STATE_CLOCKSTEP ||
+                         g_pGame->GetPlayer()->IsWizard() )
+                {
+                    color = curTile->m_dtd->m_Color;
+                }
+                else if( !isVisible )
+                {
+                    // Fog of War: seen but not currently visible — dim grey
+                    color = JColor( 60, 60, 80, 255 );
+                }
+                else if( IsLit( vScreen ) )
+                {
+                    color = JColor( 200, 200, 0, 255 );
+                }
+                else
+                {
+                    color = curTile->m_dtd->m_Color;
+                }
             }
             m_TileSet->SetTileColor( color );
-            m_TileSet->DrawChar( curTile->m_dtd->m_chTile, vScreen, vSize );
+            char chDraw = ( bRangedBeamTile && m_pProjectileEffect )
+                              ? m_pProjectileEffect->m_cBeamChar
+                              : curTile->m_dtd->m_chTile;
+            m_TileSet->DrawChar( chDraw, vScreen, vSize );
         }
     }
 }

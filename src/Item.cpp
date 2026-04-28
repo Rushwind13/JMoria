@@ -147,12 +147,10 @@ void CItem::SetCursed( bool bCursed )
     {
         m_dwFlags &= ~ITEM_FLAG_CURSED;
         m_dwFlags |= ITEM_FLAG_CURSED;
-        m_Color.SetColor( 255, 0, 0, 255 );
     }
     else
     {
         m_dwFlags &= ~ITEM_FLAG_CURSED;
-        m_Color.SetColor( m_id->m_Color );
     }
 }
 

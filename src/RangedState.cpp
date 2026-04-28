@@ -157,14 +157,14 @@ int CRangedState::OnHandleFire( JKeysym *keysym )
     JLog( LOG_LEVEL_NOISE, true, "FIRE got a selection\n" );
     if( TestFire() ) // can fire
     {
-        // Ensure trajectory is built if we have a target
-        if( ReadyToLaunch() && !m_llTrajectory )
-        {
-            BuildTrajectory();
-        }
-
         if( ReadyToLaunch() ) // have target
         {
+            // Ensure trajectory is built if we have a target
+            if( !m_llTrajectory )
+            {
+                BuildTrajectory();
+            }
+
             if( DoLaunch() ) // have charges
             {
                 m_eCurModifier = RANGED_TRAJECTORY;

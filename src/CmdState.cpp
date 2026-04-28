@@ -5,6 +5,7 @@
 #include "DungeonTile.h"
 #include "Game.h"
 #include "JMDefs.h"
+#include "MonsterRecall.h"
 #include "Player.h"
 
 extern CGame *g_pGame;
@@ -169,6 +170,19 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
         g_pGame->SetState( STATE_STRINGINPUT );
         g_pGame->GetGameState()->HandleKey( keysym );
         retval = 0;
+    }
+
+    else if( IsMonsterRecallCommand( keysym ) )
+    {
+        CMonster *pMon = g_pGame->GetPlayer()->GetTarget();
+        if( pMon && pMon->m_md )
+        {
+            g_pGame->GetMsgs()->Clear();
+            g_pGame->GetMonsterRecall()->PrintRecall( pMon->m_md, g_pGame->GetMsgs() );
+        }
+        else
+            g_pGame->GetMsgs()->Printf( "No current target for recall.\n" );
+        retval = JHANDLED_NOTURN;
     }
 
     /*
@@ -424,6 +438,11 @@ bool CCmdState::IsCreateItemCommand( JKeysym *keysym )
     }
 
     return false;
+}
+
+bool CCmdState::IsMonsterRecallCommand( JKeysym *keysym )
+{
+    return ( keysym->sym == JKEY_r && ( keysym->mod & JMOD_CTRL ) );
 }
 
 bool CCmdState::IsSummonMonsterCommand( JKeysym *keysym )

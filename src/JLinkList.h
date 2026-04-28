@@ -99,7 +99,9 @@ public:
         : m_lpHead( NULL ),
           m_lpTail( NULL ),
           m_iNumElements( 0 ),
-          m_bOwnsData( bOwnsData ) {}
+          m_bOwnsData( bOwnsData )
+    {
+    }
     virtual inline ~JLinkList( void ) { Terminate(); };
     CLink<T> *Add( T *pData, int dwIndex = -1, int dwInstanceId = -1, bool bAscending = true )
     {

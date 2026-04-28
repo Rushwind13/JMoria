@@ -240,6 +240,10 @@ void CDungeon::PopulateLevel( const int depth )
         m_llMonsters = new JLinkList<CMonster>;
     }
 
+    // Instance IDs from the previous level are no longer valid
+    if( g_pGame->GetMonsterRecall() )
+        g_pGame->GetMonsterRecall()->ResetLevelSightings();
+
     // Spawn the player last — they arrive on a fully populated level
     g_pGame->GetPlayer()->m_bHasSpawned = false;
     g_pGame->GetPlayer()->SpawnPlayer();

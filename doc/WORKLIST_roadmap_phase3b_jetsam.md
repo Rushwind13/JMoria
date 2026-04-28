@@ -109,19 +109,41 @@ BDD coverage added in `test/features/elemental_item_destruction.feature` with 6 
 ---
 
 #### #236 - Monster Recall — Knowledge of the Ancestors
-**Status**: Not started  
+**Status**: ✅ Complete (April 27, 2026)  
 **Type**: Gameplay (Knowledge/UI System)  
 **Description**: Build persistent monster knowledge glossary as player encounters creatures. On encountering a monster type again, display accumulated knowledge.
-- **Tracked Data**: Encounter count, physical description, typical depth, XP value per level, attack types, resistances/weaknesses, special abilities
-- **Storage**: Local file `~/.jmoria/monster_recall.txt` (persists across games)
-- **Display**: Popup or dedicated UI pane showing knowledge when targeting/encountering a known monster
-- **Example Message**: "You have encountered 7 of these creatures. Taller than an average orc, white handprint across its face. Normally lives at 450' and is worth 250 XP for a 13th level character. Harmed by bright light and showers. Resistant to fear and fire. Can pick up and wield weapons."
+
+**Resolution**:
+
+**Persistence** — `src/MonsterRecall.h` / `src/MonsterRecall.cpp`. `CMonsterRecall` owns a fixed-size array of `CRecallEntry` (up to 256 species). Saved to `~/.jmoria/monster_recall.txt` in the JMoria FileParse block format:
+```
+MonsterRecall <White Worm Mass>
+{
+    Encounters  7
+    Kills       3
+    DeepestFeet 250
+    KnownFlags  256
+    DepthKnown  1
+    XPKnown     1
+}
+```
+`CDataFile::ReadMonsterRecall()` / `WriteMonsterRecall()` added to `FileParse`; `CDataFile::Write()` (truncating write mode) added alongside existing `Open`/`Append`.
+
+**Observation gating** — `PrintRecall()` only reveals what the player has *earned*:
+- Depth shown after first kill (`bDepthKnown`) — sighting alone is insufficient to assess native depth
+- XP shown after first kill (`bXPKnown`)
+- Flags (resistances, abilities, movement) revealed via `RecordObservation()` call sites — `dwKnownFlags |= MON_FLAG_*` bit
+
+**Integration points**:
+- `Player::UpdateVisibleMonsters()` → `RecordSighting()` (per-session dedup via `m_bSeenThisSession[]`)
+- `Player::OnKillMonster()` → `RecordKill()`
+- `CmdState` — `Ctrl+R` prints recall for current target
+- `LookState` — `:` look prints recall inline
+- `TargetState` — target cycling prints recall for targeted monster
 
 **Impact**: Enables emergent learning system, rewards repeated play, adds flavor/lore  
-**Dependencies**: None blocking (future UI framework); pairs with #45 (Monster behavior depth)  
-**Effort**: Very High (requires UI pane, file I/O, knowledge parsing + formatting)  
-**Blocking**: Lays groundwork for Item Recall (#114 extension) and Bestiary systems  
-**Files**: New `src/MonsterRecall.cpp`, `src/DisplayText.cpp` (new pane), `Player.cpp` (encounter tracking)
+**Dependencies**: None blocking  
+**Files**: `src/MonsterRecall.h`, `src/MonsterRecall.cpp` (new), `src/FileParse.h`, `src/FileParse.cpp`, `src/Game.h`, `src/Game.cpp`, `src/Player.cpp`, `src/CmdState.h`, `src/CmdState.cpp`, `src/LookState.cpp`, `src/TargetState.cpp`
 
 
 ---
@@ -134,7 +156,7 @@ BDD coverage added in `test/features/elemental_item_destruction.feature` with 6 
 2. **#165, #166** (bug fixes, 1-2 hours) — ✅ Done
 3. **#226 Phase 1** (spawn filter, 1-2 hours) — ✅ Done (pre-existing)
 4. **#271** (item destruction, 2-3 days) — ✅ Done
-5. **#236** (monster recall, 2-3 days) — Ambitious but high flavor/engagement value
+5. **#236** (monster recall, 2-3 days) — ✅ Done
 
 ---
 

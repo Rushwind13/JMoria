@@ -1,0 +1,45 @@
+# JMoria monster recall — sample fixture
+# Format: MonsterRecall <name> { Key value }
+# Attack entries: <type|effect|count|dmgMin|dmgMax|dmgTotal>
+#   MON_FLAG_BITE=4, MON_FLAG_CLAW=16, MON_FLAG_BREATHE=64
+#   MON_FLAG_WARM=256, MON_FLAG_BREED=32768
+
+MonsterRecall <Giant Ant>
+{
+	Encounters	7
+	Kills	3
+	DeepestFeet	250
+	KnownFlags	256
+	DepthKnown	1
+	XPKnown	1
+	HPObsMin	8
+	HPObsMax	14
+	Attack	<4||5|3|8|28>
+}
+
+MonsterRecall <White Worm Mass>
+{
+	Encounters	2
+	Kills	0
+	DeepestFeet	100
+	KnownFlags	32768
+	DepthKnown	1
+	XPKnown	0
+	HPObsMin	0
+	HPObsMax	0
+	Attack	<16||2|2|5|7>
+}
+
+MonsterRecall <Cave Dragon>
+{
+	Encounters	1
+	Kills	1
+	DeepestFeet	1500
+	KnownFlags	0
+	DepthKnown	1
+	XPKnown	1
+	HPObsMin	85
+	HPObsMax	85
+	Attack	<64|fire|1|18|18|18>
+	Attack	<16||3|4|12|22>
+}

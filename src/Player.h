@@ -311,7 +311,7 @@ public:
     int TakeDamage( float fDamage, const char *szMon, uint32 dwElement = 0 );
     float Resist( uint32 dwElement );
 
-    void OnKillMonster( CMonster *pMon );
+    void OnKillMonster( CMonster *pMon, float fKillingBlow );
     bool DamageMonster( CMonster *pMon, float fDamage );
 
     void SetWizard();

@@ -7,6 +7,7 @@
 #include "Dungeon.h"
 #include "Game.h"
 #include "JLinkList.h"
+#include "MonsterRecall.h"
 #include "StateBase.h"
 #include "TileSet.h"
 #include <cmath>
@@ -895,8 +896,16 @@ float CPlayer::Damage( float fDamageMult )
     return fDamage;
 }
 
-void CPlayer::OnKillMonster( CMonster *pMon )
+void CPlayer::OnKillMonster( CMonster *pMon, float fKillingBlow )
 {
+    if( g_pGame->GetMonsterRecall() )
+    {
+        // The player doesn't know exactly how much HP the monster had —
+        // only that fKillingBlow was enough to finish it off.  The estimate
+        // is: actual_max_HP minus at most (fKillingBlow - 1) remaining HP.
+        float fEstimatedHP = pMon->m_fHP - ( fKillingBlow - 1.0f );
+        g_pGame->GetMonsterRecall()->RecordKill( pMon->m_md->m_szName, fEstimatedHP );
+    }
     m_fExperience += pMon->m_md->m_fExpValue / m_fLevel;
     GainLevel();
     m_pTarget = NULL;
@@ -906,7 +915,7 @@ bool CPlayer::DamageMonster( CMonster *pMon, float fDamage )
 {
     if( pMon->TakeDamage( fDamage ) == STATUS_DEAD )
     {
-        OnKillMonster( pMon );
+        OnKillMonster( pMon, fDamage );
         g_pGame->GetDungeon()->RemoveMonster( pMon );
         return true;
     }
@@ -2181,6 +2190,13 @@ void CPlayer::UpdateVisibleMonsters()
             int dist =
                 abs( (int)vMonPos.x - (int)m_vPos.x ) + abs( (int)vMonPos.y - (int)m_vPos.y );
             m_llVisibleMonsters->Add( pMon, dist, pMon->GetInstanceId() );
+
+            if( g_pGame->GetMonsterRecall() )
+            {
+                int depthFeet = pDungeon->depth * 50;
+                g_pGame->GetMonsterRecall()->RecordSighting( pMon->m_md->m_szName, depthFeet,
+                                                             pMon->GetInstanceId() );
+            }
         }
         pLink = pLink->next;
     }

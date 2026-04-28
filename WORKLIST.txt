@@ -14,7 +14,7 @@ DOORS / TRAPS / SCENERY:
 - make new DUNG_IDX type for gold vein
 - rubble has chance of treasure
 
-MONSTERS:
+MONSTERS:(all in-game since v0.7.0 2026-04-20)
 - orcs
 - trolls
 - giants
@@ -35,7 +35,7 @@ MONSTERS:
 
 
 ITEMS:
-- Magic items "x of Protection", "y of Resist Fire", but scramble the varieties each game of course.
+- Magic items "x of Protection", "y of Resist Fire", but scramble the varieties each game of course. (done)
 - ego items [FB] [DB] [WB] [DF] [HA] ...
 - unique items I mean Vlad had to take on a Jenoine, I'm just saying.
 - Maybe uniques can't be found until the character holding them dies.
@@ -46,8 +46,8 @@ ITEMS:
 PLAYER:
 - Player can only hold one of each wieldable type (for now; two rings is an enhancement)
 - equipped items enhance player instrinsics; player wears ring, set the intrinsic "isInvisible" on the player.
-- equipped items are used to make attacks and to defend against attacks (raise AC, raise to-hit and damage stats, &c)
-- equippable items restricted to certain subset of all items ITEM_FLAG_EQUIPMENT, instead of hardcoded in CPlayer::Wield.
+- equipped items are used to make attacks and to defend against attacks (raise AC, raise to-hit and damage stats, &c)(done)
+- equippable items restricted to certain subset of all items ITEM_FLAG_EQUIPMENT, instead of hardcoded in CPlayer::Wield.(done)
 - implement paginated inventory
 - how to remove cursed? (complete ?Remove Curse exists)
 - how to shoot bows (issue #39)

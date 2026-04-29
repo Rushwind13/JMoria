@@ -261,11 +261,11 @@
 #define EFFECT_FLAG_NO_COLLIDE 0x00000008
 
 #define EFFECT_FLAG_CURSE 0x00000010
-// #define EFFECT_FLAG_x 0x00000020
+#define EFFECT_FLAG_SEARCH 0x00000020
 // #define EFFECT_FLAG_x 0x00000040
 // #define EFFECT_FLAG_x 0x00000080
 
-#define NUM_EFFECT_FLAGS2 5
+#define NUM_EFFECT_FLAGS2 6
 
 // Effect Modifiers
 #define EFFECT_MOD_RESIST 0x000000001
@@ -565,6 +565,7 @@ public:
         m_StringTable[i++].Init( "EFFECT_FLAG_MONSTERS", EFFECT_FLAG_MONSTERS, EFFECT_FLAG2 );
         m_StringTable[i++].Init( "EFFECT_FLAG_NO_COLLIDE", EFFECT_FLAG_NO_COLLIDE, EFFECT_FLAG2 );
         m_StringTable[i++].Init( "EFFECT_FLAG_CURSE", EFFECT_FLAG_CURSE, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG_SEARCH", EFFECT_FLAG_SEARCH, EFFECT_FLAG2 );
 
         // Effect Modifiers
         m_StringTable[i++].Init( "EFFECT_MOD_RESIST", EFFECT_MOD_RESIST );

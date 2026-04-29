@@ -735,7 +735,7 @@ Effect <Timed Speed>
 Effect <Searching>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_SEARCHING>
+    Flag        <EFFECT_FLAG_SEARCH>
 }
 
 # --- RESTORE - identify, recharge ---

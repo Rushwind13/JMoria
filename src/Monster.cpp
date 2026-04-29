@@ -2,6 +2,7 @@
 #include "DisplayText.h"
 #include "Dungeon.h"
 #include "Game.h"
+#include "MonsterRecall.h"
 static uint32 s_nextMonsterInstanceId = 1;
 
 CMonster::CMonster()
@@ -14,7 +15,8 @@ CMonster::CMonster()
       m_pBrain( NULL ),
       m_fColorChangeInterval( COLOR_CHANGE_TIMEOUT + 1 ),
       m_fLastBreed( BREED_INTERVAL ),
-      m_dwInstanceId( 0 )
+      m_dwInstanceId( 0 ),
+      m_bDetected( false )
 {
     m_pBrain = new CAIBrain;
 }
@@ -33,6 +35,10 @@ void CMonster::Init( CMonsterDef *pmd )
     if( pmd->m_fBaseHP != 0.0f )
     {
         m_fHP = pmd->m_fBaseHP;
+    }
+    else if( pmd->m_dwFlags & MON_FLAG_MAXHP )
+    {
+        m_fHP = Util::RollMax( pmd->m_szHD );
     }
     else
     {
@@ -203,9 +209,9 @@ float CMonster::Attack()
 
 const char *CMonster::AttackEffect()
 {
-    if( m_pCurrentAttack == NULL )
+    if( m_pCurrentAttack == NULL || m_pCurrentAttack->m_pEffect == NULL )
         return "thoughts and prayers";
-    switch( m_pCurrentAttack->m_dwEffectFlags )
+    switch( m_pCurrentAttack->m_pEffect->m_dwFlags )
     {
     case EFFECT_FLAG_ACID:
         return "acid";
@@ -265,10 +271,25 @@ const char *CMonster::AttackFlavorText()
 
 float CMonster::Damage( float fDamageMult )
 {
+    // Breath weapons scale with the monster's current HP — the weaker the monster,
+    // the less damage its breath deals.
+    if( m_pCurrentAttack->m_dwType & MON_FLAG_BREATHE )
+    {
+        float fDamage = m_fCurHP * fDamageMult;
+        JLog( LOG_LEVEL_INFO, true,
+              "%s breathed for %.2f damage (current HP: %.2f)(damagemult: %.2f). ", GetName(),
+              fDamage, m_fCurHP, fDamageMult );
+        return fDamage;
+    }
+
     char *szDamage = m_pCurrentAttack->m_szDamage;
     float fDamageModifier = 0.0f;
 
-    float fDamage = ( Util::Roll( szDamage ) + fDamageModifier ) * fDamageMult;
+    bool bMaxRoll = ( m_pCurrentAttack->m_pEffect != NULL &&
+                      ( m_pCurrentAttack->m_pEffect->m_dwModifier & EFFECT_MOD_MAX ) );
+    float fDamage =
+        ( ( bMaxRoll ? Util::RollMax( szDamage ) : Util::Roll( szDamage ) ) + fDamageModifier ) *
+        fDamageMult;
     JLog( LOG_LEVEL_INFO, true, "%s did %.2f damage (rolled %s)(damagemult: %.2f). ", GetName(),
           fDamage, szDamage, fDamageMult );
 
@@ -317,6 +338,12 @@ void CMonster::Breed()
             // Spawn a new copy
             JIVector vSpawn( VEC_EXPAND( GetPos() ) );
             CreateMonster( m_md, vSpawn, true );
+            // Record breeding only if the spawn point is visible to the player
+            JVector vSpawnF( (float)vSpawn.x, (float)vSpawn.y );
+            uint32 dwSenseFlags = m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND );
+            if( g_pGame->RecallMonster() && m_md &&
+                g_pGame->GetDungeon()->PlayerCanSee( vSpawnF, dwSenseFlags ) )
+                g_pGame->RecallMonster()->RecordObservation( m_md->m_szName, MON_FLAG_BREED );
         }
         JLog( LOG_LEVEL_NOISE, false, "\n" );
         m_dwFecundity--;
@@ -344,7 +371,12 @@ void CMonster::SetColor()
     m_fColorChangeInterval = 0.0f;
 }
 
-unsigned char MonIDs[MON_IDX_MAX + 1] = "abcddefghhikllmnoprsuwxyzABCDFFFGGHIJKLOPRSTUVWWXY&.,$t";
+// MonIDs: index → tile character, alphabetical within each group
+// lowercase: a b c d d e f f f g h i j k l l m n o p r s u w x y z
+// uppercase: A B C D D E F G G H I J K L M M O P P R S T U V W W X Y
+// special:   & . , $ t |
+unsigned char MonIDs[MON_IDX_MAX + 1] =
+    "abcddefffghijkllmnoprsuwxyzABCDDEFGGHIJKLMMOPPRSTUVWWXY&.,$t|";
 void CMonster::Draw()
 {
     char monster_char = MonIDs[m_md->m_dwIndex];

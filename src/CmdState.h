@@ -38,7 +38,9 @@ private:
     bool IsSummonMonsterCommand( JKeysym *keysym );
     bool IsPickupCommand( JKeysym *keysym );
     bool IsExitWizardCommand( JKeysym *keysym );
+    bool IsSearchCommand( JKeysym *keysym );
     bool IsStringInputCommand( JKeysym *keysym );
+    bool IsToggleCommand( JKeysym *keysym );
     void ResetToState( int newstate ) {}
 
     int OnHandleStairs( JKeysym *keysym );

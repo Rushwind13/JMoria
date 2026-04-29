@@ -2,6 +2,7 @@
 #define __MONSTER_H__
 
 #include "AIMgr.h"
+#include "Effect.h"
 #include "JLinkList.h"
 #include "JMDefs.h"
 
@@ -12,7 +13,7 @@
 class CAttack
 {
 public:
-    CAttack() : m_dwType( -1 ), m_dwEffect( -1 ), m_dwEffectFlags( -1 ), m_szDamage( NULL ) {}
+    CAttack() : m_dwType( -1 ), m_szDamage( NULL ), m_pEffect( NULL ) {}
     ~CAttack()
     {
         if( m_szDamage )
@@ -20,11 +21,15 @@ public:
             delete[] m_szDamage;
             m_szDamage = NULL;
         }
+        if( m_pEffect )
+        {
+            delete m_pEffect;
+            m_pEffect = NULL;
+        }
     }
-    int m_dwType;
-    int m_dwEffect;
-    int m_dwEffectFlags;
-    char *m_szDamage;
+    int m_dwType;       // MON_FLAG_BITE/CLAW/etc — delivery flavor for AttackFlavorText()
+    char *m_szDamage;   // NdM dice string (inline attacks, or effect Amount copy)
+    CEffect *m_pEffect; // owned; NULL for legacy inline attacks
 };
 
 // There will be 1 instance of CMonsterTileDef for each line in Monsters.dat
@@ -37,6 +42,8 @@ public:
           m_dwType( 0 ),
           m_dwIndex( 0 ),
           m_dwLevel( 0 ),
+          m_fLevelSigma( 10.0f ),
+          m_fSpawnWeight( 0.0f ),
           m_fExpValue( 0 ),
           m_dwMoveType( 0 ),
           m_fBaseHP( 0.0f ),
@@ -102,7 +109,9 @@ public:
     char *m_szAppear;                // how many copies of this monster show up at first
     char *m_szHD;                    // NdM form of this monster's hit dice.
     JLinkList<CAttack> *m_llAttacks; // this monster's attacks
-    int m_dwLevel;                   // earliest dungeon level to place this monster
+    int m_dwLevel;                   // peak dungeon depth (center of bell curve)
+    float m_fLevelSigma;             // spread of bell curve (default 10.0)
+    float m_fSpawnWeight;            // scratch: Gaussian weight computed by ChooseMonsterForDepth
     float m_fExpValue;               // how much XP do you get for killing this monster
 protected:
 private:
@@ -131,6 +140,7 @@ public:
     CAIBrain *m_pBrain;       // this is the place to get info for the AI.
     uint32 m_dwActiveEffects; // this monster is confused, blind, ...
     uint32 m_dwInstanceId;    // unique instance id for this monster
+    bool m_bDetected;         // true for one turn after Detect Monsters
 
     uint32 GetInstanceId() { return m_dwInstanceId; }
 

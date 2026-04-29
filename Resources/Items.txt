@@ -29,6 +29,7 @@
 # Speed        float     how quickly one can attack with this item
 # Weight       float     weight of the item in pounds
 # Effect       string,XdY string = what it does, XdY = how much or for how long
+# Charges      XdY    initial charges for wands/staves (rolled per instance)
 #
 #
 # example item entry follows: e.g.
@@ -46,462 +47,88 @@
 # TODO: get all items sorted by type (and fix tests)
 
 # Armor
-Item <Chain Mail>
-{
-Plural        <Sets of Chain Mail>
-Type        <ITEM_IDX_ARMOR>
-Value       40.0
-Level       26
-AC          22.0
-Weight      2.0
-Color        <225,225,50,255>
-}
 
-Item <Leather Armor>
-{
-Plural        <Sets of Leather Armor>
-Type        <ITEM_IDX_ARMOR>
-Value       50.0
-Level       2
-AC          8.0
-Weight      2.0
-Color        <225,225,50,255>
-}
+#
+# SPAWN WINDOW REDESIGN (TODO: implement bell-curve item placement in C++ engine)
+#
+# CURRENT BEHAVIOR: Level = hard floor. Item spawns in dungeon levels [Level, Level+10].
+#
+# DESIGN INTENT: Level should become the PEAK depth (center of a bell curve).
+#   Items appear with peak probability at their Level, fade out above and below.
+#   Out-of-depth items (shallower than Level) possible but rare.
+#   Below-depth items (deeper than Level) possible but increasingly uncommon.
+#   Some items (e.g. healing potions) remain findable at great depth with slow fade.
+#
+# Proposed new data fields (not yet in parser or engine):
+#   LevelPeak   int    dungeon depth at which item is most common  (= current Level)
+#   LevelSigma  float  spread of the bell curve (default ~10; consumables wider)
+#   LevelFloor  int    hard minimum depth (0 = can trickle up to town)
+#   LevelCeil   int    hard maximum depth (100 = never fades entirely)
+#
+# RESERVED LEVEL SPACE (items not yet implemented):
+#   Level 60-70  Potion of Gain Str/Int/Wis/Dex/Con (x5)
+#   Level 60     Potion of Restore Life Levels
+#
 
-Item <Padded Armor>
-{
-Plural        <Sets of Padded Armor>
-Type        <ITEM_IDX_ARMOR>
-Value       40.0
-Level       7
-AC          15.0
-Weight      2.0
-Color        <225,225,50,255>
-}
+# --- One-Handed Swords ---
 
-Item <Plate Mail Armor>
+Item <Short Sword>
 {
-Plural        <Sets of Plate Mail Armor>
-Type        <ITEM_IDX_ARMOR>
-Value       40.0
-Level       48
-AC          38.0
-Weight      2.0
-Color        <225,225,50,255>
+    Plural      <Short Swords>
+    Type        <ITEM_IDX_SWORD>
+    Value       80.0
+    Level       5
+    Damage      <1d6>
+    Weight      3.0
+    Speed       3.0
+    Color       <200,200,200,255>
 }
-
-Item <Robe>
+Item <Short Sword>
 {
-Plural        <Robes>
-Type        <ITEM_IDX_ARMOR>
-Value       6.0
-Level       1
-AC          1.0
-Weight      1.0
-Color        <225,225,50,255>
+    Plural      <Short Swords>
+    Type        <ITEM_IDX_SWORD>
+    Value       80.0
+    Level       5
+    Damage      <1d6>
+    Weight      3.0
+    Speed       3.0
+    Color       <200,200,200,255>
 }
-
-Item <Splint Mail>
+Item <Long Sword>
 {
-Plural        <Sets of Splint Mail>
-Type        <ITEM_IDX_ARMOR>
-Value       40.0
-Level       24
-AC          25.0
-Weight      2.0
-Color        <225,225,50,255>
+    Plural        <Long swords>
+    Type        <ITEM_IDX_SWORD>
+    Value       150.0
+    Level       14
+    Damage      <1d10>
+    Weight      6.0
+    Speed       5.0
+    Color        <200,200,200,255>
 }
-
-# Boots
-Item <Pair of Leather Boots>
+Item <Scimitar>
 {
-Plural        <Pairs of Leather Boots>
-Type        <ITEM_IDX_BOOTS>
-Value       20.0
-Level       1
-AC          2.0
-Weight      2.0
-Color        <225,225,50,255>
+Plural        <Scimitars>
+Type        <ITEM_IDX_SWORD>
+Value     150.0
+Level        18
+Damage       1d8
+Weight        4.0
+Speed         4.0
+Color        <200,200,200,255>
 }
-
-Item <Pair of Steel Boots>
-{
-Plural        <Pairs of Steel Boots>
-Type        <ITEM_IDX_BOOTS>
-Value       20.0
-Level       1
-AC          5.0
-Weight      4.0
-Color        <225,225,50,255>
-}
-
-# Cloaks
-Item <Cloak>
-{
-Plural        <Cloaks>
-Type        <ITEM_IDX_CLOAK>
-Value       5.0
-Level       1
-AC          1.0
-Weight      1.0
-Color        <225,225,50,255>
-}
-
-# Gloves
-Item <Pair of Leather Gloves>
-{
-Plural        <Pairs of Leather Gloves>
-Type        <ITEM_IDX_GLOVES>
-Value       50.0
-Level       1
-AC          2.0
-Weight      2.0
-Color        <225,225,50,255>
-}
-
-Item <Set of Gauntlets>
-{
-Plural        <Sets of Gauntlets>
-Type        <ITEM_IDX_GLOVES>
-Value       50.0
-Level       1
-AC          4.0
-Weight      2.0
-Color        <225,225,50,255>
-}
-
-# Helmets
-Item <Steel Cap>
-{
-Plural        <Steel Caps>
-Type        <ITEM_IDX_HELMET>
-Value       150.0
-Level       7
-AC          3.0
-Weight      6.0
-Color        <225,225,50,255>
-}
-
-Item <Steel Helm>
-{
-Plural        <Steel Helms>
-Type        <ITEM_IDX_HELMET>
-Value       150.0
-Level       10
-AC          5.0
-Weight      2.0
-Color        <225,225,50,255>
-}
-
-# Light Sources
-Item <Torch>
-{
-Plural      <Torches>
-Type        <ITEM_IDX_TORCH>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LIGHT>
-Value       10.0
-Level       1
-Weight      1.0
-Radius      3
-Duration    3000.0
-Color        <225,225,50,255>
-}
-
-Item <Brass Lantern>
-{
-Plural        <Brass Lanterns>
-Type        <ITEM_IDX_TORCH>
-Effect       <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LIGHT>
-Value       10.0
-Flags       <ITEM_FLAG_NEEDSAMMO>
-Level       5
-Weight      2.0
-Radius      5
-Duration    7500.0
-Color        <225,225,50,255>
-}
-
-Item <Flask of Oil>
-{
-Plural      <Flasks of Oil>
-Type        <ITEM_IDX_FUEL>
-Effect      <EFFECT_TYPE_GAIN>,<EFFECT_FLAG_FUEL>
-Value       10.0
-Level       4
-Weight      0.5
-Duration    5000.0
-Color       <225,225,50,255>
-Flags       <ITEM_FLAG_STACKS>
-}
-
-# Rings
-Item <Ring of Invisibility>
-{
-    Plural        <Rings of Invisibility>
-    Type        <ITEM_IDX_RING>
-    Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_INVISIBLE>
-    Value       1000.0
-    Level       20
-    Weight      0.2
-    Color        <225,225,50,255>
-}
-
-# Potions
-Item <Potion of Minor Healing>
-{
-    Plural      <Potions of Minor Healing>
-    Type        <ITEM_IDX_POTION>
-    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_HP>
-    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_POISON>
-    Effect      <EFFECT_TYPE_HEAL>,<EFFECT_FLAG_BLIND>
-    Damage      1d20 #  "healing" damage
-    Value       100.0
-    Level       2
-    Weight      0.2
-    Flags       <ITEM_FLAG_STACKS>
-}
-
-Item <Potion of Resist Fire>
-{
-Plural      <Potions of Resist Fire>
-Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FIRE>,<EFFECT_MOD_RESIST>
-Value       200.0
-Level       4
-Weight      0.2
-Duration    150.0
-Flags       <ITEM_FLAG_STACKS>
-}
-
-Item <Potion of Infravision>
-{
-Plural      <Potions of Infravision>
-Type        <ITEM_IDX_POTION>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_INFRA>
-Value       80.0
-Level       4
-Weight      0.2
-Duration    100.0
-Flags       <ITEM_FLAG_STACKS>
-}
-
-Item <Ring of Levitation>
-{
-Plural        <Rings of Levitation>
-Type        <ITEM_IDX_RING>
-Effect       <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_LEVITATE>
-Value       300.0
-Level       20
-Weight      0.2
-Color        <225,225,50,255>
-}
-
-Item <Ring of Telepathy>
-{
-Plural        <Rings of Telepathy>
-Type        <ITEM_IDX_RING>
-Effect       <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ESP>
-Value       300.0
-Level       20
-Weight      0.2
-Color        <225,225,50,255>
-}
-
-Item <Ring of Fire Resistance>
-{
-Plural        <Rings of Fire Resistance>
-Type        <ITEM_IDX_RING>
-Value       300.0
-Level       10
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_FIRE>,<EFFECT_MOD_RESIST>
-Weight      0.2
-Color        <225,225,50,255>
-}
-
-Item <Ring of Protection>
-{
-    Plural        <Rings of Protection>
-    Type        <ITEM_IDX_RING>
-    ACBonus     <1d20>
-    Value       1000.0
-    Level       20
-    Weight      0.2
-    Color        <225,50,225,255>
-}
-
-# Scrolls
-Item <Scroll of Light>
-{
-Plural      <Scrolls of Light>
-Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_LIGHT>
-Value       20.0
-Level       1
-Weight      2.0
-Color       <255,255,255,255>
-Flags       <ITEM_FLAG_STACKS>
-}
-
-Item <Scroll of Telepathy>
-{
-Plural      <Scrolls of Telepathy>
-Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_ESP>
-Value       80.0
-Level       4
-Weight      0.2
-Duration    100.0
-Color       <215,215,80,255>
-Flags       <ITEM_FLAG_STACKS>
-}
-
-Item <Scroll of Remove Curse>
-{
-Plural      <Scrolls of Remove Curse>
-Type        <ITEM_IDX_SCROLL>
-Effect      <EFFECT_TYPE_DESTROY>,<ITEM_FLAG_CURSED>
-Value       100.0
-Level       1
-Weight      2.0
-Color       <225,225,50,255>
-Flags       <ITEM_FLAG_STACKS>
-}
-
-# Shields
-Item <Large Steel Shield>
-{
-    Plural        <Large Steel Shields>
-    Type        <ITEM_IDX_SHIELD>
-    Value        150.0
-    Flags       <ITEM_FLAG_OFFHAND>
-    Level        2
-    AC           6.0
-    Weight       10.0
-    Color        <115,112,121,255>
-}
-
-Item <Small Steel Shield>
-{
-    Plural        <Small Steel Shields>
-    Type        <ITEM_IDX_SHIELD>
-    Value        100.0
-    Flags       <ITEM_FLAG_OFFHAND>
-    Level        2
-    AC           4.0
-    Weight       10.0
-    Color        <115,112,121,255>
-}
-
-Item <Small Wooden Shield>
-{
-    Plural        <Small Wooden Shields>
-    Type        <ITEM_IDX_SHIELD>
-    Value       10.0
-    Flags       <ITEM_FLAG_OFFHAND>
-    Level       1
-    AC          2.0
-    Weight      10.0
-    Color        <150,100,50,255>
-}
-
-Item <Steel Shield>
-{
-    Plural      <Steel Shields>
-    Type        <ITEM_IDX_SHIELD>
-    Value        125.0
-    Flags       <ITEM_FLAG_OFFHAND>
-    Level        2
-    AC           5.0
-    Weight       10.0
-    Color        <115,112,121,255>
-}
-
-# Tools
-Item <Shovel>
-{
-Plural        <Shovels>
-Type        <ITEM_IDX_SHOVEL>
-Value       15.0
-Level       1
-Weight      2.0
-Color        <225,225,50,255>
-}
-
-Item <Pickaxe>
-{
-Plural        <Pickaxes>
-Type        <ITEM_IDX_SHOVEL>
-Value       50.0
-Level       1
-Weight      2.0
-Color        <225,225,50,255>
-}
-
-# Wands
-Item <Wand of Light>
-{
-Plural      <Wands of Light>
-Type        <ITEM_IDX_WAND>
-Effect      <EFFECT_TYPE_HIT>,<EFFECT_FLAG_LIGHT>,<EFFECT_MOD_LINE>
-Effect      <EFFECT_TYPE_CREATE>,<EFFECT_FLAG_LIGHT>
-Damage      1d5 #  "bright light" damage
-Value       100.0
-Level       1
-Weight      4.0
-Color       <255,255,255,255>
-Flags       <ITEM_FLAG_STACKS,ITEM_FLAG_NO_COLLIDE>
-}
-
-# Weapons
 Item <Bastard sword>
 {
     Plural        <Bastard  swords>
     Type        <ITEM_IDX_SWORD>
     Value        250.0
-    Level        5
+    Level        25
     Damage       <2d8>
     Weight       10.0
     Speed        6.0
     Color        <200,200,200,255>
 }
 
-Item <Battle Axe>
-{
-    Plural        <Battle  Axes>
-    Type        <ITEM_IDX_AXE>
-    Value        600.0
-    Flags       <ITEM_FLAG_2HANDED>
-    Level        10
-    Damage       <2d4>
-    Weight       7.5
-    Speed        4.0
-    Color        <200,200,200,255>
-}
-
-Item <Battle Mace>
-{
-    Plural        <Battle Maces>
-    Type        <ITEM_IDX_MACE>
-    Value        80.0
-    Flags       <ITEM_FLAG_2HANDED>
-    Level        110
-    Damage       <2d3>
-    Weight       10.0
-    Speed        7.0
-    Color        <200,200,200,255>
-}
-
-Item <Club>
-{
-    Plural        <Clubs>
-    Type        <ITEM_IDX_MACE>
-    Value        600.0
-    Level        10
-    Damage       <2d3>
-    Weight       3.0
-    Speed        4.0
-    Color        <200,200,200,255>
-}
+# --- Daggers ---
 
 Item <Dagger>
 {
@@ -515,104 +142,118 @@ Item <Dagger>
     Color        <200,200,200,255>
 }
 
-Item <Glaive>
-{
-    Plural        <Glaives>
-    Type        <ITEM_IDX_POLEARM>
-    Value        60.0
-    Flags       <ITEM_FLAG_2HANDED>
-    Level        10
-    Damage       <2d5>
-    Weight       7.5
-    Speed        8.0
-    Color        <200,200,200,255>
-}
-
-Item <Halberd>
-{
-    Plural        <Halberds>
-    Type        <ITEM_IDX_POLEARM>
-    Value        90.0
-    Flags       <ITEM_FLAG_2HANDED>
-    Level        10
-    Damage       <2d5>
-    Weight       17.5
-    Speed        9.0
-    Color        <200,200,200,255>
-}
+# --- Axes ---
 
 Item <Hand Axe>
 {
-    Plural        <Battle  Axes>
+    Plural        <Hand Axes>
     Type        <ITEM_IDX_AXE>
     Value        150.0
-    Level        7
+    Level        8
     Damage       <2d4>
     Weight       3.5
     Speed        7.0
     Color        <200,200,200,255>
 }
+Item <Battle Axe>
+{
+    Plural        <Battle  Axes>
+    Type        <ITEM_IDX_AXE>
+    Value        600.0
+    Flags       <ITEM_FLAG_2HANDED>
+    Level        25
+    Damage       <2d4>
+    Weight       7.5
+    Speed        4.0
+    Color        <200,200,200,255>
+}
 
+# --- Maces & Clubs ---
+
+Item <Club>
+{
+    Plural        <Clubs>
+    Type        <ITEM_IDX_MACE>
+    Value        600.0
+    Level        5
+    Damage       <2d3>
+    Weight       3.0
+    Speed        4.0
+    Color        <200,200,200,255>
+}
+Item <Mace>
+{
+    Plural        <Maces>
+    Type        <ITEM_IDX_MACE>
+    Value        80.0
+    Level        14
+    Damage       <1d8>
+    Weight       10.0
+    Speed        7.0
+    Color        <200,200,200,255>
+}
+Item <Morning Star>
+{
+    Plural        <Morning Stars>
+    Type        <ITEM_IDX_MACE>
+    Value        50.0
+    Level        20
+    Damage       <2d4>
+    Weight       12.5
+    Speed        7.0
+    Color        <200,200,200,255>
+}
+Item <War Hammer>
+{
+    Plural        <War hammers>
+    Type        <ITEM_IDX_MACE>
+    Value        10.0
+    Flags       <ITEM_FLAG_2HANDED>
+    Level        20
+    Damage       <1d5>
+    Weight       5.0
+    Speed        4.0
+    Color        <200,200,200,255>
+}
+Item <Battle Mace>
+{
+    Plural        <Battle Maces>
+    Type        <ITEM_IDX_MACE>
+    Value        80.0
+    Flags       <ITEM_FLAG_2HANDED>
+    Level        28
+    Damage       <2d3>
+    Weight       10.0
+    Speed        7.0
+    Color        <200,200,200,255>
+}
+
+# --- Spears & Lances ---
+
+Item <Spear>
+{
+    Plural        <Spears>
+    Type        <ITEM_IDX_SPEAR>
+    Value        10.0
+    Level        8
+    Damage       <2d4>
+    Weight       5.0
+    Speed        7.0
+    Color        <200,200,200,255>
+}
 Item <Lance>
 {
     Plural        <Lances>
     Type        <ITEM_IDX_SPEAR>
     Value        60.0
-    Level        10
+    Level        20
     Damage       <3d6>
     Weight       15.0
     Speed        6.0
     Color        <200,200,200,255>
 }
 
-Item <Long Bow>
-{
-    Plural        <Long Bows>
-    Type        <ITEM_IDX_BOW>
-    Value        250.0
-    Flags       <ITEM_FLAG_NEEDSAMMO>
-    Level        5
-    Damage       <1d8>
-    Weight       10.0
-    Speed        6.0
-    Color        <200,200,200,255>
-}
-
-Item <Long Sword>
-{
-    Plural        <Long swords>
-    Type        <ITEM_IDX_SWORD>
-    Value       150.0
-    Level       1
-    Damage      <1d10>
-    Weight      6.0
-    Speed       5.0
-    Color        <200,200,200,255>
-}
-
-Item <Mace>
-{
-    Plural        <Maces>
-    Type        <ITEM_IDX_MACE>
-    Value        80.0
-    Level        10
-    Damage       <1d8>
-    Weight       10.0
-    Speed        7.0
-    Color        <200,200,200,255>
-}
-
-Item <Morning Star>
-{
-    Plural        <Morning Stars>
-    Type        <ITEM_IDX_MACE>
-    Value        50.0
-    Level        10
-    Damage       <2d4>
-    Weight       12.5
-    Speed        7.0
-    Color        <200,200,200,255>
-}
+# --- Polearms ---
 
 Item <Quarter Staff>
 {
@@ -620,59 +261,1655 @@ Item <Quarter Staff>
     Type        <ITEM_IDX_POLEARM>
     Value       15.0
     Flags       <ITEM_FLAG_2HANDED>
-    Level        10
+    Level        8
     Damage       1d6
     Weight        5.0
     Speed        4.0
     Color        <89,90,91,255>
 }
-
-Item <Scimitar>
-{
-Plural        <Scimitar>>
-Type        <ITEM_IDX_SWORD>
-Value     150.0
-Level        10
-Damage       1d8
-Weight        4.0
-Speed         4.0
-Color        <200,200,200,255>
-}
-
-Item <Spear>
-{
-    Plural        <Spears>
-    Type        <ITEM_IDX_SPEAR>
-    Value        10.0
-    Level        10
-    Damage       <2d4>
-    Weight       5.0
-    Speed        7.0
-    Color        <200,200,200,255>
-}
-
 Item <Trident>
 {
 Plural        <Tridents>
 Type        <ITEM_IDX_POLEARM>
 Value     40.0
 Flags       <ITEM_FLAG_2HANDED>
-Level        10
+Level        18
 Damage       3d4
 Weight        4.0
 Speed         7.0
 Color        <200,200,200,255>
 }
-
-Item <War Hammer>
+Item <Glaive>
 {
-    Plural        <War hammers>
-    Type        <ITEM_IDX_MACE>
-    Value        10.0
+    Plural        <Glaives>
+    Type        <ITEM_IDX_POLEARM>
+    Value        60.0
     Flags       <ITEM_FLAG_2HANDED>
-    Level        10
-    Damage       <1d5>
-    Weight       5.0
-    Speed        4.0
+    Level        22
+    Damage       <2d5>
+    Weight       7.5
+    Speed        8.0
     Color        <200,200,200,255>
+}
+Item <Halberd>
+{
+    Plural        <Halberds>
+    Type        <ITEM_IDX_POLEARM>
+    Value        90.0
+    Flags       <ITEM_FLAG_2HANDED>
+    Level        28
+    Damage       <2d5>
+    Weight       17.5
+    Speed        9.0
+    Color        <200,200,200,255>
+}
+
+# --- Bows ---
+
+Item <Short Bow>
+{
+    Plural      <Short Bows>
+    Type        <ITEM_IDX_BOW>
+    Value       120.0
+    Flags       <ITEM_FLAG_NEEDSAMMO>
+    Level       3
+    Damage      <1d5>
+    Weight      3.0
+    Speed       4.0
+    Color       <150,100,50,255>
+}
+Item <Short Bow>
+{
+    Plural      <Short Bows>
+    Type        <ITEM_IDX_BOW>
+    Value       120.0
+    Flags       <ITEM_FLAG_NEEDSAMMO>
+    Level       3
+    Damage      <1d5>
+    Weight      3.0
+    Speed       4.0
+    Color       <150,100,50,255>
+}
+Item <Long Bow>
+{
+    Plural        <Long Bows>
+    Type        <ITEM_IDX_BOW>
+    Value        250.0
+    Flags       <ITEM_FLAG_NEEDSAMMO>
+    Level        20
+    Damage       <1d8>
+    Weight       10.0
+    Speed        6.0
+    Color        <200,200,200,255>
+}
+
+# --- Tools (Shovels / Pickaxes) ---
+
+Item <Pickaxe>
+{
+Plural        <Pickaxes>
+Type        <ITEM_IDX_SHOVEL>
+Value       50.0
+Level       1
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Shovel>
+{
+Plural        <Shovels>
+Type        <ITEM_IDX_SHOVEL>
+Value       15.0
+Level       1
+Weight      2.0
+Color        <225,225,50,255>
+}
+
+# --- Body Armor ---
+
+Item <Robe>
+{
+Plural        <Robes>
+Type        <ITEM_IDX_ARMOR>
+Value       6.0
+Level       1
+AC          1.0
+Weight      1.0
+Color        <225,225,50,255>
+}
+Item <Leather Armor>
+{
+Plural        <Sets of Leather Armor>
+Type        <ITEM_IDX_ARMOR>
+Value       50.0
+Level       5
+AC          8.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Padded Armor>
+{
+Plural        <Sets of Padded Armor>
+Type        <ITEM_IDX_ARMOR>
+Value       40.0
+Level       7
+AC          15.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Splint Mail>
+{
+Plural        <Sets of Splint Mail>
+Type        <ITEM_IDX_ARMOR>
+Value       40.0
+Level       32
+AC          25.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Chain Mail>
+{
+Plural        <Sets of Chain Mail>
+Type        <ITEM_IDX_ARMOR>
+Value       40.0
+Level       38
+AC          22.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Plate Mail Armor>
+{
+Plural        <Sets of Plate Mail Armor>
+Type        <ITEM_IDX_ARMOR>
+Value       40.0
+Level       52
+AC          38.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+
+# --- Shields ---
+
+Item <Small Wooden Shield>
+{
+    Plural        <Small Wooden Shields>
+    Type        <ITEM_IDX_SHIELD>
+    Value       10.0
+    Flags       <ITEM_FLAG_OFFHAND>
+    Level       5
+    AC          2.0
+    Weight      10.0
+    Color        <150,100,50,255>
+}
+Item <Small Steel Shield>
+{
+    Plural        <Small Steel Shields>
+    Type        <ITEM_IDX_SHIELD>
+    Value        100.0
+    Flags       <ITEM_FLAG_OFFHAND>
+    Level        14
+    AC           4.0
+    Weight       10.0
+    Color        <115,112,121,255>
+}
+Item <Steel Shield>
+{
+    Plural      <Steel Shields>
+    Type        <ITEM_IDX_SHIELD>
+    Value        125.0
+    Flags       <ITEM_FLAG_OFFHAND>
+    Level        16
+    AC           5.0
+    Weight       10.0
+    Color        <115,112,121,255>
+}
+Item <Large Steel Shield>
+{
+    Plural        <Large Steel Shields>
+    Type        <ITEM_IDX_SHIELD>
+    Value        150.0
+    Flags       <ITEM_FLAG_OFFHAND>
+    Level        22
+    AC           6.0
+    Weight       10.0
+    Color        <115,112,121,255>
+}
+
+# --- Helmets ---
+
+Item <Leather Cap>
+{
+    Plural      <Leather Caps>
+    Type        <ITEM_IDX_HELMET>
+    Value       8.0
+    Level       1
+    AC          1.0
+    Weight      1.0
+    Color       <139,90,43,255>
+}
+Item <Leather Cap>
+{
+    Plural      <Leather Caps>
+    Type        <ITEM_IDX_HELMET>
+    Value       8.0
+    Level       1
+    AC          1.0
+    Weight      1.0
+    Color       <139,90,43,255>
+}
+Item <Steel Cap>
+{
+Plural        <Steel Caps>
+Type        <ITEM_IDX_HELMET>
+Value       150.0
+Level       12
+AC          3.0
+Weight      6.0
+Color        <225,225,50,255>
+}
+Item <Steel Helm>
+{
+Plural        <Steel Helms>
+Type        <ITEM_IDX_HELMET>
+Value       150.0
+Level       18
+AC          5.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Helm of Infravision>
+{
+Plural      <Helms of Infravision>
+Type        <ITEM_IDX_HELMET>
+Effect      <Infravision>
+Value       500.0
+Level       28
+AC          4.0
+Weight      2.0
+Color       <225,100,50,255>
+Flags       <ITEM_FLAG_MAGIC>
+}
+Item <Helm of Telepathy>
+{
+Plural      <Helms of Telepathy>
+Type        <ITEM_IDX_HELMET>
+Effect      <ESP>
+Value       2000.0
+Level       42
+AC          4.0
+Weight      2.0
+Color       <150,150,255,255>
+Flags       <ITEM_FLAG_MAGIC>
+}
+Item <Helmet of Lordly Protection>
+{
+Plural      <Helmets of Lordly Protection>
+Type        <ITEM_IDX_HELMET>
+Effect      <Immune Fire>
+Value       3000.0
+Level       65
+AC          6.0
+Weight      3.0
+Color       <255,150,50,255>
+Flags       <ITEM_FLAG_MAGIC>
+}
+
+# --- Cloaks ---
+
+Item <Cloak>
+{
+Plural        <Cloaks>
+Type        <ITEM_IDX_CLOAK>
+Value       5.0
+Level       1
+AC          1.0
+Weight      1.0
+Color        <225,225,50,255>
+}
+Item <Cloak of Protection>
+{
+Plural      <Cloaks of Protection>
+Type        <ITEM_IDX_CLOAK>
+ACBonus     <1d10>
+Value       500.0
+Level       25
+AC          1.0
+Weight      1.0
+Color       <200,200,255,255>
+Flags       <ITEM_FLAG_MAGIC>
+}
+
+# --- Gloves & Gauntlets ---
+
+Item <Pair of Leather Gloves>
+{
+Plural        <Pairs of Leather Gloves>
+Type        <ITEM_IDX_GLOVES>
+Value       50.0
+Level       1
+AC          2.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Set of Gauntlets>
+{
+Plural        <Sets of Gauntlets>
+Type        <ITEM_IDX_GLOVES>
+Value       50.0
+Level       16
+AC          4.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Gloves of Elvenkind>
+{
+Plural      <Pairs of Gloves of Elvenkind>
+Type        <ITEM_IDX_GLOVES>
+Effect      <Speed>
+Speed       1.0
+Value       4000.0
+Level       44
+AC          2.0
+Weight      1.0
+Color       <150,255,150,255>
+Flags       <ITEM_FLAG_MAGIC>
+}
+
+# --- Boots ---
+
+Item <Pair of Leather Boots>
+{
+Plural        <Pairs of Leather Boots>
+Type        <ITEM_IDX_BOOTS>
+Value       20.0
+Level       1
+AC          2.0
+Weight      2.0
+Color        <225,225,50,255>
+}
+Item <Pair of Steel Boots>
+{
+Plural        <Pairs of Steel Boots>
+Type        <ITEM_IDX_BOOTS>
+Value       20.0
+Level       16
+AC          5.0
+Weight      4.0
+Color        <225,225,50,255>
+}
+Item <Boots of Speed>
+{
+Plural      <Pairs of Boots of Speed>
+Type        <ITEM_IDX_BOOTS>
+Effect      <Speed>
+Speed       1.0
+Value       5000.0
+Level       48
+AC          2.0
+Weight      3.0
+Color       <255,200,50,255>
+Flags       <ITEM_FLAG_MAGIC>
+}
+
+# --- Rings ---
+
+Item <Ring of Tunneling>
+{
+Plural      <Rings of Tunneling>
+Type        <ITEM_IDX_RING>
+Effect      <Tunneling>
+Value       300.0
+Level       8
+Weight      0.2
+Color       <180,140,100,255>
+}
+Item <Ring of Cold Resistance>
+{
+Plural      <Rings of Cold Resistance>
+Type        <ITEM_IDX_RING>
+Effect      <Resist Cold>
+Value       300.0
+Level       12
+Weight      0.2
+Color       <50,150,255,255>
+}
+Item <Ring of Fire Resistance>
+{
+Plural        <Rings of Fire Resistance>
+Type        <ITEM_IDX_RING>
+Value       300.0
+Level       12
+Effect      <Resist Fire>
+Weight      0.2
+Color        <225,225,50,255>
+}
+Item <Ring of Greed>
+{
+Plural      <Rings of Greed>
+Type        <ITEM_IDX_RING>
+Effect      <Treasure Sense>
+Value       500.0
+Level       15
+Weight      0.2
+Color       <255,200,0,255>
+}
+Item <Ring of Searching>
+{
+Plural      <Rings of Searching>
+Type        <ITEM_IDX_RING>
+Effect      <Searching>
+Value       1000.0
+Level       15
+Weight      0.2
+Color       <200,255,200,255>
+}
+Item <Ring of Acid Resistance>
+{
+Plural      <Rings of Acid Resistance>
+Type        <ITEM_IDX_RING>
+Effect      <Resist Acid>
+Value       300.0
+Level       18
+Weight      0.2
+Color       <100,255,100,255>
+}
+Item <Ring of Electricity Resistance>
+{
+Plural      <Rings of Electricity Resistance>
+Type        <ITEM_IDX_RING>
+Effect      <Resist Electricity>
+Value       300.0
+Level       18
+Weight      0.2
+Color       <255,255,100,255>
+}
+Item <Ring of Sensing>
+{
+Plural      <Rings of Sensing>
+Type        <ITEM_IDX_RING>
+Effect      <Treasure Sense>
+Value       800.0
+Level       25
+Weight      0.2
+Color       <255,215,0,255>
+}
+Item <Ring of Levitation>
+{
+Plural        <Rings of Levitation>
+Type        <ITEM_IDX_RING>
+Effect       <Levitation>
+Value       300.0
+Level       30
+Weight      0.2
+Color        <225,225,50,255>
+}
+Item <Ring of Invisibility>
+{
+    Plural        <Rings of Invisibility>
+    Type        <ITEM_IDX_RING>
+    Effect      <Invisibility>
+    Value       1000.0
+    Level       32
+    Weight      0.2
+    Color        <225,225,50,255>
+}
+Item <Ring of Protection>
+{
+    Plural        <Rings of Protection>
+    Type        <ITEM_IDX_RING>
+    ACBonus     <1d20>
+    Value       1000.0
+    Level       32
+    Weight      0.2
+    Color        <225,50,225,255>
+}
+Item <Ring of Telepathy>
+{
+Plural        <Rings of Telepathy>
+Type        <ITEM_IDX_RING>
+Effect       <ESP>
+Value       300.0
+Level       35
+Weight      0.2
+Color        <225,225,50,255>
+}
+Item <Ring of Free Action>
+{
+Plural      <Rings of Free Action>
+Type        <ITEM_IDX_RING>
+Effect      <Free Action>
+Value       500.0
+Level       40
+Weight      0.2
+Color       <200,200,255,255>
+}
+Item <Ring of Speed>
+{
+Plural      <Rings of Speed>
+Type        <ITEM_IDX_RING>
+Effect      <Speed>
+Value       3000.0
+Level       52
+Weight      0.2
+Color       <255,200,50,255>
+}
+
+# --- Light Sources ---
+
+Item <Torch>
+{
+Plural      <Torches>
+Type        <ITEM_IDX_TORCH>
+Effect      <Light>
+Value       10.0
+Level       1
+Weight      1.0
+Radius      3
+Duration    3000.0
+Color        <225,225,50,255>
+}
+Item <Brass Lantern>
+{
+Plural        <Brass Lanterns>
+Type        <ITEM_IDX_TORCH>
+Effect       <Light>
+Value       10.0
+Flags       <ITEM_FLAG_NEEDSAMMO>
+Level       5
+Weight      2.0
+Radius      5
+Duration    7500.0
+Color        <225,225,50,255>
+}
+
+# --- Fuel ---
+
+Item <Flask of Oil>
+{
+Plural      <Flasks of Oil>
+Type        <ITEM_IDX_FUEL>
+Effect      <Gain Fuel>
+Value       10.0
+Level       4
+Weight      0.5
+Duration    5000.0
+Color       <225,225,50,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+# --- Scrolls ---
+
+Item <Scroll of Door/Stair Location>
+{
+Plural      <Scrolls of Door/Stair Location>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Detect Doors>
+Value       40.0
+Level       1
+Weight      0.2
+Color       <200,200,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Light>
+{
+Plural      <Scrolls of Light>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Light Area>
+Value       20.0
+Level       1
+Weight      2.0
+Color       <255,255,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Phase Door>
+{
+Plural      <Scrolls of Phase Door>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Phase Door>
+Value       80.0
+Level       3
+Weight      0.2
+Color       <200,200,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Detect Monsters>
+{
+Plural      <Scrolls of Detect Monsters>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Detect Monsters>
+Value       60.0
+Level       5
+Weight      0.2
+Color       <255,200,200,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Detect Traps>
+{
+Plural      <Scrolls of Detect Traps>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Detect Traps>
+Value       50.0
+Level       5
+Weight      0.2
+Color       <200,255,200,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Remove Curse>
+{
+Plural      <Scrolls of Remove Curse>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Remove Curse>
+Value       100.0
+Level       5
+Weight      2.0
+Color       <225,225,50,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Treasure Detection>
+{
+Plural      <Scrolls of Treasure Detection>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Detect Treasure>
+Value       60.0
+Level       5
+Weight      0.2
+Color       <255,215,0,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Telepathy>
+{
+Plural      <Scrolls of Telepathy>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Timed ESP>
+Value       80.0
+Level       6
+Weight      0.2
+Duration    100.0
+Color       <215,215,80,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Blessing>
+{
+Plural      <Scrolls of Blessing>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Timed Blessing>
+Duration    50.0
+Value       80.0
+Level       8
+Weight      0.2
+Color       <255,215,100,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Curse Object>
+{
+Plural      <Scrolls of Curse Object>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Curse Object>
+Value       0.0
+Level       8
+Weight      0.2
+Color       <150,50,150,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Scare Monster>
+{
+Plural      <Scrolls of Scare Monster>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Cause Fear>
+Value       80.0
+Level       8
+Weight      0.2
+Color       <200,150,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Identify>
+{
+Plural      <Scrolls of Identify>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Identify>
+Value       50.0
+Level       10
+Weight      0.2
+Color       <255,255,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Teleportation>
+{
+Plural      <Scrolls of Teleportation>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Teleport Self>
+Value       200.0
+Level       15
+Weight      0.2
+Color       <180,180,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Word of Recall>
+{
+Plural      <Scrolls of Word of Recall>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Recall>
+Value       200.0
+Level       18
+Weight      0.2
+Color       <200,200,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Summon Monsters>
+{
+Plural      <Scrolls of Summon Monsters>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Summon Monsters>
+Value       10.0
+Level       20
+Weight      0.2
+Color       <255,100,100,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Enchant Armor>
+{
+Plural      <Scrolls of Enchant Armor>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Enchant Armor>
+Value       200.0
+Level       22
+Weight      0.2
+Color       <200,200,220,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Enchant Weapon Damage>
+{
+Plural      <Scrolls of Enchant Weapon Damage>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Enchant to Damage>
+Value       200.0
+Level       22
+Weight      0.2
+Color       <200,200,220,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Enchant Weapon to Hit>
+{
+Plural      <Scrolls of Enchant Weapon to Hit>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Enchant to Hit>
+Value       200.0
+Level       22
+Weight      0.2
+Color       <200,200,220,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Magic Mapping>
+{
+Plural      <Scrolls of Magic Mapping>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Partial Mapping>
+Value       150.0
+Level       25
+Weight      0.2
+Color       <200,255,200,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Mass Sleep>
+{
+Plural      <Scrolls of Mass Sleep>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Mass Sleep>
+Value       150.0
+Level       25
+Weight      0.2
+Color       <150,150,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Recharging>
+{
+Plural      <Scrolls of Recharging>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Recharge>
+Value       200.0
+Level       25
+Weight      0.2
+Color       <100,200,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of *Enchant Armor*>
+{
+Plural      <Scrolls of *Enchant Armor*>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Star-Enchant Armor>
+Value       600.0
+Level       52
+Weight      0.2
+Color       <255,255,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of *Enchant Weapon*>
+{
+Plural      <Scrolls of *Enchant Weapon*>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Star-Enchant Weapon>
+Value       600.0
+Level       52
+Weight      0.2
+Color       <255,255,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of *Recharging*>
+{
+Plural      <Scrolls of *Recharging*>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Star-Recharge>
+Value       600.0
+Level       52
+Weight      0.2
+Color       <50,255,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of *Magic Mapping*>
+{
+Plural      <Scrolls of *Magic Mapping*>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Full Mapping>
+Value       500.0
+Level       58
+Weight      0.2
+Color       <150,255,150,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+# --- Potions ---
+
+Item <Potion of Apple Juice>
+{
+Plural      <Potions of Apple Juice>
+Type        <ITEM_IDX_POTION>
+Value       1.0
+Level       1
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS,ITEM_FLAG_IDENTIFIED>
+}
+Item <Potion of Minor Healing>
+{
+    Plural      <Potions of Minor Healing>
+    Type        <ITEM_IDX_POTION>
+    Effect      <Minor Healing>
+    Effect      <Cure Poison>
+    Effect      <Cure Blindness>
+    Damage      1d20 #  "healing" damage
+    Value       100.0
+    Level       3
+    Weight      0.2
+    Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Blindness>
+{
+Plural      <Potions of Blindness>
+Type        <ITEM_IDX_POTION>
+Effect      <Cause Blindness>
+Value       0.0
+Level       4
+Weight      0.2
+Duration    50.0
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Confusion>
+{
+Plural      <Potions of Confusion>
+Type        <ITEM_IDX_POTION>
+Effect      <Inflict Confusion>
+Value       0.0
+Level       4
+Weight      0.2
+Duration    30.0
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Sleep>
+{
+Plural      <Potions of Sleep>
+Type        <ITEM_IDX_POTION>
+Effect      <Inflict Sleep>
+Duration    30.0
+Value       10.0
+Level       4
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Slow Poison>
+{
+Plural      <Potions of Slow Poison>
+Type        <ITEM_IDX_POTION>
+Effect      <Resist Poison>
+Duration    100.0
+Value       50.0
+Level       5
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Courage>
+{
+Plural      <Potions of Courage>
+Type        <ITEM_IDX_POTION>
+Effect      <Cure Fear>
+Effect      <Resist Fear>
+Duration    50.0
+Value       100.0
+Level       8
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Cure Poison>
+{
+Plural      <Potions of Cure Poison>
+Type        <ITEM_IDX_POTION>
+Effect      <Cure Poison>
+Value       75.0
+Level       8
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Flames>
+{
+Plural      <Potions of Flames>
+Type        <ITEM_IDX_POTION>
+Effect      <Inflict Fire>
+Value       0.0
+Level       8
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Poison>
+{
+Plural      <Potions of Poison>
+Type        <ITEM_IDX_POTION>
+Effect      <Inflict Poison>
+Value       0.0
+Level       8
+Weight      0.2
+Duration    80.0
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Infravision>
+{
+Plural      <Potions of Infravision>
+Type        <ITEM_IDX_POTION>
+Effect      <Timed Infravision>
+Value       80.0
+Level       10
+Weight      0.2
+Duration    100.0
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Resist Cold>
+{
+Plural      <Potions of Resist Cold>
+Type        <ITEM_IDX_POTION>
+Effect      <Timed Resist Cold>
+Value       200.0
+Level       10
+Weight      0.2
+Duration    150.0
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Resist Fire>
+{
+Plural      <Potions of Resist Fire>
+Type        <ITEM_IDX_POTION>
+Effect      <Timed Resist Fire>
+Value       200.0
+Level       10
+Weight      0.2
+Duration    150.0
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Levitation>
+{
+Plural      <Potions of Levitation>
+Type        <ITEM_IDX_POTION>
+Effect      <Timed Levitation>
+Value       150.0
+Level       15
+Weight      0.2
+Duration    100.0
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Neutralize Poison>
+{
+Plural      <Potions of Neutralize Poison>
+Type        <ITEM_IDX_POTION>
+Effect      <Cure Poison>
+Effect      <Destroy Poison>
+Value       150.0
+Level       15
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Resist Acid>
+{
+Plural      <Potions of Resist Acid>
+Type        <ITEM_IDX_POTION>
+Effect      <Timed Resist Acid>
+Value       200.0
+Level       15
+Weight      0.2
+Duration    150.0
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Resist Electricity>
+{
+Plural      <Potions of Resist Electricity>
+Type        <ITEM_IDX_POTION>
+Effect      <Timed Resist Electricity>
+Value       200.0
+Level       15
+Weight      0.2
+Duration    150.0
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Invisibility>
+{
+Plural      <Potions of Invisibility>
+Type        <ITEM_IDX_POTION>
+Effect      <Timed Invisibility>
+Value       250.0
+Level       22
+Weight      0.2
+Duration    100.0
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Cure Light Wounds>
+{
+Plural      <Potions of Cure Light Wounds>
+Type        <ITEM_IDX_POTION>
+Effect      <Cure Light Wounds>
+Effect      <Cure Poison>
+Effect      <Cure Blindness>
+Damage      8d8
+Value       200.0
+Level       28
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Speed>
+{
+Plural      <Potions of Speed>
+Type        <ITEM_IDX_POTION>
+Effect      <Timed Speed>
+Value       300.0
+Level       35
+Weight      0.2
+Duration    80.0
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Cure Serious Wounds>
+{
+Plural      <Potions of Cure Serious Wounds>
+Type        <ITEM_IDX_POTION>
+Effect      <Cure Serious Wounds>
+Effect      <Cure Poison>
+Effect      <Cure Blindness>
+Effect      <Cure Confusion>
+Damage      16d8
+Value       400.0
+Level       48
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Cure Critical Wounds>
+{
+Plural      <Potions of Cure Critical Wounds>
+Type        <ITEM_IDX_POTION>
+Effect      <Major Healing>
+Effect      <Cure Poison>
+Effect      <Cure Blindness>
+Effect      <Cure Confusion>
+Effect      <Cure Fear>
+Damage      24d8
+Value       600.0
+Level       62
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of Healing>
+{
+Plural      <Potions of Healing>
+Type        <ITEM_IDX_POTION>
+Effect      <Greater Healing>
+Effect      <Cure Poison>
+Effect      <Cure Blindness>
+Effect      <Cure Confusion>
+Effect      <Cure Fear>
+Effect      <Cure Paralysis>
+Effect      <Cure Sleep>
+Damage      32d8
+Value       1000.0
+Level       68
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Potion of *Healing*>
+{
+Plural      <Potions of *Healing*>
+Type        <ITEM_IDX_POTION>
+Effect      <Massive Healing>
+Effect      <Cure Poison>
+Effect      <Cure Blindness>
+Effect      <Cure Confusion>
+Effect      <Cure Fear>
+Effect      <Cure Paralysis>
+Effect      <Cure Sleep>
+Damage      100d8
+Value       2500.0
+Level       82
+Weight      0.2
+Flags       <ITEM_FLAG_STACKS>
+}
+
+# --- Wands ---
+
+Item <Wand of Heal Monster>
+{
+Plural      <Wands of Heal Monster>
+Type        <ITEM_IDX_WAND>
+Effect      <Heal Monster>
+Charges     <2d6>
+Value       50.0
+Level       3
+Weight      4.0
+Color       <200,255,200,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Light>
+{
+Plural      <Wands of Light>
+Type        <ITEM_IDX_WAND>
+Effect      <Light Ray>
+Charges     <3d8>
+Value       100.0
+Level       3
+Weight      4.0
+Color       <255,255,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Stone to Mud>
+{
+Plural      <Wands of Stone to Mud>
+Type        <ITEM_IDX_WAND>
+Effect      <Stone to Mud>
+Charges     <2d4>
+Value       200.0
+Level       6
+Weight      4.0
+Color       <139,90,43,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Sleep>
+{
+Plural      <Wands of Sleep>
+Type        <ITEM_IDX_WAND>
+Effect      <Cause Sleep>
+Charges     <2d6>
+Value       250.0
+Level       8
+Weight      4.0
+Color       <150,150,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Confusion>
+{
+Plural      <Wands of Confusion>
+Type        <ITEM_IDX_WAND>
+Effect      <Cause Confusion>
+Charges     <2d6>
+Value       250.0
+Level       10
+Weight      4.0
+Color       <200,100,200,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Firebolts>
+{
+Plural      <Wands of Firebolts>
+Type        <ITEM_IDX_WAND>
+Effect      <Firebolt>
+Charges     <2d6>
+Value       300.0
+Level       10
+Weight      4.0
+Color       <255,100,50,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Fear>
+{
+Plural      <Wands of Fear>
+Type        <ITEM_IDX_WAND>
+Effect      <Cause Fear>
+Charges     <2d6>
+Value       300.0
+Level       12
+Weight      4.0
+Color       <200,150,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Frost>
+{
+Plural      <Wands of Frost>
+Type        <ITEM_IDX_WAND>
+Effect      <Frost Bolt>
+Charges     <2d6>
+Value       300.0
+Level       16
+Weight      4.0
+Color       <100,200,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Lightning>
+{
+Plural      <Wands of Lightning>
+Type        <ITEM_IDX_WAND>
+Effect      <Lightning Bolt>
+Charges     <2d6>
+Value       300.0
+Level       22
+Weight      4.0
+Color       <255,255,100,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Summoning>
+{
+Plural      <Wands of Summoning>
+Type        <ITEM_IDX_WAND>
+Effect      <Summon Monsters>
+Charges     <1d6>
+Value       200.0
+Level       22
+Weight      4.0
+Color       <255,100,100,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Teleport Away>
+{
+Plural      <Wands of Teleport Away>
+Type        <ITEM_IDX_WAND>
+Effect      <Teleport Away>
+Charges     <2d6>
+Value       400.0
+Level       25
+Weight      4.0
+Color       <180,180,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Acid>
+{
+Plural      <Wands of Acid>
+Type        <ITEM_IDX_WAND>
+Effect      <Acid Bolt>
+Charges     <2d6>
+Value       300.0
+Level       28
+Weight      4.0
+Color       <100,255,100,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Fireballs>
+{
+Plural      <Wands of Fireballs>
+Type        <ITEM_IDX_WAND>
+Effect      <Fireball>
+Charges     <1d4>
+Value       600.0
+Level       32
+Weight      4.0
+Color       <255,60,20,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Frost Balls>
+{
+Plural      <Wands of Frost Balls>
+Type        <ITEM_IDX_WAND>
+Effect      <Frost Ball>
+Charges     <1d4>
+Value       600.0
+Level       36
+Weight      4.0
+Color       <80,180,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Lightning Balls>
+{
+Plural      <Wands of Lightning Balls>
+Type        <ITEM_IDX_WAND>
+Effect      <Lightning Ball>
+Charges     <1d4>
+Value       600.0
+Level       40
+Weight      4.0
+Color       <255,255,80,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Paralyze>
+{
+Plural      <Wands of Paralyze>
+Type        <ITEM_IDX_WAND>
+Effect      <Cause Paralysis>
+Charges     <2d6>
+Value       300.0
+Level       40
+Weight      4.0
+Color       <255,200,100,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Probing>
+{
+Plural      <Wands of Probing>
+Type        <ITEM_IDX_WAND>
+Effect      <Probe>
+Charges     <2d6>
+Value       400.0
+Level       40
+Weight      4.0
+Color       <200,200,255,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Acid Balls>
+{
+Plural      <Wands of Acid Balls>
+Type        <ITEM_IDX_WAND>
+Effect      <Acid Ball>
+Charges     <1d4>
+Value       600.0
+Level       44
+Weight      4.0
+Color       <80,255,80,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
+# --- Staves ---
+
+Item <Staff of Cure Light Wounds>
+{
+Plural      <Staves of Cure Light Wounds>
+Type        <ITEM_IDX_STAFF>
+Effect      <Cure Light Wounds>
+Effect      <Cure Poison>
+Effect      <Cure Blindness>
+Charges     <2d4>
+Value       800.0
+Level       8
+Weight      6.0
+Color       <180,255,180,255>
+}
+Item <Staff of Light>
+{
+Plural      <Staves of Light>
+Type        <ITEM_IDX_STAFF>
+Effect      <Light Area>
+Charges     <3d8>
+Value       200.0
+Level       10
+Weight      6.0
+Color       <255,255,200,255>
+}
+Item <Staff of Healing>
+{
+Plural      <Staves of Healing>
+Type        <ITEM_IDX_STAFF>
+Effect      <Minor Healing>
+Effect      <Cure Poison>
+Charges     <2d6>
+Value       500.0
+Level       20
+Weight      6.0
+Color       <200,255,200,255>
+}
+Item <Staff of Mapping>
+{
+Plural      <Staves of Mapping>
+Type        <ITEM_IDX_STAFF>
+Effect      <Partial Mapping>
+Charges     <2d4>
+Value       400.0
+Level       20
+Weight      6.0
+Color       <200,200,150,255>
+}
+Item <Staff of Treasure Detection>
+{
+Plural      <Staves of Treasure Detection>
+Type        <ITEM_IDX_STAFF>
+Effect      <Detect Treasure>
+Charges     <2d6>
+Value       300.0
+Level       20
+Weight      6.0
+Color       <255,215,0,255>
+}
+Item <Staff of Sleep>
+{
+Plural      <Staves of Sleep>
+Type        <ITEM_IDX_STAFF>
+Effect      <Cause Sleep>
+Charges     <2d4>
+Value       300.0
+Level       23
+Weight      6.0
+Color       <150,150,255,255>
+}
+Item <Staff of Acid Resistance>
+{
+Plural      <Staves of Acid Resistance>
+Type        <ITEM_IDX_STAFF>
+Effect      <Timed Resist Acid>
+Charges     <2d4>
+Duration    100.0
+Value       400.0
+Level       25
+Weight      6.0
+Color       <100,255,100,255>
+}
+Item <Staff of Cold Resistance>
+{
+Plural      <Staves of Cold Resistance>
+Type        <ITEM_IDX_STAFF>
+Effect      <Timed Resist Cold>
+Charges     <2d4>
+Duration    100.0
+Value       400.0
+Level       25
+Weight      6.0
+Color       <100,200,255,255>
+}
+Item <Staff of Electricity Resistance>
+{
+Plural      <Staves of Electricity Resistance>
+Type        <ITEM_IDX_STAFF>
+Effect      <Timed Resist Electricity>
+Charges     <2d4>
+Duration    100.0
+Value       400.0
+Level       25
+Weight      6.0
+Color       <255,255,100,255>
+}
+Item <Staff of Fear>
+{
+Plural      <Staves of Fear>
+Type        <ITEM_IDX_STAFF>
+Effect      <Mass Fear>
+Charges     <2d4>
+Value       400.0
+Level       25
+Weight      6.0
+Color       <200,150,255,255>
+}
+Item <Staff of Fire Resistance>
+{
+Plural      <Staves of Fire Resistance>
+Type        <ITEM_IDX_STAFF>
+Effect      <Timed Resist Fire>
+Charges     <2d4>
+Duration    100.0
+Value       400.0
+Level       25
+Weight      6.0
+Color       <255,100,50,255>
+}
+Item <Staff of Protection>
+{
+Plural      <Staves of Protection>
+Type        <ITEM_IDX_STAFF>
+Effect      <Timed Blessing>
+Charges     <2d4>
+Duration    80.0
+Value       500.0
+Level       25
+Weight      6.0
+Color       <200,200,255,255>
+}
+Item <Staff of Starlight>
+{
+Plural      <Staves of Starlight>
+Type        <ITEM_IDX_STAFF>
+Effect      <Light Ray>
+Effect      <Light Area>
+Charges     <2d4>
+Value       600.0
+Level       25
+Weight      6.0
+Color       <255,255,255,255>
+}
+Item <Staff of Teleportation>
+{
+Plural      <Staves of Teleportation>
+Type        <ITEM_IDX_STAFF>
+Effect      <Teleport Self>
+Charges     <2d6>
+Value       300.0
+Level       25
+Weight      6.0
+Color       <100,200,255,255>
+}
+Item <Staff of Paralysis>
+{
+Plural      <Staves of Paralysis>
+Type        <ITEM_IDX_STAFF>
+Effect      <Mass Paralyze>
+Charges     <1d4>
+Value       600.0
+Level       30
+Weight      6.0
+Color       <255,255,100,255>
+}
+Item <Staff of Perception>
+{
+Plural      <Staves of Perception>
+Type        <ITEM_IDX_STAFF>
+Effect      <Identify>
+Charges     <2d6>
+Value       400.0
+Level       30
+Weight      6.0
+Color       <200,200,255,255>
+}
+Item <Staff of Summoning>
+{
+Plural      <Staves of Summoning>
+Type        <ITEM_IDX_STAFF>
+Effect      <Summon Monsters>
+Charges     <1d4>
+Value       300.0
+Level       30
+Weight      6.0
+Color       <255,100,100,255>
+}
+Item <Staff of Telepathy>
+{
+Plural      <Staves of Telepathy>
+Type        <ITEM_IDX_STAFF>
+Effect      <Timed ESP>
+Charges     <2d4>
+Duration    80.0
+Value       500.0
+Level       30
+Weight      6.0
+Color       <200,150,255,255>
+}
+Item <Staff of Mass Sleep>
+{
+Plural      <Staves of Mass Sleep>
+Type        <ITEM_IDX_STAFF>
+Effect      <Mass Sleep>
+Charges     <2d4>
+Value       400.0
+Level       35
+Weight      6.0
+Color       <150,150,255,255>
+}
+Item <Staff of Resistance>
+{
+Plural      <Staves of Resistance>
+Type        <ITEM_IDX_STAFF>
+Effect      <Timed Resist Fire>
+Effect      <Timed Resist Cold>
+Effect      <Timed Resist Electricity>
+Effect      <Timed Resist Acid>
+Charges     <1d4>
+Duration    80.0
+Value       1200.0
+Level       40
+Weight      6.0
+Color       <200,200,255,255>
+}
+Item <Staff of Word of Recall>
+{
+Plural      <Staves of Word of Recall>
+Type        <ITEM_IDX_STAFF>
+Effect      <Recall>
+Charges     <1d4>
+Value       500.0
+Level       50
+Weight      6.0
+Color       <200,150,100,255>
+}
+Item <Staff of *Resistance*>
+{
+Plural      <Staves of *Resistance*>
+Type        <ITEM_IDX_STAFF>
+Effect      <Timed Immune Fire>
+Effect      <Timed Immune Cold>
+Effect      <Timed Immune Electricity>
+Effect      <Timed Immune Acid>
+Charges     <1d2>
+Duration    60.0
+Value       5000.0
+Level       55
+Weight      6.0
+Color       <255,215,0,255>
+}
+Item <Staff of Cure Serious Wounds>
+{
+Plural      <Staves of Cure Serious Wounds>
+Type        <ITEM_IDX_STAFF>
+Effect      <Cure Serious Wounds>
+Effect      <Cure Poison>
+Effect      <Cure Blindness>
+Effect      <Cure Confusion>
+Charges     <2d4>
+Value       1200.0
+Level       55
+Weight      6.0
+Color       <150,255,150,255>
+}
+Item <Staff of Greater Healing>
+{
+Plural      <Staves of Greater Healing>
+Type        <ITEM_IDX_STAFF>
+Effect      <Greater Healing>
+Effect      <Cure Poison>
+Effect      <Cure Blindness>
+Effect      <Cure Confusion>
+Effect      <Cure Fear>
+Charges     <1d4>
+Value       2000.0
+Level       75
+Weight      6.0
+Color       <100,255,100,255>
 }

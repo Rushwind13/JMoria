@@ -22,10 +22,6 @@
 #define DUNG_ASPECT vSize( 0.75f, 1.0f )
 #endif
 
-#define DUNG_ZOOM_MIN 4
-#define DUNG_ZOOM_NORMAL 20
-#define DUNG_ZOOM_MAX 100
-
 class CDungeon
 {
     // Member Variables
@@ -38,6 +34,7 @@ public:
     JLinkList<CMonster> *m_llMonsters;
     JLinkList<CItem> *m_llItems;
     JLinkList<JIVector> *m_llOpenArea;
+    JLinkList<CEffectDef> *m_llEffectDefs;
 
 protected:
     CDungeonTileDef *m_dtdlist;
@@ -46,9 +43,11 @@ protected:
     JVector m_vLookPos;
     JVector m_vProjectilePos;
     JLinkList<JIVector> *m_llLOSLine;
+    CEffectDef *m_pProjectileEffect;               // for multicolor beam rendering
+    JLinkList<JIVector> *m_llProjectileTrajectory; // full path for beam animation
+    int m_dwProjectileColorIndex;                  // current color in effect's color list
 
 private:
-    Uint16 m_dwZoom;
     bool m_bDraw;
 
     // Member Functions
@@ -62,18 +61,22 @@ public:
           m_dtdlist( NULL ),
           m_Rect( -DUNG_WIDTH, DUNG_HEIGHT, DUNG_WIDTH, -DUNG_HEIGHT ),
           m_vfTranslate( (int)( -DUNG_WIDTH * 0.5f ), (int)( -DUNG_HEIGHT * 0.5f ) ),
-          m_dwZoom( DUNG_ZOOM_NORMAL ),
           m_vLookPos( (int)( -DUNG_WIDTH * 0.5f ), (int)( -DUNG_HEIGHT * 0.5f ) ),
           // m_dmTownLevel(NULL),
           m_llItems( NULL ),
           m_llMonsters( NULL ),
           m_llOpenArea( NULL ),
           m_llItemDefs( NULL ),
+          m_llEffectDefs( NULL ),
           m_llMonsterDefs( NULL ),
           m_llLOSLine( NULL ),
+          m_pProjectileEffect( NULL ),
+          m_llProjectileTrajectory( NULL ),
+          m_dwProjectileColorIndex( 0 ),
           m_dmCurLevel( NULL ) {};
     ~CDungeon() { Term(); }
-    void DumpMap();
+    char *DumpMap();
+    void RevealMap( int xMin, int yMin, int xMax, int yMax );
     void PreDraw();
     void Draw();
     void DrawDungeon();
@@ -99,6 +102,22 @@ public:
     }
     JVector GetProjectilePosition() { return m_vProjectilePos; }
 
+    void SetProjectileEffect( CEffectDef *pEffect, JLinkList<JIVector> *pTrajectory )
+    {
+        m_pProjectileEffect = pEffect;
+        m_llProjectileTrajectory = pTrajectory;
+        m_dwProjectileColorIndex = 0;
+    }
+    void AdvanceProjectileColor()
+    {
+        // Increment trajectory position for beam animation.
+        // Rendering code will cycle colors based on (position % num_colors)
+        m_dwProjectileColorIndex++;
+    }
+    CEffectDef *GetProjectileEffect() { return m_pProjectileEffect; }
+    JLinkList<JIVector> *GetProjectileTrajectory() { return m_llProjectileTrajectory; }
+    int GetProjectileColorIndex() { return m_dwProjectileColorIndex; }
+
     void SetLOSLine( JLinkList<JIVector> *pLine )
     {
         ClearLOSLine();
@@ -118,19 +137,6 @@ public:
     CDungeonTileDef *GetTileDef( int idx ) { return &m_dtdlist[idx]; }
 
     JResult OnChangeLevel( const int delta );
-
-    void Zoom( Uint16 dwDelta )
-    {
-        m_dwZoom += dwDelta;
-        if( m_dwZoom < DUNG_ZOOM_MIN )
-        {
-            m_dwZoom = DUNG_ZOOM_MIN;
-        }
-        else if( m_dwZoom > DUNG_ZOOM_MAX )
-        {
-            m_dwZoom = DUNG_ZOOM_MAX;
-        }
-    }
 
     CDungeonTile *GetITile( JIVector &vPos )
     {
@@ -173,14 +179,17 @@ public:
     CMonsterDef *GetMonsterDef( int which_monster );
     CItemDef *GetItemDef( const char *szItemName );
     CItemDef *GetItemDef( int which_item );
+    CEffectDef *GetEffectDef( const char *szEffectName );
     bool SpawnMonster( int which_monster );
     void RemoveMonster( CMonster *pMon );
-    CMonster *FindMonsterByInstanceId( uint32 dwInstanceId );
+
     JResult Modify( JVector &vPos );
     CItem *PickUp( JVector &vPickupPos );
     void Drop( CItem *pItem, JVector &vDropPos );
     void PopulateLevel( const int depth ); // Place scenery, items, and monsters
     void SetDrawFlag( bool bDraw ) { m_bDraw = bDraw; }
+    void UpdateVisibility();
+    void LightPosition( const JVector &vPos );
 
 protected:
     JRect m_Rect;
@@ -198,7 +207,11 @@ protected:
     JResult PlaceStairs( const int desired, const int type );
     JResult PlaceItems( const int depth );
     JResult SpawnMonsters( const int depth );
-    int ChooseMonsterForDepth( const int depth );
+
+public:
+    int ChooseMonsterForDepth( const int depth, const float sigma = 0.0f );
+
+protected:
     int ChooseItemForDepth( const int depth );
 
     JResult TerminateLevel();

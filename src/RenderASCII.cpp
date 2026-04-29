@@ -5,6 +5,7 @@
 #include "JMDefs.h"
 #ifdef RENDER_ASCII
 
+#include "DisplayText.h"
 #include "RenderASCII.h"
 #include <cmath>
 #include <cstring>
@@ -29,11 +30,20 @@ ASCIILayout ASCIILayout::CreateForSize( int w, int h )
     l.messages = { 0, 0, w, msgH };
     l.endgame = { 0, 0, w, h };
 
-    // Stats panel (always on left)
+    // Stats panel (always on left), clipped to leave room for monsters pane
     int statsRight = STATS_WIDTH;
     if( statsRight > w / 3 )
         statsRight = w / 3; // don't take more than 1/3
-    l.stats = { 0, bodyTop, statsRight, bodyBottom };
+
+    // Monsters pane: 10 rows tall at the bottom of the left sidebar
+    int monstersBottom = bodyBottom;
+    int monstersTop = monstersBottom - MONSTERS_HEIGHT;
+    if( monstersTop < bodyTop )
+        monstersTop = bodyTop;
+    l.monsters = { 0, monstersTop, statsRight, monstersBottom };
+
+    // Stats occupies the left column above the monsters pane
+    l.stats = { 0, bodyTop, statsRight, monstersTop };
 
     // Inventory/equipment panel (right side, only when wide enough)
     int invLeft = w;
@@ -63,6 +73,15 @@ ASCIILayout ASCIILayout::CreateForSize( int w, int h )
     int useLeft = w / 4;
     int useRight = 3 * w / 4;
     l.use = { useLeft, bodyTop, useRight, bodyBottom };
+
+    // Bottom panels: 3 panels to the right of the existing Visible Monsters panel
+    // They should have the same height as monsters panel (which is monstersTop to monstersBottom)
+    int panelLeft = statsRight;
+    int panelWidth = ( w - statsRight ) / 3;
+    l.monRecall = { panelLeft, monstersTop, panelLeft + panelWidth, monstersBottom };
+    l.itemRecall = { panelLeft + panelWidth, monstersTop, panelLeft + 2 * panelWidth,
+                     monstersBottom };
+    l.map = { panelLeft + 2 * panelWidth, monstersTop, w, monstersBottom };
 
     return l;
 }
@@ -110,6 +129,131 @@ bool CRenderASCII::CheckResize()
         return false;
 
     m_layout = ASCIILayout::CreateForSize( termW, termH );
+    return true;
+}
+
+void CRenderASCII::ConfigureDisplayRegions( CDisplayText *pMsgs, CDisplayText *pStats,
+                                            CDisplayText *pInv, CDisplayText *pEquip,
+                                            CDisplayText *pUse, CDisplayText *pEndGame,
+                                            CDisplayText *pMonsters, CDisplayText *pMonRecall,
+                                            CDisplayText *pItemRecall, CDisplayText *pMap )
+{
+    auto toPixelRect = []( const ASCIILayoutRegion &r )
+    { return JRect( r.left * 6, r.top * 8, r.right * 6, r.bottom * 8 ); };
+
+    pMsgs->SetRect( toPixelRect( m_layout.messages ) );
+    pStats->SetRect( toPixelRect( m_layout.stats ) );
+    pInv->SetRect( toPixelRect( m_layout.inventory ) );
+    pEquip->SetRect( toPixelRect( m_layout.equipment ) );
+    pUse->SetRect( toPixelRect( m_layout.use ) );
+    pEndGame->SetRect( toPixelRect( m_layout.endgame ) );
+    pEndGame->SetContentMargin( 0, 0 );
+    pMonsters->SetRect( toPixelRect( m_layout.monsters ) );
+
+    pMonRecall->SetRect( toPixelRect( m_layout.monRecall ) );
+    pItemRecall->SetRect( toPixelRect( m_layout.itemRecall ) );
+    pMap->SetRect( toPixelRect( m_layout.map ) );
+}
+
+bool CRenderASCII::PollEvent( JInputEvent &event )
+{
+    int ch = getch();
+    if( ch == ERR )
+        return false; // no input available
+
+    // Terminal resize: consume the event, CheckResize handles the actual resize
+    if( ch == KEY_RESIZE )
+        return false;
+
+    event.type = JInputEvent::KEY;
+    memset( &event.keysym, 0, sizeof( event.keysym ) );
+
+    // Map ncurses keys to JMoria keysyms
+    // For ASCII printable characters, JKeycode values match ASCII codes
+    if( ch >= 'a' && ch <= 'z' )
+    {
+        event.keysym.sym = (JKeycode)ch;
+        event.keysym.mod = JMOD_NONE;
+    }
+    else if( ch >= 'A' && ch <= 'Z' )
+    {
+        // Uppercase: map to lowercase sym + shift modifier
+        event.keysym.sym = (JKeycode)( ch - 'A' + 'a' );
+        event.keysym.mod = JMOD_SHIFT;
+    }
+    else if( ch >= 1 && ch <= 26 && ch != '\n' && ch != '\r' )
+    {
+        // Ctrl+letter: ch 1 = Ctrl+A, ch 3 = Ctrl+C, etc.
+        // Exclude \n (10) and \r (13) so they reach the Enter case below.
+        event.keysym.sym = (JKeycode)( 'a' + ch - 1 );
+        event.keysym.mod = JMOD_CTRL;
+    }
+    else if( ch >= '0' && ch <= '9' )
+    {
+        event.keysym.sym = (JKeycode)ch;
+        event.keysym.mod = JMOD_NONE;
+    }
+    else
+    {
+        // Map special keys
+        switch( ch )
+        {
+        case '\n':
+        case '\r':
+        case KEY_ENTER:
+            event.keysym.sym = JKEY_RETURN;
+            break;
+        case 27: // Escape
+            event.keysym.sym = JKEY_ESCAPE;
+            break;
+        case ' ':
+            event.keysym.sym = JKEY_SPACE;
+            break;
+        case '.':
+            event.keysym.sym = JKEY_PERIOD;
+            break;
+        case '>': // Shift+.
+            event.keysym.sym = JKEY_PERIOD;
+            event.keysym.mod = JMOD_SHIFT;
+            break;
+        case ',':
+            event.keysym.sym = JKEY_COMMA;
+            break;
+        case '<': // Shift+,
+            event.keysym.sym = JKEY_COMMA;
+            event.keysym.mod = JMOD_SHIFT;
+            break;
+        case ';':
+            event.keysym.sym = JKEY_SEMICOLON;
+            break;
+        case '*': // Shift+8: target command
+            event.keysym.sym = JKEY_8;
+            event.keysym.mod = JMOD_SHIFT;
+            break;
+        case '(': // Shift+9: item recall
+            event.keysym.sym = (JKeycode)'(';
+            event.keysym.mod = JMOD_NONE;
+            break;
+        case ')': // Shift+0: map overview
+            event.keysym.sym = (JKeycode)')';
+            event.keysym.mod = JMOD_NONE;
+            break;
+        case KEY_BACKSPACE:
+        case 127: // DEL on some terminals
+            event.keysym.sym = JKEY_BACKSPACE;
+            break;
+        case KEY_DC: // ncurses Delete key
+            event.keysym.sym = JKEY_DELETE;
+            break;
+        case KEY_F( 1 ):
+            event.keysym.sym = JKEY_F1;
+            break;
+        default:
+            // Unknown key, ignore
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -299,6 +443,12 @@ int CRenderASCII::GetColorPair( JColor color, attr_t &outAttr )
     int pair = Nearest16( r, g, b, bold );
     if( bold )
         outAttr = A_BOLD;
+
+    // Dark foreground colours are barely visible on a black terminal background.
+    // Apply A_BOLD so the terminal renders the bright variant of the colour pair.
+    if( (int)r + (int)g + (int)b < 300 )
+        outAttr |= A_BOLD;
+
     return pair;
 }
 

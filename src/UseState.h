@@ -16,6 +16,8 @@ enum eUseModifier
     USE_DROP,
     USE_QUAFF,
     USE_READ,
+    USE_FUEL,
+    USE_IDENTIFY,
     USE_MAX
 };
 
@@ -27,6 +29,8 @@ protected:
     char m_cCommand;
     int m_dwSelected;
     CLink<CItem> *m_pSelected;
+    int m_dwQuantityPrompt; // For stack splitting: -1 = no prompt, 0+ = awaiting quantity input
+    char m_szQuantityBuffer[32]; // Buffer for numeric input
 
 private:
     // Member Functions
@@ -55,6 +59,8 @@ private:
     int OnHandleDrop( JKeysym *keysym );
     int OnHandleQuaff( JKeysym *keysym );
     int OnHandleRead( JKeysym *keysym );
+    int OnHandleFuel( JKeysym *keysym );
+    int OnHandleIdentify( JKeysym *keysym );
 
     bool TestWield();
     bool DoWield();
@@ -70,6 +76,11 @@ private:
 
     bool TestRead();
     bool DoRead();
+
+    bool TestFuel();
+    bool DoFuel();
+
+    int OnHandleQuantityPrompt( JKeysym *keysym );
 
     void ResetToState( int newstate );
 };

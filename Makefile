@@ -43,7 +43,13 @@ else
   LD_FLAGS = $(LOCAL_LIB_PATHS) -lSDL2 -lSDL2_image -lncurses -framework OpenGL
 endif
 # Update TEST_LD_FLAGS to use LOCAL_LIB_PATHS for robustness
-TEST_LD_FLAGS = $(LOCAL_LIB_PATHS) -lcucumber-cpp -lboost_program_options -lboost_regex -lboost_filesystem /opt/homebrew/Cellar/googletest/1.17.0/lib/libgtest.a /opt/homebrew/Cellar/googletest/1.17.0/lib/libgtest_main.a
+ifeq ($(RENDER_MODE),ascii)
+  TEST_LD_FLAGS = $(LOCAL_LIB_PATHS) -lcucumber-cpp -lboost_program_options -lboost_regex -lboost_filesystem /opt/homebrew/Cellar/googletest/1.17.0/lib/libgtest.a /opt/homebrew/Cellar/googletest/1.17.0/lib/libgtest_main.a -lncurses
+else ifeq ($(RENDER_MODE),opengl)
+  TEST_LD_FLAGS = $(LOCAL_LIB_PATHS) -lcucumber-cpp -lboost_program_options -lboost_regex -lboost_filesystem /opt/homebrew/Cellar/googletest/1.17.0/lib/libgtest.a /opt/homebrew/Cellar/googletest/1.17.0/lib/libgtest_main.a -lSDL2 -lSDL2_image -framework OpenGL
+else
+  TEST_LD_FLAGS = $(LOCAL_LIB_PATHS) -lcucumber-cpp -lboost_program_options -lboost_regex -lboost_filesystem /opt/homebrew/Cellar/googletest/1.17.0/lib/libgtest.a /opt/homebrew/Cellar/googletest/1.17.0/lib/libgtest_main.a -lSDL2 -lSDL2_image -lncurses -framework OpenGL
+endif
 else
 # Linux/Other specific flags
 GAME_CC_FLAGS = $(COMMON_CC_FLAGS)
@@ -84,8 +90,13 @@ ascii:
 opengl:
 	$(MAKE) RENDER_MODE=opengl
 
+ascii-test:
+	$(MAKE) RENDER_MODE=ascii test
+
+.PHONY: ascii opengl ascii-test test clean
+
 $(TEST_EXEC): $(TEST_DIR) $(TEST_OBJECTS) $(filter-out src/main.o, $(OBJECTS))
-	$(CC) $(TEST_OBJECTS) $(filter-out src/main.o, $(OBJECTS)) $(TEST_LD_FLAGS) $(LD_FLAGS) -o $(TEST_DIR)/$(TEST_EXEC)
+	$(CC) $(TEST_OBJECTS) $(filter-out src/main.o, $(OBJECTS)) $(TEST_LD_FLAGS) -o $(TEST_DIR)/$(TEST_EXEC)
 
 $(SCORE_FILE):
 	touch $(SCORE_FILE)
@@ -104,4 +115,5 @@ test/%.o: test/%.cpp
 clean:
 	rm -f $(EXEC) $(OBJECTS) $(TEST_DIR)/$(TEST_EXEC) $(TEST_OBJECTS)
 	rm -rf $(TEST_DIR)
+	find . -name '* [0-9].*' -not -path './.git/*' -delete
 

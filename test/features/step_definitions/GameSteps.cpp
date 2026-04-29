@@ -1,3 +1,5 @@
+#include "DisplayText.h"
+#include "EndGameState.h"
 #include "TestContext.hpp"
 using cucumber::ScenarioScope;
 
@@ -217,4 +219,72 @@ THEN( "^the ([-A-Za-z ]+) moves toward the player$" )
         JLog( LOG_LEVEL_ERROR, true, "want %s have %s\n", monster.c_str(), pMon->m_md->m_szName );
     }
     EXPECT_EQ( compare, 0 );
+}
+WHEN( "^I set the killer name to \"([^\"]+)\"$" )
+{
+    REGEX_PARAM( std::string, name );
+    ScenarioScope<TestCtx> context;
+    char *szName = new char[name.size() + 1];
+    strncpy( szName, name.c_str(), name.size() );
+    szName[name.size()] = '\0';
+
+    CEndGameState *pEG = g_pGame->m_pEndGameState;
+    if( pEG->m_pScore->m_szKilledBy )
+        delete[] pEG->m_pScore->m_szKilledBy;
+    pEG->m_pScore->m_szKilledBy = szName;
+
+    // Provide minimal name/class so DoTomb() doesn't crash on NULL
+    if( !pEG->m_pScore->m_szName )
+    {
+        pEG->m_pScore->m_szName = new char[5];
+        strncpy( pEG->m_pScore->m_szName, "Test", 5 );
+    }
+    if( !pEG->m_pScore->m_szClass )
+    {
+        pEG->m_pScore->m_szClass = new char[8];
+        strncpy( pEG->m_pScore->m_szClass, "Warrior", 8 );
+    }
+}
+
+WHEN( "^I render the tombstone$" )
+{
+    ScenarioScope<TestCtx> context;
+    g_pGame->GetEnd()->Clear();
+    g_pGame->m_pEndGameState->DoTomb();
+    strncpy( context->szBuffer, g_pGame->GetEnd()->m_szText, sizeof( context->szBuffer ) - 1 );
+    context->szBuffer[sizeof( context->szBuffer ) - 1] = '\0';
+}
+
+THEN( "^no tombstone line has characters past the closing pipe$" )
+{
+    ScenarioScope<TestCtx> context;
+    const char *p = context->szBuffer;
+    while( p && *p )
+    {
+        const char *eol = strchr( p, '\n' );
+        if( !eol )
+            eol = p + strlen( p );
+        const char *firstPipe = (const char *)memchr( p, '|', eol - p );
+        if( firstPipe )
+        {
+            const char *lastPipe = NULL;
+            for( const char *q = eol - 1; q >= firstPipe; q-- )
+            {
+                if( *q == '|' )
+                {
+                    lastPipe = q;
+                    break;
+                }
+            }
+            if( lastPipe )
+            {
+                for( const char *q = lastPipe + 1; q < eol; q++ )
+                {
+                    EXPECT_TRUE( *q == ' ' || *q == '\0' )
+                        << "Character '" << *q << "' found after closing '|' on tombstone line";
+                }
+            }
+        }
+        p = ( *eol == '\n' ) ? eol + 1 : eol;
+    }
 }

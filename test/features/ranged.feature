@@ -58,3 +58,31 @@ Feature: Ranged Combat
         And I confirm the target
         And I fire slot a
         Then the game is in command state
+
+    Scenario: Wand of Light beam lights tiles along its path
+        Given the player has a Wand of Light in slot a
+        And I spawn a Kobold, a monster at distance 5
+        When I enter targeting mode
+        And I confirm the target
+        And I zap slot a
+        And the projectile completes its trajectory
+        Then the tiles between the player and the target are lit
+
+    Scenario: Wand of Light beam lights room boundary wall tiles
+        Given the player has a Wand of Light in slot a
+        And I spawn a Kobold, a monster at distance 3
+        And a wall exists one tile above the beam path
+        When I enter targeting mode
+        And I confirm the target
+        And I zap slot a
+        And the projectile completes its trajectory
+        Then the wall tile adjacent to the beam is lit
+
+    Scenario: Wand of Light beam sets the room LIT flag
+        Given the player has a Wand of Light in slot a
+        And I spawn a Kobold, a monster at distance 5
+        When I enter targeting mode
+        And I confirm the target
+        And I zap slot a
+        And the projectile completes its trajectory
+        Then the player's current room is lit

@@ -1,9 +1,6 @@
 #include "JMDefs.h"
 #include "JTimer.h"
 #include "RenderMode.h"
-#include <cstdlib>
-#include <cstring>
-#include <ctime>
 
 // The global game pointer
 CGame *g_pGame = NULL;
@@ -21,15 +18,13 @@ int main( int argc, char **argv )
     // whether or not the window is active
     int isActive = true;
 
-    Util::SeedRandom( (unsigned)time( NULL ) );
-
     // Parse command-line arguments
     RenderMode renderMode = RenderMode::None;
     for( int i = 1; i < argc; i++ )
     {
-        if( strcmp( argv[i], "--renderer=ascii" ) == 0 )
+        if( Util::jstrcmp( argv[i], "--renderer=ascii" ) == 0 )
             renderMode = RenderMode::ASCII;
-        else if( strcmp( argv[i], "--renderer=opengl" ) == 0 )
+        else if( Util::jstrcmp( argv[i], "--renderer=opengl" ) == 0 )
             renderMode = RenderMode::OpenGL;
     }
 
@@ -37,16 +32,16 @@ int main( int argc, char **argv )
 #if defined( RENDER_ASCII ) && defined( RENDER_OPENGL )
     if( renderMode == RenderMode::None )
     {
-        printf( "Usage: %s --renderer=ascii|opengl\n", argv[0] );
-        exit( 1 );
+        JLog( LOG_LEVEL_ERROR, true, "Usage: %s --renderer=ascii|opengl\n", argv[0] );
+        return 1;
     }
 #elif defined( RENDER_ASCII )
     if( renderMode == RenderMode::OpenGL )
-        printf( "Warning: OpenGL renderer not compiled in, using ASCII.\n" );
+        JLog( LOG_LEVEL_WARN, true, "OpenGL renderer not compiled in, using ASCII.\n" );
     renderMode = RenderMode::ASCII;
 #elif defined( RENDER_OPENGL )
     if( renderMode == RenderMode::ASCII )
-        printf( "Warning: ASCII renderer not compiled in, using OpenGL.\n" );
+        JLog( LOG_LEVEL_WARN, true, "ASCII renderer not compiled in, using OpenGL.\n" );
     renderMode = RenderMode::OpenGL;
 #endif
 
@@ -64,7 +59,7 @@ int main( int argc, char **argv )
     if( result != JSUCCESS )
     {
         JLog( LOG_LEVEL_ERROR, true, "Error in game initialization. Terminating.\n" );
-        exit( 1 );
+        return 1;
     }
 
     atexit( Term );

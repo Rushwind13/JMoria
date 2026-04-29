@@ -9,7 +9,7 @@
 #define __CONSTANTS_H__
 #include "Util.h"
 
-#define VERSION "0.60"
+#define VERSION "0.70"
 #define COPYRIGHT "2002-2026"
 #define AUTHOR "Jimbo S. Harris"
 
@@ -81,7 +81,17 @@
 
 #define DUNG_FLAG_TRAP 0x00000010
 #define DUNG_FLAG_LOCKED 0x00000020
-// #define DUNG_FLAG_x  0x00000040
+#define DUNG_FLAG_VISIBLE 0x00000040
+
+// Door and search chance percentages (1-100)
+#define CHANCE_PICK_LOCK 75
+#define CHANCE_CLOSE_DOOR 90
+#define CHANCE_FIND_SECRET_BUMP 20
+#define CHANCE_SEARCH_ACTIVE 25
+#define CHANCE_SEARCH_PASSIVE 5
+
+// UI / Display constants
+#define MSGS_ROWS 5 // height of the Messages pane in text rows (8px each)
 // #define DUNG_FLAG_x  0x00000080
 
 // Dungeon Flags
@@ -92,67 +102,76 @@
 #define DUNG_CFG_MONSTERS_PER_LEVEL 0.01f
 #define DUNG_CFG_ITEMS_PER_LEVEL 0.02f
 #endif // FIXED_DUNGEON
-#define DUNG_CFG_START_LEVEL 1
+#define DUNG_CFG_START_LEVEL 0
 #define DUNG_CFG_MAX_SPAWN_TRIES 10
 
 // Types of Monsters
 #define MON_IDX_INVALID -1
-#define MON_IDX_ANT 0
-#define MON_IDX_BAT 1
-#define MON_IDX_CENTIPEDE 2
-#define MON_IDX_DRAGON 3
-#define MON_IDX_DINOSAUR 4
-#define MON_IDX_EYE 5
-#define MON_IDX_CAT 6
-#define MON_IDX_GOLEM 7
-#define MON_IDX_HUMANOID 8
-#define MON_IDX_HARPY 9
-#define MON_IDX_ICKY 10
-#define MON_IDX_KOBOLD 11
-#define MON_IDX_LOUSE 12
-#define MON_IDX_LEECH 13
-#define MON_IDX_MOLD 14
-#define MON_IDX_NAGA 15
-#define MON_IDX_ORC 16
-#define MON_IDX_PERSON 17
-#define MON_IDX_RAT 18
-#define MON_IDX_SKELETON 19
-#define MON_IDX_MINOR_DEMON 20
-#define MON_IDX_WORM 21
-#define MON_IDX_SPIDER 22
-#define MON_IDX_YEEK 23
-#define MON_IDX_ZOMBIE 24
-#define MON_IDX_FROG 25
-#define MON_IDX_BALROG 26
-#define MON_IDX_DOG 27
-#define MON_IDX_ANCIENT_DRAGON 28
-#define MON_IDX_FLY 29
-#define MON_IDX_DRAGON_FLY 30
-#define MON_IDX_FAERIE_DRAGON 31
-#define MON_IDX_GHOUL 32
-#define MON_IDX_GHOST 33
-#define MON_IDX_GIANT 34
-#define MON_IDX_INSECT 35
-#define MON_IDX_JELLY 36
-#define MON_IDX_BEETLE 37
-#define MON_IDX_LICH 38
-#define MON_IDX_OGRE 39
-#define MON_IDX_L_PERSON 40
-#define MON_IDX_REPTILE 41
-#define MON_IDX_SNAKE 42
-#define MON_IDX_TROLL 43
-#define MON_IDX_MAJOR_DEMON 44
-#define MON_IDX_VAMPIRE 45
-#define MON_IDX_WIGHT 46
-#define MON_IDX_WRAITH 47
-#define MON_IDX_XORN 48
-#define MON_IDX_YETI 49
-#define MON_IDX_MIMIC 50
-#define MON_IDX_LURKER 51
-#define MON_IDX_SHROOM 52
-#define MON_IDX_COIN 53
-#define MON_IDX_TOWNSFOLK 54
-#define MON_IDX_MAX 55
+// Lowercase tiles (a-z) — minor creatures
+#define MON_IDX_ANT 0           // a
+#define MON_IDX_BAT 1           // b
+#define MON_IDX_CENTIPEDE 2     // c
+#define MON_IDX_DRAGON 3        // d
+#define MON_IDX_HYDRA 4         // d (shares with DRAGON)
+#define MON_IDX_EYE 5           // e
+#define MON_IDX_FLY 6           // f
+#define MON_IDX_DRAGON_FLY 7    // f (shares with FLY)
+#define MON_IDX_FAERIE_DRAGON 8 // f (shares with FLY)
+#define MON_IDX_GOLEM 9         // g
+#define MON_IDX_HUMANOID 10     // h
+#define MON_IDX_ICKY 11         // i
+#define MON_IDX_OOZE 12         // j
+#define MON_IDX_KOBOLD 13       // k
+#define MON_IDX_LOUSE 14        // l
+#define MON_IDX_LEECH 15        // l (shares with LOUSE)
+#define MON_IDX_MOLD 16         // m
+#define MON_IDX_NAGA 17         // n
+#define MON_IDX_ORC 18          // o
+#define MON_IDX_PERSON 19       // p
+#define MON_IDX_RAT 20          // r
+#define MON_IDX_SKELETON 21     // s
+#define MON_IDX_MINOR_DEMON 22  // u
+#define MON_IDX_WORM 23         // w
+#define MON_IDX_SPIDER 24       // x
+#define MON_IDX_YEEK 25         // y
+#define MON_IDX_ZOMBIE 26       // z
+// Uppercase tiles (A-Y) — major creatures
+#define MON_IDX_FROG 27           // A
+#define MON_IDX_BALROG 28         // B
+#define MON_IDX_DOG 29            // C
+#define MON_IDX_ANCIENT_DRAGON 30 // D
+#define MON_IDX_DINOSAUR 31       // D (shares with ANCIENT_DRAGON)
+#define MON_IDX_ELEMENTAL 32      // E
+#define MON_IDX_BIRD 33           // F
+#define MON_IDX_GHOUL 34          // G
+#define MON_IDX_GHOST 35          // G (shares with GHOUL)
+#define MON_IDX_HARPY 36          // H
+#define MON_IDX_INSECT 37         // I
+#define MON_IDX_JELLY 38          // J
+#define MON_IDX_BEETLE 39         // K
+#define MON_IDX_LICH 40           // L
+#define MON_IDX_MAMMAL 41         // M
+#define MON_IDX_CAT 42            // M (shares with MAMMAL)
+#define MON_IDX_OGRE 43           // O
+#define MON_IDX_GIANT 44          // P
+#define MON_IDX_L_PERSON 45       // P (shares with GIANT)
+#define MON_IDX_REPTILE 46        // R
+#define MON_IDX_SNAKE 47          // S
+#define MON_IDX_TROLL 48          // T
+#define MON_IDX_MAJOR_DEMON 49    // U
+#define MON_IDX_VAMPIRE 50        // V
+#define MON_IDX_WIGHT 51          // W
+#define MON_IDX_WRAITH 52         // W (shares with WIGHT)
+#define MON_IDX_XORN 53           // X
+#define MON_IDX_YETI 54           // Y
+// Special tiles
+#define MON_IDX_MIMIC 55           // &
+#define MON_IDX_LURKER 56          // .
+#define MON_IDX_SHROOM 57          // ,
+#define MON_IDX_COIN 58            // $
+#define MON_IDX_TOWNSFOLK 59       // t
+#define MON_IDX_ANIMATED_WEAPON 60 // |
+#define MON_IDX_MAX 61
 
 // Monster flags
 #define MON_FLAG_SPORE 0x00000001
@@ -175,10 +194,10 @@
 // #define MON_FLAG_x          0x00004000
 #define MON_FLAG_BREED 0x00008000
 
-// #define MON_FLAG_x          0x00100000
+#define MON_FLAG_INVISIBLE 0x00100000
 // #define MON_FLAG_x          0x00200000
 // #define MON_FLAG_x          0x00400000
-// #define MON_FLAG_x          0x00800000
+#define MON_FLAG_MAXHP 0x00800000
 
 #define MON_AI_DONTMOVE 0x01000000
 #define MON_AI_100RANDOMMOVE 0x02000000
@@ -190,7 +209,7 @@
 // #define MON_COLOR_x          0x40000000
 // #define MON_COLOR_x          0x80000000
 
-#define NUM_MON_FLAGS 18
+#define NUM_MON_FLAGS 20
 
 // Effect Flags
 #define EFFECT_FLAG_FIRE 0x00000001
@@ -234,28 +253,37 @@
 #define EFFECT_FLAG_SPEED 0x80000000
 
 #define NUM_EFFECT_FLAGS 32
-// probably need a second set of effects
-// cursed
-// trap
-// holding might be an item thing
+
+// Effect Flags (word 2) — dungeon features
+#define EFFECT_FLAG_DOOR 0x00000001
+#define EFFECT_FLAG_TRAP 0x00000002
+#define EFFECT_FLAG_MONSTERS 0x00000004
+#define EFFECT_FLAG_NO_COLLIDE 0x00000008
+
+#define EFFECT_FLAG_CURSE 0x00000010
+// #define EFFECT_FLAG_x 0x00000020
+// #define EFFECT_FLAG_x 0x00000040
+// #define EFFECT_FLAG_x 0x00000080
+
+#define NUM_EFFECT_FLAGS2 5
 
 // Effect Modifiers
 #define EFFECT_MOD_RESIST 0x000000001
-#define EFFECT_MOD_SEE 0x000000002
-#define EFFECT_MOD_IMMUNE 0x000000004
-#define EFFECT_MOD_WEAK 0x000000008
+#define EFFECT_MOD_IMMUNE 0x000000002
+#define EFFECT_MOD_WEAK 0x000000004
+#define EFFECT_MOD_TIMED 0x000000008
 
-#define EFFECT_MOD_TIMED 0x000000010
-#define EFFECT_MOD_AREA 0x000000020
-#define EFFECT_MOD_LINE 0x000000040
-#define EFFECT_MOD_BALL 0x000000080
+#define EFFECT_MOD_AREA 0x000000010
+#define EFFECT_MOD_LINE 0x000000020
+#define EFFECT_MOD_BALL 0x000000040
+#define EFFECT_MOD_STAR 0x000000080
 
 #define EFFECT_MOD_ENCHANT 0x000000100
-// #define EFFECT_MOD_x 0x000000200
-// #define EFFECT_MOD_x 0x000000400
+#define EFFECT_MOD_SUSTAIN 0x000000200
+#define EFFECT_MOD_MAX 0x000000400
 // #define EFFECT_MOD_x 0x000000800
 
-#define NUM_EFFECT_MODIFIERS 9
+#define NUM_EFFECT_MODIFIERS 11
 
 // Effect Types
 #define EFFECT_TYPE_HEAL 0x00000001
@@ -268,12 +296,12 @@
 #define EFFECT_TYPE_GAIN 0x00000040
 #define EFFECT_TYPE_LOSE 0x00000080
 
-// #define EFFECT_TYPE_x 0x00000100
+#define EFFECT_TYPE_SEE 0x00000100 // proposed: reveal / detect
 // #define EFFECT_TYPE_x 0x00000200
 // #define EFFECT_TYPE_x 0x00000400
 // #define EFFECT_TYPE_x 0x00000800
 
-#define NUM_EFFECT_TYPES 8
+#define NUM_EFFECT_TYPES 9
 
 // Character equipment slots
 // index for m_llEquipment
@@ -338,32 +366,38 @@
 
 #define ITEM_FLAG_CURSED 0x00000001
 #define ITEM_FLAG_STACKS 0x00000002
-// #define ITEM_FLAG_x 0x00000004
-// #define ITEM_FLAG_x 0x00000008
+#define ITEM_FLAG_IDENTIFIED 0x00000004
+#define ITEM_FLAG_MAGIC 0x00000008
 
 #define ITEM_FLAG_2HANDED 0x00000010
 #define ITEM_FLAG_OFFHAND 0x00000020
 #define ITEM_FLAG_MAINHAND 0x00000040
 #define ITEM_FLAG_NEEDSAMMO 0x00000080
 
-#define ITEM_FLAG_NO_COLLIDE 0x00000100
+// #define ITEM_FLAG_x 0x00000100
 // #define ITEM_FLAG_x 0x00000200
 // #define ITEM_FLAG_x 0x00000400
 // #define ITEM_FLAG_x 0x00000800
 
 // #define ITEM_FLAG_x 0x00001000
 // #define ITEM_FLAG_x 0x00002000
-// #define ITEM_FLAG_x 0x00004000
+#define ITEM_FLAG_BLESSED 0x00004000
 #define ITEM_FLAG_HOLDING 0x00008000
 
 #define ITEM_COLOR_MULTI 0x10000000
 
-#define NUM_ITEM_FLAGS 9
+// Known-property flags for CItem::m_dwKnownProps
+#define KNOWN_CURSED 0x00000001
+#define KNOWN_BONUSES 0x00000002
+#define KNOWN_CHARGES 0x00000004
+#define KNOWN_TRIED 0x00000008
+
+#define NUM_ITEM_FLAGS 11
 
 // Make sure you change below here if you added any flags.
 #define NUM_STRINGS                                                                                \
     MON_IDX_MAX + NUM_MON_FLAGS + EQUIP_IDX_MAX + ITEM_IDX_MAX + NUM_ITEM_FLAGS +                  \
-        NUM_EFFECT_FLAGS + NUM_EFFECT_MODIFIERS + NUM_EFFECT_TYPES
+        NUM_EFFECT_FLAGS + NUM_EFFECT_FLAGS2 + NUM_EFFECT_MODIFIERS + NUM_EFFECT_TYPES
 
 #define MON_IDX 0
 #define MON_FLAG 1
@@ -371,9 +405,10 @@
 #define ITEM_IDX 3
 #define ITEM_FLAG 4
 #define EFFECT_FLAG 5
-#define EFFECT_MOD 6
-#define MON_AI 7
-#define EFFECT_TYPE 8
+#define EFFECT_FLAG2 6
+#define EFFECT_MOD 7
+#define MON_AI 8
+#define EFFECT_TYPE 9
 
 #define NUM_POTION_TYPES 32
 #define NUM_SCROLL_TYPES 32
@@ -453,6 +488,12 @@ public:
         m_StringTable[i++].Init( "MON_IDX_LURKER", MON_IDX_LURKER );
         m_StringTable[i++].Init( "MON_IDX_COIN", MON_IDX_COIN );
         m_StringTable[i++].Init( "MON_IDX_TOWNSFOLK", MON_IDX_TOWNSFOLK );
+        m_StringTable[i++].Init( "MON_IDX_HYDRA", MON_IDX_HYDRA );
+        m_StringTable[i++].Init( "MON_IDX_OOZE", MON_IDX_OOZE );
+        m_StringTable[i++].Init( "MON_IDX_ELEMENTAL", MON_IDX_ELEMENTAL );
+        m_StringTable[i++].Init( "MON_IDX_MAMMAL", MON_IDX_MAMMAL );
+        m_StringTable[i++].Init( "MON_IDX_BIRD", MON_IDX_BIRD );
+        m_StringTable[i++].Init( "MON_IDX_ANIMATED_WEAPON", MON_IDX_ANIMATED_WEAPON );
 
         // Monster flags (attack types, ai types, color types)
         m_StringTable[i++].Init( "MON_FLAG_SPORE", MON_FLAG_SPORE );
@@ -468,6 +509,8 @@ public:
         m_StringTable[i++].Init( "MON_FLAG_REGENERATE", MON_FLAG_REGENERATE );
         m_StringTable[i++].Init( "MON_FLAG_HURT_BY_LIGHT", MON_FLAG_HURT_BY_LIGHT );
         m_StringTable[i++].Init( "MON_FLAG_BREED", MON_FLAG_BREED );
+        m_StringTable[i++].Init( "MON_FLAG_INVISIBLE", MON_FLAG_INVISIBLE );
+        m_StringTable[i++].Init( "MON_FLAG_MAXHP", MON_FLAG_MAXHP );
         m_StringTable[i++].Init( "MON_AI_DONTMOVE", MON_AI_DONTMOVE );
         m_StringTable[i++].Init( "MON_AI_100RANDOMMOVE", MON_AI_100RANDOMMOVE );
         m_StringTable[i++].Init( "MON_AI_75RANDOMMOVE", MON_AI_75RANDOMMOVE );
@@ -475,49 +518,56 @@ public:
         m_StringTable[i++].Init( "MON_COLOR_MULTI", MON_COLOR_MULTI );
 
         // Effect flags (flags, modifiers, types)
-        m_StringTable[i++].Init( "EFFECT_FLAG_FIRE", EFFECT_FLAG_FIRE );
-        m_StringTable[i++].Init( "EFFECT_FLAG_COLD", EFFECT_FLAG_COLD );
-        m_StringTable[i++].Init( "EFFECT_FLAG_ELECTRICITY", EFFECT_FLAG_ELECTRICITY );
-        m_StringTable[i++].Init( "EFFECT_FLAG_ACID", EFFECT_FLAG_ACID );
+        m_StringTable[i++].Init( "EFFECT_FLAG_FIRE", EFFECT_FLAG_FIRE, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_COLD", EFFECT_FLAG_COLD, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_ELECTRICITY", EFFECT_FLAG_ELECTRICITY, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_ACID", EFFECT_FLAG_ACID, EFFECT_FLAG );
 
-        m_StringTable[i++].Init( "EFFECT_FLAG_POISON", EFFECT_FLAG_POISON );
-        m_StringTable[i++].Init( "EFFECT_FLAG_LIGHT", EFFECT_FLAG_LIGHT );
-        m_StringTable[i++].Init( "EFFECT_FLAG_PARALYZE", EFFECT_FLAG_PARALYZE );
-        m_StringTable[i++].Init( "EFFECT_FLAG_TREASURE", EFFECT_FLAG_TREASURE );
+        m_StringTable[i++].Init( "EFFECT_FLAG_POISON", EFFECT_FLAG_POISON, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_LIGHT", EFFECT_FLAG_LIGHT, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_PARALYZE", EFFECT_FLAG_PARALYZE, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_TREASURE", EFFECT_FLAG_TREASURE, EFFECT_FLAG );
 
-        m_StringTable[i++].Init( "EFFECT_FLAG_AFRAID", EFFECT_FLAG_AFRAID );
-        m_StringTable[i++].Init( "EFFECT_FLAG_BLIND", EFFECT_FLAG_BLIND );
-        m_StringTable[i++].Init( "EFFECT_FLAG_SLEEP", EFFECT_FLAG_SLEEP );
-        m_StringTable[i++].Init( "EFFECT_FLAG_CONFUSE", EFFECT_FLAG_CONFUSE );
+        m_StringTable[i++].Init( "EFFECT_FLAG_AFRAID", EFFECT_FLAG_AFRAID, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_BLIND", EFFECT_FLAG_BLIND, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_SLEEP", EFFECT_FLAG_SLEEP, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_CONFUSE", EFFECT_FLAG_CONFUSE, EFFECT_FLAG );
 
-        m_StringTable[i++].Init( "EFFECT_FLAG_STONE_TO_MUD", EFFECT_FLAG_STONE_TO_MUD );
-        m_StringTable[i++].Init( "EFFECT_FLAG_FUEL", EFFECT_FLAG_FUEL );
-        m_StringTable[i++].Init( "EFFECT_FLAG_INFRA", EFFECT_FLAG_INFRA );
-        m_StringTable[i++].Init( "EFFECT_FLAG_ESP", EFFECT_FLAG_ESP );
+        m_StringTable[i++].Init( "EFFECT_FLAG_STONE_TO_MUD", EFFECT_FLAG_STONE_TO_MUD,
+                                 EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_FUEL", EFFECT_FLAG_FUEL, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_INFRA", EFFECT_FLAG_INFRA, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_ESP", EFFECT_FLAG_ESP, EFFECT_FLAG );
 
-        m_StringTable[i++].Init( "EFFECT_FLAG_IDENTIFY", EFFECT_FLAG_IDENTIFY );
-        m_StringTable[i++].Init( "EFFECT_FLAG_RECALL", EFFECT_FLAG_RECALL );
-        m_StringTable[i++].Init( "EFFECT_FLAG_MAPPING", EFFECT_FLAG_MAPPING );
-        m_StringTable[i++].Init( "EFFECT_FLAG_SUMMON", EFFECT_FLAG_SUMMON );
+        m_StringTable[i++].Init( "EFFECT_FLAG_IDENTIFY", EFFECT_FLAG_IDENTIFY, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_RECALL", EFFECT_FLAG_RECALL, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_MAPPING", EFFECT_FLAG_MAPPING, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_SUMMON", EFFECT_FLAG_SUMMON, EFFECT_FLAG );
 
-        m_StringTable[i++].Init( "EFFECT_FLAG_STAT", EFFECT_FLAG_STAT );
-        m_StringTable[i++].Init( "EFFECT_FLAG_TOHIT", EFFECT_FLAG_TOHIT );
-        m_StringTable[i++].Init( "EFFECT_FLAG_TODAM", EFFECT_FLAG_TODAM );
-        m_StringTable[i++].Init( "EFFECT_FLAG_AC", EFFECT_FLAG_AC );
+        m_StringTable[i++].Init( "EFFECT_FLAG_STAT", EFFECT_FLAG_STAT, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_TOHIT", EFFECT_FLAG_TOHIT, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_TODAM", EFFECT_FLAG_TODAM, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_AC", EFFECT_FLAG_AC, EFFECT_FLAG );
 
-        m_StringTable[i++].Init( "EFFECT_FLAG_HP", EFFECT_FLAG_HP );
-        m_StringTable[i++].Init( "EFFECT_FLAG_XP", EFFECT_FLAG_XP );
-        m_StringTable[i++].Init( "EFFECT_FLAG_MP", EFFECT_FLAG_MP );
-        m_StringTable[i++].Init( "EFFECT_FLAG_TELEPORT", EFFECT_FLAG_TELEPORT );
+        m_StringTable[i++].Init( "EFFECT_FLAG_HP", EFFECT_FLAG_HP, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_XP", EFFECT_FLAG_XP, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_MP", EFFECT_FLAG_MP, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_TELEPORT", EFFECT_FLAG_TELEPORT, EFFECT_FLAG );
 
-        m_StringTable[i++].Init( "EFFECT_FLAG_FREE_ACTION", EFFECT_FLAG_FREE_ACTION );
-        m_StringTable[i++].Init( "EFFECT_FLAG_INVISIBLE", EFFECT_FLAG_INVISIBLE );
-        m_StringTable[i++].Init( "EFFECT_FLAG_LEVITATE", EFFECT_FLAG_LEVITATE );
-        m_StringTable[i++].Init( "EFFECT_FLAG_SPEED", EFFECT_FLAG_SPEED );
+        m_StringTable[i++].Init( "EFFECT_FLAG_FREE_ACTION", EFFECT_FLAG_FREE_ACTION, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_INVISIBLE", EFFECT_FLAG_INVISIBLE, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_LEVITATE", EFFECT_FLAG_LEVITATE, EFFECT_FLAG );
+        m_StringTable[i++].Init( "EFFECT_FLAG_SPEED", EFFECT_FLAG_SPEED, EFFECT_FLAG );
+
+        // Effect Flags (word 2) — dungeon features
+        m_StringTable[i++].Init( "EFFECT_FLAG_DOOR", EFFECT_FLAG_DOOR, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG_TRAP", EFFECT_FLAG_TRAP, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG_MONSTERS", EFFECT_FLAG_MONSTERS, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG_NO_COLLIDE", EFFECT_FLAG_NO_COLLIDE, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG_CURSE", EFFECT_FLAG_CURSE, EFFECT_FLAG2 );
 
         // Effect Modifiers
         m_StringTable[i++].Init( "EFFECT_MOD_RESIST", EFFECT_MOD_RESIST );
-        m_StringTable[i++].Init( "EFFECT_MOD_SEE", EFFECT_MOD_SEE );
         m_StringTable[i++].Init( "EFFECT_MOD_IMMUNE", EFFECT_MOD_IMMUNE );
         m_StringTable[i++].Init( "EFFECT_MOD_WEAK", EFFECT_MOD_WEAK );
 
@@ -525,8 +575,11 @@ public:
         m_StringTable[i++].Init( "EFFECT_MOD_AREA", EFFECT_MOD_AREA );
         m_StringTable[i++].Init( "EFFECT_MOD_LINE", EFFECT_MOD_LINE );
         m_StringTable[i++].Init( "EFFECT_MOD_BALL", EFFECT_MOD_BALL );
+        m_StringTable[i++].Init( "EFFECT_MOD_STAR", EFFECT_MOD_STAR );
 
         m_StringTable[i++].Init( "EFFECT_MOD_ENCHANT", EFFECT_MOD_ENCHANT );
+        m_StringTable[i++].Init( "EFFECT_MOD_SUSTAIN", EFFECT_MOD_SUSTAIN );
+        m_StringTable[i++].Init( "EFFECT_MOD_MAX", EFFECT_MOD_MAX );
 
         // Effect types
         m_StringTable[i++].Init( "EFFECT_TYPE_HEAL", EFFECT_TYPE_HEAL );
@@ -537,7 +590,7 @@ public:
         m_StringTable[i++].Init( "EFFECT_TYPE_RESTORE", EFFECT_TYPE_RESTORE );
         m_StringTable[i++].Init( "EFFECT_TYPE_GAIN", EFFECT_TYPE_GAIN );
         m_StringTable[i++].Init( "EFFECT_TYPE_LOSE", EFFECT_TYPE_LOSE );
-
+        m_StringTable[i++].Init( "EFFECT_TYPE_SEE", EFFECT_TYPE_SEE );
         // Equipment slots
         m_StringTable[i++].Init( "EQUIP_IDX_MAIN_HAND", EQUIP_IDX_MAIN_HAND );
         m_StringTable[i++].Init( "EQUIP_IDX_OFF_HAND", EQUIP_IDX_OFF_HAND );
@@ -589,21 +642,27 @@ public:
         // Item flags
         m_StringTable[i++].Init( "ITEM_FLAG_CURSED", ITEM_FLAG_CURSED );
         m_StringTable[i++].Init( "ITEM_FLAG_STACKS", ITEM_FLAG_STACKS );
+        m_StringTable[i++].Init( "ITEM_FLAG_IDENTIFIED", ITEM_FLAG_IDENTIFIED );
+        m_StringTable[i++].Init( "ITEM_FLAG_MAGIC", ITEM_FLAG_MAGIC );
         m_StringTable[i++].Init( "ITEM_FLAG_2HANDED", ITEM_FLAG_2HANDED );
         m_StringTable[i++].Init( "ITEM_FLAG_OFFHAND", ITEM_FLAG_OFFHAND );
         m_StringTable[i++].Init( "ITEM_FLAG_MAINHAND", ITEM_FLAG_MAINHAND );
         m_StringTable[i++].Init( "ITEM_FLAG_NEEDSAMMO", ITEM_FLAG_NEEDSAMMO );
-        m_StringTable[i++].Init( "ITEM_FLAG_NO_COLLIDE", ITEM_FLAG_NO_COLLIDE );
+        m_StringTable[i++].Init( "ITEM_FLAG_BLESSED", ITEM_FLAG_BLESSED );
         m_StringTable[i++].Init( "ITEM_FLAG_HOLDING", ITEM_FLAG_HOLDING );
         m_StringTable[i++].Init( "ITEM_COLOR_MULTI", ITEM_COLOR_MULTI );
 
-        if( i == NUM_STRINGS )
+        if( i != NUM_STRINGS )
         {
-            JLog( LOG_LEVEL_INFO, false, "Success!\n" );
+            JLog( LOG_LEVEL_ERROR, true,
+                  "FATAL: StringTable expected %d entries but got %d. "
+                  "NUM_ITEM_FLAGS or another NUM_ constant is out of sync!\n",
+                  NUM_STRINGS, i );
+            assert( i == NUM_STRINGS && "StringTable entry count mismatch" );
         }
         else
         {
-            JLog( LOG_LEVEL_ERROR, true, "got %d strings instead, misconfiguration error!\n", i );
+            JLog( LOG_LEVEL_INFO, false, "Success!\n" );
         }
     };
 
@@ -653,6 +712,8 @@ public:
         case EFFECT_TYPE:
             offset += NUM_EFFECT_MODIFIERS;
         case EFFECT_MOD:
+            offset += NUM_EFFECT_FLAGS2;
+        case EFFECT_FLAG2:
             offset += NUM_EFFECT_FLAGS;
         case EFFECT_FLAG:
             offset += NUM_MON_FLAGS;
@@ -673,6 +734,49 @@ public:
             index = Util::jlog2( dwIndex );
         }
         return m_StringTable[offset + index].m_szString;
+    }
+
+    // Look up an effect flag string and assign to the correct word
+    void LookupEffectFlag( const char *szIn, uint32 &dwFlags, uint32 &dwFlags2 )
+    {
+        for( int i = 0; i < NUM_STRINGS; i++ )
+        {
+            if( Util::jstrcmp( m_StringTable[i].m_szString, szIn ) == 0 )
+            {
+                if( m_StringTable[i].m_dwFlagSet == EFFECT_FLAG2 )
+                    dwFlags2 |= m_StringTable[i].m_dwValue;
+                else
+                    dwFlags |= m_StringTable[i].m_dwValue;
+                return;
+            }
+        }
+        JLog( LOG_LEVEL_WARN, true, "bad effect flag string: %s\n", szIn );
+    }
+
+    // Check whether a named effect flag is set in the given flag words
+    bool CheckEffectFlag( const char *szIn, uint32 dwFlags, uint32 dwFlags2 )
+    {
+        for( int i = 0; i < NUM_STRINGS; i++ )
+        {
+            if( Util::jstrcmp( m_StringTable[i].m_szString, szIn ) == 0 )
+            {
+                if( m_StringTable[i].m_dwFlagSet == EFFECT_FLAG2 )
+                    return ( dwFlags2 & m_StringTable[i].m_dwValue ) != 0;
+                else
+                    return ( dwFlags & m_StringTable[i].m_dwValue ) != 0;
+            }
+        }
+        return false;
+    }
+
+    // Return the name of whichever effect flag word is set
+    const char *EffectFlagToString( uint32 dwFlags, uint32 dwFlags2 )
+    {
+        if( dwFlags2 )
+            return IndexToString( EFFECT_FLAG2, dwFlags2 );
+        if( dwFlags )
+            return IndexToString( EFFECT_FLAG, dwFlags );
+        return "(none)";
     }
 
     const char *PotionColor( const uint32 dwIndex )

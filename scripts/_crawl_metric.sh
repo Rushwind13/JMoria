@@ -9,11 +9,11 @@ OUT="$SCRIPT_DIR/bot_test_latest.txt"
 
 # Ensure persistent crawler session exists and is ready
 if ! tmux has-session -t crawler 2>/dev/null; then
-    tmux new-session -d -s crawler -x 200 -y 57 "cd '$PROJ_ROOT' && exec zsh"
+    tmux new-session -d -s crawler -x 125 -y 45 "cd '$PROJ_ROOT' && exec zsh"
     sleep 1
 fi
 
-python3 -u "$SCRIPT_DIR/crawler.py" --verbose --think --persistent-session --jmoria "$PROJ_ROOT/jmoria" "$@" 2>&1 > "$OUT"
+python3 -u "$SCRIPT_DIR/_crawler.py" --verbose --think --persistent-session --jmoria "$PROJ_ROOT/jmoria" "$@" 2>&1 > "$OUT"
 turns=$(grep -ac "\[turn" "$OUT" || echo 0)
 loops=$(grep -ac "loop_detect\|loop_break" "$OUT" || echo 0)
 breakouts=$(grep -ac "breakout" "$OUT" || echo 0)

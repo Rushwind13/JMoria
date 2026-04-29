@@ -8,9 +8,6 @@
 #endif // __WIN32__
 #include <stdio.h>
 #include <string.h>
-#ifndef TURN_BASED
-#include <sys/time.h>
-#endif
 #include <sys/time.h>
 
 #include "JMDefs.h"
@@ -29,6 +26,13 @@ void SeedRandom( unsigned int seed )
 }
 
 unsigned int GetRandomSeed() { return g_RandomSeed; }
+
+void SeedRandomFromClock()
+{
+    struct timeval tv;
+    gettimeofday( &tv, NULL );
+    SeedRandom( (unsigned int)( tv.tv_sec ^ tv.tv_usec ) );
+}
 
 // The RNG in all its glory
 float GetRandom( float lo, float hi )
@@ -65,6 +69,20 @@ JIVector GetRandomPoint( const JRect rcIn )
     return vPoint;
 }
 
+float windowed_bell( float delta, float sigma )
+{
+    // Normalize delta to a 0-1 range based on sigma
+    float x = delta / sigma;
+    float abs_x = ( x < 0 ) ? -x : x;
+
+    if( abs_x >= 1.0f )
+        return 0.0f;
+
+    // A simple smooth polynomial: (1 - x^2)^2
+    float v = 1.0f - abs_x * abs_x;
+    return v * v;
+}
+
 // Roll some dice
 float Roll( int dice, int sides )
 {
@@ -82,6 +100,40 @@ float Roll( int dice, int sides )
     }
 
     return total;
+}
+
+// RollMax: returns the maximum possible roll (dice * sides) with no randomness
+float RollMax( const char *szFormat )
+{
+    if( !szFormat || *szFormat == nul )
+    {
+        return 0.0f;
+    }
+
+    char *szToken;
+    int dice;
+    int sides;
+    char *c;
+    szToken = new char[Util::jstrlen( szFormat ) + 1];
+
+    Util::jstrcpy( szToken, szFormat );
+
+    c = strtok( szToken, "d" );
+    if( c == NULL )
+    {
+        return 0.0f;
+    }
+
+    dice = atoi( c );
+    c = strtok( NULL, "d" );
+    if( c == NULL )
+    {
+        return 0.0f;
+    }
+
+    sides = atoi( c );
+    delete[] szToken;
+    return (float)( dice * sides );
 }
 
 // function overload; pass in "2d5"
@@ -276,7 +328,7 @@ bool Bresenham( const JIVector vSource, const JIVector vTarget, const uint8 dist
 }
 
 JLinkList<JIVector> *GenerateLine( const JIVector vSource, const JIVector vTarget,
-                                    const uint8 distance )
+                                   const uint8 distance )
 {
     JLinkList<JIVector> *llLine = new JLinkList<JIVector>;
 
@@ -319,7 +371,7 @@ JLinkList<JIVector> *GenerateLine( const JIVector vSource, const JIVector vTarge
 }
 
 bool CheckLineCollision( JLinkList<JIVector> *llLine, const JIVector vSource,
-                          bool ( *isWalkable )( JVector & ) )
+                         bool ( *isWalkable )( JVector & ) )
 {
     JVector vTest;
     CLink<JIVector> *pLink = llLine->GetHead();

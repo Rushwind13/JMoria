@@ -1,27 +1,36 @@
 #ifndef __FILEPARSE_H__
 #define __FILEPARSE_H__
+#include "Effect.h"
 #include "JColor.h"
 #include "JLinkList.h"
+#include "MonsterRecall.h"
 #include "TextEntry.h"
 
 class CMonsterDef;
 class CItemDef;
+class CDungeon;
 class CScore;
+struct CRecallEntry;
 class CDataFile
 {
     // Member variables
 public:
-    CDataFile() {}
+    CDataFile() : m_pDungeon( NULL ) {}
     ~CDataFile() {}
 
     bool Open( const char *szFilename );
     bool Append( const char *szFilename );
+    bool Write( const char *szFilename );
     bool Close();
 
+    void SetDungeon( CDungeon *pDungeon ) { m_pDungeon = pDungeon; }
     CMonsterDef *ReadMonster( CMonsterDef &mdIn );
     CItemDef *ReadItem( CItemDef &idIn );
+    CEffectDef *ReadEffect( CEffectDef &edIn );
     CScore *ReadScore( CScore &sIn );
     bool WriteScore( CScore *sIn );
+    CRecallEntry *ReadMonsterRecall( CRecallEntry &rIn );
+    bool WriteMonsterRecall( const CRecallEntry *rIn );
 
 protected:
     char *Strip( char *szLine );
@@ -31,9 +40,11 @@ protected:
     int GetValue( char *szLine, int &dwIn );
     int GetValue( char *szLine, long &dwIn );
     float GetValue( char *szLine, float &fIn );
+    CEffect *EffectFromName( const char *szName );
 
 private:
     FILE *m_fp;
+    CDungeon *m_pDungeon;
     int PotionIndex[NUM_POTION_TYPES];
     int ScrollIndex[NUM_SCROLL_TYPES];
     int WandIndex[NUM_LUMBER_TYPES];

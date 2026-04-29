@@ -1,34 +1,10 @@
 #ifndef __ITEM_H__
 #define __ITEM_H__
 
+#include "Effect.h"
 #include "JLinkList.h"
 #include "JMDefs.h"
-
-class CEffect
-{
-public:
-    CEffect()
-        : m_dwEffect( -1 ),
-          m_dwFlags( 0 ),
-          m_dwModifier( 0 ),
-          m_szAmount( NULL ),
-          m_fDuration( 0 )
-    {
-    }
-    ~CEffect()
-    {
-        if( m_szAmount )
-        {
-            delete[] m_szAmount;
-            m_szAmount = NULL;
-        }
-    }
-    int m_dwEffect;
-    int m_dwFlags;
-    int m_dwModifier;
-    char *m_szAmount;
-    float m_fDuration;
-};
+#include "Util.h"
 
 class CItemDef
 {
@@ -41,19 +17,24 @@ public:
           m_szUnidentifiedPlural( NULL ),
           m_szFlavor( NULL ),
           m_fSpeed( 0.0f ),
-          m_fACBonus( 0.0f ),
+          m_szACBonus( NULL ),
           m_fBaseAC( 0.0f ),
           m_szBaseDamage( NULL ),
-          m_fBonusToHit( 0.0f ),
-          m_fBonusToDamage( 0.0f ),
+          m_szBonusToHit( NULL ),
+          m_szBonusToDamage( NULL ),
+          m_szCharges( NULL ),
           m_dwLevel( 0 ),
+          m_fLevelSigma( 10.0f ),
+          m_fSpawnWeight( 0.0f ),
           m_fValue( 0.0f ),
           m_fWeight( 0.0f ),
           m_fRadius( 0.0f ),
           m_fDuration( 0.0f ),
           m_dwFlags( 0 ),
           m_dwIndex( ITEM_IDX_INVALID ),
-          m_dwBaseHP( 0.0f )
+          m_dwBaseHP( 0.0f ),
+          m_bIdentified( false ),
+          m_bTried( false )
     {
         m_Colors = new JLinkList<JColor>;
         m_llEffects = new JLinkList<CEffect>;
@@ -90,6 +71,26 @@ public:
             delete[] m_szBaseDamage;
             m_szBaseDamage = NULL;
         }
+        if( m_szACBonus )
+        {
+            delete[] m_szACBonus;
+            m_szACBonus = NULL;
+        }
+        if( m_szBonusToHit )
+        {
+            delete[] m_szBonusToHit;
+            m_szBonusToHit = NULL;
+        }
+        if( m_szBonusToDamage )
+        {
+            delete[] m_szBonusToDamage;
+            m_szBonusToDamage = NULL;
+        }
+        if( m_szCharges )
+        {
+            delete[] m_szCharges;
+            m_szCharges = NULL;
+        }
         if( m_Colors )
         {
             m_Colors->Terminate();
@@ -109,12 +110,15 @@ public:
     char *m_szUnidentifiedPlural;
     char *m_szFlavor; // "Green" Potion
     float m_fSpeed;
-    float m_fACBonus;
+    char *m_szACBonus; // NdM dice string for magical AC bonus (rolled per-instance)
     float m_fBaseAC;
     char *m_szBaseDamage;
-    float m_fBonusToHit;
-    float m_fBonusToDamage;
-    int m_dwLevel;
+    char *m_szBonusToHit;    // NdM dice string for magical to-hit bonus (rolled per-instance)
+    char *m_szBonusToDamage; // NdM dice string for magical to-damage bonus (rolled per-instance)
+    char *m_szCharges;       // NdM dice string for initial charges (rolled per-instance)
+    int m_dwLevel;           // peak dungeon depth (center of bell curve)
+    float m_fLevelSigma;     // spread of bell curve (default 10.0)
+    float m_fSpawnWeight;    // scratch: Gaussian weight computed by ChooseItemForDepth
     float m_fValue;
     float m_fWeight;
     int m_dwFlags;
@@ -125,13 +129,17 @@ public:
     JLinkList<JColor> *m_Colors;
     JLinkList<CEffect> *m_llEffects;
     JColor m_Color;
+    bool m_bIdentified; // has this item type been identified?
+    bool m_bTried;      // has this item type been used without identifying?
 
 protected:
 private:
     // Member Functions
 public:
-    //    virtual int HandleModify(/*cmd?*/); // how do you deal with a modify cmd?
-    // ... need one of these per state (virt in base, defined in subclasses)?
+    void FormatProperties( char *szOut, int maxLen, uint32 knownProps, uint32 itemFlags,
+                           uint32 charges, float fACBonus, float fBonusToHit,
+                           float fBonusToDamage );
+
 protected:
 private:
 };
@@ -145,8 +153,14 @@ public:
     int m_dwCount; // how many of this item are being carried?
     int m_dwFlags; // item cursed, or other specific to this instance, rather than in the general
                    // CItemDef
-    uint32 m_dwCharges;    // for wands and staves and other items that have an "ammo count"
-    uint32 m_dwInstanceId; // unique instance id for this item
+    uint32 m_dwCharges;     // for wands and staves and other items that have an "ammo count"
+    uint32 m_dwMaxCharges;  // lifetime charge limit for recharge explosion curve
+    uint32 m_dwInstanceId;  // unique instance id for this item
+    uint32 m_dwKnownProps;  // bitmask of known properties (KNOWN_CURSED, KNOWN_BONUSES, etc.)
+    float m_fACBonus;       // per-instance rolled magical AC bonus
+    float m_fBonusToHit;    // per-instance rolled magical to-hit bonus
+    float m_fBonusToDamage; // per-instance rolled magical to-damage bonus
+    float m_fSpeedBonus;    // per-instance speed bonus (rings: random 0.1-1.0; boots/gloves: fixed)
 protected:
     float m_fColorChangeInterval;
     JColor m_Color;
@@ -160,7 +174,13 @@ public:
         : m_vPos( 0, 0 ),
           m_dwFlags( 0 ),
           m_dwCharges( 0 ),
+          m_dwMaxCharges( 0 ),
           m_dwInstanceId( 0 ),
+          m_dwKnownProps( 0 ),
+          m_fACBonus( 0.0f ),
+          m_fBonusToHit( 0.0f ),
+          m_fBonusToDamage( 0.0f ),
+          m_fSpeedBonus( 0.0f ),
           m_dwCount( 1 ),
           m_pllLink( NULL ),
           m_id( NULL ),
@@ -173,10 +193,23 @@ public:
     const char *GetName();
     const char *GetPlural();
     bool IsStackable() { return ( m_id->m_dwFlags & ITEM_FLAG_STACKS ) == ITEM_FLAG_STACKS; }
+    bool IsIdentified() { return m_id->m_bIdentified || ( m_dwFlags & ITEM_FLAG_IDENTIFIED ); }
+    void Identify()
+    {
+        m_id->m_bIdentified = true;
+        RevealAllProperties();
+    }
+    bool KnowsProperty( uint32 prop ) { return ( m_dwKnownProps & prop ) != 0; }
+    void RevealProperty( uint32 prop ) { m_dwKnownProps |= prop; }
+    void RevealAllProperties()
+    {
+        m_dwKnownProps |= ( KNOWN_CURSED | KNOWN_BONUSES | KNOWN_CHARGES );
+    }
     bool IsOpenable() { return false; }   // for chests, etc.
     bool IsCloseable() { return false; }  // closeable pickup?
     bool IsTunnelable() { return false; } // Tunnelable pickup? unlikely.
     int EquipType();
+    bool IsWeakTo( uint32 dwElement );
 
     float GetDuration() { return m_fRemainingDuration; };
     void ChangeDuration( float fValue, bool bReset = false )
@@ -191,8 +224,13 @@ public:
         }
     };
 
+    float GetRadius() { return m_id->m_fRadius; };
+
     static JResult CreateItem( CItemDef *pid, JVector vSpawnPoint = JVector( -1, -1 ),
                                bool bNear = false );
+    void Imbue( int depth );
+    CItem *
+    Copy( int quantity = 0 ); // Create a copy of this item with specified quantity (0 = full stack)
     JResult SpawnItem( JVector vSpawnPoint = JVector( -1, -1 ) );
     JResult SpawnAt( JVector vSpawnPoint );
 

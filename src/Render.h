@@ -32,7 +32,8 @@ public:
           m_dwScreenBPP( 0 ),
           m_dwWindowFlags( 0 ),
           m_hWindow( NULL ),
-          m_dwTileMetricsTilesPerRow( 0 ) {};
+          m_dwTileMetricsTilesPerRow( 0 ),
+          m_dwZoom( ZOOM_NORMAL ) {};
     virtual ~CRender() { Term(); }
 
     virtual JResult Init( int width, int height, int bpp );
@@ -83,6 +84,21 @@ public:
     int GetScreenWidth() const override { return m_dwScreenWidth; }
     int GetScreenHeight() const override { return m_dwScreenHeight; }
 
+    // Translate SDL events into renderer-agnostic events
+    bool PollEvent( JInputEvent &event ) override;
+
+    // Zoom control (OpenGL viewport)
+    Uint16 GetZoom() const override { return m_dwZoom; }
+    void SetZoom( Uint16 zoom ) override { m_dwZoom = zoom; }
+    void Zoom( Uint16 dwDelta ) override
+    {
+        m_dwZoom += dwDelta;
+        if( m_dwZoom < ZOOM_MIN )
+            m_dwZoom = ZOOM_MIN;
+        else if( m_dwZoom > ZOOM_MAX )
+            m_dwZoom = ZOOM_MAX;
+    }
+
 protected:
     int m_dwScreenWidth;
     int m_dwScreenHeight;
@@ -91,8 +107,13 @@ protected:
     int m_dwWindowFlags;
 
 private:
+    static constexpr Uint16 ZOOM_MIN = 4;
+    static constexpr Uint16 ZOOM_NORMAL = 20;
+    static constexpr Uint16 ZOOM_MAX = 100;
+
     bool m_bHasBeenInitted;
     SDL_Window *m_hWindow;
+    Uint16 m_dwZoom;
 
     // Tileset metrics for DrawChar: stored by SetTileMetrics(), used to convert chars to quads
     int m_dwTileMetricsTilesPerRow;

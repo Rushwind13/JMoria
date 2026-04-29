@@ -6,9 +6,11 @@
 
 #include <JMDefs.h>
 
+#include "DisplayText.h"
 #include "FileParse.h"
 #include "Item.h"
 #include "Monster.h"
+#include "MonsterRecall.h"
 #include <AIMgr.h>
 #include <Constants.h>
 #include <Dungeon.h>
@@ -63,6 +65,9 @@ struct TestCtx
     CDungeonCreationStep *pStep;
     CRoom *pRoom;
 
+    // Dungeon (for effect definitions and resource loading)
+    CDungeon *dungeon = NULL;
+
     // Fixture / Regression testing
     std::string fixture_filename;
     CDungeonMap imported_map;
@@ -77,6 +82,10 @@ struct TestCtx
 
     // AI Brain
     CAIBrain *brain;
+    // Effect system
+    uint32 effect_flags;
+    uint32 effect_flags2;
+
     // ItemDef
     CItemDef *ItemDef;
     JResult Success;
@@ -103,6 +112,10 @@ struct TestCtx
     int hi_f;
 
     char szBuffer[1024];
+
+    // MonsterRecall
+    CMonsterRecall *recall = nullptr;
+    CDisplayText *recallDT = nullptr;
 };
 
 #endif // __TEST_CONTEXT__

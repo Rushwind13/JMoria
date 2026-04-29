@@ -5,6 +5,7 @@
 #include "DungeonTile.h"
 #include "Game.h"
 #include "JMDefs.h"
+#include "MonsterRecall.h"
 #include "Player.h"
 
 extern CGame *g_pGame;
@@ -14,6 +15,11 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
     // If you haven't handled the key by the end of this function,
     // it's an invalid key, so return an error.
     int retval = -1;
+
+    // Panel toggles are display-only and don't consume a game turn.
+    if( IsToggleCommand( keysym ) )
+        return JHANDLED_NOTURN;
+
     if( IsDirectional( keysym ) )
     {
         JVector vTestDir( 0, 0 );
@@ -122,6 +128,12 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
         retval = 0;
     }
 
+    else if( IsSearchCommand( keysym ) )
+    {
+        g_pGame->GetPlayer()->Search();
+        retval = 0;
+    }
+
     // Wizard-mode commands
 
     else if( IsExitWizardCommand( keysym ) )
@@ -207,7 +219,15 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
 #ifdef TURN_BASED
     if( retval != -1 )
     {
-        g_pGame->SetReadyForUpdate( true );
+        // Don't consume a turn for state transitions to selection modes.
+        // These states (RANGED, USE, MODIFY, etc.) manage their own ready-for-update
+        // flag and only consume a turn when the selection is complete.
+        int eNewState = g_pGame->GetGameStateIndex();
+        if( eNewState != STATE_RANGED && eNewState != STATE_USE && eNewState != STATE_MODIFY &&
+            eNewState != STATE_LOOK && eNewState != STATE_TARGET && eNewState != STATE_STRINGINPUT )
+        {
+            g_pGame->SetReadyForUpdate( true );
+        }
     }
 #endif // TURN_BASED
     return retval;
@@ -248,6 +268,15 @@ bool CCmdState::IsUseCommand( JKeysym *keysym )
     case JKEY_w:
     {
         if( !( keysym->mod & JMOD_SHIFT ) && !( keysym->mod & JMOD_CTRL ) )
+        {
+            return true;
+        }
+        break;
+    }
+    case JKEY_f:
+    {
+        // F (shift+f, not ^f) for fuel/fill
+        if( ( keysym->mod & JMOD_SHIFT ) && !( keysym->mod & JMOD_CTRL ) )
         {
             return true;
         }
@@ -427,6 +456,11 @@ bool CCmdState::IsPickupCommand( JKeysym *keysym )
     return ( keysym->sym == JKEY_g && !( keysym->mod & ( JMOD_SHIFT | JMOD_CTRL ) ) );
 }
 
+bool CCmdState::IsSearchCommand( JKeysym *keysym )
+{
+    return ( keysym->sym == JKEY_s && !( keysym->mod & ( JMOD_SHIFT | JMOD_CTRL ) ) );
+}
+
 bool CCmdState::IsExitWizardCommand( JKeysym *keysym )
 {
     switch( keysym->sym )
@@ -442,9 +476,50 @@ bool CCmdState::IsExitWizardCommand( JKeysym *keysym )
     return false;
 }
 
-// Handlers
-#define DIR_UP 4
-#define DIR_DOWN 5
+bool CCmdState::IsToggleCommand( JKeysym *keysym )
+{
+    if( keysym->sym == JKEY_i && keysym->mod == JMOD_NONE )
+    {
+        g_pGame->ToggleInv();
+        return true;
+    }
+    if( keysym->sym == JKEY_e && keysym->mod == JMOD_NONE )
+    {
+        g_pGame->ToggleEquip();
+        return true;
+    }
+    if( keysym->sym == JKEY_c && ( keysym->mod & JMOD_SHIFT ) )
+    {
+        g_pGame->ToggleStats();
+        return true;
+    }
+    if( keysym->sym == JKEY_v && keysym->mod == JMOD_NONE )
+    {
+        g_pGame->ToggleMonsters();
+        return true;
+    }
+
+    // Check for Shift+lowercase v - monster recall (any non-zero mod besides caps lock)
+    // When Shift+V is pressed, many systems send lowercase 'v' with a SHIFT modifier
+    if( keysym->sym == JKEY_v && keysym->mod == JMOD_SHIFT )
+    {
+        g_pGame->ToggleMonsterRecall();
+        return true;
+    }
+    // Check for '(' (Item Recall) - Shift+9 produces this character
+    if( keysym->sym == '(' )
+    {
+        g_pGame->ToggleItemRecall();
+        return true;
+    }
+    // Check for ')' (Map Overview) - Shift+0 produces this character
+    if( keysym->sym == ')' )
+    {
+        g_pGame->ToggleMap();
+        return true;
+    }
+    return false;
+}
 
 int CCmdState::OnHandleStairs( JKeysym *keysym )
 {

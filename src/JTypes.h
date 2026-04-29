@@ -6,10 +6,9 @@
 #ifndef __JTYPES_H__
 #define __JTYPES_H__
 
-#include <cstdint>
-
-typedef uint8_t Uint8;
-typedef int8_t Sint8;
-typedef uint16_t Uint16;
+typedef unsigned char Uint8;
+typedef signed char Sint8;
+typedef unsigned short Uint16;
+typedef int Sint32;
 
 #endif // __JTYPES_H__

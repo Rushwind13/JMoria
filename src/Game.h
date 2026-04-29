@@ -24,6 +24,7 @@ class CStringInputState;
 class CTargetState;
 class CUseState;
 class CAIMgr;
+class CMonsterRecall;
 
 class CGame
 {
@@ -49,7 +50,13 @@ public:
     CDisplayText *GetEquip() { return m_pEquipDT; }
     CDisplayText *GetUse() { return m_pUseDT; }
     CDisplayText *GetEnd() { return m_pEndGameDT; }
+    CDisplayText *GetMonsters() { return m_pMonstersDT; }
+    CDisplayText *GetMonsterRecall() { return m_pMonRecallDT; }
+    CDisplayText *GetItemRecall() { return m_pItemRecallDT; }
+    CDisplayText *GetMap() { return m_pMapDT; }
     CAIMgr *GetAIMgr() { return m_pAIMgr; }
+    CMonsterRecall *RecallMonster() { return m_pMonRecall; }
+    // LLM: TODO: CItemRecall *RecallItem() { return m_pItemRecall; }
     void Term();
     void Quit( int returncode );
     void SetState( int eNewState );
@@ -59,13 +66,22 @@ public:
     int GetITime() { return (int)m_fGameTime; }
     int GetTime() { return GetITime(); }
 
-    // ASCII fly-out panel toggles
+    // Panel visibility toggles (i=inventory, e=equipment, C=stats, v=monsters,
+    // V=monster recall, (=item recall, )=map overview)
     void ToggleStats() { m_bShowStats = !m_bShowStats; }
     void ToggleInv() { m_bShowInv = !m_bShowInv; }
     void ToggleEquip() { m_bShowEquip = !m_bShowEquip; }
+    void ToggleMonsters() { m_bShowMonsters = !m_bShowMonsters; }
+    void ToggleMonsterRecall() { m_bShowMonRecall = !m_bShowMonRecall; }
+    void ToggleItemRecall() { m_bShowItemRecall = !m_bShowItemRecall; }
+    void ToggleMap() { m_bShowMap = !m_bShowMap; }
     bool IsShowingStats() const { return m_bShowStats; }
     bool IsShowingInv() const { return m_bShowInv; }
     bool IsShowingEquip() const { return m_bShowEquip; }
+    bool IsShowingMonsters() const { return m_bShowMonsters; }
+    bool IsShowingMonsterRecall() const { return m_bShowMonRecall; }
+    bool IsShowingItemRecall() const { return m_bShowItemRecall; }
+    bool IsShowingMap() const { return m_bShowMap; }
 
 #ifdef TURN_BASED
     void SetReadyForUpdate( const bool isReady ) { m_bReadyForUpdate = isReady; }
@@ -79,6 +95,7 @@ protected:
     CDungeon *m_pDungeon;
     CPlayer *m_pPlayer;
     CAIMgr *m_pAIMgr;
+    CMonsterRecall *m_pMonRecall;
 
     CDisplayText *m_pMsgsDT;
     CDisplayText *m_pStatsDT;
@@ -86,13 +103,22 @@ protected:
     CDisplayText *m_pEquipDT;
     CDisplayText *m_pUseDT;
     CDisplayText *m_pEndGameDT;
+    CDisplayText *m_pMonstersDT;
+    CDisplayText *m_pMonRecallDT;
+    CDisplayText *m_pItemRecallDT;
+    CDisplayText *m_pMapDT;
 
     CStateBase *m_pCurState;
     int m_eCurState;
 
     CClockStepState *m_pClockStepState;
     CCmdState *m_pCmdState;
+#ifdef UNIT_TEST
+public:
+#endif
     CEndGameState *m_pEndGameState;
+
+protected:
     CIntroState *m_pIntroState;
     CLookState *m_pLookState;
     CModState *m_pModState;
@@ -107,15 +133,14 @@ private:
     IRenderBackend *m_pRender;
     RenderMode m_eRenderMode;
 
-    // ASCII fly-out panel visibility (toggled by c/i/e keys)
+    // Panel visibility (toggled by i/e/C/v keys and bottom panel hotkeys)
     bool m_bShowStats;
     bool m_bShowInv;
     bool m_bShowEquip;
-
-#ifdef RENDER_ASCII
-    void HandleEventsASCII( int &isActive, int &done );
-    void UpdateASCIILayout();
-#endif
+    bool m_bShowMonsters;
+    bool m_bShowMonRecall;
+    bool m_bShowItemRecall;
+    bool m_bShowMap;
 
     int m_dwNextTime;
     float m_fGameTime;

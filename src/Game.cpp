@@ -4,6 +4,7 @@
 
 #include "Game.h"
 #include "Dungeon.h"
+#include "MonsterRecall.h"
 #include "Player.h"
 #include "TileSet.h"
 
@@ -23,7 +24,6 @@
 #include "DisplayText.h"
 #ifdef RENDER_OPENGL
 #include "Render.h"
-#include "SDL2/SDL.h"
 #endif
 #ifdef RENDER_ASCII
 #include "RenderASCII.h"
@@ -53,12 +53,17 @@ CGame::CGame()
       m_pStringInputState( NULL ),
       m_pTargetState( NULL ),
       m_pUseState( NULL ),
+      m_pMonRecall( NULL ),
       m_eCurState( STATE_INVALID ),
       m_fGameTime( 0.0f ),
       m_eRenderMode( RenderMode::None ),
       m_bShowStats( true ),
       m_bShowInv( false ),
-      m_bShowEquip( false )
+      m_bShowEquip( false ),
+      m_bShowMonsters( false ),
+      m_bShowMonRecall( false ),
+      m_bShowItemRecall( false ),
+      m_bShowMap( false )
 {
     m_pClockStepState = new CClockStepState;
     m_pCmdState = new CCmdState;
@@ -82,6 +87,8 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     JResult result = JSUCCESS;
     // Initialize all the game stuff, baby.
 
+    Util::SeedRandomFromClock();
+
     g_Constants.Init();
 
     m_eRenderMode = mode;
@@ -91,42 +98,32 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     {
         m_pRender = new CRenderNull;
     }
-#if defined( RENDER_ASCII ) && defined( RENDER_OPENGL )
+#ifdef RENDER_ASCII
     else if( m_eRenderMode == RenderMode::ASCII )
     {
         m_pRender = new CRenderASCII;
         result = m_pRender->Init( 80, 24, 0 );
     }
+#endif
+#ifdef RENDER_OPENGL
     else if( m_eRenderMode == RenderMode::OpenGL )
     {
         m_pRender = new CRender;
         result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
     }
+#endif
     else
     {
         JLog( LOG_LEVEL_ERROR, true, "No render mode specified.\n" );
         return 1;
     }
-#elif defined( RENDER_ASCII )
-    else
-    {
-        m_pRender = new CRenderASCII;
-        result = m_pRender->Init( 80, 24, 0 );
-    }
-#elif defined( RENDER_OPENGL )
-    else
-    {
-        m_pRender = new CRender;
-        result = m_pRender->Init( SCREEN_WIDTH, SCREEN_HEIGHT, SCREEN_BPP );
-    }
-#endif
     if( m_pRender && result != JSUCCESS )
     {
         m_pRender->Term();
         return result;
     }
 
-    m_pMsgsDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, 40 ), 255 );
+    m_pMsgsDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, MSGS_ROWS * 8 ), 255 );
     m_pMsgsDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE );
 
     m_pStatsDT = new CDisplayText( szBasedir, JRect( 0, 50, 150, 480 ), 220 );
@@ -136,7 +133,8 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     m_pInvDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
 
     m_pEquipDT = new CDisplayText( szBasedir, JRect( 440, 345, 640, 480 ), 180 );
-    m_pEquipDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
+    m_pEquipDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
+                          FLAG_TEXT_TRIM_TAIL );
 
     m_pUseDT = new CDisplayText( szBasedir, JRect( 200, 40, 440, 480 ), 200 );
     m_pUseDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
@@ -144,16 +142,40 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     m_pEndGameDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, 480 ), 255 );
     m_pEndGameDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
 
-    if( m_eRenderMode == RenderMode::ASCII )
-    {
-#ifdef RENDER_ASCII
-        UpdateASCIILayout();
-        m_bShowInv = ( m_pRender->GetScreenWidth() >= ASCIILayout::INV_AUTO_WIDTH );
-#endif
-    }
+    // Bottom panels: 4 panels across bottom of screen (70px height each)
+    // Visible Monsters (very narrow, leftmost)
+    m_pMonstersDT = new CDisplayText( szBasedir, JRect( 0, 410, 80, 480 ), 180 );
+    m_pMonstersDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
+                             FLAG_TEXT_TRIM_TAIL );
+
+    // Monster Recall (knowledge, wider)
+    m_pMonRecallDT = new CDisplayText( szBasedir, JRect( 80, 410, 340, 480 ), 180 );
+    m_pMonRecallDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
+                              FLAG_TEXT_TRIM_TAIL );
+
+    // Item Recall (similar width to Monster Recall)
+    m_pItemRecallDT = new CDisplayText( szBasedir, JRect( 340, 410, 490, 480 ), 180 );
+    m_pItemRecallDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
+                               FLAG_TEXT_TRIM_TAIL );
+
+    // Map Overview (right side)
+    m_pMapDT = new CDisplayText( szBasedir, JRect( 490, 410, 640, 480 ), 180 );
+    m_pMapDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX | FLAG_TEXT_TRIM_TAIL );
+
+    // Let the renderer configure display region rects for its coordinate system
+    m_pRender->ConfigureDisplayRegions( m_pMsgsDT, m_pStatsDT, m_pInvDT, m_pEquipDT, m_pUseDT,
+                                        m_pEndGameDT, m_pMonstersDT, m_pMonRecallDT,
+                                        m_pItemRecallDT, m_pMapDT );
+
+    m_bShowInv = m_pRender->ShouldAutoShowInventory();
+    m_bShowEquip = m_pRender->ShouldAutoShowEquipment();
+    m_bShowMonsters = m_pRender->ShouldAutoShowMonsters();
 
     m_pAIMgr = new CAIMgr;
     m_pAIMgr->Init();
+
+    m_pMonRecall = new CMonsterRecall;
+    m_pMonRecall->Init( szBasedir );
 
     // Init the Player
     m_pPlayer = new CPlayer;
@@ -211,6 +233,13 @@ void CGame::Term()
     {
         delete m_pAIMgr;
         m_pAIMgr = NULL;
+    }
+
+    if( m_pMonRecall )
+    {
+        m_pMonRecall->Save();
+        delete m_pMonRecall;
+        m_pMonRecall = NULL;
     }
 
     JLog( LOG_LEVEL_DEBUG, true, "States..." );
@@ -311,6 +340,12 @@ void CGame::Term()
         m_pEquipDT = NULL;
     }
 
+    if( m_pMonstersDT )
+    {
+        delete m_pMonstersDT;
+        m_pMonstersDT = NULL;
+    }
+
     if( m_pUseDT )
     {
         delete m_pUseDT;
@@ -321,6 +356,24 @@ void CGame::Term()
     {
         delete m_pEndGameDT;
         m_pEndGameDT = NULL;
+    }
+
+    if( m_pMonRecallDT )
+    {
+        delete m_pMonRecallDT;
+        m_pMonRecallDT = NULL;
+    }
+
+    if( m_pItemRecallDT )
+    {
+        delete m_pItemRecallDT;
+        m_pItemRecallDT = NULL;
+    }
+
+    if( m_pMapDT )
+    {
+        delete m_pMapDT;
+        m_pMapDT = NULL;
     }
     JLog( LOG_LEVEL_DEBUG, true, "done.\n" );
 }
@@ -493,11 +546,14 @@ bool CGame::Update()
     if( m_bReadyForUpdate )
     {
         m_fGameTime++;
-        // fCurTime = 1.0f;
         m_bReadyForUpdate = false;
-        // TODO: Why does the AI require 2 ticks to move the monster?
-        GetAIMgr()->Update( fCurTime );
-        // GetAIMgr()->Update( fCurTime );
+        // Scale AI time by inverse of player speed:
+        // fast player (1.5) -> monsters get 0.67 per action (player acts 1.5x more)
+        // slow player (0.8) -> monsters get 1.25 per action (player acts 0.8x)
+        float fPlayerSpeed = m_pPlayer ? m_pPlayer->GetSpeed() : 1.0f;
+        if( fPlayerSpeed <= 0.0f )
+            fPlayerSpeed = 1.0f;
+        GetAIMgr()->Update( fCurTime / fPlayerSpeed );
     }
 //    else
 //    {
@@ -507,8 +563,14 @@ bool CGame::Update()
 bool CGame::Update( float fCurTime )
 {
     m_fGameTime += fCurTime;
-    // Update the AI
-    GetAIMgr()->Update( fCurTime );
+    // Don't update AI during use commands or ranged item selection
+    if( m_eCurState != STATE_USE && m_eCurState != STATE_RANGED )
+    {
+        float fPlayerSpeed = m_pPlayer ? m_pPlayer->GetSpeed() : 1.0f;
+        if( fPlayerSpeed <= 0.0f )
+            fPlayerSpeed = 1.0f;
+        GetAIMgr()->Update( fCurTime / fPlayerSpeed );
+    }
 #endif // TURN_BASED
 
 #ifdef CLOCKSTEP
@@ -542,13 +604,30 @@ bool CGame::Update( float fCurTime )
     GetEquip()->Update( fCurTime );
     if( m_eCurState == STATE_USE )
     {
-        switch( reinterpret_cast<CUseState *>( m_pCurState )->GetModifier() )
+        eUseModifier mod = reinterpret_cast<CUseState *>( m_pCurState )->GetModifier();
+        eInvFilter filter = INV_COMPLETE;
+        switch( mod )
+        {
+        case USE_QUAFF:
+            filter = INV_QUAFF;
+            break;
+        case USE_READ:
+            filter = INV_READ;
+            break;
+        case USE_WIELD:
+            filter = INV_WIELD;
+            break;
+        default:
+            break;
+        }
+        switch( mod )
         {
         case USE_WIELD:
         case USE_DROP:
         case USE_READ:
         case USE_QUAFF:
-            GetPlayer()->DisplayInventory( PLACEMENT_USE );
+        case USE_FUEL:
+            GetPlayer()->DisplayInventory( PLACEMENT_USE, filter );
             break;
         case USE_REMOVE:
             GetPlayer()->DisplayEquipment( PLACEMENT_USE );
@@ -561,13 +640,13 @@ bool CGame::Update( float fCurTime )
     }
     else if( m_eCurState == STATE_RANGED )
     {
-        switch( reinterpret_cast<CRangedState *>( m_pCurState )->GetCommand() )
+        switch( reinterpret_cast<CRangedState *>( m_pCurState )->GetModifier() )
         {
-        case JKEY_f:
-            GetPlayer()->DisplayEquipment( PLACEMENT_USE );
+        case RANGED_FIRE:
+            GetPlayer()->DisplayEquipment( PLACEMENT_USE, INV_FIRE );
             break;
-        case JKEY_z:
-            GetPlayer()->DisplayInventory( PLACEMENT_USE );
+        case RANGED_ZAP:
+            GetPlayer()->DisplayInventory( PLACEMENT_USE, INV_ZAP );
             break;
         default:
             JLog( LOG_LEVEL_DEBUG, true, "Nothing to display for command\n" );
@@ -588,27 +667,6 @@ bool CGame::Update( float fCurTime )
     return true;
 }
 
-// Convert ASCIILayout regions (char coords) to pixel-space JRects
-// that DisplayText expects (x*6, y*8).
-#ifdef RENDER_ASCII
-void CGame::UpdateASCIILayout()
-{
-    CRenderASCII *pASCII = static_cast<CRenderASCII *>( m_pRender );
-    const ASCIILayout &l = pASCII->GetLayout();
-
-    auto toPixelRect = []( const ASCIILayoutRegion &r )
-    { return JRect( r.left * 6, r.top * 8, r.right * 6, r.bottom * 8 ); };
-
-    m_pMsgsDT->SetRect( toPixelRect( l.messages ) );
-    m_pStatsDT->SetRect( toPixelRect( l.stats ) );
-    m_pInvDT->SetRect( toPixelRect( l.inventory ) );
-    m_pEquipDT->SetRect( toPixelRect( l.equipment ) );
-    m_pUseDT->SetRect( toPixelRect( l.use ) );
-    m_pEndGameDT->SetRect( toPixelRect( l.endgame ) );
-    m_pEndGameDT->SetContentMargin( 0, 0 );
-}
-#endif // RENDER_ASCII
-
 void CGame::Draw()
 {
     bool bResized = GetRender()->CheckResize();
@@ -617,13 +675,14 @@ void CGame::Draw()
     bool bASCII = ( m_eRenderMode == RenderMode::ASCII );
 
     // After resize, update DisplayText rects and auto-show/hide inventory
-#ifdef RENDER_ASCII
-    if( bASCII && bResized )
+    if( bResized )
     {
-        UpdateASCIILayout();
-        m_bShowInv = ( GetRender()->GetScreenWidth() >= ASCIILayout::INV_AUTO_WIDTH );
+        GetRender()->ConfigureDisplayRegions( m_pMsgsDT, m_pStatsDT, m_pInvDT, m_pEquipDT, m_pUseDT,
+                                              m_pEndGameDT, m_pMonstersDT, m_pMonRecallDT,
+                                              m_pItemRecallDT, m_pMapDT );
+        if( bASCII )
+            m_bShowInv = GetRender()->ShouldAutoShowInventory();
     }
-#endif
 
     bool bOverlayState = ( m_eCurState == STATE_INTRO || m_eCurState == STATE_ENDGAME );
 
@@ -639,22 +698,23 @@ void CGame::Draw()
 
         GetMsgs()->Draw();
 
-        // In ASCII mode, stats/inv/equip are fly-out panels toggled by c/i/e
-        if( !bASCII )
-        {
+        // Panel visibility toggled by i/e/C/v keys
+        if( m_bShowStats )
             GetStats()->Draw();
+        if( m_bShowInv )
             GetInv()->Draw();
+        if( m_bShowEquip )
             GetEquip()->Draw();
-        }
-        else
-        {
-            if( m_bShowStats )
-                GetStats()->Draw();
-            if( m_bShowInv )
-                GetInv()->Draw();
-            if( m_bShowEquip )
-                GetEquip()->Draw();
-        }
+        if( m_bShowMonsters )
+            GetMonsters()->Draw();
+
+        // Bottom panels (toggleable by V/(/))
+        if( m_bShowMonRecall )
+            GetMonsterRecall()->Draw();
+        if( m_bShowItemRecall )
+            GetItemRecall()->Draw();
+        if( m_bShowMap )
+            GetMap()->Draw();
     }
 
     if( m_eCurState == STATE_USE )
@@ -684,218 +744,30 @@ void CGame::Draw()
 
 void CGame::HandleEvents( int &isActive, int &done )
 {
-#ifdef RENDER_ASCII
-    if( m_eRenderMode == RenderMode::ASCII )
-    {
-        HandleEventsASCII( isActive, done );
-        return;
-    }
-#endif
-
-#ifdef RENDER_OPENGL
-    // used to collect events
-    SDL_Event event;
+    JInputEvent event;
     JResult retval;
 
-    while( SDL_PollEvent( &event ) )
+    while( m_pRender->PollEvent( event ) )
     {
         switch( event.type )
         {
-        case SDL_WINDOWEVENT:
-            switch( event.window.event )
-            {
-            // Something's happend with our focus
-            // If we lost focus or we are iconified, we
-            // shouldn't draw the screen
-            case SDL_WINDOWEVENT_FOCUS_GAINED:
-                isActive = true;
-                break;
-            case SDL_WINDOWEVENT_FOCUS_LOST:
-                isActive = false;
-                break;
-            case SDL_WINDOWEVENT_RESIZED:
-                // used to be SDL_VIDEORESIZE:
-                retval = static_cast<CRender *>( GetRender() )
-                             ->ResizeWindow( event.window.data1, event.window.data2 );
-                if( retval != JSUCCESS )
-                {
-                    Quit( retval );
-                }
-                break;
-            }
-            break;
-        case SDL_KEYDOWN:
-        {
-            // Translate SDL keysym to JMoria keysym at the boundary
-            JKeysym jkey;
-            jkey.sym = (JKeycode)event.key.keysym.sym;
-            jkey.mod = (JKeymod)event.key.keysym.mod;
-            retval = m_pCurState->HandleKey( &jkey );
+        case JInputEvent::KEY:
+            retval = m_pCurState->HandleKey( &event.keysym );
             if( retval == JBOGUSKEY )
             {
-                JLog( LOG_LEVEL_INFO, true, "Bogus command: 0x%x\n", jkey.sym );
-                GetMsgs()->Printf( "Unrecognized command: 0x%x\n", jkey.sym );
+                JLog( LOG_LEVEL_INFO, true, "Bogus command: 0x%x\n", event.keysym.sym );
+                GetMsgs()->Printf( "Unrecognized command: 0x%x\n", event.keysym.sym );
             }
             else if( retval == JQUITREQUEST )
             {
                 Quit( 0 );
             }
             break;
-        }
-        case SDL_QUIT:
-            // handle quit requests
+        case JInputEvent::QUIT:
             done = true;
             break;
-        case SDL_MOUSEBUTTONDOWN:
-        case SDL_MOUSEBUTTONUP:
-            if( event.button.state == SDL_RELEASED )
-            {
-                // Nothing to see here.
-                break;
-            }
-            switch( event.button.button )
-            {
-            case MOUSE_WHEEL_UP:
-                g_pGame->GetDungeon()->Zoom( 3 );
-                break;
-            case MOUSE_WHEEL_DOWN:
-                g_pGame->GetDungeon()->Zoom( -3 );
-                break;
-            }
-            /*JLog( LOG_LEVEL_NOISE, true, "Got up event type: %d which: %d button: %d state: %d at
-            <%d %d>\n", event.button.type, event.button.which, event.button.button,
-            event.button.state, event.button.x, event.button.y );/* */
-            break;
         default:
-            JLog( LOG_LEVEL_NOISE, true, "unhandled event type: %d\n", event.type );
             break;
         }
-    }
-#endif // RENDER_OPENGL
-}
-
-#ifdef RENDER_ASCII
-void CGame::HandleEventsASCII( int &isActive, int &done )
-{
-    int ch = getch();
-    if( ch == ERR )
-        return; // no input available
-
-    // Terminal resize: consume the event, PreDraw handles the actual resize
-    if( ch == KEY_RESIZE )
-        return;
-
-    JKeysym keysym;
-    memset( &keysym, 0, sizeof( keysym ) );
-
-    // Map ncurses keys to SDL keysyms
-    // For ASCII printable characters, SDLK values match ASCII codes
-    if( ch >= 'a' && ch <= 'z' )
-    {
-        keysym.sym = (JKeycode)ch;
-        keysym.mod = JMOD_NONE;
-    }
-    else if( ch >= 'A' && ch <= 'Z' )
-    {
-        // Uppercase: map to lowercase sym + shift modifier
-        keysym.sym = (JKeycode)( ch - 'A' + 'a' );
-        keysym.mod = JMOD_SHIFT;
-    }
-    else if( ch >= 1 && ch <= 26 && ch != '\n' && ch != '\r' )
-    {
-        // Ctrl+letter: ch 1 = Ctrl+A, ch 3 = Ctrl+C, etc.
-        // Exclude \n (10) and \r (13) so they reach the Enter case below.
-        keysym.sym = (JKeycode)( 'a' + ch - 1 );
-        keysym.mod = JMOD_CTRL;
-    }
-    else if( ch >= '0' && ch <= '9' )
-    {
-        keysym.sym = (JKeycode)ch;
-        keysym.mod = JMOD_NONE;
-    }
-    else
-    {
-        // Map special keys
-        switch( ch )
-        {
-        case '\n':
-        case '\r':
-        case KEY_ENTER:
-            keysym.sym = JKEY_RETURN;
-            break;
-        case 27: // Escape
-            keysym.sym = JKEY_ESCAPE;
-            break;
-        case ' ':
-            keysym.sym = JKEY_SPACE;
-            break;
-        case '.':
-            keysym.sym = JKEY_PERIOD;
-            break;
-        case '>': // Shift+.
-            keysym.sym = JKEY_PERIOD;
-            keysym.mod = JMOD_SHIFT;
-            break;
-        case ',':
-            keysym.sym = JKEY_COMMA;
-            break;
-        case '<': // Shift+,
-            keysym.sym = JKEY_COMMA;
-            keysym.mod = JMOD_SHIFT;
-            break;
-        case ';':
-            keysym.sym = JKEY_SEMICOLON;
-            break;
-        case '*': // Shift+8: target command
-            keysym.sym = JKEY_8;
-            keysym.mod = JMOD_SHIFT;
-            break;
-        case KEY_BACKSPACE:
-        case 127: // DEL on some terminals
-            keysym.sym = JKEY_BACKSPACE;
-            break;
-        case KEY_DC: // ncurses Delete key
-            keysym.sym = JKEY_DELETE;
-            break;
-        case KEY_F( 1 ):
-            keysym.sym = JKEY_F1;
-            break;
-        default:
-            // Unknown key, ignore
-            return;
-        }
-    }
-
-    // ASCII fly-out panel toggles: i=inventory, e=equipment, C=character stats
-    // These are display-only and don't consume a game turn.
-    if( m_eCurState == STATE_COMMAND )
-    {
-        if( keysym.sym == JKEY_i && keysym.mod == JMOD_NONE )
-        {
-            ToggleInv();
-            return;
-        }
-        if( keysym.sym == JKEY_e && keysym.mod == JMOD_NONE )
-        {
-            ToggleEquip();
-            return;
-        }
-        if( keysym.sym == JKEY_c && ( keysym.mod & JMOD_SHIFT ) )
-        {
-            ToggleStats();
-            return;
-        }
-    }
-
-    JResult retval = m_pCurState->HandleKey( &keysym );
-    if( retval == JBOGUSKEY )
-    {
-        JLog( LOG_LEVEL_INFO, true, "Bogus command: 0x%x\n", keysym.sym );
-        GetMsgs()->Printf( "Unrecognized command: 0x%x\n", keysym.sym );
-    }
-    else if( retval == JQUITREQUEST )
-    {
-        Quit( 0 );
     }
 }
-#endif // RENDER_ASCII

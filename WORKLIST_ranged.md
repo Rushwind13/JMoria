@@ -2,6 +2,7 @@
 
 **Status**: In Progress
 **Related Issue**: #39 - Implement ranged attacks
+**Related PR**: #235
 **Repo**: `Rushwind13/JMoria`
 **Branch**: `issue/39-ranged-weapon-system`
 **Build**: `make clean ascii test`

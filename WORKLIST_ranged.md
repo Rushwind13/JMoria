@@ -64,9 +64,9 @@ bow+arrow selection flow. The x)change command (swap weapon sets) is the other m
 ### Bow Data (partial, bugs present)
 - [x] Short Bow entry in Items.txt with `ITEM_FLAG_NEEDSAMMO`
 - [x] Long Bow entry in Items.txt with `ITEM_FLAG_NEEDSAMMO`
-- [ ] **BUG**: Long Bow `Damage <1d8>` — must be `<1d2>` (see B2)
-- [ ] **BUG**: Short Bow `Damage <1d5>` — must be `<1d2>` (see B2)
-- [ ] **MISSING**: No Arrow item definitions in Items.txt at all
+- [x] **BUG**: Long Bow `Damage <1d8>` — must be `<1d2>` (see B2)
+- [x] **BUG**: Short Bow `Damage <1d5>` — must be `<1d2>` (see B2)
+- [x] **MISSING**: No Arrow item definitions in Items.txt at all
 
 ---
 
@@ -183,8 +183,8 @@ All ranged weapons now correctly set to `Damage <1d2>` (= unarmed):
 
 - [ ] Scenario: player with bow equipped fires flight arrow at monster — monster takes damage,
       arrow count decrements by 1
-- [ ] Scenario: player without ranged weapon presses f)ire — "You have nothing to fire with."
-- [ ] Scenario: player with bow but no arrows presses f)ire — "You have nothing to fire."
+- [x] Scenario: player without ranged weapon presses f)ire — "You have nothing to fire with."
+- [x] Scenario: player with bow but no arrows presses f)ire — "You have nothing to fire."
 - [ ] Scenario: player carries two arrow types — selection prompt appears; chosen type is consumed
 - [ ] Scenario: x)change swaps weapon sets; primary weapon and combat stats update correctly
 - [ ] Edge: fire arrow beyond max range — arrow stops at boundary, drops or breaks

@@ -353,6 +353,9 @@ void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
     case INV_ZAP:
         sprintf( meta.header, "Zap which wand?\n" );
         break;
+    case INV_FIRE:
+        sprintf( meta.header, "Fire which ammo?\n" );
+        break;
     default:
         sprintf( meta.header, "You are Carrying:\n" );
         break;
@@ -384,6 +387,9 @@ void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
             break;
         case INV_ZAP:
             show = IsZappable( pLink );
+            break;
+        case INV_FIRE:
+            show = IsCompatibleAmmo( pLink );
             break;
         default:
             show = true;
@@ -2147,14 +2153,36 @@ bool CPlayer::IsFireable( CLink<CItem> *pLink )
     bool retval = false;
     switch( pLink->m_lpData->m_id->m_dwIndex )
     {
-    case ITEM_IDX_BOW:
-    case ITEM_IDX_XBOW:
+    case ITEM_IDX_ARROW:
+    case ITEM_IDX_BOLT:
         retval = true;
         break;
     default:
         break;
     }
     return retval;
+}
+
+bool CPlayer::IsCompatibleAmmo( CLink<CItem> *pLink )
+{
+    // Check if this ammo is compatible with the equipped primary weapon
+    if( !IsFireable( pLink ) )
+        return false;
+
+    CLink<CItem> *pMainWeapon = m_llEquipment->GetLink( EQUIP_IDX_MAIN_HAND );
+    if( pMainWeapon == NULL )
+        return false;
+
+    uint32 weaponType = pMainWeapon->m_lpData->m_id->m_dwIndex;
+    uint32 ammoType = pLink->m_lpData->m_id->m_dwIndex;
+
+    // BOW uses ARROW, XBOW uses BOLT
+    if( weaponType == ITEM_IDX_BOW && ammoType == ITEM_IDX_ARROW )
+        return true;
+    if( weaponType == ITEM_IDX_XBOW && ammoType == ITEM_IDX_BOLT )
+        return true;
+
+    return false;
 }
 
 bool CPlayer::IsReadable( CLink<CItem> *pLink )

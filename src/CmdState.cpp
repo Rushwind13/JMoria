@@ -122,6 +122,13 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
         retval = 0;
     }
 
+    else if( IsFireCommand( keysym ) )
+    {
+        g_pGame->SetState( STATE_RANGED );
+        g_pGame->GetGameState()->HandleKey( keysym );
+        retval = 0;
+    }
+
     else if( IsPickupCommand( keysym ) )
     {
         g_pGame->GetPlayer()->PickUp( g_pGame->GetPlayer()->m_vPos );
@@ -411,6 +418,19 @@ bool CCmdState::IsZapCommand( JKeysym *keysym )
     switch( keysym->sym )
     {
     case JKEY_z:
+        if( keysym->mod == 0 )
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool CCmdState::IsFireCommand( JKeysym *keysym )
+{
+    switch( keysym->sym )
+    {
+    case JKEY_f:
         if( keysym->mod == 0 )
         {
             return true;

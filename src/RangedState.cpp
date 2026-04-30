@@ -71,9 +71,42 @@ int CRangedState::OnHandleInit( JKeysym *keysym )
         switch( m_cCommand )
         {
         case JKEY_f:
+        {
+            // Validate equipped primary weapon for fire
+            CLink<CItem> *pMainWeapon =
+                g_pGame->GetPlayer()->m_llEquipment->GetLink( EQUIP_IDX_MAIN_HAND );
+            if( pMainWeapon == NULL ||
+                !( pMainWeapon->m_lpData->m_id->m_dwFlags & ITEM_FLAG_NEEDSAMMO ) )
+            {
+                g_pGame->GetMsgs()->Printf( "You have nothing to fire with.\n" );
+                ResetToState( STATE_COMMAND );
+                return JRESETSTATE;
+            }
+
+            // Check if inventory has compatible ammo for this weapon
+            CLink<CItem> *pAmmo = g_pGame->GetPlayer()->m_llInventory->GetHead();
+            bool hasAmmo = false;
+            while( pAmmo )
+            {
+                if( g_pGame->GetPlayer()->IsCompatibleAmmo( pAmmo ) )
+                {
+                    hasAmmo = true;
+                    break;
+                }
+                pAmmo = g_pGame->GetPlayer()->m_llInventory->GetNext( pAmmo );
+            }
+
+            if( !hasAmmo )
+            {
+                g_pGame->GetMsgs()->Printf( "You have nothing to fire.\n" );
+                ResetToState( STATE_COMMAND );
+                return JRESETSTATE;
+            }
+
             mod = RANGED_FIRE;
-            g_pGame->GetMsgs()->Printf( "Fire which weapon? [a-z]\n" );
+            g_pGame->GetPlayer()->DisplayInventory( PLACEMENT_USE, INV_FIRE );
             break;
+        }
         case JKEY_z:
             mod = RANGED_ZAP;
             g_pGame->GetMsgs()->Printf( "Zap which wand? [a-z]\n" );
@@ -148,12 +181,12 @@ int CRangedState::OnHandleFire( JKeysym *keysym )
         {
             JLog( LOG_LEVEL_DEBUG, true,
                   "FIRE cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
-            g_pGame->GetMsgs()->Printf( "Choose an item from equipment(a to z):\n" );
+            g_pGame->GetMsgs()->Printf( "Choose ammo from inventory (a to z):\n" );
             return JSUCCESS;
         }
     }
 
-    // We got a alpha key; do a "zap" of that item
+    // We got an alpha key; do a "fire" of that ammo
     JLog( LOG_LEVEL_NOISE, true, "FIRE got a selection\n" );
     if( TestFire() ) // can fire
     {
@@ -165,7 +198,7 @@ int CRangedState::OnHandleFire( JKeysym *keysym )
                 BuildTrajectory();
             }
 
-            if( DoLaunch() ) // have charges
+            if( DoLaunch() ) // have ammo
             {
                 m_eCurModifier = RANGED_TRAJECTORY;
                 m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -173,7 +206,7 @@ int CRangedState::OnHandleFire( JKeysym *keysym )
             }
             else
             {
-                // no charges
+                // no ammo (shouldn't happen if validation in OnHandleInit worked)
                 g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
                 ResetToState( STATE_COMMAND );
                 return JCOMPLETESTATE;
@@ -646,6 +679,26 @@ CLink<CItem> *CRangedState::GetResponse( eRangedModifier whichUse )
     switch( whichUse )
     {
     case RANGED_FIRE:
+    {
+        // Filter inventory to compatible ammo items (arrows/bolts matching equipped weapon)
+        pList = g_pGame->GetPlayer()->m_llInventory;
+        pLink = pList->GetHead();
+        uint32 count = 0;
+
+        while( pLink )
+        {
+            if( g_pGame->GetPlayer()->IsCompatibleAmmo( pLink ) )
+            {
+                if( count == m_dwSelected )
+                {
+                    break;
+                }
+                count++;
+            }
+            pLink = pList->GetNext( pLink );
+        }
+        break;
+    }
     case RANGED_ZAP:
         pList = g_pGame->GetPlayer()->m_llInventory;
         pLink = pList->GetNthLink( m_dwSelected );

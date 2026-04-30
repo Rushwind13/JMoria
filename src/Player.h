@@ -239,6 +239,7 @@ public:
     JResult Quaff( CLink<CItem> *pLink );
 
     bool IsFireable( CLink<CItem> *pLink );
+    bool IsCompatibleAmmo( CLink<CItem> *pLink );
     JResult Fire( CLink<CItem> *pLink );
 
     bool IsReadable( CLink<CItem> *pLink );

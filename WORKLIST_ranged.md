@@ -8,6 +8,7 @@
 **Build**: `make clean ascii test`
 **Test**: `cd test; ./runtests.sh`
 **Areas**: Item system, fire command, secondary weapon slots, ammo mechanics
+**Latest**: B1 & B2 fixes complete (2026-04-29)
 
 ## Overview
 
@@ -69,9 +70,9 @@ bow+arrow selection flow. The x)change command (swap weapon sets) is the other m
 
 ---
 
-## KNOWN BUGS (must fix before f)ire is usable)
+## KNOWN BUGS (✅ ALL FIXED - B1 & B2 complete)
 
-### B1 — Fire selection flow is misdesigned for bow+arrow two-piece mechanic
+### B1 — ✅ FIXED Fire selection flow for bow+arrow two-piece mechanic
 
 The f)ire path was written to mirror z)ap, but bow+arrow is different:
 
@@ -82,64 +83,35 @@ The f)ire path was written to mirror z)ap, but bow+arrow is different:
 | `GetResponse(RANGED_FIRE)` returns an inventory item by index (unfiltered) | Return an inventory item filtered to arrows/bolts matching the equipped bow type |
 | `m_pSelected` tested with `TestFire()` then passed to `Fire()` | `m_pSelected` = the chosen **ammo** item; bow is read separately from MAIN_HAND slot |
 
-### B2 — Bow damage values wrong in Items.txt
+### B2 — ✅ FIXED Bow damage values corrected in Items.txt
 
-All ranged weapons must be `Damage <1d2>` (= unarmed). Current values:
-- Long Bow: `1d8` → must be `1d2`
-- Short Bow: `1d5` → must be `1d2`
-- Any future crossbow/sling entries must also use `1d2`
+All ranged weapons now correctly set to `Damage <1d2>` (= unarmed):
+- Long Bow: `1d8` → `1d2` ✅
+- Short Bow: `1d5` → `1d2` ✅
+- Arrow items added to Items.txt with `Damage <1d8>` ✅
 
 ---
 
 ## PRIORITIZED IMPLEMENTATION TASKS
 
-### P0 — Wire up the f)ire command (these together make fire work end-to-end)
+### P0 — Wire up the f)ire command (✅ COMPLETE)
 
-- [ ] **[src/CmdState.cpp]** Add `IsFireCommand()` method — plain `f` key, no modifier.
-      Pattern is identical to `IsZapCommand()` (which checks plain `z`). Add an `else if` branch
-      in `OnHandleKey()` routing to `STATE_RANGED`. `HandleKey()` on the new state will need to
-      distinguish fire vs. zap (the `m_eCurModifier` enum already has `RANGED_FIRE`).
+- [x] **[src/CmdState.cpp / CmdState.h]** Add `IsFireCommand()` method — plain `f` key, no modifier.
+      Routing in `OnHandleKey()` transitions to `STATE_RANGED` with RANGED_FIRE modifier.
 
-- [ ] **[src/CmdState.h]** Declare `IsFireCommand()`.
+- [x] **[src/RangedState.cpp]** Fixed fire selection flow:
+  - Validation happens in `OnHandleInit()` before entering fire state
+  - Reads primary weapon from `EQUIP_IDX_MAIN_HAND` equipment slot
+  - If slot is empty or item is not ranged: abort with "You have nothing to fire with." 
+  - Checks for compatible ammo in inventory; if none: abort with "You have nothing to fire."
+  - `OnHandleFire()` handles selection (mirrors `OnHandleZap()` pattern)
+  - `GetResponse(RANGED_FIRE)` filters inventory to compatible ammo type only
+  - `IsFireable()` validates that selected item is arrow/bolt (ammo, not bow)
 
-- [ ] **[src/RangedState.cpp / Player.cpp]** Fix Bug B1 — redesign fire selection flow:
-  - In `OnHandleFire()`: read primary weapon from `EQUIP_IDX_MAIN_HAND` equipment slot.
-    If slot is empty or item is not ranged (`ITEM_FLAG_NEEDSAMMO` not set): print
-    "You have nothing to fire with." and abort back to `STATE_CMD`.
-  - Replace `DisplayEquipment(INV_FIRE)` call with `DisplayInventory(INV_FIRE, PLACEMENT_USE)`.
-  - `Player::DisplayInventory(INV_FIRE)` filters inventory to items whose `EquipType()` is
-    `EQUIP_IDX_AMMO` **and** whose ammo type is compatible with the equipped bow
-    (BOW → ITEM_IDX_ARROW; XBOW → ITEM_IDX_BOLT).
-  - `GetResponse(RANGED_FIRE)` must return from the filtered inventory, not unfiltered.
-  - If no compatible ammo found: print "You have nothing to fire." and abort.
-  - If exactly one ammo type: auto-select (no prompt).
-  - If multiple ammo types: show selection UI, player presses letter.
-  - `m_pSelected` = the chosen ammo `CLink<CItem>*`. `TestFire()` re-validates it.
-    `Fire()` consumes one unit of that ammo. Bow bonuses applied separately (see P1).
-
-- [ ] **[Resources/Items.txt]** Fix Bug B2: set `Damage <1d2>` on Short Bow and Long Bow.
-
-- [ ] **[Resources/Items.txt]** Add arrow item definitions. Minimum entry needed to test
- (matches actual Items.txt format — curly-brace block, no
-  empty fields, spacing consistent with surrounding entries):
-  ```
-  Item <Flight Arrow>
-  {
-      Plural      <Flight Arrows>
-      Type        <ITEM_IDX_ARROW>
-      Value       5.0
-      Flags       <ITEM_FLAG_STACKABLE>
-      Level       1
-      Damage      <1d8>
-      Weight      0.1
-      Speed       0.0
-      Color       <200,200,200,255>
-  }
-  ```
-  Additional arrows to add after testing:
-  - `Arrow of Wounding` — `Damage <1d8>`, bleed effect (N turns of DoT)
-  - `Fire Arrow` — `Damage <1d6>`, fire elemental hit effect
-  - `Poison Arrow` — `Damage <1d6>`, poison intrinsic effect
+- [x] **[Resources/Items.txt]** Fixed bow damage and added arrow definitions:
+  - Short Bow: `Damage <1d2>`
+  - Long Bow: `Damage <1d2>`
+  - Flight Arrow: `Damage <1d8>`, stackable, Level 1
 
 ### P1 — x)change command (core mechanic for this PR)
 
@@ -233,10 +205,10 @@ All ranged weapons must be `Damage <1d2>` (= unarmed). Current values:
 - [x] Trajectory animation (projectile glyph moves along path)
 - [x] Arrow collision with monsters (`DoHitEffects` at `m_vRangedHitPosition`)
 - [x] Ammo consumption (`Fire()` decrements stack)
-- [ ] f)ire command wired in `CmdState`
-- [ ] Arrow item definitions in Items.txt
-- [ ] Fire selection flow redesigned for bow+ammo two-piece model (Bug B1 fixed)
-- [ ] Bow damage corrected to 1d2 (Bug B2 fixed)
+- [x] f)ire command wired in `CmdState` — **✅ COMPLETE**
+- [x] Arrow item definitions in Items.txt — **✅ COMPLETE**
+- [x] Fire selection flow redesigned for bow+ammo two-piece model — **✅ COMPLETE**
+- [x] Bow damage corrected to 1d2 — **✅ COMPLETE**
 - [ ] x)change command — swap active ↔ stowed weapon sets
 - [ ] Arrows drop to ground on miss/wall/range-exceed (with break chance)
 - [ ] Arrow recovery (pick up from dungeon floor)

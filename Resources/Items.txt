@@ -313,19 +313,7 @@ Item <Short Bow>
     Value       120.0
     Flags       <ITEM_FLAG_NEEDSAMMO>
     Level       3
-    Damage      <1d5>
-    Weight      3.0
-    Speed       4.0
-    Color       <150,100,50,255>
-}
-Item <Short Bow>
-{
-    Plural      <Short Bows>
-    Type        <ITEM_IDX_BOW>
-    Value       120.0
-    Flags       <ITEM_FLAG_NEEDSAMMO>
-    Level       3
-    Damage      <1d5>
+    Damage      <1d2>
     Weight      3.0
     Speed       4.0
     Color       <150,100,50,255>
@@ -337,10 +325,25 @@ Item <Long Bow>
     Value        250.0
     Flags       <ITEM_FLAG_NEEDSAMMO>
     Level        20
-    Damage       <1d8>
+    Damage       <1d2>
     Weight       10.0
     Speed        6.0
     Color        <200,200,200,255>
+}
+
+# --- Arrows ---
+
+Item <Flight Arrow>
+{
+    Plural      <Flight Arrows>
+    Type        <ITEM_IDX_ARROW>
+    Value       5.0
+    Flags       <ITEM_FLAG_STACKABLE>
+    Level       1
+    Damage      <1d8>
+    Weight      0.1
+    Speed       0.0
+    Color       <200,200,200,255>
 }
 
 # --- Tools (Shovels / Pickaxes) ---

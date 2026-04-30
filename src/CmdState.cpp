@@ -141,6 +141,12 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
         retval = 0;
     }
 
+    else if( IsXchangeCommand( keysym ) )
+    {
+        g_pGame->GetPlayer()->XchangeWeapons();
+        retval = 0;
+    }
+
     // Wizard-mode commands
 
     else if( IsExitWizardCommand( keysym ) )
@@ -431,6 +437,19 @@ bool CCmdState::IsFireCommand( JKeysym *keysym )
     switch( keysym->sym )
     {
     case JKEY_f:
+        if( keysym->mod == 0 )
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool CCmdState::IsXchangeCommand( JKeysym *keysym )
+{
+    switch( keysym->sym )
+    {
+    case JKEY_x:
         if( keysym->mod == 0 )
         {
             return true;

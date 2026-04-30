@@ -319,8 +319,10 @@
 #define EQUIP_IDX_LRING 9
 #define EQUIP_IDX_RRING 10
 #define EQUIP_IDX_TORCH 11
-#define EQUIP_IDX_AMMO 12
-#define EQUIP_IDX_MAX 13 // adding a new type to equipment could be tricky; avoid
+#define EQUIP_IDX_2ND_MAIN 12
+#define EQUIP_IDX_2ND_OFF 13
+#define EQUIP_IDX_AMMO 14
+#define EQUIP_IDX_MAX 15 // adding a new type to equipment could be tricky; avoid
 
 // Types of items
 // see ItemIDs
@@ -605,6 +607,8 @@ public:
         m_StringTable[i++].Init( "EQUIP_IDX_LRING", EQUIP_IDX_LRING );
         m_StringTable[i++].Init( "EQUIP_IDX_RRING", EQUIP_IDX_RRING );
         m_StringTable[i++].Init( "EQUIP_IDX_TORCH", EQUIP_IDX_TORCH );
+        m_StringTable[i++].Init( "EQUIP_IDX_2ND_MAIN", EQUIP_IDX_2ND_MAIN );
+        m_StringTable[i++].Init( "EQUIP_IDX_2ND_OFF", EQUIP_IDX_2ND_OFF );
         m_StringTable[i++].Init( "EQUIP_IDX_AMMO", EQUIP_IDX_AMMO );
 
         // Item Types

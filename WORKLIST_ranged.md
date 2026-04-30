@@ -8,7 +8,7 @@
 **Build**: `make clean ascii test`
 **Test**: `cd test; ./runtests.sh`
 **Areas**: Item system, fire command, secondary weapon slots, ammo mechanics
-**Latest**: B1 & B2 fixes complete (2026-04-29)
+**Latest**: x)change command complete (2026-04-29)
 
 ## Overview
 
@@ -29,7 +29,7 @@ bow+arrow selection flow. The x)change command (swap weapon sets) is the other m
 - **Ammo does the damage. Bows do not.** All ranged weapons have `Damage <1d2>` in Items.txt
   (same as unarmed). Bow enchantments add +to-hit only; arrow `Damage` field = shot damage.
 - The x)change command swaps two full weapon sets:
-  `MAIN_HAND + OFF_HAND` (active) ↔ `2ND_MAIN + 2ND_OFF` (stowed, `ITEM_FLAG_STOWED`).
+  `MAIN_HAND + OFF_HAND` (active) ↔ `2ND_MAIN + 2ND_OFF`.
   Only the active set contributes to combat stats (+to-hit, +damage, effects).
 - Player consequence: forgetting to x)change after ranged combat means attacking with 1d2 damage.
   "You begin bashing the Orc with your Short Bow."
@@ -113,9 +113,9 @@ All ranged weapons now correctly set to `Damage <1d2>` (= unarmed):
   - Long Bow: `Damage <1d2>`
   - Flight Arrow: `Damage <1d8>`, stackable, Level 1
 
-### P1 — x)change command (core mechanic for this PR)
+### P1 — x)change command (core mechanic for this PR) ✅ COMPLETE
 
-- [ ] **[src/Constants.h]** Add new equipment slot indices and renumber AMMO to keep it last.
+- [x] **[src/Constants.h]** Add new equipment slot indices and renumber AMMO to keep it last.
   Current layout ends at `EQUIP_IDX_AMMO = 12`, `EQUIP_IDX_MAX = 13`.
   New layout:
   ```cpp
@@ -128,13 +128,11 @@ All ranged weapons now correctly set to `Damage <1d2>` (= unarmed):
   **Note**: moving `EQUIP_IDX_AMMO` from 12 to 15 requires updating `Item::EquipType()` and
   any other sites that hardcode the value 12.
 
-- [ ] **[src/Constants.h]** Add `ITEM_FLAG_STOWED` item flag (use next available bit).
-
-- [ ] **[src/CmdState.cpp / CmdState.h]** Add `IsXchangeCommand()` for plain `x` key.
+- [x] **[src/CmdState.cpp / CmdState.h]** Add `IsXchangeCommand()` for plain `x` key.
       In `OnHandleKey()`, add routing branch that calls `Player::XchangeWeapons()` directly
       (no new state needed — it's a single atomic operation, like PickUp).
 
-- [ ] **[src/Player.cpp]** Implement `Player::XchangeWeapons()`:
+- [x] **[src/Player.cpp]** Implement `Player::XchangeWeapons()`:
   - Look up the four slot nodes: `GetLink(EQUIP_IDX_MAIN_HAND)`, `GetLink(EQUIP_IDX_OFF_HAND)`,
     `GetLink(EQUIP_IDX_2ND_MAIN)`, `GetLink(EQUIP_IDX_2ND_OFF)` (any may be null/empty).
   - Call `m_llEquipment->SwapData(pMain, p2ndMain)` and
@@ -144,17 +142,24 @@ All ranged weapons now correctly set to `Damage <1d2>` (= unarmed):
   - Print "You switch to your <new primary weapon name>."
   - If new primary slot is empty: "You switch to your bare hands."
 
-- [ ] **[src/Player.h]** Declare `XchangeWeapons()`.
+- [x] **[src/Player.h]** Declare `XchangeWeapons()`.
 
-- [ ] **[src/Player.cpp / DisplayEquipment]** No display logic changes needed beyond adding
+- [x] **[src/Player.cpp / DisplayEquipment]** No display logic changes needed beyond adding
       labels for the two new slot indices. `DisplayEquipment()` already iterates the full
       `m_llEquipment` list in slot-index order. Because `XchangeWeapons()` physically moves
       items between slots in the list (no flag needed), the display is always correct by
       construction. Add label strings for `EQUIP_IDX_2ND_MAIN` ("Secondary Weapon") and
       `EQUIP_IDX_2ND_OFF` ("Secondary Off-Hand") to match the format of existing slot labels.
 
-- [ ] **[src/Player.cpp / Wield()]** Enforce that 2-handed weapons (`ITEM_FLAG_2HANDED`) clear
+- [x] **[src/Player.cpp / Wield()]** Enforce that 2-handed weapons (`ITEM_FLAG_2HANDED`) clear
       the off-hand of the **same weapon set** (already partly done; verify it works for 2ND slots).
+
+- [x] **[test/features/equipment.feature]** BDD test scenarios for weapon swapping:
+  - Primary and secondary weapon can be swapped
+  - Main and offhand weapons can be swapped together
+  - Sword and shield swap with two-handed bow
+  - Sword and shield swap with one-handed dagger
+  - Two-handed quarterstaff swaps with two-handed bow
 
 ### P1 — Bow+arrow combined combat math
 
@@ -209,7 +214,7 @@ All ranged weapons now correctly set to `Damage <1d2>` (= unarmed):
 - [x] Arrow item definitions in Items.txt — **✅ COMPLETE**
 - [x] Fire selection flow redesigned for bow+ammo two-piece model — **✅ COMPLETE**
 - [x] Bow damage corrected to 1d2 — **✅ COMPLETE**
-- [ ] x)change command — swap active ↔ stowed weapon sets
+- [ ] x)change command — swap active ↔ secondary weapon sets
 - [ ] Arrows drop to ground on miss/wall/range-exceed (with break chance)
 - [ ] Arrow recovery (pick up from dungeon floor)
 
@@ -227,7 +232,7 @@ Optional:
 | [src/RangedState.cpp](src/RangedState.cpp) | Fix fire selection flow, add arrow drop |
 | [src/Player.cpp](src/Player.cpp) | `Fire()`, `IsFireable()`, `XchangeWeapons()`, `DisplayInventory(INV_FIRE)` |
 | [src/Player.h](src/Player.h) | Declare `XchangeWeapons()` |
-| [src/Constants.h](src/Constants.h) | Add `EQUIP_IDX_2ND_MAIN/OFF`, `ITEM_FLAG_STOWED` |
+| [src/Constants.h](src/Constants.h) | Add `EQUIP_IDX_2ND_MAIN/OFF` |
 | [Resources/Items.txt](Resources/Items.txt) | Fix bow damage, add arrow entries |
 | [src/Item.cpp](src/Item.cpp) | `EquipType()` (already correct for ARROW → AMMO) |
 

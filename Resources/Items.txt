@@ -338,7 +338,7 @@ Item <Flight Arrow>
     Plural      <Flight Arrows>
     Type        <ITEM_IDX_ARROW>
     Value       5.0
-    Flags       <ITEM_FLAG_STACKABLE>
+    Flags       <ITEM_FLAG_STACKS>
     Level       1
     Damage      <1d8>
     Weight      0.1

@@ -235,6 +235,8 @@ public:
     bool IsRemovable( CLink<CItem> *pLink );
     bool RemoveEquipment( CLink<CItem> *pLink );
 
+    void XchangeWeapons();
+
     bool IsDrinkable( CLink<CItem> *pLink );
     JResult Quaff( CLink<CItem> *pLink );
 

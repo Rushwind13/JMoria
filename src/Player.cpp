@@ -773,6 +773,80 @@ bool CPlayer::RemoveEquipment( CLink<CItem> *pLink )
     return true;
 }
 
+void CPlayer::XchangeWeapons()
+{
+    // Look up the four equipment slot nodes
+    CLink<CItem> *pMainHand = m_llEquipment->GetLink( EQUIP_IDX_MAIN_HAND );
+    CLink<CItem> *pOffHand = m_llEquipment->GetLink( EQUIP_IDX_OFF_HAND );
+    CLink<CItem> *p2ndMain = m_llEquipment->GetLink( EQUIP_IDX_2ND_MAIN );
+    CLink<CItem> *p2ndOff = m_llEquipment->GetLink( EQUIP_IDX_2ND_OFF );
+
+    // If there are no secondary slots yet, create them
+    if( !p2ndMain )
+    {
+        CItem *pEmpty = NULL; // SwapData will handle null data
+        p2ndMain = m_llEquipment->Add( pEmpty, EQUIP_IDX_2ND_MAIN, -1 );
+    }
+    if( !p2ndOff )
+    {
+        CItem *pEmpty = NULL;
+        p2ndOff = m_llEquipment->Add( pEmpty, EQUIP_IDX_2ND_OFF, -1 );
+    }
+
+    // Swap the main and secondary weapon sets
+    m_llEquipment->SwapData( pMainHand, p2ndMain );
+    m_llEquipment->SwapData( pOffHand, p2ndOff );
+
+    // Recalculate all combat stats from scratch
+    // Start with base values
+    m_fArmorClass = 10.0f; // Base AC
+    Util::jstrcpy( m_szDamage, PLAYER_BASE_DAMAGE );
+    m_fDamageModifier = 0.0f;
+    m_fToHitModifier = 0.0f;
+    m_fSpeed = 1.0f; // Base speed multiplier
+
+    // Re-add contributions from all equipped items
+    CLink<CItem> *pLink = m_llEquipment->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData )
+        {
+            CItem *pItem = pLink->m_lpData;
+            // Only count items in active slots (not secondary slots)
+            bool isActive =
+                ( pLink->m_dwIndex == EQUIP_IDX_MAIN_HAND ||
+                  pLink->m_dwIndex == EQUIP_IDX_OFF_HAND || pLink->m_dwIndex == EQUIP_IDX_HELMET ||
+                  pLink->m_dwIndex == EQUIP_IDX_AMULET || pLink->m_dwIndex == EQUIP_IDX_ARMOR ||
+                  pLink->m_dwIndex == EQUIP_IDX_CLOAK || pLink->m_dwIndex == EQUIP_IDX_GLOVES ||
+                  pLink->m_dwIndex == EQUIP_IDX_BELT || pLink->m_dwIndex == EQUIP_IDX_BOOTS ||
+                  pLink->m_dwIndex == EQUIP_IDX_LRING || pLink->m_dwIndex == EQUIP_IDX_RRING ||
+                  pLink->m_dwIndex == EQUIP_IDX_TORCH );
+
+            if( isActive && pItem->m_id )
+            {
+                m_fArmorClass += pItem->m_id->m_fBaseAC + pItem->m_fACBonus;
+                if( pItem->m_id->m_szBaseDamage != NULL )
+                    Util::jstrcpy( m_szDamage, pItem->m_id->m_szBaseDamage );
+                m_fDamageModifier += pItem->m_fBonusToDamage;
+                m_fToHitModifier += pItem->m_fBonusToHit;
+                m_fSpeed += pItem->m_fSpeedBonus;
+            }
+        }
+        pLink = m_llEquipment->GetNext( pLink );
+    }
+
+    // Print feedback message
+    CLink<CItem> *pNewMain = m_llEquipment->GetLink( EQUIP_IDX_MAIN_HAND );
+    if( pNewMain && pNewMain->m_lpData )
+    {
+        g_pGame->GetMsgs()->Printf( "You switch to your %s.\n", pNewMain->m_lpData->GetName() );
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "You switch to your bare hands.\n" );
+    }
+}
+
 float CPlayer::LightSource()
 {
     if( m_llEquipment == NULL )

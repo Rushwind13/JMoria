@@ -821,7 +821,7 @@ Monster <Greater Beholder>
     Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 3d12
     Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 3d8
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d8
-    Attack             <MON_FLAG_TOUCH>, <Life Drain>, 2d8
+    Attack             <MON_FLAG_TOUCH>, <XP Drain Touch>, 2d8
     Color		<0,100,180,255>
 }
 
@@ -1492,7 +1492,7 @@ Monster <Elder Mind Flayer>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 2d20
     Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 2d15
-    Attack             <MON_FLAG_TOUCH>, <Life Drain>, 2d8
+    Attack             <MON_FLAG_TOUCH>, <XP Drain Touch>, 2d8
     Color		<140,0,180,255>
 }
 Monster <Mind Flayer Lich>
@@ -1510,7 +1510,7 @@ Monster <Mind Flayer Lich>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 3d20
     Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 3d15
-    Attack             <MON_FLAG_TOUCH>, <Life Drain>, 3d10
+    Attack             <MON_FLAG_TOUCH>, <XP Drain Touch>, 3d10
     Color		<160,0,200,255>
 }
 

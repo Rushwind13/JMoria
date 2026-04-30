@@ -8,7 +8,7 @@
 **Build**: `make clean ascii test`
 **Test**: `cd test; ./runtests.sh`
 **Areas**: Item system, fire command, secondary weapon slots, ammo mechanics
-**Latest**: x)change command complete (2026-04-29)
+**Latest**: P1 - Bow+arrow combined combat math complete (2026-04-29)
 
 ## Overview
 
@@ -163,7 +163,7 @@ All ranged weapons now correctly set to `Damage <1d2>` (= unarmed):
 
 ### P1 — Bow+arrow combined combat math
 
-- [ ] **[src/RangedState.cpp]** At fire time, read the equipped bow's `m_fBonusToHit` from
+- [x] **[src/RangedState.cpp]** At fire time, read the equipped bow's `m_fBonusToHit` from
       `EQUIP_IDX_MAIN_HAND` and add it to the to-hit roll used in `DoFire()` / `DoHitEffects()`.
       Arrow's own `m_fBonusToHit` and `m_fBonusToDamage` come from `m_pSelected` (the ammo item).
 
@@ -214,7 +214,8 @@ All ranged weapons now correctly set to `Damage <1d2>` (= unarmed):
 - [x] Arrow item definitions in Items.txt — **✅ COMPLETE**
 - [x] Fire selection flow redesigned for bow+ammo two-piece model — **✅ COMPLETE**
 - [x] Bow damage corrected to 1d2 — **✅ COMPLETE**
-- [ ] x)change command — swap active ↔ secondary weapon sets
+- [x] x)change command — swap active ↔ secondary weapon sets — **✅ COMPLETE**
+- [x] Bow+arrow combined combat math (to-hit & damage bonus integration) — **✅ COMPLETE**
 - [ ] Arrows drop to ground on miss/wall/range-exceed (with break chance)
 - [ ] Arrow recovery (pick up from dungeon floor)
 

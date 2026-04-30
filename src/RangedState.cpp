@@ -310,7 +310,6 @@ int CRangedState::OnHandleZap( JKeysym *keysym )
 int CRangedState::OnHandleTarget( JKeysym *keysym )
 {
     int retval;
-    JLog( LOG_LEVEL_DEBUG, true, "Handling TARGET modifier\n" );
     if( !ReadyToLaunch() )
     {
         retval = OnBaseHandleKey( keysym );
@@ -322,13 +321,11 @@ int CRangedState::OnHandleTarget( JKeysym *keysym )
 
         if( retval != JSUCCESS )
         {
-            JLog( LOG_LEVEL_DEBUG, true, "TARGET cmd still waiting for target.\n" );
             g_pGame->GetMsgs()->Printf( "Choose target: * or Direction (1 2 3 4 6 7 8 9)\n" );
             return JSUCCESS;
         }
     }
 
-    JLog( LOG_LEVEL_DEBUG, true, "TARGET modifier complete, RANGED state reset to previous\n" );
     eRangedModifier mod = RANGED_INIT;
     switch( m_cCommand )
     {
@@ -345,9 +342,8 @@ int CRangedState::OnHandleTarget( JKeysym *keysym )
     }
     m_eCurModifier = mod;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
-    // Don't re-process the keystroke; we've already consumed it getting the target.
-    // The next keypress will be handled by the new modifier.
-
+    // Re-process the keystroke through the new modifier handler (fire/zap) now that we have target
+    HandleKey( keysym );
     return JSUCCESS;
 }
 
@@ -510,8 +506,18 @@ void CRangedState::ResetToState( int newstate )
 
 bool CRangedState::DoLaunch()
 {
-    if( m_pSelected->m_lpData->m_dwCharges <= 0 )
+    // Check if we have ammo available
+    // Arrows/bolts are stackable items (check m_dwCount)
+    // Wands are charged items (check m_dwCharges)
+    CItem *pItem = m_pSelected->m_lpData;
+    bool isStackable = pItem->IsStackable();
+    uint32 availability = isStackable ? pItem->m_dwCount : pItem->m_dwCharges;
+
+    if( availability <= 0 )
+    {
+        g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
         return false;
+    }
     JLog( LOG_LEVEL_DEBUG, true, "RANGED state firing projectile...\n" );
 
     // Get effect description from the current effect being used
@@ -541,7 +547,12 @@ bool CRangedState::DoLaunch()
         g_pGame->GetDungeon()->SetProjectileEffect( pEffectDef, m_llTrajectory );
     }
 
-    m_pSelected->m_lpData->m_dwCharges--;
+    // NOTE: Ammo consumption happens in Player::Fire() after effect application, not here
+    // Wand charges are decremented here because wands are consumed at use time
+    if( !isStackable )
+    {
+        m_pSelected->m_lpData->m_dwCharges--;
+    }
     g_pGame->SetReadyForUpdate( false );
     return true;
 }
@@ -605,6 +616,8 @@ bool CRangedState::DoTrajectory()
         }
         break;
     case DUNG_COLL_MONSTER:
+        JLog( LOG_LEVEL_DEBUG, true, "COLLISION WITH MONSTER at <%d %d>\n", (int)vTest.x,
+              (int)vTest.y );
         g_pGame->GetPlayer()->SetRangedHitPosition( vTest );
         switch( m_cCommand )
         {
@@ -646,8 +659,13 @@ bool CRangedState::DoTrajectory()
     case DUNG_COLL_PLAYER:
         break;
     default:
+        // Wall or obstacle collision - consume arrow and stop
         JLog( LOG_LEVEL_ERROR, true, "invalid collision at <%f %f> type: %d\n", VEC_EXPAND( vTest ),
               collide_type );
+        if( m_cCommand == JKEY_f && m_pSelected )
+        {
+            DoFire();
+        }
         ResetToState( STATE_COMMAND );
         return false;
         break;
@@ -664,6 +682,12 @@ bool CRangedState::DoTrajectory()
     if( m_dwClock >= m_dwTrajectory )
     {
         JLog( LOG_LEVEL_DEBUG, true, "RANGED state complete, reset to CMD state.\n" );
+        // Consume arrows even if they didn't hit anything
+        // (Wands already consumed in DoLaunch, so only handle arrows here)
+        if( m_cCommand == JKEY_f && m_pSelected )
+        {
+            DoFire();
+        }
         ResetToState( STATE_COMMAND );
         return true;
     }

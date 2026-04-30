@@ -344,6 +344,7 @@ Item <Flight Arrow>
     Weight      0.1
     Speed       0.0
     Color       <200,200,200,255>
+    Effect      <Arrow Shot>
 }
 
 # --- Tools (Shovels / Pickaxes) ---

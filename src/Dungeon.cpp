@@ -11,6 +11,8 @@
 #include "Player.h"
 #include "RenderBase.h"
 
+extern unsigned char ItemIDs[];
+
 unsigned char TileIDs[DUNG_IDX_MAX + 1] = ".#+'<<>>:#@";
 int ModifiedTileTypes[DUNG_IDX_MAX + 1] = {
     DUNG_IDX_INVALID,   // 0  FLOOR: can't modify
@@ -335,7 +337,6 @@ char *CDungeon::DumpMap()
 {
     extern unsigned char TileIDs[];
     extern unsigned char MonIDs[];
-    extern unsigned char ItemIDs[];
 
     // Build the full map into a temporary buffer
     char map[DUNG_HEIGHT][DUNG_WIDTH + 1];
@@ -1248,7 +1249,8 @@ void CDungeon::DrawDungeon()
                         JIVector curPos = *( plPos->m_lpData );
                         if( (int)vScreen.x == curPos.x && (int)vScreen.y == curPos.y )
                         {
-                            bRangedBeamTile = true;
+                            bRangedBeamTile =
+                                m_pProjectileEffect->m_cBeamChar != ItemIDs[ITEM_IDX_ARROW];
                             // Get color from effect definition, cycling through colors
                             if( m_pProjectileEffect->m_llColors &&
                                 m_pProjectileEffect->m_llColors->length() > 0 )

@@ -1015,6 +1015,37 @@ float CPlayer::Attack()
     return fRoll;
 }
 
+float CPlayer::RangedAttack( CLink<CItem> *pArrow )
+{
+    // Calculate ranged attack to-hit roll combining bow and arrow bonuses
+    float fRoll = Util::Roll( "1d100" );
+
+    // Get the equipped primary weapon (bow)
+    CLink<CItem> *pBow = m_llEquipment->GetLink( EQUIP_IDX_MAIN_HAND );
+    float fBowBonus = 0.0f;
+    if( pBow && pBow->m_lpData && pBow->m_lpData->m_id &&
+        ( pBow->m_lpData->m_id->m_dwFlags & ITEM_FLAG_NEEDSAMMO ) )
+    {
+        fBowBonus = pBow->m_lpData->m_fBonusToHit;
+    }
+
+    // Get arrow bonuses
+    float fArrowBonus = 0.0f;
+    if( pArrow && pArrow->m_lpData )
+    {
+        fArrowBonus = pArrow->m_lpData->m_fBonusToHit;
+    }
+
+    float fTotalBonus = fBowBonus + fArrowBonus;
+    fRoll += fTotalBonus;
+
+    JLog( LOG_LEVEL_INFO, true,
+          "Ranged: rolled: %.2f, bow: %.2f, arrow: %.2f, total bonus: %.2f = Total: %.2f\n",
+          fRoll - fTotalBonus, fBowBonus, fArrowBonus, fTotalBonus, fRoll );
+
+    return fRoll;
+}
+
 float CPlayer::Damage( float fDamageMult )
 {
     float fDamage = ( Util::Roll( m_szDamage ) + m_fDamageModifier ) * fDamageMult;
@@ -1264,8 +1295,15 @@ JResult CPlayer::Fire( CLink<CItem> *pLink )
     // this will get called multiple times for a single shot, if EFFECT_FLAG_NO_COLLIDE is set,
     // this function is to do damage to the monster in the current position
     CItem *pItem = pLink->m_lpData;
+
+    // Track this ammo for ranged to-hit calculations in DoElementalHit
+    m_pCurrentRangedAmmo = pItem;
+
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
+
+    // Clear the ranged ammo tracker
+    m_pCurrentRangedAmmo = NULL;
 
     // Consume one arrow/bolt at a time (not the whole stack)
     if( pItem->IsStackable() && pItem->m_dwCount > 1 )
@@ -1487,7 +1525,88 @@ JResult CPlayer::DoHitEffects( CEffect *pEffect )
         return DoElementalHit( pEffect );
         break;
     default:
+        return DoPhysicalHit( pEffect );
         break;
+    }
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoPhysicalHit( CEffect *pEffect )
+{
+    bool bCriticalHit = false;
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vRangedHitPosition );
+    if( !pTile )
+    {
+        return JBOGUSKEY;
+    }
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+        return JBOGUSKEY;
+    }
+    // Save monster name before it's potentially deleted
+    const char *szMonName = pMon->GetName();
+
+    // If this is a ranged attack (arrow/ammo with bow), perform to-hit check
+    if( m_pCurrentRangedAmmo )
+    {
+        // Get the arrow as a CLink
+        CLink<CItem> *pArrowLink = NULL;
+        CLink<CItem> *pInvItem = m_llInventory->GetHead();
+        while( pInvItem )
+        {
+            if( pInvItem->m_lpData == m_pCurrentRangedAmmo )
+            {
+                pArrowLink = pInvItem;
+                break;
+            }
+            pInvItem = m_llInventory->GetNext( pInvItem );
+        }
+
+        float fRoll = RangedAttack( pArrowLink );
+        bool bHit = pMon->Hit( fRoll );
+
+        if( !bHit )
+        {
+            g_pGame->GetMsgs()->Printf( "You miss the %s.\n", szMonName );
+            JLog( LOG_LEVEL_INFO, true, "Ranged miss: roll %.2f vs AC %d\n", fRoll,
+                  (int)pMon->m_fCurAC );
+            return JSUCCESS; // Arrow missed, no damage
+        }
+
+        if( fRoll > 80.0f )
+        {
+            g_pGame->GetMsgs()->Printf( "(Critical hit!)\n" );
+            bCriticalHit = true;
+        }
+    }
+    const char *szAmount = pEffect->m_szAmount;
+    if( !szAmount && pEffect->m_ed )
+        szAmount = pEffect->m_ed->m_szAmount;
+    if( !szAmount )
+        szAmount = "1d2";
+
+    float fDamage = Util::Roll( szAmount );
+
+    // For ranged attacks, add arrow's damage bonus
+    if( m_pCurrentRangedAmmo )
+    {
+        fDamage += m_pCurrentRangedAmmo->m_fBonusToDamage;
+    }
+
+    if( bCriticalHit )
+    {
+        fDamage *= 2.0f;
+    }
+
+    if( DamageMonster( pMon, fDamage ) )
+    {
+        g_pGame->GetMsgs()->Printf( "The %s dies.\n", szMonName );
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
     }
     return JSUCCESS;
 }
@@ -1557,7 +1676,6 @@ JResult CPlayer::DoElementalHit( CEffect *pEffect )
 
     // Save monster name before it's potentially deleted
     const char *szMonName = pMon->GetName();
-
     // Print effect description message
     if( pEffect->m_ed && pEffect->m_ed->m_szName )
     {
@@ -1572,6 +1690,12 @@ JResult CPlayer::DoElementalHit( CEffect *pEffect )
         szAmount = "1d6";
 
     float fDamage = Util::Roll( szAmount );
+
+    // For ranged attacks, add arrow's damage bonus
+    if( m_pCurrentRangedAmmo )
+    {
+        fDamage += m_pCurrentRangedAmmo->m_fBonusToDamage;
+    }
 
     if( DamageMonster( pMon, fDamage ) )
     {
@@ -2241,20 +2365,28 @@ bool CPlayer::IsCompatibleAmmo( CLink<CItem> *pLink )
 {
     // Check if this ammo is compatible with the equipped primary weapon
     if( !IsFireable( pLink ) )
+    {
         return false;
+    }
 
     CLink<CItem> *pMainWeapon = m_llEquipment->GetLink( EQUIP_IDX_MAIN_HAND );
     if( pMainWeapon == NULL )
+    {
         return false;
+    }
 
     uint32 weaponType = pMainWeapon->m_lpData->m_id->m_dwIndex;
     uint32 ammoType = pLink->m_lpData->m_id->m_dwIndex;
 
     // BOW uses ARROW, XBOW uses BOLT
     if( weaponType == ITEM_IDX_BOW && ammoType == ITEM_IDX_ARROW )
+    {
         return true;
+    }
     if( weaponType == ITEM_IDX_XBOW && ammoType == ITEM_IDX_BOLT )
+    {
         return true;
+    }
 
     return false;
 }

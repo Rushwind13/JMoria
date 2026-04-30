@@ -128,6 +128,7 @@ public:
           m_bWizardMode( false ),
           m_pClass( NULL ),
           m_pTarget( NULL ),
+          m_pCurrentRangedAmmo( NULL ),
           m_vRangedHitPosition( 0, 0 ),
           m_llVisibleMonsters( NULL )
     {
@@ -267,6 +268,7 @@ public:
     JResult DoHealEffects( CEffect *pEffect );
     JResult DoHealHP( CEffect *pEffect );
     JResult DoHitEffects( CEffect *pEffect );
+    JResult DoPhysicalHit( CEffect *pEffect );
     JResult DoLightRay( CEffect *pEffect );
     JResult DoElementalHit( CEffect *pEffect );
     JResult DoDamageInventory( uint32 dwElement );
@@ -311,6 +313,7 @@ public:
     }
 
     float Attack();
+    float RangedAttack( CLink<CItem> *pArrow );
     float Damage( float fDamageMult );
 
     bool Hit( float &fRoll );
@@ -338,6 +341,7 @@ public:
     float m_fDamageModifier;
     float m_fToHitModifier;
     float m_fSpeed; // action economy: 1.0 = base (10), 2.0 = fast (20), 0.8 = slow (8)
+    CItem *m_pCurrentRangedAmmo; // Current arrow/bolt being fired, for to-hit calculation
 
     char *m_szKilledBy;
 

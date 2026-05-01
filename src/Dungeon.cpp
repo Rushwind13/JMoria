@@ -1729,12 +1729,31 @@ CItem *CDungeon::PickUp( JVector &vPickupPos )
 
 void CDungeon::Drop( CItem *pItem, JVector &vDropPos )
 {
+    JLog( LOG_LEVEL_WARN, true, "CDungeon::Drop called - pItem=%p, type=%s, count=%d at <%f %f>\n",
+          pItem, pItem ? pItem->GetName() : "NULL", pItem ? pItem->m_dwCount : 0,
+          VEC_EXPAND( vDropPos ) );
+
     JVector vFinalPos = vDropPos;
 
-    // If the drop position already has an item, try adjacent tiles
-    if( GetTile( vDropPos )->m_pCurItem != NULL )
+    // Check if we can stack with an existing item of the same type
+    CDungeonTile *pTargetTile = GetTile( vDropPos );
+    if( pTargetTile && pTargetTile->m_pCurItem != NULL )
     {
+        CItem *pExisting = pTargetTile->m_pCurItem;
+        // If same item type and stackable, increment count and discard the new item
+        if( pExisting->m_id->m_dwIndex == pItem->m_id->m_dwIndex && pItem->IsStackable() )
+        {
+            pExisting->m_dwCount += pItem->m_dwCount;
+            JLog( LOG_LEVEL_DEBUG, true, "Stacked item; new count: %d\n", pExisting->m_dwCount );
+            delete pItem; // Discard the new item; existing one now has all counts
+            JLog( LOG_LEVEL_DEBUG, true, ">>Drop: Stacking, returning early\n" );
+            return;
+        }
+
+        // Different item type or non-stackable; find an adjacent empty tile
         bool bFoundSpot = false;
+        JLog( LOG_LEVEL_DEBUG, true,
+              ">>Drop: Different item or non-stackable, searching adjacent tiles\n" );
 
         // Use Util::Nearby to get all adjacent tiles
         JRect rcNearby = Util::Nearby( JIVector( (int)vDropPos.x, (int)vDropPos.y ), 1 );
@@ -1756,19 +1775,24 @@ void CDungeon::Drop( CItem *pItem, JVector &vDropPos )
                 {
                     vFinalPos = vTry;
                     bFoundSpot = true;
+                    JLog( LOG_LEVEL_DEBUG, true, ">>Drop: Found adjacent spot at <%f %f>\n",
+                          vFinalPos.x, vFinalPos.y );
                 }
             }
         }
 
         if( !bFoundSpot )
         {
-            // No adjacent spot found; cannot drop here
-            g_pGame->GetMsgs()->Printf( "There is no room to drop the item here.\n" );
-            // Item stays in caller's possession; don't add to dungeon
+            // No adjacent spot found; cannot drop here - item disappears
+            JLog( LOG_LEVEL_DEBUG, true, ">>Drop: No adjacent spot found, item disappears\n" );
+            g_pGame->GetMsgs()->Printf( "The %s disappears.\n", pItem->GetName() );
+            delete pItem;
             return;
         }
     }
 
+    JLog( LOG_LEVEL_DEBUG, true, ">>Drop: Adding to m_llItems at <%f %f>\n", vFinalPos.x,
+          vFinalPos.y );
     GetTile( vFinalPos )->m_pCurItem = pItem;
     pItem->m_vPos = vFinalPos;
     pItem->m_pllLink = m_llItems->Add( pItem, pItem->m_id->m_dwIndex, pItem->GetInstanceId() );

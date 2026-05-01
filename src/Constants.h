@@ -89,6 +89,8 @@
 #define CHANCE_FIND_SECRET_BUMP 20
 #define CHANCE_SEARCH_ACTIVE 25
 #define CHANCE_SEARCH_PASSIVE 5
+// Ranged attack percentages (1-100)
+#define CHANCE_ARROW_BREAK 33 // ~1 in 3 chance arrow breaks on landing
 
 // UI / Display constants
 #define MSGS_ROWS 5 // height of the Messages pane in text rows (8px each)

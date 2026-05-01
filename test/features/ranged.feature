@@ -87,6 +87,40 @@ Feature: Ranged Combat
         And the projectile completes its trajectory
         Then the player's current room is lit
 
+    # Arrow ground behavior tests (P2 — Arrow ground behavior)
+    @skip
+    Scenario: Arrow drops to ground when fire trajectory ends (miss)
+        Given the player has a Short Bow in slot a
+        And the player has Flight Arrow in slot a with 1 count
+        And the player equips the Short Bow
+        When I enter targeting mode for ranged attack with no monster
+        And I fire slot a
+        And the projectile completes its trajectory
+        Then an arrow exists on the ground at the trajectory end
+        And the player has no Flight Arrow in inventory
+        
+    @skip
+    Scenario: Arrows of same type stack on ground
+        Given the player has a Short Bow in slot a
+        And the player has Flight Arrow in slot a with 1 count
+        And the player equips the Short Bow
+        And an arrow exists on the ground at distance 10 with count 2
+        When I enter targeting mode for ranged attack with no monster
+        And I fire slot a  
+        And the projectile completes its trajectory
+        Then the ground arrow count is 3
+        And the player has no Flight Arrow in inventory
+
+    Scenario: Arrow landing location has space to scatter
+        Given the player has a Short Bow in slot a
+        And the player has Flight Arrow in slot a with 1 count
+        And the player equips the Short Bow
+        And an item exists on the ground at distance 20
+        When I enter targeting mode for ranged attack with no monster
+        And I fire slot a
+        And the projectile completes its trajectory
+        Then an arrow exists on the ground adjacent to the trajectory end
+
     # Bow+arrow combat math tests (P1 — Bow+arrow combined combat math)
 
     @skip

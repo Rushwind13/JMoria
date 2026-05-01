@@ -1220,11 +1220,9 @@ bool CPlayer::Drop( CItem *pItem, int quantity )
 
 bool CPlayer::CanDropHere()
 {
-    if( g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurItem != NULL )
-    {
-        g_pGame->GetMsgs()->Printf( "There is already an item there.\n" );
-        return false;
-    }
+    // With enhanced Drop() handling stacking and scattering, we can always attempt to drop.
+    // Drop() itself will handle placement logic (stacking, scatter to adjacent, or fail with
+    // message).
     return true;
 }
 

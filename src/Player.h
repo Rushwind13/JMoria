@@ -340,7 +340,7 @@ public:
     char *m_szDamage;
     float m_fDamageModifier;
     float m_fToHitModifier;
-    float m_fSpeed; // action economy: 1.0 = base (10), 2.0 = fast (20), 0.8 = slow (8)
+    float m_fSpeed;              // action economy: 1.0 = base (10), 2.0 = fast (20), 0.8 = slow (8)
     CItem *m_pCurrentRangedAmmo; // Current arrow/bolt being fired, for to-hit calculation
 
     char *m_szKilledBy;

@@ -11,6 +11,7 @@
 #include "DisplayText.h"
 #include "Game.h"
 #include "Player.h"
+#include "Util.h"
 
 #include "assert.h"
 
@@ -168,6 +169,9 @@ int CRangedState::OnHandleFire( JKeysym *keysym )
 {
     int retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling FIRE\n" );
+    JLog( LOG_LEVEL_WARN, true, "OnHandleFire: pSelected=%p, ReadyToLaunch=%s\n", m_pSelected,
+          ReadyToLaunch() ? "YES" : "NO" );
+
     if( m_pSelected == NULL )
     {
         retval = OnBaseHandleKey( keysym );
@@ -184,12 +188,22 @@ int CRangedState::OnHandleFire( JKeysym *keysym )
             g_pGame->GetMsgs()->Printf( "Choose ammo from inventory (a to z):\n" );
             return JSUCCESS;
         }
+
+        JLog( LOG_LEVEL_WARN, true,
+              "OnHandleFire: After OnBaseHandleKey - pSelected=%p, m_dwSelected=%d\n", m_pSelected,
+              m_dwSelected );
     }
 
     // We got an alpha key; do a "fire" of that ammo
     JLog( LOG_LEVEL_NOISE, true, "FIRE got a selection\n" );
+    JLog( LOG_LEVEL_WARN, true,
+          "OnHandleFire: After base handler - pSelected=%p, ReadyToLaunch=%s, TestFire=%s\n",
+          m_pSelected, ReadyToLaunch() ? "YES" : "NO", TestFire() ? "YES" : "NO" );
+
     if( TestFire() ) // can fire
     {
+        JLog( LOG_LEVEL_WARN, true, "OnHandleFire: TestFire passed. ReadyToLaunch=%s\n",
+              ReadyToLaunch() ? "YES" : "NO" );
         if( ReadyToLaunch() ) // have target
         {
             // Ensure trajectory is built if we have a target
@@ -200,6 +214,8 @@ int CRangedState::OnHandleFire( JKeysym *keysym )
 
             if( DoLaunch() ) // have ammo
             {
+                JLog( LOG_LEVEL_WARN, true,
+                      "OnHandleFire: DoLaunch returned true, setting RANGED_TRAJECTORY\n" );
                 m_eCurModifier = RANGED_TRAJECTORY;
                 m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
                 return JSUCCESS;
@@ -366,6 +382,8 @@ bool CollisionCheck( JVector &vTest )
 
 int CRangedState::BuildTrajectory()
 {
+    JLog( LOG_LEVEL_WARN, true, "BuildTrajectory: from <%d %d> to <%d %d>, range=%d\n",
+          VEC_EXPAND( m_vCurrentPosition ), VEC_EXPAND( m_vTarget ), PROJECTILE_RANGE );
     m_llTrajectory = Util::GenerateLine( m_vCurrentPosition, m_vTarget, PROJECTILE_RANGE );
 
     if( m_llTrajectory && m_llTrajectory->length() > 0 )
@@ -567,7 +585,10 @@ bool CRangedState::DoTrajectory()
 {
     assert( !g_pGame->IsReadyForUpdate() );
     if( !ReadyToLaunch() )
+    {
+        JLog( LOG_LEVEL_WARN, true, "DoTrajectory: ReadyToLaunch=NO, returning early\n" );
         return true;
+    }
 
     if( !m_llTrajectory )
     {
@@ -579,7 +600,18 @@ bool CRangedState::DoTrajectory()
     }
 
     JLog( LOG_LEVEL_DEBUG, true, "doing trajectory %d/%d\n", m_dwClock, m_llTrajectory->length() );
-    m_vCurrentPosition.Init( VEC_EXPAND( *( m_llTrajectory->GetNthLink( m_dwClock )->m_lpData ) ) );
+    JLog( LOG_LEVEL_WARN, true, "DoTrajectory: clock=%d, trajectory=%d, command=%c, pSelected=%p\n",
+          m_dwClock, m_dwTrajectory, m_cCommand, m_pSelected );
+
+    JIVector *pTrajectoryPos = (JIVector *)( m_llTrajectory->GetNthLink( m_dwClock )->m_lpData );
+    JLog( LOG_LEVEL_DEBUG, true, ">>Trajectory[%d] raw = <%d %d>\n", m_dwClock, pTrajectoryPos->x,
+          pTrajectoryPos->y );
+
+    // Directly assign trajectory position coordinates
+    m_vCurrentPosition.x = pTrajectoryPos->x;
+    m_vCurrentPosition.y = pTrajectoryPos->y;
+    JLog( LOG_LEVEL_DEBUG, true, ">>After assign: m_vCurrentPosition = <%d %d>\n",
+          m_vCurrentPosition.x, m_vCurrentPosition.y );
     m_dwClock++;
 
     // Advance to next color in beam animation
@@ -635,20 +667,43 @@ bool CRangedState::DoTrajectory()
         {
             bool bNoCollide = false;
             CLink<CEffect> *plEff = m_pSelected->m_lpData->m_id->m_llEffects->GetHead();
+            int effCount = 0;
             while( plEff != NULL )
             {
                 CEffectDef *pDef = plEff->m_lpData->m_ed;
-                if( pDef && ( pDef->m_dwFlags2 & EFFECT_FLAG_NO_COLLIDE ) )
+                if( pDef )
                 {
-                    bNoCollide = true;
-                    break;
+                    JLog( LOG_LEVEL_WARN, true,
+                          "DoTrajectory: Effect[%d]=%s flags2=0x%08x (NO_COLLIDE=0x%08x)\n",
+                          effCount, pDef->m_szName, pDef->m_dwFlags2, EFFECT_FLAG_NO_COLLIDE );
+                    if( pDef->m_dwFlags2 & EFFECT_FLAG_NO_COLLIDE )
+                    {
+                        bNoCollide = true;
+                        break;
+                    }
                 }
+                effCount++;
                 plEff = plEff->next;
             }
+            JLog( LOG_LEVEL_WARN, true, "DoTrajectory: Monster collision - bNoCollide=%s\n",
+                  bNoCollide ? "YES" : "NO" );
             if( !bNoCollide )
             {
                 JLog( LOG_LEVEL_DEBUG, true,
                       "Projectile collided. RANGED state complete, reset to CMD state.\n" );
+                // Drop arrow after hitting target
+                if( m_cCommand == JKEY_f && m_pSelected )
+                {
+                    JLog( LOG_LEVEL_WARN, true,
+                          "CALLING DropAmmo: monster collision\n" );
+                    DropAmmo( vTest );
+                }
+                else
+                {
+                    JLog( LOG_LEVEL_WARN, true,
+                          "NOT dropping arrow at monster: command=%c, pSelected=%p\n", m_cCommand,
+                          m_pSelected );
+                }
                 ResetToState( STATE_COMMAND );
                 return true;
             }
@@ -659,12 +714,18 @@ bool CRangedState::DoTrajectory()
     case DUNG_COLL_PLAYER:
         break;
     default:
-        // Wall or obstacle collision - consume arrow and stop
-        JLog( LOG_LEVEL_ERROR, true, "invalid collision at <%f %f> type: %d\n", VEC_EXPAND( vTest ),
+        // Wall or obstacle collision - drop arrow at impact point
+        JLog( LOG_LEVEL_DEBUG, true, "Wall collision at <%f %f> type: %d\n", VEC_EXPAND( vTest ),
               collide_type );
+        JLog( LOG_LEVEL_WARN, true,
+              "DoTrajectory DEFAULT case: command=%c, pSelected=%p, m_vCurrentPosition=<%f %f>\n",
+              m_cCommand, m_pSelected, VEC_EXPAND( m_vCurrentPosition ) );
         if( m_cCommand == JKEY_f && m_pSelected )
         {
-            DoFire();
+            JLog( LOG_LEVEL_WARN, true,
+                  "CALLING DropAmmo: wall collision, vTest=<%f %f>\n",
+                  VEC_EXPAND( vTest ) );
+            DropAmmo( vTest );
         }
         ResetToState( STATE_COMMAND );
         return false;
@@ -675,18 +736,34 @@ bool CRangedState::DoTrajectory()
     if( m_dwClock > 20 )
     {
         JLog( LOG_LEVEL_WARN, true, "failsafe in TRAJECTORY\n" );
+        // Arrow exceeded maximum trajectory steps; drop it at current position
+        if( m_cCommand == JKEY_f && m_pSelected )
+        {
+            JVector vDropPos( VEC_EXPAND( m_vCurrentPosition ) );
+            DropAmmo( vDropPos );
+        }
         ResetToState( STATE_COMMAND );
         return false;
     }
 
     if( m_dwClock >= m_dwTrajectory )
     {
+        JLog( LOG_LEVEL_WARN, true, "RANGED state complete: clock=%d >= trajectory=%d\n", m_dwClock,
+              m_dwTrajectory );
         JLog( LOG_LEVEL_DEBUG, true, "RANGED state complete, reset to CMD state.\n" );
-        // Consume arrows even if they didn't hit anything
+        // Arrow reached end of range; drop it at final position
         // (Wands already consumed in DoLaunch, so only handle arrows here)
         if( m_cCommand == JKEY_f && m_pSelected )
         {
-            DoFire();
+            JLog( LOG_LEVEL_WARN, true, "CALLING DropAmmo at end\n" );
+            JVector vDropPos( VEC_EXPAND( m_vCurrentPosition ) );
+            DropAmmo( vDropPos );
+        }
+        else
+        {
+            JLog( LOG_LEVEL_WARN, true,
+                  "NOT calling DropAmmo: command=%c, pSelected=%p\n", m_cCommand,
+                  m_pSelected );
         }
         ResetToState( STATE_COMMAND );
         return true;
@@ -709,18 +786,36 @@ CLink<CItem> *CRangedState::GetResponse( eRangedModifier whichUse )
         pLink = pList->GetHead();
         uint32 count = 0;
 
+        JLog( LOG_LEVEL_WARN, true, "GetResponse FIRE: Looking for ammo index %d\n", m_dwSelected );
+
+        CLink<CItem> *pDebugLink = pList->GetHead();
+        uint32 dbgIdx = 0;
+        while( pDebugLink )
+        {
+            JLog( LOG_LEVEL_WARN, true, "  [%d] %s (type=%d) Compatible=%s\n", dbgIdx,
+                  pDebugLink->m_lpData->GetName(), pDebugLink->m_lpData->m_id->m_dwIndex,
+                  g_pGame->GetPlayer()->IsCompatibleAmmo( pDebugLink ) ? "YES" : "NO" );
+            dbgIdx++;
+            pDebugLink = pList->GetNext( pDebugLink );
+        }
+
         while( pLink )
         {
             if( g_pGame->GetPlayer()->IsCompatibleAmmo( pLink ) )
             {
                 if( count == m_dwSelected )
                 {
+                    JLog( LOG_LEVEL_WARN, true,
+                          "GetResponse FIRE: Found matching ammo at count %d\n", count );
                     break;
                 }
                 count++;
             }
             pLink = pList->GetNext( pLink );
         }
+
+        JLog( LOG_LEVEL_WARN, true, "GetResponse FIRE: Returning %p (count=%d, selected=%d)\n",
+              pLink, count, m_dwSelected );
         break;
     }
     case RANGED_ZAP:
@@ -745,6 +840,48 @@ bool CRangedState::DoFire() { return g_pGame->GetPlayer()->Fire( m_pSelected ) =
 
 bool CRangedState::TestZap() { return g_pGame->GetPlayer()->IsZappable( m_pSelected ); }
 bool CRangedState::DoZap() { return g_pGame->GetPlayer()->Zap( m_pSelected ) == JSUCCESS; }
+
+void CRangedState::DropAmmo( JVector vFinalPos )
+{
+    JLog( LOG_LEVEL_DEBUG, true, ">>DropAmmo called at <%f %f>, m_pSelected=%p\n",
+          VEC_EXPAND( vFinalPos ), m_pSelected );
+
+    // Only arrows and bolts can be dropped on the ground
+    if( !m_pSelected || m_pSelected->m_lpData == NULL )
+    {
+        JLog( LOG_LEVEL_DEBUG, true, ">>Early return: m_pSelected is NULL\n" );
+        return;
+    }
+
+    CItem *pAmmo = m_pSelected->m_lpData;
+    int eAmmoType = pAmmo->m_id->m_dwIndex;
+
+    // Only ammo types (arrows, bolts) drop on terrain
+    if( eAmmoType != ITEM_IDX_ARROW && eAmmoType != ITEM_IDX_BOLT )
+    {
+        JLog( LOG_LEVEL_DEBUG, true, ">>Early return: not arrow/bolt (type=%d)\n", eAmmoType );
+        return;
+    }
+
+    // Check if arrow breaks on impact (before creating/placing anything)
+    int breakChance = Util::GetRandom( 1, 100 );
+    if( breakChance <= CHANCE_ARROW_BREAK )
+    {
+        g_pGame->GetMsgs()->Printf( "The arrow breaks.\n" );
+        JLog( LOG_LEVEL_DEBUG, true, ">>Arrow broke on landing (roll=%d)\n", breakChance );
+        return;
+    }
+
+    // Arrow survives: create new item and drop it
+    // Drop() will handle stacking if same-type arrow is on ground, or scattering to adjacent
+    CItem *pDropArrow = pAmmo->Copy(1);
+
+    // Drop the arrow (Drop() now handles stacking and scattering)
+    JLog( LOG_LEVEL_DEBUG, true, ">>About to call Drop with pos=<%f %f>\n",
+          VEC_EXPAND( vFinalPos ) );
+    g_pGame->GetDungeon()->Drop( pDropArrow, vFinalPos );
+    JLog( LOG_LEVEL_DEBUG, true, ">>Arrow dropped at <%f %f>\n", VEC_EXPAND( vFinalPos ) );
+}
 
 void CRangedState::UsePlayerTarget()
 {

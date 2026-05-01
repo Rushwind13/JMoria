@@ -454,3 +454,177 @@ THEN( "^the programmatic wield failed$" )
     ScenarioScope<TestCtx> context;
     EXPECT_NE( context->result, JSUCCESS );
 }
+
+GIVEN( "^A ([A-Za-z ]+) is in the primary weapon equipment slot$" )
+{
+    REGEX_PARAM( std::string, item );
+    ScenarioScope<TestCtx> context;
+
+    // Spawn the item
+    context->vec_b = g_pGame->GetPlayer()->m_vPos;
+    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item.c_str() );
+    ASSERT_NE( pid, (CItemDef *)NULL ) << "Item def not found: " << item;
+
+    CItem::CreateItem( pid, context->vec_b );
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    ASSERT_NE( pTile->m_pCurItem, (CItem *)NULL ) << "Item not spawned";
+
+    // Pick up the item
+    g_pGame->GetPlayer()->PickUp( context->vec_b );
+
+    // Equip it to primary weapon slot
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetLink( pid->m_dwIndex );
+    ASSERT_NE( pLink, (CLink<CItem> *)NULL ) << "Item not in inventory";
+    JResult res = g_pGame->GetPlayer()->Wield( pLink );
+    EXPECT_EQ( res, JSUCCESS ) << "Failed to wield " << item;
+
+    // Verify it's in primary slot
+    CItem *pEquipped =
+        g_pGame->GetPlayer()->m_llEquipment->GetLink( EQUIP_IDX_MAIN_HAND )->m_lpData;
+    EXPECT_NE( pEquipped, (CItem *)NULL ) << "Primary weapon slot is empty";
+    EXPECT_EQ( Util::jstrcmp( pEquipped->GetName(), item.c_str() ), 0 )
+        << "Expected " << item << " but got " << pEquipped->GetName();
+}
+
+GIVEN( "^A ([A-Za-z ]+) is in the secondary weapon equipment slot$" )
+{
+    REGEX_PARAM( std::string, item );
+    ScenarioScope<TestCtx> context;
+
+    // Spawn the item
+    context->vec_b = g_pGame->GetPlayer()->m_vPos;
+    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item.c_str() );
+    ASSERT_NE( pid, (CItemDef *)NULL ) << "Item def not found: " << item;
+
+    CItem::CreateItem( pid, context->vec_b );
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    ASSERT_NE( pTile->m_pCurItem, (CItem *)NULL ) << "Item not spawned";
+
+    // Pick up the item
+    g_pGame->GetPlayer()->PickUp( context->vec_b );
+
+    // Equip it to secondary main slot (EQUIP_IDX_2ND_MAIN)
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetLink( pid->m_dwIndex );
+    ASSERT_NE( pLink, (CLink<CItem> *)NULL ) << "Item not in inventory";
+
+    // Move item from inventory to secondary weapon slot directly
+    CItem *pItem = pLink->m_lpData;
+    g_pGame->GetPlayer()->m_llInventory->Remove( pLink, false );
+    pItem->m_pllLink = g_pGame->GetPlayer()->m_llEquipment->Add( pItem, EQUIP_IDX_2ND_MAIN,
+                                                                 pItem->GetInstanceId() );
+
+    // Verify it's in secondary main slot
+    CItem *pEquipped = g_pGame->GetPlayer()->m_llEquipment->GetLink( EQUIP_IDX_2ND_MAIN )->m_lpData;
+    EXPECT_NE( pEquipped, (CItem *)NULL ) << "Secondary weapon slot is empty";
+    EXPECT_EQ( Util::jstrcmp( pEquipped->GetName(), item.c_str() ), 0 )
+        << "Expected " << item << " but got " << pEquipped->GetName();
+}
+
+GIVEN( "^A ([A-Za-z ]+) is in the offhand weapon equipment slot$" )
+{
+    REGEX_PARAM( std::string, item );
+    ScenarioScope<TestCtx> context;
+
+    // Spawn the item
+    context->vec_b = g_pGame->GetPlayer()->m_vPos;
+    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item.c_str() );
+    ASSERT_NE( pid, (CItemDef *)NULL ) << "Item def not found: " << item;
+
+    CItem::CreateItem( pid, context->vec_b );
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    ASSERT_NE( pTile->m_pCurItem, (CItem *)NULL ) << "Item not spawned";
+
+    // Pick up the item
+    g_pGame->GetPlayer()->PickUp( context->vec_b );
+
+    // Move item from inventory to offhand slot directly
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetLink( pid->m_dwIndex );
+    ASSERT_NE( pLink, (CLink<CItem> *)NULL ) << "Item not in inventory";
+
+    CItem *pItem = pLink->m_lpData;
+    g_pGame->GetPlayer()->m_llInventory->Remove( pLink, false );
+    pItem->m_pllLink = g_pGame->GetPlayer()->m_llEquipment->Add( pItem, EQUIP_IDX_OFF_HAND,
+                                                                 pItem->GetInstanceId() );
+
+    // Verify it's in offhand slot
+    CItem *pEquipped = g_pGame->GetPlayer()->m_llEquipment->GetLink( EQUIP_IDX_OFF_HAND )->m_lpData;
+    EXPECT_NE( pEquipped, (CItem *)NULL ) << "Offhand weapon slot is empty";
+    EXPECT_EQ( Util::jstrcmp( pEquipped->GetName(), item.c_str() ), 0 )
+        << "Expected " << item << " but got " << pEquipped->GetName();
+}
+
+GIVEN( "^A ([A-Za-z ]+) is in the secondary offhand weapon equipment slot$" )
+{
+    REGEX_PARAM( std::string, item );
+    ScenarioScope<TestCtx> context;
+
+    // Spawn the item
+    context->vec_b = g_pGame->GetPlayer()->m_vPos;
+    CItemDef *pid = g_pGame->GetDungeon()->GetItemDef( item.c_str() );
+    ASSERT_NE( pid, (CItemDef *)NULL ) << "Item def not found: " << item;
+
+    CItem::CreateItem( pid, context->vec_b );
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( context->vec_b );
+    ASSERT_NE( pTile->m_pCurItem, (CItem *)NULL ) << "Item not spawned";
+
+    // Pick up the item
+    g_pGame->GetPlayer()->PickUp( context->vec_b );
+
+    // Move item from inventory to secondary offhand slot directly
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetLink( pid->m_dwIndex );
+    ASSERT_NE( pLink, (CLink<CItem> *)NULL ) << "Item not in inventory";
+
+    CItem *pItem = pLink->m_lpData;
+    g_pGame->GetPlayer()->m_llInventory->Remove( pLink, false );
+    pItem->m_pllLink = g_pGame->GetPlayer()->m_llEquipment->Add( pItem, EQUIP_IDX_2ND_OFF,
+                                                                 pItem->GetInstanceId() );
+
+    // Verify it's in secondary offhand slot
+    CItem *pEquipped = g_pGame->GetPlayer()->m_llEquipment->GetLink( EQUIP_IDX_2ND_OFF )->m_lpData;
+    EXPECT_NE( pEquipped, (CItem *)NULL ) << "Secondary offhand weapon slot is empty";
+    EXPECT_EQ( Util::jstrcmp( pEquipped->GetName(), item.c_str() ), 0 )
+        << "Expected " << item << " but got " << pEquipped->GetName();
+}
+
+WHEN( "^the player swaps weapons$" ) { g_pGame->GetPlayer()->XchangeWeapons(); }
+
+THEN( "^A ([A-Za-z ]+) should be in the primary weapon equipment slot$" )
+{
+    REGEX_PARAM( std::string, item );
+
+    CItem *pEquipped =
+        g_pGame->GetPlayer()->m_llEquipment->GetLink( EQUIP_IDX_MAIN_HAND )->m_lpData;
+    EXPECT_NE( pEquipped, (CItem *)NULL ) << "Primary weapon slot is empty";
+    EXPECT_EQ( Util::jstrcmp( pEquipped->GetName(), item.c_str() ), 0 )
+        << "Expected " << item << " but got " << pEquipped->GetName();
+}
+
+THEN( "^A ([A-Za-z ]+) should be in the offhand weapon equipment slot$" )
+{
+    REGEX_PARAM( std::string, item );
+
+    CItem *pEquipped = g_pGame->GetPlayer()->m_llEquipment->GetLink( EQUIP_IDX_OFF_HAND )->m_lpData;
+    EXPECT_NE( pEquipped, (CItem *)NULL ) << "Offhand weapon slot is empty";
+    EXPECT_EQ( Util::jstrcmp( pEquipped->GetName(), item.c_str() ), 0 )
+        << "Expected " << item << " but got " << pEquipped->GetName();
+}
+
+THEN( "^A ([A-Za-z ]+) should be in the secondary weapon equipment slot$" )
+{
+    REGEX_PARAM( std::string, item );
+
+    CItem *pEquipped = g_pGame->GetPlayer()->m_llEquipment->GetLink( EQUIP_IDX_2ND_MAIN )->m_lpData;
+    EXPECT_NE( pEquipped, (CItem *)NULL ) << "Secondary weapon slot is empty";
+    EXPECT_EQ( Util::jstrcmp( pEquipped->GetName(), item.c_str() ), 0 )
+        << "Expected " << item << " but got " << pEquipped->GetName();
+}
+
+THEN( "^A ([A-Za-z ]+) should be in the secondary offhand weapon equipment slot$" )
+{
+    REGEX_PARAM( std::string, item );
+
+    CItem *pEquipped = g_pGame->GetPlayer()->m_llEquipment->GetLink( EQUIP_IDX_2ND_OFF )->m_lpData;
+    EXPECT_NE( pEquipped, (CItem *)NULL ) << "Secondary offhand weapon slot is empty";
+    EXPECT_EQ( Util::jstrcmp( pEquipped->GetName(), item.c_str() ), 0 )
+        << "Expected " << item << " but got " << pEquipped->GetName();
+}

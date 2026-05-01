@@ -131,7 +131,6 @@ protected:
 
 private:
     char *m_szTombstone;
-    CScore *m_pScore;
 
     // Member Functions
 public:
@@ -151,7 +150,15 @@ private:
 
     void ResetToState( int newstate );
 
+#ifdef UNIT_TEST
+public:
+#else
+private:
+#endif
     bool DoTomb();
+    CScore *m_pScore;
+
+private:
     bool DoMap();
     bool InitScores();
     bool DoScores();

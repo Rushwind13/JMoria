@@ -40,13 +40,64 @@ Feature: Equipment
     #     And The ring is in equipment
     #     And A ring is in the second ring equipment slot
 
-    # Scenario: Primary and secondary weapon can be swapped
-    #     Given I have a Player
-    #     Given A dagger is in the primary weapon equipment slot
-    #     Given A pickaxe is in the secondary weapon equipment slot
-    #     When the player swaps weapons
-    #     Given A pickaxe is in the primary weapon equipment slot
-    #     Given A dagger is in the secondary weapon equipment slot
+    Scenario: Primary and secondary weapon can be swapped
+        Given I have a Player
+        Given A Dagger is in the primary weapon equipment slot
+        Given A Pickaxe is in the secondary weapon equipment slot
+        When the player swaps weapons
+        Given A Pickaxe is in the primary weapon equipment slot
+        Given A Dagger is in the secondary weapon equipment slot
+
+    Scenario: Main and offhand weapons can be swapped together
+        Given I have a Player
+        Given A Battle Axe is in the primary weapon equipment slot
+        Given A Steel Shield is in the offhand weapon equipment slot
+        Given A Long Sword is in the secondary weapon equipment slot
+        Given A Small Steel Shield is in the secondary offhand weapon equipment slot
+        When the player swaps weapons
+        Then A Long Sword should be in the primary weapon equipment slot
+        Then A Small Steel Shield should be in the offhand weapon equipment slot
+        Then A Battle Axe should be in the secondary weapon equipment slot
+        Then A Steel Shield should be in the secondary offhand weapon equipment slot
+
+    Scenario: Sword and shield swap with two-handed bow
+        Given I have a Player
+        Given A Long Sword is in the primary weapon equipment slot
+        Given A Steel Shield is in the offhand weapon equipment slot
+        Given A Long Bow is in the secondary weapon equipment slot
+        When the player swaps weapons
+        Then A Long Bow should be in the primary weapon equipment slot
+        Then A Long Sword should be in the secondary weapon equipment slot
+        Then A Steel Shield should be in the secondary offhand weapon equipment slot
+
+    Scenario: Sword and shield swap with one-handed dagger
+        Given I have a Player
+        Given A Long Sword is in the primary weapon equipment slot
+        Given A Steel Shield is in the offhand weapon equipment slot
+        Given A Dagger is in the secondary weapon equipment slot
+        When the player swaps weapons
+        Then A Dagger should be in the primary weapon equipment slot
+        Then A Long Sword should be in the secondary weapon equipment slot
+        Then A Steel Shield should be in the secondary offhand weapon equipment slot
+
+    Scenario: Two-handed quarterstaff swaps with two-handed bow
+        Given I have a Player
+        Given A Quarter Staff is in the primary weapon equipment slot
+        Given A Long Bow is in the secondary weapon equipment slot
+        When the player swaps weapons
+        Given A Long Bow is in the primary weapon equipment slot
+        Given A Quarter Staff is in the secondary weapon equipment slot
+
+    Scenario: Shield goes to inventory when wielding two-handed weapon
+        Given I have a Player
+        Given A Long Sword is in the primary weapon equipment slot
+        Given A Steel Shield is in the offhand weapon equipment slot
+        Given I spawn a Long Bow
+        Given the Long Bow is not cursed
+        Given the player has a Long Bow in inventory
+        When the player equips the Long Bow
+        Then The Long Bow is in equipment at 0
+        # Then The Steel Shield is in inventory at -1
 
     Scenario: Equipment can be taken off
         Given I have a Player
@@ -82,7 +133,7 @@ Feature: Equipment
         Then The Dagger is in equipment at 0
         Then The Dagger is not in inventory at -1
 
-    @skip
+    # @skip
     Scenario: Cursed Equipment can be uncursed with scroll of remove cruse
         Given I have a Player
         Given I spawn a Dagger

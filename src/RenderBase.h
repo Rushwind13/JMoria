@@ -104,11 +104,19 @@ public:
     // OpenGL: always true (fixed layout). ASCII: false (toggled by user).
     virtual bool ShouldAutoShowEquipment() const { return true; }
 
+    // Whether the monsters pane should auto-show.
+    // OpenGL: false (user toggles with v). ASCII: false (toggled by user).
+    virtual bool ShouldAutoShowMonsters() const { return false; }
+
     // Configure DisplayText region rects based on renderer's layout.
     // Called at init and on resize. Each renderer knows its own coordinate system.
     virtual void ConfigureDisplayRegions( class CDisplayText *pMsgs, class CDisplayText *pStats,
                                           class CDisplayText *pInv, class CDisplayText *pEquip,
-                                          class CDisplayText *pUse, class CDisplayText *pEndGame )
+                                          class CDisplayText *pUse, class CDisplayText *pEndGame,
+                                          class CDisplayText *pMonsters,
+                                          class CDisplayText *pMonRecall = nullptr,
+                                          class CDisplayText *pItemRecall = nullptr,
+                                          class CDisplayText *pMap = nullptr )
     {
     }
 

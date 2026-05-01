@@ -99,7 +99,9 @@ public:
         : m_lpHead( NULL ),
           m_lpTail( NULL ),
           m_iNumElements( 0 ),
-          m_bOwnsData( bOwnsData ) {}
+          m_bOwnsData( bOwnsData )
+    {
+    }
     virtual inline ~JLinkList( void ) { Terminate(); };
     CLink<T> *Add( T *pData, int dwIndex = -1, int dwInstanceId = -1, bool bAscending = true )
     {
@@ -302,6 +304,20 @@ public:
     }
 
     int length() { return m_iNumElements; }
+
+    // Swap the data pointer and instance ID between two nodes, leaving the nodes
+    // themselves in their list positions.  Use this when slot identity (m_dwIndex)
+    // must be preserved — for example, swapping equipment slot contents without
+    // disturbing slot order.  O(1).
+    void SwapData( CLink<T> *pA, CLink<T> *pB )
+    {
+        T *tmpData = pA->m_lpData;
+        int tmpInstanceId = pA->m_dwInstanceId;
+        pA->m_lpData = pB->m_lpData;
+        pA->m_dwInstanceId = pB->m_dwInstanceId;
+        pB->m_lpData = tmpData;
+        pB->m_dwInstanceId = tmpInstanceId;
+    }
 
     void Terminate()
     {

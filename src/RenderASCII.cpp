@@ -30,11 +30,20 @@ ASCIILayout ASCIILayout::CreateForSize( int w, int h )
     l.messages = { 0, 0, w, msgH };
     l.endgame = { 0, 0, w, h };
 
-    // Stats panel (always on left)
+    // Stats panel (always on left), clipped to leave room for monsters pane
     int statsRight = STATS_WIDTH;
     if( statsRight > w / 3 )
         statsRight = w / 3; // don't take more than 1/3
-    l.stats = { 0, bodyTop, statsRight, bodyBottom };
+
+    // Monsters pane: 10 rows tall at the bottom of the left sidebar
+    int monstersBottom = bodyBottom;
+    int monstersTop = monstersBottom - MONSTERS_HEIGHT;
+    if( monstersTop < bodyTop )
+        monstersTop = bodyTop;
+    l.monsters = { 0, monstersTop, statsRight, monstersBottom };
+
+    // Stats occupies the left column above the monsters pane
+    l.stats = { 0, bodyTop, statsRight, monstersTop };
 
     // Inventory/equipment panel (right side, only when wide enough)
     int invLeft = w;
@@ -64,6 +73,15 @@ ASCIILayout ASCIILayout::CreateForSize( int w, int h )
     int useLeft = w / 4;
     int useRight = 3 * w / 4;
     l.use = { useLeft, bodyTop, useRight, bodyBottom };
+
+    // Bottom panels: 3 panels to the right of the existing Visible Monsters panel
+    // They should have the same height as monsters panel (which is monstersTop to monstersBottom)
+    int panelLeft = statsRight;
+    int panelWidth = ( w - statsRight ) / 3;
+    l.monRecall = { panelLeft, monstersTop, panelLeft + panelWidth, monstersBottom };
+    l.itemRecall = { panelLeft + panelWidth, monstersTop, panelLeft + 2 * panelWidth,
+                     monstersBottom };
+    l.map = { panelLeft + 2 * panelWidth, monstersTop, w, monstersBottom };
 
     return l;
 }
@@ -116,7 +134,9 @@ bool CRenderASCII::CheckResize()
 
 void CRenderASCII::ConfigureDisplayRegions( CDisplayText *pMsgs, CDisplayText *pStats,
                                             CDisplayText *pInv, CDisplayText *pEquip,
-                                            CDisplayText *pUse, CDisplayText *pEndGame )
+                                            CDisplayText *pUse, CDisplayText *pEndGame,
+                                            CDisplayText *pMonsters, CDisplayText *pMonRecall,
+                                            CDisplayText *pItemRecall, CDisplayText *pMap )
 {
     auto toPixelRect = []( const ASCIILayoutRegion &r )
     { return JRect( r.left * 6, r.top * 8, r.right * 6, r.bottom * 8 ); };
@@ -128,6 +148,11 @@ void CRenderASCII::ConfigureDisplayRegions( CDisplayText *pMsgs, CDisplayText *p
     pUse->SetRect( toPixelRect( m_layout.use ) );
     pEndGame->SetRect( toPixelRect( m_layout.endgame ) );
     pEndGame->SetContentMargin( 0, 0 );
+    pMonsters->SetRect( toPixelRect( m_layout.monsters ) );
+
+    pMonRecall->SetRect( toPixelRect( m_layout.monRecall ) );
+    pItemRecall->SetRect( toPixelRect( m_layout.itemRecall ) );
+    pMap->SetRect( toPixelRect( m_layout.map ) );
 }
 
 bool CRenderASCII::PollEvent( JInputEvent &event )
@@ -204,6 +229,14 @@ bool CRenderASCII::PollEvent( JInputEvent &event )
         case '*': // Shift+8: target command
             event.keysym.sym = JKEY_8;
             event.keysym.mod = JMOD_SHIFT;
+            break;
+        case '(': // Shift+9: item recall
+            event.keysym.sym = (JKeycode)'(';
+            event.keysym.mod = JMOD_NONE;
+            break;
+        case ')': // Shift+0: map overview
+            event.keysym.sym = (JKeycode)')';
+            event.keysym.mod = JMOD_NONE;
             break;
         case KEY_BACKSPACE:
         case 127: // DEL on some terminals
@@ -410,6 +443,12 @@ int CRenderASCII::GetColorPair( JColor color, attr_t &outAttr )
     int pair = Nearest16( r, g, b, bold );
     if( bold )
         outAttr = A_BOLD;
+
+    // Dark foreground colours are barely visible on a black terminal background.
+    // Apply A_BOLD so the terminal renders the bright variant of the colour pair.
+    if( (int)r + (int)g + (int)b < 300 )
+        outAttr |= A_BOLD;
+
     return pair;
 }
 

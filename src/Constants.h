@@ -9,7 +9,7 @@
 #define __CONSTANTS_H__
 #include "Util.h"
 
-#define VERSION "0.61"
+#define VERSION "0.70"
 #define COPYRIGHT "2002-2026"
 #define AUTHOR "Jimbo S. Harris"
 
@@ -89,6 +89,13 @@
 #define CHANCE_FIND_SECRET_BUMP 20
 #define CHANCE_SEARCH_ACTIVE 25
 #define CHANCE_SEARCH_PASSIVE 5
+// Ranged attack percentages (1-100)
+#define CHANCE_ARROW_BREAK 33 // ~1 in 3 chance arrow breaks on landing
+// Ranged attack limits
+#define MAX_PROJECTILE_RANGE 20 // Maximum trajectory length for projectiles (wands, arrows, bolts)
+
+// UI / Display constants
+#define MSGS_ROWS 5 // height of the Messages pane in text rows (8px each)
 // #define DUNG_FLAG_x  0x00000080
 
 // Dungeon Flags
@@ -258,11 +265,11 @@
 #define EFFECT_FLAG_NO_COLLIDE 0x00000008
 
 #define EFFECT_FLAG_CURSE 0x00000010
-// #define EFFECT_FLAG_x 0x00000020
+#define EFFECT_FLAG_SEARCH 0x00000020
 // #define EFFECT_FLAG_x 0x00000040
 // #define EFFECT_FLAG_x 0x00000080
 
-#define NUM_EFFECT_FLAGS2 5
+#define NUM_EFFECT_FLAGS2 6
 
 // Effect Modifiers
 #define EFFECT_MOD_RESIST 0x000000001
@@ -277,10 +284,10 @@
 
 #define EFFECT_MOD_ENCHANT 0x000000100
 #define EFFECT_MOD_SUSTAIN 0x000000200
-// #define EFFECT_MOD_x 0x000000400
+#define EFFECT_MOD_MAX 0x000000400
 // #define EFFECT_MOD_x 0x000000800
 
-#define NUM_EFFECT_MODIFIERS 10
+#define NUM_EFFECT_MODIFIERS 11
 
 // Effect Types
 #define EFFECT_TYPE_HEAL 0x00000001
@@ -316,8 +323,10 @@
 #define EQUIP_IDX_LRING 9
 #define EQUIP_IDX_RRING 10
 #define EQUIP_IDX_TORCH 11
-#define EQUIP_IDX_AMMO 12
-#define EQUIP_IDX_MAX 13 // adding a new type to equipment could be tricky; avoid
+#define EQUIP_IDX_2ND_MAIN 12
+#define EQUIP_IDX_2ND_OFF 13
+#define EQUIP_IDX_AMMO 14
+#define EQUIP_IDX_MAX 15 // adding a new type to equipment could be tricky; avoid
 
 // Types of items
 // see ItemIDs
@@ -562,6 +571,7 @@ public:
         m_StringTable[i++].Init( "EFFECT_FLAG_MONSTERS", EFFECT_FLAG_MONSTERS, EFFECT_FLAG2 );
         m_StringTable[i++].Init( "EFFECT_FLAG_NO_COLLIDE", EFFECT_FLAG_NO_COLLIDE, EFFECT_FLAG2 );
         m_StringTable[i++].Init( "EFFECT_FLAG_CURSE", EFFECT_FLAG_CURSE, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG_SEARCH", EFFECT_FLAG_SEARCH, EFFECT_FLAG2 );
 
         // Effect Modifiers
         m_StringTable[i++].Init( "EFFECT_MOD_RESIST", EFFECT_MOD_RESIST );
@@ -576,6 +586,7 @@ public:
 
         m_StringTable[i++].Init( "EFFECT_MOD_ENCHANT", EFFECT_MOD_ENCHANT );
         m_StringTable[i++].Init( "EFFECT_MOD_SUSTAIN", EFFECT_MOD_SUSTAIN );
+        m_StringTable[i++].Init( "EFFECT_MOD_MAX", EFFECT_MOD_MAX );
 
         // Effect types
         m_StringTable[i++].Init( "EFFECT_TYPE_HEAL", EFFECT_TYPE_HEAL );
@@ -600,6 +611,8 @@ public:
         m_StringTable[i++].Init( "EQUIP_IDX_LRING", EQUIP_IDX_LRING );
         m_StringTable[i++].Init( "EQUIP_IDX_RRING", EQUIP_IDX_RRING );
         m_StringTable[i++].Init( "EQUIP_IDX_TORCH", EQUIP_IDX_TORCH );
+        m_StringTable[i++].Init( "EQUIP_IDX_2ND_MAIN", EQUIP_IDX_2ND_MAIN );
+        m_StringTable[i++].Init( "EQUIP_IDX_2ND_OFF", EQUIP_IDX_2ND_OFF );
         m_StringTable[i++].Init( "EQUIP_IDX_AMMO", EQUIP_IDX_AMMO );
 
         // Item Types

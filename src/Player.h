@@ -115,6 +115,7 @@ public:
           m_fDamageModifier( 0.0f ),
           m_fToHitModifier( 0.0f ),
           m_fArmorClass( 1.0f ),
+          m_fSpeed( 1.0f ),
           m_fHitPoints( 0.0f ),
           m_fLastHPTime( 0.0f ),
           m_fLastMPTime( 0.0f ),
@@ -127,6 +128,8 @@ public:
           m_bWizardMode( false ),
           m_pClass( NULL ),
           m_pTarget( NULL ),
+          m_pCurrentRangedAmmo( NULL ),
+          m_pCurrentRangedWeapon( NULL ),
           m_vRangedHitPosition( 0, 0 ),
           m_llVisibleMonsters( NULL )
     {
@@ -214,11 +217,16 @@ public:
     void DisplayStats();
     void DisplayInventory( uint8 dwPlacement, eInvFilter filter = INV_COMPLETE );
     void DisplayEquipment( uint8 dwPlacement, eInvFilter filter = INV_COMPLETE );
+    void DisplayVisibleMonsters();
+    void DisplayMonsterRecall();
+    void DisplayItemRecall();
+    void DisplayMap();
     void PickUp( JVector &vPickupPos );
     bool Drop( CItem *pItem );
     bool Drop( CItem *pItem, int quantity ); // Drop a partial stack
 
     bool CanDropHere();
+    void ConsolidateInventory(); // Auto-consolidate stacks with matching charges/identification
 
     void SetIntrinsic( const uint32 dwIntrinsic ) { m_dwIntrinsics |= dwIntrinsic; };
     void UnsetIntrinsic( const uint32 dwIntrinsic ) { m_dwIntrinsics &= ~dwIntrinsic; };
@@ -230,10 +238,13 @@ public:
     bool IsRemovable( CLink<CItem> *pLink );
     bool RemoveEquipment( CLink<CItem> *pLink );
 
+    void XchangeWeapons();
+
     bool IsDrinkable( CLink<CItem> *pLink );
     JResult Quaff( CLink<CItem> *pLink );
 
     bool IsFireable( CLink<CItem> *pLink );
+    bool IsCompatibleAmmo( CLink<CItem> *pLink );
     JResult Fire( CLink<CItem> *pLink );
 
     bool IsReadable( CLink<CItem> *pLink );
@@ -241,6 +252,11 @@ public:
 
     bool IsZappable( CLink<CItem> *pLink );
     JResult Zap( CLink<CItem> *pLink );
+
+    void
+    ConsumeItem( CLink<CItem> *pLink ); // Unified consumption for ammo/charges: decrement or remove
+    void ConsumeAndRemoveIfEmpty(
+        CLink<CItem> *pLink ); // Consume item and remove from inventory if empty
 
     bool IsCastable( CLink<CItem> *pLink );
     JResult Magic( CLink<CItem> *pLink );
@@ -259,8 +275,11 @@ public:
     JResult DoHealEffects( CEffect *pEffect );
     JResult DoHealHP( CEffect *pEffect );
     JResult DoHitEffects( CEffect *pEffect );
+    JResult DoPhysicalHit( CEffect *pEffect );
     JResult DoLightRay( CEffect *pEffect );
     JResult DoElementalHit( CEffect *pEffect );
+    JResult DoDamageInventory( uint32 dwElement );
+    JResult DoDamageEquipment( uint32 dwElement );
     JResult DoCreateEffects( CEffect *pEffect );
     JResult DoLightArea();
     JResult DoDestroyEffects( CEffect *pEffect, int dwFlags );
@@ -301,13 +320,14 @@ public:
     }
 
     float Attack();
+    float RangedAttack( CLink<CItem> *pArrow );
     float Damage( float fDamageMult );
 
     bool Hit( float &fRoll );
     int TakeDamage( float fDamage, const char *szMon, uint32 dwElement = 0 );
     float Resist( uint32 dwElement );
 
-    void OnKillMonster( CMonster *pMon );
+    void OnKillMonster( CMonster *pMon, float fKillingBlow );
     bool DamageMonster( CMonster *pMon, float fDamage );
 
     void SetWizard();
@@ -327,6 +347,9 @@ public:
     char *m_szDamage;
     float m_fDamageModifier;
     float m_fToHitModifier;
+    float m_fSpeed;              // action economy: 1.0 = base (10), 2.0 = fast (20), 0.8 = slow (8)
+    CItem *m_pCurrentRangedAmmo; // Current arrow/bolt being fired, for to-hit calculation
+    CItem *m_pCurrentRangedWeapon; // Current bow/wand being used, for range calculation
 
     char *m_szKilledBy;
 
@@ -337,6 +360,7 @@ public:
 
     bool HasPendingIdentify() { return m_bPendingIdentify; }
     void ClearPendingIdentify() { m_bPendingIdentify = false; }
+    float GetSpeed() { return m_fSpeed; }
 
 protected:
     void GainLevel();

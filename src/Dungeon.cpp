@@ -11,6 +11,8 @@
 #include "Player.h"
 #include "RenderBase.h"
 
+extern unsigned char ItemIDs[];
+
 unsigned char TileIDs[DUNG_IDX_MAX + 1] = ".#+'<<>>:#@";
 int ModifiedTileTypes[DUNG_IDX_MAX + 1] = {
     DUNG_IDX_INVALID,   // 0  FLOOR: can't modify
@@ -87,7 +89,11 @@ void CDungeon::Init( const char *szBasedir )
     CDataFile dfEffects;
     char szEffectFilename[256];
     sprintf( szEffectFilename, "%s%s", szBasedir, "Resources/Effects.txt" );
-    dfEffects.Open( szEffectFilename );
+    if( !dfEffects.Open( szEffectFilename ) )
+    {
+        JLog( LOG_LEVEL_ERROR, true, "FATAL: Cannot open Effects.txt at: %s\n", szEffectFilename );
+        exit( 1 );
+    }
 
     ped = new CEffectDef;
     while( dfEffects.ReadEffect( *ped ) )
@@ -105,7 +111,11 @@ void CDungeon::Init( const char *szBasedir )
     CDataFile dfMonsters;
     char szMonsterFile[256];
     sprintf( szMonsterFile, "%s%s", szBasedir, "Resources/Monsters.txt" );
-    dfMonsters.Open( szMonsterFile );
+    if( !dfMonsters.Open( szMonsterFile ) )
+    {
+        JLog( LOG_LEVEL_ERROR, true, "FATAL: Cannot open Monsters.txt at: %s\n", szMonsterFile );
+        exit( 1 );
+    }
     dfMonsters.SetDungeon( this );
 
     pmd = new CMonsterDef;
@@ -125,7 +135,11 @@ void CDungeon::Init( const char *szBasedir )
     CDataFile dfItems;
     char szItemFilename[256];
     sprintf( szItemFilename, "%s%s", szBasedir, "Resources/Items.txt" );
-    dfItems.Open( szItemFilename );
+    if( !dfItems.Open( szItemFilename ) )
+    {
+        JLog( LOG_LEVEL_ERROR, true, "FATAL: Cannot open Items.txt at: %s\n", szItemFilename );
+        exit( 1 );
+    }
     dfItems.SetDungeon( this );
 
     pid = new CItemDef;
@@ -228,6 +242,10 @@ void CDungeon::PopulateLevel( const int depth )
         m_llMonsters = new JLinkList<CMonster>;
     }
 
+    // Instance IDs from the previous level are no longer valid
+    if( g_pGame->RecallMonster() )
+        g_pGame->RecallMonster()->ResetLevelSightings();
+
     // Spawn the player last — they arrive on a fully populated level
     g_pGame->GetPlayer()->m_bHasSpawned = false;
     g_pGame->GetPlayer()->SpawnPlayer();
@@ -319,7 +337,6 @@ char *CDungeon::DumpMap()
 {
     extern unsigned char TileIDs[];
     extern unsigned char MonIDs[];
-    extern unsigned char ItemIDs[];
 
     // Build the full map into a temporary buffer
     char map[DUNG_HEIGHT][DUNG_WIDTH + 1];
@@ -884,10 +901,36 @@ void CDungeon::LightRoom( CRoom *pRoom )
     {
         for( vCurPos.x = rcRoom.left; vCurPos.x <= rcRoom.right; vCurPos.x++ )
         {
-            GetTile( vCurPos )->SetFlags( DUNG_FLAG_SEEN );
+            GetTile( vCurPos )->SetFlags( DUNG_FLAG_LIT | DUNG_FLAG_SEEN );
         }
     }
     pRoom->SetFlags( DUNG_FLAG_SEEN );
+}
+
+void CDungeon::LightPosition( const JVector &vPos )
+{
+    // If the beam crosses a room tile, light the whole room.
+    CRoom *pRoom = InRoom( const_cast<JVector &>( vPos ) );
+    if( pRoom )
+    {
+        pRoom->SetFlags( DUNG_FLAG_LIT );
+        LightRoom( pRoom );
+        return;
+    }
+    // Otherwise (hallway / open area): light the tile itself and all 8 neighbours
+    // so that adjacent walls become visible.
+    JVector vNeighbour;
+    for( int dy = -1; dy <= 1; dy++ )
+    {
+        for( int dx = -1; dx <= 1; dx++ )
+        {
+            vNeighbour.x = vPos.x + dx;
+            vNeighbour.y = vPos.y + dy;
+            CDungeonTile *pTile = GetTile( vNeighbour );
+            if( pTile )
+                pTile->SetFlags( DUNG_FLAG_LIT | DUNG_FLAG_SEEN );
+        }
+    }
 }
 
 bool SightCollisionTest( JVector &vTest );
@@ -943,12 +986,15 @@ void CDungeon::UpdateVisibility()
             int dy = Util::abs( viCheck.y - vPlayer.y );
             int chebyshev = MAX( dx, dy );
 
-            // Tiles beyond base sight range need to be in a lit room to be visible
+            // Tiles beyond base sight range need to be in a lit room, or be
+            // individually lit (e.g. by a Wand of Light beam), to be visible
             if( chebyshev > SIGHT_DISTANCE_PLAYER )
             {
                 JVector vCheckF( viCheck.x, viCheck.y );
                 CRoom *pTargetRoom = InRoom( vCheckF );
-                if( !pTargetRoom || !pTargetRoom->HasFlags( DUNG_FLAG_LIT ) )
+                bool inLitRoom = pTargetRoom && pTargetRoom->HasFlags( DUNG_FLAG_LIT );
+                bool isLitTile = ( pTile->m_dwFlags & DUNG_FLAG_LIT ) != 0;
+                if( !inLitRoom && !isLitTile )
                     continue;
             }
 
@@ -1034,10 +1080,10 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
 
     // check for "in visible range" before doing the
     // more expensive line-of-sight test
-    // If target is in a lit room, use extended sight distance
-    // (player can see into lit rooms from down the hall through doorways)
+    // Extended sight distance only applies within the same room.
+    // Different rooms must pass line-of-sight check even if both are lit.
     int sight_distance = SIGHT_DISTANCE_PLAYER;
-    if( prTarget && prTarget->HasFlags( DUNG_FLAG_LIT ) )
+    if( prSource && prTarget && prSource == prTarget && prSource->HasFlags( DUNG_FLAG_LIT ) )
         sight_distance = SIGHT_DISTANCE_LIT;
 
     if( !Util::Nearby( vSource, sight_distance ).Contains( vTarget ) )
@@ -1182,38 +1228,89 @@ void CDungeon::DrawDungeon()
             bool isVisible = ( curTile->m_dwFlags & DUNG_FLAG_VISIBLE ) != 0;
 
             // Determine tile color based on game state
+            bool bRangedBeamTile = false;
             if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
             {
                 color = JColor( 100, 0, 100, 255 );
             }
-            else if( g_pGame->GetGameStateIndex() == STATE_RANGED && vScreen == vProjectile )
+            else if( g_pGame->GetGameStateIndex() == STATE_RANGED )
             {
-                color = JColor( 255, 255, 85, 255 );
+                // Set default color for projectiles (white)
+                color = JColor( 255, 255, 255, 255 );
+
+                if( m_llProjectileTrajectory )
+                {
+                    // Check if vScreen is on the trajectory path
+                    int pathIndex = 0;
+                    CLink<JIVector> *plPos = m_llProjectileTrajectory->GetHead();
+                    while( plPos && pathIndex <= m_dwProjectileColorIndex )
+                    {
+                        JIVector curPos = *( plPos->m_lpData );
+                        if( (int)vScreen.x == curPos.x && (int)vScreen.y == curPos.y )
+                        {
+                            // On trajectory - use effect colors if available
+                            if( m_pProjectileEffect )
+                            {
+                                bRangedBeamTile =
+                                    m_pProjectileEffect->m_cBeamChar != ItemIDs[ITEM_IDX_ARROW];
+                                // Get color from effect definition, cycling through colors
+                                if( m_pProjectileEffect->m_llColors &&
+                                    m_pProjectileEffect->m_llColors->length() > 0 )
+                                {
+                                    int colorIndex =
+                                        pathIndex % m_pProjectileEffect->m_llColors->length();
+                                    CLink<JColor> *plColor =
+                                        m_pProjectileEffect->m_llColors->GetNthLink( colorIndex );
+                                    if( plColor )
+                                    {
+                                        color = *( plColor->m_lpData );
+                                    }
+                                }
+                            }
+                            break;
+                        }
+                        plPos = plPos->next;
+                        pathIndex++;
+                    }
+                }
             }
-            else if( IsOnLOSLine( vScreen ) )
+
+            if( !bRangedBeamTile )
             {
-                color = JColor( 85, 255, 255, 255 );
-            }
-            else if( g_pGame->GetGameStateIndex() == STATE_CLOCKSTEP ||
-                     g_pGame->GetPlayer()->IsWizard() )
-            {
-                color = curTile->m_dtd->m_Color;
-            }
-            else if( !isVisible )
-            {
-                // Fog of War: seen but not currently visible — dim grey
-                color = JColor( 60, 60, 80, 255 );
-            }
-            else if( IsLit( vScreen ) )
-            {
-                color = JColor( 200, 200, 0, 255 );
-            }
-            else
-            {
-                color = curTile->m_dtd->m_Color;
+                // Normal tile coloring logic (for non-beam tiles or when no multicolor effect)
+                if( g_pGame->GetGameStateIndex() == STATE_RANGED && vScreen == vProjectile )
+                {
+                    color = JColor( 255, 255, 85, 255 );
+                    bRangedBeamTile = true; // Draw beam character at current projectile position
+                }
+                else if( IsOnLOSLine( vScreen ) )
+                {
+                    color = JColor( 85, 255, 255, 255 );
+                }
+                else if( g_pGame->GetGameStateIndex() == STATE_CLOCKSTEP ||
+                         g_pGame->GetPlayer()->IsWizard() )
+                {
+                    color = curTile->m_dtd->m_Color;
+                }
+                else if( !isVisible )
+                {
+                    // Fog of War: seen but not currently visible — dim grey
+                    color = JColor( 60, 60, 80, 255 );
+                }
+                else if( IsLit( vScreen ) )
+                {
+                    color = JColor( 200, 200, 0, 255 );
+                }
+                else
+                {
+                    color = curTile->m_dtd->m_Color;
+                }
             }
             m_TileSet->SetTileColor( color );
-            m_TileSet->DrawChar( curTile->m_dtd->m_chTile, vScreen, vSize );
+            char chDraw = ( bRangedBeamTile && m_pProjectileEffect )
+                              ? m_pProjectileEffect->m_cBeamChar
+                              : curTile->m_dtd->m_chTile;
+            m_TileSet->DrawChar( chDraw, vScreen, vSize );
         }
     }
 }
@@ -1627,12 +1724,31 @@ CItem *CDungeon::PickUp( JVector &vPickupPos )
 
 void CDungeon::Drop( CItem *pItem, JVector &vDropPos )
 {
+    JLog( LOG_LEVEL_WARN, true, "CDungeon::Drop called - pItem=%p, type=%s, count=%d at <%f %f>\n",
+          pItem, pItem ? pItem->GetName() : "NULL", pItem ? pItem->m_dwCount : 0,
+          VEC_EXPAND( vDropPos ) );
+
     JVector vFinalPos = vDropPos;
 
-    // If the drop position already has an item, try adjacent tiles
-    if( GetTile( vDropPos )->m_pCurItem != NULL )
+    // Check if we can stack with an existing item of the same type
+    CDungeonTile *pTargetTile = GetTile( vDropPos );
+    if( pTargetTile && pTargetTile->m_pCurItem != NULL )
     {
+        CItem *pExisting = pTargetTile->m_pCurItem;
+        // If same item type and stackable, increment count and discard the new item
+        if( pExisting->m_id->m_dwIndex == pItem->m_id->m_dwIndex && pItem->IsStackable() )
+        {
+            pExisting->m_dwCount += pItem->m_dwCount;
+            JLog( LOG_LEVEL_DEBUG, true, "Stacked item; new count: %d\n", pExisting->m_dwCount );
+            delete pItem; // Discard the new item; existing one now has all counts
+            JLog( LOG_LEVEL_DEBUG, true, ">>Drop: Stacking, returning early\n" );
+            return;
+        }
+
+        // Different item type or non-stackable; find an adjacent empty tile
         bool bFoundSpot = false;
+        JLog( LOG_LEVEL_DEBUG, true,
+              ">>Drop: Different item or non-stackable, searching adjacent tiles\n" );
 
         // Use Util::Nearby to get all adjacent tiles
         JRect rcNearby = Util::Nearby( JIVector( (int)vDropPos.x, (int)vDropPos.y ), 1 );
@@ -1654,19 +1770,24 @@ void CDungeon::Drop( CItem *pItem, JVector &vDropPos )
                 {
                     vFinalPos = vTry;
                     bFoundSpot = true;
+                    JLog( LOG_LEVEL_DEBUG, true, ">>Drop: Found adjacent spot at <%f %f>\n",
+                          vFinalPos.x, vFinalPos.y );
                 }
             }
         }
 
         if( !bFoundSpot )
         {
-            // No adjacent spot found; cannot drop here
-            g_pGame->GetMsgs()->Printf( "There is no room to drop the item here.\n" );
-            // Item stays in caller's possession; don't add to dungeon
+            // No adjacent spot found; cannot drop here - item disappears
+            JLog( LOG_LEVEL_DEBUG, true, ">>Drop: No adjacent spot found, item disappears\n" );
+            g_pGame->GetMsgs()->Printf( "The %s disappears.\n", pItem->GetName() );
+            delete pItem;
             return;
         }
     }
 
+    JLog( LOG_LEVEL_DEBUG, true, ">>Drop: Adding to m_llItems at <%f %f>\n", vFinalPos.x,
+          vFinalPos.y );
     GetTile( vFinalPos )->m_pCurItem = pItem;
     pItem->m_vPos = vFinalPos;
     pItem->m_pllLink = m_llItems->Add( pItem, pItem->m_id->m_dwIndex, pItem->GetInstanceId() );

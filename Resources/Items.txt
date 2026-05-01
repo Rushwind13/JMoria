@@ -312,35 +312,41 @@ Item <Short Bow>
     Type        <ITEM_IDX_BOW>
     Value       120.0
     Flags       <ITEM_FLAG_NEEDSAMMO>
+    Range       <3-8>
     Level       3
-    Damage      <1d5>
-    Weight      3.0
-    Speed       4.0
-    Color       <150,100,50,255>
-}
-Item <Short Bow>
-{
-    Plural      <Short Bows>
-    Type        <ITEM_IDX_BOW>
-    Value       120.0
-    Flags       <ITEM_FLAG_NEEDSAMMO>
-    Level       3
-    Damage      <1d5>
+    Damage      <1d2>
     Weight      3.0
     Speed       4.0
     Color       <150,100,50,255>
 }
 Item <Long Bow>
 {
-    Plural        <Long Bows>
-    Type        <ITEM_IDX_BOW>
+    Plural       <Long Bows>
+    Type         <ITEM_IDX_BOW>
     Value        250.0
-    Flags       <ITEM_FLAG_NEEDSAMMO>
+    Flags        <ITEM_FLAG_NEEDSAMMO>
+    Range        <4-12>
     Level        20
-    Damage       <1d8>
+    Damage       <1d2>
     Weight       10.0
     Speed        6.0
     Color        <200,200,200,255>
+}
+
+# --- Arrows ---
+
+Item <Flight Arrow>
+{
+    Plural      <Flight Arrows>
+    Type        <ITEM_IDX_ARROW>
+    Value       5.0
+    Flags       <ITEM_FLAG_STACKS>
+    Level       1
+    Damage      <1d8>
+    Weight      0.1
+    Speed       0.0
+    Color       <200,200,200,255>
+    Effect      <Arrow Shot>
 }
 
 # --- Tools (Shovels / Pickaxes) ---
@@ -600,6 +606,19 @@ AC          4.0
 Weight      2.0
 Color        <225,225,50,255>
 }
+Item <Gloves of Elvenkind>
+{
+Plural      <Pairs of Gloves of Elvenkind>
+Type        <ITEM_IDX_GLOVES>
+Effect      <Speed>
+Speed       1.0
+Value       4000.0
+Level       44
+AC          2.0
+Weight      1.0
+Color       <150,255,150,255>
+Flags       <ITEM_FLAG_MAGIC>
+}
 
 # --- Boots ---
 
@@ -628,6 +647,7 @@ Item <Boots of Speed>
 Plural      <Pairs of Boots of Speed>
 Type        <ITEM_IDX_BOOTS>
 Effect      <Speed>
+Speed       1.0
 Value       5000.0
 Level       48
 AC          2.0
@@ -1408,7 +1428,6 @@ Item <Wand of Light>
 Plural      <Wands of Light>
 Type        <ITEM_IDX_WAND>
 Effect      <Light Ray>
-Effect      <Light Area>
 Charges     <3d8>
 Value       100.0
 Level       3

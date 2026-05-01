@@ -2,6 +2,7 @@
 #include "DisplayText.h"
 #include "Dungeon.h"
 #include "Game.h"
+#include "MonsterRecall.h"
 static uint32 s_nextMonsterInstanceId = 1;
 
 CMonster::CMonster()
@@ -34,6 +35,10 @@ void CMonster::Init( CMonsterDef *pmd )
     if( pmd->m_fBaseHP != 0.0f )
     {
         m_fHP = pmd->m_fBaseHP;
+    }
+    else if( pmd->m_dwFlags & MON_FLAG_MAXHP )
+    {
+        m_fHP = Util::RollMax( pmd->m_szHD );
     }
     else
     {
@@ -266,10 +271,25 @@ const char *CMonster::AttackFlavorText()
 
 float CMonster::Damage( float fDamageMult )
 {
+    // Breath weapons scale with the monster's current HP — the weaker the monster,
+    // the less damage its breath deals.
+    if( m_pCurrentAttack->m_dwType & MON_FLAG_BREATHE )
+    {
+        float fDamage = m_fCurHP * fDamageMult;
+        JLog( LOG_LEVEL_INFO, true,
+              "%s breathed for %.2f damage (current HP: %.2f)(damagemult: %.2f). ", GetName(),
+              fDamage, m_fCurHP, fDamageMult );
+        return fDamage;
+    }
+
     char *szDamage = m_pCurrentAttack->m_szDamage;
     float fDamageModifier = 0.0f;
 
-    float fDamage = ( Util::Roll( szDamage ) + fDamageModifier ) * fDamageMult;
+    bool bMaxRoll = ( m_pCurrentAttack->m_pEffect != NULL &&
+                      ( m_pCurrentAttack->m_pEffect->m_dwModifier & EFFECT_MOD_MAX ) );
+    float fDamage =
+        ( ( bMaxRoll ? Util::RollMax( szDamage ) : Util::Roll( szDamage ) ) + fDamageModifier ) *
+        fDamageMult;
     JLog( LOG_LEVEL_INFO, true, "%s did %.2f damage (rolled %s)(damagemult: %.2f). ", GetName(),
           fDamage, szDamage, fDamageMult );
 
@@ -318,6 +338,12 @@ void CMonster::Breed()
             // Spawn a new copy
             JIVector vSpawn( VEC_EXPAND( GetPos() ) );
             CreateMonster( m_md, vSpawn, true );
+            // Record breeding only if the spawn point is visible to the player
+            JVector vSpawnF( (float)vSpawn.x, (float)vSpawn.y );
+            uint32 dwSenseFlags = m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND );
+            if( g_pGame->RecallMonster() && m_md &&
+                g_pGame->GetDungeon()->PlayerCanSee( vSpawnF, dwSenseFlags ) )
+                g_pGame->RecallMonster()->RecordObservation( m_md->m_szName, MON_FLAG_BREED );
         }
         JLog( LOG_LEVEL_NOISE, false, "\n" );
         m_dwFecundity--;

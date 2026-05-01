@@ -7,8 +7,10 @@
 #include "Dungeon.h"
 #include "Game.h"
 #include "JLinkList.h"
+#include "MonsterRecall.h"
 #include "StateBase.h"
 #include "TileSet.h"
+#include <cmath>
 
 extern CGame *g_pGame;
 
@@ -74,6 +76,10 @@ bool CPlayer::Update( float fCurTime )
     DisplayStats();
     DisplayInventory( PLACEMENT_INV );
     DisplayEquipment( PLACEMENT_EQUIP );
+    DisplayVisibleMonsters();
+    DisplayMonsterRecall();
+    DisplayItemRecall();
+    DisplayMap();
     return true;
 }
 
@@ -254,6 +260,14 @@ void CPlayer::DisplayStats()
     g_pGame->GetStats()->Printf( "Damage: %s\n", m_szDamage );
     g_pGame->GetStats()->Printf( "+to Hit: %d\n", (int)m_fToHitModifier );
     g_pGame->GetStats()->Printf( "+to Dam: %d\n", (int)m_fDamageModifier );
+    {
+        // Speed display: hidden at base (1.0); show Fast(+N) or Slow(-N) as integer offset from 10
+        int nSpeedOffset = (int)roundf( m_fSpeed * 10.0f ) - 10;
+        if( nSpeedOffset > 0 )
+            g_pGame->GetStats()->Printf( "Speed: Fast(+%d)\n", nSpeedOffset );
+        else if( nSpeedOffset < 0 )
+            g_pGame->GetStats()->Printf( "Speed: Slow(%d)\n", nSpeedOffset );
+    }
     g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "\n" );
     g_pGame->GetStats()->Printf( "Level: %d\n", (int)m_fLevel );
@@ -339,6 +353,9 @@ void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
     case INV_ZAP:
         sprintf( meta.header, "Zap which wand?\n" );
         break;
+    case INV_FIRE:
+        sprintf( meta.header, "Fire which ammo?\n" );
+        break;
     default:
         sprintf( meta.header, "You are Carrying:\n" );
         break;
@@ -370,6 +387,9 @@ void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
             break;
         case INV_ZAP:
             show = IsZappable( pLink );
+            break;
+        case INV_FIRE:
+            show = IsCompatibleAmmo( pLink );
             break;
         default:
             show = true;
@@ -465,6 +485,99 @@ void CPlayer::DisplayEquipment( uint8 dwPlacement, eInvFilter filter )
     }
 }
 
+void CPlayer::DisplayVisibleMonsters()
+{
+    if( !g_pGame->IsShowingMonsters() )
+        return;
+
+    CDisplayText *pDT = g_pGame->GetMonsters();
+    pDT->Clear();
+    pDT->Printf( "Visible monsters:\n" );
+
+    JLinkList<CMonster> *pList = GetVisibleMonsters();
+
+    // First pass: count each monster type (m_md->m_dwIndex = type slot)
+    int counts[MON_IDX_MAX] = {};
+    CLink<CMonster> *pLink = pList->GetHead();
+    while( pLink != NULL )
+    {
+        CMonster *pMon = pLink->m_lpData;
+        if( pMon && pMon->m_md && pMon->m_md->m_dwIndex >= 0 &&
+            pMon->m_md->m_dwIndex < MON_IDX_MAX )
+        {
+            counts[pMon->m_md->m_dwIndex]++;
+        }
+        pLink = pLink->next;
+    }
+
+    // Second pass: list is sorted by distance (ascending), so the first
+    // occurrence of each type is the closest one — use that ordering.
+    bool seen[MON_IDX_MAX] = {};
+    pLink = pList->GetHead();
+    while( pLink != NULL )
+    {
+        CMonster *pMon = pLink->m_lpData;
+        if( pMon && pMon->m_md && pMon->m_md->m_dwIndex >= 0 &&
+            pMon->m_md->m_dwIndex < MON_IDX_MAX )
+        {
+            int idx = pMon->m_md->m_dwIndex;
+            if( !seen[idx] )
+            {
+                seen[idx] = true;
+                if( counts[idx] > 1 )
+                    pDT->Printf( "%s (%d)\n", pMon->GetName(), counts[idx] );
+                else
+                    pDT->Printf( "%s\n", pMon->GetName() );
+            }
+        }
+        pLink = pLink->next;
+    }
+}
+
+void CPlayer::DisplayMonsterRecall()
+{
+    if( !g_pGame->IsShowingMonsterRecall() )
+        return;
+
+    CDisplayText *pDT = g_pGame->GetMonsterRecall();
+    pDT->Clear();
+
+    // Display recall info for the currently targeted monster
+    CMonster *pMon = GetTarget();
+    if( pMon && pMon->m_md )
+    {
+        g_pGame->RecallMonster()->PrintRecall( pMon->m_md, pDT );
+    }
+    else
+    {
+        pDT->Printf( "No current target.\n" );
+    }
+}
+
+void CPlayer::DisplayItemRecall()
+{
+    if( !g_pGame->IsShowingItemRecall() )
+        return;
+
+    CDisplayText *pDT = g_pGame->GetItemRecall();
+    pDT->Clear();
+
+    // TODO: Display item recall information
+    pDT->Printf( "[Item Recall]\n" );
+    pDT->Printf( "Not yet implemented\n" );
+}
+
+void CPlayer::DisplayMap()
+{
+    if( !g_pGame->IsShowingMap() )
+        return;
+
+    CDisplayText *pDT = g_pGame->GetMap();
+    pDT->Clear();
+    pDT->Printf( "[Map]\n" );
+    pDT->Printf( "Not yet implemented\n" );
+}
+
 void CPlayer::PickUp( JVector &vPickupPos )
 {
     CItem *pItem = g_pGame->GetDungeon()->PickUp( vPickupPos );
@@ -476,11 +589,27 @@ void CPlayer::PickUp( JVector &vPickupPos )
             while( pExists != NULL )
             {
                 // we have an item of that type in inventory -- is it the correct item?
-                if( Util::jstrcmp( pExists->m_lpData->GetName(), pItem->GetName() ) == 0 )
+                CItem *pExisting = pExists->m_lpData;
+
+                // Stack only if: name matches, identification status matches, and charges match (if
+                // applicable)
+                bool nameMatches = ( Util::jstrcmp( pExisting->GetName(), pItem->GetName() ) == 0 );
+                bool identStatusMatches = ( ( pExisting->m_dwFlags & ITEM_FLAG_IDENTIFIED ) ==
+                                            ( pItem->m_dwFlags & ITEM_FLAG_IDENTIFIED ) );
+
+                // For wands/staffs (charged items), also check charge count
+                bool chargesMatch = true;
+                if( pItem->m_id->m_dwIndex == ITEM_IDX_WAND ||
+                    pItem->m_id->m_dwIndex == ITEM_IDX_STAFF )
                 {
-                    pExists->m_lpData->m_dwCount++;
-                    g_pGame->GetMsgs()->Printf( "You have %d %s.\n", pExists->m_lpData->m_dwCount,
-                                                pExists->m_lpData->GetPlural() );
+                    chargesMatch = ( pExisting->m_dwCharges == pItem->m_dwCharges );
+                }
+
+                if( nameMatches && identStatusMatches && chargesMatch )
+                {
+                    pExisting->m_dwCount++;
+                    g_pGame->GetMsgs()->Printf( "You have %d %s.\n", pExisting->m_dwCount,
+                                                pExisting->GetPlural() );
 
                     g_pGame->GetDungeon()->GetTile( vPickupPos )->m_pCurItem = NULL;
                     return;
@@ -498,7 +627,13 @@ void CPlayer::PickUp( JVector &vPickupPos )
 
 bool CPlayer::IsWieldable( CLink<CItem> *pLink )
 {
-    return ( pLink->m_lpData->EquipType() != EQUIP_IDX_INVALID );
+    CItem *pItem = pLink->m_lpData;
+    if( pItem == NULL )
+        return false;
+    // Exclude ammo items (arrows, bolts) from wield list
+    if( pItem->m_id->m_dwIndex == ITEM_IDX_ARROW || pItem->m_id->m_dwIndex == ITEM_IDX_BOLT )
+        return false;
+    return ( pItem->EquipType() != EQUIP_IDX_INVALID );
 }
 
 JResult CPlayer::Wield( CLink<CItem> *pLink )
@@ -591,6 +726,7 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
         Util::jstrcpy( m_szDamage, pItem->m_id->m_szBaseDamage );
     m_fDamageModifier += pItem->m_fBonusToDamage;
     m_fToHitModifier += pItem->m_fBonusToHit;
+    m_fSpeed += pItem->m_fSpeedBonus;
 
     // Defensive: if this is a two-handed weapon, ensure off-hand is clear.
     if( pItem->m_id && ( pItem->m_id->m_dwFlags & ITEM_FLAG_2HANDED ) )
@@ -654,8 +790,83 @@ bool CPlayer::RemoveEquipment( CLink<CItem> *pLink )
         Util::jstrcpy( m_szDamage, PLAYER_BASE_DAMAGE );
     m_fDamageModifier -= pItem->m_fBonusToDamage;
     m_fToHitModifier -= pItem->m_fBonusToHit;
+    m_fSpeed -= pItem->m_fSpeedBonus;
 
     return true;
+}
+
+void CPlayer::XchangeWeapons()
+{
+    // Look up the four equipment slot nodes
+    CLink<CItem> *pMainHand = m_llEquipment->GetLink( EQUIP_IDX_MAIN_HAND );
+    CLink<CItem> *pOffHand = m_llEquipment->GetLink( EQUIP_IDX_OFF_HAND );
+    CLink<CItem> *p2ndMain = m_llEquipment->GetLink( EQUIP_IDX_2ND_MAIN );
+    CLink<CItem> *p2ndOff = m_llEquipment->GetLink( EQUIP_IDX_2ND_OFF );
+
+    // If there are no secondary slots yet, create them
+    if( !p2ndMain )
+    {
+        CItem *pEmpty = NULL; // SwapData will handle null data
+        p2ndMain = m_llEquipment->Add( pEmpty, EQUIP_IDX_2ND_MAIN, -1 );
+    }
+    if( !p2ndOff )
+    {
+        CItem *pEmpty = NULL;
+        p2ndOff = m_llEquipment->Add( pEmpty, EQUIP_IDX_2ND_OFF, -1 );
+    }
+
+    // Swap the main and secondary weapon sets
+    m_llEquipment->SwapData( pMainHand, p2ndMain );
+    m_llEquipment->SwapData( pOffHand, p2ndOff );
+
+    // Recalculate all combat stats from scratch
+    // Start with base values
+    m_fArmorClass = 10.0f; // Base AC
+    Util::jstrcpy( m_szDamage, PLAYER_BASE_DAMAGE );
+    m_fDamageModifier = 0.0f;
+    m_fToHitModifier = 0.0f;
+    m_fSpeed = 1.0f; // Base speed multiplier
+
+    // Re-add contributions from all equipped items
+    CLink<CItem> *pLink = m_llEquipment->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData )
+        {
+            CItem *pItem = pLink->m_lpData;
+            // Only count items in active slots (not secondary slots)
+            bool isActive =
+                ( pLink->m_dwIndex == EQUIP_IDX_MAIN_HAND ||
+                  pLink->m_dwIndex == EQUIP_IDX_OFF_HAND || pLink->m_dwIndex == EQUIP_IDX_HELMET ||
+                  pLink->m_dwIndex == EQUIP_IDX_AMULET || pLink->m_dwIndex == EQUIP_IDX_ARMOR ||
+                  pLink->m_dwIndex == EQUIP_IDX_CLOAK || pLink->m_dwIndex == EQUIP_IDX_GLOVES ||
+                  pLink->m_dwIndex == EQUIP_IDX_BELT || pLink->m_dwIndex == EQUIP_IDX_BOOTS ||
+                  pLink->m_dwIndex == EQUIP_IDX_LRING || pLink->m_dwIndex == EQUIP_IDX_RRING ||
+                  pLink->m_dwIndex == EQUIP_IDX_TORCH );
+
+            if( isActive && pItem->m_id )
+            {
+                m_fArmorClass += pItem->m_id->m_fBaseAC + pItem->m_fACBonus;
+                if( pItem->m_id->m_szBaseDamage != NULL )
+                    Util::jstrcpy( m_szDamage, pItem->m_id->m_szBaseDamage );
+                m_fDamageModifier += pItem->m_fBonusToDamage;
+                m_fToHitModifier += pItem->m_fBonusToHit;
+                m_fSpeed += pItem->m_fSpeedBonus;
+            }
+        }
+        pLink = m_llEquipment->GetNext( pLink );
+    }
+
+    // Print feedback message
+    CLink<CItem> *pNewMain = m_llEquipment->GetLink( EQUIP_IDX_MAIN_HAND );
+    if( pNewMain && pNewMain->m_lpData )
+    {
+        g_pGame->GetMsgs()->Printf( "You switch to your %s.\n", pNewMain->m_lpData->GetName() );
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "You switch to your bare hands.\n" );
+    }
 }
 
 float CPlayer::LightSource()
@@ -826,6 +1037,37 @@ float CPlayer::Attack()
     return fRoll;
 }
 
+float CPlayer::RangedAttack( CLink<CItem> *pArrow )
+{
+    // Calculate ranged attack to-hit roll combining bow and arrow bonuses
+    float fRoll = Util::Roll( "1d100" );
+
+    // Get the equipped primary weapon (bow)
+    CLink<CItem> *pBow = m_llEquipment->GetLink( EQUIP_IDX_MAIN_HAND );
+    float fBowBonus = 0.0f;
+    if( pBow && pBow->m_lpData && pBow->m_lpData->m_id &&
+        ( pBow->m_lpData->m_id->m_dwFlags & ITEM_FLAG_NEEDSAMMO ) )
+    {
+        fBowBonus = pBow->m_lpData->m_fBonusToHit;
+    }
+
+    // Get arrow bonuses
+    float fArrowBonus = 0.0f;
+    if( pArrow && pArrow->m_lpData )
+    {
+        fArrowBonus = pArrow->m_lpData->m_fBonusToHit;
+    }
+
+    float fTotalBonus = fBowBonus + fArrowBonus;
+    fRoll += fTotalBonus;
+
+    JLog( LOG_LEVEL_INFO, true,
+          "Ranged: rolled: %.2f, bow: %.2f, arrow: %.2f, total bonus: %.2f = Total: %.2f\n",
+          fRoll - fTotalBonus, fBowBonus, fArrowBonus, fTotalBonus, fRoll );
+
+    return fRoll;
+}
+
 float CPlayer::Damage( float fDamageMult )
 {
     float fDamage = ( Util::Roll( m_szDamage ) + m_fDamageModifier ) * fDamageMult;
@@ -834,8 +1076,16 @@ float CPlayer::Damage( float fDamageMult )
     return fDamage;
 }
 
-void CPlayer::OnKillMonster( CMonster *pMon )
+void CPlayer::OnKillMonster( CMonster *pMon, float fKillingBlow )
 {
+    if( g_pGame->RecallMonster() )
+    {
+        // The player doesn't know exactly how much HP the monster had —
+        // only that fKillingBlow was enough to finish it off.  The estimate
+        // is: actual_max_HP minus at most (fKillingBlow - 1) remaining HP.
+        float fEstimatedHP = pMon->m_fHP - ( fKillingBlow - 1.0f );
+        g_pGame->RecallMonster()->RecordKill( pMon->m_md->m_szName, fEstimatedHP );
+    }
     m_fExperience += pMon->m_md->m_fExpValue / m_fLevel;
     GainLevel();
     m_pTarget = NULL;
@@ -845,7 +1095,7 @@ bool CPlayer::DamageMonster( CMonster *pMon, float fDamage )
 {
     if( pMon->TakeDamage( fDamage ) == STATUS_DEAD )
     {
-        OnKillMonster( pMon );
+        OnKillMonster( pMon, fDamage );
         g_pGame->GetDungeon()->RemoveMonster( pMon );
         return true;
     }
@@ -934,6 +1184,10 @@ int CPlayer::TakeDamage( float fDamage, const char *szMon, uint32 dwElement )
         fDamage *= fMult;
     }
 
+    // Elemental attacks may destroy vulnerable inventory items or degrade equipment
+    DoDamageInventory( dwElement );
+    DoDamageEquipment( dwElement );
+
     if( (int)fDamage < (int)m_fCurHitPoints )
     {
         m_fCurHitPoints -= fDamage;
@@ -988,11 +1242,9 @@ bool CPlayer::Drop( CItem *pItem, int quantity )
 
 bool CPlayer::CanDropHere()
 {
-    if( g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurItem != NULL )
-    {
-        g_pGame->GetMsgs()->Printf( "There is already an item there.\n" );
-        return false;
-    }
+    // With enhanced Drop() handling stacking and scattering, we can always attempt to drop.
+    // Drop() itself will handle placement logic (stacking, scatter to adjacent, or fail with
+    // message).
     return true;
 }
 
@@ -1011,14 +1263,7 @@ JResult CPlayer::Quaff( CLink<CItem> *pLink )
     {
         pItem->m_id->m_bTried = true;
     }
-    if( pItem->IsStackable() && pItem->m_dwCount > 1 )
-    {
-        pItem->m_dwCount--;
-    }
-    else
-    {
-        m_llInventory->Remove( pItem->m_pllLink, false ); // Potions are single-use
-    }
+    ConsumeItem( pLink ); // Unified consumption
     return retval;
 }
 
@@ -1037,14 +1282,7 @@ JResult CPlayer::Read( CLink<CItem> *pLink )
     {
         pItem->m_id->m_bTried = true;
     }
-    if( pItem->IsStackable() && pItem->m_dwCount > 1 )
-    {
-        pItem->m_dwCount--;
-    }
-    else
-    {
-        m_llInventory->Remove( pItem->m_pllLink, false ); // Scrolls are single-use
-    }
+    ConsumeItem( pLink ); // Unified consumption
     return retval;
 }
 
@@ -1060,23 +1298,115 @@ JResult CPlayer::Zap( CLink<CItem> *pLink )
 
 JResult CPlayer::Fire( CLink<CItem> *pLink )
 {
-    // this will get called multiple times for a single shot, if EFFECT_FLAG_NO_COLLIDE is set,
-    // this function is to do damage to the monster in the current position
+    // Apply effects on impact (called when projectile hits a monster)
+    // NOTE: Consumption happens in RangedState::DoLaunch(), not here
     CItem *pItem = pLink->m_lpData;
+
+    // Track this ammo for ranged to-hit calculations in DoElementalHit
+    m_pCurrentRangedAmmo = pItem;
+
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
 
-    // Consume one arrow/bolt at a time (not the whole stack)
-    if( pItem->IsStackable() && pItem->m_dwCount > 1 )
+    // Clear the ranged ammo tracker
+    m_pCurrentRangedAmmo = NULL;
+
+    return retval;
+}
+
+void CPlayer::ConsumeItem( CLink<CItem> *pLink )
+{
+    // Unified consumption: remove item from inventory when used
+    // Stack decrements are handled by CItem::Consume() (for charges/counts)
+    // This handles inventory removal when the last unit is consumed
+    if( pLink == NULL || pLink->m_lpData == NULL )
+    {
+        return;
+    }
+
+    CItem *pItem = pLink->m_lpData;
+    if( pItem->m_dwCount > 1 )
     {
         pItem->m_dwCount--;
     }
     else
     {
-        m_llInventory->Remove( pItem->m_pllLink, false ); // Arrows/bolts are consumable
+        m_llInventory->Remove( pItem->m_pllLink, false );
+    }
+}
+
+void CPlayer::ConsumeAndRemoveIfEmpty( CLink<CItem> *pLink )
+{
+    // Consume an item and remove it from inventory if it becomes empty
+    if( pLink == NULL || pLink->m_lpData == NULL )
+    {
+        return;
     }
 
-    return retval;
+    pLink->m_lpData->Consume();
+    if( pLink->m_lpData->IsConsumed() )
+    {
+        m_llInventory->Remove( pLink, false );
+    }
+}
+
+void CPlayer::ConsolidateInventory()
+{
+    // Auto-consolidate inventory stacks with matching charges/identification
+    // After items are consumed or equipment is modified, stacks may need reorganization
+    // This runs between turns and silently merges matching stacks
+
+    bool anyMerged = false;
+
+    CLink<CItem> *pOuter = m_llInventory->GetHead();
+    while( pOuter != NULL )
+    {
+        CItem *pOuterItem = pOuter->m_lpData;
+        CLink<CItem> *pInner = m_llInventory->GetNext( pOuter );
+
+        while( pInner != NULL )
+        {
+            CItem *pInnerItem = pInner->m_lpData;
+            CLink<CItem> *pNext = m_llInventory->GetNext( pInner );
+
+            // Check if these items can stack together
+            if( pOuterItem->m_id->m_dwIndex == pInnerItem->m_id->m_dwIndex &&
+                pOuterItem->IsStackable() &&
+                Util::jstrcmp( pOuterItem->GetName(), pInnerItem->GetName() ) == 0 &&
+                ( ( pOuterItem->m_dwFlags & ITEM_FLAG_IDENTIFIED ) ==
+                  ( pInnerItem->m_dwFlags & ITEM_FLAG_IDENTIFIED ) ) )
+            {
+                // For charged items, also check charge count matches
+                bool chargesMatch = true;
+                if( pOuterItem->m_id->m_dwIndex == ITEM_IDX_WAND ||
+                    pOuterItem->m_id->m_dwIndex == ITEM_IDX_STAFF )
+                {
+                    chargesMatch = ( pOuterItem->m_dwCharges == pInnerItem->m_dwCharges );
+                }
+
+                if( chargesMatch )
+                {
+                    // Merge: add inner count to outer
+                    pOuterItem->m_dwCount += pInnerItem->m_dwCount;
+                    m_llInventory->Remove( pInner, false );
+                    anyMerged = true;
+
+                    // Don't advance pInner since we just removed it
+                    pInner = pNext;
+                    continue;
+                }
+            }
+
+            pInner = pNext;
+        }
+
+        pOuter = m_llInventory->GetNext( pOuter );
+    }
+
+    if( anyMerged )
+    {
+        g_pGame->GetMsgs()->Printf( "You organize your pack.\n" );
+    }
 }
 
 JResult CPlayer::Magic( CLink<CItem> *pLink )
@@ -1286,7 +1616,88 @@ JResult CPlayer::DoHitEffects( CEffect *pEffect )
         return DoElementalHit( pEffect );
         break;
     default:
+        return DoPhysicalHit( pEffect );
         break;
+    }
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoPhysicalHit( CEffect *pEffect )
+{
+    bool bCriticalHit = false;
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vRangedHitPosition );
+    if( !pTile )
+    {
+        return JBOGUSKEY;
+    }
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+        return JBOGUSKEY;
+    }
+    // Save monster name before it's potentially deleted
+    const char *szMonName = pMon->GetName();
+
+    // If this is a ranged attack (arrow/ammo with bow), perform to-hit check
+    if( m_pCurrentRangedAmmo )
+    {
+        // Get the arrow as a CLink
+        CLink<CItem> *pArrowLink = NULL;
+        CLink<CItem> *pInvItem = m_llInventory->GetHead();
+        while( pInvItem )
+        {
+            if( pInvItem->m_lpData == m_pCurrentRangedAmmo )
+            {
+                pArrowLink = pInvItem;
+                break;
+            }
+            pInvItem = m_llInventory->GetNext( pInvItem );
+        }
+
+        float fRoll = RangedAttack( pArrowLink );
+        bool bHit = pMon->Hit( fRoll );
+
+        if( !bHit )
+        {
+            g_pGame->GetMsgs()->Printf( "You miss the %s.\n", szMonName );
+            JLog( LOG_LEVEL_INFO, true, "Ranged miss: roll %.2f vs AC %d\n", fRoll,
+                  (int)pMon->m_fCurAC );
+            return JSUCCESS; // Arrow missed, no damage
+        }
+
+        if( fRoll > 80.0f )
+        {
+            g_pGame->GetMsgs()->Printf( "(Critical hit!)\n" );
+            bCriticalHit = true;
+        }
+    }
+    const char *szAmount = pEffect->m_szAmount;
+    if( !szAmount && pEffect->m_ed )
+        szAmount = pEffect->m_ed->m_szAmount;
+    if( !szAmount )
+        szAmount = "1d2";
+
+    float fDamage = Util::Roll( szAmount );
+
+    // For ranged attacks, add arrow's damage bonus
+    if( m_pCurrentRangedAmmo )
+    {
+        fDamage += m_pCurrentRangedAmmo->m_fBonusToDamage;
+    }
+
+    if( bCriticalHit )
+    {
+        fDamage *= 2.0f;
+    }
+
+    if( DamageMonster( pMon, fDamage ) )
+    {
+        g_pGame->GetMsgs()->Printf( "The %s dies.\n", szMonName );
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
     }
     return JSUCCESS;
 }
@@ -1307,8 +1718,11 @@ JResult CPlayer::DoLightRay( CEffect *pEffect )
 
         return JBOGUSKEY;
     }
-    JLog( LOG_LEVEL_INFO, true, "monster: %s\n", pMon->GetName() );
 
+    // Save monster name before it's potentially deleted
+    const char *szMonName = pMon->GetName();
+
+    JLog( LOG_LEVEL_INFO, true, "monster: %s\n", szMonName );
     // TODO: this should be "weaknesses" and re-use effect_flag_light instead of new "general flag"
     if( ( pMon->m_md->m_dwFlags & MON_FLAG_HURT_BY_LIGHT ) == MON_FLAG_HURT_BY_LIGHT )
     {
@@ -1318,17 +1732,16 @@ JResult CPlayer::DoLightRay( CEffect *pEffect )
 
         if( DamageMonster( pMon, fDamage ) )
         {
-            g_pGame->GetMsgs()->Printf( "The %s shrivels away in the bright light!\n",
-                                        pMon->GetName() );
+            g_pGame->GetMsgs()->Printf( "The %s shrivels away in the bright light!\n", szMonName );
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "The %s screams in agony.\n", pMon->GetName() );
+            g_pGame->GetMsgs()->Printf( "The %s screams in agony.\n", szMonName );
         }
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "The %s is unaffected.\n", pMon->GetName() );
+        g_pGame->GetMsgs()->Printf( "The %s is unaffected.\n", szMonName );
     }
 
     return JSUCCESS;
@@ -1352,6 +1765,15 @@ JResult CPlayer::DoElementalHit( CEffect *pEffect )
     const char *szElement = g_Constants.IndexToString( EFFECT_FLAG, pEffect->m_dwFlags );
     JLog( LOG_LEVEL_INFO, true, "elemental hit (%s) on %s\n", szElement, pMon->GetName() );
 
+    // Save monster name before it's potentially deleted
+    const char *szMonName = pMon->GetName();
+    // Print effect description message
+    if( pEffect->m_ed && pEffect->m_ed->m_szName )
+    {
+        g_pGame->GetMsgs()->Printf( "The %s strikes the %s with %s.\n", pEffect->m_ed->m_szName,
+                                    szMonName, szElement );
+    }
+
     const char *szAmount = pEffect->m_szAmount;
     if( !szAmount && pEffect->m_ed )
         szAmount = pEffect->m_ed->m_szAmount;
@@ -1360,15 +1782,125 @@ JResult CPlayer::DoElementalHit( CEffect *pEffect )
 
     float fDamage = Util::Roll( szAmount );
 
+    // For ranged attacks, add arrow's damage bonus
+    if( m_pCurrentRangedAmmo )
+    {
+        fDamage += m_pCurrentRangedAmmo->m_fBonusToDamage;
+    }
+
     if( DamageMonster( pMon, fDamage ) )
     {
-        g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", pMon->GetName() );
+        g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "The %s is hit.\n", pMon->GetName() );
+        g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
     }
 
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoDamageInventory( uint32 dwElement )
+{
+    uint32 elementMask =
+        EFFECT_FLAG_FIRE | EFFECT_FLAG_COLD | EFFECT_FLAG_ELECTRICITY | EFFECT_FLAG_ACID;
+    uint32 element = dwElement & elementMask;
+    if( element == 0 )
+        return JBOGUSKEY;
+
+    float fResistMult = Resist( dwElement );
+    // Immunity protects items
+    if( fResistMult == 0.0f )
+        return JBOGUSKEY;
+
+    // Base 3% chance per inventory slot; halved when player resists
+    float fChance = ( fResistMult < 1.0f ) ? 0.015f : 0.03f;
+
+    const char *szVerb = "are destroyed";
+    if( element == EFFECT_FLAG_FIRE )
+        szVerb = "catch fire";
+    else if( element == EFFECT_FLAG_COLD )
+        szVerb = "shatter in the cold";
+    else if( element == EFFECT_FLAG_ACID )
+        szVerb = "are dissolved by acid";
+    else if( element == EFFECT_FLAG_ELECTRICITY )
+        szVerb = "are blasted by lightning";
+
+    CLink<CItem> *pLink = m_llInventory->GetHead();
+    while( pLink != NULL )
+    {
+        CLink<CItem> *pNext = pLink->next;
+        CItem *pItem = pLink->m_lpData;
+
+        if( pItem->IsWeakTo( element ) && Util::GetRandom( 0.0f, 1.0f ) < fChance )
+        {
+            g_pGame->GetMsgs()->Printf( "Your %s %s!\n", pItem->GetPlural(), szVerb );
+            if( pItem->m_dwCount > 1 )
+                pItem->m_dwCount--;
+            else
+                m_llInventory->Remove( pLink, false );
+        }
+
+        pLink = pNext;
+    }
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoDamageEquipment( uint32 dwElement )
+{
+    uint32 elementMask = EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID;
+    uint32 element = dwElement & elementMask;
+    if( element == 0 )
+        return JBOGUSKEY;
+
+    float fResistMult = Resist( dwElement );
+    if( fResistMult == 0.0f )
+        return JBOGUSKEY;
+
+    float fChance = ( fResistMult < 1.0f ) ? 0.015f : 0.03f;
+
+    const char *szElement = ( element == EFFECT_FLAG_FIRE ) ? "fire" : "acid";
+
+    CLink<CItem> *pLink = m_llEquipment->GetHead();
+    while( pLink != NULL )
+    {
+        CItem *pItem = pLink->m_lpData;
+
+        if( pItem->IsWeakTo( element ) && Util::GetRandom( 0.0f, 1.0f ) < fChance )
+        {
+            // Weapons: randomly reduce to-hit or to-damage bonus
+            bool bIsWeapon = ( pItem->EquipType() == EQUIP_IDX_MAIN_HAND );
+            if( bIsWeapon )
+            {
+                bool bReduceToHit = ( Util::GetRandom( 0, 1 ) == 0 );
+                if( bReduceToHit )
+                {
+                    pItem->m_fBonusToHit -= 1.0f;
+                    g_pGame->GetMsgs()->Printf( "Your %s is pitted by %s! (to-hit reduced)\n",
+                                                pItem->GetName(), szElement );
+                }
+                else
+                {
+                    pItem->m_fBonusToDamage -= 1.0f;
+                    g_pGame->GetMsgs()->Printf( "Your %s is pitted by %s! (to-damage reduced)\n",
+                                                pItem->GetName(), szElement );
+                }
+            }
+            else
+            {
+                // Armor/clothing: reduce AC bonus, floor at -(baseAC)
+                float fFloor = -pItem->m_id->m_fBaseAC;
+                if( pItem->m_fACBonus > fFloor )
+                {
+                    pItem->m_fACBonus -= 1.0f;
+                    g_pGame->GetMsgs()->Printf( "Your %s is damaged by %s!\n", pItem->GetName(),
+                                                szElement );
+                }
+            }
+        }
+
+        pLink = pLink->next;
+    }
     return JSUCCESS;
 }
 
@@ -1625,6 +2157,7 @@ JResult CPlayer::DoIntrinsicEffects( CEffect *pEffect, float fDuration )
         break;
     case EFFECT_FLAG_SPEED:
         g_pGame->GetMsgs()->Printf( "You feel yourself moving faster.\n" );
+        m_fSpeed += 1.0f;
         break;
     case EFFECT_FLAG_LIGHT:
         break;
@@ -1684,6 +2217,7 @@ JResult CPlayer::UndoIntrinsicEffects( CEffect *pEffect )
         break;
     case EFFECT_FLAG_SPEED:
         g_pGame->GetMsgs()->Printf( "You feel yourself slowing down.\n" );
+        m_fSpeed -= 1.0f;
         break;
     case EFFECT_FLAG_LIGHT:
         break;
@@ -1830,8 +2364,6 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
             g_pGame->GetMsgs()->Printf( "You sense the presence of doors!\n" );
         if( bFoundStairs )
             g_pGame->GetMsgs()->Printf( "You sense the presence of stairs!\n" );
-        if( !bFoundDoors && !bFoundStairs )
-            g_pGame->GetMsgs()->Printf( "You sense no doors or stairs.\n" );
         m_bLastEffectNoticed = true;
     }
 
@@ -1854,8 +2386,6 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
         }
         if( bFound )
             g_pGame->GetMsgs()->Printf( "You sense traps.\n" );
-        else
-            g_pGame->GetMsgs()->Printf( "You sense no traps.\n" );
         m_bLastEffectNoticed = true;
     }
 
@@ -1886,8 +2416,6 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
         }
         if( bFound )
             g_pGame->GetMsgs()->Printf( "You sense the presence of monsters!\n" );
-        else
-            g_pGame->GetMsgs()->Printf( "You sense no monsters.\n" );
         m_bLastEffectNoticed = true;
     }
 
@@ -1912,16 +2440,51 @@ bool CPlayer::IsDrinkable( CLink<CItem> *pLink )
 bool CPlayer::IsFireable( CLink<CItem> *pLink )
 {
     bool retval = false;
-    switch( pLink->m_lpData->m_id->m_dwIndex )
+    CItem *pItem = pLink->m_lpData;
+    if( pItem == NULL || pItem->m_id == NULL )
+        return false;
+
+    switch( pItem->m_id->m_dwIndex )
     {
-    case ITEM_IDX_BOW:
-    case ITEM_IDX_XBOW:
-        retval = true;
+    case ITEM_IDX_ARROW:
+    case ITEM_IDX_BOLT:
+        // Only fireable if we have ammo remaining
+        retval = ( pItem->m_dwCount > 0 );
         break;
     default:
         break;
     }
     return retval;
+}
+
+bool CPlayer::IsCompatibleAmmo( CLink<CItem> *pLink )
+{
+    // Check if this ammo is compatible with the equipped primary weapon
+    if( !IsFireable( pLink ) )
+    {
+        return false;
+    }
+
+    CLink<CItem> *pMainWeapon = m_llEquipment->GetLink( EQUIP_IDX_MAIN_HAND );
+    if( pMainWeapon == NULL )
+    {
+        return false;
+    }
+
+    uint32 weaponType = pMainWeapon->m_lpData->m_id->m_dwIndex;
+    uint32 ammoType = pLink->m_lpData->m_id->m_dwIndex;
+
+    // BOW uses ARROW, XBOW uses BOLT
+    if( weaponType == ITEM_IDX_BOW && ammoType == ITEM_IDX_ARROW )
+    {
+        return true;
+    }
+    if( weaponType == ITEM_IDX_XBOW && ammoType == ITEM_IDX_BOLT )
+    {
+        return true;
+    }
+
+    return false;
 }
 
 bool CPlayer::IsReadable( CLink<CItem> *pLink )
@@ -2016,6 +2579,13 @@ void CPlayer::UpdateVisibleMonsters()
             int dist =
                 abs( (int)vMonPos.x - (int)m_vPos.x ) + abs( (int)vMonPos.y - (int)m_vPos.y );
             m_llVisibleMonsters->Add( pMon, dist, pMon->GetInstanceId() );
+
+            if( g_pGame->RecallMonster() )
+            {
+                int depthFeet = pDungeon->depth * 50;
+                g_pGame->RecallMonster()->RecordSighting( pMon->m_md->m_szName, depthFeet,
+                                                          pMon->GetInstanceId() );
+            }
         }
         pLink = pLink->next;
     }

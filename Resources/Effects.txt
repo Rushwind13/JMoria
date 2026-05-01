@@ -42,6 +42,8 @@ Effect <Fireball>
     Amount      <6d8>
     Range       20
     Radius      3
+    Beam        <W>
+    Color       <<255,0,0,255>;<255,165,0,255>;<255,255,0,255>>
 }
 Effect <Firebolt>
 {
@@ -50,6 +52,8 @@ Effect <Firebolt>
     Modifier    <EFFECT_MOD_LINE>
     Amount      <2d8>
     Range       15
+    Beam        <w>
+    Color       <<255,0,0,255>;<255,165,0,255>;<255,255,0,255>>
 }
 Effect <Inflict Fire>
 {
@@ -74,6 +78,8 @@ Effect <Frost Ball>
     Amount      <6d8>
     Range       20
     Radius      3
+    Beam        <X>
+    Color       <<0,255,255,255>;<135,206,250,255>;<240,248,255,255>>
 }
 Effect <Frost Bolt>
 {
@@ -82,6 +88,8 @@ Effect <Frost Bolt>
     Modifier    <EFFECT_MOD_LINE>
     Amount      <2d8>
     Range       15
+    Beam        <x>
+    Color       <<0,255,255,255>;<135,206,250,255>;<240,248,255,255>>
 }
 # --- EFFECT_FLAG_ELECTRICITY ---
 
@@ -93,6 +101,8 @@ Effect <Lightning Ball>
     Amount      <6d6>
     Range       20
     Radius      3
+    Beam        </>
+    Color       <<255,255,0,255>;<255,255,255,255>;<255,215,0,255>>
 }
 Effect <Lightning Bolt>
 {
@@ -102,6 +112,8 @@ Effect <Lightning Bolt>
     Modifier    <EFFECT_MOD_LINE>
     Amount      <3d6>
     Range       20
+    Beam        <->
+    Color       <<255,255,0,255>;<255,255,255,255>;<255,215,0,255>>
 }
 Effect <Lightning Touch>
 {
@@ -120,6 +132,8 @@ Effect <Acid Ball>
     Amount      <6d8>
     Range       20
     Radius      3
+    Beam        <O>
+    Color       <<50,205,50,255>;<144,238,144,255>;<173,255,47,255>>
 }
 Effect <Acid Bolt>
 {
@@ -128,6 +142,8 @@ Effect <Acid Bolt>
     Modifier    <EFFECT_MOD_LINE>
     Amount      <2d8>
     Range       15
+    Beam        <*>
+    Color       <<50,205,50,255>;<144,238,144,255>;<173,255,47,255>>
 }
 Effect <Acid Touch>
 {
@@ -146,6 +162,8 @@ Effect <Poison Ball>
     Amount      <6d8>
     Range       5
     Radius      3
+    Beam        <O>
+    Color       <<0,255,0,255>;<34,139,34,255>;<75,0,130,255>>
 }
 Effect <Poison Bolt>
 {
@@ -154,6 +172,8 @@ Effect <Poison Bolt>
     Modifier    <EFFECT_MOD_LINE>
     Amount      <2d8>
     Range       8
+    Beam        <->
+    Color       <<0,255,0,255>;<34,139,34,255>;<75,0,130,255>>
 }
 Effect <Poison Sting>
 {
@@ -178,6 +198,8 @@ Effect <Light Ray>
     Modifier    <EFFECT_MOD_LINE>
     Amount      <1d5>
     Range       15
+    Beam        <~>
+    Color       <<255,255,255,255>;<255,255,200,255>;<255,255,100,255>>
 }
 Effect <Light Touch>
 {
@@ -306,6 +328,7 @@ Effect <Timed Blessing>
 {
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_AC>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    50.0
 }
 # --- EFFECT_FLAG_XP ---
@@ -325,13 +348,6 @@ Effect <Heal Monster>
     Flag        <EFFECT_FLAG_HP>
     Range       15
 }
-Effect <Life Drain>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_HP>
-    Amount      <1d10>
-    Range       1
-}
 # --- EFFECT_FLAG_TELEPORT ---
 
 Effect <Teleport Away>
@@ -345,6 +361,14 @@ Effect <Physical Hit>
     Type        <EFFECT_TYPE_HIT>
     Amount      <1d6>
     Range       1
+}
+Effect <Arrow Shot>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Amount      <1d8>
+    Beam        <}>
+    Range       20
+    Color       <64, 64, 0, 255>
 }
 
 # --- HEAL - restore HP and cure status ---
@@ -500,6 +524,7 @@ Effect <Timed Immune Fire>
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_FIRE>
     Modifier    <EFFECT_MOD_IMMUNE>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    80.0
 }
 Effect <Timed Resist Fire>
@@ -507,6 +532,7 @@ Effect <Timed Resist Fire>
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_FIRE>
     Modifier    <EFFECT_MOD_RESIST>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    150.0
 }
 Effect <Resist Cold>
@@ -520,6 +546,7 @@ Effect <Timed Immune Cold>
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_COLD>
     Modifier    <EFFECT_MOD_IMMUNE>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    80.0
 }
 Effect <Timed Resist Cold>
@@ -527,6 +554,7 @@ Effect <Timed Resist Cold>
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_COLD>
     Modifier    <EFFECT_MOD_RESIST>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    150.0
 }
 Effect <Resist Electricity>
@@ -540,6 +568,7 @@ Effect <Timed Immune Electricity>
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_ELECTRICITY>
     Modifier    <EFFECT_MOD_IMMUNE>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    80.0
 }
 Effect <Timed Resist Electricity>
@@ -547,6 +576,7 @@ Effect <Timed Resist Electricity>
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_ELECTRICITY>
     Modifier    <EFFECT_MOD_RESIST>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    150.0
 }
 Effect <Resist Acid>
@@ -560,6 +590,7 @@ Effect <Timed Immune Acid>
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_ACID>
     Modifier    <EFFECT_MOD_IMMUNE>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    80.0
 }
 Effect <Timed Resist Acid>
@@ -567,6 +598,7 @@ Effect <Timed Resist Acid>
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_ACID>
     Modifier    <EFFECT_MOD_RESIST>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    150.0
 }
 Effect <Inflict Poison>
@@ -631,6 +663,7 @@ Effect <Timed Infravision>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_INFRA>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    100.0
 }
 Effect <ESP>
@@ -642,6 +675,7 @@ Effect <Timed ESP>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_ESP>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    100.0
 }
 Effect <Sustain CHA>
@@ -655,6 +689,7 @@ Effect <Timed Heroism>
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_HP>
     Flag        <EFFECT_FLAG_STAT>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    50.0
 }
 Effect <Free Action>
@@ -671,6 +706,7 @@ Effect <Timed Invisibility>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_INVISIBLE>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    100.0
 }
 Effect <Levitation>
@@ -682,6 +718,7 @@ Effect <Timed Levitation>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_LEVITATE>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    100.0
 }
 Effect <Speed>
@@ -693,12 +730,13 @@ Effect <Timed Speed>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_SPEED>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    80.0
 }
 Effect <Searching>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_SEARCHING>
+    Flag        <EFFECT_FLAG_SEARCH>
 }
 
 # --- RESTORE - identify, recharge ---
@@ -786,6 +824,7 @@ Effect <Timed See Invisible>
 {
     Type        <EFFECT_TYPE_SEE>
     Flag        <EFFECT_FLAG_INVISIBLE>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    100.0
 }
 Effect <Detect Doors>

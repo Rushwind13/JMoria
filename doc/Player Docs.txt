@@ -8,7 +8,13 @@ HJKLYUBN - run until disturbed
 o - open
 c - close
 T - tunnel
-i - inventory (removed this in favor of just having it onscreen all the time)
+i - show inventory
+e - show equipment
+C - show stats
+v - show visible monsters
+V - show monster recall panel
+( - show item recall panel
+) - show map overview panel
 w - wield an item
 t - remove (take off) a piece of equipment
 < - go upstairs
@@ -21,12 +27,17 @@ R - rest until at full health, or until disturbed
 q - quaff a potion
 r - read a scroll
 z - zap a wand
+F - fill/fuel a light source
 N - set character name
+p - purchase something in a store
+s - search
+g - get/pickup
 ^c - exit game
 ^t - wizard teleport (Note: will turn on Wizard Mode, which prevents score being saved)
 ^f - wizard set flag (Note: needs Wizard Mode)
 ^i - wizard item (Note: needs Wizard Mode)
 ^s - wizard summon (Note: needs Wizard Mode)
+^w - exit wizard mode
 
 *Items*
 Players will automatically pick up items they walk over. Inventory is sorted by item type.

@@ -3,6 +3,7 @@
 #include "DisplayText.h"
 #include "Game.h"
 #include "JMDefs.h"
+#include "MonsterRecall.h"
 
 #include "Dungeon.h"
 #include "Player.h"
@@ -22,9 +23,7 @@ CTargetState::CTargetState()
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
 }
 
-CTargetState::~CTargetState()
-{
-}
+CTargetState::~CTargetState() {}
 
 int CTargetState::OnHandleKey( JKeysym *keysym )
 {
@@ -89,7 +88,14 @@ int CTargetState::DoInit()
         // Set initial target to nearest monster (first in distance-sorted list)
         CMonster *pFirst = pVisible->GetHead()->m_lpData;
         if( pFirst )
+        {
             g_pGame->GetPlayer()->SetTarget( pFirst );
+            if( g_pGame->RecallMonster() && pFirst->m_md )
+            {
+                g_pGame->GetMsgs()->Clear();
+                g_pGame->RecallMonster()->PrintRecall( pFirst->m_md, g_pGame->GetMsgs() );
+            }
+        }
         UpdateLOSLine();
     }
     else
@@ -173,6 +179,11 @@ int CTargetState::OnBaseHandleKey( JKeysym *keysym )
               pMon->GetInstanceId(), pMon->GetName() );
         g_pGame->GetPlayer()->SetTarget( pMon );
         UpdateLOSLine();
+        if( g_pGame->RecallMonster() && pMon->m_md )
+        {
+            g_pGame->GetMsgs()->Clear();
+            g_pGame->RecallMonster()->PrintRecall( pMon->m_md, g_pGame->GetMsgs() );
+        }
         return JSUCCESS;
     }
     else if( keysym->sym == JKEY_PERIOD )
@@ -238,7 +249,6 @@ void CTargetState::UpdateLOSLine()
 
     JIVector vSource( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
     JIVector vTarget( VEC_EXPAND( pTarget->GetPos() ) );
-    JLinkList<JIVector> *pLine =
-        Util::GenerateLine( vSource, vTarget, SIGHT_DISTANCE_PLAYER );
+    JLinkList<JIVector> *pLine = Util::GenerateLine( vSource, vTarget, SIGHT_DISTANCE_PLAYER );
     g_pGame->GetDungeon()->SetLOSLine( pLine );
 }

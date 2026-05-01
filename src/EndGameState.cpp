@@ -14,6 +14,8 @@
 
 #include "FileParse.h"
 
+#define TOMBSTONE_FIELD_WIDTH 17
+
 extern CGame *g_pGame;
 
 CEndGameState::CEndGameState() : m_cCommand( 0 ), m_szTombstone( NULL )
@@ -31,7 +33,7 @@ CEndGameState::CEndGameState() : m_cCommand( 0 ), m_szTombstone( NULL )
         "|%*s%*s| \n          |                 | \n          |Level %2d %8s| \n          |        "
         "         | \n          |                 | \n          |died on level %3d| \n          |  "
         "               | \n          |   killed by a   | \n          |                 | \n       "
-        "   |%*s%*s| \n          |                 | \n          |_________________| \n";
+        "   |%*s%*s| \n          |%*s%*s| \n          |_________________| \n";
     m_szTombstone = new char[Util::jstrlen( tombstone ) + 1];
     memset( m_szTombstone, 0, Util::jstrlen( tombstone ) + 1 );
     Util::jstrcpy( m_szTombstone, tombstone );
@@ -197,21 +199,46 @@ void CEndGameState::ResetToState( int newstate )
 //// Tomb commands
 bool CEndGameState::DoTomb()
 {
-    int dwNamePadding = ( 17 - Util::jstrlen( m_pScore->m_szName ) ) / 2;
-    int dwNameExtraPad = 0;
-    if( Util::jstrlen( m_pScore->m_szName ) % 2 == 0 )
-        dwNameExtraPad = 1;
+    int dwNameLen = Util::jstrlen( m_pScore->m_szName );
+    int dwNamePadding = MAX( 0, ( TOMBSTONE_FIELD_WIDTH - dwNameLen ) / 2 );
+    int dwNameExtraPad = ( dwNameLen % 2 == 0 ) ? 1 : 0;
 
-    int dwKillerPadding = ( 17 - Util::jstrlen( m_pScore->m_szKilledBy ) ) / 2;
-    int dwKillerExtraPad = 0;
-    if( Util::jstrlen( m_pScore->m_szKilledBy ) % 2 == 0 )
-        dwKillerExtraPad = 1;
+    // Split killer name across two lines if needed
+    char szKiller1[TOMBSTONE_FIELD_WIDTH + 1];
+    char szKiller2[TOMBSTONE_FIELD_WIDTH + 1];
+    memset( szKiller1, 0, sizeof( szKiller1 ) );
+    memset( szKiller2, 0, sizeof( szKiller2 ) );
 
-    g_pGame->GetEnd()->Printf( m_szTombstone, dwNamePadding + Util::jstrlen( m_pScore->m_szName ),
-                               m_pScore->m_szName, dwNamePadding + dwNameExtraPad, "",
-                               m_pScore->m_dwLevel, m_pScore->m_szClass, m_pScore->m_dwDepth,
-                               dwKillerPadding + Util::jstrlen( m_pScore->m_szKilledBy ),
-                               m_pScore->m_szKilledBy, dwKillerPadding + dwKillerExtraPad, "" );
+    int dwKillerLen = Util::jstrlen( m_pScore->m_szKilledBy );
+    if( dwKillerLen > TOMBSTONE_FIELD_WIDTH )
+    {
+        strncpy( szKiller1, m_pScore->m_szKilledBy, TOMBSTONE_FIELD_WIDTH );
+        szKiller1[TOMBSTONE_FIELD_WIDTH] = '\0';
+        int remainder = dwKillerLen - TOMBSTONE_FIELD_WIDTH;
+        if( remainder > TOMBSTONE_FIELD_WIDTH )
+            remainder = TOMBSTONE_FIELD_WIDTH;
+        strncpy( szKiller2, m_pScore->m_szKilledBy + TOMBSTONE_FIELD_WIDTH, remainder );
+        szKiller2[remainder] = '\0';
+    }
+    else
+    {
+        Util::jstrcpy( szKiller1, m_pScore->m_szKilledBy );
+    }
+
+    int dwKiller1Len = Util::jstrlen( szKiller1 );
+    int dwKiller1Padding = MAX( 0, ( TOMBSTONE_FIELD_WIDTH - dwKiller1Len ) / 2 );
+    int dwKiller1ExtraPad = ( dwKiller1Len % 2 == 0 ) ? 1 : 0;
+
+    int dwKiller2Len = Util::jstrlen( szKiller2 );
+    int dwKiller2Padding = MAX( 0, ( TOMBSTONE_FIELD_WIDTH - dwKiller2Len ) / 2 );
+    int dwKiller2ExtraPad = ( dwKiller2Len % 2 == 0 ) ? 1 : 0;
+
+    g_pGame->GetEnd()->Printf(
+        m_szTombstone, dwNamePadding + dwNameLen, m_pScore->m_szName,
+        dwNamePadding + dwNameExtraPad, "", m_pScore->m_dwLevel, m_pScore->m_szClass,
+        m_pScore->m_dwDepth, dwKiller1Padding + dwKiller1Len, szKiller1,
+        dwKiller1Padding + dwKiller1ExtraPad, "", dwKiller2Padding + dwKiller2Len, szKiller2,
+        dwKiller2Padding + dwKiller2ExtraPad, "" );
     return true;
 }
 

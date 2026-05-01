@@ -4,6 +4,7 @@
 
 #include "Game.h"
 #include "Dungeon.h"
+#include "MonsterRecall.h"
 #include "Player.h"
 #include "TileSet.h"
 
@@ -52,12 +53,17 @@ CGame::CGame()
       m_pStringInputState( NULL ),
       m_pTargetState( NULL ),
       m_pUseState( NULL ),
+      m_pMonRecall( NULL ),
       m_eCurState( STATE_INVALID ),
       m_fGameTime( 0.0f ),
       m_eRenderMode( RenderMode::None ),
       m_bShowStats( true ),
       m_bShowInv( false ),
-      m_bShowEquip( false )
+      m_bShowEquip( false ),
+      m_bShowMonsters( false ),
+      m_bShowMonRecall( false ),
+      m_bShowItemRecall( false ),
+      m_bShowMap( false )
 {
     m_pClockStepState = new CClockStepState;
     m_pCmdState = new CCmdState;
@@ -80,6 +86,8 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
 {
     JResult result = JSUCCESS;
     // Initialize all the game stuff, baby.
+
+    Util::SeedRandomFromClock();
 
     g_Constants.Init();
 
@@ -115,7 +123,7 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
         return result;
     }
 
-    m_pMsgsDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, 40 ), 255 );
+    m_pMsgsDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, MSGS_ROWS * 8 ), 255 );
     m_pMsgsDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE );
 
     m_pStatsDT = new CDisplayText( szBasedir, JRect( 0, 50, 150, 480 ), 220 );
@@ -125,7 +133,8 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     m_pInvDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
 
     m_pEquipDT = new CDisplayText( szBasedir, JRect( 440, 345, 640, 480 ), 180 );
-    m_pEquipDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
+    m_pEquipDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
+                          FLAG_TEXT_TRIM_TAIL );
 
     m_pUseDT = new CDisplayText( szBasedir, JRect( 200, 40, 440, 480 ), 200 );
     m_pUseDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
@@ -133,15 +142,40 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     m_pEndGameDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, 480 ), 255 );
     m_pEndGameDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
 
+    // Bottom panels: 4 panels across bottom of screen (70px height each)
+    // Visible Monsters (very narrow, leftmost)
+    m_pMonstersDT = new CDisplayText( szBasedir, JRect( 0, 410, 80, 480 ), 180 );
+    m_pMonstersDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
+                             FLAG_TEXT_TRIM_TAIL );
+
+    // Monster Recall (knowledge, wider)
+    m_pMonRecallDT = new CDisplayText( szBasedir, JRect( 80, 410, 340, 480 ), 180 );
+    m_pMonRecallDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
+                              FLAG_TEXT_TRIM_TAIL );
+
+    // Item Recall (similar width to Monster Recall)
+    m_pItemRecallDT = new CDisplayText( szBasedir, JRect( 340, 410, 490, 480 ), 180 );
+    m_pItemRecallDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX |
+                               FLAG_TEXT_TRIM_TAIL );
+
+    // Map Overview (right side)
+    m_pMapDT = new CDisplayText( szBasedir, JRect( 490, 410, 640, 480 ), 180 );
+    m_pMapDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX | FLAG_TEXT_TRIM_TAIL );
+
     // Let the renderer configure display region rects for its coordinate system
     m_pRender->ConfigureDisplayRegions( m_pMsgsDT, m_pStatsDT, m_pInvDT, m_pEquipDT, m_pUseDT,
-                                        m_pEndGameDT );
+                                        m_pEndGameDT, m_pMonstersDT, m_pMonRecallDT,
+                                        m_pItemRecallDT, m_pMapDT );
 
     m_bShowInv = m_pRender->ShouldAutoShowInventory();
     m_bShowEquip = m_pRender->ShouldAutoShowEquipment();
+    m_bShowMonsters = m_pRender->ShouldAutoShowMonsters();
 
     m_pAIMgr = new CAIMgr;
     m_pAIMgr->Init();
+
+    m_pMonRecall = new CMonsterRecall;
+    m_pMonRecall->Init( szBasedir );
 
     // Init the Player
     m_pPlayer = new CPlayer;
@@ -199,6 +233,13 @@ void CGame::Term()
     {
         delete m_pAIMgr;
         m_pAIMgr = NULL;
+    }
+
+    if( m_pMonRecall )
+    {
+        m_pMonRecall->Save();
+        delete m_pMonRecall;
+        m_pMonRecall = NULL;
     }
 
     JLog( LOG_LEVEL_DEBUG, true, "States..." );
@@ -299,6 +340,12 @@ void CGame::Term()
         m_pEquipDT = NULL;
     }
 
+    if( m_pMonstersDT )
+    {
+        delete m_pMonstersDT;
+        m_pMonstersDT = NULL;
+    }
+
     if( m_pUseDT )
     {
         delete m_pUseDT;
@@ -309,6 +356,24 @@ void CGame::Term()
     {
         delete m_pEndGameDT;
         m_pEndGameDT = NULL;
+    }
+
+    if( m_pMonRecallDT )
+    {
+        delete m_pMonRecallDT;
+        m_pMonRecallDT = NULL;
+    }
+
+    if( m_pItemRecallDT )
+    {
+        delete m_pItemRecallDT;
+        m_pItemRecallDT = NULL;
+    }
+
+    if( m_pMapDT )
+    {
+        delete m_pMapDT;
+        m_pMapDT = NULL;
     }
     JLog( LOG_LEVEL_DEBUG, true, "done.\n" );
 }
@@ -481,11 +546,14 @@ bool CGame::Update()
     if( m_bReadyForUpdate )
     {
         m_fGameTime++;
-        // fCurTime = 1.0f;
         m_bReadyForUpdate = false;
-        // TODO: Why does the AI require 2 ticks to move the monster?
-        GetAIMgr()->Update( fCurTime );
-        // GetAIMgr()->Update( fCurTime );
+        // Scale AI time by inverse of player speed:
+        // fast player (1.5) -> monsters get 0.67 per action (player acts 1.5x more)
+        // slow player (0.8) -> monsters get 1.25 per action (player acts 0.8x)
+        float fPlayerSpeed = m_pPlayer ? m_pPlayer->GetSpeed() : 1.0f;
+        if( fPlayerSpeed <= 0.0f )
+            fPlayerSpeed = 1.0f;
+        GetAIMgr()->Update( fCurTime / fPlayerSpeed );
     }
 //    else
 //    {
@@ -498,7 +566,10 @@ bool CGame::Update( float fCurTime )
     // Don't update AI during use commands or ranged item selection
     if( m_eCurState != STATE_USE && m_eCurState != STATE_RANGED )
     {
-        GetAIMgr()->Update( fCurTime );
+        float fPlayerSpeed = m_pPlayer ? m_pPlayer->GetSpeed() : 1.0f;
+        if( fPlayerSpeed <= 0.0f )
+            fPlayerSpeed = 1.0f;
+        GetAIMgr()->Update( fCurTime / fPlayerSpeed );
     }
 #endif // TURN_BASED
 
@@ -572,7 +643,7 @@ bool CGame::Update( float fCurTime )
         switch( reinterpret_cast<CRangedState *>( m_pCurState )->GetModifier() )
         {
         case RANGED_FIRE:
-            GetPlayer()->DisplayEquipment( PLACEMENT_USE, INV_FIRE );
+            GetPlayer()->DisplayInventory( PLACEMENT_USE, INV_FIRE );
             break;
         case RANGED_ZAP:
             GetPlayer()->DisplayInventory( PLACEMENT_USE, INV_ZAP );
@@ -591,6 +662,13 @@ bool CGame::Update( float fCurTime )
     {
         GetEnd()->Update( fCurTime );
     }
+
+    // Consolidate inventory between turns (silently merge matching stacks)
+    if( m_eCurState == STATE_COMMAND )
+    {
+        GetPlayer()->ConsolidateInventory();
+    }
+
     m_pCurState->Update( fCurTime );
 #endif // CLOCKSTEP
     return true;
@@ -607,7 +685,8 @@ void CGame::Draw()
     if( bResized )
     {
         GetRender()->ConfigureDisplayRegions( m_pMsgsDT, m_pStatsDT, m_pInvDT, m_pEquipDT, m_pUseDT,
-                                              m_pEndGameDT );
+                                              m_pEndGameDT, m_pMonstersDT, m_pMonRecallDT,
+                                              m_pItemRecallDT, m_pMapDT );
         if( bASCII )
             m_bShowInv = GetRender()->ShouldAutoShowInventory();
     }
@@ -626,13 +705,23 @@ void CGame::Draw()
 
         GetMsgs()->Draw();
 
-        // Panel visibility toggled by i/e/C keys
+        // Panel visibility toggled by i/e/C/v keys
         if( m_bShowStats )
             GetStats()->Draw();
         if( m_bShowInv )
             GetInv()->Draw();
         if( m_bShowEquip )
             GetEquip()->Draw();
+        if( m_bShowMonsters )
+            GetMonsters()->Draw();
+
+        // Bottom panels (toggleable by V/(/))
+        if( m_bShowMonRecall )
+            GetMonsterRecall()->Draw();
+        if( m_bShowItemRecall )
+            GetItemRecall()->Draw();
+        if( m_bShowMap )
+            GetMap()->Draw();
     }
 
     if( m_eCurState == STATE_USE )

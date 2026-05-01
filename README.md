@@ -18,31 +18,54 @@ JMoria supports three build configurations:
 * **Both build:** `./jmoria --renderer=ascii` or `./jmoria --renderer=opengl` (required)
 
 ## Keyboard commands
-* *Ctrl-C* - Exit
+
+### Panel toggles (display-only, no turn consumed)
+* *i* - show character inventory
+* *e* - show equipment
+* *C* - show character stats
+* *v* - show visible monsters sidebar
+* *V* - show monster recall panel
+* *(* - show item recall panel
+* *)* - show map overview panel
+
+### Movement
 * *Arrow keys (or numberpad)* - movement
 * *hjklyubn* - movement
 * *HJKLYUBN* - run until disturbed
+
+### Actions
 * *o* - open a door
 * *c* - close a door
 * *T* - tunnel through rubble
 * *<* - go up a staircase
 * *>* - go down a staircase
-* *i* - show character inventory (removed this in favor of just having it onscreen all the time)
+* *g* - get/pick up item
+* *d* - drop item
 * *w* - wield an item
 * *t* - remove (take off) a piece of equipment
-* *d* - drop
-* *** - choose target monster (choose target with *.*)
-* *:* - look (choose target with *.*)
-* *.* - rest one turn
-* *R* - rest until at full health, or until disturbed
 * *q* - quaff a potion
 * *r* - read a scroll
 * *z* - zap a wand
+* *F* - fill/fuel a light source
+* *s* - search
+* *.* - rest one turn
+* *R* - rest until at full health, or until disturbed
+
+### Interaction
+* *** - choose target monster (choose target with *.*)
+* *:* - look (choose target with movement keys)
 * *N* - set character name
-* *Ctrl-T* - ^t - teleport (Note: will turn on Wizard Mode)
-* *Ctrl-F* - ^f - set player intrinsic flag (Note: needs Wizard Mode)
-* *Ctrl-I* - ^i - create item (Note: needs Wizard Mode)
-* *Ctrl-S* - ^s - summon monster (Note: needs Wizard Mode)
+* *p* - purchase something in a store
+
+### Wizard Mode (disables score saving)
+* *Ctrl-T* - teleport (enables Wizard Mode)
+* *Ctrl-F* - set player intrinsic flag (needs Wizard Mode)
+* *Ctrl-I* - create item (needs Wizard Mode)
+* *Ctrl-S* - summon monster (needs Wizard Mode)
+* *Ctrl-W* - exit wizard mode
+
+### System
+* *Ctrl-C* - Exit
 
 
 Monster definitions are in _Resources/Monsters.txt_

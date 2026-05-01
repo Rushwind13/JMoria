@@ -643,7 +643,7 @@ bool CGame::Update( float fCurTime )
         switch( reinterpret_cast<CRangedState *>( m_pCurState )->GetModifier() )
         {
         case RANGED_FIRE:
-            GetPlayer()->DisplayEquipment( PLACEMENT_USE, INV_FIRE );
+            GetPlayer()->DisplayInventory( PLACEMENT_USE, INV_FIRE );
             break;
         case RANGED_ZAP:
             GetPlayer()->DisplayInventory( PLACEMENT_USE, INV_ZAP );
@@ -662,6 +662,13 @@ bool CGame::Update( float fCurTime )
     {
         GetEnd()->Update( fCurTime );
     }
+
+    // Consolidate inventory between turns (silently merge matching stacks)
+    if( m_eCurState == STATE_COMMAND )
+    {
+        GetPlayer()->ConsolidateInventory();
+    }
+
     m_pCurState->Update( fCurTime );
 #endif // CLOCKSTEP
     return true;

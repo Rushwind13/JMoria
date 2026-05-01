@@ -38,7 +38,8 @@ static void CleanupBresLine()
 ## WHEN
 ##
 #######*/
-WHEN( "^I compute a Bresenham line from ([0-9]+),([0-9]+) to ([0-9]+),([0-9]+) with distance ([0-9]+)$" )
+WHEN( "^I compute a Bresenham line from ([0-9]+),([0-9]+) to ([0-9]+),([0-9]+) with distance "
+      "([0-9]+)$" )
 {
     REGEX_PARAM( int, sx );
     REGEX_PARAM( int, sy );
@@ -54,7 +55,8 @@ WHEN( "^I compute a Bresenham line from ([0-9]+),([0-9]+) to ([0-9]+),([0-9]+) w
     s_bresResult = Util::Bresenham( src, tgt, (uint8)dist, AlwaysWalkable, s_bresLine );
 }
 
-WHEN( "^I compute a Bresenham line from ([0-9]+),([0-9]+) to ([0-9]+),([0-9]+) with distance ([0-9]+) and obstacle at ([0-9]+),([0-9]+)$" )
+WHEN( "^I compute a Bresenham line from ([0-9]+),([0-9]+) to ([0-9]+),([0-9]+) with distance "
+      "([0-9]+) and obstacle at ([0-9]+),([0-9]+)$" )
 {
     REGEX_PARAM( int, sx );
     REGEX_PARAM( int, sy );
@@ -88,7 +90,8 @@ WHEN( "^I generate a line from ([0-9]+),([0-9]+) to ([0-9]+),([0-9]+) with dista
     s_bresLine = Util::GenerateLine( src, tgt, (uint8)dist );
 }
 
-WHEN( "^I generate a line from ([0-9]+),([0-9]+) to ([0-9]+),([0-9]+) with distance ([0-9]+) and obstacle at ([0-9]+),([0-9]+)$" )
+WHEN( "^I generate a line from ([0-9]+),([0-9]+) to ([0-9]+),([0-9]+) with distance ([0-9]+) and "
+      "obstacle at ([0-9]+),([0-9]+)$" )
 {
     REGEX_PARAM( int, sx );
     REGEX_PARAM( int, sy );

@@ -89,6 +89,10 @@
 #define CHANCE_FIND_SECRET_BUMP 20
 #define CHANCE_SEARCH_ACTIVE 25
 #define CHANCE_SEARCH_PASSIVE 5
+// Ranged attack percentages (1-100)
+#define CHANCE_ARROW_BREAK 33 // ~1 in 3 chance arrow breaks on landing
+// Ranged attack limits
+#define MAX_PROJECTILE_RANGE 20 // Maximum trajectory length for projectiles (wands, arrows, bolts)
 
 // UI / Display constants
 #define MSGS_ROWS 5 // height of the Messages pane in text rows (8px each)
@@ -261,11 +265,11 @@
 #define EFFECT_FLAG_NO_COLLIDE 0x00000008
 
 #define EFFECT_FLAG_CURSE 0x00000010
-// #define EFFECT_FLAG_x 0x00000020
+#define EFFECT_FLAG_SEARCH 0x00000020
 // #define EFFECT_FLAG_x 0x00000040
 // #define EFFECT_FLAG_x 0x00000080
 
-#define NUM_EFFECT_FLAGS2 5
+#define NUM_EFFECT_FLAGS2 6
 
 // Effect Modifiers
 #define EFFECT_MOD_RESIST 0x000000001
@@ -319,8 +323,10 @@
 #define EQUIP_IDX_LRING 9
 #define EQUIP_IDX_RRING 10
 #define EQUIP_IDX_TORCH 11
-#define EQUIP_IDX_AMMO 12
-#define EQUIP_IDX_MAX 13 // adding a new type to equipment could be tricky; avoid
+#define EQUIP_IDX_2ND_MAIN 12
+#define EQUIP_IDX_2ND_OFF 13
+#define EQUIP_IDX_AMMO 14
+#define EQUIP_IDX_MAX 15 // adding a new type to equipment could be tricky; avoid
 
 // Types of items
 // see ItemIDs
@@ -565,6 +571,7 @@ public:
         m_StringTable[i++].Init( "EFFECT_FLAG_MONSTERS", EFFECT_FLAG_MONSTERS, EFFECT_FLAG2 );
         m_StringTable[i++].Init( "EFFECT_FLAG_NO_COLLIDE", EFFECT_FLAG_NO_COLLIDE, EFFECT_FLAG2 );
         m_StringTable[i++].Init( "EFFECT_FLAG_CURSE", EFFECT_FLAG_CURSE, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG_SEARCH", EFFECT_FLAG_SEARCH, EFFECT_FLAG2 );
 
         // Effect Modifiers
         m_StringTable[i++].Init( "EFFECT_MOD_RESIST", EFFECT_MOD_RESIST );
@@ -604,6 +611,8 @@ public:
         m_StringTable[i++].Init( "EQUIP_IDX_LRING", EQUIP_IDX_LRING );
         m_StringTable[i++].Init( "EQUIP_IDX_RRING", EQUIP_IDX_RRING );
         m_StringTable[i++].Init( "EQUIP_IDX_TORCH", EQUIP_IDX_TORCH );
+        m_StringTable[i++].Init( "EQUIP_IDX_2ND_MAIN", EQUIP_IDX_2ND_MAIN );
+        m_StringTable[i++].Init( "EQUIP_IDX_2ND_OFF", EQUIP_IDX_2ND_OFF );
         m_StringTable[i++].Init( "EQUIP_IDX_AMMO", EQUIP_IDX_AMMO );
 
         // Item Types

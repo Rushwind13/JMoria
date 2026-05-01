@@ -3,7 +3,6 @@
 // clang-format off
 #include "JMDefs.h"
 // clang-format on
-#include "Constants.h"
 #include "JColor.h"
 #include "JLinkList.h"
 #include "Util.h"

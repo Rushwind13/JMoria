@@ -33,7 +33,9 @@ private:
     bool IsTargetCommand( JKeysym *keysym );
     bool IsTeleportCommand( JKeysym *keysym );
     bool IsSetIntrinsicCommand( JKeysym *keysym );
+    bool IsFireCommand( JKeysym *keysym );
     bool IsZapCommand( JKeysym *keysym );
+    bool IsXchangeCommand( JKeysym *keysym );
     bool IsCreateItemCommand( JKeysym *keysym );
     bool IsSummonMonsterCommand( JKeysym *keysym );
     bool IsPickupCommand( JKeysym *keysym );

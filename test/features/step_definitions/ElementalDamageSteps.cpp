@@ -65,8 +65,8 @@ THEN( "^the player's ([A-Za-z ]+) count is less than (\\d+)$" )
         pLink = pLink->next;
     }
 
-    JLog( LOG_LEVEL_INFO, true, "Item count for %s: %d (expected < %d)\n", itemName.c_str(),
-          total, expected );
+    JLog( LOG_LEVEL_INFO, true, "Item count for %s: %d (expected < %d)\n", itemName.c_str(), total,
+          expected );
     EXPECT_LT( total, expected );
 }
 

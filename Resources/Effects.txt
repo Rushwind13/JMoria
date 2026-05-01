@@ -348,13 +348,6 @@ Effect <Heal Monster>
     Flag        <EFFECT_FLAG_HP>
     Range       15
 }
-Effect <Life Drain>
-{
-    Type        <EFFECT_TYPE_HIT>
-    Flag        <EFFECT_FLAG_HP>
-    Amount      <1d10>
-    Range       1
-}
 # --- EFFECT_FLAG_TELEPORT ---
 
 Effect <Teleport Away>
@@ -368,6 +361,14 @@ Effect <Physical Hit>
     Type        <EFFECT_TYPE_HIT>
     Amount      <1d6>
     Range       1
+}
+Effect <Arrow Shot>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Amount      <1d8>
+    Beam        <}>
+    Range       20
+    Color       <64, 64, 0, 255>
 }
 
 # --- HEAL - restore HP and cure status ---
@@ -735,7 +736,7 @@ Effect <Timed Speed>
 Effect <Searching>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
-    Flag        <EFFECT_FLAG_SEARCHING>
+    Flag        <EFFECT_FLAG_SEARCH>
 }
 
 # --- RESTORE - identify, recharge ---

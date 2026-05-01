@@ -589,11 +589,27 @@ void CPlayer::PickUp( JVector &vPickupPos )
             while( pExists != NULL )
             {
                 // we have an item of that type in inventory -- is it the correct item?
-                if( Util::jstrcmp( pExists->m_lpData->GetName(), pItem->GetName() ) == 0 )
+                CItem *pExisting = pExists->m_lpData;
+
+                // Stack only if: name matches, identification status matches, and charges match (if
+                // applicable)
+                bool nameMatches = ( Util::jstrcmp( pExisting->GetName(), pItem->GetName() ) == 0 );
+                bool identStatusMatches = ( ( pExisting->m_dwFlags & ITEM_FLAG_IDENTIFIED ) ==
+                                            ( pItem->m_dwFlags & ITEM_FLAG_IDENTIFIED ) );
+
+                // For wands/staffs (charged items), also check charge count
+                bool chargesMatch = true;
+                if( pItem->m_id->m_dwIndex == ITEM_IDX_WAND ||
+                    pItem->m_id->m_dwIndex == ITEM_IDX_STAFF )
                 {
-                    pExists->m_lpData->m_dwCount++;
-                    g_pGame->GetMsgs()->Printf( "You have %d %s.\n", pExists->m_lpData->m_dwCount,
-                                                pExists->m_lpData->GetPlural() );
+                    chargesMatch = ( pExisting->m_dwCharges == pItem->m_dwCharges );
+                }
+
+                if( nameMatches && identStatusMatches && chargesMatch )
+                {
+                    pExisting->m_dwCount++;
+                    g_pGame->GetMsgs()->Printf( "You have %d %s.\n", pExisting->m_dwCount,
+                                                pExisting->GetPlural() );
 
                     g_pGame->GetDungeon()->GetTile( vPickupPos )->m_pCurItem = NULL;
                     return;
@@ -611,7 +627,13 @@ void CPlayer::PickUp( JVector &vPickupPos )
 
 bool CPlayer::IsWieldable( CLink<CItem> *pLink )
 {
-    return ( pLink->m_lpData->EquipType() != EQUIP_IDX_INVALID );
+    CItem *pItem = pLink->m_lpData;
+    if( pItem == NULL )
+        return false;
+    // Exclude ammo items (arrows, bolts) from wield list
+    if( pItem->m_id->m_dwIndex == ITEM_IDX_ARROW || pItem->m_id->m_dwIndex == ITEM_IDX_BOLT )
+        return false;
+    return ( pItem->EquipType() != EQUIP_IDX_INVALID );
 }
 
 JResult CPlayer::Wield( CLink<CItem> *pLink )
@@ -1241,14 +1263,7 @@ JResult CPlayer::Quaff( CLink<CItem> *pLink )
     {
         pItem->m_id->m_bTried = true;
     }
-    if( pItem->IsStackable() && pItem->m_dwCount > 1 )
-    {
-        pItem->m_dwCount--;
-    }
-    else
-    {
-        m_llInventory->Remove( pItem->m_pllLink, false ); // Potions are single-use
-    }
+    ConsumeItem( pLink ); // Unified consumption
     return retval;
 }
 
@@ -1267,14 +1282,7 @@ JResult CPlayer::Read( CLink<CItem> *pLink )
     {
         pItem->m_id->m_bTried = true;
     }
-    if( pItem->IsStackable() && pItem->m_dwCount > 1 )
-    {
-        pItem->m_dwCount--;
-    }
-    else
-    {
-        m_llInventory->Remove( pItem->m_pllLink, false ); // Scrolls are single-use
-    }
+    ConsumeItem( pLink ); // Unified consumption
     return retval;
 }
 
@@ -1290,8 +1298,8 @@ JResult CPlayer::Zap( CLink<CItem> *pLink )
 
 JResult CPlayer::Fire( CLink<CItem> *pLink )
 {
-    // this will get called multiple times for a single shot, if EFFECT_FLAG_NO_COLLIDE is set,
-    // this function is to do damage to the monster in the current position
+    // Apply effects on impact (called when projectile hits a monster)
+    // NOTE: Consumption happens in RangedState::DoLaunch(), not here
     CItem *pItem = pLink->m_lpData;
 
     // Track this ammo for ranged to-hit calculations in DoElementalHit
@@ -1303,17 +1311,102 @@ JResult CPlayer::Fire( CLink<CItem> *pLink )
     // Clear the ranged ammo tracker
     m_pCurrentRangedAmmo = NULL;
 
-    // Consume one arrow/bolt at a time (not the whole stack)
-    if( pItem->IsStackable() && pItem->m_dwCount > 1 )
+    return retval;
+}
+
+void CPlayer::ConsumeItem( CLink<CItem> *pLink )
+{
+    // Unified consumption: remove item from inventory when used
+    // Stack decrements are handled by CItem::Consume() (for charges/counts)
+    // This handles inventory removal when the last unit is consumed
+    if( pLink == NULL || pLink->m_lpData == NULL )
+    {
+        return;
+    }
+
+    CItem *pItem = pLink->m_lpData;
+    if( pItem->m_dwCount > 1 )
     {
         pItem->m_dwCount--;
     }
     else
     {
-        m_llInventory->Remove( pItem->m_pllLink, false ); // Arrows/bolts are consumable
+        m_llInventory->Remove( pItem->m_pllLink, false );
+    }
+}
+
+void CPlayer::ConsumeAndRemoveIfEmpty( CLink<CItem> *pLink )
+{
+    // Consume an item and remove it from inventory if it becomes empty
+    if( pLink == NULL || pLink->m_lpData == NULL )
+    {
+        return;
     }
 
-    return retval;
+    pLink->m_lpData->Consume();
+    if( pLink->m_lpData->IsConsumed() )
+    {
+        m_llInventory->Remove( pLink, false );
+    }
+}
+
+void CPlayer::ConsolidateInventory()
+{
+    // Auto-consolidate inventory stacks with matching charges/identification
+    // After items are consumed or equipment is modified, stacks may need reorganization
+    // This runs between turns and silently merges matching stacks
+
+    bool anyMerged = false;
+
+    CLink<CItem> *pOuter = m_llInventory->GetHead();
+    while( pOuter != NULL )
+    {
+        CItem *pOuterItem = pOuter->m_lpData;
+        CLink<CItem> *pInner = m_llInventory->GetNext( pOuter );
+
+        while( pInner != NULL )
+        {
+            CItem *pInnerItem = pInner->m_lpData;
+            CLink<CItem> *pNext = m_llInventory->GetNext( pInner );
+
+            // Check if these items can stack together
+            if( pOuterItem->m_id->m_dwIndex == pInnerItem->m_id->m_dwIndex &&
+                pOuterItem->IsStackable() &&
+                Util::jstrcmp( pOuterItem->GetName(), pInnerItem->GetName() ) == 0 &&
+                ( ( pOuterItem->m_dwFlags & ITEM_FLAG_IDENTIFIED ) ==
+                  ( pInnerItem->m_dwFlags & ITEM_FLAG_IDENTIFIED ) ) )
+            {
+                // For charged items, also check charge count matches
+                bool chargesMatch = true;
+                if( pOuterItem->m_id->m_dwIndex == ITEM_IDX_WAND ||
+                    pOuterItem->m_id->m_dwIndex == ITEM_IDX_STAFF )
+                {
+                    chargesMatch = ( pOuterItem->m_dwCharges == pInnerItem->m_dwCharges );
+                }
+
+                if( chargesMatch )
+                {
+                    // Merge: add inner count to outer
+                    pOuterItem->m_dwCount += pInnerItem->m_dwCount;
+                    m_llInventory->Remove( pInner, false );
+                    anyMerged = true;
+
+                    // Don't advance pInner since we just removed it
+                    pInner = pNext;
+                    continue;
+                }
+            }
+
+            pInner = pNext;
+        }
+
+        pOuter = m_llInventory->GetNext( pOuter );
+    }
+
+    if( anyMerged )
+    {
+        g_pGame->GetMsgs()->Printf( "You organize your pack.\n" );
+    }
 }
 
 JResult CPlayer::Magic( CLink<CItem> *pLink )
@@ -2347,11 +2440,16 @@ bool CPlayer::IsDrinkable( CLink<CItem> *pLink )
 bool CPlayer::IsFireable( CLink<CItem> *pLink )
 {
     bool retval = false;
-    switch( pLink->m_lpData->m_id->m_dwIndex )
+    CItem *pItem = pLink->m_lpData;
+    if( pItem == NULL || pItem->m_id == NULL )
+        return false;
+
+    switch( pItem->m_id->m_dwIndex )
     {
     case ITEM_IDX_ARROW:
     case ITEM_IDX_BOLT:
-        retval = true;
+        // Only fireable if we have ammo remaining
+        retval = ( pItem->m_dwCount > 0 );
         break;
     default:
         break;

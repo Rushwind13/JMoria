@@ -312,6 +312,7 @@ Item <Short Bow>
     Type        <ITEM_IDX_BOW>
     Value       120.0
     Flags       <ITEM_FLAG_NEEDSAMMO>
+    Range       <3-8>
     Level       3
     Damage      <1d2>
     Weight      3.0
@@ -320,10 +321,11 @@ Item <Short Bow>
 }
 Item <Long Bow>
 {
-    Plural        <Long Bows>
-    Type        <ITEM_IDX_BOW>
+    Plural       <Long Bows>
+    Type         <ITEM_IDX_BOW>
     Value        250.0
-    Flags       <ITEM_FLAG_NEEDSAMMO>
+    Flags        <ITEM_FLAG_NEEDSAMMO>
+    Range        <4-12>
     Level        20
     Damage       <1d2>
     Weight       10.0

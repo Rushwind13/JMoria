@@ -499,6 +499,38 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
             {
                 idIn.m_fDuration = GetValue( szLine, idIn.m_fDuration );
             }
+            else if( strncasecmp( szLine, "range", 5 ) == 0 )
+            {
+                // Parse Range <min max> format
+                char szRange[256] = "";
+                char *pRange = GetValue( szLine, szRange );
+                if( pRange && *pRange )
+                {
+                    uint32 dwMin = 0, dwMax = 0;
+                    int nScanned = sscanf( pRange, "%u-%u", &dwMin, &dwMax );
+                    if( nScanned == 2 && dwMin > 0 && dwMax >= dwMin )
+                    {
+                        idIn.m_dwMinRange = dwMin;
+                        idIn.m_dwMaxRange = dwMax;
+                        // Validate that range does not exceed max projectile range
+                        if( idIn.m_dwMaxRange > MAX_PROJECTILE_RANGE )
+                        {
+                            fprintf( stderr,
+                                     "Error Parsing Items.txt: Item range %u exceeds "
+                                     "MAX_PROJECTILE_RANGE %u\n",
+                                     idIn.m_dwMaxRange, MAX_PROJECTILE_RANGE );
+                            exit( 1 );
+                        }
+                    }
+                    else
+                    {
+                        fprintf( stderr, "Error Parsing Items.txt: Invalid Range format (expected "
+                                         "'Range <min max>')\n" );
+                        exit( 1 );
+                    }
+                    delete[] pRange;
+                }
+            }
             else if( strncasecmp( szLine, "type", 4 ) == 0 )
             {
                 // TODO: Add validation that this is ITEM_IDX_ and not...

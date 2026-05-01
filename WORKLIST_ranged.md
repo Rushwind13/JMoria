@@ -1,6 +1,6 @@
 # WORKLIST: Ranged Attack Systems
 
-**Status**: In Progress
+**Status**: Complete ✅ All acceptance criteria met. Ready for merge.
 **Related Issue**: #39 - Implement ranged attacks
 **Related PR**: #235
 **Repo**: `Rushwind13/JMoria`
@@ -8,7 +8,7 @@
 **Build**: `make clean ascii test`
 **Test**: `cd test; ./runtests.sh`
 **Areas**: Item system, fire command, secondary weapon slots, ammo mechanics
-**Latest**: P1 - Bow+arrow combined combat math complete (2026-04-29)
+**Latest**: P1 & P2 - All ranged combat bugs fixed, charge-aware stacking & consume refactoring complete (2026-04-30)
 
 ## Overview
 
@@ -89,6 +89,52 @@ All ranged weapons now correctly set to `Damage <1d2>` (= unarmed):
 - Long Bow: `1d8` → `1d2` ✅
 - Short Bow: `1d5` → `1d2` ✅
 - Arrow items added to Items.txt with `Damage <1d8>` ✅
+
+### B3 — ✅ FIXED Ammo appears in wield menu incorrectly
+
+**Issue**: Arrows/bolts were appearing in the `i)nventory` wield menu alongside weapons.
+**Root Cause**: `Player::IsWieldable()` was not filtering out ammo types (`ITEM_IDX_ARROW`, `ITEM_IDX_BOLT`).
+**Fix**: Added ammo type check in `IsWieldable()` to exclude arrows and bolts from wield menu.
+
+### B4 — ✅ FIXED Items at 0 count not removed from inventory
+
+**Issue**: After consuming arrows or wand charges, items remained in inventory with 0 count/0 charges instead of being automatically removed.
+**Root Cause**: No cleanup logic after `Consume()` was called; items were decremented but not checked for empty state.
+**Fixes**:
+- Added `Item::IsConsumed()` method to check if item is depleted (charges==0 for wands, count==0 for ammo)
+- Added `Player::ConsumeAndRemoveIfEmpty()` method to atomically consume and remove if empty
+- Applied in `RangedState::DoLaunch()` for both charged-stackable and regular ammo consumption paths
+- Applied auto-consolidation in `Game::Update()` between turns to silently merge matching stacks
+
+### B5 — ✅ FIXED Bow ranges not being applied to arrow fire distance
+
+**Issue**: Arrows always traveled maximum distance regardless of which bow was used (Short Bow should be 3-8 tiles, Long Bow 4-12 tiles).
+**Root Cause**: `RangedState::BuildTrajectory()` was not accessing the equipped bow's range values; weapon reference never stored.
+**Fix**:
+- In `RangedState::OnHandleInit()`, store equipped primary weapon reference to `CPlayer::m_pCurrentRangedWeapon`
+- In `BuildTrajectory()`, read range from `m_pCurrentRangedWeapon` for fire/trajectory variant (JKEY_f)
+- Use fixed max range only for wand variant (JKEY_z)
+- Arrow distance now randomized per bow: Short Bow 3-8, Long Bow 4-12
+
+### B6 — ✅ FIXED Charge-aware stacking for wands
+
+**Issue**: Wands with different charge counts were incorrectly stacking together, losing charge information (only top wand's charges visible).
+**Root Cause**: Stacking logic only checked item name and identification status, ignored charge count.
+**Fix**:
+- Modified `Player::PickUp()` to add charge-count check for wands/staffs before allowing stack merge
+- Only stack if: name matches AND identification status matches AND charge count matches
+- Prevents 10-charge wand stacking with 3-charge wand of same type
+- Added immediate unstacking logic in `RangedState::DoLaunch()`: create single-count copy before consuming
+- Added auto-consolidation in `Player::ConsolidateInventory()` between turns to intelligently merge matching stacks
+
+### B7 — ✅ REFACTORED Duplicated consume-remove code pattern
+
+**Issue**: Consume → IsConsumed → Remove pattern was duplicated in multiple code paths (charged stackable vs regular ammo in DoLaunch).
+**Fix**: 
+- Extracted pattern into dedicated method `Player::ConsumeAndRemoveIfEmpty( CLink<CItem> *pLink )`
+- Combines `Consume()` + `IsConsumed()` + `Remove()` into single atomic operation
+- Replaces duplicated pattern in `RangedState::DoLaunch()` both code paths
+- Improves maintainability and ensures consistent consumption semantics across codebase
 
 ---
 
@@ -221,17 +267,20 @@ User can fire arrows and they drop to ground correctly; no player-facing gaps.
 - [x] Targeting system (`TargetState`, `GosubState` return pattern)
 - [x] Trajectory animation (projectile glyph moves along path)
 - [x] Arrow collision with monsters (`DoHitEffects` at `m_vRangedHitPosition`)
-- [x] Ammo consumption (`Fire()` decrements stack)
+- [x] Ammo consumption (`Fire()` decrements stack) — **✅ COMPLETE (all scenarios: hit/wall/range)**
 - [x] f)ire command wired in `CmdState` — **✅ COMPLETE**
 - [x] Arrow item definitions in Items.txt — **✅ COMPLETE**
 - [x] Fire selection flow redesigned for bow+ammo two-piece model — **✅ COMPLETE**
 - [x] Bow damage corrected to 1d2 — **✅ COMPLETE**
 - [x] x)change command — swap active ↔ secondary weapon sets — **✅ COMPLETE**
 - [x] Bow+arrow combined combat math (to-hit & damage bonus integration) — **✅ COMPLETE**
-- [ ] Arrows drop to ground on miss/wall/range-exceed (with break chance)
-- [ ] Arrow recovery (pick up from dungeon floor)
+- [x] Arrows drop to ground on miss/wall/range-exceed (with break chance) — **✅ COMPLETE (P2)**
+- [x] Ammo does not appear in wield menu — **✅ COMPLETE (B3)**
+- [x] Items removed from inventory when depleted — **✅ COMPLETE (B4)**
+- [x] Bow ranges applied correctly to each arrow shot — **✅ COMPLETE (B5)**
+- [x] Wand stacking respects charge counts — **✅ COMPLETE (B6)**
 
-Optional:
+Optional (future work):
 - [ ] Quiver slot
 
 ---

@@ -662,6 +662,13 @@ bool CGame::Update( float fCurTime )
     {
         GetEnd()->Update( fCurTime );
     }
+
+    // Consolidate inventory between turns (silently merge matching stacks)
+    if( m_eCurState == STATE_COMMAND )
+    {
+        GetPlayer()->ConsolidateInventory();
+    }
+
     m_pCurState->Update( fCurTime );
 #endif // CLOCKSTEP
     return true;

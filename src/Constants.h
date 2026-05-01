@@ -91,6 +91,8 @@
 #define CHANCE_SEARCH_PASSIVE 5
 // Ranged attack percentages (1-100)
 #define CHANCE_ARROW_BREAK 33 // ~1 in 3 chance arrow breaks on landing
+// Ranged attack limits
+#define MAX_PROJECTILE_RANGE 20 // Maximum trajectory length for projectiles (wands, arrows, bolts)
 
 // UI / Display constants
 #define MSGS_ROWS 5 // height of the Messages pane in text rows (8px each)

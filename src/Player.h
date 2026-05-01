@@ -129,6 +129,7 @@ public:
           m_pClass( NULL ),
           m_pTarget( NULL ),
           m_pCurrentRangedAmmo( NULL ),
+          m_pCurrentRangedWeapon( NULL ),
           m_vRangedHitPosition( 0, 0 ),
           m_llVisibleMonsters( NULL )
     {
@@ -225,6 +226,7 @@ public:
     bool Drop( CItem *pItem, int quantity ); // Drop a partial stack
 
     bool CanDropHere();
+    void ConsolidateInventory(); // Auto-consolidate stacks with matching charges/identification
 
     void SetIntrinsic( const uint32 dwIntrinsic ) { m_dwIntrinsics |= dwIntrinsic; };
     void UnsetIntrinsic( const uint32 dwIntrinsic ) { m_dwIntrinsics &= ~dwIntrinsic; };
@@ -250,6 +252,11 @@ public:
 
     bool IsZappable( CLink<CItem> *pLink );
     JResult Zap( CLink<CItem> *pLink );
+
+    void
+    ConsumeItem( CLink<CItem> *pLink ); // Unified consumption for ammo/charges: decrement or remove
+    void ConsumeAndRemoveIfEmpty(
+        CLink<CItem> *pLink ); // Consume item and remove from inventory if empty
 
     bool IsCastable( CLink<CItem> *pLink );
     JResult Magic( CLink<CItem> *pLink );
@@ -342,6 +349,7 @@ public:
     float m_fToHitModifier;
     float m_fSpeed;              // action economy: 1.0 = base (10), 2.0 = fast (20), 0.8 = slow (8)
     CItem *m_pCurrentRangedAmmo; // Current arrow/bolt being fired, for to-hit calculation
+    CItem *m_pCurrentRangedWeapon; // Current bow/wand being used, for range calculation
 
     char *m_szKilledBy;
 

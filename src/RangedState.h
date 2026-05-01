@@ -93,7 +93,11 @@ public:
     };
 
 protected:
+#ifdef UNIT_TEST
+public:
+#else
 private:
+#endif // UNIT_TEST    
     int OnHandleFire( JKeysym *keysym );
     int OnHandleInit( JKeysym *keysym );
     int OnHandleLaunch( JKeysym *keysym );

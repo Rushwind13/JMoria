@@ -1235,11 +1235,10 @@ void CDungeon::DrawDungeon()
             }
             else if( g_pGame->GetGameStateIndex() == STATE_RANGED )
             {
-                if( !m_llProjectileTrajectory || !m_pProjectileEffect )
-                {
-                    // No trajectory data available
-                }
-                else
+                // Set default color for projectiles (white)
+                color = JColor( 255, 255, 255, 255 );
+
+                if( m_llProjectileTrajectory )
                 {
                     // Check if vScreen is on the trajectory path
                     int pathIndex = 0;
@@ -1249,28 +1248,24 @@ void CDungeon::DrawDungeon()
                         JIVector curPos = *( plPos->m_lpData );
                         if( (int)vScreen.x == curPos.x && (int)vScreen.y == curPos.y )
                         {
-                            bRangedBeamTile =
-                                m_pProjectileEffect->m_cBeamChar != ItemIDs[ITEM_IDX_ARROW];
-                            // Get color from effect definition, cycling through colors
-                            if( m_pProjectileEffect->m_llColors &&
-                                m_pProjectileEffect->m_llColors->length() > 0 )
+                            // On trajectory - use effect colors if available
+                            if( m_pProjectileEffect )
                             {
-                                int colorIndex =
-                                    pathIndex % m_pProjectileEffect->m_llColors->length();
-                                CLink<JColor> *plColor =
-                                    m_pProjectileEffect->m_llColors->GetNthLink( colorIndex );
-                                if( plColor )
+                                bRangedBeamTile =
+                                    m_pProjectileEffect->m_cBeamChar != ItemIDs[ITEM_IDX_ARROW];
+                                // Get color from effect definition, cycling through colors
+                                if( m_pProjectileEffect->m_llColors &&
+                                    m_pProjectileEffect->m_llColors->length() > 0 )
                                 {
-                                    color = *( plColor->m_lpData );
+                                    int colorIndex =
+                                        pathIndex % m_pProjectileEffect->m_llColors->length();
+                                    CLink<JColor> *plColor =
+                                        m_pProjectileEffect->m_llColors->GetNthLink( colorIndex );
+                                    if( plColor )
+                                    {
+                                        color = *( plColor->m_lpData );
+                                    }
                                 }
-                                else
-                                {
-                                    color = JColor( 255, 255, 85, 255 ); // fallback
-                                }
-                            }
-                            else
-                            {
-                                color = JColor( 255, 255, 85, 255 ); // fallback yellow
                             }
                             break;
                         }

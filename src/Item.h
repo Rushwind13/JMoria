@@ -33,6 +33,8 @@ public:
           m_dwFlags( 0 ),
           m_dwIndex( ITEM_IDX_INVALID ),
           m_dwBaseHP( 0.0f ),
+          m_dwMinRange( 0 ),
+          m_dwMaxRange( 0 ),
           m_bIdentified( false ),
           m_bTried( false )
     {
@@ -126,6 +128,8 @@ public:
     int m_dwBaseHP;    // for busting down walls, disarming traps, etc.
     float m_fDuration; // for potions, scrolls, torches -- "How long will this last?"
     float m_fRadius;   // for AoE effects -- "How big is the badaboom?"
+    uint32 m_dwMinRange; // for ranged weapons -- minimum trajectory length
+    uint32 m_dwMaxRange; // for ranged weapons -- maximum trajectory length
     JLinkList<JColor> *m_Colors;
     JLinkList<CEffect> *m_llEffects;
     JColor m_Color;
@@ -231,6 +235,10 @@ public:
     void Imbue( int depth );
     CItem *
     Copy( int quantity = 0 ); // Create a copy of this item with specified quantity (0 = full stack)
+    void Consume(); // Decrement charges (wands) or count (ammo); unified handler for fire/zap
+                    // consumption
+    bool
+    IsConsumed(); // Check if item is empty (0 charges/count) and should be removed from inventory
     JResult SpawnItem( JVector vSpawnPoint = JVector( -1, -1 ) );
     JResult SpawnAt( JVector vSpawnPoint );
 

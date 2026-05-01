@@ -141,6 +141,43 @@ CItem *CItem::Copy( int quantity )
     return pCopy;
 }
 
+void CItem::Consume()
+{
+    if( this == NULL || m_id == NULL )
+    {
+        return;
+    }
+
+    if( m_id->m_dwIndex == ITEM_IDX_WAND || m_id->m_dwIndex == ITEM_IDX_STAFF )
+    {
+        // Wand/staff: decrement charges
+        if( m_dwCharges > 0 )
+        {
+            m_dwCharges--;
+        }
+    }
+    else if( m_id->m_dwIndex == ITEM_IDX_ARROW || m_id->m_dwIndex == ITEM_IDX_BOLT )
+    {
+        // Ammo: decrement count
+        if( m_dwCount > 0 )
+        {
+            m_dwCount--;
+        }
+    }
+}
+
+bool CItem::IsConsumed()
+{
+    // Check if item should be removed from inventory (empty consumable)
+    if( m_id == NULL )
+        return false;
+    if( m_id->m_dwIndex == ITEM_IDX_WAND || m_id->m_dwIndex == ITEM_IDX_STAFF )
+        return ( m_dwCharges == 0 );
+    if( m_id->m_dwIndex == ITEM_IDX_ARROW || m_id->m_dwIndex == ITEM_IDX_BOLT )
+        return ( m_dwCount == 0 );
+    return false;
+}
+
 void CItem::SetCursed( bool bCursed )
 {
     if( bCursed )

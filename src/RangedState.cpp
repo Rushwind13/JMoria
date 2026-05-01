@@ -104,6 +104,9 @@ int CRangedState::OnHandleInit( JKeysym *keysym )
                 return JRESETSTATE;
             }
 
+            // Store the weapon so BuildTrajectory can access its range values
+            g_pGame->GetPlayer()->m_pCurrentRangedWeapon = pMainWeapon->m_lpData;
+
             mod = RANGED_FIRE;
             g_pGame->GetPlayer()->DisplayInventory( PLACEMENT_USE, INV_FIRE );
             break;
@@ -382,9 +385,38 @@ bool CollisionCheck( JVector &vTest )
 
 int CRangedState::BuildTrajectory()
 {
-    JLog( LOG_LEVEL_WARN, true, "BuildTrajectory: from <%d %d> to <%d %d>, range=%d\n",
-          VEC_EXPAND( m_vCurrentPosition ), VEC_EXPAND( m_vTarget ), PROJECTILE_RANGE );
-    m_llTrajectory = Util::GenerateLine( m_vCurrentPosition, m_vTarget, PROJECTILE_RANGE );
+    // Determine trajectory distance based on command type
+    uint32 dwDistance = MAX_PROJECTILE_RANGE; // default fallback
+
+    if( m_cCommand == JKEY_f )
+    {
+        // Bows: randomize between min and max range per shot
+        if( g_pGame->GetPlayer()->m_pCurrentRangedWeapon != NULL )
+        {
+            uint32 dwMin = g_pGame->GetPlayer()->m_pCurrentRangedWeapon->m_id->m_dwMinRange;
+            uint32 dwMax = g_pGame->GetPlayer()->m_pCurrentRangedWeapon->m_id->m_dwMaxRange;
+            if( dwMin > 0 && dwMax >= dwMin )
+            {
+                dwDistance = (uint32)Util::GetRandom( (float)dwMin, (float)dwMax );
+            }
+        }
+    }
+    else if( m_cCommand == JKEY_z )
+    {
+        // Wands: full range (max distance) every shot
+        if( m_pSelected != NULL && m_pSelected->m_lpData != NULL )
+        {
+            uint32 dwMax = m_pSelected->m_lpData->m_id->m_dwMaxRange;
+            if( dwMax > 0 )
+            {
+                dwDistance = dwMax;
+            }
+        }
+    }
+
+    JLog( LOG_LEVEL_WARN, true, "BuildTrajectory: from <%d %d> to <%d %d>, distance=%d\n",
+          VEC_EXPAND( m_vCurrentPosition ), VEC_EXPAND( m_vTarget ), dwDistance );
+    m_llTrajectory = Util::GenerateLine( m_vCurrentPosition, m_vTarget, dwDistance );
 
     if( m_llTrajectory && m_llTrajectory->length() > 0 )
     {
@@ -564,13 +596,40 @@ bool CRangedState::DoLaunch()
     {
         g_pGame->GetDungeon()->SetProjectileEffect( pEffectDef, m_llTrajectory );
     }
-
-    // NOTE: Ammo consumption happens in Player::Fire() after effect application, not here
-    // Wand charges are decremented here because wands are consumed at use time
-    if( !isStackable )
+    else if( m_llTrajectory && m_pSelected )
     {
-        m_pSelected->m_lpData->m_dwCharges--;
+        // No effect - trajectory will render at mundane projectile color (white fallback)
+        g_pGame->GetDungeon()->SetProjectileEffect( NULL, m_llTrajectory );
     }
+
+    // NOTE: Ammo and wand consumption now happens in CItem::Consume() called below,
+    // unified handler for both fire and zap paths.
+    // This ensures ammo is consumed immediately when fired, not on hit or impact.
+
+    // For charged items in a stack: unstack before consuming to preserve charge counts
+    bool isChargedStackable =
+        ( pItem->m_id->m_dwIndex == ITEM_IDX_WAND || pItem->m_id->m_dwIndex == ITEM_IDX_STAFF ) &&
+        pItem->m_dwCount > 1;
+
+    if( isChargedStackable )
+    {
+        // Create a copy with count=1 to unstack (takes one out of the stack)
+        CItem *pSingleCopy = pItem->Copy( 1 ); // Single item from this stack
+        pSingleCopy->m_pllLink = g_pGame->GetPlayer()->m_llInventory->Add(
+            pSingleCopy, pSingleCopy->m_id->m_dwIndex, pSingleCopy->GetInstanceId() );
+
+        // Decrement the original stack
+        pItem->m_dwCount--;
+
+        // Consume the copy and remove if depleted
+        g_pGame->GetPlayer()->ConsumeAndRemoveIfEmpty( pSingleCopy->m_pllLink );
+    }
+    else
+    {
+        // Non-charged or non-stacked: just consume and remove if empty
+        g_pGame->GetPlayer()->ConsumeAndRemoveIfEmpty( m_pSelected );
+    }
+
     g_pGame->SetReadyForUpdate( false );
     return true;
 }
@@ -733,7 +792,7 @@ bool CRangedState::DoTrajectory()
     }
 
     // failsafe: don't lock up
-    if( m_dwClock > 20 )
+    if( m_dwClock > MAX_PROJECTILE_RANGE )
     {
         JLog( LOG_LEVEL_WARN, true, "failsafe in TRAJECTORY\n" );
         // Arrow exceeded maximum trajectory steps; drop it at current position

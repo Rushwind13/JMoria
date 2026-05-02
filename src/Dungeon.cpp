@@ -1466,6 +1466,13 @@ void CDungeon::Term()
         m_llItemDefs = NULL;
     }
 
+    if( m_llEffectDefs )
+    {
+        m_llEffectDefs->Terminate();
+        delete m_llEffectDefs;
+        m_llEffectDefs = NULL;
+    }
+
     ClearLOSLine();
 }
 

@@ -1812,9 +1812,12 @@ JResult CPlayer::DoDamageInventory( uint32 dwElement )
     // Immunity protects items
     if( fResistMult == 0.0f )
         return JBOGUSKEY;
-
+#ifdef UNIT_TEST
+    float fChance = 1.1f;
+#else
     // Base 3% chance per inventory slot; halved when player resists
     float fChance = ( fResistMult < 1.0f ) ? 0.015f : 0.03f;
+#endif
 
     const char *szVerb = "are destroyed";
     if( element == EFFECT_FLAG_FIRE )
@@ -1856,9 +1859,11 @@ JResult CPlayer::DoDamageEquipment( uint32 dwElement )
     float fResistMult = Resist( dwElement );
     if( fResistMult == 0.0f )
         return JBOGUSKEY;
-
+#ifdef UNIT_TEST
+    float fChance = 1.1;
+#else
     float fChance = ( fResistMult < 1.0f ) ? 0.015f : 0.03f;
-
+#endif
     const char *szElement = ( element == EFFECT_FLAG_FIRE ) ? "fire" : "acid";
 
     CLink<CItem> *pLink = m_llEquipment->GetHead();

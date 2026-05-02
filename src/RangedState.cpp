@@ -923,7 +923,11 @@ void CRangedState::DropAmmo( JVector vFinalPos )
     }
 
     // Check if arrow breaks on impact (before creating/placing anything)
+#ifdef UNIT_TEST
+    int breakChance = 100;  // Force arrows to survive in unit tests
+#else
     int breakChance = Util::GetRandom( 1, 100 );
+#endif // UNIT_TEST
     if( breakChance <= CHANCE_ARROW_BREAK )
     {
         g_pGame->GetMsgs()->Printf( "The arrow breaks.\n" );

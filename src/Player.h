@@ -151,6 +151,9 @@ public:
                 m_fHitPoints = fMinHP;
         }
         m_fCurHitPoints = m_fHitPoints;
+
+        // Keep derived combat stats in sync with the canonical recalc path.
+        RecalcCombatStats();
     };
     ~CPlayer() { Term(); }
 
@@ -238,6 +241,7 @@ public:
     bool IsRemovable( CLink<CItem> *pLink );
     bool RemoveEquipment( CLink<CItem> *pLink );
 
+    void RecalcCombatStats();
     void XchangeWeapons();
 
     bool IsDrinkable( CLink<CItem> *pLink );
@@ -326,6 +330,10 @@ public:
     bool Hit( float &fRoll );
     int TakeDamage( float fDamage, const char *szMon, uint32 dwElement = 0 );
     float Resist( uint32 dwElement );
+    static float ItemDestroyChance( float fResistMult )
+    {
+        return fResistMult * ITEM_DESTROY_CHANCE;
+    }
 
     void OnKillMonster( CMonster *pMon, float fKillingBlow );
     bool DamageMonster( CMonster *pMon, float fDamage );

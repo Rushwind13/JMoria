@@ -20,10 +20,10 @@ Open issues labeled `cleanup` on branch `feat/phase3c_polish`, prioritized by im
 ## P2 — Quick Cleanup (small scope, clear fix)
 
 - **#290** [High score list prints backwards](https://github.com/Rushwind13/JMoria/issues/290)
-  Scores display in ascending order after recent `JLinkList` fix; trivial reversal needed.
+  Completed: fixed `Add()` argument order so score sort now uses descending index (`Add(ps, score, -1, false)`).
 
 - **#303** [player stat reset during x)change](https://github.com/Rushwind13/JMoria/issues/303)
-  Stat reset logic during character swap should be extracted into a shared `Init()`-style function instead of being duplicated inline.
+  Completed: extracted shared `RecalcCombatStats()` and switched `XchangeWeapons()`, `Wield()`, `RemoveEquipment()`, and player construction to use it (AC base remains `1.0`).
 
 ---
 

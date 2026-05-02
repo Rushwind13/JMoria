@@ -721,12 +721,6 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
     // Now put on the new item.
     m_llInventory->Remove( pLink, false );
     pItem->m_pllLink = m_llEquipment->Add( pItem, pItem->EquipType(), pItem->GetInstanceId() );
-    m_fArmorClass += pItem->m_id->m_fBaseAC + pItem->m_fACBonus;
-    if( pItem->m_id->m_szBaseDamage != NULL )
-        Util::jstrcpy( m_szDamage, pItem->m_id->m_szBaseDamage );
-    m_fDamageModifier += pItem->m_fBonusToDamage;
-    m_fToHitModifier += pItem->m_fBonusToHit;
-    m_fSpeed += pItem->m_fSpeedBonus;
 
     // Defensive: if this is a two-handed weapon, ensure off-hand is clear.
     if( pItem->m_id && ( pItem->m_id->m_dwFlags & ITEM_FLAG_2HANDED ) )
@@ -752,6 +746,8 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
             RemoveEquipment( pOffCheck );
         }
     }
+
+    RecalcCombatStats();
 
     return JSUCCESS;
 }
@@ -785,14 +781,48 @@ bool CPlayer::RemoveEquipment( CLink<CItem> *pLink )
 
     m_llEquipment->Remove( pLink, false );
     pItem->m_pllLink = m_llInventory->Add( pItem, pItem->m_id->m_dwIndex, pItem->GetInstanceId() );
-    m_fArmorClass -= pItem->m_id->m_fBaseAC + pItem->m_fACBonus;
-    if( pItem->m_id->m_szBaseDamage != NULL )
-        Util::jstrcpy( m_szDamage, PLAYER_BASE_DAMAGE );
-    m_fDamageModifier -= pItem->m_fBonusToDamage;
-    m_fToHitModifier -= pItem->m_fBonusToHit;
-    m_fSpeed -= pItem->m_fSpeedBonus;
+    RecalcCombatStats();
 
     return true;
+}
+
+void CPlayer::RecalcCombatStats()
+{
+    // Reset to base values
+    m_fArmorClass = 1.0f;
+    Util::jstrcpy( m_szDamage, PLAYER_BASE_DAMAGE );
+    m_fDamageModifier = 0.0f;
+    m_fToHitModifier = 0.0f;
+    m_fSpeed = 1.0f;
+
+    // Re-add contributions from all active equipment slots
+    CLink<CItem> *pLink = m_llEquipment->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData )
+        {
+            CItem *pItem = pLink->m_lpData;
+            bool isActive =
+                ( pLink->m_dwIndex == EQUIP_IDX_MAIN_HAND ||
+                  pLink->m_dwIndex == EQUIP_IDX_OFF_HAND || pLink->m_dwIndex == EQUIP_IDX_HELMET ||
+                  pLink->m_dwIndex == EQUIP_IDX_AMULET || pLink->m_dwIndex == EQUIP_IDX_ARMOR ||
+                  pLink->m_dwIndex == EQUIP_IDX_CLOAK || pLink->m_dwIndex == EQUIP_IDX_GLOVES ||
+                  pLink->m_dwIndex == EQUIP_IDX_BELT || pLink->m_dwIndex == EQUIP_IDX_BOOTS ||
+                  pLink->m_dwIndex == EQUIP_IDX_LRING || pLink->m_dwIndex == EQUIP_IDX_RRING ||
+                  pLink->m_dwIndex == EQUIP_IDX_TORCH );
+
+            if( isActive && pItem->m_id )
+            {
+                m_fArmorClass += pItem->m_id->m_fBaseAC + pItem->m_fACBonus;
+                if( pItem->m_id->m_szBaseDamage != NULL )
+                    Util::jstrcpy( m_szDamage, pItem->m_id->m_szBaseDamage );
+                m_fDamageModifier += pItem->m_fBonusToDamage;
+                m_fToHitModifier += pItem->m_fBonusToHit;
+                m_fSpeed += pItem->m_fSpeedBonus;
+            }
+        }
+        pLink = m_llEquipment->GetNext( pLink );
+    }
 }
 
 void CPlayer::XchangeWeapons()
@@ -819,43 +849,7 @@ void CPlayer::XchangeWeapons()
     m_llEquipment->SwapData( pMainHand, p2ndMain );
     m_llEquipment->SwapData( pOffHand, p2ndOff );
 
-    // Recalculate all combat stats from scratch
-    // Start with base values
-    m_fArmorClass = 10.0f; // Base AC
-    Util::jstrcpy( m_szDamage, PLAYER_BASE_DAMAGE );
-    m_fDamageModifier = 0.0f;
-    m_fToHitModifier = 0.0f;
-    m_fSpeed = 1.0f; // Base speed multiplier
-
-    // Re-add contributions from all equipped items
-    CLink<CItem> *pLink = m_llEquipment->GetHead();
-    while( pLink )
-    {
-        if( pLink->m_lpData )
-        {
-            CItem *pItem = pLink->m_lpData;
-            // Only count items in active slots (not secondary slots)
-            bool isActive =
-                ( pLink->m_dwIndex == EQUIP_IDX_MAIN_HAND ||
-                  pLink->m_dwIndex == EQUIP_IDX_OFF_HAND || pLink->m_dwIndex == EQUIP_IDX_HELMET ||
-                  pLink->m_dwIndex == EQUIP_IDX_AMULET || pLink->m_dwIndex == EQUIP_IDX_ARMOR ||
-                  pLink->m_dwIndex == EQUIP_IDX_CLOAK || pLink->m_dwIndex == EQUIP_IDX_GLOVES ||
-                  pLink->m_dwIndex == EQUIP_IDX_BELT || pLink->m_dwIndex == EQUIP_IDX_BOOTS ||
-                  pLink->m_dwIndex == EQUIP_IDX_LRING || pLink->m_dwIndex == EQUIP_IDX_RRING ||
-                  pLink->m_dwIndex == EQUIP_IDX_TORCH );
-
-            if( isActive && pItem->m_id )
-            {
-                m_fArmorClass += pItem->m_id->m_fBaseAC + pItem->m_fACBonus;
-                if( pItem->m_id->m_szBaseDamage != NULL )
-                    Util::jstrcpy( m_szDamage, pItem->m_id->m_szBaseDamage );
-                m_fDamageModifier += pItem->m_fBonusToDamage;
-                m_fToHitModifier += pItem->m_fBonusToHit;
-                m_fSpeed += pItem->m_fSpeedBonus;
-            }
-        }
-        pLink = m_llEquipment->GetNext( pLink );
-    }
+    RecalcCombatStats();
 
     // Print feedback message
     CLink<CItem> *pNewMain = m_llEquipment->GetLink( EQUIP_IDX_MAIN_HAND );
@@ -1812,12 +1806,7 @@ JResult CPlayer::DoDamageInventory( uint32 dwElement )
     // Immunity protects items
     if( fResistMult == 0.0f )
         return JBOGUSKEY;
-#ifdef UNIT_TEST
-    float fChance = 1.1f;
-#else
-    // Base 3% chance per inventory slot; halved when player resists
-    float fChance = ( fResistMult < 1.0f ) ? 0.015f : 0.03f;
-#endif
+    float fChance = ItemDestroyChance( fResistMult );
 
     const char *szVerb = "are destroyed";
     if( element == EFFECT_FLAG_FIRE )
@@ -1859,11 +1848,7 @@ JResult CPlayer::DoDamageEquipment( uint32 dwElement )
     float fResistMult = Resist( dwElement );
     if( fResistMult == 0.0f )
         return JBOGUSKEY;
-#ifdef UNIT_TEST
-    float fChance = 1.1;
-#else
-    float fChance = ( fResistMult < 1.0f ) ? 0.015f : 0.03f;
-#endif
+    float fChance = ItemDestroyChance( fResistMult );
     const char *szElement = ( element == EFFECT_FLAG_FIRE ) ? "fire" : "acid";
 
     CLink<CItem> *pLink = m_llEquipment->GetHead();

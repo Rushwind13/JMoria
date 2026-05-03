@@ -253,38 +253,18 @@ bool CAIBrain::UpdateIdle( float fCurTime ) { return true; }
 
 bool CAIBrain::SetRandomDest( float fCurTime )
 {
-    JFVector delta, dest;
+    JFVector delta;
     delta.Init( (int)( Util::GetRandom( -2.0f, 2.0f ) ), (int)( Util::GetRandom( -2.0f, 2.0f ) ) );
-    dest = m_vPos + delta;
 
     JLog( LOG_LEVEL_NOISE, true, "and we're rnging... <%.2f %.2f> + <%.2f %.2f> = <%.2f %.2f> ",
-          VEC_EXPAND( m_vPos ), VEC_EXPAND( delta ), VEC_EXPAND( dest ) );
+          VEC_EXPAND( m_vPos ), VEC_EXPAND( delta ), VEC_EXPAND( m_vPos + delta ) );
 
-    if( Util::IsInWorld( dest ) )
-    {
-        int dwCollideType = g_pGame->GetDungeon()->IsWalkableFor( dest );
-        switch( dwCollideType )
-        {
-        case DUNG_COLL_NO_COLLISION:
-        case DUNG_COLL_PLAYER:
-            m_vVel = delta;
-            JLog( LOG_LEVEL_NOISE, true, "hit %d change course <%.2f %.2f>\n", dwCollideType,
-                  VEC_EXPAND( m_vVel ) );
-            break;
-        default:
-            JLog( LOG_LEVEL_NOISE, true, "hit %d steady course <%.2f %.2f>\n", dwCollideType,
-                  VEC_EXPAND( m_vVel ) );
-            // m_vVel.Init();
-            break;
-        }
-    }
-
-    return true;
+    return GotoDest( fCurTime, delta );
 }
 
 bool CAIBrain::WalkSeek( float fCurTime )
 {
-    JVector delta( 0, 0 ), dest( 0, 0 );
+    JVector delta( 0, 0 );
 
     float x_delta = m_vTargetPos.x - m_vPos.x;
     float y_delta = m_vTargetPos.y - m_vPos.y;
@@ -300,38 +280,39 @@ bool CAIBrain::WalkSeek( float fCurTime )
 
     delta.Init( x_delta, y_delta );
 
-    dest = m_vPos + delta;
-
     JLog( LOG_LEVEL_NOISE, true, "and we're seeking... <%.2f %.2f> + <%.2f %.2f> = <%.2f %.2f> ",
-          VEC_EXPAND( m_vPos ), VEC_EXPAND( delta ), VEC_EXPAND( dest ) );
+          VEC_EXPAND( m_vPos ), VEC_EXPAND( delta ), VEC_EXPAND( m_vPos + delta ) );
+
+    return GotoDest( fCurTime, delta );
+}
+
+bool CAIBrain::GotoDest( float fCurTime, JVector &delta )
+{
     int dwCollideType = DUNG_COLL_NO_COLLISION;
+    JVector dest = m_vPos + delta;
+
     if( dest.IsInWorld() )
     {
         dwCollideType = g_pGame->GetDungeon()->IsWalkableFor( dest );
+
+        switch( dwCollideType )
+        {
+        case DUNG_COLL_NO_COLLISION:
+        case DUNG_COLL_PLAYER:
+            m_vVel = delta;
+            JLog( LOG_LEVEL_NOISE, true, "hit %d change course <%.2f %.2f>\n", dwCollideType,
+                  VEC_EXPAND( m_vVel ) );
+            break;
+        default:
+            JLog( LOG_LEVEL_NOISE, true, "hit %d steady course <%.2f %.2f>\n", dwCollideType,
+                  VEC_EXPAND( m_vVel ) );
+            // m_vVel.Init();
+            break;
+        }
     }
     else
     {
         // delta.Init();
-    }
-
-    return WalkSeek( fCurTime, delta, dwCollideType );
-}
-
-bool CAIBrain::WalkSeek( float fCurTime, JVector &delta, int dwCollideType )
-{
-    switch( dwCollideType )
-    {
-    case DUNG_COLL_NO_COLLISION:
-    case DUNG_COLL_PLAYER:
-        m_vVel = delta;
-        JLog( LOG_LEVEL_NOISE, true, "hit %d change course <%.2f %.2f>\n", dwCollideType,
-              VEC_EXPAND( m_vVel ) );
-        break;
-    default:
-        JLog( LOG_LEVEL_NOISE, true, "hit %d steady course <%.2f %.2f>\n", dwCollideType,
-              VEC_EXPAND( m_vVel ) );
-        // m_vVel.Init();
-        break;
     }
 
     return true;

@@ -37,7 +37,7 @@ public:
 
     bool SetRandomDest( float fCurTime );
     bool WalkSeek( float fCurTime );
-    bool WalkSeek( float fCurTime, JVector &vPlayerPos, int dwCollideType );
+    bool GotoDest( float fCurTime, JVector &vVel );
     bool Update( float fCurTime );
 
     bool UpdateRest( float fCurTime );

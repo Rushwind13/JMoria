@@ -71,7 +71,7 @@ Monster <Bat>
     Plural		<Bats>
     Appear		<1d3>
     Speed		2.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <1d4>
     AC          15.0
     Level       1
@@ -86,7 +86,7 @@ Monster <Fruit Bat>
     Plural		<Fruit Bats>
     Appear		<1d2>
     Speed		1.5
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <1d4>
     AC          20.0
     Level       2
@@ -101,7 +101,7 @@ Monster <Large Bat>
     Plural		<Large Bats>
     Appear		<1d2>
     Speed		2.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <2d4>
     AC          25.0
     Level       3
@@ -116,7 +116,7 @@ Monster <Flaming Bat>
     Plural		<Flaming Bats>
     Appear      <1d1>
     Speed		2.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <4d8>
     AC          50.0
     Level       8
@@ -150,7 +150,7 @@ Monster <White Centipede>
     Plural		<White Centipedes>
     Appear		<1d2>
     Speed		0.8
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <1d4>
     AC          20.0
     Level       2
@@ -164,7 +164,7 @@ Monster <Yellow Centipede>
     Plural		<Yellow Centipedes>
     Appear		<1d2>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <2d4>
     AC          25.0
     Level       4
@@ -763,7 +763,7 @@ Monster <Gas Spore>
     Plural		<Gas Spores>
     Appear		<1d4>
     Speed		0.5
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <1d1>
     AC          5.0
     Level       8
@@ -832,7 +832,7 @@ Monster <Fruit Fly>
     Plural		<Fruit Flies>
     Appear		<1d5>
     Speed		2.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <1d4>
     AC          10.0
     Level       2
@@ -847,7 +847,7 @@ Monster <Fire Fly>
     Plural		<Fire Flies>
     Appear		<1d4>
     Speed		2.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <2d4>
     AC          20.0
     Level       5
@@ -862,7 +862,7 @@ Monster <Giant Fly>
     Plural		<Giant Flies>
     Appear		<1d3>
     Speed		2.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <3d8>
     AC          35.0
     Level       15
@@ -1520,7 +1520,7 @@ Monster <Blue Icky Thing>
 {
     Plural		<Blue Icky Things>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD			<2d8>
     AC			50.0
     Level		1
@@ -1533,7 +1533,7 @@ Monster <Green Icky Thing>
 {
     Plural		<Green Icky Things>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD			<2d8>
     AC			50.0
     Level		1
@@ -1546,7 +1546,7 @@ Monster <Opal Icky Thing>
 {
     Plural		<Opal Icky Things>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD			<2d8>
     AC			20.0
     Level		1
@@ -1559,7 +1559,7 @@ Monster <Red Icky Thing>
 {
     Plural		<Red Icky Things>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD			<2d8>
     AC			50.0
     Level		1
@@ -1572,7 +1572,7 @@ Monster <White Icky Thing>
 {
     Plural		<White Icky Things>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD			<2d8>
     AC			50.0
     Level		1
@@ -1585,7 +1585,7 @@ Monster <Yellow Icky Thing>
 {
     Plural		<Yellow Icky Things>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD			<2d8>
     AC			50.0
     Level		1
@@ -1598,7 +1598,7 @@ Monster <Clear Icky Thing>
 {
     Plural		<Clear Icky Things>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD			<2d8>
     AC			50.0
     Level		3
@@ -1676,7 +1676,7 @@ Monster <Small Kobold>
     Plural		<Small Kobolds>
     Appear		<1d2>
     Speed		0.8
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <1d4>
     AC          20.0
     Level       1
@@ -1756,7 +1756,7 @@ Monster <Louse>
     Plural		<Lice>
     Appear		<1d5>
     Speed		0.5
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <1d2>
     AC          5.0
     Level       1
@@ -2521,7 +2521,7 @@ Monster <Norska>
     Plural		<Norska>
     Appear		<1d4>
     Speed		1.5
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <1d4>
     AC          10.0
     Level       0
@@ -2536,7 +2536,7 @@ Monster <Teckla>
     Plural		<Tecklas>
     Appear		<1d3>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <1d4>
     AC          10.0
     Level       1
@@ -2551,7 +2551,7 @@ Monster <Large Teckla>
     Plural		<Large Tecklas>
     Appear		<1d2>
     Speed		1.2
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <2d4>
     AC          20.0
     Level       4
@@ -2566,7 +2566,7 @@ Monster <Large Norska>
     Plural		<Large Norska>
     Appear		<1d3>
     Speed		1.5
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <2d4>
     AC          18.0
     Level       5
@@ -2778,7 +2778,7 @@ Monster <White Worm Mass>
     Plural		<White Worm Masses>
     Appear      <1d3>
     Speed		0.5
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <1d8>
     AC          40.0
     Level       1
@@ -2794,7 +2794,7 @@ Monster <Blue Worm Mass>
     Plural		<Blue Worm Masses>
     Appear      <1d3>
     Speed		0.5
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <2d8>
     AC          40.0
     Level       3
@@ -2811,7 +2811,7 @@ Monster <Clear Worm Mass>
     Plural		<Clear Worm Masses>
     Appear		<1d3>
     Speed		0.5
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <2d8>
     AC          40.0
     Level       3
@@ -2827,7 +2827,7 @@ Monster <Red Worm Mass>
     Plural		<Red Worm Masses>
     Appear      <1d3>
     Speed		0.5
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <2d8>
     AC          40.0
     Level       3
@@ -2844,7 +2844,7 @@ Monster <Green Worm Mass>
     Plural		<Green Worm Masses>
     Appear      <1d3>
     Speed		0.5
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <3d8>
     AC          42.0
     Level       5
@@ -2860,7 +2860,7 @@ Monster <Yellow Worm Mass>
     Plural		<Yellow Worm Masses>
     Appear      <1d3>
     Speed		0.5
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <3d8>
     AC          42.0
     Level       5
@@ -2876,7 +2876,7 @@ Monster <Black Worm Mass>
     Plural		<Black Worm Masses>
     Appear		<1d3>
     Speed		0.5
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <5d8>
     AC          45.0
     Level       10
@@ -2911,7 +2911,7 @@ Monster <Huge Creotha>
     Plural		<Huge Creotha>
     Appear      <1d5>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <2d8>
     AC          50.0
     Level       5
@@ -2995,7 +2995,7 @@ Monster <Yeek>
     Plural		<Yeeks>
     Appear		<1d2>
     Speed		0.8
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <1d4>
     AC          15.0
     Level       2
@@ -3196,7 +3196,7 @@ Monster <Stray Dog>
     Plural		<Stray Dogs>
     Appear		<1d1>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <1d4>
     AC          10.0
     Level       0
@@ -3758,7 +3758,7 @@ Monster <Giant Bee>
     Plural		<Giant Bees>
     Appear		<1d3>
     Speed		1.5
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <3d8>
     AC          40.0
     Level       13
@@ -4443,7 +4443,7 @@ Monster <Teckla>
     Plural		<Teckla>
     Appear		<1d2>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <2d8>
     AC          20.0
     Level       4
@@ -4624,7 +4624,7 @@ Monster <Newt>
     Plural		<Newts>
     Appear		<1d3>
     Speed		0.8
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD          <1d4>
     AC          10.0
     Level       1
@@ -4734,7 +4734,7 @@ Monster <Giant Yendi>
 {
     Plural		<Giant Yendi>
     Speed		1.0
-    MoveType	<MON_AI_100RANDOMMOVE>
+    MoveType	<MON_AI_75RANDOMMOVE>
     HD			<2d8>
     AC			34.0
     Level		2

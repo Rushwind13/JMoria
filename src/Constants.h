@@ -429,6 +429,7 @@
 #define NUM_POTION_TYPES 32
 #define NUM_SCROLL_TYPES 32
 #define NUM_LUMBER_TYPES 32
+#define NUM_METAL_TYPES 32
 
 #include "TextEntry.h"
 class Constants
@@ -929,6 +930,67 @@ public:
         };
 
         return LumberRGBAs[dwIndex];
+    }
+
+    const char *Metal( const uint32 dwIndex )
+    {
+        if( dwIndex >= NUM_METAL_TYPES )
+            return "";
+
+        const char *myMetal[] = {
+            "Token",    "Matte",     "Bright",   "Shiny",    "Sparkly", "Gaudy",    "Wedding",
+            "Electrum", "Rubber",    "Woven",    "Obsidian", "Topaz",   "Pearl",    "Opal",
+            "Jet",      "Tanzanite", "Sapphire", "Emerald",  "Ruby",    "Diamond",  "Mithril",
+            "Platinum", "Brass",     "Steel",    "Glass",    "Plastic", "Aluminum", "Dragonbone",
+            "Iron",     "Silver",    "Gold",     "Bronze" };
+
+        return myMetal[dwIndex];
+    }
+
+    const char *MetalRGBA( const uint32 dwIndex )
+    {
+        if( dwIndex >= NUM_METAL_TYPES )
+            return "0,0,0,0";
+
+        const char *MetalRGBAs[] = {
+            "255,215,0,255",   // Token (Classic Gold)
+            "100,100,100,255", // Matte (Neutral Grey)
+            "240,240,255,255", // Bright (Cool White)
+            "220,220,220,255", // Shiny (High Polish Silver)
+            "255,250,205,255", // Sparkly (Pale Champagne)
+            "255,0,255,255",   // Gaudy (Magenta/Electric Purple)
+            "255,248,220,255", // Wedding (Cream/Ivory)
+            "212,255,170,255", // Electrum (Pale Gold-Green alloy)
+
+            "40,40,40,255",    // Rubber (Soft Black)
+            "139,115,85,255",  // Woven (Burlap/Tan)
+            "20,20,25,255",    // Obsidian (Deep Inky Black)
+            "255,200,0,255",   // Topaz (Golden Amber)
+            "245,245,220,255", // Pearl (Creamy Off-white)
+            "230,230,250,255", // Opal (Iridescent Blue-white)
+            "10,10,10,255",    // Jet (Pure Coal Black)
+            "106,90,205,255",  // Tanzanite (Deep Violet-Blue)
+
+            "15,82,186,255",   // Sapphire (Royal Blue)
+            "80,200,120,255",  // Emerald (Deep Green)
+            "224,17,95,255",   // Ruby (Deep Red)
+            "185,242,255,255", // Diamond (Light Refractive Blue)
+            "135,206,235,255", // Mithril (Pale Ethereal Blue)
+            "229,228,226,255", // Platinum (Bright White-Grey)
+            "181,166,66,255",  // Brass (Muted Yellow-Brown)
+            "176,196,222,255", // Steel (Blue-Grey Metal)
+
+            "173,216,230,128", // Glass (Translucent Pale Blue)
+            "255,255,255,255", // Plastic (Plain White)
+            "169,171,173,255", // Aluminum (Dull Light Grey)
+            "240,230,190,255", // Dragonbone (Weathered Bone/Tan)
+            "67,70,75,255",    // Iron (Heavy Dark Grey)
+            "192,192,192,255", // Silver (Traditional Silver)
+            "255,215,0,255",   // Gold (Metallic Gold)
+            "205,127,50,255"   // Bronze (Metallic Brown)
+        };
+
+        return MetalRGBAs[dwIndex];
     }
 
 public:

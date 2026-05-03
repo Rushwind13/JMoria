@@ -35,7 +35,7 @@ Open issues labeled `cleanup` on branch `feat/phase3c_polish`, prioritized by im
 - **#288** [ITEM_IDX_STAFF implementation](https://github.com/Rushwind13/JMoria/issues/288)
   Staves (`Z` keybind) are not yet implemented. Wands may share the same gap.
 
-- **#291** [Rings/amulets need flavors like potions/scrolls/etc.](https://github.com/Rushwind13/JMoria/issues/291)
+- **#291** COMPLETE [Rings/amulets need flavors like potions/scrolls/etc.](https://github.com/Rushwind13/JMoria/issues/291)
   Rings, staves, and amulets lack randomized flavor names (gems/metals/woods). 14 ring flavors needed; same for amulets and staves.
 
 ---

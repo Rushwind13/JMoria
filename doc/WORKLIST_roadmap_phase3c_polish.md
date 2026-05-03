@@ -6,7 +6,7 @@ Open issues labeled `cleanup` on branch `feat/phase3c_polish`, prioritized by im
 
 ## P1 — Bug Fixes (gameplay-breaking or visually wrong)
 
-- **#301** [all weapons add speed](https://github.com/Rushwind13/JMoria/issues/301)
+- **#301** COMPLETE [all weapons add speed](https://github.com/Rushwind13/JMoria/issues/301)
   All melee weapons incorrectly add differing amounts of speed to the player (spear +70, etc.). Bullet-time gameplay is unintended.
 
 - **#294** ["strikes with the EFFECT_FLAG_FIRE"](https://github.com/Rushwind13/JMoria/issues/294)
@@ -17,12 +17,12 @@ Open issues labeled `cleanup` on branch `feat/phase3c_polish`, prioritized by im
 
 ---
 
-## P2 — Quick Cleanup (small scope, clear fix)
+## P2 — Quick Cleanup (small scope, clear fix) COMPLETE 2026-05-02
 
-- **#290** [High score list prints backwards](https://github.com/Rushwind13/JMoria/issues/290)
+- **#290** COMPLETE [High score list prints backwards](https://github.com/Rushwind13/JMoria/issues/290)
   Completed: fixed `Add()` argument order so score sort now uses descending index (`Add(ps, score, -1, false)`).
 
-- **#303** [player stat reset during x)change](https://github.com/Rushwind13/JMoria/issues/303)
+- **#303** COMPLETE [player stat reset during x)change](https://github.com/Rushwind13/JMoria/issues/303)
   Completed: extracted shared `RecalcCombatStats()` and switched `XchangeWeapons()`, `Wield()`, `RemoveEquipment()`, and player construction to use it (AC base remains `1.0`).
 
 ---

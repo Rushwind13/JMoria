@@ -725,6 +725,7 @@ Effect <Speed>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_SPEED>
+    Amount      <1d10>
 }
 Effect <Timed Speed>
 {
@@ -732,6 +733,7 @@ Effect <Timed Speed>
     Flag        <EFFECT_FLAG_SPEED>
     Modifier    <EFFECT_MOD_TIMED>
     Duration    80.0
+    Amount      10.0
 }
 Effect <Searching>
 {

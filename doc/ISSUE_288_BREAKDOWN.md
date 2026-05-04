@@ -105,13 +105,13 @@ Issue #288 requires:
 | Staff of Acid Resistance | Timed Resist Acid | INTRINSIC + EFFECT_MOD_TIMED | ✅ WORKS |
 | Staff of Cold Resistance | Timed Resist Cold | INTRINSIC + EFFECT_MOD_TIMED | ✅ WORKS |
 | Staff of Electricity Resistance | Timed Resist Electricity | INTRINSIC + EFFECT_MOD_TIMED | ✅ WORKS |
-| Staff of Fear | Mass Fear | HIT + EFFECT_FLAG_AFRAID + MOD_AREA (player-centered) | ✅ IMPLEMENTED (DoAreaHit) |
+| Staff of Fear | Mass Fear | HIT + EFFECT_FLAG_AFRAID + MOD_AREA (player-centered) | ✅ WORKS |
 | Staff of Fire Resistance | Timed Resist Fire | INTRINSIC + EFFECT_MOD_TIMED | ✅ WORKS |
 | Staff of Protection | Timed Blessing | HIT + EFFECT_FLAG_AC + MOD_TIMED (player-centered) | ❌ NEEDS AREA HANDLER |
 | Staff of Starlight | Light Ray + Light Area | HIT/CREATE + EFFECT_FLAG_LIGHT | ✅ WORKS |
 | Staff of Teleportation | Teleport Self | CREATE + EFFECT_FLAG_TELEPORT | ✅ WORKS |
 | Staff of Paralysis | Mass Paralyze | HIT + EFFECT_FLAG_PARALYZE + MOD_AREA (player-centered) | ✅ IMPLEMENTED (DoAreaHit) |
-| Staff of Perception | Identify | RESTORE + EFFECT_FLAG_IDENTIFY | ✅ WORKS |
+| Staff of Perception | Identify | RESTORE + EFFECT_FLAG_IDENTIFY | ❌ "emits an Identify" should choose an item to ID |
 | Staff of Summoning | Summon Monsters | CREATE + EFFECT_FLAG_SUMMON | ✅ WORKS |
 | Staff of Telepathy | Timed ESP | INTRINSIC + EFFECT_MOD_TIMED | ✅ WORKS |
 | Staff of Mass Sleep | Mass Sleep | HIT + EFFECT_FLAG_SLEEP + MOD_AREA (player-centered, large radius) | ✅ IMPLEMENTED (DoAreaHit) |

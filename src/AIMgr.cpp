@@ -288,13 +288,18 @@ bool CAIBrain::WalkSeek( float fCurTime )
 
 bool CAIBrain::GotoDest( float fCurTime, JVector &delta )
 {
+    JLog( LOG_LEVEL_NOISE, true, "and we're going to dest... <%.2f %.2f> + <%.2f %.2f> = <%.2f %.2f> ",
+          VEC_EXPAND( m_vPos ), VEC_EXPAND( delta ), VEC_EXPAND( m_vPos + delta ) );
     int dwCollideType = DUNG_COLL_NO_COLLISION;
     JVector dest = m_vPos + delta;
 
     if( dest.IsInWorld() )
     {
+        JLog( LOG_LEVEL_NOISE, true, "and we're in the world... %d, %d", &g_pGame, g_pGame->GetDungeon()
+     );
         dwCollideType = g_pGame->GetDungeon()->IsWalkableFor( dest );
 
+        JLog( LOG_LEVEL_NOISE, true, "and we collide with %d... ", dwCollideType );
         switch( dwCollideType )
         {
         case DUNG_COLL_NO_COLLISION:
@@ -312,8 +317,11 @@ bool CAIBrain::GotoDest( float fCurTime, JVector &delta )
     }
     else
     {
+        JLog( LOG_LEVEL_NOISE, true, "and we're out of the world... steady course <%.2f %.2f>\n",
+              VEC_EXPAND( m_vVel ) );
         // delta.Init();
     }
 
+    JLog( LOG_LEVEL_NOISE, true, "\n" );
     return true;
 }

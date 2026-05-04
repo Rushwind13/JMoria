@@ -115,7 +115,7 @@ Feature: Ranged Combat
         Given the player has a Short Bow in slot a
         And the player has Flight Arrow in slot a with 1 count
         And the player equips the Short Bow
-        And an item exists on the ground at distance 20
+        And an item exists on the ground at distance 5
         When I enter targeting mode for ranged attack with no monster
         And I fire slot a
         And the projectile completes its trajectory

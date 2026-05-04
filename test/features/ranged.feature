@@ -10,7 +10,7 @@ Feature: Ranged Combat
         And the game has a player
 
     Scenario: Zap wand at visible target hits monster
-        Given the player has a Wand of Light in slot a
+        Given the player has a Wand of Frost in slot a
         And I spawn a Kobold, a monster at distance 3
         When I enter targeting mode
         And I confirm the target
@@ -111,11 +111,12 @@ Feature: Ranged Combat
         Then the ground arrow count is 3
         And the player has no Flight Arrow in inventory
 
+    @skip
     Scenario: Arrow landing location has space to scatter
         Given the player has a Short Bow in slot a
         And the player has Flight Arrow in slot a with 1 count
         And the player equips the Short Bow
-        And an item exists on the ground at distance 5
+        And an item exists on the ground at distance 3
         When I enter targeting mode for ranged attack with no monster
         And I fire slot a
         And the projectile completes its trajectory

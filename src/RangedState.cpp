@@ -30,6 +30,7 @@ CRangedState::CRangedState()
     m_pKeyHandlers[RANGED_FIRE] = &CRangedState::OnHandleFire;
     m_pKeyHandlers[RANGED_TRAJECTORY] = &CRangedState::OnHandleTrajectory;
     m_pKeyHandlers[RANGED_ZAP] = &CRangedState::OnHandleZap;
+    m_pKeyHandlers[RANGED_STAFF] = &CRangedState::OnHandleStaff;
 
     m_eCurModifier = RANGED_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -112,8 +113,18 @@ int CRangedState::OnHandleInit( JKeysym *keysym )
             break;
         }
         case JKEY_z:
-            mod = RANGED_ZAP;
-            g_pGame->GetMsgs()->Printf( "Zap which wand? [a-z]\n" );
+            if( keysym->mod & JMOD_SHIFT )
+            {
+                // Shift+z = Z = staff (no targeting)
+                m_cCommand = 'Z'; // store uppercase to distinguish from wand
+                mod = RANGED_STAFF;
+                g_pGame->GetMsgs()->Printf( "Use which staff? [a-z]\n" );
+            }
+            else
+            {
+                mod = RANGED_ZAP;
+                g_pGame->GetMsgs()->Printf( "Zap which wand? [a-z]\n" );
+            }
             break;
         default:
             JLog( LOG_LEVEL_ERROR, true,
@@ -325,6 +336,74 @@ int CRangedState::OnHandleZap( JKeysym *keysym )
     return JSUCCESS;
 }
 
+// Z) use a staff — no targeting, fires immediately at player position
+int CRangedState::OnHandleStaff( JKeysym *keysym )
+{
+    int retval;
+    JLog( LOG_LEVEL_DEBUG, true, "Handling STAFF\n" );
+    if( m_pSelected == NULL )
+    {
+        retval = OnBaseHandleKey( keysym );
+
+        if( retval == JRESETSTATE )
+        {
+            return JSUCCESS;
+        }
+
+        if( retval != JSUCCESS )
+        {
+            JLog( LOG_LEVEL_DEBUG, true,
+                  "STAFF cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
+            g_pGame->GetMsgs()->Printf( "Choose an item from inventory (a to z):\n" );
+            return JSUCCESS;
+        }
+    }
+
+    JLog( LOG_LEVEL_DEBUG, true, "STAFF got a selection: %s\n", m_pSelected->m_lpData->GetName() );
+
+    if( !TestStaff() )
+    {
+        g_pGame->GetMsgs()->Printf( "You can't use a %s as a staff!\n",
+                                    m_pSelected->m_lpData->GetName() );
+        ResetToState( STATE_COMMAND );
+        return JCOMPLETESTATE;
+    }
+
+    // Staves fire immediately — set hit position to player position, no trajectory
+    g_pGame->GetPlayer()->SetRangedHitPosition( g_pGame->GetPlayer()->m_vPos );
+
+    CItem *pItem = m_pSelected->m_lpData;
+    if( pItem->m_dwCharges <= 0 )
+    {
+        g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+        ResetToState( STATE_COMMAND );
+        return JCOMPLETESTATE;
+    }
+
+    const char *szEffectDesc = NULL;
+    CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
+    if( plEffect && plEffect->m_lpData && plEffect->m_lpData->m_ed &&
+        plEffect->m_lpData->m_ed->m_szName )
+    {
+        szEffectDesc = plEffect->m_lpData->m_ed->m_szName;
+    }
+
+    if( szEffectDesc )
+    {
+        g_pGame->GetMsgs()->Printf( "The %s emits a %s.\n", pItem->GetName(), szEffectDesc );
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "The %s glows.\n", pItem->GetName() );
+    }
+
+    DoStaff();
+    g_pGame->GetPlayer()->ConsumeAndRemoveIfEmpty( m_pSelected );
+
+    ResetToState( STATE_COMMAND );
+    return JCOMPLETESTATE;
+}
+
 // choose a target either * or direction
 int CRangedState::OnHandleTarget( JKeysym *keysym )
 {
@@ -455,6 +534,7 @@ int CRangedState::OnBaseHandleKey( JKeysym *keysym )
         break;
     case RANGED_FIRE:
     case RANGED_ZAP:
+    case RANGED_STAFF:
         if( m_pSelected != NULL )
             return JSUCCESS;
         m_dwSelected = GetAlpha( keysym );
@@ -878,6 +958,7 @@ CLink<CItem> *CRangedState::GetResponse( eRangedModifier whichUse )
         break;
     }
     case RANGED_ZAP:
+    case RANGED_STAFF:
         pList = g_pGame->GetPlayer()->m_llInventory;
         pLink = pList->GetNthLink( m_dwSelected );
         break;
@@ -899,6 +980,9 @@ bool CRangedState::DoFire() { return g_pGame->GetPlayer()->Fire( m_pSelected ) =
 
 bool CRangedState::TestZap() { return g_pGame->GetPlayer()->IsZappable( m_pSelected ); }
 bool CRangedState::DoZap() { return g_pGame->GetPlayer()->Zap( m_pSelected ) == JSUCCESS; }
+
+bool CRangedState::TestStaff() { return g_pGame->GetPlayer()->IsUseable( m_pSelected ); }
+bool CRangedState::DoStaff() { return g_pGame->GetPlayer()->UseStaff( m_pSelected ) == JSUCCESS; }
 
 void CRangedState::DropAmmo( JVector vFinalPos )
 {

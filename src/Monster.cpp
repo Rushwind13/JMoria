@@ -16,6 +16,7 @@ CMonster::CMonster()
       m_fColorChangeInterval( COLOR_CHANGE_TIMEOUT + 1 ),
       m_fLastBreed( BREED_INTERVAL ),
       m_dwInstanceId( 0 ),
+      m_dwActiveEffects( 0 ),
       m_bDetected( false )
 {
     m_pBrain = new CAIBrain;
@@ -318,6 +319,27 @@ int CMonster::TakeDamage( float fDamage )
     JLog( LOG_LEVEL_INFO, true, "Remaining HP: %.2f \n", m_fCurHP );
 
     return retval;
+}
+
+bool CMonster::IsImmuneToEffect( uint32 dwFlag ) const
+{
+    // Table of effect flags that empty-minded creatures are immune to.
+    // PARALYZE is notably absent — it is a physical effect, not mental.
+    static const struct
+    {
+        uint32 effectFlag;
+        uint32 monsterFlag;
+    } immunityTable[] = {
+        { EFFECT_FLAG_SLEEP, MON_FLAG_EMPTY_MIND },
+        { EFFECT_FLAG_AFRAID, MON_FLAG_EMPTY_MIND },
+        { EFFECT_FLAG_CONFUSE, MON_FLAG_EMPTY_MIND },
+    };
+    for( const auto &entry : immunityTable )
+    {
+        if( ( dwFlag & entry.effectFlag ) && ( m_md->m_dwFlags & entry.monsterFlag ) )
+            return true;
+    }
+    return false;
 }
 
 // draw routines

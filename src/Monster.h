@@ -163,6 +163,7 @@ public:
 
     bool Hit( float &fRoll );
     int TakeDamage( float fDamageMult );
+    bool IsImmuneToEffect( uint32 dwFlag ) const;
 
     JVector GetPos()
     {

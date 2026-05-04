@@ -122,6 +122,13 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
         retval = 0;
     }
 
+    else if( IsStaffCommand( keysym ) )
+    {
+        g_pGame->SetState( STATE_RANGED );
+        g_pGame->GetGameState()->HandleKey( keysym );
+        retval = 0;
+    }
+
     else if( IsFireCommand( keysym ) )
     {
         g_pGame->SetState( STATE_RANGED );
@@ -425,6 +432,20 @@ bool CCmdState::IsZapCommand( JKeysym *keysym )
     {
     case JKEY_z:
         if( keysym->mod == 0 )
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool CCmdState::IsStaffCommand( JKeysym *keysym )
+{
+    // Z (uppercase) — use a staff (no targeting required)
+    switch( keysym->sym )
+    {
+    case JKEY_z:
+        if( keysym->mod & JMOD_SHIFT )
         {
             return true;
         }

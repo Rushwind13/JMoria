@@ -3,12 +3,14 @@
 #include "Dungeon.h"
 #include "Game.h"
 #include "JMDefs.h"
+#include "Monster.h"
 #include "MonsterRecall.h"
 #include "Player.h"
 
 CAIBrain::CAIBrain()
     : m_dwMoveType( 0 ),
       m_fSpeed( 0.0f ),
+      m_nEffectTurns( 0 ),
       m_eBrainState( BRAINSTATE_INVALID ),
       m_vTargetPos( 0, 0 )
 {
@@ -68,6 +70,7 @@ bool CAIBrain::Update( float fCurTime )
     }
     m_pParent->m_fColorChangeInterval += fCurTime;
     m_pParent->Breed();
+
     switch( m_eBrainState )
     {
     case BRAINSTATE_REST:
@@ -103,6 +106,21 @@ bool CAIBrain::Update( float fCurTime )
 
 bool CAIBrain::UpdateSeek( float fCurTime )
 {
+    // Afraid monsters flee from the player regardless of their movement type.
+    // Empty-minded creatures are immune to fear.
+    if( ( m_pParent->m_dwActiveEffects & EFFECT_FLAG_AFRAID ) &&
+        !m_pParent->IsImmuneToEffect( EFFECT_FLAG_AFRAID ) )
+    {
+        JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
+        float dx = m_vPos.x - vPlayerPos.x;
+        float dy = m_vPos.y - vPlayerPos.y;
+        m_vTargetPos.Init( m_vPos.x + ( dx > 0 ? 5 : ( dx < 0 ? -5 : 0 ) ),
+                           m_vPos.y + ( dy > 0 ? 5 : ( dy < 0 ? -5 : 0 ) ) );
+        WalkSeek( fCurTime );
+        SetState( BRAINSTATE_GOTODEST );
+        return true;
+    }
+
     switch( m_dwMoveType )
     {
     case MON_AI_100RANDOMMOVE:
@@ -147,7 +165,30 @@ bool CAIBrain::UpdateSeek( float fCurTime )
     return true;
 }
 
-bool CAIBrain::UpdateRest( float fCurTime ) { return true; }
+bool CAIBrain::UpdateRest( float fCurTime )
+{
+    // Sleeping or paralyzed monsters are held in REST state; tick down the effect duration.
+    const uint32 dwStunFlags = EFFECT_FLAG_SLEEP | EFFECT_FLAG_PARALYZE;
+    if( m_pParent->m_dwActiveEffects & dwStunFlags )
+    {
+        m_fStateTicks += fCurTime * m_fSpeed;
+        while( m_fStateTicks >= 1.0f )
+        {
+            m_fStateTicks -= 1.0f;
+            if( m_nEffectTurns > 0 )
+            {
+                m_nEffectTurns--;
+                if( m_nEffectTurns == 0 )
+                {
+                    m_pParent->m_dwActiveEffects &= ~dwStunFlags;
+                    SetState( BRAINSTATE_SEEK );
+                }
+            }
+        }
+        return true;
+    }
+    return true;
+}
 
 bool CAIBrain::UpdateGoToDest( float fCurTime )
 {

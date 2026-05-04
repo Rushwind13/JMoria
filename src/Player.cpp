@@ -1598,6 +1598,20 @@ JResult CPlayer::DoHealHP( CEffect *pEffect )
 
 JResult CPlayer::DoHitEffects( CEffect *pEffect )
 {
+    // Area-of-effect modifiers take priority over single-target dispatch
+    if( pEffect->m_dwModifier & EFFECT_MOD_AREA )
+    {
+        return DoAreaHit( pEffect );
+    }
+    if( pEffect->m_dwModifier & EFFECT_MOD_BALL )
+    {
+        return DoBallHit( pEffect );
+    }
+    if( pEffect->m_dwModifier & EFFECT_MOD_LINE )
+    {
+        return DoLineHit( pEffect );
+    }
+
     switch( pEffect->m_dwFlags )
     {
     case EFFECT_FLAG_LIGHT:
@@ -1608,6 +1622,18 @@ JResult CPlayer::DoHitEffects( CEffect *pEffect )
     case EFFECT_FLAG_ELECTRICITY:
     case EFFECT_FLAG_ACID:
         return DoElementalHit( pEffect );
+        break;
+    case EFFECT_FLAG_SLEEP:
+    case EFFECT_FLAG_PARALYZE:
+    case EFFECT_FLAG_AFRAID:
+    case EFFECT_FLAG_CONFUSE:
+        return DoStatusHit( pEffect, pEffect->m_dwFlags );
+        break;
+    case EFFECT_FLAG_STONE_TO_MUD:
+        return DoStoneToMud( pEffect );
+        break;
+    case EFFECT_FLAG_TELEPORT:
+        return DoTeleportAway( pEffect );
         break;
     default:
         return DoPhysicalHit( pEffect );
@@ -1791,6 +1817,273 @@ JResult CPlayer::DoElementalHit( CEffect *pEffect )
         g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
     }
 
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoAreaHit( CEffect *pEffect )
+{
+    // Apply a status or elemental effect to all monsters within radius of the player.
+    // Used by staves (Mass Sleep, Mass Fear, Mass Paralyze, etc.).
+    const char *szAmount = pEffect->m_szAmount;
+    if( !szAmount && pEffect->m_ed )
+        szAmount = pEffect->m_ed->m_szAmount;
+
+    uint8 radius = pEffect->m_ed ? (uint8)pEffect->m_ed->m_fRadius : 5;
+    JIVector vCenter( (int)m_vPos.x, (int)m_vPos.y );
+
+    int nAffected = 0;
+    CLink<CMonster> *pLink = g_pGame->GetDungeon()->m_llMonsters->GetHead();
+    while( pLink != NULL )
+    {
+        CMonster *pMon = pLink->m_lpData;
+        pLink = g_pGame->GetDungeon()->m_llMonsters->GetNext( pLink );
+
+        if( !pMon )
+            continue;
+
+        JIVector vMonPos( (int)pMon->GetPos().x, (int)pMon->GetPos().y );
+        if( !Util::WithinRadius( vCenter, vMonPos, radius ) )
+            continue;
+
+        // Elemental damage flags — deal damage
+        if( pEffect->m_dwFlags &
+            ( EFFECT_FLAG_FIRE | EFFECT_FLAG_COLD | EFFECT_FLAG_ELECTRICITY | EFFECT_FLAG_ACID ) )
+        {
+            float fDamage = szAmount ? Util::Roll( szAmount ) : Util::Roll( "1d6" );
+            if( DamageMonster( pMon, fDamage ) )
+            {
+                g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", pMon->GetName() );
+            }
+            else
+            {
+                g_pGame->GetMsgs()->Printf( "The %s is hit.\n", pMon->GetName() );
+            }
+        }
+        else
+        {
+            // Status effect flags — set active effect on monster if not immune.
+            if( !pMon->IsImmuneToEffect( pEffect->m_dwFlags ) )
+            {
+                pMon->m_dwActiveEffects |= pEffect->m_dwFlags;
+                if( pEffect->m_dwFlags & ( EFFECT_FLAG_SLEEP | EFFECT_FLAG_PARALYZE ) )
+                {
+                    pMon->m_pBrain->m_nEffectTurns = (int)Util::Roll( "3d6" );
+                    pMon->m_pBrain->SetState( BRAINSTATE_REST );
+                }
+            }
+            else
+            {
+                continue;
+            }
+        }
+        nAffected++;
+    }
+
+    if( nAffected > 0 )
+    {
+        m_bLastEffectNoticed = true;
+        const char *szEffName =
+            ( pEffect->m_ed && pEffect->m_ed->m_szName ) ? pEffect->m_ed->m_szName : "something";
+        g_pGame->GetMsgs()->Printf( "The %s affects %d creature%s.\n", szEffName, nAffected,
+                                    nAffected == 1 ? "" : "s" );
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+    }
+
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoBallHit( CEffect *pEffect )
+{
+    // Projectile explodes at impact point, hitting all monsters within blast radius.
+    // Used by ball wands (Fireball, Frost Ball, Lightning Ball, Acid Ball).
+    const char *szAmount = pEffect->m_szAmount;
+    if( !szAmount && pEffect->m_ed )
+        szAmount = pEffect->m_ed->m_szAmount;
+    if( !szAmount )
+        szAmount = "2d6";
+
+    uint8 radius = pEffect->m_ed ? (uint8)pEffect->m_ed->m_fRadius : 2;
+    JIVector vCenter( (int)m_vRangedHitPosition.x, (int)m_vRangedHitPosition.y );
+
+    int nAffected = 0;
+    CLink<CMonster> *pLink = g_pGame->GetDungeon()->m_llMonsters->GetHead();
+    while( pLink != NULL )
+    {
+        CMonster *pMon = pLink->m_lpData;
+        pLink = g_pGame->GetDungeon()->m_llMonsters->GetNext( pLink );
+
+        if( !pMon )
+            continue;
+
+        JIVector vMonPos( (int)pMon->GetPos().x, (int)pMon->GetPos().y );
+        if( !Util::WithinRadius( vCenter, vMonPos, radius ) )
+            continue;
+
+        float fDamage = Util::Roll( szAmount );
+        const char *szMonName = pMon->GetName();
+        if( DamageMonster( pMon, fDamage ) )
+        {
+            g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
+        }
+        nAffected++;
+    }
+
+    if( nAffected > 0 )
+    {
+        m_bLastEffectNoticed = true;
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "The ball explodes harmlessly.\n" );
+    }
+
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoLineHit( CEffect *pEffect )
+{
+    // LINE modifier: the trajectory handles the line path; here we apply elemental damage to
+    // the single monster at the collision point, following the same pattern as DoBallHit.
+    const char *szAmount = pEffect->m_szAmount;
+    if( !szAmount && pEffect->m_ed )
+        szAmount = pEffect->m_ed->m_szAmount;
+    if( !szAmount )
+        szAmount = "2d6";
+
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vRangedHitPosition );
+    if( !pTile )
+        return JBOGUSKEY;
+
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+        return JSUCCESS;
+    }
+
+    float fDamage = Util::Roll( szAmount );
+    const char *szMonName = pMon->GetName();
+    if( DamageMonster( pMon, fDamage ) )
+    {
+        g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
+    }
+
+    m_bLastEffectNoticed = true;
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoStatusHit( CEffect *pEffect, uint32 dwFlag )
+{
+    // Apply a status condition to the single monster at the ranged hit position.
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vRangedHitPosition );
+    if( !pTile )
+        return JBOGUSKEY;
+
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+        return JBOGUSKEY;
+    }
+
+    if( pMon->IsImmuneToEffect( dwFlag ) )
+    {
+        g_pGame->GetMsgs()->Printf( "The %s is unaffected.\n", pMon->GetName() );
+        return JSUCCESS;
+    }
+
+    pMon->m_dwActiveEffects |= dwFlag;
+    m_bLastEffectNoticed = true;
+
+    // Sleeping or paralyzed monsters enter the REST brain state for turn-skipping.
+    if( dwFlag & ( EFFECT_FLAG_SLEEP | EFFECT_FLAG_PARALYZE ) )
+    {
+        pMon->m_pBrain->m_nEffectTurns = (int)Util::Roll( "3d6" );
+        pMon->m_pBrain->SetState( BRAINSTATE_REST );
+    }
+
+    const char *szStatusName = "affected";
+    if( dwFlag & EFFECT_FLAG_SLEEP )
+        szStatusName = "falls asleep";
+    else if( dwFlag & EFFECT_FLAG_PARALYZE )
+        szStatusName = "is paralyzed";
+    else if( dwFlag & EFFECT_FLAG_AFRAID )
+        szStatusName = "flees in terror";
+    else if( dwFlag & EFFECT_FLAG_CONFUSE )
+        szStatusName = "looks confused";
+
+    g_pGame->GetMsgs()->Printf( "The %s %s.\n", pMon->GetName(), szStatusName );
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoStoneToMud( CEffect *pEffect )
+{
+    // Destroy rock wall at target location, turning it into floor.
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vRangedHitPosition );
+    if( !pTile || !pTile->m_dtd )
+        return JBOGUSKEY;
+
+    if( pTile->m_dtd->m_dwType == DUNG_IDX_WALL )
+    {
+        pTile->m_dtd = g_pGame->GetDungeon()->GetTileDef( DUNG_IDX_FLOOR );
+        m_bLastEffectNoticed = true;
+        g_pGame->GetMsgs()->Printf( "The wall turns to mud and collapses!\n" );
+        return JSUCCESS;
+    }
+
+    g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoTeleportAway( CEffect *pEffect )
+{
+    // Teleport the target monster to a random location on the level.
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vRangedHitPosition );
+    if( !pTile )
+        return JBOGUSKEY;
+
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+        return JBOGUSKEY;
+    }
+
+    const char *szMonName = pMon->GetName();
+
+    // Clear monster from current tile
+    pTile->m_pCurMonster = NULL;
+
+    // Find a random open floor tile using the same logic as monster spawning.
+    // Passing an out-of-world vector forces a global random search.
+    JIVector vNew = pMon->GetSpawnPoint( JIVector( -1, -1 ) );
+    if( vNew.IsWithinWorld() )
+    {
+        CDungeonTile *pNewTile = g_pGame->GetDungeon()->GetTile( JVector( vNew.x, vNew.y ) );
+        if( pNewTile )
+        {
+            pMon->SetPos( JVector( vNew.x, vNew.y ) );
+            pNewTile->m_pCurMonster = pMon;
+            m_bLastEffectNoticed = true;
+            g_pGame->GetMsgs()->Printf( "The %s vanishes!\n", szMonName );
+            return JSUCCESS;
+        }
+    }
+
+    // Restore monster if no valid position found
+    pTile->m_pCurMonster = pMon;
+    g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
     return JSUCCESS;
 }
 
@@ -2505,6 +2798,22 @@ bool CPlayer::IsZappable( CLink<CItem> *pLink )
         break;
     }
     return retval;
+}
+
+bool CPlayer::IsUseable( CLink<CItem> *pLink )
+{
+    if( !pLink || !pLink->m_lpData || !pLink->m_lpData->m_id )
+        return false;
+    return pLink->m_lpData->m_id->m_dwIndex == ITEM_IDX_STAFF;
+}
+
+JResult CPlayer::UseStaff( CLink<CItem> *pLink )
+{
+    // Staves fire at player position (no targeting). m_vRangedHitPosition was already
+    // set to player position by OnHandleStaff before this is called.
+    CItem *pItem = pLink->m_lpData;
+    CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
+    return DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
 }
 
 bool CPlayer::SetName( const char *szName )

@@ -28,6 +28,7 @@ public:
 
     float m_fSpeed;
     int m_dwMoveType;
+    int m_nEffectTurns; // remaining turns for active timed status effect
     JFVector m_vPos;
     JVector m_vTargetPos;
     CLink<CAIBrain> *m_pllLink;

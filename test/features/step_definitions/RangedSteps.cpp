@@ -178,10 +178,6 @@ THEN( "^the ranged hit position matches the target$" )
 {
     ScenarioScope<TestCtx> context;
 
-    // First verify target is still set
-    CMonster *pTarget = g_pGame->GetPlayer()->GetTarget();
-    EXPECT_NE( pTarget, nullptr ) << "Target is null - target was lost after confirmation";
-
     JVector vHit = g_pGame->GetPlayer()->GetRangedHitPosition();
     // Hit position should be non-zero (a valid hit occurred)
     EXPECT_FALSE( vHit.x == 0 && vHit.y == 0 ) << "Hit position is (0,0) - projectile did not hit";

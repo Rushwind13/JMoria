@@ -257,6 +257,9 @@ public:
     bool IsZappable( CLink<CItem> *pLink );
     JResult Zap( CLink<CItem> *pLink );
 
+    bool IsUseable( CLink<CItem> *pLink );
+    JResult UseStaff( CLink<CItem> *pLink );
+
     void
     ConsumeItem( CLink<CItem> *pLink ); // Unified consumption for ammo/charges: decrement or remove
     void ConsumeAndRemoveIfEmpty(
@@ -279,9 +282,15 @@ public:
     JResult DoHealEffects( CEffect *pEffect );
     JResult DoHealHP( CEffect *pEffect );
     JResult DoHitEffects( CEffect *pEffect );
+    JResult DoAreaHit( CEffect *pEffect );
+    JResult DoBallHit( CEffect *pEffect );
+    JResult DoLineHit( CEffect *pEffect );
     JResult DoPhysicalHit( CEffect *pEffect );
     JResult DoLightRay( CEffect *pEffect );
     JResult DoElementalHit( CEffect *pEffect );
+    JResult DoStatusHit( CEffect *pEffect, uint32 dwFlag );
+    JResult DoStoneToMud( CEffect *pEffect );
+    JResult DoTeleportAway( CEffect *pEffect );
     JResult DoDamageInventory( uint32 dwElement );
     JResult DoDamageEquipment( uint32 dwElement );
     JResult DoCreateEffects( CEffect *pEffect );

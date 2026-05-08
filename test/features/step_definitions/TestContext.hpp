@@ -104,6 +104,8 @@ struct TestCtx
     int result_int;
     float result_float;
     JResult result;
+    CItemDef *pendingSourceItemDef = nullptr;
+    int pendingSourceItemFlags = 0;
 
     int index;
     int lo;

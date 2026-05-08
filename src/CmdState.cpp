@@ -122,13 +122,6 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
         retval = 0;
     }
 
-    else if( IsStaffCommand( keysym ) )
-    {
-        g_pGame->SetState( STATE_RANGED );
-        g_pGame->GetGameState()->HandleKey( keysym );
-        retval = 0;
-    }
-
     else if( IsFireCommand( keysym ) )
     {
         g_pGame->SetState( STATE_RANGED );
@@ -288,6 +281,15 @@ bool CCmdState::IsUseCommand( JKeysym *keysym )
     case JKEY_w:
     {
         if( !( keysym->mod & JMOD_SHIFT ) && !( keysym->mod & JMOD_CTRL ) )
+        {
+            return true;
+        }
+        break;
+    }
+    case JKEY_z:
+    {
+        // Z (shift+z) for staff
+        if( ( keysym->mod & JMOD_SHIFT ) && !( keysym->mod & JMOD_CTRL ) )
         {
             return true;
         }

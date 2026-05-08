@@ -17,8 +17,9 @@ typedef unsigned char uint8;
 #define JQUITREQUEST 1
 #define JRESETSTATE 2
 #define JCOMPLETESTATE 3
-#define JFAILED 4
-#define JHANDLED_NOTURN 5
+#define JNEED_CHOOSE_ITEM 4 // effect fired; caller should prompt player to choose an item
+#define JFAILED 5
+#define JHANDLED_NOTURN 6
 #define JBOGUSKEY -1
 
 #define INVALID_LENGTH -1

@@ -823,6 +823,7 @@ void CPlayer::RecalcCombatStats()
         }
         pLink = m_llEquipment->GetNext( pLink );
     }
+    m_fArmorClass += m_fACBonus;
 }
 
 void CPlayer::XchangeWeapons()
@@ -1454,9 +1455,46 @@ JResult CPlayer::Fuel( CLink<CItem> *pLink )
     return JSUCCESS;
 }
 
+// Returns true if this effect requires the player to choose an item before it can be applied.
+// All such effects flow through UseState's USE_IDENTIFY sub-mode and return JNEED_CHOOSE_ITEM.
+/*static*/ bool CPlayer::NeedsItemChoice( CEffect *pEffect )
+{
+    switch( pEffect->m_dwFlags )
+    {
+    case EFFECT_FLAG_IDENTIFY: // Scroll/Staff of Perception — player chooses item to identify
+        return true;
+    case EFFECT_FLAG_FUEL: // Scroll of Recharge — player chooses wand/staff to recharge
+        return pEffect->m_dwEffect == EFFECT_TYPE_RESTORE;
+    case EFFECT_FLAG_TOHIT: // Scroll of Enchant Weapon (to-hit)
+    case EFFECT_FLAG_TODAM: // Scroll of Enchant Weapon (to-damage)
+        return ( pEffect->m_dwModifier & EFFECT_MOD_ENCHANT ) != 0;
+    }
+    // Flag2 checks (CURSE lives in flags2)
+    if( pEffect->HasFlag( "EFFECT_FLAG_CURSE" ) &&
+        pEffect->m_dwEffect == EFFECT_TYPE_DESTROY ) // Remove Curse, not Curse Object
+        return true;
+    if( pEffect->m_dwFlags == EFFECT_FLAG_AC && // Enchant Armor, not Timed Blessing
+        ( pEffect->m_dwModifier & EFFECT_MOD_ENCHANT ) )
+        return true;
+    return false;
+}
+
+/*static*/ CEffect *CPlayer::FindNeedsChoiceEffect( CItemDef *pItemDef )
+{
+    CLink<CEffect> *pLink = pItemDef->m_llEffects->GetHead();
+    while( pLink != NULL )
+    {
+        if( NeedsItemChoice( pLink->m_lpData ) )
+            return pLink->m_lpData;
+        pLink = pLink->next;
+    }
+    return nullptr;
+}
+
 JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwItemFlags )
 {
     CEffect *pEffect;
+    JResult retval = JSUCCESS;
     m_bLastEffectNoticed = false;
     while( plEffect != NULL )
     {
@@ -1465,6 +1503,13 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwIte
               g_Constants.IndexToString( EFFECT_TYPE, pEffect->m_dwEffect ),
               g_Constants.EffectFlagToString( pEffect->m_dwFlags, pEffect->m_dwFlags2 ),
               g_Constants.IndexToString( EFFECT_MOD, pEffect->m_dwModifier ) );
+        if( NeedsItemChoice( pEffect ) )
+        {
+            m_bLastEffectNoticed = true;
+            retval = JNEED_CHOOSE_ITEM;
+            plEffect = plEffect->next;
+            continue;
+        }
         switch( pEffect->m_dwEffect )
         {
         case EFFECT_TYPE_HEAL:
@@ -1478,17 +1523,17 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwIte
             break;
         case EFFECT_TYPE_DESTROY:
             JLog( LOG_LEVEL_DEBUG, true, "Destroying\n" );
-            DoDestroyEffects( pEffect, dwItemFlags );
+            retval = DoDestroyEffects( pEffect, dwItemFlags );
             break;
         case EFFECT_TYPE_INTRINSIC:
             JLog( LOG_LEVEL_DEBUG, true, "Setting intrinsic\n" );
             DoIntrinsicEffects( pEffect, fDuration );
             break;
         case EFFECT_TYPE_RESTORE:
-            DoRestoreEffects( pEffect );
+            retval = DoRestoreEffects( pEffect );
             break;
         case EFFECT_TYPE_GAIN:
-            DoGainEffects( pEffect );
+            retval = DoGainEffects( pEffect );
             break;
         case EFFECT_TYPE_LOSE:
             DoLoseEffects( pEffect );
@@ -1502,7 +1547,7 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwIte
         }
         plEffect = plEffect->next;
     }
-    return JSUCCESS;
+    return retval;
 }
 
 JResult CPlayer::DoHealEffects( CEffect *pEffect )
@@ -1634,6 +1679,15 @@ JResult CPlayer::DoHitEffects( CEffect *pEffect )
         break;
     case EFFECT_FLAG_TELEPORT:
         return DoTeleportAway( pEffect );
+        break;
+    case EFFECT_FLAG_IDENTIFY:
+        return DoProbe( pEffect );
+        break;
+    case EFFECT_FLAG_AC:
+        return DoACBuff( pEffect );
+        break;
+    case EFFECT_FLAG_HP:
+        return DoHealMonster( pEffect );
         break;
     default:
         return DoPhysicalHit( pEffect );
@@ -2087,6 +2141,83 @@ JResult CPlayer::DoTeleportAway( CEffect *pEffect )
     return JSUCCESS;
 }
 
+JResult CPlayer::DoProbe( CEffect *pEffect )
+{
+    // Reveal full stats of the monster at the ranged hit position.
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vRangedHitPosition );
+    if( !pTile )
+        return JBOGUSKEY;
+
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+        return JBOGUSKEY;
+    }
+
+    const CMonsterDef *pmd = pMon->m_md;
+    g_pGame->GetMsgs()->Printf( "The %s: HP %d/%d  AC %d  Lvl %d  Spd %.1f\n", pMon->GetName(),
+                                (int)pMon->m_fCurHP, (int)pMon->m_fHP, (int)pmd->m_fBaseAC,
+                                pmd->m_dwLevel, pmd->m_fSpeed );
+    m_bLastEffectNoticed = true;
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoACBuff( CEffect *pEffect )
+{
+    // If a previous AC buff is still active, remove it so only one entry exists.
+    CLink<CEffect> *pLink = m_llActiveEffects->GetHead();
+    while( pLink )
+    {
+        CLink<CEffect> *pNext = pLink->next;
+        if( pLink->m_lpData && pLink->m_lpData->m_dwFlags == EFFECT_FLAG_AC )
+        {
+            m_llActiveEffects->Remove( pLink, true );
+            break;
+        }
+        pLink = pNext;
+    }
+
+    // Apply a timed AC bonus to the player.
+    float fBonus = pEffect->m_szAmount ? Util::Roll( pEffect->m_szAmount ) : 5.0f;
+    float fDuration = pEffect->m_fDuration > 0.0f ? pEffect->m_fDuration : 50.0f;
+
+    m_fACBonus = fBonus;
+    RecalcCombatStats();
+
+    g_pGame->GetMsgs()->Printf( "You feel more protected. (+%d AC)\n", (int)fBonus );
+    m_bLastEffectNoticed = true;
+
+    CEffect *pActive = new CEffect( *pEffect );
+    pActive->m_fDuration = fDuration;
+    m_llActiveEffects->Add( pActive, pActive->m_dwFlags );
+    return JSUCCESS;
+}
+
+JResult CPlayer::DoHealMonster( CEffect *pEffect )
+{
+    // Heal the monster at the ranged hit position (dangerous wand!).
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vRangedHitPosition );
+    if( !pTile )
+        return JBOGUSKEY;
+
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+        return JBOGUSKEY;
+    }
+
+    float fHeal = pEffect->m_szAmount ? Util::Roll( pEffect->m_szAmount ) : 10.0f;
+    pMon->m_fCurHP += fHeal;
+    if( pMon->m_fCurHP > pMon->m_fHP )
+        pMon->m_fCurHP = pMon->m_fHP;
+
+    g_pGame->GetMsgs()->Printf( "The %s looks healthier.\n", pMon->GetName() );
+    m_bLastEffectNoticed = true;
+    return JSUCCESS;
+}
+
 JResult CPlayer::DoDamageInventory( uint32 dwElement )
 {
     uint32 elementMask =
@@ -2504,6 +2635,11 @@ JResult CPlayer::UndoIntrinsicEffects( CEffect *pEffect )
         break;
     case EFFECT_FLAG_LIGHT:
         break;
+    case EFFECT_FLAG_AC:
+        m_fACBonus = 0.0f;
+        RecalcCombatStats();
+        g_pGame->GetMsgs()->Printf( "You feel less protected.\n" );
+        break;
     default:
         JLog( LOG_LEVEL_ERROR, true, "unknown intrinsic type: %d\n", pEffect->m_dwFlags );
         return JBOGUSKEY;
@@ -2516,9 +2652,6 @@ JResult CPlayer::DoRestoreEffects( CEffect *pEffect )
 {
     switch( pEffect->m_dwFlags )
     {
-    case EFFECT_FLAG_IDENTIFY:
-        m_bLastEffectNoticed = true;
-        return DoIdentify();
     case EFFECT_FLAG_HP:
         if( m_fCurHitPoints < m_fHitPoints )
         {
@@ -2536,13 +2669,6 @@ JResult CPlayer::DoRestoreEffects( CEffect *pEffect )
     }
     return JSUCCESS;
 }
-
-JResult CPlayer::DoIdentify()
-{
-    m_bPendingIdentify = true;
-    return JSUCCESS;
-}
-
 JResult CPlayer::DoGainEffects( CEffect *pEffect )
 {
     switch( pEffect->m_dwFlags )
@@ -2699,6 +2825,35 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
         }
         if( bFound )
             g_pGame->GetMsgs()->Printf( "You sense the presence of monsters!\n" );
+        m_bLastEffectNoticed = true;
+    }
+
+    if( pEffect->m_dwFlags & EFFECT_FLAG_TREASURE )
+    {
+        // Reveal all items within range by marking their tiles as seen.
+        CLink<CItem> *pLink = pDungeon->m_llItems->GetHead();
+        bool bFound = false;
+        while( pLink )
+        {
+            CItem *pItem = pLink->m_lpData;
+            if( pItem )
+            {
+                int dx = abs( (int)pItem->m_vPos.x - vPlayer.x );
+                int dy = abs( (int)pItem->m_vPos.y - vPlayer.y );
+                if( dx <= range && dy <= range )
+                {
+                    CDungeonTile *pTile = pDungeon->GetTile( pItem->m_vPos );
+                    if( pTile )
+                        pTile->SetFlags( DUNG_FLAG_SEEN );
+                    bFound = true;
+                }
+            }
+            pLink = pLink->next;
+        }
+        if( bFound )
+            g_pGame->GetMsgs()->Printf( "You sense the presence of treasure!\n" );
+        else
+            g_pGame->GetMsgs()->Printf( "You sense no treasure nearby.\n" );
         m_bLastEffectNoticed = true;
     }
 
@@ -2895,4 +3050,52 @@ JLinkList<CMonster> *CPlayer::GetVisibleMonsters()
     if( !m_llVisibleMonsters )
         UpdateVisibleMonsters();
     return m_llVisibleMonsters;
+}
+
+JResult CPlayer::ApplyChosenItem( CLink<CItem> *pChosen, CEffect *pEffect, int dwItemFlags )
+{
+    if( !pEffect || !pChosen )
+        return JBOGUSKEY;
+    CItem *pItem = pChosen->m_lpData;
+    switch( pEffect->m_dwFlags )
+    {
+    case EFFECT_FLAG_IDENTIFY:
+        pItem->Identify();
+        g_pGame->GetMsgs()->Printf( "It is %s.\n", pItem->GetName() );
+        break;
+    case EFFECT_FLAG_FUEL: // Recharge
+        g_pGame->GetMsgs()->Printf( "It glows with magical energy.\n" );
+        // TODO: add charges based on effect m_szAmount
+        break;
+    case EFFECT_FLAG_TOHIT: // Enchant weapon to-hit
+        pItem->m_fBonusToHit += 1.0f;
+        g_pGame->GetMsgs()->Printf( "It glows with power.\n" );
+        break;
+    case EFFECT_FLAG_TODAM: // Enchant weapon to-damage
+        pItem->m_fBonusToDamage += 1.0f;
+        g_pGame->GetMsgs()->Printf( "It glows with power.\n" );
+        break;
+    default:
+        if( pEffect->m_dwFlags == EFFECT_FLAG_AC && ( pEffect->m_dwModifier & EFFECT_MOD_ENCHANT ) )
+        {
+            pItem->m_fACBonus += 1.0f;
+            g_pGame->GetMsgs()->Printf( "It glows with a soft light.\n" );
+        }
+        else if( pEffect->HasFlag( "EFFECT_FLAG_CURSE" ) &&
+                 pEffect->m_dwEffect == EFFECT_TYPE_DESTROY )
+        {
+            if( dwItemFlags & ITEM_FLAG_CURSED )
+            {
+                pItem->m_dwFlags |= ITEM_FLAG_CURSED;
+                g_pGame->GetMsgs()->Printf( "It is now cursed.\n" );
+            }
+            else
+            {
+                pItem->m_dwFlags &= ~ITEM_FLAG_CURSED;
+                g_pGame->GetMsgs()->Printf( "It is no longer cursed.\n" );
+            }
+        }
+        break;
+    }
+    return JSUCCESS;
 }

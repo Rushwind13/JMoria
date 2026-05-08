@@ -2,6 +2,7 @@
 
 #include "DisplayText.h"
 #include "DungeonTile.h"
+#include "Effect.h"
 #include "Game.h"
 #include "JMDefs.h"
 
@@ -10,7 +11,11 @@
 
 extern CGame *g_pGame;
 
-CUseState::CUseState() : m_cCommand( 0 ), m_dwQuantityPrompt( -1 )
+CUseState::CUseState()
+    : m_cCommand( 0 ),
+      m_dwQuantityPrompt( -1 ),
+      m_pPendingEffect( nullptr ),
+      m_dwPendingItemFlags( 0 )
 {
     m_pKeyHandlers[USE_INIT] = &CUseState::OnHandleInit;
     m_pKeyHandlers[USE_WIELD] = &CUseState::OnHandleWield;
@@ -20,6 +25,7 @@ CUseState::CUseState() : m_cCommand( 0 ), m_dwQuantityPrompt( -1 )
     m_pKeyHandlers[USE_READ] = &CUseState::OnHandleRead;
     m_pKeyHandlers[USE_FUEL] = &CUseState::OnHandleFuel;
     m_pKeyHandlers[USE_IDENTIFY] = &CUseState::OnHandleIdentify;
+    m_pKeyHandlers[USE_STAFF] = &CUseState::OnHandleStaff;
 
     m_eCurModifier = USE_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -216,24 +222,27 @@ int CUseState::OnHandleRead( JKeysym *keysym )
     JLog( LOG_LEVEL_NOISE, true, "READ got a selection\n" );
     if( TestRead() )
     {
-        if( DoRead() )
+        JResult readResult = DoRead();
+        if( readResult == JSUCCESS )
         {
             g_pGame->GetMsgs()->Printf( "You read the %s.\n", m_pSelected->m_lpData->GetName() );
         }
-        else
+        if( readResult == JNEED_CHOOSE_ITEM )
+        {
+            m_pPendingEffect = CPlayer::FindNeedsChoiceEffect( m_pSelected->m_lpData->m_id );
+            m_dwPendingItemFlags = m_pSelected->m_lpData->m_dwFlags;
+            g_pGame->GetMsgs()->Printf( "You read the %s.\n", m_pSelected->m_lpData->GetName() );
+            g_pGame->GetMsgs()->Printf( "Identify which item? [a-z]\n" );
+            m_eCurModifier = USE_IDENTIFY;
+            m_pCurKeyHandler = m_pKeyHandlers[USE_IDENTIFY];
+            return 0;
+        }
+        if( readResult != JSUCCESS )
         {
             g_pGame->GetMsgs()->Printf(
                 "The %s slips from your fingers and returns to your pack!\n",
                 m_pSelected->m_lpData->GetName() );
         }
-    }
-
-    if( g_pGame->GetPlayer()->HasPendingIdentify() )
-    {
-        g_pGame->GetMsgs()->Printf( "Identify which item? [a-z]\n" );
-        m_eCurModifier = USE_IDENTIFY;
-        m_pCurKeyHandler = m_pKeyHandlers[USE_IDENTIFY];
-        return 0;
     }
 
     JLog( LOG_LEVEL_DEBUG, true, "READ resetting game state to COMMAND, USE state to INIT\n" );
@@ -322,6 +331,10 @@ int CUseState::OnHandleInit( JKeysym *keysym )
             mod = USE_FUEL;
             g_pGame->GetMsgs()->Printf( "Fill with which fuel? [a-z]\n" );
             break;
+        case JKEY_z:
+            mod = USE_STAFF;
+            g_pGame->GetMsgs()->Printf( "Use which staff? [a-z]\n" );
+            break;
         default:
             JLog( LOG_LEVEL_ERROR, true,
                   "There seems to be some kind of mistake; I don't handle mod: %d\n", m_cCommand );
@@ -378,7 +391,6 @@ int CUseState::OnHandleIdentify( JKeysym *keysym )
 
     if( retval == JRESETSTATE )
     {
-        g_pGame->GetPlayer()->ClearPendingIdentify();
         return 0;
     }
 
@@ -390,10 +402,9 @@ int CUseState::OnHandleIdentify( JKeysym *keysym )
         return 0;
     }
 
-    CItem *pItem = m_pSelected->m_lpData;
-    pItem->Identify();
-    g_pGame->GetMsgs()->Printf( "It is %s.\n", pItem->GetName() );
-    g_pGame->GetPlayer()->ClearPendingIdentify();
+    g_pGame->GetPlayer()->ApplyChosenItem( m_pSelected, m_pPendingEffect, m_dwPendingItemFlags );
+    m_pPendingEffect = nullptr;
+    m_dwPendingItemFlags = 0;
     m_pSelected = NULL;
 
     JLog( LOG_LEVEL_DEBUG, true, "IDENTIFY resetting game state to COMMAND, USE state to INIT\n" );
@@ -524,6 +535,7 @@ CLink<CItem> *CUseState::GetResponse( eUseModifier whichUse )
     case USE_WIELD:
     case USE_FUEL:
     case USE_IDENTIFY:
+    case USE_STAFF:
         pList = g_pGame->GetPlayer()->m_llInventory;
         pLink = pList->GetNthLink( m_dwSelected );
         break;
@@ -565,12 +577,98 @@ bool CUseState::DoQuaff() { return g_pGame->GetPlayer()->Quaff( m_pSelected ) ==
 //// Read commands
 bool CUseState::TestRead() { return g_pGame->GetPlayer()->IsReadable( m_pSelected ); }
 
-bool CUseState::DoRead() { return g_pGame->GetPlayer()->Read( m_pSelected ) == JSUCCESS; }
+JResult CUseState::DoRead() { return g_pGame->GetPlayer()->Read( m_pSelected ); }
 
 //// Fuel commands
 bool CUseState::TestFuel() { return g_pGame->GetPlayer()->IsFuel( m_pSelected ); }
 
 bool CUseState::DoFuel() { return g_pGame->GetPlayer()->Fuel( m_pSelected ) == JSUCCESS; }
+
+//// Staff commands
+bool CUseState::TestStaff() { return g_pGame->GetPlayer()->IsUseable( m_pSelected ); }
+
+JResult CUseState::DoStaff() { return g_pGame->GetPlayer()->UseStaff( m_pSelected ); }
+
+int CUseState::OnHandleStaff( JKeysym *keysym )
+{
+    int retval;
+    JLog( LOG_LEVEL_DEBUG, true, "Handling STAFF\n" );
+    retval = OnBaseHandleKey( keysym, USE_STAFF );
+
+    if( retval == JRESETSTATE )
+    {
+        return 0;
+    }
+
+    if( retval != JSUCCESS )
+    {
+        JLog( LOG_LEVEL_DEBUG, true,
+              "STAFF cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
+        g_pGame->GetMsgs()->Printf( "Choose an item from inventory (a to z):\n" );
+        return 0;
+    }
+
+    JLog( LOG_LEVEL_DEBUG, true, "STAFF got a selection: %s\n", m_pSelected->m_lpData->GetName() );
+
+    if( !TestStaff() )
+    {
+        g_pGame->GetMsgs()->Printf( "You can't use a %s as a staff!\n",
+                                    m_pSelected->m_lpData->GetName() );
+        m_pSelected = NULL;
+        ResetToState( STATE_COMMAND );
+        return 0;
+    }
+
+    CItem *pItem = m_pSelected->m_lpData;
+    if( pItem->m_dwCharges <= 0 )
+    {
+        g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+        m_pSelected = NULL;
+        ResetToState( STATE_COMMAND );
+        return 0;
+    }
+
+    // Staves fire at player position — no trajectory needed
+    g_pGame->GetPlayer()->SetRangedHitPosition( g_pGame->GetPlayer()->m_vPos );
+
+    const char *szEffectDesc = NULL;
+    CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
+    if( plEffect && plEffect->m_lpData && plEffect->m_lpData->m_ed &&
+        plEffect->m_lpData->m_ed->m_szName )
+    {
+        szEffectDesc = plEffect->m_lpData->m_ed->m_szName;
+    }
+
+    if( szEffectDesc && !CPlayer::FindNeedsChoiceEffect( pItem->m_id ) )
+    {
+        g_pGame->GetMsgs()->Printf( "The %s emits a %s.\n", pItem->GetName(), szEffectDesc );
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "The %s glows.\n", pItem->GetName() );
+    }
+
+    JResult staffResult = DoStaff();
+    if( staffResult == JNEED_CHOOSE_ITEM )
+    {
+        m_pPendingEffect = CPlayer::FindNeedsChoiceEffect( m_pSelected->m_lpData->m_id );
+        m_dwPendingItemFlags = m_pSelected->m_lpData->m_dwFlags;
+    }
+    g_pGame->GetPlayer()->ConsumeAndRemoveIfEmpty( m_pSelected );
+    m_pSelected = NULL;
+
+    if( staffResult == JNEED_CHOOSE_ITEM )
+    {
+        g_pGame->GetMsgs()->Printf( "Identify which item? [a-z]\n" );
+        m_eCurModifier = USE_IDENTIFY;
+        m_pCurKeyHandler = m_pKeyHandlers[USE_IDENTIFY];
+        return 0;
+    }
+
+    JLog( LOG_LEVEL_DEBUG, true, "STAFF resetting game state to COMMAND, USE state to INIT\n" );
+    ResetToState( STATE_COMMAND );
+    return 0;
+}
 
 int CUseState::OnHandleFuel( JKeysym *keysym )
 {

@@ -177,6 +177,8 @@ WHEN( "^the player reads the scroll in inventory at ([-0-9]+)$" )
     ScenarioScope<TestCtx> context;
     CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llInventory->GetLink( inv_id );
     JLog( LOG_LEVEL_DEBUG, true, "Found item to read is %s\n", pLink->m_lpData->GetName() );
+    context->pendingSourceItemDef = pLink->m_lpData->m_id;
+    context->pendingSourceItemFlags = pLink->m_lpData->m_dwFlags;
     g_pGame->GetPlayer()->Read( pLink );
 }
 
@@ -627,4 +629,14 @@ THEN( "^A ([A-Za-z ]+) should be in the secondary offhand weapon equipment slot$
     EXPECT_NE( pEquipped, (CItem *)NULL ) << "Secondary offhand weapon slot is empty";
     EXPECT_EQ( Util::jstrcmp( pEquipped->GetName(), item.c_str() ), 0 )
         << "Expected " << item << " but got " << pEquipped->GetName();
+}
+
+WHEN( "^the player applies the pending effect to equipment at ([-0-9]+)$" )
+{
+    REGEX_PARAM( int, slot );
+    ScenarioScope<TestCtx> context;
+    CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llEquipment->GetLink( slot );
+    ASSERT_NE( pLink, (CLink<CItem> *)NULL );
+    CEffect *pEffect = CPlayer::FindNeedsChoiceEffect( context->pendingSourceItemDef );
+    g_pGame->GetPlayer()->ApplyChosenItem( pLink, pEffect, context->pendingSourceItemFlags );
 }

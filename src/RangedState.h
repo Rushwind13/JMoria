@@ -28,7 +28,6 @@ enum eRangedModifier
     RANGED_TARGET,
     RANGED_TRAJECTORY,
     RANGED_ZAP,
-    RANGED_STAFF,
     RANGED_MAX
 };
 class CRangedState : public CStateBase
@@ -105,7 +104,6 @@ private:
     int OnHandleTarget( JKeysym *keysym );
     int OnHandleTrajectory( JKeysym *keysym );
     int OnHandleZap( JKeysym *keysym );
-    int OnHandleStaff( JKeysym *keysym );
 
     void ResetToState( int newstate );
     void GosubState( int newstate );
@@ -124,8 +122,5 @@ private:
 
     bool TestZap();
     bool DoZap();
-
-    bool TestStaff();
-    bool DoStaff();
 };
 #endif /* RangedState_h */

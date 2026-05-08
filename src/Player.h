@@ -6,6 +6,7 @@
 
 class CTileset;
 class CItem;
+class CItemDef;
 class CEffect;
 class CMonster;
 #define PLAYER_TURNS_PER_HP 4
@@ -110,11 +111,11 @@ public:
           m_szKilledBy( NULL ),
           m_bIsRested( true ),
           m_bIsDisturbed( false ),
-          m_bPendingIdentify( false ),
           m_bLastEffectNoticed( false ),
           m_fDamageModifier( 0.0f ),
           m_fToHitModifier( 0.0f ),
           m_fArmorClass( 1.0f ),
+          m_fACBonus( 0.0f ),
           m_fSpeed( 1.0f ),
           m_fHitPoints( 0.0f ),
           m_fLastHPTime( 0.0f ),
@@ -279,6 +280,8 @@ public:
     void UpdateLight( float fValue, bool bReset = false );
 
     JResult DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwFlags );
+    static bool NeedsItemChoice( CEffect *pEffect );
+    static CEffect *FindNeedsChoiceEffect( CItemDef *pItemDef );
     JResult DoHealEffects( CEffect *pEffect );
     JResult DoHealHP( CEffect *pEffect );
     JResult DoHitEffects( CEffect *pEffect );
@@ -291,6 +294,9 @@ public:
     JResult DoStatusHit( CEffect *pEffect, uint32 dwFlag );
     JResult DoStoneToMud( CEffect *pEffect );
     JResult DoTeleportAway( CEffect *pEffect );
+    JResult DoProbe( CEffect *pEffect );
+    JResult DoACBuff( CEffect *pEffect );
+    JResult DoHealMonster( CEffect *pEffect );
     JResult DoDamageInventory( uint32 dwElement );
     JResult DoDamageEquipment( uint32 dwElement );
     JResult DoCreateEffects( CEffect *pEffect );
@@ -301,7 +307,6 @@ public:
     JResult UndoIntrinsicEffects( CEffect *pEffect );
     JResult DoApplyCurse();
     JResult DoRestoreEffects( CEffect *pEffect );
-    JResult DoIdentify();
     JResult DoGainEffects( CEffect *pEffect );
     JResult DoLoseEffects( CEffect *pEffect );
     JResult DoSeeEffects( CEffect *pEffect );
@@ -309,6 +314,7 @@ public:
     JResult DoMagicMapping( CEffect *pEffect );
     JResult DoRecall();
     JResult DoSummonMonsters();
+    JResult ApplyChosenItem( CLink<CItem> *pChosen, CEffect *pEffect, int dwItemFlags );
 
     bool SetName( const char *szName );
 
@@ -372,17 +378,15 @@ public:
 
     bool m_bIsRested;
     bool m_bIsDisturbed;
-    bool m_bPendingIdentify;
     bool m_bLastEffectNoticed;
 
-    bool HasPendingIdentify() { return m_bPendingIdentify; }
-    void ClearPendingIdentify() { m_bPendingIdentify = false; }
     float GetSpeed() { return m_fSpeed; }
 
 protected:
     void GainLevel();
 
     float m_fArmorClass;
+    float m_fACBonus;
     float m_fHitPoints;
     float m_fCurHitPoints;
     float m_fLastHPTime;

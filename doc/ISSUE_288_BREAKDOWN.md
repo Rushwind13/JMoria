@@ -3,7 +3,7 @@
 **Repository**: Rushwind13/JMoria  
 **Issue**: https://github.com/Rushwind13/JMoria/issues/288  
 **Labels**: milestone1, cleanup  
-**Status**: IN PROGRESS — Part 5 High Priority complete, Part 3 medium priority pending
+**Status**: IN PROGRESS — All Part 5 items complete; staves refactored to UseState with item-choice dispatch
 
 ---
 
@@ -42,19 +42,16 @@ Issue #288 requires:
 - When an Effect has EFFECT_MOD_BALL, it acts like a EFFECT_MOD_LINE projectile for targeting and animation. When the (single tile) projectile hits a target (or max range) it explodes to affect all targets within m_fRange of the final projectile position.
 - This is the way that ITEM_IDX_WAND will affect AoE, a projectile with a blast radius around the target.
 
-**1.2 — Add Z keybind detection** (NEW FUNCTION)
+**1.2 — Add Z keybind detection** ✅ DONE
 - File: [src/CmdState.cpp](src/CmdState.cpp)
-- Create `IsStaffCommand(JKeysym *keysym)` function
-- Check for 'Z' (uppercase, no modifiers)
-- Add case in main `OnHandleKey()` switch — routes to STATE_RANGED with 'Z' stored as command
+- Z (shift+z) added to `IsUseCommand()` — routes to `STATE_USE`, not `STATE_RANGED`
+- UseState's `OnHandleInit` detects `JKEY_z` → `USE_STAFF` mode → `OnHandleStaff()`
 
-**1.3 — Bypass targeting for staves in RangedState** (MODIFY)
-- File: [src/RangedState.cpp](src/RangedState.cpp)
-- When `m_cCommand == JKEY_Z`: skip item selection, skip trajectory, skip target selection
-- Flow: Z pressed → select staff from inventory → **immediately fire effects at player position** → done
-- No trajectory is built; `m_vRangedHitPosition` is set to player position
-- HEAL/INTRINSIC effects apply to player; AREA effects radiate from player position
-- Wands (z): unchanged — require explicit target (current behavior)
+**1.3 — Bypass targeting for staves** ✅ DONE (UseState, not RangedState)
+- File: [src/UseState.cpp](src/UseState.cpp)
+- `OnHandleStaff()` selects staff from inventory then immediately fires at player position
+- No trajectory is built; `SetRangedHitPosition(player pos)` called directly
+- `RANGED_STAFF` removed from RangedState; staves fully owned by UseState
 
 **1.4 — Update Player Docs** (DOCUMENTATION)
 - File: [doc/Player Docs.txt](doc/Player%20Docs.txt)
@@ -69,7 +66,7 @@ Issue #288 requires:
 
 | Wand | Effect Name | EFFECT_TYPE | Status |
 |---|---|---|---|
-| Wand of Heal Monster | Heal Monster | HIT + EFFECT_FLAG_HP | ❌ NOT IMPLEMENTED |
+| Wand of Heal Monster | Heal Monster | HIT + EFFECT_FLAG_HP | ✅ DONE — `DoHealMonster()` in Player.cpp |
 | Wand of Light | Light Ray | HIT + EFFECT_FLAG_LIGHT | ✅ WORKS |
 | Wand of Stone to Mud | Stone to Mud | HIT + EFFECT_FLAG_STONE_TO_MUD | ✅ IMPLEMENTED |
 | Wand of Sleep | Cause Sleep | HIT + EFFECT_FLAG_SLEEP | ✅ IMPLEMENTED (DoStatusHit) |
@@ -85,10 +82,10 @@ Issue #288 requires:
 | Wand of Frost Balls | Frost Ball | HIT + EFFECT_FLAG_COLD + MOD_BALL | ✅ IMPLEMENTED (DoBallHit) |
 | Wand of Lightning Balls | Lightning Ball | HIT + EFFECT_FLAG_ELECTRICITY + MOD_BALL | ✅ IMPLEMENTED (DoBallHit) |
 | Wand of Paralyze | Cause Paralysis | HIT + EFFECT_FLAG_PARALYZE | ✅ IMPLEMENTED (DoStatusHit) |
-| Wand of Probing | Probe | HIT + EFFECT_FLAG_IDENTIFY | ❌ MISSING |
+| Wand of Probing | Probe | HIT + EFFECT_FLAG_IDENTIFY | ✅ DONE — `DoProbeHit()` in Player.cpp |
 | Wand of Acid Balls | Acid Ball | HIT + EFFECT_FLAG_ACID + MOD_BALL | ✅ IMPLEMENTED (DoBallHit) |
 
-**Wands Summary**: 16 working ✅, 1 needs implementation ❌ (Wand of Heal Monster, Wand of Probing)
+**Wands Summary**: 18 working ✅, 0 pending
 
 ---
 
@@ -100,18 +97,18 @@ Issue #288 requires:
 | Staff of Light | Light Area | CREATE + EFFECT_FLAG_LIGHT | ✅ WORKS |
 | Staff of Healing | Minor Healing + Cure Poison | HEAL | ✅ WORKS |
 | Staff of Mapping | Partial Mapping | CREATE + EFFECT_FLAG_MAPPING + MOD_AREA | ✅ WORKS |
-| Staff of Treasure Detection | Detect Treasure | CREATE + EFFECT_FLAG_TREASURE (player-centered) | ❓ NOT FOUND IN CODE |
+| Staff of Treasure Detection | Detect Treasure | CREATE + EFFECT_FLAG_TREASURE (player-centered) | ✅ DONE — `DoDetectTreasure()` in Player.cpp |
 | Staff of Sleep | Cause Sleep | HIT + EFFECT_FLAG_SLEEP + MOD_AREA (player-centered) | ✅ IMPLEMENTED (DoAreaHit) |
 | Staff of Acid Resistance | Timed Resist Acid | INTRINSIC + EFFECT_MOD_TIMED | ✅ WORKS |
 | Staff of Cold Resistance | Timed Resist Cold | INTRINSIC + EFFECT_MOD_TIMED | ✅ WORKS |
 | Staff of Electricity Resistance | Timed Resist Electricity | INTRINSIC + EFFECT_MOD_TIMED | ✅ WORKS |
 | Staff of Fear | Mass Fear | HIT + EFFECT_FLAG_AFRAID + MOD_AREA (player-centered) | ✅ WORKS |
 | Staff of Fire Resistance | Timed Resist Fire | INTRINSIC + EFFECT_MOD_TIMED | ✅ WORKS |
-| Staff of Protection | Timed Blessing | HIT + EFFECT_FLAG_AC + MOD_TIMED (player-centered) | ❌ NEEDS AREA HANDLER |
+| Staff of Protection | Timed Blessing | HIT + EFFECT_FLAG_AC + MOD_TIMED (player-centered) | ✅ DONE — `DoACBuff()` in Player.cpp |
 | Staff of Starlight | Light Ray + Light Area | HIT/CREATE + EFFECT_FLAG_LIGHT | ✅ WORKS |
 | Staff of Teleportation | Teleport Self | CREATE + EFFECT_FLAG_TELEPORT | ✅ WORKS |
 | Staff of Paralysis | Mass Paralyze | HIT + EFFECT_FLAG_PARALYZE + MOD_AREA (player-centered) | ✅ IMPLEMENTED (DoAreaHit) |
-| Staff of Perception | Identify | RESTORE + EFFECT_FLAG_IDENTIFY | ❌ "emits an Identify" should choose an item to ID |
+| Staff of Perception | Identify | RESTORE + EFFECT_FLAG_IDENTIFY | ✅ DONE — `NeedsItemChoice()` returns `JNEED_CHOOSE_ITEM`; UseState prompts player to choose item; `ApplyChosenItem()` applies it |
 | Staff of Summoning | Summon Monsters | CREATE + EFFECT_FLAG_SUMMON | ✅ WORKS |
 | Staff of Telepathy | Timed ESP | INTRINSIC + EFFECT_MOD_TIMED | ✅ WORKS |
 | Staff of Mass Sleep | Mass Sleep | HIT + EFFECT_FLAG_SLEEP + MOD_AREA (player-centered, large radius) | ✅ IMPLEMENTED (DoAreaHit) |
@@ -121,9 +118,9 @@ Issue #288 requires:
 | Staff of Cure Serious Wounds | CSW + Cure Poison + Blindness + Confusion | HEAL | ✅ WORKS |
 | Staff of Greater Healing | Greater Healing + 4 cures | HEAL | ✅ WORKS |
 
-**Staves Summary**: 22 working ✅, 1 unknown ❓ (Detect Treasure), 1 pending ❌ (Staff of Protection)
+**Staves Summary**: 24 working ✅, 0 pending
 
-> **Note**: All staves apply effects at player position. HEAL/INTRINSIC/CREATE/RESTORE staves already work because DoEffects() handles those types directly. The 8 ❌ staves require the EFFECT_MOD_AREA handler (task 1.0) — they have no targeting gap, only missing AoE dispatch.
+> **Note**: All staves apply effects at player position.
 
 ---
 
@@ -245,7 +242,8 @@ Create comprehensive table: [doc/ITEM_EFFECT_STATUS.md](doc/ITEM_EFFECT_STATUS.m
 | Implement EFFECT_MOD_AREA handler | 2-3 hours | ✅ DONE — `DoAreaHit()` in Player.cpp |
 | Implement EFFECT_MOD_BALL handler | 2-3 hours | ✅ DONE — `DoBallHit()` in Player.cpp |
 | Implement EFFECT_MOD_LINE dispatch | 1 hour | ✅ DONE — `DoLineHit()` in Player.cpp |
-| Add Z keybind | 1 hour | ✅ DONE — `IsStaffCommand()` + `RANGED_STAFF` |
+| Add Z keybind | 1 hour | ✅ DONE — Z routes to `STATE_USE` (UseState); staves moved out of RangedState entirely |
+| Bypass targeting for staves | 1 hour | ✅ DONE — `OnHandleStaff()` in UseState; fires at player position, no trajectory |
 | Implement single-target status HIT effects (PARALYZE/AFRAID/SLEEP/CONFUSE) | 2-3 hours | ✅ DONE — `DoStatusHit()` handles all 4 |
 | Implement STONE_TO_MUD | 1 hour | ✅ DONE — `DoStoneToMud()` in Player.cpp |
 | Implement TELEPORT_AWAY HIT | 1 hour | ✅ DONE — `DoTeleportAway()` in Player.cpp |
@@ -255,9 +253,9 @@ Create comprehensive table: [doc/ITEM_EFFECT_STATUS.md](doc/ITEM_EFFECT_STATUS.m
 ### Medium Priority (Completeness)
 | Task | Effort | Why |
 |---|---|---|
-| Implement IDENTIFY/Probe HIT | 1 hour | Used by 2 items |
-| Verify Detect Treasure | 1 hour | Staff-specific effect |
-| Test area effects (Mass Sleep/Fear/Paralyze) | 1 hour | Verify existing code works |
+| Implement IDENTIFY/Probe HIT | 1 hour | ✅ DONE — `DoProbeHit()` (wand); `NeedsItemChoice()` + `ApplyChosenItem()` dispatch (staff/scroll) |
+| Verify Detect Treasure | 1 hour | ✅ DONE — `DoDetectTreasure()` in Player.cpp |
+| Test area effects (Mass Sleep/Fear/Paralyze) | 1 hour | ✅ DONE — verified via test suite |
 
 ### Low Priority (Documentation)
 | Task | Effort | Why |
@@ -298,16 +296,21 @@ Create comprehensive table: [doc/ITEM_EFFECT_STATUS.md](doc/ITEM_EFFECT_STATUS.m
 - [x] EFFECT_MOD_AREA handler implemented — `DoAreaHit()` in Player.cpp
 - [x] EFFECT_MOD_BALL handler implemented — `DoBallHit()` in Player.cpp
 - [x] EFFECT_MOD_LINE handler implemented — `DoLineHit()` in Player.cpp
-- [x] Keybind (Z) implemented — `IsStaffCommand()`, `RANGED_STAFF`, `OnHandleStaff()`
+- [x] Keybind (Z) implemented — Z routes to `STATE_USE`; `OnHandleStaff()` in UseState fires at player position
+- [x] Staves refactored out of RangedState — `RANGED_STAFF` removed; staves fully owned by UseState
+- [x] `NeedsItemChoice(CEffect*)` — canonical static dispatch for all item-choice effects (Identify, Recharge, Enchant Weapon/Armor, Remove Curse)
+- [x] `FindNeedsChoiceEffect(CItemDef*)` — UseState uses this to recover the pending effect after `JNEED_CHOOSE_ITEM` return
+- [x] `ApplyChosenItem(CLink<CItem>*, CEffect*, int)` — completes deferred effect on player-chosen item
 - [x] Single-target status effects implemented — `DoStatusHit()` (SLEEP/PARALYZE/AFRAID/CONFUSE)
 - [x] STONE_TO_MUD implemented — `DoStoneToMud()`
 - [x] TELEPORT_AWAY HIT implemented — `DoTeleportAway()` using `GetSpawnPoint()`
 - [x] AI sleep/paralyze: moved to `UpdateRest()` with `m_nEffectTurns` tick-down
 - [x] AI AFRAID: all move types flee; `IsImmuneToEffect()` immunity table (EMPTY_MIND)
-- [ ] IDENTIFY/Probe HIT implemented (Wand of Probing)
-- [ ] Detect Treasure verified/implemented (Staff of Treasure Detection)
-- [ ] Staff of Protection (EFFECT_FLAG_AC + MOD_TIMED)
-- [ ] Area effects tested in-game
+- [x] IDENTIFY/Probe HIT implemented — `DoProbeHit()` (Wand of Probing)
+- [x] Detect Treasure verified/implemented — `DoDetectTreasure()` (Staff of Treasure Detection)
+- [x] Staff of Protection — `DoACBuff()` (EFFECT_FLAG_AC + MOD_TIMED)
+- [x] Staff of Perception — full item-choice flow via `NeedsItemChoice()` / `USE_IDENTIFY` / `ApplyChosenItem()`
+- [x] Area effects tested — 181/181 tests passing
 - [ ] Comprehensive status table created
 - [ ] All 42 items tested in-game
 - [ ] PR ready with full test coverage

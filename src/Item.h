@@ -201,14 +201,10 @@ public:
     void Identify()
     {
         m_id->m_bIdentified = true;
-        RevealAllProperties();
+        m_dwKnownProps |= ( KNOWN_CURSED | KNOWN_BONUSES | KNOWN_CHARGES );
     }
     bool KnowsProperty( uint32 prop ) { return ( m_dwKnownProps & prop ) != 0; }
     void RevealProperty( uint32 prop ) { m_dwKnownProps |= prop; }
-    void RevealAllProperties()
-    {
-        m_dwKnownProps |= ( KNOWN_CURSED | KNOWN_BONUSES | KNOWN_CHARGES );
-    }
     bool IsOpenable() { return false; }   // for chests, etc.
     bool IsCloseable() { return false; }  // closeable pickup?
     bool IsTunnelable() { return false; } // Tunnelable pickup? unlikely.

@@ -57,6 +57,6 @@ Open issues labeled `cleanup` on branch `feat/phase3c_polish`, prioritized by im
   Monsters with hands open closed doors; large/heavy monsters bash through locked/spiked doors. New items: iron spikes. New spell: Wizard Lock.
   *Depends on sleep system for full behavior (#296).*
 
-- **#269** [Shrieker Mushroom Patch — monster sleep and aggravate mechanic](https://github.com/Rushwind13/JMoria/issues/269)
+- **#269** COMPLETE [Shrieker Mushroom Patch — monster sleep and aggravate mechanic](https://github.com/Rushwind13/JMoria/issues/269)
   Stationary `MON_AI_DONTMOVE` monster that wakes and aggravates nearby monsters when the player is adjacent.
   *Blocked by monster sleep state (#296).*

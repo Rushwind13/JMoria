@@ -1,4 +1,7 @@
 #include "Effect.h"
+#include "DisplayText.h"
+#include "Dungeon.h"
+#include "Player.h"
 void CEffect::SetAmount( const char *szAmount )
 {
     if( m_szAmount )
@@ -47,5 +50,567 @@ const char *CEffect::Effect()
         return "poison gas";
     default:
         return "energy";
+    }
+}
+
+JResult CEffect::Physical( JVector vOrigin )
+{
+    bool bCriticalHit = false;
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( vOrigin );
+    if( !pTile )
+        return JBOGUSKEY;
+
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+        return JBOGUSKEY;
+    }
+    const char *szMonName = pMon->GetName();
+
+    CPlayer *pPlayer = g_pGame->GetPlayer();
+    if( pPlayer->m_pCurrentRangedAmmo )
+    {
+        CLink<CItem> *pArrowLink = NULL;
+        CLink<CItem> *pInvItem = pPlayer->m_llInventory->GetHead();
+        while( pInvItem )
+        {
+            if( pInvItem->m_lpData == pPlayer->m_pCurrentRangedAmmo )
+            {
+                pArrowLink = pInvItem;
+                break;
+            }
+            pInvItem = pPlayer->m_llInventory->GetNext( pInvItem );
+        }
+
+        float fRoll = pPlayer->RangedAttack( pArrowLink );
+        bool bHit = pMon->Hit( fRoll );
+
+        if( !bHit )
+        {
+            g_pGame->GetMsgs()->Printf( "You miss the %s.\n", szMonName );
+            JLog( LOG_LEVEL_INFO, true, "Ranged miss: roll %.2f vs AC %d\n", fRoll,
+                  (int)pMon->m_fCurAC );
+            return JSUCCESS;
+        }
+
+        if( fRoll > 80.0f )
+        {
+            g_pGame->GetMsgs()->Printf( "(Critical hit!)\n" );
+            bCriticalHit = true;
+        }
+    }
+
+    const char *szAmount = m_szAmount;
+    if( !szAmount && m_ed )
+        szAmount = m_ed->m_szAmount;
+    if( !szAmount )
+        szAmount = "1d2";
+
+    float fDamage = Util::Roll( szAmount );
+
+    if( pPlayer->m_pCurrentRangedAmmo )
+        fDamage += pPlayer->m_pCurrentRangedAmmo->m_fBonusToDamage;
+
+    if( bCriticalHit )
+        fDamage *= 2.0f;
+
+    if( pPlayer->DamageMonster( pMon, fDamage ) )
+        g_pGame->GetMsgs()->Printf( "The %s dies.\n", szMonName );
+    else
+        g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
+
+    return JSUCCESS;
+}
+
+JResult CEffect::LightRay( JVector vOrigin )
+{
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( vOrigin );
+    if( !pTile )
+        return JBOGUSKEY;
+
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+        return JBOGUSKEY;
+    }
+
+    const char *szMonName = pMon->GetName();
+    JLog( LOG_LEVEL_INFO, true, "monster: %s\n", szMonName );
+
+    if( ( pMon->m_md->m_dwFlags & MON_FLAG_HURT_BY_LIGHT ) == MON_FLAG_HURT_BY_LIGHT )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "that's gonna hurt\n" );
+        float fDamage = Util::Roll( "1d5" );
+        if( g_pGame->GetPlayer()->DamageMonster( pMon, fDamage ) )
+            g_pGame->GetMsgs()->Printf( "The %s shrivels away in the bright light!\n", szMonName );
+        else
+            g_pGame->GetMsgs()->Printf( "The %s screams in agony.\n", szMonName );
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "The %s is unaffected.\n", szMonName );
+    }
+
+    return JSUCCESS;
+}
+
+JResult CEffect::Elemental( JVector vOrigin )
+{
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( vOrigin );
+    if( !pTile )
+        return JBOGUSKEY;
+
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+        return JBOGUSKEY;
+    }
+
+    const char *szEffect = Effect();
+    const char *szMonName = pMon->GetName();
+    JLog( LOG_LEVEL_INFO, true, "elemental hit (%s) on %s\n", szEffect, szMonName );
+
+    if( m_ed && m_ed->m_szName )
+        g_pGame->GetMsgs()->Printf( "The %s strikes the %s with %s.\n", m_ed->m_szName, szMonName,
+                                    szEffect );
+
+    const char *szAmount = m_szAmount;
+    if( !szAmount && m_ed )
+        szAmount = m_ed->m_szAmount;
+    if( !szAmount )
+        szAmount = "1d6";
+
+    float fDamage = Util::Roll( szAmount );
+
+    CPlayer *pPlayer = g_pGame->GetPlayer();
+    if( pPlayer->m_pCurrentRangedAmmo )
+        fDamage += pPlayer->m_pCurrentRangedAmmo->m_fBonusToDamage;
+
+    float fAffinityMult = Util::CheckAffinity( m_dwFlags, pMon->GetElementFlags() );
+    if( fAffinityMult == 0.0f )
+    {
+        pMon->m_fCurHP += fDamage;
+        if( pMon->m_fCurHP > pMon->m_fHP )
+            pMon->m_fCurHP = pMon->m_fHP;
+        g_pGame->GetMsgs()->Printf( "The %s shrugs off the attack!\n", szMonName );
+        return JSUCCESS;
+    }
+    fDamage *= fAffinityMult;
+    if( fAffinityMult > 1.0f )
+        g_pGame->GetMsgs()->Printf( "The %s is especially vulnerable!\n", szMonName );
+
+    if( pPlayer->DamageMonster( pMon, fDamage ) )
+        g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );
+    else
+        g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
+
+    return JSUCCESS;
+}
+
+JResult CEffect::Area( JVector vOrigin )
+{
+    const char *szAmount = m_szAmount;
+    if( !szAmount && m_ed )
+        szAmount = m_ed->m_szAmount;
+
+    uint8 radius = m_ed ? (uint8)m_ed->m_fRadius : 5;
+    JIVector vCenter( (int)vOrigin.x, (int)vOrigin.y );
+
+    int nAffected = 0;
+    CLink<CMonster> *pLink = g_pGame->GetDungeon()->m_llMonsters->GetHead();
+    while( pLink != NULL )
+    {
+        CMonster *pMon = pLink->m_lpData;
+        pLink = g_pGame->GetDungeon()->m_llMonsters->GetNext( pLink );
+
+        if( !pMon )
+            continue;
+
+        JIVector vMonPos( (int)pMon->GetPos().x, (int)pMon->GetPos().y );
+        if( !Util::WithinRadius( vCenter, vMonPos, radius ) )
+            continue;
+
+        if( m_dwFlags &
+            ( EFFECT_FLAG_FIRE | EFFECT_FLAG_COLD | EFFECT_FLAG_ELECTRICITY | EFFECT_FLAG_ACID ) )
+        {
+            float fDamage = szAmount ? Util::Roll( szAmount ) : Util::Roll( "1d6" );
+            const char *szMonName = pMon->GetName();
+
+            float fAffinityMult = Util::CheckAffinity( m_dwFlags, pMon->GetElementFlags() );
+            if( fAffinityMult == 0.0f )
+            {
+                pMon->m_fCurHP += fDamage;
+                if( pMon->m_fCurHP > pMon->m_fHP )
+                    pMon->m_fCurHP = pMon->m_fHP;
+                g_pGame->GetMsgs()->Printf( "The %s shrugs off the attack!\n", szMonName );
+            }
+            else
+            {
+                fDamage *= fAffinityMult;
+                if( fAffinityMult > 1.0f )
+                    g_pGame->GetMsgs()->Printf( "The %s is especially vulnerable!\n", szMonName );
+                if( g_pGame->GetPlayer()->DamageMonster( pMon, fDamage ) )
+                    g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );
+                else
+                    g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
+            }
+        }
+        else
+        {
+            if( !pMon->IsImmuneToEffect( m_dwFlags ) )
+            {
+                pMon->m_dwActiveEffects |= m_dwFlags;
+                if( m_dwFlags & ( EFFECT_FLAG_SLEEP | EFFECT_FLAG_PARALYZE ) )
+                {
+                    pMon->m_pBrain->m_nEffectTurns = (int)Util::Roll( "3d6" );
+                    pMon->m_pBrain->SetState( BRAINSTATE_REST );
+                }
+            }
+            else
+            {
+                continue;
+            }
+        }
+        nAffected++;
+    }
+
+    if( nAffected > 0 )
+    {
+        g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
+        const char *szEffName = ( m_ed && m_ed->m_szName ) ? m_ed->m_szName : "something";
+        g_pGame->GetMsgs()->Printf( "The %s affects %d creature%s.\n", szEffName, nAffected,
+                                    nAffected == 1 ? "" : "s" );
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+    }
+
+    return JSUCCESS;
+}
+
+JResult CEffect::Ball( JVector vOrigin )
+{
+    const char *szAmount = m_szAmount;
+    if( !szAmount && m_ed )
+        szAmount = m_ed->m_szAmount;
+    if( !szAmount )
+        szAmount = "2d6";
+
+    uint8 radius = m_ed ? (uint8)m_ed->m_fRadius : 2;
+    JIVector vCenter( (int)vOrigin.x, (int)vOrigin.y );
+
+    int nAffected = 0;
+    CLink<CMonster> *pLink = g_pGame->GetDungeon()->m_llMonsters->GetHead();
+    while( pLink != NULL )
+    {
+        CMonster *pMon = pLink->m_lpData;
+        pLink = g_pGame->GetDungeon()->m_llMonsters->GetNext( pLink );
+
+        if( !pMon )
+            continue;
+
+        JIVector vMonPos( (int)pMon->GetPos().x, (int)pMon->GetPos().y );
+        if( !Util::WithinRadius( vCenter, vMonPos, radius ) )
+            continue;
+
+        float fDamage = Util::Roll( szAmount );
+        const char *szMonName = pMon->GetName();
+
+        float fAffinityMult = Util::CheckAffinity( m_dwFlags, pMon->GetElementFlags() );
+        if( fAffinityMult == 0.0f )
+        {
+            pMon->m_fCurHP += fDamage;
+            if( pMon->m_fCurHP > pMon->m_fHP )
+                pMon->m_fCurHP = pMon->m_fHP;
+            g_pGame->GetMsgs()->Printf( "The %s shrugs off the attack!\n", szMonName );
+            nAffected++;
+            continue;
+        }
+        fDamage *= fAffinityMult;
+        if( fAffinityMult > 1.0f )
+            g_pGame->GetMsgs()->Printf( "The %s is especially vulnerable!\n", szMonName );
+        if( g_pGame->GetPlayer()->DamageMonster( pMon, fDamage ) )
+            g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );
+        else
+            g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
+        nAffected++;
+    }
+
+    if( nAffected > 0 )
+        g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
+    else
+        g_pGame->GetMsgs()->Printf( "The ball explodes harmlessly.\n" );
+
+    return JSUCCESS;
+}
+
+JResult CEffect::Line( JVector vOrigin )
+{
+    const char *szAmount = m_szAmount;
+    if( !szAmount && m_ed )
+        szAmount = m_ed->m_szAmount;
+    if( !szAmount )
+        szAmount = "2d6";
+
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( vOrigin );
+    if( !pTile )
+        return JBOGUSKEY;
+
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+        return JSUCCESS;
+    }
+
+    float fDamage = Util::Roll( szAmount );
+    const char *szMonName = pMon->GetName();
+    const char *szEffect = Effect();
+    if( m_ed && m_ed->m_szName )
+        g_pGame->GetMsgs()->Printf( "The %s strikes the %s with %s.\n", m_ed->m_szName, szMonName,
+                                    szEffect );
+
+    float fAffinityMult = Util::CheckAffinity( m_dwFlags, pMon->GetElementFlags() );
+    if( fAffinityMult == 0.0f )
+    {
+        pMon->m_fCurHP += fDamage;
+        if( pMon->m_fCurHP > pMon->m_fHP )
+            pMon->m_fCurHP = pMon->m_fHP;
+        g_pGame->GetMsgs()->Printf( "The %s shrugs off the attack!\n", szMonName );
+        g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
+        return JSUCCESS;
+    }
+    fDamage *= fAffinityMult;
+    if( fAffinityMult > 1.0f )
+        g_pGame->GetMsgs()->Printf( "The %s is especially vulnerable!\n", szMonName );
+
+    if( g_pGame->GetPlayer()->DamageMonster( pMon, fDamage ) )
+        g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );
+    else
+        g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
+
+    g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
+    return JSUCCESS;
+}
+
+JResult CEffect::Status( JVector vOrigin, uint32 dwFlag )
+{
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( vOrigin );
+    if( !pTile )
+        return JBOGUSKEY;
+
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+        return JBOGUSKEY;
+    }
+
+    if( pMon->IsImmuneToEffect( dwFlag ) )
+    {
+        g_pGame->GetMsgs()->Printf( "The %s is unaffected.\n", pMon->GetName() );
+        return JSUCCESS;
+    }
+
+    pMon->m_dwActiveEffects |= dwFlag;
+    g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
+
+    if( dwFlag & ( EFFECT_FLAG_SLEEP | EFFECT_FLAG_PARALYZE ) )
+    {
+        pMon->m_pBrain->m_nEffectTurns = (int)Util::Roll( "3d6" );
+        pMon->m_pBrain->SetState( BRAINSTATE_REST );
+    }
+
+    const char *szStatusName = "affected";
+    if( dwFlag & EFFECT_FLAG_SLEEP )
+        szStatusName = "falls asleep";
+    else if( dwFlag & EFFECT_FLAG_PARALYZE )
+        szStatusName = "is paralyzed";
+    else if( dwFlag & EFFECT_FLAG_AFRAID )
+        szStatusName = "flees in terror";
+    else if( dwFlag & EFFECT_FLAG_CONFUSE )
+        szStatusName = "looks confused";
+
+    g_pGame->GetMsgs()->Printf( "The %s %s.\n", pMon->GetName(), szStatusName );
+    return JSUCCESS;
+}
+
+JResult CEffect::StoneToMud( JVector vOrigin )
+{
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( vOrigin );
+    if( !pTile || !pTile->m_dtd )
+        return JBOGUSKEY;
+
+    if( pTile->m_dtd->m_dwType == DUNG_IDX_WALL )
+    {
+        pTile->m_dtd = g_pGame->GetDungeon()->GetTileDef( DUNG_IDX_FLOOR );
+        g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
+        g_pGame->GetMsgs()->Printf( "The wall turns to mud and collapses!\n" );
+        return JSUCCESS;
+    }
+
+    g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+    return JSUCCESS;
+}
+
+JResult CEffect::TeleportAway( JVector vOrigin )
+{
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( vOrigin );
+    if( !pTile )
+        return JBOGUSKEY;
+
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+        return JBOGUSKEY;
+    }
+
+    const char *szMonName = pMon->GetName();
+    pTile->m_pCurMonster = NULL;
+
+    JIVector vNew = pMon->GetSpawnPoint( JIVector( -1, -1 ) );
+    if( vNew.IsWithinWorld() )
+    {
+        CDungeonTile *pNewTile = g_pGame->GetDungeon()->GetTile( JVector( vNew.x, vNew.y ) );
+        if( pNewTile )
+        {
+            pMon->SetPos( JVector( vNew.x, vNew.y ) );
+            pNewTile->m_pCurMonster = pMon;
+            g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
+            g_pGame->GetMsgs()->Printf( "The %s vanishes!\n", szMonName );
+            return JSUCCESS;
+        }
+    }
+
+    pTile->m_pCurMonster = pMon;
+    g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+    return JSUCCESS;
+}
+
+JResult CEffect::Probe( JVector vOrigin )
+{
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( vOrigin );
+    if( !pTile )
+        return JBOGUSKEY;
+
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+        return JBOGUSKEY;
+    }
+
+    const CMonsterDef *pmd = pMon->m_md;
+    g_pGame->GetMsgs()->Printf( "The %s: HP %d/%d  AC %d  Lvl %d  Spd %.1f\n", pMon->GetName(),
+                                (int)pMon->m_fCurHP, (int)pMon->m_fHP, (int)pmd->m_fBaseAC,
+                                pmd->m_dwLevel, pmd->m_fSpeed );
+    g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
+    return JSUCCESS;
+}
+
+JResult CEffect::HealMonster( JVector vOrigin )
+{
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( vOrigin );
+    if( !pTile )
+        return JBOGUSKEY;
+
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( !pMon )
+    {
+        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
+        return JBOGUSKEY;
+    }
+
+    float fHeal = m_szAmount ? Util::Roll( m_szAmount ) : 10.0f;
+    pMon->m_fCurHP += fHeal;
+    if( pMon->m_fCurHP > pMon->m_fHP )
+        pMon->m_fCurHP = pMon->m_fHP;
+
+    g_pGame->GetMsgs()->Printf( "The %s looks healthier.\n", pMon->GetName() );
+    g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
+    return JSUCCESS;
+}
+
+JResult CEffect::DoHitEffects()
+{
+    CPlayer *pPlayer = g_pGame->GetPlayer();
+    JVector vCasterPos = pPlayer->m_vPos;
+    JVector vTargetPos = pPlayer->GetRangedHitPosition();
+
+    if( m_dwModifier & EFFECT_MOD_AREA )
+        return Area( vCasterPos );
+    if( m_dwModifier & EFFECT_MOD_BALL )
+        return Ball( vTargetPos );
+    if( m_dwModifier & EFFECT_MOD_LINE )
+        return Line( vTargetPos );
+
+    switch( m_dwFlags )
+    {
+    case EFFECT_FLAG_LIGHT:
+        return LightRay( vTargetPos );
+    case EFFECT_FLAG_FIRE:
+    case EFFECT_FLAG_COLD:
+    case EFFECT_FLAG_ELECTRICITY:
+    case EFFECT_FLAG_ACID:
+        return Elemental( vTargetPos );
+    case EFFECT_FLAG_SLEEP:
+    case EFFECT_FLAG_PARALYZE:
+    case EFFECT_FLAG_AFRAID:
+    case EFFECT_FLAG_CONFUSE:
+        return Status( vTargetPos, m_dwFlags );
+    case EFFECT_FLAG_STONE_TO_MUD:
+        return StoneToMud( vTargetPos );
+    case EFFECT_FLAG_TELEPORT:
+        return TeleportAway( vTargetPos );
+    case EFFECT_FLAG_IDENTIFY:
+        return Probe( vTargetPos );
+    case EFFECT_FLAG_AC:
+        return pPlayer->DoACBuff( this );
+    case EFFECT_FLAG_HP:
+        return HealMonster( vTargetPos );
+    default:
+        return Physical( vTargetPos );
+    }
+    return JSUCCESS;
+}
+
+JResult CEffect::Dispatch( float fDuration, int dwItemFlags )
+{
+    // TODO: this is a bit of a mess. Refactor so that the player
+    // doesn't have to know about all the different effect types.
+    // TBD in Issue#315
+    CPlayer *pPlayer = g_pGame->GetPlayer();
+    switch( m_dwEffect )
+    {
+    case EFFECT_TYPE_HEAL:
+        return pPlayer->DoHealEffects( this );
+    case EFFECT_TYPE_HIT:
+        return DoHitEffects();
+    case EFFECT_TYPE_CREATE:
+        return pPlayer->DoCreateEffects( this );
+    case EFFECT_TYPE_DESTROY:
+        JLog( LOG_LEVEL_DEBUG, true, "Destroying\n" );
+        return pPlayer->DoDestroyEffects( this, dwItemFlags );
+    case EFFECT_TYPE_INTRINSIC:
+        JLog( LOG_LEVEL_DEBUG, true, "Setting intrinsic\n" );
+        return pPlayer->DoIntrinsicEffects( this, fDuration );
+    case EFFECT_TYPE_RESTORE:
+        return pPlayer->DoRestoreEffects( this );
+    case EFFECT_TYPE_GAIN:
+        return pPlayer->DoGainEffects( this );
+    case EFFECT_TYPE_LOSE:
+        pPlayer->DoLoseEffects( this );
+        return JSUCCESS;
+    case EFFECT_TYPE_SEE:
+        pPlayer->DoSeeEffects( this );
+        return JSUCCESS;
+    default:
+        JLog( LOG_LEVEL_ERROR, true, "bad effect type: %d\n", m_dwEffect );
+        return JSUCCESS;
     }
 }

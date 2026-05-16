@@ -17,19 +17,19 @@ All SLEEP/wake functionality is complete (#296). This work adds:
 
 ---
 
-## Phase 1 — Effect Flag & Data
+## Phase 1 — Effect Flag & Data ✅ COMPLETE
 
-### T1 — Add `EFFECT_FLAG_AGGRAVATE` to `Constants.h`
+### T1 — Add `EFFECT_FLAG_AGGRAVATE` to `Constants.h` ✅
 - Add a new bit in the effect flags block (currently 32 flags defined in word 1, room available in word 2)
 - Name: `EFFECT_FLAG_AGGRAVATE`
 - Add the corresponding string mapping in `Constants.cpp` so it prints cleanly in logs/messages
 
-### T2 — Add `<Aggravate Monsters>` (area) to `Effects.txt`
+### T2 — Add `<Aggravate Monsters>` (area) to `Effects.txt` ✅
 - Area-of-effect version: `Radius=25`
 - Uses `EFFECT_FLAG_AGGRAVATE`
 - This is what the Shrieker, Scroll, and Staff cast
 
-### T3 — Add `<Aggravate Monster>` (single-target) to `Effects.txt`
+### T3 — Add `<Aggravate Monster>` (single-target) to `Effects.txt` ✅
 - No radius (single target)
 - Uses `EFFECT_FLAG_AGGRAVATE`
 - This is what the Wand casts
@@ -129,7 +129,7 @@ UpdateAttack():
 
 ---
 
-### T6a — Move all outward effect-resolution methods off `CPlayer` and onto `CEffect`
+### T6a — Move all outward effect-resolution methods off `CPlayer` and onto `CEffect` ✅ COMPLETE
 
 These methods apply effects *outward* (to monsters or the dungeon). They are currently `CPlayer` methods only because the player was the only thing that could cast them. They belong on `CEffect`, taking an origin position, so any caster (player, monster, future spell/item) calls the same code with no special cases.
 
@@ -150,10 +150,16 @@ Methods to move from `CPlayer` → `CEffect`:
 Each `CPlayer` stub becomes a one-liner: `pEffect->ApplyXxx( m_vPos )`.
 
 Methods that stay on `CPlayer` (self-effects applied to the player character):
-- `DoEffects` — stat/status changes to the player
 - `DoHealEffects` — player healing
 - `DoHealHP` — player HP restore
-- `DoHitEffects` — effects applied when the player strikes a monster
+- `DoACBuff` — timed AC bonus (touches player intrinsics)
+- `DoCreate/Destroy/Intrinsic/Restore/Gain/Lose/SeeEffects` — all player-state responses
+
+`CEffect` now also owns the full dispatch chain:
+- `CEffect::Dispatch(fDuration, dwItemFlags)` — top-level `EFFECT_TYPE_*` switch (was `CPlayer::DoEffects` inner loop)
+- `CEffect::DoHitEffects()` — modifier+flag dispatch to `Apply*` (was `CPlayer::DoHitEffects`)
+- `CEffect::ApplyProbe(vOrigin)` and `CEffect::ApplyHealMonster(vOrigin)` — moved from `CPlayer`
+- `CPlayer::DoEffects` is now a thin loop that calls `pEffect->Dispatch()` per effect
 
 **What remains unchanged:**
 - `CollideWithPlayer()` — still fires for any melee collision during `UpdateGoToDest`

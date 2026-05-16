@@ -59,7 +59,7 @@ WHEN( "^I fire a (fire|cold|lightning|acid) elemental bolt at the spawned monste
     effect.SetAmount( pED->m_szAmount );
 
     g_pGame->GetPlayer()->SetRangedHitPosition( pMon->GetPos() );
-    g_pGame->GetPlayer()->DoElementalHit( &effect );
+    effect.DoHitEffects();
 }
 
 // ── THEN ─────────────────────────────────────────────────────────────────────

@@ -111,6 +111,23 @@ public:
     bool HasFlag( const char *szFlag );
     const char *Effect();
 
+    JResult Area( JVector vOrigin );
+    JResult Ball( JVector vOrigin );
+    JResult Line( JVector vOrigin );
+    JResult LightRay( JVector vOrigin );
+    JResult Elemental( JVector vOrigin );
+    JResult Physical( JVector vOrigin );
+    JResult Status( JVector vOrigin, uint32 dwFlag );
+    JResult StoneToMud( JVector vOrigin );
+    JResult TeleportAway( JVector vOrigin );
+    JResult Probe( JVector vOrigin );
+    JResult HealMonster( JVector vOrigin );
+
+    // Top-level dispatch — called once per effect in the effect list.
+    JResult Dispatch( float fDuration, int dwItemFlags );
+    // Hit-effect sub-dispatch — selects Apply* based on modifier and flag.
+    JResult DoHitEffects();
+
     CEffectDef *m_ed; // pointer to shared effect definition (NULL for inline effects)
     int m_dwEffect;
     uint32 m_dwFlags;

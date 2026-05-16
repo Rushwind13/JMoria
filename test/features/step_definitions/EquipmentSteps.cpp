@@ -417,6 +417,16 @@ WHEN( "^I programmatically read the spawned item$" )
     EXPECT_EQ( context->result, JSUCCESS );
 }
 
+WHEN( "^the recall completes$" )
+{
+    ASSERT_EQ( RECALL_DURATION, 1 );
+    for( int i = 0; i < RECALL_DURATION + 1; i++ )
+    {
+        g_pGame->SetReadyForUpdate( true );
+        g_pGame->Update();
+    }
+}
+
 THEN( "^the spawned item is back in inventory$" )
 {
     ScenarioScope<TestCtx> context;

@@ -179,6 +179,7 @@ public:
     CMonsterDef *GetMonsterDef( int which_monster );
     CItemDef *GetItemDef( const char *szItemName );
     CItemDef *GetItemDef( int which_item );
+    JLinkList<CItemDef> *GetItemDefs() { return m_llItemDefs; }
     CEffectDef *GetEffectDef( const char *szEffectName );
     bool SpawnMonster( int which_monster );
     void RemoveMonster( CMonster *pMon );

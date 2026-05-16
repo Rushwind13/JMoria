@@ -1692,7 +1692,7 @@ Item <Staff of Sleep>
 {
 Plural      <Staves of Sleep>
 Type        <ITEM_IDX_STAFF>
-Effect      <Cause Sleep>
+Effect      <Sleep Area>
 Charges     <2d4>
 Value       300.0
 Level       23

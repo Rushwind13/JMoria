@@ -185,6 +185,18 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
         retval = 0;
     }
 
+    else if( IsGiveAllWandsCommand( keysym ) )
+    {
+        g_pGame->GetPlayer()->GiveAllWandsAndStaves();
+        retval = 0;
+    }
+
+    else if( IsIdentifyAllCommand( keysym ) )
+    {
+        g_pGame->GetPlayer()->IdentifyAllInventory();
+        retval = 0;
+    }
+
     /*
     // These commands will bring up a ""
     // Inventory, Equipment
@@ -503,6 +515,36 @@ bool CCmdState::IsSummonMonsterCommand( JKeysym *keysym )
     {
     case JKEY_s:
         // want ^t not t
+        return ( keysym->mod & JMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
+        break;
+    default:
+        return false;
+        break;
+    }
+
+    return false;
+}
+
+bool CCmdState::IsGiveAllWandsCommand( JKeysym *keysym )
+{
+    switch( keysym->sym )
+    {
+    case JKEY_e:
+        return ( keysym->mod & JMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
+        break;
+    default:
+        return false;
+        break;
+    }
+
+    return false;
+}
+
+bool CCmdState::IsIdentifyAllCommand( JKeysym *keysym )
+{
+    switch( keysym->sym )
+    {
+    case JKEY_d:
         return ( keysym->mod & JMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
         break;
     default:

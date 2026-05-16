@@ -163,7 +163,7 @@ bool CItem::IsConsumed()
     if( m_id == NULL )
         return false;
     if( m_id->m_dwIndex == ITEM_IDX_WAND || m_id->m_dwIndex == ITEM_IDX_STAFF )
-        return ( m_dwCharges == 0 );
+        return false; // Wands/staves stay in inventory when depleted; recharge to restore
     if( m_id->m_dwIndex == ITEM_IDX_ARROW || m_id->m_dwIndex == ITEM_IDX_BOLT )
         return ( m_dwCount == 0 );
     return false;
@@ -501,7 +501,10 @@ const char *CItem::GetName()
         return baseName;
     }
 
-    snprintf( szDisplay, sizeof( szDisplay ), "%s", baseName );
+    if( m_id->m_szFlavor )
+        snprintf( szDisplay, sizeof( szDisplay ), "%s %s", m_id->m_szFlavor, baseName );
+    else
+        snprintf( szDisplay, sizeof( szDisplay ), "%s", baseName );
     int baseLen = strlen( szDisplay );
     m_id->FormatProperties( szDisplay + baseLen, sizeof( szDisplay ) - baseLen, m_dwKnownProps,
                             m_dwFlags, m_dwCharges, m_fACBonus, m_fBonusToHit, m_fBonusToDamage );
@@ -527,7 +530,10 @@ const char *CItem::GetPlural()
         return baseName;
     }
 
-    snprintf( szDisplay, sizeof( szDisplay ), "%s", baseName );
+    if( m_id->m_szFlavor )
+        snprintf( szDisplay, sizeof( szDisplay ), "%s %s", m_id->m_szFlavor, baseName );
+    else
+        snprintf( szDisplay, sizeof( szDisplay ), "%s", baseName );
     int baseLen = strlen( szDisplay );
     m_id->FormatProperties( szDisplay + baseLen, sizeof( szDisplay ) - baseLen, m_dwKnownProps,
                             m_dwFlags, m_dwCharges, m_fACBonus, m_fBonusToHit, m_fBonusToDamage );

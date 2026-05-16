@@ -390,6 +390,7 @@ int CStringInputState::OnBaseHandleKey( JKeysym *keysym )
     else if( keysym->sym == JKEY_ESCAPE )
     {
         // ESC key gets us out of modify mode
+        memset( m_szInput, 0, MAX_STRING_LENGTH );
         ResetToState( STATE_COMMAND );
         return JRESETSTATE;
     }

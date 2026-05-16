@@ -5195,7 +5195,7 @@ Monster <Mimic>
     Plural		<Mimics>
     Appear		<1d1>
     Speed		0.8
-    MoveType	<MON_AI_SEEKPLAYER>
+    MoveType	<MON_AI_DONTMOVE>
     HD          <7d8>
     AC          50.0
     Level       25
@@ -5211,7 +5211,7 @@ Monster <Chest Mimic>
     Plural		<Chest Mimics>
     Appear		<1d1>
     Speed		0.8
-    MoveType	<MON_AI_SEEKPLAYER>
+    MoveType	<MON_AI_DONTMOVE>
     HD          <12d8>
     AC          65.0
     Level       40

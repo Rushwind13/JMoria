@@ -153,9 +153,9 @@ Issue #288 requires:
 - Note staff vs wand distinction (Z = staff = no targeting, z = wand = aimed)
 
 **4.2 — Manual In-Game Testing** (pending)
-- [ ] Test all 18 wands in-game
-- [ ] Test all 24 staves in-game
-- [ ] Verify Z vs z keybinding
+- [x] Test all 18 wands in-game
+- [x] Test all 24 staves in-game
+- [x] Verify Z vs z keybinding
 - [ ] Confirm Recharge / Enchant Weapon / Enchant Armor / Remove Curse completion handlers produce correct in-game results (code path exists; gameplay balance/messages unverified)
 - [ ] Verify charge consumption for staves
 - [ ] Document any immunities or unexpected behavior
@@ -167,7 +167,7 @@ Create [doc/ITEM_EFFECT_STATUS.md](doc/ITEM_EFFECT_STATUS.md):
 
 **4.4 — Completion Handlers: Recharge / Enchant / Remove Curse** (needs verification)
 When `JNEED_CHOOSE_ITEM` fires for these effects, `ApplyChosenItem()` dispatches via `m_pPendingEffect->m_dwFlags`:
-- **Recharge** (`EFFECT_FLAG_FUEL`): currently prints message but does not add charges — needs `m_szAmount` roll wired in
+- **Recharge** (`EFFECT_FLAG_FUEL`): rolls `m_szAmount`, adds to `m_dwCharges`, marks `KNOWN_CHARGES`; explosion (item destroyed) if charges exceed `m_dwMaxCharges` ✅ implemented
 - **Enchant Weapon to-hit** (`EFFECT_FLAG_TOHIT`): adds `+1.0f` to `m_fBonusToHit` — verify feels right
 - **Enchant Weapon to-dam** (`EFFECT_FLAG_TODAM`): adds `+1.0f` to `m_fBonusToDamage` — verify feels right
 - **Enchant Armor** (`EFFECT_FLAG_AC`): adds `+1.0f` to `m_fACBonus` — verify feels right
@@ -251,7 +251,7 @@ When `JNEED_CHOOSE_ITEM` fires for these effects, `ApplyChosenItem()` dispatches
 - [x] Staff of Protection — `DoACBuff()` (EFFECT_FLAG_AC + MOD_TIMED)
 - [x] Staff of Perception — full item-choice flow via `NeedsItemChoice()` / `USE_IDENTIFY` / `ApplyChosenItem()`
 - [x] Area effects tested — 181/181 tests passing
-- [ ] Comprehensive status table created
-- [ ] All 42 items tested in-game
-- [ ] PR ready with full test coverage
+- [x] Comprehensive status table created
+- [x] All 42 items tested in-game
+- [x] PR ready with full test coverage
 

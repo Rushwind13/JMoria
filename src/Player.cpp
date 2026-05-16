@@ -69,7 +69,6 @@ bool CPlayer::Update( float fCurTime )
         }
         m_fLastLightTime = (float)g_pGame->GetTime();
     }
-    UpdateActiveEffects( fCurTime );
     UpdateVisibleMonsters();
     CheckDisturbance();
     PassiveSearch();
@@ -91,12 +90,22 @@ void CPlayer::UpdateActiveEffects( float fCurTime )
     while( pActive != NULL )
     {
         pEffect = pActive->m_lpData;
-        pEffect->m_fDuration -= fCurTime;
+        pEffect->m_fDuration -= 1.0f;
         if( pEffect->m_fDuration <= 0.0f )
         {
-            UndoIntrinsicEffects( pEffect );
+            m_bIsDisturbed = true;
+            bool isRecall = ( pEffect->m_dwEffect == EFFECT_TYPE_CREATE &&
+                              pEffect->m_dwFlags == EFFECT_FLAG_RECALL );
             pDelete = pActive;
             pActive = pActive->next;
+            if( isRecall )
+            {
+                // Remove before executing: OnChangeLevel reinitializes game state
+                m_llActiveEffects->Remove( pDelete, true );
+                Recall();
+                return; // world state changed; stop processing this tick
+            }
+            UndoIntrinsicEffects( pEffect );
             m_llActiveEffects->Remove( pDelete, true );
             continue;
         }
@@ -356,6 +365,9 @@ void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
     case INV_FIRE:
         sprintf( meta.header, "Fire which ammo?\n" );
         break;
+    case INV_STAFF:
+        sprintf( meta.header, "Use which staff?\n" );
+        break;
     default:
         sprintf( meta.header, "You are Carrying:\n" );
         break;
@@ -391,6 +403,9 @@ void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
         case INV_FIRE:
             show = IsCompatibleAmmo( pLink );
             break;
+        case INV_STAFF:
+            show = IsStaff( pLink );
+            break;
         default:
             show = true;
             break;
@@ -406,15 +421,15 @@ void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
             {
                 pDT->Printf( "%c - %s\n", cListId, pItem->GetName() );
             }
-        }
-        if( cListId < meta.limit )
-        {
-            cListId++;
-        }
-        else
-        {
-            pDT->Printf( meta.footer );
-            break;
+            if( cListId < meta.limit )
+            {
+                cListId++;
+            }
+            else
+            {
+                pDT->Printf( meta.footer );
+                break;
+            }
         }
         pLink = m_llInventory->GetNext( pLink );
     }
@@ -1246,15 +1261,14 @@ bool CPlayer::CanDropHere()
 JResult CPlayer::Quaff( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
-    bool wasIdentified = pItem->IsIdentified();
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
-    if( !wasIdentified && m_bLastEffectNoticed )
+    if( !( pItem->IsIdentified() ) && m_bLastEffectNoticed )
     {
         pItem->Identify();
         g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
     }
-    else if( !wasIdentified && !m_bLastEffectNoticed )
+    else if( !( pItem->IsIdentified() ) && !m_bLastEffectNoticed )
     {
         pItem->m_id->m_bTried = true;
     }
@@ -1265,15 +1279,14 @@ JResult CPlayer::Quaff( CLink<CItem> *pLink )
 JResult CPlayer::Read( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
-    bool wasIdentified = pItem->IsIdentified();
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
-    if( !wasIdentified && m_bLastEffectNoticed )
+    if( !( pItem->IsIdentified() ) && m_bLastEffectNoticed )
     {
         pItem->Identify();
         g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
     }
-    else if( !wasIdentified && !m_bLastEffectNoticed )
+    else if( !( pItem->IsIdentified() ) && !m_bLastEffectNoticed )
     {
         pItem->m_id->m_bTried = true;
     }
@@ -1288,6 +1301,15 @@ JResult CPlayer::Zap( CLink<CItem> *pLink )
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
+    if( !( pItem->IsIdentified() ) && m_bLastEffectNoticed )
+    {
+        pItem->Identify();
+        g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
+    }
+    else if( !( pItem->IsIdentified() ) && !m_bLastEffectNoticed )
+    {
+        pItem->m_id->m_bTried = true;
+    }
     return retval;
 }
 
@@ -1357,6 +1379,10 @@ void CPlayer::ConsolidateInventory()
     while( pOuter != NULL )
     {
         CItem *pOuterItem = pOuter->m_lpData;
+        // Snapshot name now — GetName() returns a static buffer, so calling it twice in the
+        // same expression would compare the inner item's name against itself.
+        char szOuterName[128];
+        Util::jstrcpy( szOuterName, pOuterItem->GetName() );
         CLink<CItem> *pInner = m_llInventory->GetNext( pOuter );
 
         while( pInner != NULL )
@@ -1367,7 +1393,7 @@ void CPlayer::ConsolidateInventory()
             // Check if these items can stack together
             if( pOuterItem->m_id->m_dwIndex == pInnerItem->m_id->m_dwIndex &&
                 pOuterItem->IsStackable() &&
-                Util::jstrcmp( pOuterItem->GetName(), pInnerItem->GetName() ) == 0 &&
+                Util::jstrcmp( szOuterName, pInnerItem->GetName() ) == 0 &&
                 ( ( pOuterItem->m_dwFlags & ITEM_FLAG_IDENTIFIED ) ==
                   ( pInnerItem->m_dwFlags & ITEM_FLAG_IDENTIFIED ) ) )
             {
@@ -1462,7 +1488,9 @@ JResult CPlayer::Fuel( CLink<CItem> *pLink )
     switch( pEffect->m_dwFlags )
     {
     case EFFECT_FLAG_IDENTIFY: // Scroll/Staff of Perception — player chooses item to identify
-        return true;
+        // Probe wand uses HIT+IDENTIFY (fires at target);
+        // only intercept RESTORE+IDENTIFY (scroll/staff)
+        return pEffect->m_dwEffect == EFFECT_TYPE_RESTORE;
     case EFFECT_FLAG_FUEL: // Scroll of Recharge — player chooses wand/staff to recharge
         return pEffect->m_dwEffect == EFFECT_TYPE_RESTORE;
     case EFFECT_FLAG_TOHIT: // Scroll of Enchant Weapon (to-hit)
@@ -2333,7 +2361,7 @@ JResult CPlayer::DoCreateEffects( CEffect *pEffect )
         retval = DoMagicMapping( pEffect );
         break;
     case EFFECT_FLAG_RECALL:
-        retval = DoRecall();
+        retval = BeginRecall();
         break;
     case EFFECT_FLAG_SUMMON:
         retval = DoSummonMonsters();
@@ -2351,8 +2379,10 @@ JResult CPlayer::DoLightArea()
     {
         pRoom->SetFlags( DUNG_FLAG_LIT );
         g_pGame->GetDungeon()->LightRoom( pRoom );
+        g_pGame->GetMsgs()->Printf( "The room is flooded with light!\n" );
         return JSUCCESS;
     }
+    g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
     return JBOGUSKEY;
 }
 
@@ -2407,30 +2437,54 @@ JResult CPlayer::DoMagicMapping( CEffect *pEffect )
     return JSUCCESS;
 }
 
-JResult CPlayer::DoRecall()
+JResult CPlayer::BeginRecall()
+{
+    // Check if recall is already pending
+    CLink<CEffect> *pLink = m_llActiveEffects->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData && pLink->m_lpData->m_dwFlags == EFFECT_FLAG_RECALL )
+        {
+            g_pGame->GetMsgs()->Printf( "You already feel the pull of recall.\n" );
+            return JSUCCESS;
+        }
+        pLink = pLink->next;
+    }
+
+    CEffect *pActive = new CEffect();
+    pActive->m_dwEffect = EFFECT_TYPE_CREATE;
+    pActive->m_dwFlags = EFFECT_FLAG_RECALL;
+    pActive->m_fDuration = (float)RECALL_DURATION;
+    m_llActiveEffects->Add( pActive, pActive->m_dwFlags );
+
+    g_pGame->GetMsgs()->Printf( "You feel yourself starting to drift...\n" );
+    return JSUCCESS;
+}
+
+void CPlayer::Recall()
 {
     CDungeon *pDungeon = g_pGame->GetDungeon();
+    int delta = pDungeon->depth > 0 ? -pDungeon->depth : -m_dwRecallDepth;
+
+    // In dungeon: save current depth, return to town
     if( pDungeon->depth > 0 )
     {
-        // In dungeon: save current depth, return to town
         if( m_dwRecallDepth > (uint8)pDungeon->depth )
         {
             g_pGame->GetMsgs()->Printf( "Recall depth reset (was: %dft)\n", m_dwRecallDepth * 50 );
         }
         m_dwRecallDepth = pDungeon->depth;
-        int delta = -pDungeon->depth; // go to depth 0
+
+        // go to depth 0
         g_pGame->GetMsgs()->Printf( "The world spins and you find yourself in town.\n" );
-        pDungeon->OnChangeLevel( delta );
     }
     else
     {
-        // In town: return to last-visited dungeon depth
-        int delta = m_dwRecallDepth; // go from 0 to recall depth
         g_pGame->GetMsgs()->Printf( "The world spins and you are back at %d ft.\n",
                                     m_dwRecallDepth * 50 );
-        pDungeon->OnChangeLevel( delta );
     }
-    return JSUCCESS;
+
+    pDungeon->OnChangeLevel( delta );
 }
 
 JResult CPlayer::DoSummonMonsters()
@@ -2955,7 +3009,7 @@ bool CPlayer::IsZappable( CLink<CItem> *pLink )
     return retval;
 }
 
-bool CPlayer::IsUseable( CLink<CItem> *pLink )
+bool CPlayer::IsStaff( CLink<CItem> *pLink )
 {
     if( !pLink || !pLink->m_lpData || !pLink->m_lpData->m_id )
         return false;
@@ -2968,7 +3022,17 @@ JResult CPlayer::UseStaff( CLink<CItem> *pLink )
     // set to player position by OnHandleStaff before this is called.
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    return DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
+    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
+    if( !( pItem->IsIdentified() ) && m_bLastEffectNoticed )
+    {
+        pItem->Identify();
+        g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
+    }
+    else if( !( pItem->IsIdentified() ) && !m_bLastEffectNoticed )
+    {
+        pItem->m_id->m_bTried = true;
+    }
+    return retval;
 }
 
 bool CPlayer::SetName( const char *szName )
@@ -3052,6 +3116,39 @@ JLinkList<CMonster> *CPlayer::GetVisibleMonsters()
     return m_llVisibleMonsters;
 }
 
+void CPlayer::GiveAllWandsAndStaves()
+{
+    int nGiven = 0;
+    CLink<CItemDef> *pLink = g_pGame->GetDungeon()->GetItemDefs()->GetHead();
+    while( pLink )
+    {
+        CItemDef *pid = pLink->m_lpData;
+        if( pid && ( pid->m_dwIndex == ITEM_IDX_WAND || pid->m_dwIndex == ITEM_IDX_STAFF ) )
+        {
+            CItem *pItem = new CItem;
+            pItem->Init( pid );
+            pItem->m_pllLink = m_llInventory->Add( pItem );
+            nGiven++;
+        }
+        pLink = pLink->next;
+    }
+
+    g_pGame->GetMsgs()->Printf( "Wizard: added %d wands/staves to inventory.\n", nGiven );
+}
+
+void CPlayer::IdentifyAllInventory()
+{
+    CLink<CItem> *pLink = m_llInventory->GetHead();
+    int nIdentified = 0;
+    while( pLink )
+    {
+        pLink->m_lpData->Identify();
+        nIdentified++;
+        pLink = m_llInventory->GetNext( pLink );
+    }
+    g_pGame->GetMsgs()->Printf( "Wizard: identified %d items.\n", nIdentified );
+}
+
 JResult CPlayer::ApplyChosenItem( CLink<CItem> *pChosen, CEffect *pEffect, int dwItemFlags )
 {
     if( !pEffect || !pChosen )
@@ -3064,9 +3161,24 @@ JResult CPlayer::ApplyChosenItem( CLink<CItem> *pChosen, CEffect *pEffect, int d
         g_pGame->GetMsgs()->Printf( "It is %s.\n", pItem->GetName() );
         break;
     case EFFECT_FLAG_FUEL: // Recharge
-        g_pGame->GetMsgs()->Printf( "It glows with magical energy.\n" );
-        // TODO: add charges based on effect m_szAmount
+    {
+        uint32 gain = pEffect->m_szAmount ? (uint32)Util::Roll( pEffect->m_szAmount ) : 1;
+        pItem->m_dwCharges += gain;
+        pItem->m_dwKnownProps |= KNOWN_CHARGES;
+        if( pItem->m_dwCharges > pItem->m_dwMaxCharges )
+        {
+            pItem->m_dwCharges = 0;
+            g_pGame->GetMsgs()->Printf( "The %s explodes in a shower of sparks!\n",
+                                        pItem->GetName() );
+            m_llInventory->Remove( pItem->m_pllLink, true );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "The %s glows with magical energy. (%d charges)\n",
+                                        pItem->GetName(), pItem->m_dwCharges );
+        }
         break;
+    }
     case EFFECT_FLAG_TOHIT: // Enchant weapon to-hit
         pItem->m_fBonusToHit += 1.0f;
         g_pGame->GetMsgs()->Printf( "It glows with power.\n" );

@@ -232,7 +232,10 @@ int CUseState::OnHandleRead( JKeysym *keysym )
             m_pPendingEffect = CPlayer::FindNeedsChoiceEffect( m_pSelected->m_lpData->m_id );
             m_dwPendingItemFlags = m_pSelected->m_lpData->m_dwFlags;
             g_pGame->GetMsgs()->Printf( "You read the %s.\n", m_pSelected->m_lpData->GetName() );
-            g_pGame->GetMsgs()->Printf( "Identify which item? [a-z]\n" );
+            if( m_pPendingEffect && m_pPendingEffect->m_dwFlags == EFFECT_FLAG_FUEL )
+                g_pGame->GetMsgs()->Printf( "Recharge which item? [a-z]\n" );
+            else
+                g_pGame->GetMsgs()->Printf( "Identify which item? [a-z]\n" );
             m_eCurModifier = USE_IDENTIFY;
             m_pCurKeyHandler = m_pKeyHandlers[USE_IDENTIFY];
             return 0;
@@ -530,15 +533,66 @@ CLink<CItem> *CUseState::GetResponse( eUseModifier whichUse )
     switch( whichUse )
     {
     case USE_DROP:
-    case USE_READ:
-    case USE_QUAFF:
     case USE_WIELD:
     case USE_FUEL:
     case USE_IDENTIFY:
-    case USE_STAFF:
         pList = g_pGame->GetPlayer()->m_llInventory;
         pLink = pList->GetNthLink( m_dwSelected );
         break;
+    case USE_READ:
+    {
+        // Filter to readable items only (matches INV_READ filtered display)
+        pList = g_pGame->GetPlayer()->m_llInventory;
+        pLink = pList->GetHead();
+        uint32 count = 0;
+        while( pLink )
+        {
+            if( g_pGame->GetPlayer()->IsReadable( pLink ) )
+            {
+                if( count == m_dwSelected )
+                    break;
+                count++;
+            }
+            pLink = pList->GetNext( pLink );
+        }
+        break;
+    }
+    case USE_QUAFF:
+    {
+        // Filter to drinkable items only (matches INV_QUAFF filtered display)
+        pList = g_pGame->GetPlayer()->m_llInventory;
+        pLink = pList->GetHead();
+        uint32 count = 0;
+        while( pLink )
+        {
+            if( g_pGame->GetPlayer()->IsDrinkable( pLink ) )
+            {
+                if( count == m_dwSelected )
+                    break;
+                count++;
+            }
+            pLink = pList->GetNext( pLink );
+        }
+        break;
+    }
+    case USE_STAFF:
+    {
+        // Filter to Staff items only (compact-letter display)
+        pList = g_pGame->GetPlayer()->m_llInventory;
+        pLink = pList->GetHead();
+        uint32 count = 0;
+        while( pLink )
+        {
+            if( g_pGame->GetPlayer()->IsStaff( pLink ) )
+            {
+                if( count == m_dwSelected )
+                    break;
+                count++;
+            }
+            pLink = pList->GetNext( pLink );
+        }
+        break;
+    }
     case USE_REMOVE:
         pList = g_pGame->GetPlayer()->m_llEquipment;
         pLink = pList->GetLink( m_dwSelected );
@@ -585,13 +639,13 @@ bool CUseState::TestFuel() { return g_pGame->GetPlayer()->IsFuel( m_pSelected );
 bool CUseState::DoFuel() { return g_pGame->GetPlayer()->Fuel( m_pSelected ) == JSUCCESS; }
 
 //// Staff commands
-bool CUseState::TestStaff() { return g_pGame->GetPlayer()->IsUseable( m_pSelected ); }
+bool CUseState::TestStaff() { return g_pGame->GetPlayer()->IsStaff( m_pSelected ); }
 
 JResult CUseState::DoStaff() { return g_pGame->GetPlayer()->UseStaff( m_pSelected ); }
 
 int CUseState::OnHandleStaff( JKeysym *keysym )
 {
-    int retval;
+    JResult retval;
     JLog( LOG_LEVEL_DEBUG, true, "Handling STAFF\n" );
     retval = OnBaseHandleKey( keysym, USE_STAFF );
 

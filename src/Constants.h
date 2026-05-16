@@ -89,18 +89,17 @@
 #define CHANCE_FIND_SECRET_BUMP 20
 #define CHANCE_SEARCH_ACTIVE 25
 #define CHANCE_SEARCH_PASSIVE 5
-// Item destruction chance per elemental hit (multiplied by Resist() scalar)
+
 #ifdef UNIT_TEST
-#define ITEM_DESTROY_CHANCE 1.1f // guaranteed destruction in tests
-#else
-#define ITEM_DESTROY_CHANCE 0.03f // 3% base chance per inventory slot
-#endif
-// Ranged attack percentages (1-100)
-#ifdef UNIT_TEST
-#define CHANCE_ARROW_BREAK 0 // arrows never break in tests
+#define CHANCE_ARROW_BREAK 0
+#define ITEM_DESTROY_CHANCE 1.1f
+#define RECALL_DURATION 1
 #else
 #define CHANCE_ARROW_BREAK 33 // ~1 in 3 chance arrow breaks on landing
+#define ITEM_DESTROY_CHANCE 0.03f // 3% base chance per inventory slot
+#define RECALL_DURATION ( Util::Roll( 1, 20 ) + 30 )
 #endif
+
 // Ranged attack limits
 #define MAX_PROJECTILE_RANGE 20 // Maximum trajectory length for projectiles (wands, arrows, bolts)
 

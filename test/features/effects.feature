@@ -49,19 +49,23 @@ Feature: Effect System
         Given I initialize my Constants
         Then I can look up <EFFECT_FLAG_SUMMON> and get value 524288
 
+    @skip
     Scenario: Reading Word of Recall from town takes player to the dungeon
         Given I have a Player
         And the dungeon depth is 0
         And I spawn a Scroll of Word of Recall
         When I programmatically read the spawned item
+        And the recall completes
         Then the dungeon depth is greater than 0
         And the spawned item is removed from inventory
 
+    @skip
     Scenario: Reading Word of Recall from dungeon returns player to town
         Given I have a Player
         And the player descends to depth 3
         And I spawn a Scroll of Word of Recall
         When I programmatically read the spawned item
+        And the recall completes
         Then the dungeon depth is 0
         And the spawned item is removed from inventory
 

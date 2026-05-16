@@ -39,6 +39,8 @@ private:
     bool IsXchangeCommand( JKeysym *keysym );
     bool IsCreateItemCommand( JKeysym *keysym );
     bool IsSummonMonsterCommand( JKeysym *keysym );
+    bool IsGiveAllWandsCommand( JKeysym *keysym );
+    bool IsIdentifyAllCommand( JKeysym *keysym );
     bool IsPickupCommand( JKeysym *keysym );
     bool IsExitWizardCommand( JKeysym *keysym );
     bool IsSearchCommand( JKeysym *keysym );

@@ -547,6 +547,7 @@ bool CGame::Update()
     {
         m_fGameTime++;
         m_bReadyForUpdate = false;
+        GetPlayer()->UpdateActiveEffects( fCurTime );
         // Scale AI time by inverse of player speed:
         // fast player (1.5) -> monsters get 0.67 per action (player acts 1.5x more)
         // slow player (0.8) -> monsters get 1.25 per action (player acts 0.8x)
@@ -617,6 +618,9 @@ bool CGame::Update( float fCurTime )
         case USE_WIELD:
             filter = INV_WIELD;
             break;
+        case USE_STAFF:
+            filter = INV_STAFF;
+            break;
         default:
             break;
         }
@@ -627,6 +631,7 @@ bool CGame::Update( float fCurTime )
         case USE_READ:
         case USE_QUAFF:
         case USE_FUEL:
+        case USE_STAFF:
             GetPlayer()->DisplayInventory( PLACEMENT_USE, filter );
             break;
         case USE_REMOVE:

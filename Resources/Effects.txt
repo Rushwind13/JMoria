@@ -277,6 +277,13 @@ Effect <Cause Sleep>
     Flag        <EFFECT_FLAG_SLEEP>
     Range       15
 }
+Effect <Sleep Area>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_SLEEP>
+    Modifier    <EFFECT_MOD_AREA>
+    Radius      5
+}
 Effect <Mass Sleep>
 {
     Type        <EFFECT_TYPE_HIT>

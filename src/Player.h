@@ -24,6 +24,7 @@ enum eInvFilter
     INV_WIELD,
     INV_ZAP,
     INV_FIRE,
+    INV_STAFF,
 };
 
 #define SIGHT_DISTANCE_PLAYER 5
@@ -258,7 +259,7 @@ public:
     bool IsZappable( CLink<CItem> *pLink );
     JResult Zap( CLink<CItem> *pLink );
 
-    bool IsUseable( CLink<CItem> *pLink );
+    bool IsStaff( CLink<CItem> *pLink );
     JResult UseStaff( CLink<CItem> *pLink );
 
     void
@@ -312,9 +313,12 @@ public:
     JResult DoSeeEffects( CEffect *pEffect );
     JResult DoTeleport( CEffect *pEffect );
     JResult DoMagicMapping( CEffect *pEffect );
-    JResult DoRecall();
+    JResult BeginRecall();
+    void Recall();
     JResult DoSummonMonsters();
     JResult ApplyChosenItem( CLink<CItem> *pChosen, CEffect *pEffect, int dwItemFlags );
+    void GiveAllWandsAndStaves();
+    void IdentifyAllInventory();
 
     bool SetName( const char *szName );
 

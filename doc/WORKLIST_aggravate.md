@@ -165,9 +165,9 @@ Methods that stay on `CPlayer` (self-effects applied to the player character):
 
 ---
 
-## Phase 4 — Monster & Item Data
+## Phase 4 — Monster & Item Data ✅ COMPLETE
 
-### T7 — Add Shrieker Mushroom Patch to `Monsters.txt`
+### T7 — Add Shrieker Mushroom Patch to `Monsters.txt` ✅ COMPLETE
 - **Tile**: `,` (camouflages as food)
 - **Color**: bright/glowing red (alarm light aesthetic)
 - **AI**: `MON_AI_DONTMOVE`
@@ -182,17 +182,17 @@ Methods that stay on `CPlayer` (self-effects applied to the player character):
 - **HD/AC/Level**: Set to low-power (e.g., Level 3, 1d4 HP, AC 10) — it can't move or deal damage, the threat is the alarm
 - **Level appearance range**: Low dungeon levels (2–5) — found early as an environmental hazard
 
-### T8 — Add Scroll of Aggravate Monsters to `Items.txt`
+### T8 — Add Scroll of Aggravate Monsters to `Items.txt` ✅ COMPLETE
 - Uses `<Aggravate Monsters>` area effect (radius 25)
 - Flavor: randomized scroll name (existing scroll flavor system)
 - Level: low (common, intentionally dangerous to use carelessly)
 
-### T9 — Add Staff of Aggravate Monsters to `Items.txt`
+### T9 — Add Staff of Aggravate Monsters to `Items.txt` ✅ COMPLETE
 - Uses `<Aggravate Monsters>` area effect (radius 25)
 - Charges: ~5–10
 - Level: low-medium
 
-### T10 — Add Wand of Aggravate Monster to `Items.txt`
+### T10 — Add Wand of Aggravate Monster to `Items.txt` ✅ COMPLETE
 - Uses `<Aggravate Monster>` single-target effect
 - Charges: ~8–12
 - Level: low-medium

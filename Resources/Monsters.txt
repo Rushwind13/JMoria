@@ -5352,6 +5352,21 @@ Monster <Blue Mushroom Patch>
     Attack		<EFFECT_TYPE_INTRINSIC>,<EFFECT_FLAG_STAT>,1d3
     Color		<0,0,255,255>
 }
+Monster <Shrieker Mushroom Patch>
+{
+    Plural		<Shrieker Mushroom Patches>
+    Appear		<1d1>
+    Speed		0.0
+    MoveType	<MON_AI_DONTMOVE>
+    HD          <1d4>
+    AC          10.0
+    Level       3
+    ExpValue	5.0
+    Type		<MON_IDX_SHROOM>
+    Flags		<MON_FLAG_EMPTY_MIND, MON_FLAG_HURT_BY_LIGHT, MON_FLAG_NEVER_SLEEP>
+    Attack             <MON_FLAG_SPORE>, <Aggravate Monsters>, 0d0
+    Color		<255,50,0,255>
+}
 
 # --- CREEPING COINS ($) ---
 

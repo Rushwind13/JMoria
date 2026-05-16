@@ -1129,6 +1129,17 @@ Weight      0.2
 Color       <150,255,150,255>
 Flags       <ITEM_FLAG_STACKS>
 }
+Item <Scroll of Aggravate Monsters>
+{
+Plural      <Scrolls of Aggravate Monsters>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Aggravate Monsters>
+Value       5.0
+Level       2
+Weight      0.2
+Color       <255,100,100,255>
+Flags       <ITEM_FLAG_STACKS>
+}
 
 # --- Potions ---
 
@@ -1635,6 +1646,18 @@ Weight      4.0
 Color       <80,255,80,255>
 Flags       <ITEM_FLAG_STACKS>
 }
+Item <Wand of Aggravate Monster>
+{
+Plural      <Wands of Aggravate Monster>
+Type        <ITEM_IDX_WAND>
+Effect      <Aggravate Monster>
+Charges     <2d6>
+Value       10.0
+Level       5
+Weight      4.0
+Color       <255,100,100,255>
+Flags       <ITEM_FLAG_STACKS>
+}
 
 # --- Staves ---
 
@@ -1926,4 +1949,15 @@ Value       2000.0
 Level       75
 Weight      6.0
 Color       <100,255,100,255>
+}
+Item <Staff of Aggravate Monsters>
+{
+Plural      <Staves of Aggravate Monsters>
+Type        <ITEM_IDX_STAFF>
+Effect      <Aggravate Monsters>
+Charges     <2d4>
+Value       10.0
+Level       5
+Weight      6.0
+Color       <255,100,100,255>
 }

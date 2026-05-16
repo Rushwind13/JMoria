@@ -298,6 +298,19 @@ Effect <Sleep Touch>
     Duration    5.0
     Range       1
 }
+# --- EFFECT_FLAG_AGGRAVATE ---
+
+Effect <Aggravate Monsters>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag2       <EFFECT_FLAG_AGGRAVATE>
+    Radius      25
+}
+Effect <Aggravate Monster>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag2       <EFFECT_FLAG_AGGRAVATE>
+}
 # --- EFFECT_FLAG_CONFUSE ---
 
 Effect <Cause Confusion>

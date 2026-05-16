@@ -109,6 +109,8 @@ public:
     void SetAmount( const char *szAmount );
     float Resist() const;
     bool HasFlag( const char *szFlag );
+    const char *Effect();
+
     CEffectDef *m_ed; // pointer to shared effect definition (NULL for inline effects)
     int m_dwEffect;
     uint32 m_dwFlags;

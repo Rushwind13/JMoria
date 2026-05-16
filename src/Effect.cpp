@@ -14,6 +14,7 @@ void CEffect::SetAmount( const char *szAmount )
         Util::jstrcpy( m_szAmount, szAmount );
     }
 }
+
 float CEffect::Resist() const
 {
     if( m_dwModifier & EFFECT_MOD_IMMUNE )
@@ -24,7 +25,27 @@ float CEffect::Resist() const
         return 2.0f;
     return 1.0f;
 }
+
 bool CEffect::HasFlag( const char *szFlag )
 {
     return g_Constants.CheckEffectFlag( szFlag, m_dwFlags, m_dwFlags2 );
+}
+
+const char *CEffect::Effect()
+{
+    switch( m_dwFlags )
+    {
+    case EFFECT_FLAG_FIRE:
+        return "fire";
+    case EFFECT_FLAG_COLD:
+        return "cold";
+    case EFFECT_FLAG_ELECTRICITY:
+        return "electricity";
+    case EFFECT_FLAG_ACID:
+        return "acid";
+    case EFFECT_FLAG_POISON:
+        return "poison gas";
+    default:
+        return "energy";
+    }
 }

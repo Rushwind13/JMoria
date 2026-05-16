@@ -1864,16 +1864,16 @@ JResult CPlayer::DoElementalHit( CEffect *pEffect )
         return JBOGUSKEY;
     }
 
-    const char *szElement = g_Constants.IndexToString( EFFECT_FLAG, pEffect->m_dwFlags );
-    JLog( LOG_LEVEL_INFO, true, "elemental hit (%s) on %s\n", szElement, pMon->GetName() );
-
+    const char *szEffect = pEffect->Effect();
     // Save monster name before it's potentially deleted
     const char *szMonName = pMon->GetName();
+    JLog( LOG_LEVEL_INFO, true, "elemental hit (%s) on %s\n", szEffect, szMonName );
+
     // Print effect description message
     if( pEffect->m_ed && pEffect->m_ed->m_szName )
     {
         g_pGame->GetMsgs()->Printf( "The %s strikes the %s with %s.\n", pEffect->m_ed->m_szName,
-                                    szMonName, szElement );
+                                    szMonName, szEffect );
     }
 
     const char *szAmount = pEffect->m_szAmount;
@@ -2052,6 +2052,12 @@ JResult CPlayer::DoLineHit( CEffect *pEffect )
 
     float fDamage = Util::Roll( szAmount );
     const char *szMonName = pMon->GetName();
+    const char *szEffect = pEffect->Effect();
+    if( pEffect->m_ed && pEffect->m_ed->m_szName )
+    {
+        g_pGame->GetMsgs()->Printf( "The %s strikes the %s with %s.\n", pEffect->m_ed->m_szName,
+                                    szMonName, szEffect );
+    }
     if( DamageMonster( pMon, fDamage ) )
     {
         g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );

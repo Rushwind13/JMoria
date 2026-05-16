@@ -212,20 +212,7 @@ const char *CMonster::AttackEffect()
 {
     if( m_pCurrentAttack == NULL || m_pCurrentAttack->m_pEffect == NULL )
         return "thoughts and prayers";
-    switch( m_pCurrentAttack->m_pEffect->m_dwFlags )
-    {
-    case EFFECT_FLAG_ACID:
-        return "acid";
-    case EFFECT_FLAG_COLD:
-        return "cold";
-    case EFFECT_FLAG_ELECTRICITY:
-        return "lightning";
-    case EFFECT_FLAG_FIRE:
-        return "fire";
-    case EFFECT_FLAG_POISON:
-        return "poison gas";
-    }
-    return "hot air";
+    return m_pCurrentAttack->m_pEffect->Effect();
 }
 
 const char *CMonster::AttackFlavorText()

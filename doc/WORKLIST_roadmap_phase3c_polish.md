@@ -1,5 +1,12 @@
 # Phase 3c Polish — Roadmap
 
+## Repo: Rushwind13/JMoria
+## build: make clean ascii test
+## all tests: cd test; ./runtests.sh
+## feature tests: cd test; ./runtests.sh ranged
+* Use MCP to interact with Github
+* Only use these exact commands for builds/testing. 
+
 Open issues labeled `cleanup` on branch `feat/phase3c_polish`, prioritized by impact and dependency order.
 
 ---

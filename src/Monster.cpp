@@ -17,6 +17,7 @@ CMonster::CMonster()
       m_fLastBreed( BREED_INTERVAL ),
       m_dwInstanceId( 0 ),
       m_dwActiveEffects( 0 ),
+      m_dwActiveEffects2( 0 ),
       m_bDetected( false )
 {
     m_pBrain = new CAIBrain;

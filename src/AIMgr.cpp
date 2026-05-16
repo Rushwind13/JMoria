@@ -121,6 +121,29 @@ bool CAIBrain::UpdateSeek( float fCurTime )
         return true;
     }
 
+    // Aggravated monsters seek the effect source.  Clear once they reach it or
+    // regain sight of the player, then fall through to normal AI.
+    if( m_pParent->m_dwActiveEffects2 & EFFECT_FLAG_AGGRAVATE )
+    {
+        JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
+        JVector vDiff = m_vPos - m_vTargetPos;
+        bool bReachedTarget = vDiff.Length() <= 1.0f;
+        bool bSeesPlayer = g_pGame->GetDungeon()->CanSeeEachOther(
+            JIVector( (int)m_vPos.x, (int)m_vPos.y ),
+            JIVector( (int)vPlayerPos.x, (int)vPlayerPos.y ) );
+        if( bReachedTarget || bSeesPlayer )
+        {
+            m_pParent->m_dwActiveEffects2 &= ~EFFECT_FLAG_AGGRAVATE;
+            // Fall through: normal AI picks up from here.
+        }
+        else
+        {
+            WalkSeek( fCurTime );
+            SetState( BRAINSTATE_GOTODEST );
+            return true;
+        }
+    }
+
     switch( m_dwMoveType )
     {
     case MON_AI_100RANDOMMOVE:

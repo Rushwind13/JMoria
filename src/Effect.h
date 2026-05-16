@@ -122,6 +122,7 @@ public:
     JResult TeleportAway( JVector vOrigin );
     JResult Probe( JVector vOrigin );
     JResult HealMonster( JVector vOrigin );
+    JResult Aggravate( JVector vOrigin );
 
     // Top-level dispatch — called once per effect in the effect list.
     JResult Dispatch( float fDuration, int dwItemFlags );

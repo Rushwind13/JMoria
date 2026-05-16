@@ -38,29 +38,18 @@ All SLEEP/wake functionality is complete (#296). This work adds:
 
 ## Phase 2 — Aggravate Logic
 
-### T4 — Implement aggravate effect handler in `Effect.cpp`
+### T4 — Implement aggravate effect handler in `Effect.cpp` ✅ COMPLETE
 When `EFFECT_FLAG_AGGRAVATE` fires:
 
-**Area variant (Radius > 0):**
-- Iterate all monsters within radius tiles
-- Wake each monster (100%): clear `EFFECT_FLAG_SLEEP`, clear `BRAINSTATE_REST`
-- Set each monster to seek the **source position** of the effect (not necessarily the player — see T5)
-- Print a message: `"The Shrieker Mushroom Patch emits a horrible wail!"` (once per trigger)
-- Print a message: `"The Kobold wakes up."` (per aggravated monster, within sight)
-- Print a message: `"You hear a stirring in the distance!"` (once per trigger, if any aggravated monsters are out of sight)
+- Dispatch via `CEffect::HasFlag("EFFECT_FLAG_AGGRAVATE")` in `DoHitEffects()` (word-2 check before the word-1 switch)
+- Area variant wakes all monsters within radius; clears `EFFECT_FLAG_SLEEP`, sets `m_dwActiveEffects2 |= EFFECT_FLAG_AGGRAVATE`, sets `m_vTargetPos` to effect source, calls `SetState(BRAINSTATE_SEEK)`
+- Single-target variant does the same for the one monster at ranged hit position
 
-**Single-target variant:**
-- Wake the one targeted monster (100%)
-- Set it to seek the source position of the effect
-
-### T5 — Add "seek arbitrary position" to `CAIBrain` (`AIMgr.cpp/.h`)
+### T5 — Add "seek arbitrary position" to `CAIBrain` (`AIMgr.cpp/.h`) ✅ COMPLETE
 Currently `BRAINSTATE_SEEK` with `MON_AI_SEEKPLAYER` always overwrites `m_vTargetPos` with the player position. Monsters woken by aggravate need to seek the effect source (which may be the mushroom's tile, or the player's tile if a player item cast it).
 
-**Design:**
-- In `UpdateSeek()`: if intrinsic EFFECT_FLAG_AGGRAVATE is set, set `m_vTargetPos` to aggravate position as target instead of the player, regardless of brain type
-- Clear intrinsic EFFECT_FLAG_AGGRAVATE when the monster reaches the aggravate tile (within 1 tile) — at that point normal AI takes over 
-- Clear intrinsic EFFECT_FLAG_AGGRAVATE when the monster can see the player — at that point normal AI takes over 
-- The aggravate effect (T4) sets `m_vTargetPos = source position` and intrinsic EFFECT_FLAG_AGGRAVATE is set on each woken monster, then calls `SetState(BRAINSTATE_SEEK)`
+- `CMonster` gained `uint32 m_dwActiveEffects2` (word-2 status flags) mirroring `CEffect`'s `m_dwFlags2` — zero collision with word-1 flags
+- In `UpdateSeek()`: checks `m_pParent->m_dwActiveEffects2 & EFFECT_FLAG_AGGRAVATE`; if set, seeks `m_vTargetPos` directly, clears when within 1 tile of target or monster gains LOS to player
 
 ---
 
@@ -137,15 +126,15 @@ Methods to move from `CPlayer` → `CEffect`:
 
 | Current `CPlayer` method | New `CEffect` method |
 |---|---|
-| `DoAreaHit(CEffect*)` | `ApplyArea(JVector vOrigin)` |
-| `DoBallHit(CEffect*)` | `ApplyBall(JVector vOrigin)` |
-| `DoLineHit(CEffect*)` | `ApplyLine(JVector vOrigin)` |
-| `DoLightRay(CEffect*)` | `ApplyLightRay(JVector vOrigin)` |
-| `DoElementalHit(CEffect*)` | `ApplyElemental(JVector vOrigin)` |
-| `DoPhysicalHit(CEffect*)` | `ApplyPhysical(JVector vOrigin)` |
-| `DoStatusHit(CEffect*, uint32)` | `ApplyStatus(JVector vOrigin, uint32 dwFlag)` |
-| `DoStoneToMud(CEffect*)` | `ApplyStoneToMud(JVector vOrigin)` |
-| `DoTeleportAway(CEffect*)` | `ApplyTeleportAway(JVector vOrigin)` |
+| `DoAreaHit(CEffect*)` | `Area(JVector vOrigin)` |
+| `DoBallHit(CEffect*)` | `Ball(JVector vOrigin)` |
+| `DoLineHit(CEffect*)` | `Line(JVector vOrigin)` |
+| `DoLightRay(CEffect*)` | `LightRay(JVector vOrigin)` |
+| `DoElementalHit(CEffect*)` | `Elemental(JVector vOrigin)` |
+| `DoPhysicalHit(CEffect*)` | `Physical(JVector vOrigin)` |
+| `DoStatusHit(CEffect*, uint32)` | `Status(JVector vOrigin, uint32 dwFlag)` |
+| `DoStoneToMud(CEffect*)` | `StoneToMud(JVector vOrigin)` |
+| `DoTeleportAway(CEffect*)` | `TeleportAway(JVector vOrigin)` |
 
 Each `CPlayer` stub becomes a one-liner: `pEffect->ApplyXxx( m_vPos )`.
 

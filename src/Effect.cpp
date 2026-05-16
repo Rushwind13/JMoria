@@ -549,6 +549,10 @@ JResult CEffect::DoHitEffects()
     if( m_dwModifier & EFFECT_MOD_LINE )
         return Line( vTargetPos );
 
+    // Word-2 flags dispatch before word-1 flag switch.
+    if( HasFlag( "EFFECT_FLAG_AGGRAVATE" ) )
+        return Aggravate( vCasterPos );
+
     switch( m_dwFlags )
     {
     case EFFECT_FLAG_LIGHT:
@@ -613,4 +617,82 @@ JResult CEffect::Dispatch( float fDuration, int dwItemFlags )
         JLog( LOG_LEVEL_ERROR, true, "bad effect type: %d\n", m_dwEffect );
         return JSUCCESS;
     }
+}
+
+JResult CEffect::Aggravate( JVector vOrigin )
+{
+    uint8 radius = m_ed ? (uint8)m_ed->m_fRadius : 0;
+    CDungeon *pDungeon = g_pGame->GetDungeon();
+    CPlayer *pPlayer = g_pGame->GetPlayer();
+
+    if( radius > 0 )
+    {
+        // Area variant: wake all monsters within radius, point them at the source.
+        JIVector vCenter( (int)vOrigin.x, (int)vOrigin.y );
+        int nWoken = 0;
+        bool bOutOfSight = false;
+
+        CLink<CMonster> *pLink = pDungeon->m_llMonsters->GetHead();
+        while( pLink != NULL )
+        {
+            CMonster *pMon = pLink->m_lpData;
+            pLink = pDungeon->m_llMonsters->GetNext( pLink );
+            if( !pMon )
+                continue;
+
+            JIVector vMonPos( (int)pMon->GetPos().x, (int)pMon->GetPos().y );
+            if( !Util::WithinRadius( vCenter, vMonPos, radius ) )
+                continue;
+
+            pMon->m_dwActiveEffects &= ~EFFECT_FLAG_SLEEP;
+            pMon->m_dwActiveEffects2 |= EFFECT_FLAG_AGGRAVATE;
+            pMon->m_pBrain->SetTargetPos( vOrigin );
+            pMon->m_pBrain->SetState( BRAINSTATE_SEEK );
+
+            if( pDungeon->PlayerCanSee( pMon->GetPos() ) )
+                g_pGame->GetMsgs()->Printf( "The %s wakes up!\n", pMon->GetName() );
+            else
+                bOutOfSight = true;
+
+            nWoken++;
+        }
+
+        if( nWoken > 0 )
+        {
+            const char *szName = ( m_ed && m_ed->m_szName ) ? m_ed->m_szName : "something";
+            g_pGame->GetMsgs()->Printf( "The %s emits a horrible wail!\n", szName );
+            if( bOutOfSight )
+                g_pGame->GetMsgs()->Printf( "You hear a stirring in the distance!\n" );
+            pPlayer->m_bLastEffectNoticed = true;
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "Nothing stirs.\n" );
+        }
+    }
+    else
+    {
+        // Single-target variant: monster at ranged hit position.
+        JVector vTargetPos = pPlayer->GetRangedHitPosition();
+        CDungeonTile *pTile = pDungeon->GetTile( vTargetPos );
+        if( !pTile )
+            return JBOGUSKEY;
+
+        CMonster *pMon = pTile->m_pCurMonster;
+        if( !pMon )
+        {
+            g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+            return JBOGUSKEY;
+        }
+
+        pMon->m_dwActiveEffects &= ~EFFECT_FLAG_SLEEP;
+        pMon->m_dwActiveEffects2 |= EFFECT_FLAG_AGGRAVATE;
+        pMon->m_pBrain->SetTargetPos( vOrigin );
+        pMon->m_pBrain->SetState( BRAINSTATE_SEEK );
+
+        g_pGame->GetMsgs()->Printf( "The %s looks enraged!\n", pMon->GetName() );
+        pPlayer->m_bLastEffectNoticed = true;
+    }
+
+    return JSUCCESS;
 }

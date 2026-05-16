@@ -138,7 +138,8 @@ public:
     CMonsterDef *m_md;
     CLink<CMonster> *m_pllLink;
     CAIBrain *m_pBrain;       // this is the place to get info for the AI.
-    uint32 m_dwActiveEffects; // this monster is confused, blind, ...
+    uint32 m_dwActiveEffects; // word-1 status flags (confused, blind, afraid, sleep, paralyze...)
+    uint32 m_dwActiveEffects2; // word-2 status flags (aggravate, ...)
     uint32 m_dwInstanceId;    // unique instance id for this monster
     bool m_bDetected;         // true for one turn after Detect Monsters
 

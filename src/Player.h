@@ -344,6 +344,7 @@ public:
 
     float Attack();
     float RangedAttack( CLink<CItem> *pArrow );
+    float GetStealth() const;
     float Damage( float fDamageMult );
 
     bool Hit( float &fRoll );

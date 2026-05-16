@@ -380,6 +380,7 @@ Value       6.0
 Level       1
 AC          1.0
 Weight      1.0
+Flags       <ITEM_FLAG_SILENT>
 Color        <225,225,50,255>
 }
 Item <Leather Armor>
@@ -390,6 +391,7 @@ Value       50.0
 Level       5
 AC          8.0
 Weight      2.0
+Flags       <ITEM_FLAG_SILENT>
 Color        <225,225,50,255>
 }
 Item <Padded Armor>
@@ -400,6 +402,7 @@ Value       40.0
 Level       7
 AC          15.0
 Weight      2.0
+Flags       <ITEM_FLAG_SILENT>
 Color        <225,225,50,255>
 }
 Item <Splint Mail>
@@ -410,6 +413,7 @@ Value       40.0
 Level       32
 AC          25.0
 Weight      2.0
+Flags       <ITEM_FLAG_METAL>
 Color        <225,225,50,255>
 }
 Item <Chain Mail>
@@ -420,6 +424,7 @@ Value       40.0
 Level       38
 AC          22.0
 Weight      2.0
+Flags       <ITEM_FLAG_METAL>
 Color        <225,225,50,255>
 }
 Item <Plate Mail Armor>
@@ -430,6 +435,7 @@ Value       40.0
 Level       52
 AC          38.0
 Weight      2.0
+Flags       <ITEM_FLAG_METAL>
 Color        <225,225,50,255>
 }
 
@@ -630,6 +636,7 @@ Value       20.0
 Level       1
 AC          2.0
 Weight      2.0
+Flags       <ITEM_FLAG_SILENT>
 Color        <225,225,50,255>
 }
 Item <Pair of Steel Boots>
@@ -640,6 +647,7 @@ Value       20.0
 Level       16
 AC          5.0
 Weight      4.0
+Flags       <ITEM_FLAG_METAL>
 Color        <225,225,50,255>
 }
 Item <Boots of Speed>
@@ -653,7 +661,7 @@ Level       48
 AC          2.0
 Weight      3.0
 Color       <255,200,50,255>
-Flags       <ITEM_FLAG_MAGIC>
+Flags       <ITEM_FLAG_MAGIC,ITEM_FLAG_SILENT>
 }
 
 # --- Rings ---

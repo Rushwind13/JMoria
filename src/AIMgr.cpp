@@ -184,6 +184,31 @@ bool CAIBrain::UpdateRest( float fCurTime )
                     SetState( BRAINSTATE_SEEK );
                 }
             }
+
+            // Proximity wake check: sleeping monsters only (not paralyzed)
+            if( m_pParent->m_dwActiveEffects & EFFECT_FLAG_SLEEP )
+            {
+                JVector vDiff = m_vPos - g_pGame->GetPlayer()->m_vPos;
+                float fDist = vDiff.Length(); // Length() returns squared distance
+
+                float fStealth = g_pGame->GetPlayer()->GetStealth();
+                CRoom *pRoom = g_pGame->GetDungeon()->InRoom( m_vPos );
+                bool inLitRoom = pRoom && pRoom->HasFlags( DUNG_FLAG_LIT );
+
+                float fWakeRange = SLEEP_BASE_WAKE_RANGE + fStealth +
+                                   ( inLitRoom ? SLEEP_LIT_ROOM_PENALTY : 0.0f );
+                if( fWakeRange < 0.0f )
+                    fWakeRange = 0.0f;
+                fWakeRange *= fWakeRange; // compare squared distances to avoid sqrt
+
+                if( fDist < fWakeRange && Util::GetRandom( 0.0f, fDist ) <
+                                              SLEEP_WAKE_CHANCE_SCALE * ( fWakeRange - fDist ) )
+                {
+                    m_pParent->m_dwActiveEffects &= ~EFFECT_FLAG_SLEEP;
+                    SetState( BRAINSTATE_SEEK );
+                    g_pGame->GetMsgs()->Printf( "The %s wakes up!\n", m_pParent->GetName() );
+                }
+            }
         }
         return true;
     }

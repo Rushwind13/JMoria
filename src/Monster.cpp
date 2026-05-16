@@ -115,6 +115,14 @@ JResult CMonster::InitAndSpawn( CMonsterDef *pmd, JIVector vRequestedSpawnPoint 
         // Put the monster in the world
         SpawnAt( vSpawnPoint );
 
+        // monsters spawn asleep
+        if( !( pmd->m_dwFlags & MON_FLAG_NEVER_SLEEP ) )
+        {
+            m_dwActiveEffects |= EFFECT_FLAG_SLEEP;
+            m_pBrain->SetState( BRAINSTATE_REST );
+            // m_nEffectTurns intentionally NOT set: spawn-sleep is indefinite until woken
+        }
+
         // Now that the monster is set up, add it to the global lists (monsters, brains)
         m_pllLink = g_pGame->GetDungeon()->m_llMonsters->Add( this );
         m_pBrain->m_pllLink = g_pGame->GetAIMgr()->m_llAIBrains->Add( m_pBrain );
@@ -330,28 +338,23 @@ uint32 CMonster::GetElementFlags() const
 
 bool CMonster::IsImmuneToEffect( uint32 dwFlag ) const
 {
-    // Table of effect flags that empty-minded creatures are immune to.
+    // Map monster intrinsic flags to the EFFECT_FLAG_* bits they block,
+    // then delegate to Util::CheckAffinity for the overlap test.
     // PARALYZE is notably absent — it is a physical effect, not mental.
-    static const struct
-    {
-        uint32 effectFlag;
-        uint32 monsterFlag;
-    } immunityTable[] = {
-        { EFFECT_FLAG_SLEEP, MON_FLAG_EMPTY_MIND },
-        { EFFECT_FLAG_AFRAID, MON_FLAG_EMPTY_MIND },
-        { EFFECT_FLAG_CONFUSE, MON_FLAG_EMPTY_MIND },
-    };
-    for( const auto &entry : immunityTable )
-    {
-        if( ( dwFlag & entry.effectFlag ) && ( m_md->m_dwFlags & entry.monsterFlag ) )
-            return true;
-    }
-    return false;
+    uint32 dwIntrinsic = 0;
+    if( m_md->m_dwFlags & ( MON_FLAG_NEVER_SLEEP ) )
+        dwIntrinsic |= EFFECT_FLAG_SLEEP;
+    if( m_md->m_dwFlags & MON_FLAG_EMPTY_MIND )
+        dwIntrinsic |= EFFECT_FLAG_SLEEP | EFFECT_FLAG_AFRAID | EFFECT_FLAG_CONFUSE;
+    return Util::CheckAffinity( dwFlag, dwIntrinsic ) == 0.0f;
 }
 
 // draw routines
 void CMonster::Breed()
 {
+    if( m_dwActiveEffects & EFFECT_FLAG_SLEEP )
+        return;
+
     if( ( m_md->m_dwFlags & MON_FLAG_BREED ) != MON_FLAG_BREED )
         return;
 

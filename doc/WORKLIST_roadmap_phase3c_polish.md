@@ -34,7 +34,7 @@ Open issues labeled `cleanup` on branch `feat/phase3c_polish`, prioritized by im
 
 ---
 
-## P3 — Content / Feature Completeness
+## P3 — Content / Feature Completeness COMPLETE 2026-05-15
 
 - **#292** COMPLETE [monsters are immune to their elemental effect](https://github.com/Rushwind13/JMoria/issues/292)
   Red dragons should shrug off firebolts (and ideally be weak to frostbolts). Elemental immunity/weakness table needed.
@@ -49,7 +49,7 @@ Open issues labeled `cleanup` on branch `feat/phase3c_polish`, prioritized by im
 
 ## P4 — Larger Features (with dependencies)
 
-- **#296** [Monsters should have a %chance to be asleep](https://github.com/Rushwind13/JMoria/issues/296)
+- **#296** COMPLETE [Monsters should have a %chance to be asleep](https://github.com/Rushwind13/JMoria/issues/296)
   Foundational sleep system: spawn chance, stealth interaction, Sleep spell, waking on attack, 4× damage bonus.
   *Prerequisite for #269 and #297.*
 

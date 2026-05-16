@@ -1103,13 +1103,52 @@ void CPlayer::OnKillMonster( CMonster *pMon, float fKillingBlow )
 
 bool CPlayer::DamageMonster( CMonster *pMon, float fDamage )
 {
+    bool bWasSleeping = ( pMon->m_dwActiveEffects & EFFECT_FLAG_SLEEP ) != 0;
+    if( bWasSleeping )
+        fDamage *= 4.0f;
     if( pMon->TakeDamage( fDamage ) == STATUS_DEAD )
     {
         OnKillMonster( pMon, fDamage );
         g_pGame->GetDungeon()->RemoveMonster( pMon );
         return true;
     }
+    if( bWasSleeping )
+    {
+        pMon->m_dwActiveEffects &= ~EFFECT_FLAG_SLEEP;
+        pMon->m_pBrain->SetState( BRAINSTATE_SEEK );
+        g_pGame->GetMsgs()->Printf( "The %s wakes up!\n", pMon->GetName() );
+    }
     return false;
+}
+
+float CPlayer::GetStealth() const
+{
+    float fNoise = 0.0f;
+    // Boots contribution
+    CLink<CItem> *pBoots = m_llEquipment->GetLink( EQUIP_IDX_BOOTS );
+    if( pBoots == NULL || pBoots->m_lpData == NULL )
+    {
+        fNoise -= 2.0f; // barefoot: very quiet
+    }
+    else
+    {
+        CItem *pItem = pBoots->m_lpData;
+        if( pItem->m_id->m_dwFlags & ITEM_FLAG_METAL )
+            fNoise += 3.0f;
+        else if( pItem->m_id->m_dwFlags & ITEM_FLAG_SILENT )
+            fNoise -= 1.0f;
+    }
+    // Body armor contribution
+    CLink<CItem> *pArmor = m_llEquipment->GetLink( EQUIP_IDX_ARMOR );
+    if( pArmor != NULL && pArmor->m_lpData != NULL )
+    {
+        CItem *pItem = pArmor->m_lpData;
+        if( pItem->m_id->m_dwFlags & ITEM_FLAG_METAL )
+            fNoise += 3.0f;
+        else if( pItem->m_id->m_dwFlags & ITEM_FLAG_SILENT )
+            fNoise -= 1.0f;
+    }
+    return fNoise;
 }
 
 void CPlayer::GainLevel()
@@ -2446,6 +2485,28 @@ JResult CPlayer::DoLightArea()
     {
         pRoom->SetFlags( DUNG_FLAG_LIT );
         g_pGame->GetDungeon()->LightRoom( pRoom );
+
+        // Wake sleeping monsters in the room with high probability
+        CDungeon *pDungeon = g_pGame->GetDungeon();
+        CLink<CMonster> *pLink = pDungeon->m_llMonsters->GetHead();
+        while( pLink != NULL )
+        {
+            CMonster *pMon = pLink->m_lpData;
+            CLink<CMonster> *pNext = pDungeon->m_llMonsters->GetNext( pLink );
+            if( pMon && ( pMon->m_dwActiveEffects & EFFECT_FLAG_SLEEP ) )
+            {
+                JVector vMon = pMon->GetPos();
+                CRoom *pMonRoom = pDungeon->InRoom( vMon );
+                if( pMonRoom == pRoom && Util::GetRandom( 0.0f, 1.0f ) < SLEEP_LIGHT_WAKE_CHANCE )
+                {
+                    pMon->m_dwActiveEffects &= ~EFFECT_FLAG_SLEEP;
+                    pMon->m_pBrain->SetState( BRAINSTATE_SEEK );
+                    g_pGame->GetMsgs()->Printf( "The %s wakes up!\n", pMon->GetName() );
+                }
+            }
+            pLink = pNext;
+        }
+
         g_pGame->GetMsgs()->Printf( "The room is flooded with light!\n" );
         return JSUCCESS;
     }

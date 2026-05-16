@@ -94,10 +94,12 @@
 #define CHANCE_ARROW_BREAK 0
 #define ITEM_DESTROY_CHANCE 1.1f
 #define RECALL_DURATION 1
+#define SLEEP_LIGHT_WAKE_CHANCE 1.0f // always wake in tests
 #else
 #define CHANCE_ARROW_BREAK 33 // ~1 in 3 chance arrow breaks on landing
 #define ITEM_DESTROY_CHANCE 0.03f // 3% base chance per inventory slot
 #define RECALL_DURATION ( Util::Roll( 1, 20 ) + 30 )
+#define SLEEP_LIGHT_WAKE_CHANCE 0.85f // 85% chance to wake sleeping monsters when lighting a room
 #endif
 
 // Ranged attack limits
@@ -209,7 +211,7 @@
 
 #define MON_FLAG_INVISIBLE 0x00100000
 // #define MON_FLAG_x          0x00200000
-// #define MON_FLAG_x          0x00400000
+#define MON_FLAG_NEVER_SLEEP 0x00400000
 #define MON_FLAG_MAXHP 0x00800000
 
 #define MON_AI_DONTMOVE 0x01000000
@@ -222,7 +224,7 @@
 // #define MON_COLOR_x          0x40000000
 // #define MON_COLOR_x          0x80000000
 
-#define NUM_MON_FLAGS 20
+#define NUM_MON_FLAGS 21
 
 // Effect Flags
 #define EFFECT_FLAG_FIRE 0x00000001
@@ -389,8 +391,8 @@
 #define ITEM_FLAG_MAINHAND 0x00000040
 #define ITEM_FLAG_NEEDSAMMO 0x00000080
 
-// #define ITEM_FLAG_x 0x00000100
-// #define ITEM_FLAG_x 0x00000200
+#define ITEM_FLAG_METAL 0x00000100  // metal armor/boots: noisy
+#define ITEM_FLAG_SILENT 0x00000200 // leather/padded armor/boots: quiet
 // #define ITEM_FLAG_x 0x00000400
 // #define ITEM_FLAG_x 0x00000800
 
@@ -407,7 +409,7 @@
 #define KNOWN_CHARGES 0x00000004
 #define KNOWN_TRIED 0x00000008
 
-#define NUM_ITEM_FLAGS 11
+#define NUM_ITEM_FLAGS 13
 
 // Make sure you change below here if you added any flags.
 #define NUM_STRINGS                                                                                \
@@ -526,6 +528,7 @@ public:
         m_StringTable[i++].Init( "MON_FLAG_HURT_BY_LIGHT", MON_FLAG_HURT_BY_LIGHT );
         m_StringTable[i++].Init( "MON_FLAG_BREED", MON_FLAG_BREED );
         m_StringTable[i++].Init( "MON_FLAG_INVISIBLE", MON_FLAG_INVISIBLE );
+        m_StringTable[i++].Init( "MON_FLAG_NEVER_SLEEP", MON_FLAG_NEVER_SLEEP );
         m_StringTable[i++].Init( "MON_FLAG_MAXHP", MON_FLAG_MAXHP );
         m_StringTable[i++].Init( "MON_AI_DONTMOVE", MON_AI_DONTMOVE );
         m_StringTable[i++].Init( "MON_AI_100RANDOMMOVE", MON_AI_100RANDOMMOVE );
@@ -667,6 +670,8 @@ public:
         m_StringTable[i++].Init( "ITEM_FLAG_OFFHAND", ITEM_FLAG_OFFHAND );
         m_StringTable[i++].Init( "ITEM_FLAG_MAINHAND", ITEM_FLAG_MAINHAND );
         m_StringTable[i++].Init( "ITEM_FLAG_NEEDSAMMO", ITEM_FLAG_NEEDSAMMO );
+        m_StringTable[i++].Init( "ITEM_FLAG_METAL", ITEM_FLAG_METAL );
+        m_StringTable[i++].Init( "ITEM_FLAG_SILENT", ITEM_FLAG_SILENT );
         m_StringTable[i++].Init( "ITEM_FLAG_BLESSED", ITEM_FLAG_BLESSED );
         m_StringTable[i++].Init( "ITEM_FLAG_HOLDING", ITEM_FLAG_HOLDING );
         m_StringTable[i++].Init( "ITEM_COLOR_MULTI", ITEM_COLOR_MULTI );

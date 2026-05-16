@@ -128,6 +128,7 @@ public:
     JResult Dispatch( float fDuration, int dwItemFlags );
     // Hit-effect sub-dispatch — selects Apply* based on modifier and flag.
     JResult DoHitEffects();
+    JResult DoHitEffects( JVector vCasterPos, JVector vTargetPos );
 
     CEffectDef *m_ed; // pointer to shared effect definition (NULL for inline effects)
     int m_dwEffect;

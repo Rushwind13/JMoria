@@ -18,17 +18,19 @@ enum eBrainState
     BRAINSTATE_REST = 0,
     BRAINSTATE_GOTODEST = 1,
     BRAINSTATE_SEEK,
+    BRAINSTATE_ATTACK,
     BRAINSTATE_IDLE,
     BRAINSTATE_MAX
 };
 
 class CMonster;
+class CAttack;
 
 class CAIBrain
 {
 public:
     CAIBrain();
-    virtual ~CAIBrain() {}
+    virtual ~CAIBrain();
 
     float m_fSpeed;
     int m_dwMoveType;
@@ -49,6 +51,9 @@ public:
     bool UpdateIdle( float fCurTime );
     bool UpdateGoToDest( float fCurTime );
     bool UpdateSeek( float fCurTime );
+    bool UpdateAttack( float fCurTime );
+    void BuildEligibleAttacks();
+    bool ChooseAction( float fCurTime );
 
     void SetState( eBrainState newState )
     {
@@ -68,7 +73,7 @@ protected:
     float m_fStateTicks;
     JVector m_vVel;
     eBrainState m_eBrainState;
-
+    JLinkList<CAttack> *m_pEligibleAttacks; // non-owning; Terminate()+reused each tick
     CMonster *m_pParent;
 };
 

@@ -12,8 +12,19 @@ CAIBrain::CAIBrain()
       m_fSpeed( 0.0f ),
       m_nEffectTurns( 0 ),
       m_eBrainState( BRAINSTATE_INVALID ),
+      m_pEligibleAttacks( new JLinkList<CAttack>( false ) ),
       m_vTargetPos( 0, 0 )
 {
+}
+
+CAIBrain::~CAIBrain()
+{
+    if( m_pEligibleAttacks )
+    {
+        m_pEligibleAttacks->Terminate();
+        delete m_pEligibleAttacks;
+        m_pEligibleAttacks = NULL;
+    }
 }
 
 CAIMgr::~CAIMgr()
@@ -84,6 +95,9 @@ bool CAIBrain::Update( float fCurTime )
         JLog( LOG_LEVEL_NOISE, true, "I seek\n" );
         return UpdateSeek( fCurTime );
         break;
+    case BRAINSTATE_ATTACK:
+        return UpdateAttack( fCurTime );
+        break;
     case BRAINSTATE_IDLE:
         return UpdateIdle( fCurTime );
         break;
@@ -143,6 +157,10 @@ bool CAIBrain::UpdateSeek( float fCurTime )
             return true;
         }
     }
+
+    BuildEligibleAttacks();
+    if( ChooseAction( fCurTime ) )
+        return true;
 
     switch( m_dwMoveType )
     {
@@ -413,5 +431,119 @@ bool CAIBrain::GotoDest( float fCurTime, JVector &delta )
     }
 
     JLog( LOG_LEVEL_NOISE, true, "\n" );
+    return true;
+}
+
+void CAIBrain::BuildEligibleAttacks()
+{
+    m_pEligibleAttacks->Terminate();
+    if( !m_pParent || !m_pParent->m_md || !m_pParent->m_md->m_llAttacks )
+        return;
+
+    JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
+    JVector vDiff = m_vPos - vPlayerPos;
+    float fDist = vDiff.Length();
+    bool bAdjacent = fDist <= 2.0f; // within 1 tile (including diagonal)
+    bool bInLOS =
+        g_pGame->GetDungeon()->CanSeeEachOther( JIVector( (int)m_vPos.x, (int)m_vPos.y ),
+                                                JIVector( (int)vPlayerPos.x, (int)vPlayerPos.y ) );
+
+    CLink<CAttack> *pLink = m_pParent->m_md->m_llAttacks->GetHead();
+    while( pLink )
+    {
+        CAttack *pAtk = pLink->m_lpData;
+        if( pAtk )
+        {
+            bool bRanged =
+                pAtk->m_pEffect && pAtk->m_pEffect->m_ed && pAtk->m_pEffect->m_ed->m_fRange > 0.0f;
+            if( bAdjacent || ( bInLOS && bRanged ) )
+                m_pEligibleAttacks->Add( pAtk );
+        }
+        pLink = m_pParent->m_md->m_llAttacks->GetNext( pLink );
+    }
+}
+
+bool CAIBrain::ChooseAction( float fCurTime )
+{
+    int nMoveW, nAttackW, nIdleW;
+    switch( m_dwMoveType )
+    {
+    case MON_AI_SEEKPLAYER:
+        nMoveW = 24;
+        nAttackW = 75;
+        nIdleW = 1;
+        break;
+    case MON_AI_75RANDOMMOVE:
+        nMoveW = 40;
+        nAttackW = 55;
+        nIdleW = 5;
+        break;
+    case MON_AI_100RANDOMMOVE:
+        nMoveW = 60;
+        nAttackW = 30;
+        nIdleW = 10;
+        break;
+    case MON_AI_DONTMOVE:
+        nMoveW = 1;
+        nAttackW = 75;
+        nIdleW = 19;
+        break;
+    default:
+        nMoveW = 50;
+        nAttackW = 40;
+        nIdleW = 10;
+        break;
+    }
+
+    int nRoll = Util::GetRandom( 1, 100 );
+    if( m_pEligibleAttacks->length() > 0 && nRoll <= nAttackW )
+    {
+        m_vTargetPos = g_pGame->GetPlayer()->m_vPos;
+        SetState( BRAINSTATE_ATTACK );
+        return true;
+    }
+
+    // Redistribute idle vs. move over remaining probability space.
+    int nDenom = nMoveW + nIdleW;
+    int nIdleThresh = ( nDenom > 0 ) ? ( nIdleW * 100 / nDenom ) : 0;
+    nRoll = Util::GetRandom( 1, 100 );
+    if( nRoll <= nIdleThresh )
+    {
+        SetState( BRAINSTATE_IDLE );
+        return true;
+    }
+
+    return false; // fall through to brain-type move switch
+}
+
+bool CAIBrain::UpdateAttack( float fCurTime )
+{
+    if( m_pEligibleAttacks->length() == 0 )
+    {
+        SetState( BRAINSTATE_SEEK );
+        return true;
+    }
+
+    int nIdx = Util::GetRandom( 0, m_pEligibleAttacks->length() - 1 );
+    CAttack *pAtk = m_pEligibleAttacks->GetNthLink( nIdx )->m_lpData;
+    m_pParent->m_pCurrentAttack = pAtk;
+
+    bool bRanged =
+        pAtk->m_pEffect && pAtk->m_pEffect->m_ed && pAtk->m_pEffect->m_ed->m_fRange > 0.0f;
+    if( bRanged )
+    {
+        JVector vMonPos( m_vPos.x, m_vPos.y );
+        JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
+        pAtk->m_pEffect->DoHitEffects( vMonPos, vPlayerPos );
+        g_pGame->GetMsgs()->Printf( "The %s %s you.\n", m_pParent->GetName(),
+                                    m_pParent->AttackFlavorText() );
+    }
+    else
+    {
+        CollideWithPlayer();
+    }
+
+    m_pParent->AttackDone();
+    SetState( BRAINSTATE_SEEK );
     return true;
 }

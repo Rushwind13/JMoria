@@ -55,7 +55,15 @@ Currently `BRAINSTATE_SEEK` with `MON_AI_SEEKPLAYER` always overwrites `m_vTarge
 
 ## Phase 3 — AIMgr Action-Choice Structure
 
-### T6 — Add `BRAINSTATE_ATTACK` and action-choice to `AIMgr.cpp`
+### T6 — Add `BRAINSTATE_ATTACK` and action-choice to `AIMgr.cpp` ✅ COMPLETE
+
+- `BRAINSTATE_ATTACK` added to `eBrainState` enum; `Update()` dispatches to `UpdateAttack()`
+- `BuildEligibleAttacks()`: populates `m_pEligibleAttacks` (non-owning `JLinkList<CAttack>`, terminated and reused each tick); filters by adjacency/LOS/range
+- `ChooseAction()`: weighted random ATTACK/IDLE/MOVE per brain type; redistributes when no eligible attacks
+- `UpdateAttack()`: picks random eligible attack; ranged calls `DoHitEffects(monPos, playerPos)`, melee calls `CollideWithPlayer()`
+- `CEffect::DoHitEffects(JVector vCasterPos, JVector vTargetPos)` overload added so monster-origin attacks supply their own caster position
+
+**Original spec preserved below for reference:**
 
 **Current state:** The state machine has REST, SEEK, GOTODEST, and IDLE. `UpdateSeek()` exclusively sets a movement target and transitions to `BRAINSTATE_GOTODEST`. `MON_AI_DONTMOVE` calls `SetRandomDest()` (sets a random direction; if the player is in that tile, `CollideWithPlayer()` fires normally via `UpdateGoToDest`) — this is correct and unchanged.
 

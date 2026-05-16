@@ -539,9 +539,12 @@ JResult CEffect::HealMonster( JVector vOrigin )
 JResult CEffect::DoHitEffects()
 {
     CPlayer *pPlayer = g_pGame->GetPlayer();
-    JVector vCasterPos = pPlayer->m_vPos;
-    JVector vTargetPos = pPlayer->GetRangedHitPosition();
+    return DoHitEffects( pPlayer->m_vPos, pPlayer->GetRangedHitPosition() );
+}
 
+JResult CEffect::DoHitEffects( JVector vCasterPos, JVector vTargetPos )
+{
+    CPlayer *pPlayer = g_pGame->GetPlayer();
     if( m_dwModifier & EFFECT_MOD_AREA )
         return Area( vCasterPos );
     if( m_dwModifier & EFFECT_MOD_BALL )

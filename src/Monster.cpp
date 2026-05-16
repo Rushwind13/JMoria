@@ -308,6 +308,26 @@ int CMonster::TakeDamage( float fDamage )
     return retval;
 }
 
+// Returns the OR of all EFFECT_FLAG_FIRE/COLD/ELECTRICITY/ACID bits found in this monster's
+// attack effects.  This bitmask represents both the elements the monster uses and the elements
+// it is immune to.  Pass the result to Util::CheckAffinity() to resolve a damage multiplier.
+uint32 CMonster::GetElementFlags() const
+{
+    static const uint32 kElementMask =
+        EFFECT_FLAG_FIRE | EFFECT_FLAG_COLD | EFFECT_FLAG_ELECTRICITY | EFFECT_FLAG_ACID;
+
+    uint32 dwFlags = 0;
+    CLink<CAttack> *pLink = m_md->m_llAttacks->GetHead();
+    while( pLink != NULL )
+    {
+        CAttack *pAtk = pLink->m_lpData;
+        if( pAtk && pAtk->m_pEffect )
+            dwFlags |= ( pAtk->m_pEffect->m_dwFlags & kElementMask );
+        pLink = m_md->m_llAttacks->GetNext( pLink );
+    }
+    return dwFlags;
+}
+
 bool CMonster::IsImmuneToEffect( uint32 dwFlag ) const
 {
     // Table of effect flags that empty-minded creatures are immune to.

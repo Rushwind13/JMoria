@@ -283,8 +283,9 @@ void CAIBrain::CollideWithPlayer()
         if( g_pGame->RecallMonster() && m_pParent->m_md )
         {
             const char *szEffect = ( pAtk && pAtk->m_pEffect ) ? m_pParent->AttackEffect() : "";
-            g_pGame->RecallMonster()->RecordAttackObservation(
-                m_pParent->m_md->m_szName, pAtk ? pAtk->m_dwType : 0, fDamage, szEffect );
+            g_pGame->RecallMonster()->RecordAttackObservation( m_pParent->m_md->m_szName,
+                                                               pAtk ? pAtk->m_dwType : 0, fDamage,
+                                                               szEffect, dwElement );
         }
         m_pParent->AttackDone();
     }

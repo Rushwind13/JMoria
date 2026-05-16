@@ -1890,6 +1890,20 @@ JResult CPlayer::DoElementalHit( CEffect *pEffect )
         fDamage += m_pCurrentRangedAmmo->m_fBonusToDamage;
     }
 
+    // Check monster elemental affinity
+    float fAffinityMult = Util::CheckAffinity( pEffect->m_dwFlags, pMon->GetElementFlags() );
+    if( fAffinityMult == 0.0f )
+    {
+        pMon->m_fCurHP += fDamage;
+        if( pMon->m_fCurHP > pMon->m_fHP )
+            pMon->m_fCurHP = pMon->m_fHP;
+        g_pGame->GetMsgs()->Printf( "The %s shrugs off the attack!\n", szMonName );
+        return JSUCCESS;
+    }
+    fDamage *= fAffinityMult;
+    if( fAffinityMult > 1.0f )
+        g_pGame->GetMsgs()->Printf( "The %s is especially vulnerable!\n", szMonName );
+
     if( DamageMonster( pMon, fDamage ) )
     {
         g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );
@@ -1932,13 +1946,30 @@ JResult CPlayer::DoAreaHit( CEffect *pEffect )
             ( EFFECT_FLAG_FIRE | EFFECT_FLAG_COLD | EFFECT_FLAG_ELECTRICITY | EFFECT_FLAG_ACID ) )
         {
             float fDamage = szAmount ? Util::Roll( szAmount ) : Util::Roll( "1d6" );
-            if( DamageMonster( pMon, fDamage ) )
+            const char *szMonName = pMon->GetName();
+
+            float fAffinityMult =
+                Util::CheckAffinity( pEffect->m_dwFlags, pMon->GetElementFlags() );
+            if( fAffinityMult == 0.0f )
             {
-                g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", pMon->GetName() );
+                pMon->m_fCurHP += fDamage;
+                if( pMon->m_fCurHP > pMon->m_fHP )
+                    pMon->m_fCurHP = pMon->m_fHP;
+                g_pGame->GetMsgs()->Printf( "The %s shrugs off the attack!\n", szMonName );
             }
             else
             {
-                g_pGame->GetMsgs()->Printf( "The %s is hit.\n", pMon->GetName() );
+                fDamage *= fAffinityMult;
+                if( fAffinityMult > 1.0f )
+                    g_pGame->GetMsgs()->Printf( "The %s is especially vulnerable!\n", szMonName );
+                if( DamageMonster( pMon, fDamage ) )
+                {
+                    g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );
+                }
+                else
+                {
+                    g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
+                }
             }
         }
         else
@@ -2006,6 +2037,20 @@ JResult CPlayer::DoBallHit( CEffect *pEffect )
 
         float fDamage = Util::Roll( szAmount );
         const char *szMonName = pMon->GetName();
+
+        float fAffinityMult = Util::CheckAffinity( pEffect->m_dwFlags, pMon->GetElementFlags() );
+        if( fAffinityMult == 0.0f )
+        {
+            pMon->m_fCurHP += fDamage;
+            if( pMon->m_fCurHP > pMon->m_fHP )
+                pMon->m_fCurHP = pMon->m_fHP;
+            g_pGame->GetMsgs()->Printf( "The %s shrugs off the attack!\n", szMonName );
+            nAffected++;
+            continue;
+        }
+        fDamage *= fAffinityMult;
+        if( fAffinityMult > 1.0f )
+            g_pGame->GetMsgs()->Printf( "The %s is especially vulnerable!\n", szMonName );
         if( DamageMonster( pMon, fDamage ) )
         {
             g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );
@@ -2058,6 +2103,22 @@ JResult CPlayer::DoLineHit( CEffect *pEffect )
         g_pGame->GetMsgs()->Printf( "The %s strikes the %s with %s.\n", pEffect->m_ed->m_szName,
                                     szMonName, szEffect );
     }
+
+    // Check monster elemental affinity
+    float fAffinityMult = Util::CheckAffinity( pEffect->m_dwFlags, pMon->GetElementFlags() );
+    if( fAffinityMult == 0.0f )
+    {
+        pMon->m_fCurHP += fDamage;
+        if( pMon->m_fCurHP > pMon->m_fHP )
+            pMon->m_fCurHP = pMon->m_fHP;
+        g_pGame->GetMsgs()->Printf( "The %s shrugs off the attack!\n", szMonName );
+        m_bLastEffectNoticed = true;
+        return JSUCCESS;
+    }
+    fDamage *= fAffinityMult;
+    if( fAffinityMult > 1.0f )
+        g_pGame->GetMsgs()->Printf( "The %s is especially vulnerable!\n", szMonName );
+
     if( DamageMonster( pMon, fDamage ) )
     {
         g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );

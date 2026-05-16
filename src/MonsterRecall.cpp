@@ -213,7 +213,7 @@ void CMonsterRecall::RecordObservation( const char *szName, int dwFlag )
 }
 
 void CMonsterRecall::RecordAttackObservation( const char *szName, int dwType, float fDamage,
-                                              const char *szEffect )
+                                              const char *szEffect, uint32 dwEffectFlags )
 {
     CRecallEntry *pEntry = FindOrCreate( szName );
     if( !pEntry )
@@ -248,6 +248,7 @@ void CMonsterRecall::RecordAttackObservation( const char *szName, int dwType, fl
     atk.dwDamageTotal = iDmg;
     strncpy( atk.szEffect, szEffect ? szEffect : "", RECALL_EFFECT_NAME_LEN - 1 );
     atk.szEffect[RECALL_EFFECT_NAME_LEN - 1] = '\0';
+    atk.dwElementFlags = dwEffectFlags;
 }
 
 const CRecallEntry *CMonsterRecall::GetEntry( const char *szName ) const
@@ -359,6 +360,43 @@ void CMonsterRecall::PrintRecall( const CMonsterDef *pmd, CDisplayText *pDT ) co
             pDT->Printf( "%s", kFlagLabels[i].label );
         }
     }
+
+    // Elemental immunity/weakness — only shown for elements the player has actually observed.
+    if( pEntry->nAttacks > 0 )
+    {
+        uint32 dwMonElements = 0;
+        for( int i = 0; i < pEntry->nAttacks; i++ )
+            dwMonElements |= pEntry->attacks[i].dwElementFlags;
+
+        static const struct
+        {
+            uint32 flag;
+            const char *immuneLabel;
+            const char *weakLabel;
+        } kElems[] = { { EFFECT_FLAG_FIRE, "ImuFire.", "WkFire." },
+                       { EFFECT_FLAG_COLD, "ImuCold.", "WkCold." },
+                       { EFFECT_FLAG_ELECTRICITY, "ImuElec.", "WkElec." },
+                       { EFFECT_FLAG_ACID, "ImuAcid.", "WkAcid." },
+                       { 0, NULL, NULL } };
+
+        for( int i = 0; kElems[i].flag; i++ )
+        {
+            if( dwMonElements & kElems[i].flag )
+            {
+                sep();
+                pDT->Printf( "%s", kElems[i].immuneLabel );
+            }
+        }
+        for( int i = 0; kElems[i].flag; i++ )
+        {
+            if( Util::CheckAffinity( kElems[i].flag, dwMonElements ) > 1.0f )
+            {
+                sep();
+                pDT->Printf( "%s", kElems[i].weakLabel );
+            }
+        }
+    }
+
     if( anyLine2 )
         pDT->Printf( "\n" );
 

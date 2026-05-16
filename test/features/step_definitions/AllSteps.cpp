@@ -7,6 +7,7 @@
 #include "DungeonMapSteps.cpp"
 #include "EffectSteps.cpp"
 #include "ElementalDamageSteps.cpp"
+#include "ElementalImmunitySteps.cpp"
 #include "EquipmentSteps.cpp"
 #include "GameSteps.cpp"
 #include "ItemSteps.cpp"

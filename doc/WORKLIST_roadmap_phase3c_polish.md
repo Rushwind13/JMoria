@@ -36,7 +36,7 @@ Open issues labeled `cleanup` on branch `feat/phase3c_polish`, prioritized by im
 
 ## P3 — Content / Feature Completeness
 
-- **#292** [monsters are immune to their elemental effect](https://github.com/Rushwind13/JMoria/issues/292)
+- **#292** COMPLETE [monsters are immune to their elemental effect](https://github.com/Rushwind13/JMoria/issues/292)
   Red dragons should shrug off firebolts (and ideally be weak to frostbolts). Elemental immunity/weakness table needed.
 
 - **#288** COMPLETE [ITEM_IDX_STAFF implementation](https://github.com/Rushwind13/JMoria/issues/288)

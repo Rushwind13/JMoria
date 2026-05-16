@@ -1,4 +1,3 @@
-#define UNIT_TEST
 #include "TestContext.hpp"
 
 #include "FirstSteps.cpp"

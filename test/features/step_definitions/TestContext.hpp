@@ -1,5 +1,6 @@
 #ifndef __TEST_CONTEXT__
 #define __TEST_CONTEXT__
+#define UNIT_TEST
 #include <gtest/gtest.h>
 
 #include <cucumber-cpp/autodetect.hpp>

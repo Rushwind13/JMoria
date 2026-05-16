@@ -9,7 +9,7 @@ Open issues labeled `cleanup` on branch `feat/phase3c_polish`, prioritized by im
 - **#301** COMPLETE [all weapons add speed](https://github.com/Rushwind13/JMoria/issues/301)
   All melee weapons incorrectly add differing amounts of speed to the player (spear +70, etc.). Bullet-time gameplay is unintended.
 
-- **#294** ["strikes with the EFFECT_FLAG_FIRE"](https://github.com/Rushwind13/JMoria/issues/294)
+- **#294** COMPLETE ["strikes with the EFFECT_FLAG_FIRE"](https://github.com/Rushwind13/JMoria/issues/294)
   `szElement` is printed raw instead of being run through `Element()` lookup. Produces garbage combat messages.
 
 - **#215** [Items visible through walls and closed doors](https://github.com/Rushwind13/JMoria/issues/215)
@@ -32,7 +32,7 @@ Open issues labeled `cleanup` on branch `feat/phase3c_polish`, prioritized by im
 - **#292** [monsters are immune to their elemental effect](https://github.com/Rushwind13/JMoria/issues/292)
   Red dragons should shrug off firebolts (and ideally be weak to frostbolts). Elemental immunity/weakness table needed.
 
-- **#288** [ITEM_IDX_STAFF implementation](https://github.com/Rushwind13/JMoria/issues/288)
+- **#288** COMPLETE [ITEM_IDX_STAFF implementation](https://github.com/Rushwind13/JMoria/issues/288)
   Staves (`Z` keybind) are not yet implemented. Wands may share the same gap.
 
 - **#291** COMPLETE [Rings/amulets need flavors like potions/scrolls/etc.](https://github.com/Rushwind13/JMoria/issues/291)

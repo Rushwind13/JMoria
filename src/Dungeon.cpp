@@ -998,8 +998,9 @@ void CDungeon::UpdateVisibility()
                     continue;
             }
 
-            // +1 because GenerateLine counts the source tile as a step
-            int target_distance = chebyshev + 1;
+            // Manhattan distance + 1: the Bresenham staircase needs dx x-steps
+            // and dy y-steps so the safety cap must be at least dx+dy+1.
+            int target_distance = dx + dy + 1;
 
             if( Util::Bresenham( vPlayer, viCheck, target_distance, SightCollisionTest ) )
             {
@@ -1093,9 +1094,9 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
     // rather than continuing past it into potential walls
     int dx = Util::abs( vTarget.x - vSource.x );
     int dy = Util::abs( vTarget.y - vSource.y );
-    int target_distance = MAX( dx, dy );
-    // +1 because GenerateLine counts the source tile as a step
-    target_distance += 1;
+    // Manhattan distance + 1: the Bresenham staircase needs dx x-steps and
+    // dy y-steps so the safety cap must be at least dx+dy+1.
+    int target_distance = dx + dy + 1;
 
     // No "see through walls" effects are active
     // Check for obstacles along the line between

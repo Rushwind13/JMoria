@@ -11,6 +11,7 @@
 #include "EquipmentSteps.cpp"
 #include "GameSteps.cpp"
 #include "ItemSteps.cpp"
+#include "LOSItemsSteps.cpp"
 #include "LightSteps.cpp"
 #include "MonsterRecallSteps.cpp"
 #include "MonsterSteps.cpp"

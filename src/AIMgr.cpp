@@ -139,12 +139,11 @@ bool CAIBrain::UpdateSeek( float fCurTime )
     // regain sight of the player, then fall through to normal AI.
     if( m_pParent->m_dwActiveEffects2 & EFFECT_FLAG_AGGRAVATE )
     {
-        JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
-        JVector vDiff = m_vPos - m_vTargetPos;
-        bool bReachedTarget = vDiff.Length() <= 1.0f;
-        bool bSeesPlayer = g_pGame->GetDungeon()->CanSeeEachOther(
-            JIVector( (int)m_vPos.x, (int)m_vPos.y ),
-            JIVector( (int)vPlayerPos.x, (int)vPlayerPos.y ) );
+        JIVector vPlayerPos( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+        JIVector vPos( VEC_EXPAND( m_vPos ) );
+        JIVector vTarget( VEC_EXPAND( m_vTargetPos ) );
+        bool bReachedTarget = Util::Taxicab( vPos, vTarget, 1 );
+        bool bSeesPlayer = g_pGame->GetDungeon()->CanSeeEachOther( vPlayerPos, vPos );
         if( bReachedTarget || bSeesPlayer )
         {
             m_pParent->m_dwActiveEffects2 &= ~EFFECT_FLAG_AGGRAVATE;
@@ -440,13 +439,12 @@ void CAIBrain::BuildEligibleAttacks()
     if( !m_pParent || !m_pParent->m_md || !m_pParent->m_md->m_llAttacks )
         return;
 
-    JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
-    JVector vDiff = m_vPos - vPlayerPos;
-    float fDist = vDiff.Length();
-    bool bAdjacent = fDist <= 2.0f; // within 1 tile (including diagonal)
-    bool bInLOS =
-        g_pGame->GetDungeon()->CanSeeEachOther( JIVector( (int)m_vPos.x, (int)m_vPos.y ),
-                                                JIVector( (int)vPlayerPos.x, (int)vPlayerPos.y ) );
+    JIVector vPlayer( VEC_EXPAND( g_pGame->GetPlayer()->m_vPos ) );
+    JIVector vPos( VEC_EXPAND( m_vPos ) );
+
+    bool bAdjacent = Util::Taxicab( vPlayer, vPos, 1 );
+
+    bool bInLOS = g_pGame->GetDungeon()->CanSeeEachOther( vPos, vPlayer );
 
     CLink<CAttack> *pLink = m_pParent->m_md->m_llAttacks->GetHead();
     while( pLink )

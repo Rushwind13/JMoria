@@ -13,19 +13,20 @@
 
 extern unsigned char ItemIDs[];
 
-unsigned char TileIDs[DUNG_IDX_MAX + 1] = ".#+'<<>>:#@";
+unsigned char TileIDs[DUNG_IDX_MAX + 1] = ".#+''<<>>:#@";
 int ModifiedTileTypes[DUNG_IDX_MAX + 1] = {
     DUNG_IDX_INVALID,   // 0  FLOOR: can't modify
     DUNG_IDX_INVALID,   // 1  WALL: can't modify
     DUNG_IDX_OPEN_DOOR, // 2  DOOR: opens
     DUNG_IDX_DOOR,      // 3  OPEN_DOOR: closes
-    DUNG_IDX_INVALID,   // 4  UPSTAIRS: can't modify
-    DUNG_IDX_INVALID,   // 5  LONG_UPSTAIRS: can't modify
-    DUNG_IDX_INVALID,   // 6  DOWNSTAIRS: can't modify
-    DUNG_IDX_INVALID,   // 7  LONG_DOWNSTAIRS: can't modify
-    DUNG_IDX_FLOOR,     // 8  RUBBLE: tunnels to floor
-    DUNG_IDX_DOOR,      // 9  SECRET_DOOR: reveals as closed door
-    DUNG_IDX_INVALID,   // 10 PLAYER: can't modify
+    DUNG_IDX_INVALID,   // 4  BROKEN_DOOR: can't modify
+    DUNG_IDX_INVALID,   // 5  UPSTAIRS: can't modify
+    DUNG_IDX_INVALID,   // 6  LONG_UPSTAIRS: can't modify
+    DUNG_IDX_INVALID,   // 7  DOWNSTAIRS: can't modify
+    DUNG_IDX_INVALID,   // 8  LONG_DOWNSTAIRS: can't modify
+    DUNG_IDX_FLOOR,     // 9  RUBBLE: tunnels to floor
+    DUNG_IDX_DOOR,      // 10 SECRET_DOOR: reveals as closed door
+    DUNG_IDX_INVALID,   // 11 PLAYER: can't modify
 };
 // extern Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH];
 
@@ -57,6 +58,9 @@ void CDungeon::Init( const char *szBasedir )
             break;
         case DUNG_IDX_DOOR:
             m_dtdlist[i].m_Color.SetColor( 64, 32, 128, 255 );
+            break;
+        case DUNG_IDX_BROKEN_DOOR:
+            m_dtdlist[i].m_Color.SetColor( 100, 60, 40, 255 );
             break;
         case DUNG_IDX_OPEN_DOOR:
             m_dtdlist[i].m_Color.SetColor( 192, 192, 192, 255 );
@@ -1215,7 +1219,8 @@ void CDungeon::DrawDungeon()
 
             if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
             {
-                ; // need to display this tile
+                if( curTile == NULL )
+                    continue; // safety: don't crash on out-of-bounds look position
             }
 
             // In CLOCKSTEP mode, show all tiles regardless of visibility
@@ -1230,11 +1235,7 @@ void CDungeon::DrawDungeon()
 
             // Determine tile color based on game state
             bool bRangedBeamTile = false;
-            if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
-            {
-                color = JColor( 100, 0, 100, 255 );
-            }
-            else if( g_pGame->GetGameStateIndex() == STATE_RANGED )
+            if( g_pGame->GetGameStateIndex() == STATE_RANGED )
             {
                 // Set default color for projectiles (white)
                 color = JColor( 255, 255, 255, 255 );
@@ -1279,7 +1280,11 @@ void CDungeon::DrawDungeon()
             if( !bRangedBeamTile )
             {
                 // Normal tile coloring logic (for non-beam tiles or when no multicolor effect)
-                if( g_pGame->GetGameStateIndex() == STATE_RANGED && vScreen == vProjectile )
+                if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
+                {
+                    color = JColor( 100, 0, 100, 255 );
+                }
+                else if( g_pGame->GetGameStateIndex() == STATE_RANGED && vScreen == vProjectile )
                 {
                     color = JColor( 255, 255, 85, 255 );
                     bRangedBeamTile = true; // Draw beam character at current projectile position

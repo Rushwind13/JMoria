@@ -63,24 +63,24 @@
 #define DUNG_IDX_WALL 1
 #define DUNG_IDX_DOOR 2
 #define DUNG_IDX_OPEN_DOOR 3
-#define DUNG_IDX_UPSTAIRS 4
-#define DUNG_IDX_LONG_UPSTAIRS 5
-#define DUNG_IDX_DOWNSTAIRS 6
-#define DUNG_IDX_LONG_DOWNSTAIRS 7
-#define DUNG_IDX_RUBBLE 8
-#define DUNG_IDX_SECRET_DOOR 9
+#define DUNG_IDX_BROKEN_DOOR 4
+#define DUNG_IDX_UPSTAIRS 5
+#define DUNG_IDX_LONG_UPSTAIRS 6
+#define DUNG_IDX_DOWNSTAIRS 7
+#define DUNG_IDX_LONG_DOWNSTAIRS 8
+#define DUNG_IDX_RUBBLE 9
+#define DUNG_IDX_SECRET_DOOR 10
 // JUNK,
-#define DUNG_IDX_PLAYER 10
-#define DUNG_IDX_MAX 11
+#define DUNG_IDX_PLAYER 11
+#define DUNG_IDX_MAX 12
 
 // Dungeon Tile flags
 #define DUNG_FLAG_LIT 0x00000001
 #define DUNG_FLAG_SEEN 0x00000002
 #define DUNG_FLAG_ROOM 0x00000004
 #define DUNG_FLAG_HALL 0x00000008
-
 #define DUNG_FLAG_TRAP 0x00000010
-#define DUNG_FLAG_LOCKED 0x00000020
+#define DUNG_FLAG_LOCKED 0x00000020 // door is spiked or wizard-locked
 #define DUNG_FLAG_VISIBLE 0x00000040
 
 // Door and search chance percentages (1-100)
@@ -89,6 +89,9 @@
 #define CHANCE_FIND_SECRET_BUMP 20
 #define CHANCE_SEARCH_ACTIVE 25
 #define CHANCE_SEARCH_PASSIVE 5
+
+#define DOOR_BASH_NOISE_RADIUS 12.0f
+#define DOOR_OPEN_NOISE_RADIUS 8.0f
 
 #ifdef UNIT_TEST
 #define CHANCE_ARROW_BREAK 0
@@ -207,6 +210,8 @@
 // #define MON_FLAG_x          0x00001000
 // #define MON_FLAG_x          0x00002000
 // #define MON_FLAG_x          0x00004000
+#define MON_FLAG_HANDS 0x00001000 // can open doors non-destructively
+#define MON_FLAG_LARGE 0x00002000 // large/heavy enough to bash through doors
 #define MON_FLAG_BREED 0x00008000
 
 #define MON_FLAG_INVISIBLE 0x00100000
@@ -224,7 +229,7 @@
 // #define MON_COLOR_x          0x40000000
 // #define MON_COLOR_x          0x80000000
 
-#define NUM_MON_FLAGS 21
+#define NUM_MON_FLAGS 23
 
 // Effect Flags
 #define EFFECT_FLAG_FIRE 0x00000001
@@ -527,6 +532,8 @@ public:
         m_StringTable[i++].Init( "MON_FLAG_REGENERATE", MON_FLAG_REGENERATE );
         m_StringTable[i++].Init( "MON_FLAG_HURT_BY_LIGHT", MON_FLAG_HURT_BY_LIGHT );
         m_StringTable[i++].Init( "MON_FLAG_BREED", MON_FLAG_BREED );
+        m_StringTable[i++].Init( "MON_FLAG_HANDS", MON_FLAG_HANDS );
+        m_StringTable[i++].Init( "MON_FLAG_LARGE", MON_FLAG_LARGE );
         m_StringTable[i++].Init( "MON_FLAG_INVISIBLE", MON_FLAG_INVISIBLE );
         m_StringTable[i++].Init( "MON_FLAG_NEVER_SLEEP", MON_FLAG_NEVER_SLEEP );
         m_StringTable[i++].Init( "MON_FLAG_MAXHP", MON_FLAG_MAXHP );

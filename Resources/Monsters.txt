@@ -393,7 +393,7 @@ Monster <Adult White Dragon>
     Level       18
     ExpValue	250.0
     Type		<MON_IDX_DRAGON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
@@ -444,7 +444,7 @@ Monster <White Dragon>
     Level		25
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
-    Flags       <MON_FLAG_WARM>
+    Flags       <MON_FLAG_WARM,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
@@ -462,7 +462,7 @@ Monster <Adult Black Dragon>
     Level       28
     ExpValue	280.0
     Type		<MON_IDX_DRAGON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
@@ -529,7 +529,7 @@ Monster <Black Dragon>
     Level		35
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
-    Flags       <MON_FLAG_WARM>
+    Flags       <MON_FLAG_WARM,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d6
@@ -547,7 +547,7 @@ Monster <Adult Green Dragon>
     Level       38
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
@@ -582,7 +582,7 @@ Monster <Green Dragon>
     Level		45
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
-    Flags       <MON_FLAG_WARM>
+    Flags       <MON_FLAG_WARM,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d10
@@ -618,7 +618,7 @@ Monster <Adult Blue Dragon>
     Level       48
     ExpValue	350.0
     Type		<MON_IDX_DRAGON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d10
@@ -636,7 +636,7 @@ Monster <Adult Red Dragon>
     Level       55
     ExpValue	400.0
     Type		<MON_IDX_DRAGON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
@@ -653,7 +653,7 @@ Monster <Blue Dragon>
     Level		55
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
-    Flags       <MON_FLAG_WARM>
+    Flags       <MON_FLAG_WARM,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
@@ -670,7 +670,7 @@ Monster <Red Dragon>
     Level		65
     ExpValue	300.0
     Type		<MON_IDX_DRAGON>
-    Flags       <MON_FLAG_WARM>
+    Flags       <MON_FLAG_WARM,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d10
@@ -691,7 +691,7 @@ Monster <5-Headed Hydra>
     Level       40
     ExpValue	400.0
     Type		<MON_IDX_HYDRA>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_LARGE>
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
@@ -710,7 +710,7 @@ Monster <7-Headed Hydra>
     Level       56
     ExpValue	800.0
     Type		<MON_IDX_HYDRA>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_LARGE>
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
@@ -731,7 +731,7 @@ Monster <11-Headed Hydra>
     Level       78
     ExpValue	3000.0
     Type		<MON_IDX_HYDRA>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_LARGE>
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
@@ -1179,7 +1179,7 @@ Monster <Hobgoblin>
     Level       8
     ExpValue	15.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Color		<140,100,60,255>
 }
@@ -1194,7 +1194,7 @@ Monster <Hobgoblin Warrior>
     Level       10
     ExpValue	22.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Color		<150,110,65,255>
@@ -1210,7 +1210,7 @@ Monster <Gnoll>
     Level       12
     ExpValue	30.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d4
     Color		<160,120,60,255>
@@ -1226,7 +1226,7 @@ Monster <Hobgoblin Shaman>
     Level       13
     ExpValue	30.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_SPORE>, <Fire Touch>, 2d4
     Color		<170,120,55,255>
@@ -1242,7 +1242,7 @@ Monster <Dark Elven Warrior>
     Level       15
     ExpValue	60.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Color		<100,0,140,255>
@@ -1258,7 +1258,7 @@ Monster <Hobgoblin Chieftain>
     Level       16
     ExpValue	50.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Color		<180,130,60,255>
@@ -1274,7 +1274,7 @@ Monster <Bugbear>
     Level       18
     ExpValue	65.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<120,80,40,255>
@@ -1290,7 +1290,7 @@ Monster <Gnoll Warrior>
     Level       18
     ExpValue	45.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<165,125,62,255>
@@ -1306,7 +1306,7 @@ Monster <Gnoll Shaman>
     Level       22
     ExpValue	60.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_SPORE>, <Poison Touch>, 2d4
     Color		<175,135,55,255>
@@ -1322,7 +1322,7 @@ Monster <Bugbear Warrior>
     Level       24
     ExpValue	80.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d8
     Color		<130,85,42,255>
@@ -1338,7 +1338,7 @@ Monster <Gnoll Chieftain>
     Level       26
     ExpValue	90.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
@@ -1355,7 +1355,7 @@ Monster <Bugbear Shaman>
     Level       28
     ExpValue	100.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_SPORE>, <Cold Touch>, 2d6
     Color		<140,90,44,255>
@@ -1404,7 +1404,7 @@ Monster <Bugbear Chieftain>
     Level       32
     ExpValue	140.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
@@ -1421,7 +1421,7 @@ Monster <Dark Elven Priest>
     Level       35
     ExpValue	350.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_SPORE>, <Cold Touch>, 3d6
     Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d10
@@ -1438,7 +1438,7 @@ Monster <Dark Elven Ranger>
     Level       40
     ExpValue	400.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Color		<90,0,140,255>
@@ -1454,7 +1454,7 @@ Monster <Dark Elven Lord>
     Level       50
     ExpValue	800.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_SPORE>, <Cold Touch>, 4d6
@@ -1471,7 +1471,7 @@ Monster <Mind Flayer>
     Level       72
     ExpValue	2000.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d20
     Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 1d15
@@ -1488,7 +1488,7 @@ Monster <Elder Mind Flayer>
     Level       80
     ExpValue	5000.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 2d20
     Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 2d15
@@ -1506,7 +1506,7 @@ Monster <Mind Flayer Lich>
     Level       92
     ExpValue	10000.0
     Type		<MON_IDX_HUMANOID>
-    Flags		<MON_FLAG_REGENERATE,MON_FLAG_EMPTY_MIND>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_EMPTY_MIND,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 3d20
     Attack             <MON_FLAG_TOUCH>, <Confusion Touch>, 3d15
@@ -1682,7 +1682,7 @@ Monster <Small Kobold>
     Level       1
     ExpValue	2.0
     Type		<MON_IDX_KOBOLD>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d2
     Color		<150,150,150,255>
 }
@@ -1697,7 +1697,7 @@ Monster <Kobold>
     Level		2
     ExpValue	10.0
     Type		<MON_IDX_KOBOLD>
-    Flags       <MON_FLAG_WARM>
+    Flags       <MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d4
     Color		<170,170,170,255>
 }
@@ -1712,7 +1712,7 @@ Monster <Kobold Warrior>
     Level       4
     ExpValue	8.0
     Type		<MON_IDX_KOBOLD>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d6
     Color		<139,90,43,255>
 }
@@ -1727,7 +1727,7 @@ Monster <Kobold Shaman>
     Level       5
     ExpValue	20.0
     Type		<MON_IDX_KOBOLD>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d3
     Attack             <MON_FLAG_SPORE>, <Fire Touch>, 1d4
     Color		<128,0,128,255>
@@ -1743,7 +1743,7 @@ Monster <Kobold Chieftain>
     Level       8
     ExpValue	25.0
     Type		<MON_IDX_KOBOLD>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d4
     Color		<180,120,60,255>
@@ -1925,7 +1925,7 @@ Monster <Goblin>
     Level       5
     ExpValue	10.0
     Type		<MON_IDX_ORC>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Color		<60,100,40,255>
 }
@@ -1940,7 +1940,7 @@ Monster <Goblin Warrior>
     Level       8
     ExpValue	18.0
     Type		<MON_IDX_ORC>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d4
     Color		<55,95,35,255>
@@ -1956,7 +1956,7 @@ Monster <Goblin Shaman>
     Level       10
     ExpValue	24.0
     Type		<MON_IDX_ORC>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_SPORE>, <Poison Touch>, 1d6
     Color		<50,90,30,255>
@@ -1972,7 +1972,7 @@ Monster <Skaven>
     Level       11
     ExpValue	25.0
     Type		<MON_IDX_ORC>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Color		<100,100,80,255>
 }
@@ -1987,7 +1987,7 @@ Monster <Goblin Chieftain>
     Level       14
     ExpValue	40.0
     Type		<MON_IDX_ORC>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Color		<65,105,42,255>
@@ -2003,7 +2003,7 @@ Monster <Orc>
     Level       15
     ExpValue	50.0
     Type		<MON_IDX_ORC>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Color		<80,120,40,255>
 }
@@ -2018,7 +2018,7 @@ Monster <Cave Orc>
     Level       18
     ExpValue	60.0
     Type		<MON_IDX_ORC>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d4
     Color		<70,90,50,255>
@@ -2034,7 +2034,7 @@ Monster <Uruk-hai>
     Level       20
     ExpValue	120.0
     Type		<MON_IDX_ORC>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<50,80,30,255>
@@ -2050,7 +2050,7 @@ Monster <Hill Orc>
     Level       22
     ExpValue	80.0
     Type		<MON_IDX_ORC>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Color		<90,100,40,255>
@@ -2066,7 +2066,7 @@ Monster <Orc Shaman>
     Level       25
     ExpValue	160.0
     Type		<MON_IDX_ORC>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_SPORE>, <Fire Touch>, 2d6
     Color		<80,40,80,255>
@@ -2082,7 +2082,7 @@ Monster <Black Orc>
     Level       30
     ExpValue	150.0
     Type		<MON_IDX_ORC>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Color		<30,30,30,255>
@@ -2098,7 +2098,7 @@ Monster <Orc Captain>
     Level       35
     ExpValue	200.0
     Type		<MON_IDX_ORC>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
@@ -2115,7 +2115,7 @@ Monster <Orc Chieftain>
     Level       66
     ExpValue	1200.0
     Type		<MON_IDX_ORC>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
@@ -2135,7 +2135,7 @@ Monster <Novice Paladin>
     Level       5
     ExpValue	6.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_SPORE>, <Light Touch>, 1d2
     Color		<220,220,150,255>
@@ -2151,7 +2151,7 @@ Monster <Novice Ranger>
     Level       5
     ExpValue	6.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Color		<40,80,40,255>
 }
@@ -2166,7 +2166,7 @@ Monster <Novice Warrior>
     Level       5
     ExpValue	6.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Color		<130,130,130,255>
 }
@@ -2181,7 +2181,7 @@ Monster <Deacon>
     Level       8
     ExpValue	14.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_SPORE>, <Light Touch>, 1d4
     Color		<240,240,180,255>
@@ -2197,7 +2197,7 @@ Monster <Scout>
     Level       10
     ExpValue	18.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Color		<30,70,30,255>
@@ -2213,7 +2213,7 @@ Monster <Acolyte>
     Level       12
     ExpValue	25.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_SPORE>, <Light Touch>, 1d4
     Color		<255,255,200,255>
@@ -2229,7 +2229,7 @@ Monster <Apprentice Mage>
     Level       15
     ExpValue	30.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_SPORE>, <Fire Touch>, 1d6
     Color		<0,0,200,255>
@@ -2245,7 +2245,7 @@ Monster <Paladin>
     Level       18
     ExpValue	90.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_SPORE>, <Light Touch>, 2d4
     Color		<200,200,100,255>
@@ -2261,7 +2261,7 @@ Monster <Warrior>
     Level       20
     ExpValue	70.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Color		<160,160,160,255>
@@ -2277,7 +2277,7 @@ Monster <Knight>
     Level       23
     ExpValue	120.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Color		<190,190,190,255>
@@ -2293,7 +2293,7 @@ Monster <Ranger>
     Level       25
     ExpValue	80.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Color		<0,100,0,255>
@@ -2309,7 +2309,7 @@ Monster <Rogue>
     Level       33
     ExpValue	200.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Color		<40,40,40,255>
@@ -2325,7 +2325,7 @@ Monster <Cutpurse>
     Level       36
     ExpValue	220.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Color		<50,50,50,255>
@@ -2341,7 +2341,7 @@ Monster <Veteran Warrior>
     Level       38
     ExpValue	250.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Color		<180,180,180,255>
@@ -2357,7 +2357,7 @@ Monster <Mage>
     Level       40
     ExpValue	350.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_SPORE>, <Fire Touch>, 3d8
     Attack             <MON_FLAG_SPORE>, <Cold Touch>, 3d8
@@ -2374,7 +2374,7 @@ Monster <Bandit>
     Level       43
     ExpValue	400.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Color		<70,70,70,255>
@@ -2390,7 +2390,7 @@ Monster <Priest>
     Level       47
     ExpValue	450.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
     Attack             <MON_FLAG_SPORE>, <Fire Touch>, 2d8
     Color		<255,255,200,255>
@@ -2406,7 +2406,7 @@ Monster <Master Ranger>
     Level       48
     ExpValue	500.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Color		<0,80,0,255>
@@ -2422,7 +2422,7 @@ Monster <Wizard>
     Level       50
     ExpValue	600.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_SPORE>, <Fire Touch>, 4d8
     Attack             <MON_FLAG_SPORE>, <Cold Touch>, 4d8
@@ -2439,7 +2439,7 @@ Monster <Paladin Lord>
     Level       52
     ExpValue	700.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_SPORE>, <Light Touch>, 3d6
@@ -2456,7 +2456,7 @@ Monster <Champion>
     Level       55
     ExpValue	700.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Color		<200,200,200,255>
@@ -2472,7 +2472,7 @@ Monster <Bandit King>
     Level       60
     ExpValue	1200.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_BITE>, <Poison Touch>, 2d6
@@ -2489,7 +2489,7 @@ Monster <High Priest>
     Level       65
     ExpValue	1000.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
     Attack             <MON_FLAG_SPORE>, <Light Touch>, 4d6
     Attack             <MON_FLAG_SPORE>, <Fire Touch>, 3d6
@@ -2506,7 +2506,7 @@ Monster <Archmage>
     Level       72
     ExpValue	2000.0
     Type		<MON_IDX_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
     Attack             <MON_FLAG_SPORE>, <Fire Touch>, 5d8
     Attack             <MON_FLAG_SPORE>, <Cold Touch>, 5d8
@@ -2606,7 +2606,7 @@ Monster <Kobold Skeleton>
     Level       5
     ExpValue	6.0
     Type		<MON_IDX_SKELETON>
-    Flags		<MON_FLAG_EMPTY_MIND>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d4
     Color		<200,200,200,255>
 }
@@ -2621,7 +2621,7 @@ Monster <Cursed Skeleton>
     Level       10
     ExpValue	150.0
     Type		<MON_IDX_SKELETON>
-    Flags		<MON_FLAG_EMPTY_MIND>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_TOUCH>, <Fear Touch>, 1d10
     Color		<192,192,192,255>
@@ -2637,7 +2637,7 @@ Monster <Orc Skeleton>
     Level       10
     ExpValue	20.0
     Type		<MON_IDX_SKELETON>
-    Flags		<MON_FLAG_EMPTY_MIND>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d4
     Color		<200,200,200,255>
 }
@@ -2652,7 +2652,7 @@ Monster <Yendi Skeleton>
     Level       12
     ExpValue	25.0
     Type		<MON_IDX_SKELETON>
-    Flags		<MON_FLAG_EMPTY_MIND>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HANDS>
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
     Color		<200,200,200,255>
 }
@@ -2667,7 +2667,7 @@ Monster <Human Skeleton>
     Level       16
     ExpValue	40.0
     Type		<MON_IDX_SKELETON>
-    Flags		<MON_FLAG_EMPTY_MIND>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d6
     Color		<220,220,220,255>
 }
@@ -2682,7 +2682,7 @@ Monster <Elf Skeleton>
     Level       22
     ExpValue	70.0
     Type		<MON_IDX_SKELETON>
-    Flags		<MON_FLAG_EMPTY_MIND>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d8
     Color		<230,230,230,255>
 }
@@ -2697,7 +2697,7 @@ Monster <Troll Skeleton>
     Level       28
     ExpValue	120.0
     Type		<MON_IDX_SKELETON>
-    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_REGENERATE>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_REGENERATE,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Color		<180,180,180,255>
@@ -2732,7 +2732,7 @@ Monster <Quasit>
     Level       12
     ExpValue	18.0
     Type		<MON_IDX_MINOR_DEMON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_BITE>, <Fire Touch>, 1d4
     Color		<220,80,80,255>
@@ -2748,7 +2748,7 @@ Monster <Lesser Demon>
     Level       36
     ExpValue	300.0
     Type		<MON_IDX_MINOR_DEMON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_BITE>, <Fire Touch>, 2d6
@@ -2765,7 +2765,7 @@ Monster <Imp>
     Level       43
     ExpValue	200.0
     Type		<MON_IDX_MINOR_DEMON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Attack             <MON_FLAG_BITE>, <Fire Touch>, 1d8
     Color		<255,80,0,255>
@@ -2898,7 +2898,7 @@ Monster <Purple Worm>
     Level       80
     ExpValue	3000.0
     Type		<MON_IDX_WORM>
-    Flags		<MON_FLAG_EMPTY_MIND>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_LARGE>
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 5d10
     Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 4d8
     Color		<128,0,255,255>
@@ -2964,7 +2964,7 @@ Monster <Giant Creotha>
     Level       38
     ExpValue	300.0
     Type		<MON_IDX_SPIDER>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_LARGE>
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 2d8
     Color		<0,0,0,255>
@@ -3001,7 +3001,7 @@ Monster <Yeek>
     Level       2
     ExpValue	2.0
     Type		<MON_IDX_YEEK>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d3
     Color		<200,150,80,255>
 }
@@ -3016,7 +3016,7 @@ Monster <Blue Yeek>
     Level       5
     ExpValue	8.0
     Type		<MON_IDX_YEEK>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Color		<0,0,255,255>
 }
@@ -3031,7 +3031,7 @@ Monster <Master Yeek>
     Level       19
     ExpValue	50.0
     Type		<MON_IDX_YEEK>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Color		<255,200,0,255>
@@ -3050,7 +3050,7 @@ Monster <Kobold Zombie>
     Level       3
     ExpValue	5.0
     Type		<MON_IDX_ZOMBIE>
-    Flags		<MON_FLAG_EMPTY_MIND>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d3
     Color		<128,140,100,255>
 }
@@ -3065,7 +3065,7 @@ Monster <Orc Zombie>
     Level       7
     ExpValue	20.0
     Type		<MON_IDX_ZOMBIE>
-    Flags		<MON_FLAG_EMPTY_MIND>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Color		<100,120,80,255>
 }
@@ -3080,7 +3080,7 @@ Monster <Human Zombie>
     Level       20
     ExpValue	60.0
     Type		<MON_IDX_ZOMBIE>
-    Flags		<MON_FLAG_EMPTY_MIND>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<140,130,100,255>
@@ -3096,7 +3096,7 @@ Monster <Mummified Orc>
     Level       27
     ExpValue	100.0
     Type		<MON_IDX_ZOMBIE>
-    Flags		<MON_FLAG_EMPTY_MIND>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
     Attack             <MON_FLAG_TOUCH>, <Fear Touch>, 1d10
     Color		<180,160,100,255>
@@ -3112,7 +3112,7 @@ Monster <Troll Zombie>
     Level       36
     ExpValue	250.0
     Type		<MON_IDX_ZOMBIE>
-    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_REGENERATE>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_REGENERATE,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Color		<80,100,60,255>
@@ -3128,7 +3128,7 @@ Monster <Zombie Dragon>
     Level       58
     ExpValue	800.0
     Type		<MON_IDX_ZOMBIE>
-    Flags		<MON_FLAG_EMPTY_MIND>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d8
@@ -3181,7 +3181,7 @@ Monster <Balrog>
     Level       98
     ExpValue	15000.0
     Type		<MON_IDX_BALROG>
-    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP, MON_FLAG_NEVER_SLEEP>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP, MON_FLAG_NEVER_SLEEP,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d10
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d10
     Attack             <MON_FLAG_BITE>, <Fire Touch>, 5d10
@@ -3325,7 +3325,7 @@ Monster <Ancient White Dragon>
     Level       70
     ExpValue	1500.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP, MON_FLAG_NEVER_SLEEP>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP, MON_FLAG_NEVER_SLEEP,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
@@ -3343,7 +3343,7 @@ Monster <Ancient Black Dragon>
     Level       75
     ExpValue	2000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP, MON_FLAG_NEVER_SLEEP>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP, MON_FLAG_NEVER_SLEEP,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d6
@@ -3361,7 +3361,7 @@ Monster <Ancient Green Dragon>
     Level       78
     ExpValue	2500.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP, MON_FLAG_NEVER_SLEEP>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP, MON_FLAG_NEVER_SLEEP,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d10
@@ -3379,7 +3379,7 @@ Monster <Ancient Blue Dragon>
     Level       82
     ExpValue	3000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP, MON_FLAG_NEVER_SLEEP>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP, MON_FLAG_NEVER_SLEEP,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d8
@@ -3397,7 +3397,7 @@ Monster <Ancient Red Dragon>
     Level       85
     ExpValue	4000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP, MON_FLAG_NEVER_SLEEP>
+    Flags		<MON_FLAG_WARM, MON_FLAG_MAXHP, MON_FLAG_NEVER_SLEEP,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 4d10
@@ -3415,7 +3415,7 @@ Monster <Ancient Multi-hued Dragon>
     Level		88
     ExpValue	9000.0
     Type		<MON_IDX_ANCIENT_DRAGON>
-    Flags       <MON_FLAG_WARM, MON_FLAG_MAXHP, MON_FLAG_NEVER_SLEEP>
+    Flags       <MON_FLAG_WARM, MON_FLAG_MAXHP, MON_FLAG_NEVER_SLEEP,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d4
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
@@ -3440,7 +3440,7 @@ Monster <Brontosaurus>
     Level       40
     ExpValue	100.0
     Type		<MON_IDX_DINOSAUR>
-    Flags       <MON_FLAG_WARM>
+    Flags       <MON_FLAG_WARM,MON_FLAG_LARGE>
     Attack             <MON_FLAG_TRAMPLE>, <Physical Hit>, 3d6
     Color		<0,81,4,255>
 }
@@ -3455,7 +3455,7 @@ Monster <Tyrannosaurus Rex>
     Level       50
     ExpValue	100.0
     Type		<MON_IDX_DINOSAUR>
-    Flags       <MON_FLAG_WARM>
+    Flags       <MON_FLAG_WARM,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 5d8
@@ -3639,7 +3639,7 @@ Monster <Ghoul>
     Level       13
     ExpValue	50.0
     Type		<MON_IDX_GHOUL>
-    Flags		<MON_FLAG_EMPTY_MIND>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 1d6
     Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d10
     Color		<150,150,170,255>
@@ -3655,7 +3655,7 @@ Monster <Ghast>
     Level       21
     ExpValue	120.0
     Type		<MON_IDX_GHOUL>
-    Flags		<MON_FLAG_EMPTY_MIND>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d15
@@ -3713,7 +3713,7 @@ Monster <White Harpy>
     Level       20
     ExpValue	100.0
     Type		<MON_IDX_HARPY>
-    Flags       <MON_FLAG_WARM>
+    Flags       <MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Color		<255,255,255,255>
 }
@@ -3728,7 +3728,7 @@ Monster <Green Harpy>
     Level       24
     ExpValue	140.0
     Type		<MON_IDX_HARPY>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Color		<12,255,0,255>
@@ -3744,7 +3744,7 @@ Monster <Black Harpy>
     Level       38
     ExpValue	250.0
     Type		<MON_IDX_HARPY>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d6
@@ -3986,7 +3986,7 @@ Monster <Lich>
     Level       50
     ExpValue	600.0
     Type		<MON_IDX_LICH>
-    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 3d8
     Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d15
     Color		<200,200,220,255>
@@ -4002,7 +4002,7 @@ Monster <Greater Lich>
     Level       64
     ExpValue	1200.0
     Type		<MON_IDX_LICH>
-    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 4d8
     Attack             <MON_FLAG_SPORE>, <Fire Touch>, 4d8
     Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d20
@@ -4019,7 +4019,7 @@ Monster <Master Lich>
     Level       76
     ExpValue	2500.0
     Type		<MON_IDX_LICH>
-    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 5d8
     Attack             <MON_FLAG_SPORE>, <Fire Touch>, 5d8
     Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d25
@@ -4036,7 +4036,7 @@ Monster <Emperor Lich>
     Level       92
     ExpValue	8000.0
     Type		<MON_IDX_LICH>
-    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 6d8
     Attack             <MON_FLAG_SPORE>, <Fire Touch>, 6d8
     Attack             <MON_FLAG_SPORE>, <Cold Touch>, 6d8
@@ -4262,7 +4262,7 @@ Monster <Ogre>
     Level       17
     ExpValue	80.0
     Type		<MON_IDX_OGRE>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Color		<139,119,101,255>
 }
@@ -4277,7 +4277,7 @@ Monster <Ogre Mage>
     Level       37
     ExpValue	350.0
     Type		<MON_IDX_OGRE>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_SPORE>, <Cold Touch>, 3d6
     Color		<100,80,140,255>
@@ -4293,7 +4293,7 @@ Monster <Ogre Chieftain>
     Level       66
     ExpValue	1000.0
     Type		<MON_IDX_OGRE>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Color		<120,100,80,255>
@@ -4312,7 +4312,7 @@ Monster <Hill Giant>
     Level       32
     ExpValue	250.0
     Type		<MON_IDX_GIANT>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d6
     Color		<139,119,101,255>
 }
@@ -4327,7 +4327,7 @@ Monster <Stone Giant>
     Level       38
     ExpValue	400.0
     Type		<MON_IDX_GIANT>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_TRAMPLE>, <Physical Hit>, 2d8
     Color		<128,128,128,255>
@@ -4343,7 +4343,7 @@ Monster <Frost Giant>
     Level       44
     ExpValue	500.0
     Type		<MON_IDX_GIANT>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_BREATHE>, <Frost Ball>, 3d8, 6
@@ -4360,7 +4360,7 @@ Monster <Fire Giant>
     Level       50
     ExpValue	600.0
     Type		<MON_IDX_GIANT>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_BREATHE>, <Fireball>, 4d8, 6
@@ -4377,7 +4377,7 @@ Monster <Cloud Giant>
     Level       56
     ExpValue	800.0
     Type		<MON_IDX_GIANT>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_BREATHE>, <Lightning Ball>, 4d8, 5
@@ -4394,7 +4394,7 @@ Monster <Storm Giant>
     Level       62
     ExpValue	1200.0
     Type		<MON_IDX_GIANT>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d10
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d10
     Attack             <MON_FLAG_BREATHE>, <Lightning Ball>, 6d8, 5
@@ -4411,7 +4411,7 @@ Monster <Ettin>
     Level       66
     ExpValue	1200.0
     Type		<MON_IDX_GIANT>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
@@ -4429,7 +4429,7 @@ Monster <Titan>
     Level       84
     ExpValue	5000.0
     Type		<MON_IDX_GIANT>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 5d10
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 5d10
     Attack             <MON_FLAG_BREATHE>, <Lightning Ball>, 8d8, 5
@@ -4511,7 +4511,7 @@ Monster <Yendi>
     Level       25
     ExpValue	80.0
     Type		<MON_IDX_L_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 2d4
     Color		<0,128,0,255>
@@ -4577,7 +4577,7 @@ Monster <Phoenix Guard>
     Level       50
     ExpValue	500.0
     Type		<MON_IDX_L_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d6
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 3d6
     Color		<255,140,0,255>
@@ -4593,7 +4593,7 @@ Monster <Guard Captain>
     Level       60
     ExpValue	800.0
     Type		<MON_IDX_L_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d6
     Attack             <MON_FLAG_TOUCH>, <Fire Touch>, 2d6
@@ -4610,7 +4610,7 @@ Monster <Lavode>
     Level       75
     ExpValue	1500.0
     Type		<MON_IDX_L_PERSON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 5d8
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 3d8
@@ -4690,7 +4690,7 @@ Monster <Lizardman>
     Level       26
     ExpValue	100.0
     Type		<MON_IDX_REPTILE>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d8
     Color		<0,120,60,255>
@@ -4740,7 +4740,7 @@ Monster <Giant Yendi>
     Level		2
     ExpValue	3.0
     Type		<MON_IDX_SNAKE>
-    Flags       <MON_FLAG_WARM>
+    Flags       <MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<198,142,0,255>
 }
@@ -4754,7 +4754,7 @@ Monster <Poison Yendi>
     Level       16
     ExpValue	60.0
     Type		<MON_IDX_SNAKE>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d8
     Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 2d4
     Color		<0,180,0,255>
@@ -4769,7 +4769,7 @@ Monster <King Yendi>
     Level       37
     ExpValue	250.0
     Type		<MON_IDX_SNAKE>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_TOUCH>, <Poison Touch>, 3d6
     Color		<0,120,0,255>
@@ -4788,7 +4788,7 @@ Monster <Troll>
     Level       12
     ExpValue	35.0
     Type		<MON_IDX_TROLL>
-    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d6
     Color		<0,128,0,255>
@@ -4804,7 +4804,7 @@ Monster <Hill Troll>
     Level       16
     ExpValue	100.0
     Type		<MON_IDX_TROLL>
-    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 1d8
     Color		<34,139,34,255>
@@ -4820,7 +4820,7 @@ Monster <Ice Troll>
     Level       20
     ExpValue	80.0
     Type		<MON_IDX_TROLL>
-    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Cold Touch>, 2d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d4
     Color		<173,216,230,255>
@@ -4836,7 +4836,7 @@ Monster <Stone Troll>
     Level       23
     ExpValue	180.0
     Type		<MON_IDX_TROLL>
-    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_TRAMPLE>, <Physical Hit>, 2d8
     Color		<128,128,128,255>
@@ -4852,7 +4852,7 @@ Monster <Troll Berserker>
     Level       25
     ExpValue	210.0
     Type		<MON_IDX_TROLL>
-    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_TRAMPLE>, <Physical Hit>, 2d10
     Color		<34,139,34,255>
@@ -4868,7 +4868,7 @@ Monster <War Troll>
     Level       30
     ExpValue	300.0
     Type		<MON_IDX_TROLL>
-    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
@@ -4885,7 +4885,7 @@ Monster <Fire Troll>
     Level       35
     ExpValue	200.0
     Type		<MON_IDX_TROLL>
-    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Fire Touch>, 3d6
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
     Color		<255,69,0,255>
@@ -4901,7 +4901,7 @@ Monster <Troll Shaman>
     Level       41
     ExpValue	400.0
     Type		<MON_IDX_TROLL>
-    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
     Attack             <MON_FLAG_SPORE>, <Fire Touch>, 3d8
     Color		<34,100,34,255>
@@ -4917,7 +4917,7 @@ Monster <Olog-hai>
     Level       68
     ExpValue	1500.0
     Type		<MON_IDX_TROLL>
-    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM>
+    Flags		<MON_FLAG_REGENERATE,MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 3d8
@@ -4937,7 +4937,7 @@ Monster <Greater Demon>
     Level       52
     ExpValue	700.0
     Type		<MON_IDX_MAJOR_DEMON>
-    Flags		<MON_FLAG_WARM,MON_FLAG_NEVER_SLEEP>
+    Flags		<MON_FLAG_WARM,MON_FLAG_NEVER_SLEEP,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_BITE>, <Fire Touch>, 3d8
@@ -4954,7 +4954,7 @@ Monster <Demon Lord>
     Level       70
     ExpValue	2000.0
     Type		<MON_IDX_MAJOR_DEMON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_BITE>, <Fire Touch>, 4d8
@@ -4972,7 +4972,7 @@ Monster <Greater Demon Lord>
     Level       86
     ExpValue	6000.0
     Type		<MON_IDX_MAJOR_DEMON>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 5d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 5d8
     Attack             <MON_FLAG_BITE>, <Fire Touch>, 5d8
@@ -4993,7 +4993,7 @@ Monster <Vampire>
     Level       35
     ExpValue	350.0
     Type		<MON_IDX_VAMPIRE>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_BITE>, <XP Drain Touch>, 2d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d4
     Color		<150,0,0,255>
@@ -5009,7 +5009,7 @@ Monster <Greater Vampire>
     Level       48
     ExpValue	600.0
     Type		<MON_IDX_VAMPIRE>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_BITE>, <XP Drain Touch>, 3d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
@@ -5026,7 +5026,7 @@ Monster <Master Vampire>
     Level       60
     ExpValue	1000.0
     Type		<MON_IDX_VAMPIRE>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_BITE>, <XP Drain Touch>, 4d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d6
@@ -5044,7 +5044,7 @@ Monster <Lordly Vampire>
     Level       72
     ExpValue	1800.0
     Type		<MON_IDX_VAMPIRE>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_BITE>, <XP Drain Touch>, 4d10
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 3d8
@@ -5062,7 +5062,7 @@ Monster <Emperor Vampire>
     Level       90
     ExpValue	5000.0
     Type		<MON_IDX_VAMPIRE>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_BITE>, <XP Drain Touch>, 5d10
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
@@ -5083,7 +5083,7 @@ Monster <Wight>
     Level       29
     ExpValue	200.0
     Type		<MON_IDX_WIGHT>
-    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d6
     Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 2d6
     Attack             <MON_FLAG_TOUCH>, <XP Drain Touch>, 1d4
@@ -5103,7 +5103,7 @@ Monster <Wraith>
     Level       42
     ExpValue	450.0
     Type		<MON_IDX_WRAITH>
-    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 3d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
     Attack             <MON_FLAG_TOUCH>, <XP Drain Touch>, 1d6
@@ -5120,7 +5120,7 @@ Monster <Spectre>
     Level       68
     ExpValue	1500.0
     Type		<MON_IDX_WRAITH>
-    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 4d8
     Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 4d8
     Attack             <MON_FLAG_TOUCH>, <Paralysis Touch>, 1d20
@@ -5138,7 +5138,7 @@ Monster <Emperor Wraith>
     Level       88
     ExpValue	4000.0
     Type		<MON_IDX_WRAITH>
-    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_HURT_BY_LIGHT,MON_FLAG_HANDS>
     Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 5d8
     Attack             <MON_FLAG_TOUCH>, <Cold Touch>, 5d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
@@ -5181,7 +5181,7 @@ Monster <Yeti>
     Level       34
     ExpValue	200.0
     Type		<MON_IDX_YETI>
-    Flags		<MON_FLAG_WARM>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 2d8
     Attack             <MON_FLAG_BREATHE>, <Frost Bolt>, 2d8, 8

@@ -1,6 +1,6 @@
 # WORKLIST: Monsters Can Open Doors (Issue #297)
 
-**Status**: Not started
+**Status**: In Progress (H✅ A✅ B✅ C✅ — D, F, E, G remaining)
 **Related Issue**: [#297 — Monsters can open doors](https://github.com/Rushwind13/JMoria/issues/297)
 **Repo**: `Rushwind13/JMoria`
 **Branch**: `feat/phase3c_polish`

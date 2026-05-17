@@ -127,6 +127,9 @@ protected:
         }
 
         // Use "roguelike" directional keybinds
+        // Ctrl+letter is never directional (e.g. ^n = name character, not SE move)
+        if( keysym->mod & JMOD_CTRL )
+            return false;
         char sym = GetAlpha( keysym );
         if( sym == NULL )
             return false;

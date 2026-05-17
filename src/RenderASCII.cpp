@@ -226,6 +226,14 @@ bool CRenderASCII::PollEvent( JInputEvent &event )
         case ';':
             event.keysym.sym = JKEY_SEMICOLON;
             break;
+        case ':': // Shift+;: look command
+            event.keysym.sym = JKEY_SEMICOLON;
+            event.keysym.mod = JMOD_SHIFT;
+            break;
+        case '@': // Shift+2: character stats toggle
+            event.keysym.sym = JKEY_2;
+            event.keysym.mod = JMOD_SHIFT;
+            break;
         case '*': // Shift+8: target command
             event.keysym.sym = JKEY_8;
             event.keysym.mod = JMOD_SHIFT;

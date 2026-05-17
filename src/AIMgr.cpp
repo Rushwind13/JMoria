@@ -285,8 +285,78 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
         case DUNG_COLL_PLAYER:
             CollideWithPlayer();
             break;
+        case DUNG_IDX_DOOR:
+        {
+            CDungeonTile *pDoorTile = g_pGame->GetDungeon()->GetTile( vTryPos );
+            bool bLocked = pDoorTile && pDoorTile->HasFlags( DUNG_FLAG_LOCKED );
+            bool bHasHands = m_pParent->m_md && ( m_pParent->m_md->m_dwFlags & MON_FLAG_HANDS );
+            bool bIsLarge = m_pParent->m_md && ( m_pParent->m_md->m_dwFlags & MON_FLAG_LARGE );
+
+            JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
+            JVector vDiff = vTryPos - vPlayerPos;
+            bool bPlayerNearby =
+                vDiff.Length() <= ( DOOR_OPEN_NOISE_RADIUS * DOOR_OPEN_NOISE_RADIUS );
+
+            if( bIsLarge )
+            {
+                // Large monsters bash through any door (locked or not)
+                pDoorTile->m_dtd = g_pGame->GetDungeon()->GetTileDef( DUNG_IDX_BROKEN_DOOR );
+                pDoorTile->UnsetFlags( DUNG_FLAG_LOCKED );
+                uint8 nRadius = (uint8)DOOR_BASH_NOISE_RADIUS;
+                JIVector vCenter( (int)vTryPos.x, (int)vTryPos.y );
+                CLink<CMonster> *pML = g_pGame->GetDungeon()->m_llMonsters->GetHead();
+                while( pML )
+                {
+                    CMonster *pMon = pML->m_lpData;
+                    pML = g_pGame->GetDungeon()->m_llMonsters->GetNext( pML );
+                    if( !pMon || pMon == m_pParent )
+                        continue;
+                    JIVector vMonPos( (int)pMon->GetPos().x, (int)pMon->GetPos().y );
+                    if( !Util::WithinRadius( vCenter, vMonPos, nRadius ) )
+                        continue;
+                    pMon->m_dwActiveEffects &= ~EFFECT_FLAG_SLEEP;
+                    pMon->m_dwActiveEffects2 |= EFFECT_FLAG_AGGRAVATE;
+                    pMon->m_pBrain->SetTargetPos( vTryPos );
+                    pMon->m_pBrain->SetState( BRAINSTATE_SEEK );
+                }
+                g_pGame->GetDungeon()->DisturbPlayer();
+                if( bPlayerNearby )
+                    g_pGame->GetMsgs()->Printf( "You hear a door smash open.\n" );
+                Move();
+            }
+            else if( bHasHands && !bLocked )
+            {
+                // Handed monsters open unlocked doors
+                g_pGame->GetDungeon()->Modify( vTryPos );
+                uint8 nRadius = (uint8)DOOR_OPEN_NOISE_RADIUS;
+                JIVector vCenter( VEC_EXPAND( vTryPos ) );
+                CLink<CMonster> *pML = g_pGame->GetDungeon()->m_llMonsters->GetHead();
+                while( pML )
+                {
+                    CMonster *pMon = pML->m_lpData;
+                    pML = g_pGame->GetDungeon()->m_llMonsters->GetNext( pML );
+                    if( !pMon || pMon == m_pParent )
+                        continue;
+                    JIVector vMonPos( VEC_EXPAND( pMon->GetPos() ) );
+                    if( !Util::WithinRadius( vCenter, vMonPos, nRadius ) )
+                        continue;
+                    pMon->m_dwActiveEffects &= ~EFFECT_FLAG_SLEEP;
+                    pMon->m_dwActiveEffects2 |= EFFECT_FLAG_AGGRAVATE;
+                    pMon->m_pBrain->SetTargetPos( vTryPos );
+                    pMon->m_pBrain->SetState( BRAINSTATE_SEEK );
+                }
+                if( bPlayerNearby )
+                    g_pGame->GetMsgs()->Printf( "You hear a door creak open.\n" );
+                Move();
+            }
+            else
+            {
+                JLog( LOG_LEVEL_NOISE, true, "it hits a %d ", dwCollideType );
+            }
+            break;
+        }
         default:
-            JLog( LOG_LEVEL_NOISE, true, "you hit %d ", dwCollideType );
+            JLog( LOG_LEVEL_NOISE, true, "it hits a %d ", dwCollideType );
             break;
         }
     }

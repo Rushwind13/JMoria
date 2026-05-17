@@ -10,7 +10,7 @@ c - close
 T - tunnel
 i - show inventory
 e - show equipment
-C - show stats
+@ - show stats
 v - show visible monsters
 V - show monster recall panel
 ( - show item recall panel
@@ -29,7 +29,7 @@ r - read a scroll
 z - zap a wand (aimed — targets a specific tile or monster)
 Z - use a staff (no targeting — affects the player or the surrounding area)
 F - fill/fuel a light source
-N - set character name
+^n - set character name
 p - purchase something in a store
 s - search
 g - get/pickup

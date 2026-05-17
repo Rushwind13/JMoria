@@ -328,8 +328,8 @@ bool CCmdState::IsStringInputCommand( JKeysym *keysym )
 {
     switch( keysym->sym )
     {
-    case JKEY_n: // name your character
-        if( keysym->mod & JMOD_SHIFT )
+    case JKEY_n: // name your character (^n)
+        if( keysym->mod & JMOD_CTRL )
         {
             return true;
         }
@@ -592,7 +592,7 @@ bool CCmdState::IsToggleCommand( JKeysym *keysym )
         g_pGame->ToggleEquip();
         return true;
     }
-    if( keysym->sym == JKEY_c && ( keysym->mod & JMOD_SHIFT ) )
+    if( keysym->sym == JKEY_2 && ( keysym->mod & JMOD_SHIFT ) )
     {
         g_pGame->ToggleStats();
         return true;

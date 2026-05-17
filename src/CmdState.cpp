@@ -273,6 +273,13 @@ bool CCmdState::IsModifierNeeded( JKeysym *keysym )
             return true;
         }
         break;
+        // S (Shift+s = spike door; plain s = search, handled separately)
+    case JKEY_s:
+        if( keysym->mod & JMOD_SHIFT && !( keysym->mod & JMOD_CTRL ) )
+        {
+            return true;
+        }
+        break;
     default:
         return false;
         break;

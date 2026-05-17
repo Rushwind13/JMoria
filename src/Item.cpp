@@ -333,7 +333,7 @@ void CItem::SetColor()
     m_fColorChangeInterval = 0.0f;
 }
 
-unsigned char ItemIDs[ITEM_IDX_MAX + 1] = "|)[](]]\"=~{}{}&?!-_?$~//\\/|/|]!";
+unsigned char ItemIDs[ITEM_IDX_MAX + 1] = "|)[](]]\"=~{}{}&?!-_?$~//\\/|/|]!;";
 const int EquipTypes[ITEM_IDX_MAX + 1] = {
     EQUIP_IDX_MAIN_HAND, EQUIP_IDX_OFF_HAND,  EQUIP_IDX_ARMOR,     EQUIP_IDX_HELMET,
     EQUIP_IDX_CLOAK,     EQUIP_IDX_GLOVES,    EQUIP_IDX_BOOTS,     EQUIP_IDX_AMULET,
@@ -342,7 +342,7 @@ const int EquipTypes[ITEM_IDX_MAX + 1] = {
     EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,
     EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,   EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND,
     EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND,
-    EQUIP_IDX_MAIN_HAND, EQUIP_IDX_BELT,      EQUIP_IDX_INVALID };
+    EQUIP_IDX_MAIN_HAND, EQUIP_IDX_BELT,      EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID };
 
 // Item weakness table — one entry per ITEM_IDX_* value.
 // Stores EFFECT_FLAG_* elements the item type is weak against.
@@ -411,6 +411,8 @@ const uint32 kItemVuln[ITEM_IDX_MAX] = {
     EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
     // ITEM_IDX_FUEL        30: fuel system handles this
     0,
+    // ITEM_IDX_SPIKE       31: metal
+    EFFECT_FLAG_ACID,
 };
 
 int CItem::EquipType()

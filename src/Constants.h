@@ -378,7 +378,8 @@
 #define ITEM_IDX_2H_SWORD 28
 #define ITEM_IDX_BELT 29
 #define ITEM_IDX_FUEL 30
-#define ITEM_IDX_MAX 31
+#define ITEM_IDX_SPIKE 31
+#define ITEM_IDX_MAX 32
 
 // TODO: Might need to switch from "ITEM/MONSTER"
 //       to "types of harm" / "types of aid"
@@ -668,6 +669,7 @@ public:
         m_StringTable[i++].Init( "ITEM_IDX_SHOVEL", ITEM_IDX_SHOVEL );
         m_StringTable[i++].Init( "ITEM_IDX_BELT", ITEM_IDX_BELT );
         m_StringTable[i++].Init( "ITEM_IDX_FUEL", ITEM_IDX_FUEL );
+        m_StringTable[i++].Init( "ITEM_IDX_SPIKE", ITEM_IDX_SPIKE );
 
         // Item flags
         m_StringTable[i++].Init( "ITEM_FLAG_CURSED", ITEM_FLAG_CURSED );

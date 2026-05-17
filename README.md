@@ -47,7 +47,8 @@ JMoria supports three build configurations:
 * *r* - read a scroll
 * *z* - zap a wand
 * *F* - fill/fuel a light source
-* *s* - search
+* *S* - spike a door shut (requires iron spike in inventory)
+* *s* - search for secret doors and traps
 * *.* - rest one turn
 * *R* - rest until at full health, or until disturbed
 

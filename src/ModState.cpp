@@ -6,6 +6,7 @@
 #include "JMDefs.h"
 
 #include "Dungeon.h"
+#include "Item.h"
 #include "Player.h"
 
 extern CGame *g_pGame;
@@ -16,6 +17,7 @@ CModState::CModState() : m_cCommand( 0 ), m_vNewPos( 0, 0 )
     m_pKeyHandlers[MOD_TUNNEL] = &CModState::OnHandleTunnel;
     m_pKeyHandlers[MOD_INIT] = &CModState::OnHandleInit;
     m_pKeyHandlers[MOD_CLOSE] = &CModState::OnHandleClose;
+    m_pKeyHandlers[MOD_SPIKE] = &CModState::OnHandleSpike;
 
     m_eCurModifier = MOD_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -63,7 +65,16 @@ int CModState::OnHandleOpen( JKeysym *keysym )
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "I do not see anything to open there.\n" );
+        CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vNewPos );
+        if( pTile && pTile->m_dtd->m_dwType == DUNG_IDX_DOOR &&
+            pTile->HasFlags( DUNG_FLAG_LOCKED ) )
+        {
+            g_pGame->GetMsgs()->Printf( "The door is held fast.\n" );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "I do not see anything to open there.\n" );
+        }
     }
 
     JLog( LOG_LEVEL_DEBUG, true,
@@ -179,6 +190,18 @@ int CModState::OnHandleInit( JKeysym *keysym )
         case JKEY_c:
             mod = MOD_CLOSE;
             break;
+        case JKEY_s:
+            if( keysym->mod & JMOD_SHIFT )
+            {
+                mod = MOD_SPIKE;
+            }
+            else
+            {
+                JLog( LOG_LEVEL_INFO, true, "SEARCH not handled here.\n" );
+                ResetToState( STATE_COMMAND );
+                return 0;
+            }
+            break;
         case JKEY_t:
             if( keysym->mod & JMOD_SHIFT )
             {
@@ -279,4 +302,108 @@ bool CModState::DoClose()
         return true;
     }
     return false;
+}
+
+//// Spike commands
+int CModState::OnHandleSpike( JKeysym *keysym )
+{
+    int retval;
+    JLog( LOG_LEVEL_DEBUG, true, "Handling SPIKE modifier\n" );
+    retval = OnBaseHandleKey( keysym );
+
+    if( retval == JRESETSTATE )
+    {
+        return 0;
+    }
+
+    if( retval != JSUCCESS )
+    {
+        g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
+        return 0;
+    }
+
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vNewPos );
+    if( !pTile || pTile->m_dtd->m_dwType != DUNG_IDX_DOOR )
+    {
+        g_pGame->GetMsgs()->Printf( "I do not see a closed door there.\n" );
+    }
+    else if( pTile->HasFlags( DUNG_FLAG_LOCKED ) )
+    {
+        // Already spiked — pull it free
+        if( DoUnspike() )
+        {
+            g_pGame->GetMsgs()->Printf( "You pull the spike free.\n" );
+        }
+    }
+    else
+    {
+        // Spike the door shut
+        if( TestSpike() )
+        {
+            if( DoSpike() )
+            {
+                g_pGame->GetMsgs()->Printf( "You spike the door shut.\n" );
+            }
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "You have no iron spikes.\n" );
+        }
+    }
+
+    ResetToState( STATE_COMMAND );
+    return 0;
+}
+
+bool CModState::TestSpike()
+{
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vNewPos );
+    if( !pTile || pTile->m_dtd->m_dwType != DUNG_IDX_DOOR )
+        return false;
+    if( pTile->HasFlags( DUNG_FLAG_LOCKED ) )
+        return false;
+    CLink<CItem> *pSpike = g_pGame->GetPlayer()->m_llInventory->GetLink( ITEM_IDX_SPIKE );
+    return ( pSpike != nullptr && pSpike->m_lpData != nullptr );
+}
+
+bool CModState::DoSpike()
+{
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vNewPos );
+    if( !pTile )
+        return false;
+    pTile->SetFlags( DUNG_FLAG_LOCKED );
+    CLink<CItem> *pSpike = g_pGame->GetPlayer()->m_llInventory->GetLink( ITEM_IDX_SPIKE );
+    g_pGame->GetPlayer()->ConsumeItem( pSpike );
+    return true;
+}
+
+bool CModState::DoUnspike()
+{
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vNewPos );
+    if( !pTile )
+        return false;
+    pTile->UnsetFlags( DUNG_FLAG_LOCKED );
+    // Return the spike to inventory
+    CLink<CItem> *pExisting = g_pGame->GetPlayer()->m_llInventory->GetLink( ITEM_IDX_SPIKE );
+    if( pExisting && pExisting->m_lpData )
+    {
+        pExisting->m_lpData->m_dwCount++;
+    }
+    else
+    {
+        // Find the spike item def and create a new stack
+        CLink<CItemDef> *pDefLink = g_pGame->GetDungeon()->GetItemDefs()->GetHead();
+        while( pDefLink )
+        {
+            if( pDefLink->m_lpData && pDefLink->m_lpData->m_dwIndex == ITEM_IDX_SPIKE )
+            {
+                CItem *pItem = new CItem;
+                pItem->Init( pDefLink->m_lpData );
+                pItem->m_pllLink = g_pGame->GetPlayer()->m_llInventory->Add( pItem );
+                break;
+            }
+            pDefLink = pDefLink->next;
+        }
+    }
+    return true;
 }

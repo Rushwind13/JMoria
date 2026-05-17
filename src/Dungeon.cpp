@@ -1644,7 +1644,9 @@ bool CDungeon::IsOpenable( JVector &vPos )
         }
         return false;
     }
-    return ( curTile->m_dtd->m_dwType == DUNG_IDX_DOOR );
+    if( curTile->m_dtd->m_dwType == DUNG_IDX_DOOR )
+        return !curTile->HasFlags( DUNG_FLAG_LOCKED );
+    return false;
 }
 
 bool CDungeon::IsTunnelable( JVector &vPos )

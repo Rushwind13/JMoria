@@ -835,6 +835,19 @@ Duration    7500.0
 Color        <225,225,50,255>
 }
 
+# --- Spikes ---
+
+Item <Iron Spike>
+{
+Plural      <Iron Spikes>
+Type        <ITEM_IDX_SPIKE>
+Value       1.0
+Level       1
+Weight      0.5
+Color       <160,160,160,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+
 # --- Fuel ---
 
 Item <Flask of Oil>

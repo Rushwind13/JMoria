@@ -31,6 +31,7 @@ Z - use a staff (no targeting — affects the player or the surrounding area)
 F - fill/fuel a light source
 ^n - set character name
 p - purchase something in a store
+S - spike a door shut (requires iron spike in inventory)
 s - search
 g - get/pickup
 ^c - exit game

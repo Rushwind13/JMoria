@@ -12,6 +12,7 @@ enum eModModifier
     MOD_TUNNEL = 1,
     MOD_INIT,
     MOD_CLOSE,
+    MOD_SPIKE,
     MOD_MAX
 };
 
@@ -43,6 +44,7 @@ private:
     int OnHandleOpen( JKeysym *keysym );
     int OnHandleTunnel( JKeysym *keysym );
     int OnHandleClose( JKeysym *keysym );
+    int OnHandleSpike( JKeysym *keysym );
     int OnHandleInit( JKeysym *keysym );
 
     bool TestOpen();
@@ -53,6 +55,10 @@ private:
 
     bool TestClose();
     bool DoClose();
+
+    bool TestSpike();
+    bool DoSpike();
+    bool DoUnspike();
 
     void ResetToState( int newstate );
 };

@@ -11,7 +11,7 @@ Open issues labeled `cleanup` on branch `feat/phase3c_polish`, prioritized by im
 
 ---
 
-## P1 — Bug Fixes (gameplay-breaking or visually wrong)
+## P1 — Bug Fixes (gameplay-breaking or visually wrong) COMPLETE 2026-05-16
 
 - **#301** COMPLETE [all weapons add speed](https://github.com/Rushwind13/JMoria/issues/301)
   All melee weapons incorrectly add differing amounts of speed to the player (spear +70, etc.). Bullet-time gameplay is unintended.
@@ -19,7 +19,7 @@ Open issues labeled `cleanup` on branch `feat/phase3c_polish`, prioritized by im
 - **#294** COMPLETE ["strikes with the EFFECT_FLAG_FIRE"](https://github.com/Rushwind13/JMoria/issues/294)
   `szElement` is printed raw instead of being run through `Element()` lookup. Produces garbage combat messages.
 
-- **#215** [Items visible through walls and closed doors](https://github.com/Rushwind13/JMoria/issues/215)
+- **#215** COMPLETE [Items visible through walls and closed doors](https://github.com/Rushwind13/JMoria/issues/215)
   Items render without LOS checks, leaking map information to the player and the bot.
 
 ---

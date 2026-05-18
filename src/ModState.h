@@ -23,7 +23,6 @@ class CModState : public CStateBase
 public:
 protected:
     char m_cCommand;
-    JVector m_vNewPos;
 
 private:
     // Member Functions
@@ -34,9 +33,13 @@ public:
     virtual void OnUpdate( float fCurTime ) {}
     virtual int OnBaseHandleKey( JKeysym *keysym );
     virtual int OnHandleKey( JKeysym *keysym );
-
+#ifdef UNIT_TEST
+public:
+#else
 protected:
 private:
+#endif // UNIT_TEST
+    JVector m_vNewPos;
     ModKeyHandler m_pKeyHandlers[MOD_MAX];
     ModKeyHandler m_pCurKeyHandler;
 

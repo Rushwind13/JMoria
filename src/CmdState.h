@@ -20,8 +20,11 @@ public:
 
 protected:
     virtual int OnHandleKey( JKeysym *keysym );
-
+#ifdef UNIT_TEST
+public:
+#else
 private:
+#endif // UNIT_TEST
     bool IsModifierNeeded( JKeysym *keysym );
     bool IsUseCommand( JKeysym *keysym );
     bool IsStairsCommand( JKeysym *keysym );

@@ -53,7 +53,7 @@ Open issues labeled `cleanup` on branch `feat/phase3c_polish`, prioritized by im
   Foundational sleep system: spawn chance, stealth interaction, Sleep spell, waking on attack, 4× damage bonus.
   *Prerequisite for #269 and #297.*
 
-- **#297** [Monsters can open doors](https://github.com/Rushwind13/JMoria/issues/297)
+- **#297** COMPLETE [Monsters can open doors](https://github.com/Rushwind13/JMoria/issues/297)
   Monsters with hands open closed doors; large/heavy monsters bash through locked/spiked doors. New items: iron spikes. New spell: Wizard Lock.
   *Depends on sleep system for full behavior (#296).*
 

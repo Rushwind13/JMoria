@@ -123,6 +123,11 @@ public:
     JResult Probe( JVector vOrigin );
     JResult HealMonster( JVector vOrigin );
     JResult Aggravate( JVector vOrigin );
+    JResult LockDoor( JVector vOrigin );
+
+    // Fire a named effect from the loaded definitions at a given origin.
+    // Stack-allocated; no heap allocation or memory leak.
+    static JResult Fire( const char *szEffectName, JVector vOrigin );
 
     // Top-level dispatch — called once per effect in the effect list.
     JResult Dispatch( float fDuration, int dwItemFlags );

@@ -302,23 +302,7 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
                 // Large monsters bash through any door (locked or not)
                 pDoorTile->m_dtd = g_pGame->GetDungeon()->GetTileDef( DUNG_IDX_BROKEN_DOOR );
                 pDoorTile->UnsetFlags( DUNG_FLAG_LOCKED );
-                uint8 nRadius = (uint8)DOOR_BASH_NOISE_RADIUS;
-                JIVector vCenter( (int)vTryPos.x, (int)vTryPos.y );
-                CLink<CMonster> *pML = g_pGame->GetDungeon()->m_llMonsters->GetHead();
-                while( pML )
-                {
-                    CMonster *pMon = pML->m_lpData;
-                    pML = g_pGame->GetDungeon()->m_llMonsters->GetNext( pML );
-                    if( !pMon || pMon == m_pParent )
-                        continue;
-                    JIVector vMonPos( (int)pMon->GetPos().x, (int)pMon->GetPos().y );
-                    if( !Util::WithinRadius( vCenter, vMonPos, nRadius ) )
-                        continue;
-                    pMon->m_dwActiveEffects &= ~EFFECT_FLAG_SLEEP;
-                    pMon->m_dwActiveEffects2 |= EFFECT_FLAG_AGGRAVATE;
-                    pMon->m_pBrain->SetTargetPos( vTryPos );
-                    pMon->m_pBrain->SetState( BRAINSTATE_SEEK );
-                }
+                g_pGame->GetDungeon()->Aggravate( vTryPos );
                 g_pGame->GetDungeon()->DisturbPlayer();
                 if( bPlayerNearby )
                     g_pGame->GetMsgs()->Printf( "You hear a door smash open.\n" );
@@ -328,23 +312,7 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
             {
                 // Handed monsters open unlocked doors
                 g_pGame->GetDungeon()->Modify( vTryPos );
-                uint8 nRadius = (uint8)DOOR_OPEN_NOISE_RADIUS;
-                JIVector vCenter( VEC_EXPAND( vTryPos ) );
-                CLink<CMonster> *pML = g_pGame->GetDungeon()->m_llMonsters->GetHead();
-                while( pML )
-                {
-                    CMonster *pMon = pML->m_lpData;
-                    pML = g_pGame->GetDungeon()->m_llMonsters->GetNext( pML );
-                    if( !pMon || pMon == m_pParent )
-                        continue;
-                    JIVector vMonPos( VEC_EXPAND( pMon->GetPos() ) );
-                    if( !Util::WithinRadius( vCenter, vMonPos, nRadius ) )
-                        continue;
-                    pMon->m_dwActiveEffects &= ~EFFECT_FLAG_SLEEP;
-                    pMon->m_dwActiveEffects2 |= EFFECT_FLAG_AGGRAVATE;
-                    pMon->m_pBrain->SetTargetPos( vTryPos );
-                    pMon->m_pBrain->SetState( BRAINSTATE_SEEK );
-                }
+                g_pGame->GetDungeon()->Aggravate( vTryPos );
                 if( bPlayerNearby )
                     g_pGame->GetMsgs()->Printf( "You hear a door creak open.\n" );
                 Move();

@@ -846,6 +846,7 @@ Level       1
 Weight      0.5
 Color       <160,160,160,255>
 Flags       <ITEM_FLAG_STACKS>
+Effect      <Lock Door>
 }
 
 # --- Fuel ---
@@ -1151,6 +1152,17 @@ Value       5.0
 Level       2
 Weight      0.2
 Color       <255,100,100,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Scroll of Wizard Lock>
+{
+Plural      <Scrolls of Wizard Lock>
+Type        <ITEM_IDX_SCROLL>
+Effect      <Lock Door>
+Value       80.0
+Level       5
+Weight      0.2
+Color       <180,180,255,255>
 Flags       <ITEM_FLAG_STACKS>
 }
 
@@ -1669,6 +1681,18 @@ Value       10.0
 Level       5
 Weight      4.0
 Color       <255,100,100,255>
+Flags       <ITEM_FLAG_STACKS>
+}
+Item <Wand of Wizard Lock>
+{
+Plural      <Wands of Wizard Lock>
+Type        <ITEM_IDX_WAND>
+Effect      <Lock Door>
+Charges     <2d4>
+Value       200.0
+Level       10
+Weight      4.0
+Color       <180,180,255,255>
 Flags       <ITEM_FLAG_STACKS>
 }
 

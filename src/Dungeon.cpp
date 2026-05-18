@@ -7,6 +7,7 @@
 // TODO: this is for the collision defines; should move those someplace more useful --Jimbo
 #include "CmdState.h"
 #include "DisplayText.h"
+#include "Effect.h"
 #include "FileParse.h"
 #include "Player.h"
 #include "RenderBase.h"
@@ -1807,3 +1808,23 @@ void CDungeon::Drop( CItem *pItem, JVector &vDropPos )
     pItem->m_vPos = vFinalPos;
     pItem->m_pllLink = m_llItems->Add( pItem, pItem->m_id->m_dwIndex, pItem->GetInstanceId() );
 }
+
+bool CDungeon::LockDoor( JVector pos )
+{
+    CDungeonTile *pTile = GetTile( pos );
+    if( !pTile || !pTile->m_dtd || pTile->m_dtd->m_dwType != DUNG_IDX_DOOR )
+        return false;
+    pTile->SetFlags( DUNG_FLAG_LOCKED );
+    return true;
+}
+
+bool CDungeon::UnlockDoor( JVector pos )
+{
+    CDungeonTile *pTile = GetTile( pos );
+    if( !pTile || !pTile->m_dtd || pTile->m_dtd->m_dwType != DUNG_IDX_DOOR )
+        return false;
+    pTile->UnsetFlags( DUNG_FLAG_LOCKED );
+    return true;
+}
+
+void CDungeon::Aggravate( JVector vOrigin ) { CEffect::Fire( "Aggravate Monsters", vOrigin ); }

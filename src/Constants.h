@@ -110,7 +110,6 @@
 
 // UI / Display constants
 #define MSGS_ROWS 5 // height of the Messages pane in text rows (8px each)
-// #define DUNG_FLAG_x  0x00000080
 
 // Dungeon Flags
 #ifdef FIXED_DUNGEON
@@ -283,9 +282,9 @@
 #define EFFECT_FLAG_CURSE 0x00000010
 #define EFFECT_FLAG_SEARCH 0x00000020
 #define EFFECT_FLAG_AGGRAVATE 0x00000040
-// #define EFFECT_FLAG_x 0x00000080
+#define EFFECT_FLAG_LOCK 0x00000080 // door is spiked or wizard-locked
 
-#define NUM_EFFECT_FLAGS2 7
+#define NUM_EFFECT_FLAGS2 8
 
 // Effect Modifiers
 #define EFFECT_MOD_RESIST 0x000000001
@@ -594,6 +593,7 @@ public:
         m_StringTable[i++].Init( "EFFECT_FLAG_CURSE", EFFECT_FLAG_CURSE, EFFECT_FLAG2 );
         m_StringTable[i++].Init( "EFFECT_FLAG_SEARCH", EFFECT_FLAG_SEARCH, EFFECT_FLAG2 );
         m_StringTable[i++].Init( "EFFECT_FLAG_AGGRAVATE", EFFECT_FLAG_AGGRAVATE, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG_LOCK", EFFECT_FLAG_LOCK, EFFECT_FLAG2 );
 
         // Effect Modifiers
         m_StringTable[i++].Init( "EFFECT_MOD_RESIST", EFFECT_MOD_RESIST );

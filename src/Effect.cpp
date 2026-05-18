@@ -555,6 +555,8 @@ JResult CEffect::DoHitEffects( JVector vCasterPos, JVector vTargetPos )
     // Word-2 flags dispatch before word-1 flag switch.
     if( HasFlag( "EFFECT_FLAG_AGGRAVATE" ) )
         return Aggravate( vCasterPos );
+    if( m_dwFlags2 & EFFECT_FLAG_LOCK )
+        return LockDoor( vTargetPos );
 
     switch( m_dwFlags )
     {
@@ -698,4 +700,36 @@ JResult CEffect::Aggravate( JVector vOrigin )
     }
 
     return JSUCCESS;
+}
+
+JResult CEffect::LockDoor( JVector vOrigin )
+{
+    // Direct target (wand/spike): lock the specific door tile.
+    if( !g_pGame->GetDungeon()->LockDoor( vOrigin ) )
+    {
+        g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+        return JSUCCESS;
+    }
+    g_pGame->GetMsgs()->Printf( "The door clicks shut.\n" );
+    g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
+    return JSUCCESS;
+}
+
+/*static*/ JResult CEffect::Fire( const char *szEffectName, JVector vOrigin )
+{
+    CEffectDef *pDef = g_pGame->GetDungeon()->GetEffectDef( szEffectName );
+    if( !pDef )
+    {
+        JLog( LOG_LEVEL_ERROR, true, "CEffect::Fire: unknown effect '%s'\n", szEffectName );
+        return JSUCCESS;
+    }
+    CEffect fx;
+    fx.m_ed = pDef;
+    fx.m_dwEffect = pDef->m_dwEffect;
+    fx.m_dwFlags = pDef->m_dwFlags;
+    fx.m_dwFlags2 = pDef->m_dwFlags2;
+    fx.m_dwModifier = pDef->m_dwModifier;
+    fx.SetAmount( pDef->m_szAmount );
+    fx.m_fDuration = pDef->m_fDuration;
+    return fx.DoHitEffects( vOrigin, vOrigin );
 }

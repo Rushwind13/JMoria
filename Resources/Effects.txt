@@ -864,3 +864,12 @@ Effect <Detect Monsters>
     Type        <EFFECT_TYPE_SEE>
     Flag        <EFFECT_FLAG_MONSTERS>
 }
+
+# --- LOCK - door manipulation ---
+
+Effect <Lock Door>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag2       <EFFECT_FLAG_LOCK>
+    Range       1
+}

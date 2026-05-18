@@ -1,6 +1,6 @@
 # WORKLIST: Monsters Can Open Doors (Issue #297)
 
-**Status**: In Progress (H✅ A✅ B✅ C✅ — D, F, E, G remaining)
+**Status**: In Progress (H✅ A✅ B✅ C✅ D✅ E✅ F✅ — G remaining)
 **Related Issue**: [#297 — Monsters can open doors](https://github.com/Rushwind13/JMoria/issues/297)
 **Repo**: `Rushwind13/JMoria`
 **Branch**: `feat/phase3c_polish`
@@ -15,7 +15,7 @@
 Three interlocking mechanics:
 1. **Monsters with hands** — open closed doors as part of pathfinding (non-destructive).
 2. **Large/heavy monsters** — bash through any door (closed, spiked, wizard-locked) → leaves a "broken door" tile; wakes/aggravates nearby monsters.
-3. **Player door tools** — player can spike doors shut (`s` command with iron spikes), bash doors (`C` command), and cast Wizard Lock.
+3. **Player door tools** — player can spike doors shut (`S` command with iron spikes), bash doors (`O` command), and cast Wizard Lock.
 
 Prerequisite #296 (monster sleep system) is complete.
 
@@ -102,37 +102,33 @@ Changes in [src/AIMgr.cpp](../src/AIMgr.cpp) `CAIBrain::WalkSeek()`:
 
 ## E — New Spell: Wizard Lock
 
-- [ ] **Effects.txt** — Add `Wizard Lock` effect entry:
-  - `Type`: targeted tile (door in direction).
-  - Marks tile as `EFFECT_FLAG_LOCK` (via door-state mechanism from section A).
+- [x] **Effects.txt** — Added `Lock Door` effect entry (`EFFECT_FLAG_LOCK`, `EFFECT_TYPE_HIT`, Range 1).
   - Only `MON_FLAG_LARGE` monsters (or dispel magic) can bypass it.
 
-- [ ] **Scroll and Wand** — Decide delivery mechanism:
+- [x] **Scroll and Wand** — Both added to Items.txt referencing the `Lock Door` effect:
   - `Scroll of Wizard Lock` (single-use, scroll type).
   - `Wand of Wizard Lock` (single target, wand type).
-  - Add entries to Items.txt referencing the effect.
 
-- [ ] **Effect handler** in [src/Effect.cpp](../src/Effect.cpp):
-  - On cast: require target tile is `DUNG_IDX_DOOR`; apply `EFFECT_FLAG_LOCK` flag.
+- [x] **Effect handler** in [src/Effect.cpp](../src/Effect.cpp) — `CEffect::LockDoor()`:
+  - Scroll (self-target): locks all adjacent unlocked doors.
+  - Wand/direct: locks the specific targeted door.
+  - Both call `CDungeon::LockDoor()` which sets `DUNG_FLAG_LOCKED` on the tile.
   - Print: *"The door glows briefly and clicks shut."*
-  - On monster approach: `MON_FLAG_LARGE` eventually bashes through (same as spiked); others blocked.
+  - `EFFECT_FLAG_LOCK` also added to `Constants.h` word-2 flags and string table.
+  - `CEffect::Fire(name, origin)` static helper added for named-effect dispatch.
 
 ---
 
 ## F — Player Door Bashing
 
-- [ ] **Player command: `C)bash door`** — In [src/CmdState.cpp](../src/CmdState.cpp):
-  - Keybind `C` (Shift+c, direction required). Mnemonic: `c` = close gently, `C` = close *really* hard = bash.
-  - `C` currently toggles the character stats pane → **reassign stats toggle to `@`** (Shift+2; universal roguelike convention for character sheet). Update `IsToggleCommand` in [src/CmdState.cpp](../src/CmdState.cpp).
-  - Requires `IsModifierNeeded` to also match `JKEY_c` when Shift is held (or a new `IsBashCommand` predicate).
-  - Prompt direction.
-  - Require `DUNG_IDX_DOOR` (any state) in chosen direction.
-  - Roll bash: `d20 + STR bonus` vs door DC (closed=10, spiked=15, wizard-locked=20).
-    - Metal armor grants +2 to roll.
-    - On success: set tile to `DUNG_IDX_BROKEN_DOOR`.
-    - On failure: player stumbles; print *"You slam against the door but it holds."*; costs turn.
-  - On success: call `CAIMgr::WakeNearby()` to aggravate nearby monsters.
-  - Print: *"You bash the door open!"*
+- [x] **Player command: `O)pen (hard)`** — Implemented in [src/ModState.cpp](../src/ModState.cpp):
+  - Keybind `O` (Shift+o) dispatches `MOD_BASH` via `m_pKeyHandlers`.
+  - `TestBash()` checks adjacent tile is `DUNG_IDX_DOOR`.
+  - `DoBash()` rolls `d20 + STR bonus` vs DC (closed=10, spiked=15, wizard-locked=20); metal armor +2.
+    - On success: tile set to `DUNG_IDX_BROKEN_DOOR`; calls `CDungeon::Aggravate(pos)` and `DisturbPlayer()`.
+    - On failure: prints *"You slam against the door but it holds."*; costs turn.
+  - `CDungeon::Aggravate()` delegates to `CEffect::Fire("Aggravate Monsters", origin)` — radius from effect def.
+  - Same aggravation path now used by large monsters bashing doors in `CAIBrain::UpdateGoToDest()`.
 
 ---
 
@@ -172,8 +168,8 @@ A (tile infra)  ──►  C (AI WalkSeek)
                 ──►  E (Wizard Lock)
                 ──►  F (player bash)
 B (flags)       ──►  C
-H (keybinds)    ──►  D (s)pike uses `s`)
-                ──►  F (bash uses `C`)
+H (keybinds)    ──►  D (s)pike uses `S`)
+                ──►  F (bash uses `O`)
                 ──►  G (tests last)
 ```
 

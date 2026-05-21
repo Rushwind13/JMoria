@@ -466,7 +466,8 @@ int CRangedState::OnBaseHandleKey( JKeysym *keysym )
             m_pSelected = GetResponse( m_eCurModifier );
             if( m_pSelected == NULL )
             {
-                g_pGame->GetMsgs()->Printf( "Nothing valid to zap.\n" );
+                g_pGame->GetMsgs()->Printf( "Nothing valid to %s.\n",
+                                            m_eCurModifier == RANGED_FIRE ? "fire" : "zap" );
                 ResetToState( STATE_COMMAND );
                 return JRESETSTATE;
             }

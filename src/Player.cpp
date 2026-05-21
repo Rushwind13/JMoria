@@ -1333,7 +1333,7 @@ JResult CPlayer::Read( CLink<CItem> *pLink )
     {
         pItem->m_id->m_bTried = true;
     }
-    ConsumeItem( pLink ); // Unified consumption
+    ConsumeItem( pLink );
     return retval;
 }
 
@@ -1524,44 +1524,6 @@ JResult CPlayer::Fuel( CLink<CItem> *pLink )
     return JSUCCESS;
 }
 
-// Returns true if this effect requires the player to choose an item before it can be applied.
-// All such effects flow through UseState's USE_IDENTIFY sub-mode and return JNEED_CHOOSE_ITEM.
-/*static*/ bool CPlayer::NeedsItemChoice( CEffect *pEffect )
-{
-    switch( pEffect->m_dwFlags )
-    {
-    case EFFECT_FLAG_IDENTIFY: // Scroll/Staff of Perception — player chooses item to identify
-        // Probe wand uses HIT+IDENTIFY (fires at target);
-        // only intercept RESTORE+IDENTIFY (scroll/staff)
-        return pEffect->m_dwEffect == EFFECT_TYPE_RESTORE;
-    case EFFECT_FLAG_FUEL: // Scroll of Recharge — player chooses wand/staff to recharge
-        return pEffect->m_dwEffect == EFFECT_TYPE_RESTORE;
-    case EFFECT_FLAG_TOHIT: // Scroll of Enchant Weapon (to-hit)
-    case EFFECT_FLAG_TODAM: // Scroll of Enchant Weapon (to-damage)
-        return ( pEffect->m_dwModifier & EFFECT_MOD_ENCHANT ) != 0;
-    }
-    // Flag2 checks (CURSE lives in flags2)
-    if( pEffect->HasFlag( "EFFECT_FLAG_CURSE" ) &&
-        pEffect->m_dwEffect == EFFECT_TYPE_DESTROY ) // Remove Curse, not Curse Object
-        return true;
-    if( pEffect->m_dwFlags == EFFECT_FLAG_AC && // Enchant Armor, not Timed Blessing
-        ( pEffect->m_dwModifier & EFFECT_MOD_ENCHANT ) )
-        return true;
-    return false;
-}
-
-/*static*/ CEffect *CPlayer::FindNeedsChoiceEffect( CItemDef *pItemDef )
-{
-    CLink<CEffect> *pLink = pItemDef->m_llEffects->GetHead();
-    while( pLink != NULL )
-    {
-        if( NeedsItemChoice( pLink->m_lpData ) )
-            return pLink->m_lpData;
-        pLink = pLink->next;
-    }
-    return nullptr;
-}
-
 JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwItemFlags )
 {
     CEffect *pEffect;
@@ -1574,16 +1536,14 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwIte
               g_Constants.IndexToString( EFFECT_TYPE, pEffect->m_dwEffect ),
               g_Constants.EffectFlagToString( pEffect->m_dwFlags, pEffect->m_dwFlags2 ),
               g_Constants.IndexToString( EFFECT_MOD, pEffect->m_dwModifier ) );
-        if( NeedsItemChoice( pEffect ) )
+        if( pEffect->GetTargetType() != EFFECT_TARGET_NONE )
         {
-            m_bLastEffectNoticed = true;
-            retval = JNEED_CHOOSE_ITEM;
+            // Targeting effects are dispatched by the state machine after player input;
+            // DoEffects skips them here.
             plEffect = plEffect->next;
             continue;
         }
-        JResult r = pEffect->Dispatch( fDuration, dwItemFlags );
-        if( r != JSUCCESS )
-            retval = r;
+        pEffect->Dispatch( fDuration, dwItemFlags );
         plEffect = plEffect->next;
     }
     return retval;
@@ -1697,7 +1657,7 @@ JResult CPlayer::DoACBuff( CEffect *pEffect )
 
     // Apply a timed AC bonus to the player.
     float fBonus = pEffect->m_szAmount ? Util::Roll( pEffect->m_szAmount ) : 5.0f;
-    float fDuration = pEffect->m_fDuration > 0.0f ? pEffect->m_fDuration : 50.0f;
+    float fDuration = pEffect->m_fDuration > 0.0f ? pEffect->m_fDuration : 0.0f;
 
     m_fACBonus = fBonus;
     RecalcCombatStats();
@@ -1705,9 +1665,12 @@ JResult CPlayer::DoACBuff( CEffect *pEffect )
     g_pGame->GetMsgs()->Printf( "You feel more protected. (+%d AC)\n", (int)fBonus );
     m_bLastEffectNoticed = true;
 
-    CEffect *pActive = new CEffect( *pEffect );
-    pActive->m_fDuration = fDuration;
-    m_llActiveEffects->Add( pActive, pActive->m_dwFlags );
+    if( fDuration )
+    {
+        CEffect *pActive = new CEffect( *pEffect );
+        pActive->m_fDuration = fDuration;
+        m_llActiveEffects->Add( pActive, pActive->m_dwFlags );
+    }
     return JSUCCESS;
 }
 
@@ -2641,6 +2604,13 @@ JResult CPlayer::ApplyChosenItem( CLink<CItem> *pChosen, CEffect *pEffect, int d
     if( !pEffect || !pChosen )
         return JBOGUSKEY;
     CItem *pItem = pChosen->m_lpData;
+
+    if( !pEffect->IsValidTarget( pItem ) )
+    {
+        g_pGame->GetMsgs()->Printf( "%s\n", pEffect->GetTargetPrompt() );
+        return JSUCCESS;
+    }
+
     switch( pEffect->m_dwFlags )
     {
     case EFFECT_FLAG_IDENTIFY:
@@ -2669,16 +2639,19 @@ JResult CPlayer::ApplyChosenItem( CLink<CItem> *pChosen, CEffect *pEffect, int d
     case EFFECT_FLAG_TOHIT: // Enchant weapon to-hit
         pItem->m_fBonusToHit += 1.0f;
         g_pGame->GetMsgs()->Printf( "It glows with power.\n" );
+        RecalcCombatStats();
         break;
     case EFFECT_FLAG_TODAM: // Enchant weapon to-damage
         pItem->m_fBonusToDamage += 1.0f;
         g_pGame->GetMsgs()->Printf( "It glows with power.\n" );
+        RecalcCombatStats();
         break;
     default:
         if( pEffect->m_dwFlags == EFFECT_FLAG_AC && ( pEffect->m_dwModifier & EFFECT_MOD_ENCHANT ) )
         {
             pItem->m_fACBonus += 1.0f;
             g_pGame->GetMsgs()->Printf( "It glows with a soft light.\n" );
+            RecalcCombatStats();
         }
         else if( pEffect->HasFlag( "EFFECT_FLAG_CURSE" ) &&
                  pEffect->m_dwEffect == EFFECT_TYPE_DESTROY )

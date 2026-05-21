@@ -44,6 +44,7 @@ public:
         return OnHandleKey( keysym );
     };
     void Update( float fCurTime ) { OnUpdate( fCurTime ); }
+    virtual void Begin( int previousState ) {}
 
 protected:
     virtual int OnHandleKey( JKeysym *keysym ) = 0;

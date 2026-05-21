@@ -33,6 +33,7 @@ F - fill/fuel a light source
 p - purchase something in a store
 S - spike a door shut (requires iron spike in inventory)
 s - search
+O - bash open a door (Shift+O)
 g - get/pickup
 ^c - exit game
 ^t - wizard teleport (Note: will turn on Wizard Mode, which prevents score being saved)

@@ -231,6 +231,7 @@ void CMonsterRecall::RecordAttackObservation( const char *szName, int dwType, fl
                 pEntry->attacks[i].dwDamageMin = iDmg;
             if( iDmg > pEntry->attacks[i].dwDamageMax )
                 pEntry->attacks[i].dwDamageMax = iDmg;
+            pEntry->attacks[i].dwElementFlags |= dwEffectFlags;
             return;
         }
     }

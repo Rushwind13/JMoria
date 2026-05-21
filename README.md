@@ -49,6 +49,7 @@ JMoria supports three build configurations:
 * *F* - fill/fuel a light source
 * *S* - spike a door shut (requires iron spike in inventory)
 * *s* - search for secret doors and traps
+* *O* - bash open a door (Shift+O)
 * *.* - rest one turn
 * *R* - rest until at full health, or until disturbed
 

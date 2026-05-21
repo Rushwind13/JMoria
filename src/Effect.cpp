@@ -1,6 +1,7 @@
 #include "Effect.h"
 #include "DisplayText.h"
 #include "Dungeon.h"
+#include "Item.h"
 #include "Player.h"
 void CEffect::SetAmount( const char *szAmount )
 {
@@ -61,14 +62,13 @@ JResult CEffect::Physical( JVector vOrigin )
         return JBOGUSKEY;
 
     CMonster *pMon = pTile->m_pCurMonster;
+    CPlayer *pPlayer = g_pGame->GetPlayer();
     if( !pMon )
     {
         JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
         return JBOGUSKEY;
     }
     const char *szMonName = pMon->GetName();
-
-    CPlayer *pPlayer = g_pGame->GetPlayer();
     if( pPlayer->m_pCurrentRangedAmmo )
     {
         CLink<CItem> *pArrowLink = NULL;
@@ -406,6 +406,24 @@ JResult CEffect::Status( JVector vOrigin, uint32 dwFlag )
     CMonster *pMon = pTile->m_pCurMonster;
     if( !pMon )
     {
+        // Apply status effect to the player
+        CPlayer *pPlayer = g_pGame->GetPlayer();
+        if( vOrigin == pPlayer->m_vPos )
+        {
+            const char *szStatusName = "affected";
+            if( dwFlag & EFFECT_FLAG_SLEEP )
+                szStatusName = "fall asleep";
+            else if( dwFlag & EFFECT_FLAG_PARALYZE )
+                szStatusName = "are paralyzed";
+            else if( dwFlag & EFFECT_FLAG_AFRAID )
+                szStatusName = "flee in terror";
+            else if( dwFlag & EFFECT_FLAG_CONFUSE )
+                szStatusName = "feel confused";
+            g_pGame->GetMsgs()->Printf( "You %s.\n", szStatusName );
+            pPlayer->SetIntrinsic( dwFlag );
+            pPlayer->m_bLastEffectNoticed = true;
+            return JSUCCESS;
+        }
         JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
         return JBOGUSKEY;
     }
@@ -732,4 +750,114 @@ JResult CEffect::LockDoor( JVector vOrigin )
     fx.SetAmount( pDef->m_szAmount );
     fx.m_fDuration = pDef->m_fDuration;
     return fx.DoHitEffects( vOrigin, vOrigin );
+}
+
+// ---------------------------------------------------------------------------
+// Targeting helpers — CEffect owns what it needs and how to ask for it.
+// ---------------------------------------------------------------------------
+
+eEffectTargetType CEffect::GetTargetType() const
+{
+    // ITEM: effect applies to a player-chosen item
+    switch( m_dwFlags )
+    {
+    case EFFECT_FLAG_IDENTIFY:
+        if( m_dwEffect == EFFECT_TYPE_RESTORE )
+            return EFFECT_TARGET_ITEM;
+        break;
+    case EFFECT_FLAG_FUEL:
+        if( m_dwEffect == EFFECT_TYPE_RESTORE )
+            return EFFECT_TARGET_ITEM;
+        break;
+    case EFFECT_FLAG_TOHIT:
+    case EFFECT_FLAG_TODAM:
+    case EFFECT_FLAG_AC:
+        if( m_dwModifier & EFFECT_MOD_ENCHANT )
+            return EFFECT_TARGET_ITEM;
+        break;
+    default:
+        break;
+    }
+
+    switch( m_dwFlags2 )
+    {
+    case EFFECT_FLAG_CURSE:
+        if( m_dwEffect == EFFECT_TYPE_DESTROY )
+            return EFFECT_TARGET_ITEM;
+        break;
+    case EFFECT_FLAG_LOCK:
+        return EFFECT_TARGET_DIRECTION;
+    default:
+        break;
+    }
+
+    return EFFECT_TARGET_NONE;
+}
+
+bool CEffect::IsValidTarget( CItem *pItem ) const
+{
+    if( !pItem || !pItem->m_id )
+        return false;
+
+    int slot = pItem->EquipType();
+
+    switch( m_dwFlags )
+    {
+    case EFFECT_FLAG_IDENTIFY:
+        return !pItem->IsIdentified();
+
+    case EFFECT_FLAG_FUEL:
+        return pItem->NeedsFuel(); // wands, staves, and lanterns
+
+    case EFFECT_FLAG_TOHIT:
+    case EFFECT_FLAG_TODAM:
+        return pItem->IsWeapon() || pItem->IsRanged();
+
+    case EFFECT_FLAG_AC:
+        if( m_dwModifier & EFFECT_MOD_ENCHANT )
+        {
+            return pItem->IsArmor();
+        }
+        break;
+    default:
+        break;
+    }
+
+    if( ( m_dwFlags2 & EFFECT_FLAG_CURSE ) && m_dwEffect == EFFECT_TYPE_DESTROY )
+        return true; // Remove Curse works on any item
+
+    return true; // default: accept any item
+}
+
+const char *CEffect::GetTargetPrompt() const
+{
+    eEffectTargetType tt = GetTargetType();
+    if( tt == EFFECT_TARGET_DIRECTION )
+        return "Which direction? [arrow keys or numpad]";
+
+    // Item-targeting prompts
+    switch( m_dwFlags )
+    {
+    case EFFECT_FLAG_FUEL:
+        return "Recharge which wand/staff? [a-z inv, A-J equip]";
+    case EFFECT_FLAG_TOHIT:
+    case EFFECT_FLAG_TODAM:
+    case EFFECT_FLAG_AC:
+        return "Enchant which weapon? [a-z inv, A-J equip]";
+    case EFFECT_FLAG_IDENTIFY:
+        if( m_dwEffect == EFFECT_TYPE_RESTORE )
+            return "Identify which item? [a-z inv, A-J equip]";
+    default:
+        break;
+    }
+    switch( m_dwFlags2 )
+    {
+    case EFFECT_FLAG_CURSE:
+        if( m_dwEffect == EFFECT_TYPE_DESTROY )
+            return "Remove curse from which item? [a-z inv, A-J equip]";
+    default:
+        break;
+    }
+
+    return "Use on which item? [a-z inv, A-J equip]";
 }

@@ -647,6 +647,8 @@ WHEN( "^the player applies the pending effect to equipment at ([-0-9]+)$" )
     ScenarioScope<TestCtx> context;
     CLink<CItem> *pLink = g_pGame->GetPlayer()->m_llEquipment->GetLink( slot );
     ASSERT_NE( pLink, (CLink<CItem> *)NULL );
-    CEffect *pEffect = CPlayer::FindNeedsChoiceEffect( context->pendingSourceItemDef );
+    CEffect *pEffect = context->pendingSourceItemDef
+                           ? context->pendingSourceItemDef->FindTargetingEffect()
+                           : nullptr;
     g_pGame->GetPlayer()->ApplyChosenItem( pLink, pEffect, context->pendingSourceItemFlags );
 }

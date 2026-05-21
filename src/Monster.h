@@ -160,6 +160,7 @@ public:
     const char *AttackFlavorText();
     const char *AttackEffect();
     void AttackDone();
+
     float Damage( float fDamageMult );
 
     bool Hit( float &fRoll );

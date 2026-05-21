@@ -7,6 +7,17 @@
 #include "JLinkList.h"
 #include "Util.h"
 
+class CItem;
+class CItemDef;
+
+// Targeting requirement for an effect — what, if anything, must the player choose before dispatch.
+enum eEffectTargetType
+{
+    EFFECT_TARGET_NONE = 0,  // no player choice needed; fires immediately
+    EFFECT_TARGET_DIRECTION, // player must choose a direction first
+    EFFECT_TARGET_ITEM,      // player must choose an item (inv or equip) first
+};
+
 // Named effect template — shared catalog entry parsed from Effects.txt.
 // Items, monsters, and spells reference these by name.
 class CEffectDef
@@ -134,6 +145,13 @@ public:
     // Hit-effect sub-dispatch — selects Apply* based on modifier and flag.
     JResult DoHitEffects();
     JResult DoHitEffects( JVector vCasterPos, JVector vTargetPos );
+
+    // Targeting: what player choice (if any) is needed before this effect can fire.
+    eEffectTargetType GetTargetType() const;
+    // Returns true if pItem is a legal target for this effect.
+    bool IsValidTarget( CItem *pItem ) const;
+    // Human-readable prompt to show the player when selecting a target.
+    const char *GetTargetPrompt() const;
 
     CEffectDef *m_ed; // pointer to shared effect definition (NULL for inline effects)
     int m_dwEffect;

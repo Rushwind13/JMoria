@@ -281,8 +281,6 @@ public:
     void UpdateLight( float fValue, bool bReset = false );
 
     JResult DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwFlags );
-    static bool NeedsItemChoice( CEffect *pEffect );
-    static CEffect *FindNeedsChoiceEffect( CItemDef *pItemDef );
     JResult DoHealEffects( CEffect *pEffect );
     JResult DoHealHP( CEffect *pEffect );
     JResult DoACBuff( CEffect *pEffect );

@@ -228,9 +228,6 @@ bool CAIBrain::UpdateRest( float fCurTime )
             // Proximity wake check: sleeping monsters only (not paralyzed)
             if( m_pParent->m_dwActiveEffects & EFFECT_FLAG_SLEEP )
             {
-                JVector vDiff = m_vPos - g_pGame->GetPlayer()->m_vPos;
-                float fDist = vDiff.Length(); // Length() returns squared distance
-
                 float fStealth = g_pGame->GetPlayer()->GetStealth();
                 CRoom *pRoom = g_pGame->GetDungeon()->InRoom( m_vPos );
                 bool inLitRoom = pRoom && pRoom->HasFlags( DUNG_FLAG_LIT );
@@ -239,8 +236,10 @@ bool CAIBrain::UpdateRest( float fCurTime )
                                    ( inLitRoom ? SLEEP_LIT_ROOM_PENALTY : 0.0f );
                 if( fWakeRange < 0.0f )
                     fWakeRange = 0.0f;
-                fWakeRange *= fWakeRange; // compare squared distances to avoid sqrt
+                fWakeRange *= fWakeRange;
 
+                JVector vDiff = m_vPos - g_pGame->GetPlayer()->m_vPos;
+                float fDist = vDiff.Length();
                 if( fDist < fWakeRange && Util::GetRandom( 0.0f, fDist ) <
                                               SLEEP_WAKE_CHANCE_SCALE * ( fWakeRange - fDist ) )
                 {
@@ -293,9 +292,7 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
             bool bIsLarge = m_pParent->m_md && ( m_pParent->m_md->m_dwFlags & MON_FLAG_LARGE );
 
             JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
-            JVector vDiff = vTryPos - vPlayerPos;
-            bool bPlayerNearby =
-                vDiff.Length() <= ( DOOR_OPEN_NOISE_RADIUS * DOOR_OPEN_NOISE_RADIUS );
+            bool bPlayerNearby = vTryPos.WithinRange( vPlayerPos, (float)DOOR_BASH_NOISE_RADIUS );
 
             if( bIsLarge )
             {
@@ -303,9 +300,11 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
                 pDoorTile->m_dtd = g_pGame->GetDungeon()->GetTileDef( DUNG_IDX_BROKEN_DOOR );
                 pDoorTile->UnsetFlags( DUNG_FLAG_LOCKED );
                 g_pGame->GetDungeon()->Aggravate( vTryPos );
-                g_pGame->GetDungeon()->DisturbPlayer();
                 if( bPlayerNearby )
+                {
+                    g_pGame->GetDungeon()->DisturbPlayer();
                     g_pGame->GetMsgs()->Printf( "You hear a door smash open.\n" );
+                }
                 Move();
             }
             else if( bHasHands && !bLocked )
@@ -492,7 +491,12 @@ void CAIBrain::BuildEligibleAttacks()
         {
             bool bRanged =
                 pAtk->m_pEffect && pAtk->m_pEffect->m_ed && pAtk->m_pEffect->m_ed->m_fRange > 0.0f;
-            if( bAdjacent || ( bInLOS && bRanged ) )
+            bool bInRange = true;
+            if( bRanged )
+            {
+                bInRange = vPos.WithinRange( vPlayer, pAtk->m_pEffect->m_ed->m_fRange );
+            }
+            if( bAdjacent || ( bInLOS && bRanged && bInRange ) )
                 m_pEligibleAttacks->Add( pAtk );
         }
         pLink = m_pParent->m_md->m_llAttacks->GetNext( pLink );
@@ -566,17 +570,43 @@ bool CAIBrain::UpdateAttack( float fCurTime )
 
     bool bRanged =
         pAtk->m_pEffect && pAtk->m_pEffect->m_ed && pAtk->m_pEffect->m_ed->m_fRange > 0.0f;
+    JVector vMonPos = m_vPos;
+    JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
     if( bRanged )
     {
-        JVector vMonPos( m_vPos.x, m_vPos.y );
-        JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
-        pAtk->m_pEffect->DoHitEffects( vMonPos, vPlayerPos );
-        g_pGame->GetMsgs()->Printf( "The %s %s you.\n", m_pParent->GetName(),
-                                    m_pParent->AttackFlavorText() );
+        uint32 dwFlags = pAtk->m_pEffect ? pAtk->m_pEffect->m_dwFlags : 0;
+        bool bStatusEffect = dwFlags & ( EFFECT_FLAG_SLEEP | EFFECT_FLAG_PARALYZE |
+                                         EFFECT_FLAG_AFRAID | EFFECT_FLAG_CONFUSE );
+        if( bStatusEffect )
+        {
+            // Status effects use the existing dispatch (Status() handles the player-tile case)
+            g_pGame->GetMsgs()->Printf( "The %s %s you.\n", m_pParent->GetName(),
+                                        m_pParent->AttackFlavorText() );
+            pAtk->m_pEffect->DoHitEffects( vMonPos, vPlayerPos );
+        }
+        else
+        {
+            // Physical or elemental ranged damage: mirror the melee path so the correct
+            // monster name reaches TakeDamage (and the death screen).
+            float fRoll = m_pParent->Attack();
+            bool bHit = g_pGame->GetPlayer()->Hit( fRoll );
+            const char *szVerb = bHit ? m_pParent->AttackFlavorText() : "misses";
+            g_pGame->GetMsgs()->Printf( "The %s %s you.\n", m_pParent->GetName(), szVerb );
+            if( bHit )
+            {
+                float fDamage = m_pParent->Damage( 1.0f );
+                g_pGame->GetPlayer()->TakeDamage( fDamage, m_pParent->GetName(), dwFlags );
+                if( pAtk->m_pEffect && pAtk->m_pEffect->m_dwFlags == 0 )
+                    pAtk->m_pEffect->DoHitEffects( vMonPos, vPlayerPos );
+            }
+        }
     }
     else
     {
         CollideWithPlayer();
+        // Dispatch supplemental non-damage effects (e.g., Aggravate) for melee hits
+        if( pAtk->m_pEffect && pAtk->m_pEffect->m_dwFlags == 0 )
+            pAtk->m_pEffect->DoHitEffects( vMonPos, vPlayerPos );
     }
 
     m_pParent->AttackDone();

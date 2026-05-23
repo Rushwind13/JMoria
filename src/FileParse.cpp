@@ -449,9 +449,13 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
             {
                 idIn.m_szPlural = GetValue( szLine, idIn.m_szPlural );
             }
-            else if( strncasecmp( szLine, "speed", 5 ) == 0 )
+            else if( strncasecmp( szLine, "attackspeed", 11 ) == 0 )
             {
-                idIn.m_fSpeed = GetValue( szLine, idIn.m_fSpeed );
+                idIn.m_fAttackSpeed = GetValue( szLine, idIn.m_fAttackSpeed );
+            }
+            else if( strncasecmp( szLine, "speedbonus", 10 ) == 0 )
+            {
+                idIn.m_fSpeedBonus = GetValue( szLine, idIn.m_fSpeedBonus );
             }
             else if( strncasecmp( szLine, "acbonus", 7 ) == 0 )
             {

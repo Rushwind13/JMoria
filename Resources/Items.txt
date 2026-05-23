@@ -25,8 +25,9 @@
 # Damage        XdY    base amount of damage this item inflicts when it hits something
 # To-HitBonus        XdY    magical bonus to base to-hit chance
 # To-DamBonus        XdY    magical bonus to base damage
+# SpeedBonus   XdY    magical bonus to player speed
 # Level        int        earliest dungeon level this item will appear at (range: 0 (town), 1( dung lvl 1) - 100 (dung lvl 100))
-# Speed        float     how quickly one can attack with this item
+# AttackSpeed        float     how quickly one can attack with this item
 # Weight       float     weight of the item in pounds
 # Effect       string,XdY string = what it does, XdY = how much or for how long
 # Charges      XdY    initial charges for wands/staves (rolled per instance)
@@ -41,7 +42,7 @@
 #    Level        1
 #    Damage       <1d8>
 #    Weight       6.0
-#    Speed        5.0
+#    AttackSpeed        5.0
 #    Color        <200,200,200,255>
 #}
 # TODO: get all items sorted by type (and fix tests)
@@ -80,7 +81,7 @@ Item <Short Sword>
     Level       5
     Damage      <1d6>
     Weight      3.0
-    Speed       3.0
+    AttackSpeed       3.0
     Color       <200,200,200,255>
 }
 Item <Short Sword>
@@ -91,7 +92,7 @@ Item <Short Sword>
     Level       5
     Damage      <1d6>
     Weight      3.0
-    Speed       3.0
+    AttackSpeed       3.0
     Color       <200,200,200,255>
 }
 Item <Long Sword>
@@ -102,7 +103,7 @@ Item <Long Sword>
     Level       14
     Damage      <1d10>
     Weight      6.0
-    Speed       5.0
+    AttackSpeed       5.0
     Color        <200,200,200,255>
 }
 Item <Scimitar>
@@ -113,7 +114,7 @@ Value     150.0
 Level        18
 Damage       1d8
 Weight        4.0
-Speed         4.0
+AttackSpeed         4.0
 Color        <200,200,200,255>
 }
 Item <Bastard sword>
@@ -124,7 +125,7 @@ Item <Bastard sword>
     Level        25
     Damage       <2d8>
     Weight       10.0
-    Speed        6.0
+    AttackSpeed        6.0
     Color        <200,200,200,255>
 }
 
@@ -138,7 +139,7 @@ Item <Dagger>
     Level       1
     Damage      <1d4>
     Weight      1.0
-    Speed       2.0
+    AttackSpeed       2.0
     Color        <200,200,200,255>
 }
 
@@ -152,7 +153,7 @@ Item <Hand Axe>
     Level        8
     Damage       <2d4>
     Weight       3.5
-    Speed        7.0
+    AttackSpeed        7.0
     Color        <200,200,200,255>
 }
 Item <Battle Axe>
@@ -164,7 +165,7 @@ Item <Battle Axe>
     Level        25
     Damage       <2d4>
     Weight       7.5
-    Speed        4.0
+    AttackSpeed        4.0
     Color        <200,200,200,255>
 }
 
@@ -178,7 +179,7 @@ Item <Club>
     Level        5
     Damage       <2d3>
     Weight       3.0
-    Speed        4.0
+    AttackSpeed        4.0
     Color        <200,200,200,255>
 }
 Item <Mace>
@@ -189,7 +190,7 @@ Item <Mace>
     Level        14
     Damage       <1d8>
     Weight       10.0
-    Speed        7.0
+    AttackSpeed        7.0
     Color        <200,200,200,255>
 }
 Item <Morning Star>
@@ -200,7 +201,7 @@ Item <Morning Star>
     Level        20
     Damage       <2d4>
     Weight       12.5
-    Speed        7.0
+    AttackSpeed        7.0
     Color        <200,200,200,255>
 }
 Item <War Hammer>
@@ -212,7 +213,7 @@ Item <War Hammer>
     Level        20
     Damage       <1d5>
     Weight       5.0
-    Speed        4.0
+    AttackSpeed        4.0
     Color        <200,200,200,255>
 }
 Item <Battle Mace>
@@ -224,7 +225,7 @@ Item <Battle Mace>
     Level        28
     Damage       <2d3>
     Weight       10.0
-    Speed        7.0
+    AttackSpeed        7.0
     Color        <200,200,200,255>
 }
 
@@ -238,7 +239,7 @@ Item <Spear>
     Level        8
     Damage       <2d4>
     Weight       5.0
-    Speed        7.0
+    AttackSpeed        7.0
     Color        <200,200,200,255>
 }
 Item <Lance>
@@ -249,7 +250,7 @@ Item <Lance>
     Level        20
     Damage       <3d6>
     Weight       15.0
-    Speed        6.0
+    AttackSpeed        6.0
     Color        <200,200,200,255>
 }
 
@@ -264,7 +265,7 @@ Item <Quarter Staff>
     Level        8
     Damage       1d6
     Weight        5.0
-    Speed        4.0
+    AttackSpeed        4.0
     Color        <89,90,91,255>
 }
 Item <Trident>
@@ -276,7 +277,7 @@ Flags       <ITEM_FLAG_2HANDED>
 Level        18
 Damage       3d4
 Weight        4.0
-Speed         7.0
+AttackSpeed         7.0
 Color        <200,200,200,255>
 }
 Item <Glaive>
@@ -288,7 +289,7 @@ Item <Glaive>
     Level        22
     Damage       <2d5>
     Weight       7.5
-    Speed        8.0
+    AttackSpeed        8.0
     Color        <200,200,200,255>
 }
 Item <Halberd>
@@ -300,7 +301,7 @@ Item <Halberd>
     Level        28
     Damage       <2d5>
     Weight       17.5
-    Speed        9.0
+    AttackSpeed        9.0
     Color        <200,200,200,255>
 }
 
@@ -316,7 +317,7 @@ Item <Short Bow>
     Level       3
     Damage      <1d2>
     Weight      3.0
-    Speed       4.0
+    AttackSpeed       4.0
     Color       <150,100,50,255>
 }
 Item <Long Bow>
@@ -329,7 +330,7 @@ Item <Long Bow>
     Level        20
     Damage       <1d2>
     Weight       10.0
-    Speed        6.0
+    AttackSpeed        6.0
     Color        <200,200,200,255>
 }
 
@@ -344,7 +345,7 @@ Item <Flight Arrow>
     Level       1
     Damage      <1d8>
     Weight      0.1
-    Speed       0.0
+    AttackSpeed       0.0
     Color       <200,200,200,255>
     Effect      <Arrow Shot>
 }
@@ -617,11 +618,11 @@ Item <Gloves of Elvenkind>
 Plural      <Pairs of Gloves of Elvenkind>
 Type        <ITEM_IDX_GLOVES>
 Effect      <Speed>
-Speed       1.0
 Value       4000.0
 Level       44
 AC          2.0
 Weight      1.0
+SpeedBonus  5.0
 Color       <150,255,150,255>
 Flags       <ITEM_FLAG_MAGIC>
 }
@@ -655,11 +656,11 @@ Item <Boots of Speed>
 Plural      <Pairs of Boots of Speed>
 Type        <ITEM_IDX_BOOTS>
 Effect      <Speed>
-Speed       1.0
 Value       5000.0
 Level       48
 AC          2.0
 Weight      3.0
+SpeedBonus  5.0
 Color       <255,200,50,255>
 Flags       <ITEM_FLAG_MAGIC,ITEM_FLAG_SILENT>
 }
@@ -800,10 +801,11 @@ Item <Ring of Speed>
 {
 Plural      <Rings of Speed>
 Type        <ITEM_IDX_RING>
-Effect      <Speed>
+Effect      <Ring Speed>
 Value       3000.0
 Level       52
 Weight      0.2
+SpeedBonus  10.0
 Color       <255,200,50,255>
 }
 
@@ -1387,6 +1389,7 @@ Value       300.0
 Level       35
 Weight      0.2
 Duration    80.0
+SpeedBonus  10.0
 Flags       <ITEM_FLAG_STACKS>
 }
 Item <Potion of Cure Serious Wounds>

@@ -54,7 +54,7 @@ Staves never require targeting. Effect fires at player position (area or self). 
 | 13 | Staff of Starlight | Light Ray + Light Area | HIT/CREATE + EFFECT_FLAG_LIGHT | ✅ Done | built-in |
 | 14 | Staff of Teleportation | Teleport Self | CREATE + EFFECT_FLAG_TELEPORT | ✅ Done | built-in |
 | 15 | Staff of Paralysis | Mass Paralyze | HIT + EFFECT_FLAG_PARALYZE + MOD_AREA | ✅ Done | `DoAreaHit()` |
-| 16 | Staff of Perception | Identify item | RESTORE + EFFECT_FLAG_IDENTIFY | ✅ Done | `NeedsItemChoice()` → `ApplyChosenItem()` |
+| 16 | Staff of Perception | Identify item | RESTORE + EFFECT_FLAG_IDENTIFY | ✅ Done | `TargetEffect()` → `OnHandleChooseItem()` → `ApplyChosenItem()` |
 | 17 | Staff of Summoning | Summon Monsters | CREATE + EFFECT_FLAG_SUMMON | ✅ Done | built-in |
 | 18 | Staff of Telepathy | Timed ESP | INTRINSIC + EFFECT_MOD_TIMED | ✅ Done | built-in |
 | 19 | Staff of Mass Sleep | Mass Sleep (large area) | HIT + EFFECT_FLAG_SLEEP + MOD_AREA | ✅ Done | `DoAreaHit()` |
@@ -68,16 +68,16 @@ Staves never require targeting. Effect fires at player position (area or self). 
 
 ## Items Needing Item-Choice Prompt (`JNEED_CHOOSE_ITEM`)
 
-These fire a prompt asking the player to select an item from inventory before the effect completes.
+These are routed as `EFFECT_TARGET_ITEM` and prompt for a selected item (`a-z` inventory, `A-J` equipment) before completion.
 
-| Item | Effect | Dispatch Flag | Completion Handler | Verified? |
-|------|--------|---------------|--------------------|-----------|
-| Staff of Perception | Identify | EFFECT_FLAG_IDENTIFY | `ApplyChosenItem()` → clears unknown | ✅ |
-| Scroll of Identify | Identify | EFFECT_FLAG_IDENTIFY | `ApplyChosenItem()` → clears unknown | ✅ |
-| Scroll of Recharge | Recharge | EFFECT_FLAG_FUEL | `ApplyChosenItem()` → `m_szAmount` wired |  ✅  |
-| Scroll of Enchant Weapon | Enchant to-hit / to-dam | EFFECT_FLAG_TOHIT / EFFECT_FLAG_TODAM | `ApplyChosenItem()` → `+1.0f` to bonus | ⚠️ needs in-game verify |
-| Scroll of Enchant Armor | Enchant AC | EFFECT_FLAG_AC | `ApplyChosenItem()` → `+1.0f` to ACBonus | ⚠️ needs in-game verify |
-| Scroll of Remove Curse | Remove curse | ITEM_FLAG_CURSED clear | `ApplyChosenItem()` → clears flag | ✅ |
+| Item | Effect | Target Validation (`IsValidTarget`) | Prompt | Completion Handler | Verified? |
+|------|--------|--------------------------------------|--------|--------------------|-----------|
+| Staff of Perception | Identify | Item must be unidentified | `Identify which item? [a-z inv, A-J equip]` | `TargetEffect()` → `OnHandleChooseItem()` → `ApplyChosenItem()` (`Identify()`) | ✅ |
+| Scroll of Identify | Identify | Item must be unidentified | `Identify which item? [a-z inv, A-J equip]` | `TargetEffect()` → `OnHandleChooseItem()` → `ApplyChosenItem()` (`Identify()`) | ✅ |
+| Scroll of Recharge | Recharge | `NeedsFuel()` (wands, staves, lanterns) | `Recharge which wand/staff? [a-z inv, A-J equip]` | `TargetEffect()` → `OnHandleChooseItem()` → `ApplyChosenItem()` (adds charges, can overload/explode) | ✅ |
+| Scroll of Enchant Weapon | Enchant to-hit / to-dam | Item must be weapon or ranged weapon | `Enchant which weapon? [a-z inv, A-J equip]` | `TargetEffect()` → `OnHandleChooseItem()` → `ApplyChosenItem()` (`+1` to-hit and/or to-dam, recalc stats) | ✅ |
+| Scroll of Enchant Armor | Enchant AC | Item must be armor | `Enchant which weapon? [a-z inv, A-J equip]` | `TargetEffect()` → `OnHandleChooseItem()` → `ApplyChosenItem()` (`+1` AC bonus, recalc stats) | ✅ |
+| Scroll of Remove Curse | Remove curse | Any item accepted | `Remove curse from which item? [a-z inv, A-J equip]` | `TargetEffect()` → `OnHandleChooseItem()` → `ApplyChosenItem()` (clears/sets curse based on source effect) | ✅ |
 
 ---
 

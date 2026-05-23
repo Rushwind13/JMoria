@@ -84,7 +84,7 @@ void CItem::Init( CItemDef *pid )
         {
             if( pLink->m_lpData->m_dwFlags & EFFECT_FLAG_SPEED )
             {
-                m_fSpeedBonus += (float)Util::Roll(pLink->m_lpData->m_szAmount) / 10.0f;
+                m_fSpeedBonus += m_id->m_fSpeedBonus;
                 break;
             }
             pLink = pLink->next;

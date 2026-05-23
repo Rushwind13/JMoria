@@ -1014,7 +1014,6 @@ void CPlayer::HandleCollision( JVector vPos, int dwCollideType )
     {
         // Ouch, you bumped into a %s.
         char what[16];
-        bool bHandled = false;
         switch( dwCollideType )
         {
         case DUNG_IDX_WALL:
@@ -1031,10 +1030,7 @@ void CPlayer::HandleCollision( JVector vPos, int dwCollideType )
             sprintf( what, "um, something?" );
             break;
         }
-        if( !bHandled )
-        {
-            g_pGame->GetMsgs()->Printf( "Ouch! You bumped into %s!\n", what );
-        }
+        g_pGame->GetMsgs()->Printf( "Ouch! You bumped into %s!\n", what );
     }
 }
 

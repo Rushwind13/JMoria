@@ -844,61 +844,11 @@ CLink<CItem> *CRangedState::GetResponse( eRangedModifier whichUse )
     switch( whichUse )
     {
     case RANGED_FIRE:
-    {
-        // Filter inventory to compatible ammo items (arrows/bolts matching equipped weapon)
-        pList = g_pGame->GetPlayer()->m_llInventory;
-        pLink = pList->GetHead();
-        uint32 count = 0;
-
-        JLog( LOG_LEVEL_DEBUG, true, "GetResponse FIRE: Looking for ammo index %d\n",
-              m_dwSelected );
-
-        CLink<CItem> *pDebugLink = pList->GetHead();
-        uint32 dbgIdx = 0;
-        while( pDebugLink )
-        {
-            JLog( LOG_LEVEL_DEBUG, true, "  [%d] %s (type=%d) Compatible=%s\n", dbgIdx,
-                  pDebugLink->m_lpData->GetName(), pDebugLink->m_lpData->m_id->m_dwIndex,
-                  g_pGame->GetPlayer()->IsCompatibleAmmo( pDebugLink ) ? "YES" : "NO" );
-            dbgIdx++;
-            pDebugLink = pList->GetNext( pDebugLink );
-        }
-
-        while( pLink )
-        {
-            if( g_pGame->GetPlayer()->IsCompatibleAmmo( pLink ) )
-            {
-                if( count == m_dwSelected )
-                {
-                    JLog( LOG_LEVEL_DEBUG, true,
-                          "GetResponse FIRE: Found matching ammo at count %d\n", count );
-                    break;
-                }
-                count++;
-            }
-            pLink = pList->GetNext( pLink );
-        }
-
-        JLog( LOG_LEVEL_DEBUG, true, "GetResponse FIRE: Returning %p (count=%d, selected=%d)\n",
-              pLink, count, m_dwSelected );
-        break;
-    }
     case RANGED_ZAP:
     {
-        // Filter to zappable items only (compact-letter display)
+        // Keep selection logic aligned with DisplayInventory
         pList = g_pGame->GetPlayer()->m_llInventory;
-        pLink = pList->GetHead();
-        uint32 count = 0;
-        while( pLink )
-        {
-            if( g_pGame->GetPlayer()->IsZappable( pLink ) )
-            {
-                if( count == m_dwSelected )
-                    break;
-                count++;
-            }
-            pLink = pList->GetNext( pLink );
-        }
+        pLink = pList->GetNthLink( m_dwSelected );
         break;
     }
     default:

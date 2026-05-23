@@ -16,7 +16,8 @@ public:
           m_szUnidentifiedName( NULL ),
           m_szUnidentifiedPlural( NULL ),
           m_szFlavor( NULL ),
-          m_fSpeed( 0.0f ),
+          m_fAttackSpeed( 0.0f ),
+          m_fSpeedBonus( 0.0f ),
           m_szACBonus( NULL ),
           m_fBaseAC( 0.0f ),
           m_szBaseDamage( NULL ),
@@ -111,7 +112,8 @@ public:
     char *m_szUnidentifiedName;
     char *m_szUnidentifiedPlural;
     char *m_szFlavor; // "Green" Potion
-    float m_fSpeed;
+    float m_fAttackSpeed;
+    float m_fSpeedBonus; // for rings of speed, boots/gloves of swiftness, etc.
     char *m_szACBonus; // NdM dice string for magical AC bonus (rolled per-instance)
     float m_fBaseAC;
     char *m_szBaseDamage;

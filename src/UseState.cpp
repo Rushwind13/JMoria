@@ -654,87 +654,37 @@ CLink<CItem> *CUseState::GetResponse( eUseModifier whichUse )
     CLink<CItem> *pLink = NULL;
     switch( whichUse )
     {
+        // always inventory
     case USE_DROP:
     case USE_WIELD:
+    case USE_READ:
+    case USE_QUAFF:
+    case USE_STAFF:
         pList = g_pGame->GetPlayer()->m_llInventory;
-        pLink = pList->GetNthLink( m_dwSelected );
         break;
+        // either equipment or inventory
     case USE_FUEL:
     case USE_CHOOSE_ITEM:
         if( m_bFromEquipment )
         {
             pList = g_pGame->GetPlayer()->m_llEquipment;
-            pLink = pList->GetLink( m_dwSelected );
         }
         else
         {
             pList = g_pGame->GetPlayer()->m_llInventory;
-            pLink = pList->GetNthLink( m_dwSelected );
         }
         break;
-    case USE_READ:
-    {
-        // Filter to readable items only (matches INV_READ filtered display)
-        pList = g_pGame->GetPlayer()->m_llInventory;
-        pLink = pList->GetHead();
-        uint32 count = 0;
-        while( pLink )
-        {
-            if( g_pGame->GetPlayer()->IsReadable( pLink ) )
-            {
-                if( count == m_dwSelected )
-                    break;
-                count++;
-            }
-            pLink = pList->GetNext( pLink );
-        }
-        break;
-    }
-    case USE_QUAFF:
-    {
-        // Filter to drinkable items only (matches INV_QUAFF filtered display)
-        pList = g_pGame->GetPlayer()->m_llInventory;
-        pLink = pList->GetHead();
-        uint32 count = 0;
-        while( pLink )
-        {
-            if( g_pGame->GetPlayer()->IsDrinkable( pLink ) )
-            {
-                if( count == m_dwSelected )
-                    break;
-                count++;
-            }
-            pLink = pList->GetNext( pLink );
-        }
-        break;
-    }
-    case USE_STAFF:
-    {
-        // Filter to Staff items only (compact-letter display)
-        pList = g_pGame->GetPlayer()->m_llInventory;
-        pLink = pList->GetHead();
-        uint32 count = 0;
-        while( pLink )
-        {
-            if( g_pGame->GetPlayer()->IsStaff( pLink ) )
-            {
-                if( count == m_dwSelected )
-                    break;
-                count++;
-            }
-            pLink = pList->GetNext( pLink );
-        }
-        break;
-    }
+        // always equipment
     case USE_REMOVE:
         pList = g_pGame->GetPlayer()->m_llEquipment;
-        pLink = pList->GetLink( m_dwSelected );
         break;
     default:
         JLog( LOG_LEVEL_ERROR, true, "Can't get response for : %d\n", whichUse );
         return NULL;
         break;
     }
+
+    pLink = pList->GetLink( m_dwSelected );
 
     return pLink;
 }

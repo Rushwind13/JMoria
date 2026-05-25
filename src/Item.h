@@ -16,7 +16,8 @@ public:
           m_szUnidentifiedName( NULL ),
           m_szUnidentifiedPlural( NULL ),
           m_szFlavor( NULL ),
-          m_fSpeed( 0.0f ),
+          m_fAttackSpeed( 0.0f ),
+          m_fSpeedBonus( 0.0f ),
           m_szACBonus( NULL ),
           m_fBaseAC( 0.0f ),
           m_szBaseDamage( NULL ),
@@ -111,7 +112,8 @@ public:
     char *m_szUnidentifiedName;
     char *m_szUnidentifiedPlural;
     char *m_szFlavor; // "Green" Potion
-    float m_fSpeed;
+    float m_fAttackSpeed;
+    float m_fSpeedBonus; // for rings of speed, boots/gloves of swiftness, etc.
     char *m_szACBonus; // NdM dice string for magical AC bonus (rolled per-instance)
     float m_fBaseAC;
     char *m_szBaseDamage;
@@ -143,6 +145,20 @@ public:
     void FormatProperties( char *szOut, int maxLen, uint32 knownProps, uint32 itemFlags,
                            uint32 charges, float fACBonus, float fBonusToHit,
                            float fBonusToDamage );
+    CEffect *FindTargetingEffect() const
+    {
+        if( !m_llEffects )
+            return nullptr;
+        CLink<CEffect> *pLink = m_llEffects->GetHead();
+        while( pLink != NULL )
+        {
+            CEffect *pEffect = pLink->m_lpData;
+            if( pEffect && pEffect->GetTargetType() != EFFECT_TARGET_NONE )
+                return pEffect;
+            pLink = pLink->next;
+        }
+        return nullptr;
+    }
 
 protected:
 private:
@@ -201,17 +217,29 @@ public:
     void Identify()
     {
         m_id->m_bIdentified = true;
-        RevealAllProperties();
+        m_dwKnownProps |= ( KNOWN_CURSED | KNOWN_BONUSES | KNOWN_CHARGES );
     }
     bool KnowsProperty( uint32 prop ) { return ( m_dwKnownProps & prop ) != 0; }
     void RevealProperty( uint32 prop ) { m_dwKnownProps |= prop; }
-    void RevealAllProperties()
-    {
-        m_dwKnownProps |= ( KNOWN_CURSED | KNOWN_BONUSES | KNOWN_CHARGES );
-    }
     bool IsOpenable() { return false; }   // for chests, etc.
     bool IsCloseable() { return false; }  // closeable pickup?
     bool IsTunnelable() { return false; } // Tunnelable pickup? unlikely.
+    inline bool IsRanged()
+    {
+        return m_id->m_dwIndex == ITEM_IDX_BOW || m_id->m_dwIndex == ITEM_IDX_XBOW;
+    };
+    inline bool NeedsFuel()
+    {
+        return m_id->m_dwIndex == ITEM_IDX_STAFF || m_id->m_dwIndex == ITEM_IDX_WAND ||
+               ( m_id->m_dwIndex == ITEM_IDX_TORCH && ( m_id->m_dwFlags & ITEM_FLAG_NEEDSAMMO ) );
+    };
+    inline bool IsWeapon() { return EquipType() == EQUIP_IDX_MAIN_HAND && !IsRanged(); };
+    inline bool IsArmor()
+    {
+        int type = EquipType();
+        return type == EQUIP_IDX_ARMOR || type == EQUIP_IDX_OFF_HAND || type == EQUIP_IDX_HELMET ||
+               type == EQUIP_IDX_CLOAK || type == EQUIP_IDX_GLOVES || type == EQUIP_IDX_BOOTS;
+    };
     int EquipType();
     bool IsWeakTo( uint32 dwElement );
 

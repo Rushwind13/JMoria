@@ -42,8 +42,7 @@ WHEN( "^I call UpdateSeek$" )
 WHEN( "^I call WalkSeek$" )
 {
     ScenarioScope<TestCtx> context;
-    JVector dest( 0, 0 );
-    bool result = context->brain->WalkSeek( 1.0f, dest, DUNG_COLL_NO_COLLISION );
+    bool result = context->brain->WalkSeek( 1.0f );
     context->result_bool = result;
 }
 

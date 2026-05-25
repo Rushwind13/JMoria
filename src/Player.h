@@ -6,6 +6,7 @@
 
 class CTileset;
 class CItem;
+class CItemDef;
 class CEffect;
 class CMonster;
 #define PLAYER_TURNS_PER_HP 4
@@ -23,6 +24,7 @@ enum eInvFilter
     INV_WIELD,
     INV_ZAP,
     INV_FIRE,
+    INV_STAFF,
 };
 
 #define SIGHT_DISTANCE_PLAYER 5
@@ -110,11 +112,11 @@ public:
           m_szKilledBy( NULL ),
           m_bIsRested( true ),
           m_bIsDisturbed( false ),
-          m_bPendingIdentify( false ),
           m_bLastEffectNoticed( false ),
           m_fDamageModifier( 0.0f ),
           m_fToHitModifier( 0.0f ),
           m_fArmorClass( 1.0f ),
+          m_fACBonus( 0.0f ),
           m_fSpeed( 1.0f ),
           m_fHitPoints( 0.0f ),
           m_fLastHPTime( 0.0f ),
@@ -151,6 +153,9 @@ public:
                 m_fHitPoints = fMinHP;
         }
         m_fCurHitPoints = m_fHitPoints;
+
+        // Keep derived combat stats in sync with the canonical recalc path.
+        RecalcCombatStats();
     };
     ~CPlayer() { Term(); }
 
@@ -238,6 +243,7 @@ public:
     bool IsRemovable( CLink<CItem> *pLink );
     bool RemoveEquipment( CLink<CItem> *pLink );
 
+    void RecalcCombatStats();
     void XchangeWeapons();
 
     bool IsDrinkable( CLink<CItem> *pLink );
@@ -252,6 +258,9 @@ public:
 
     bool IsZappable( CLink<CItem> *pLink );
     JResult Zap( CLink<CItem> *pLink );
+
+    bool IsStaff( CLink<CItem> *pLink );
+    JResult UseStaff( CLink<CItem> *pLink );
 
     void
     ConsumeItem( CLink<CItem> *pLink ); // Unified consumption for ammo/charges: decrement or remove
@@ -274,10 +283,7 @@ public:
     JResult DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwFlags );
     JResult DoHealEffects( CEffect *pEffect );
     JResult DoHealHP( CEffect *pEffect );
-    JResult DoHitEffects( CEffect *pEffect );
-    JResult DoPhysicalHit( CEffect *pEffect );
-    JResult DoLightRay( CEffect *pEffect );
-    JResult DoElementalHit( CEffect *pEffect );
+    JResult DoACBuff( CEffect *pEffect );
     JResult DoDamageInventory( uint32 dwElement );
     JResult DoDamageEquipment( uint32 dwElement );
     JResult DoCreateEffects( CEffect *pEffect );
@@ -288,14 +294,17 @@ public:
     JResult UndoIntrinsicEffects( CEffect *pEffect );
     JResult DoApplyCurse();
     JResult DoRestoreEffects( CEffect *pEffect );
-    JResult DoIdentify();
     JResult DoGainEffects( CEffect *pEffect );
     JResult DoLoseEffects( CEffect *pEffect );
     JResult DoSeeEffects( CEffect *pEffect );
     JResult DoTeleport( CEffect *pEffect );
     JResult DoMagicMapping( CEffect *pEffect );
-    JResult DoRecall();
+    JResult BeginRecall();
+    void Recall();
     JResult DoSummonMonsters();
+    JResult ApplyChosenItem( CLink<CItem> *pChosen, CEffect *pEffect, int dwItemFlags );
+    void GiveAllWandsAndStaves();
+    void IdentifyAllInventory();
 
     bool SetName( const char *szName );
 
@@ -321,11 +330,16 @@ public:
 
     float Attack();
     float RangedAttack( CLink<CItem> *pArrow );
+    float GetStealth() const;
     float Damage( float fDamageMult );
 
     bool Hit( float &fRoll );
     int TakeDamage( float fDamage, const char *szMon, uint32 dwElement = 0 );
     float Resist( uint32 dwElement );
+    static float ItemDestroyChance( float fResistMult )
+    {
+        return fResistMult * ITEM_DESTROY_CHANCE;
+    }
 
     void OnKillMonster( CMonster *pMon, float fKillingBlow );
     bool DamageMonster( CMonster *pMon, float fDamage );
@@ -355,17 +369,15 @@ public:
 
     bool m_bIsRested;
     bool m_bIsDisturbed;
-    bool m_bPendingIdentify;
     bool m_bLastEffectNoticed;
 
-    bool HasPendingIdentify() { return m_bPendingIdentify; }
-    void ClearPendingIdentify() { m_bPendingIdentify = false; }
     float GetSpeed() { return m_fSpeed; }
 
 protected:
     void GainLevel();
 
     float m_fArmorClass;
+    float m_fACBonus;
     float m_fHitPoints;
     float m_fCurHitPoints;
     float m_fLastHPTime;

@@ -12,6 +12,8 @@ enum eModModifier
     MOD_TUNNEL = 1,
     MOD_INIT,
     MOD_CLOSE,
+    MOD_SPIKE,
+    MOD_BASH,
     MOD_MAX
 };
 
@@ -21,7 +23,6 @@ class CModState : public CStateBase
 public:
 protected:
     char m_cCommand;
-    JVector m_vNewPos;
 
 private:
     // Member Functions
@@ -32,9 +33,13 @@ public:
     virtual void OnUpdate( float fCurTime ) {}
     virtual int OnBaseHandleKey( JKeysym *keysym );
     virtual int OnHandleKey( JKeysym *keysym );
-
+#ifdef UNIT_TEST
+public:
+#else
 protected:
 private:
+#endif // UNIT_TEST
+    JVector m_vNewPos;
     ModKeyHandler m_pKeyHandlers[MOD_MAX];
     ModKeyHandler m_pCurKeyHandler;
 
@@ -43,6 +48,8 @@ private:
     int OnHandleOpen( JKeysym *keysym );
     int OnHandleTunnel( JKeysym *keysym );
     int OnHandleClose( JKeysym *keysym );
+    int OnHandleSpike( JKeysym *keysym );
+    int OnHandleBash( JKeysym *keysym );
     int OnHandleInit( JKeysym *keysym );
 
     bool TestOpen();
@@ -53,6 +60,13 @@ private:
 
     bool TestClose();
     bool DoClose();
+
+    bool TestSpike();
+    bool DoSpike();
+    bool DoUnspike();
+
+    bool TestBash();
+    bool DoBash();
 
     void ResetToState( int newstate );
 };

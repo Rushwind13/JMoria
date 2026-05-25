@@ -286,7 +286,7 @@ bool CEndGameState::InitScores()
     while( dfScores.ReadScore( *ps ) )
     {
         ps->InitToString();
-        m_llScores->Add( ps, ps->m_dwScore, false );
+        m_llScores->Add( ps, ps->m_dwScore, -1, false );
         ps = new CScore;
     }
 

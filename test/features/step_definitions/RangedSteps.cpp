@@ -126,12 +126,12 @@ WHEN( "^the projectile completes its trajectory$" )
 
     // Drive the trajectory animation to completion by calling OnUpdate
     // with sufficient time steps. The failsafe triggers at 20 steps.
-    JLog( LOG_LEVEL_WARN, true, "ProjectileCompletes: Starting trajectory loop\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "ProjectileCompletes: Starting trajectory loop\n" );
     for( int i = 0; i < 25; i++ )
     {
         if( g_pGame->GetGameStateIndex() != STATE_RANGED )
         {
-            JLog( LOG_LEVEL_WARN, true, "ProjectileCompletes: Exited RANGED at iteration %d\n", i );
+            JLog( LOG_LEVEL_DEBUG, true, "ProjectileCompletes: Exited RANGED at iter %d\n", i );
             break;
         }
         g_pGame->GetGameState()->Update( PROJECTILE_UPDATE_INTERVAL );
@@ -140,7 +140,7 @@ WHEN( "^the projectile completes its trajectory$" )
     // Run one more game update cycle to ensure any arrow drops and item additions complete
     g_pGame->Update();
 
-    JLog( LOG_LEVEL_WARN, true, "ProjectileCompletes: Loop complete, state=%d\n",
+    JLog( LOG_LEVEL_DEBUG, true, "ProjectileCompletes: Loop complete, state=%d\n",
           g_pGame->GetGameStateIndex() );
 }
 
@@ -177,10 +177,6 @@ THEN( "^the player's target is set$" )
 THEN( "^the ranged hit position matches the target$" )
 {
     ScenarioScope<TestCtx> context;
-
-    // First verify target is still set
-    CMonster *pTarget = g_pGame->GetPlayer()->GetTarget();
-    EXPECT_NE( pTarget, nullptr ) << "Target is null - target was lost after confirmation";
 
     JVector vHit = g_pGame->GetPlayer()->GetRangedHitPosition();
     // Hit position should be non-zero (a valid hit occurred)

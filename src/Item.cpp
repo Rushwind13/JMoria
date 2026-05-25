@@ -77,27 +77,18 @@ void CItem::Init( CItemDef *pid )
     m_fBonusToDamage = m_id->m_szBonusToDamage ? Util::Roll( m_id->m_szBonusToDamage ) : 0.0f;
 
     // Speed bonus: rings randomize 0.1-1.0; other equipment use fixed m_id->m_fSpeed
-    if( m_id->m_dwIndex == ITEM_IDX_RING )
+    if( m_id->m_llEffects )
     {
-        bool hasSpeedEffect = false;
-        if( m_id->m_llEffects )
+        CLink<CEffect> *pLink = m_id->m_llEffects->GetHead();
+        while( pLink )
         {
-            CLink<CEffect> *pLink = m_id->m_llEffects->GetHead();
-            while( pLink )
+            if( pLink->m_lpData->m_dwFlags & EFFECT_FLAG_SPEED )
             {
-                if( pLink->m_lpData->m_dwFlags & EFFECT_FLAG_SPEED )
-                {
-                    hasSpeedEffect = true;
-                    break;
-                }
-                pLink = pLink->next;
+                m_fSpeedBonus += m_id->m_fSpeedBonus;
+                break;
             }
+            pLink = pLink->next;
         }
-        m_fSpeedBonus = hasSpeedEffect ? (float)Util::GetRandom( 1, 20 ) / 10.0f : 0.0f;
-    }
-    else
-    {
-        m_fSpeedBonus = m_id->m_fSpeed;
     }
 
     switch( m_id->m_dwIndex )
@@ -172,7 +163,7 @@ bool CItem::IsConsumed()
     if( m_id == NULL )
         return false;
     if( m_id->m_dwIndex == ITEM_IDX_WAND || m_id->m_dwIndex == ITEM_IDX_STAFF )
-        return ( m_dwCharges == 0 );
+        return false; // Wands/staves stay in inventory when depleted; recharge to restore
     if( m_id->m_dwIndex == ITEM_IDX_ARROW || m_id->m_dwIndex == ITEM_IDX_BOLT )
         return ( m_dwCount == 0 );
     return false;
@@ -342,7 +333,7 @@ void CItem::SetColor()
     m_fColorChangeInterval = 0.0f;
 }
 
-unsigned char ItemIDs[ITEM_IDX_MAX + 1] = "|)[](]]\"=~{}{}&?!-_?$~//\\/|/|]!";
+unsigned char ItemIDs[ITEM_IDX_MAX + 1] = "|)[](]]\"=~{}{}&?!-_?$~//\\/|/|]!;";
 const int EquipTypes[ITEM_IDX_MAX + 1] = {
     EQUIP_IDX_MAIN_HAND, EQUIP_IDX_OFF_HAND,  EQUIP_IDX_ARMOR,     EQUIP_IDX_HELMET,
     EQUIP_IDX_CLOAK,     EQUIP_IDX_GLOVES,    EQUIP_IDX_BOOTS,     EQUIP_IDX_AMULET,
@@ -351,7 +342,7 @@ const int EquipTypes[ITEM_IDX_MAX + 1] = {
     EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,
     EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID,   EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND,
     EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND, EQUIP_IDX_MAIN_HAND,
-    EQUIP_IDX_MAIN_HAND, EQUIP_IDX_BELT,      EQUIP_IDX_INVALID };
+    EQUIP_IDX_MAIN_HAND, EQUIP_IDX_BELT,      EQUIP_IDX_INVALID,   EQUIP_IDX_INVALID };
 
 // Item weakness table — one entry per ITEM_IDX_* value.
 // Stores EFFECT_FLAG_* elements the item type is weak against.
@@ -420,6 +411,8 @@ const uint32 kItemVuln[ITEM_IDX_MAX] = {
     EFFECT_FLAG_FIRE | EFFECT_FLAG_ACID,
     // ITEM_IDX_FUEL        30: fuel system handles this
     0,
+    // ITEM_IDX_SPIKE       31: metal
+    EFFECT_FLAG_ACID,
 };
 
 int CItem::EquipType()
@@ -510,7 +503,10 @@ const char *CItem::GetName()
         return baseName;
     }
 
-    snprintf( szDisplay, sizeof( szDisplay ), "%s", baseName );
+    if( m_id->m_szFlavor )
+        snprintf( szDisplay, sizeof( szDisplay ), "%s %s", m_id->m_szFlavor, baseName );
+    else
+        snprintf( szDisplay, sizeof( szDisplay ), "%s", baseName );
     int baseLen = strlen( szDisplay );
     m_id->FormatProperties( szDisplay + baseLen, sizeof( szDisplay ) - baseLen, m_dwKnownProps,
                             m_dwFlags, m_dwCharges, m_fACBonus, m_fBonusToHit, m_fBonusToDamage );
@@ -536,7 +532,10 @@ const char *CItem::GetPlural()
         return baseName;
     }
 
-    snprintf( szDisplay, sizeof( szDisplay ), "%s", baseName );
+    if( m_id->m_szFlavor )
+        snprintf( szDisplay, sizeof( szDisplay ), "%s %s", m_id->m_szFlavor, baseName );
+    else
+        snprintf( szDisplay, sizeof( szDisplay ), "%s", baseName );
     int baseLen = strlen( szDisplay );
     m_id->FormatProperties( szDisplay + baseLen, sizeof( szDisplay ) - baseLen, m_dwKnownProps,
                             m_dwFlags, m_dwCharges, m_fACBonus, m_fBonusToHit, m_fBonusToDamage );

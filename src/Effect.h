@@ -7,6 +7,17 @@
 #include "JLinkList.h"
 #include "Util.h"
 
+class CItem;
+class CItemDef;
+
+// Targeting requirement for an effect — what, if anything, must the player choose before dispatch.
+enum eEffectTargetType
+{
+    EFFECT_TARGET_NONE = 0,  // no player choice needed; fires immediately
+    EFFECT_TARGET_DIRECTION, // player must choose a direction first
+    EFFECT_TARGET_ITEM,      // player must choose an item (inv or equip) first
+};
+
 // Named effect template — shared catalog entry parsed from Effects.txt.
 // Items, monsters, and spells reference these by name.
 class CEffectDef
@@ -109,6 +120,46 @@ public:
     void SetAmount( const char *szAmount );
     float Resist() const;
     bool HasFlag( const char *szFlag );
+    const char *Effect();
+
+    JResult Area( JVector vOrigin );
+    JResult Ball( JVector vOrigin );
+    JResult Line( JVector vOrigin );
+    JResult LightRay( JVector vOrigin );
+    JResult Elemental( JVector vOrigin );
+    JResult Physical( JVector vOrigin );
+    JResult Status( JVector vOrigin, uint32 dwFlag );
+    JResult StoneToMud( JVector vOrigin );
+    JResult TeleportAway( JVector vOrigin );
+    JResult Probe( JVector vOrigin );
+    JResult HealMonster( JVector vOrigin );
+    JResult Aggravate( JVector vOrigin );
+    JResult LockDoor( JVector vOrigin );
+
+    // Returns an elemental affinity multiplier for an incoming effect vs a subject's element flags.
+    // dwEffect   — EFFECT_FLAG_* bits describing the incoming attack/effect.
+    // dwSubject  — EFFECT_FLAG_* bits describing the subject's elemental nature (attacks /
+    // intrinsics). Returns: 0.0 = immune, 1.0 = normal, 2.0 = weak. Opposite pairs: FIRE<->COLD,
+    // ELECTRICITY<->ACID.
+    static float CheckAffinity( uint32 dwEffect, uint32 dwSubject );
+
+    // Fire a named effect from the loaded definitions at a given origin.
+    // Stack-allocated; no heap allocation or memory leak.
+    static JResult Fire( const char *szEffectName, JVector vOrigin );
+
+    // Top-level dispatch — called once per effect in the effect list.
+    JResult Dispatch( float fDuration, int dwItemFlags );
+    // Hit-effect sub-dispatch — selects Apply* based on modifier and flag.
+    JResult DoHitEffects();
+    JResult DoHitEffects( JVector vCasterPos, JVector vTargetPos );
+
+    // Targeting: what player choice (if any) is needed before this effect can fire.
+    eEffectTargetType GetTargetType() const;
+    // Returns true if pItem is a legal target for this effect.
+    bool IsValidTarget( CItem *pItem ) const;
+    // Human-readable prompt to show the player when selecting a target.
+    const char *GetTargetPrompt() const;
+
     CEffectDef *m_ed; // pointer to shared effect definition (NULL for inline effects)
     int m_dwEffect;
     uint32 m_dwFlags;

@@ -5,8 +5,8 @@ Feature: Targeting
     I want to verify target selection, cycling, and validation
 
     Background:
-        Given the dungeon is seeded
-        And I have a Player
+        Given I have a game
+        And I initialize the game
         And the game has a player
 
     Scenario: Target list includes visible monster

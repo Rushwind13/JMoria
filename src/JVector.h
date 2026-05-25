@@ -159,6 +159,14 @@ public:
 
     float Length() { return ( ( x * x ) + ( y * y ) ); }
 
+    // Returns true if this vector is within range of other.
+    // Uses squared distance (matching Length()) to avoid sqrt.
+    bool WithinRange( const TVector2<T> &other, T range ) const
+    {
+        return ( ( *this - other ).Length() <= range * range );
+    }
+
+    bool WithinRange( T range ) const { return ( Length() <= range * range ); }
     void Norm()
     {
         float len = Length();

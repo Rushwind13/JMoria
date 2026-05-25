@@ -44,6 +44,7 @@ public:
         return OnHandleKey( keysym );
     };
     void Update( float fCurTime ) { OnUpdate( fCurTime ); }
+    virtual void Begin( int previousState ) {}
 
 protected:
     virtual int OnHandleKey( JKeysym *keysym ) = 0;
@@ -127,6 +128,9 @@ protected:
         }
 
         // Use "roguelike" directional keybinds
+        // Ctrl+letter is never directional (e.g. ^n = name character, not SE move)
+        if( keysym->mod & JMOD_CTRL )
+            return false;
         char sym = GetAlpha( keysym );
         if( sym == NULL )
             return false;

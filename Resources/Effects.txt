@@ -277,6 +277,13 @@ Effect <Cause Sleep>
     Flag        <EFFECT_FLAG_SLEEP>
     Range       15
 }
+Effect <Sleep Area>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag        <EFFECT_FLAG_SLEEP>
+    Modifier    <EFFECT_MOD_AREA>
+    Radius      5
+}
 Effect <Mass Sleep>
 {
     Type        <EFFECT_TYPE_HIT>
@@ -290,6 +297,19 @@ Effect <Sleep Touch>
     Flag        <EFFECT_FLAG_SLEEP>
     Duration    5.0
     Range       1
+}
+# --- EFFECT_FLAG_AGGRAVATE ---
+
+Effect <Aggravate Monsters>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag2       <EFFECT_FLAG_AGGRAVATE>
+    Radius      25
+}
+Effect <Aggravate Monster>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag2       <EFFECT_FLAG_AGGRAVATE>
 }
 # --- EFFECT_FLAG_CONFUSE ---
 
@@ -733,6 +753,11 @@ Effect <Timed Speed>
     Modifier    <EFFECT_MOD_TIMED>
     Duration    80.0
 }
+Effect <Ring Speed>
+{
+    Type        <EFFECT_TYPE_INTRINSIC>
+    Flag        <EFFECT_FLAG_SPEED>
+}
 Effect <Searching>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
@@ -841,4 +866,13 @@ Effect <Detect Monsters>
 {
     Type        <EFFECT_TYPE_SEE>
     Flag        <EFFECT_FLAG_MONSTERS>
+}
+
+# --- LOCK - door manipulation ---
+
+Effect <Lock Door>
+{
+    Type        <EFFECT_TYPE_HIT>
+    Flag2       <EFFECT_FLAG_LOCK>
+    Range       1
 }

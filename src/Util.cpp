@@ -332,40 +332,39 @@ JLinkList<JIVector> *GenerateLine( const JIVector vSource, const JIVector vTarge
 {
     JLinkList<JIVector> *llLine = new JLinkList<JIVector>;
 
-    // Bresenham Line Algorithm — pure line generation, no collision checks
+    // Bresenham Line Algorithm — pure line generation, no collision checks.
+    // Terminates when the target tile is reached (primary) or the safety cap
+    // is exhausted (secondary).  The safety cap should be >= dx+dy+1 (Manhattan
+    // distance + 1) so the staircase path always has room to reach the target.
     JIVector vDelta( abs( vTarget.x - vSource.x ), abs( vTarget.y - vSource.y ) );
     JIVector vStep( vSource.x < vTarget.x ? 1 : -1, vSource.y < vTarget.y ? 1 : -1 );
     int error = 2 * ( vDelta.y - vDelta.x );
 
     JIVector vCurrent = vSource;
-    bool alreadyAdded = false;
-    uint8 steps_remaining = distance;
+    int safety = distance; // caller must pass at least dx+dy+1
 
-    while( steps_remaining > 0 )
+    while( safety > 0 )
     {
-        if( !alreadyAdded )
-        {
-            llLine->Add( new JIVector( vCurrent ) );
-            alreadyAdded = true;
-            steps_remaining--;
-            if( steps_remaining == 0 )
-                break;
-        }
+        if( !vCurrent.IsInWorld() )
+            break;
 
-        JIVector vNextPos = vCurrent;
+        llLine->Add( new JIVector( vCurrent ) );
+        safety--;
+
+        // Stop once we have added the target tile.
+        if( vCurrent.x == vTarget.x && vCurrent.y == vTarget.y )
+            break;
+
         if( error > 0 )
         {
-            vNextPos.y += vStep.y;
+            vCurrent.y += vStep.y;
             error -= 2 * vDelta.x;
         }
         else
         {
-            vNextPos.x += vStep.x;
+            vCurrent.x += vStep.x;
             error += 2 * vDelta.y;
         }
-
-        vCurrent = vNextPos;
-        alreadyAdded = false;
     }
     return llLine;
 }
@@ -389,26 +388,6 @@ bool CheckLineCollision( JLinkList<JIVector> *llLine, const JIVector vSource,
                 return false;
         }
 
-        // Check for diagonal movement between consecutive points
-        if( pPrev )
-        {
-            JIVector *pPrevPt = pPrev->m_lpData;
-            if( pCurrent->x != pPrevPt->x && pCurrent->y != pPrevPt->y )
-            {
-                JIVector vDiag1( pCurrent->x, pPrevPt->y );
-                JIVector vDiag2( pPrevPt->x, pCurrent->y );
-
-                vTest.Init( VEC_EXPAND( vDiag1 ) );
-                if( !isWalkable( vTest ) )
-                    return false;
-
-                vTest.Init( VEC_EXPAND( vDiag2 ) );
-                if( !isWalkable( vTest ) )
-                    return false;
-            }
-        }
-
-        pPrev = pLink;
         pLink = pLink->next;
     }
     return true;
@@ -526,5 +505,4 @@ double GetTimeInMillis()
     gettimeofday( &tv, NULL );
     return ( tv.tv_sec * 1000.0 ) + ( tv.tv_usec / 1000.0 );
 }
-
 } // namespace Util

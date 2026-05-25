@@ -17,7 +17,9 @@ enum eUseModifier
     USE_QUAFF,
     USE_READ,
     USE_FUEL,
-    USE_IDENTIFY,
+    USE_CHOOSE_ITEM,
+    USE_STAFF,
+    USE_TARGET,
     USE_MAX
 };
 
@@ -29,8 +31,11 @@ protected:
     char m_cCommand;
     int m_dwSelected;
     CLink<CItem> *m_pSelected;
-    int m_dwQuantityPrompt; // For stack splitting: -1 = no prompt, 0+ = awaiting quantity input
-    char m_szQuantityBuffer[32]; // Buffer for numeric input
+    int m_dwQuantityPrompt;
+    char m_szQuantityBuffer[32];
+    CEffect *m_pPendingEffect;
+    int m_dwPendingItemFlags;
+    bool m_bFromEquipment;
 
 private:
     // Member Functions
@@ -60,7 +65,9 @@ private:
     int OnHandleQuaff( JKeysym *keysym );
     int OnHandleRead( JKeysym *keysym );
     int OnHandleFuel( JKeysym *keysym );
-    int OnHandleIdentify( JKeysym *keysym );
+    int OnHandleChooseItem( JKeysym *keysym );
+    int OnHandleStaff( JKeysym *keysym );
+    int OnHandleTarget( JKeysym *keysym );
 
     bool TestWield();
     bool DoWield();
@@ -75,13 +82,18 @@ private:
     bool DoQuaff();
 
     bool TestRead();
-    bool DoRead();
+    JResult DoRead();
 
     bool TestFuel();
     bool DoFuel();
 
+    bool TestStaff();
+    JResult DoStaff();
+
     int OnHandleQuantityPrompt( JKeysym *keysym );
 
+    void TargetEffect( CEffect *pEffect, uint32 dwFlags );
+    void GosubState( int newstate );
     void ResetToState( int newstate );
 };
 

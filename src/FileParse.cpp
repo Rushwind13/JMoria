@@ -41,6 +41,8 @@ bool CDataFile::Open( const char *szFilename )
     Util::Shuffle( ScrollIndex, NUM_SCROLL_TYPES );
     Util::Shuffle( WandIndex, NUM_LUMBER_TYPES );
     Util::Shuffle( StaffIndex, NUM_LUMBER_TYPES );
+    Util::Shuffle( AmuletIndex, NUM_METAL_TYPES );
+    Util::Shuffle( RingIndex, NUM_METAL_TYPES );
 
     return true;
 }
@@ -447,9 +449,13 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
             {
                 idIn.m_szPlural = GetValue( szLine, idIn.m_szPlural );
             }
-            else if( strncasecmp( szLine, "speed", 5 ) == 0 )
+            else if( strncasecmp( szLine, "attackspeed", 11 ) == 0 )
             {
-                idIn.m_fSpeed = GetValue( szLine, idIn.m_fSpeed );
+                idIn.m_fAttackSpeed = GetValue( szLine, idIn.m_fAttackSpeed );
+            }
+            else if( strncasecmp( szLine, "speedbonus", 10 ) == 0 )
+            {
+                idIn.m_fSpeedBonus = GetValue( szLine, idIn.m_fSpeedBonus );
             }
             else if( strncasecmp( szLine, "acbonus", 7 ) == 0 )
             {
@@ -615,6 +621,48 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                         sprintf( szUnID, "%s", g_Constants.LumberRGBA( wand_index ) );
                         idIn.m_Color.SetColor( szUnID );
                         m_dwWandCount++;
+                    }
+                    else if( idIn.m_dwIndex == ITEM_IDX_RING )
+                    {
+                        int ring_index = RingIndex[m_dwRingCount];
+                        idIn.m_szFlavor =
+                            new char[Util::jstrlen( g_Constants.Metal( ring_index ) ) + 1];
+                        Util::jstrcpy( idIn.m_szFlavor, g_Constants.Metal( ring_index ) );
+                        char szUnID[100];
+                        sprintf( szUnID, "%s Ring", idIn.m_szFlavor );
+                        JLog( LOG_LEVEL_DEBUG, true, "Ring #%d - index %d color %s\n",
+                              m_dwRingCount, ring_index, szUnID );
+                        idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
+
+                        sprintf( szUnID, "%s Rings", idIn.m_szFlavor );
+                        idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
+
+                        sprintf( szUnID, "%s", g_Constants.MetalRGBA( ring_index ) );
+                        idIn.m_Color.SetColor( szUnID );
+                        m_dwRingCount++;
+                    }
+                    else if( idIn.m_dwIndex == ITEM_IDX_AMULET )
+                    {
+                        int amulet_index = AmuletIndex[m_dwAmuletCount];
+                        idIn.m_szFlavor =
+                            new char[Util::jstrlen( g_Constants.Metal( amulet_index ) ) + 1];
+                        Util::jstrcpy( idIn.m_szFlavor, g_Constants.Metal( amulet_index ) );
+                        char szUnID[100];
+                        sprintf( szUnID, "%s Amulet", idIn.m_szFlavor );
+                        JLog( LOG_LEVEL_DEBUG, true, "Amulet #%d - index %d color %s\n",
+                              m_dwAmuletCount, amulet_index, szUnID );
+                        idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
+
+                        sprintf( szUnID, "%s Amulets", idIn.m_szFlavor );
+                        idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
+                        Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
+
+                        sprintf( szUnID, "%s", g_Constants.MetalRGBA( amulet_index ) );
+                        idIn.m_Color.SetColor( szUnID );
+                        m_dwAmuletCount++;
                     }
                     else
                     {

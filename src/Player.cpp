@@ -69,7 +69,6 @@ bool CPlayer::Update( float fCurTime )
         }
         m_fLastLightTime = (float)g_pGame->GetTime();
     }
-    UpdateActiveEffects( fCurTime );
     UpdateVisibleMonsters();
     CheckDisturbance();
     PassiveSearch();
@@ -91,12 +90,22 @@ void CPlayer::UpdateActiveEffects( float fCurTime )
     while( pActive != NULL )
     {
         pEffect = pActive->m_lpData;
-        pEffect->m_fDuration -= fCurTime;
+        pEffect->m_fDuration -= 1.0f;
         if( pEffect->m_fDuration <= 0.0f )
         {
-            UndoIntrinsicEffects( pEffect );
+            m_bIsDisturbed = true;
+            bool isRecall = ( pEffect->m_dwEffect == EFFECT_TYPE_CREATE &&
+                              pEffect->m_dwFlags == EFFECT_FLAG_RECALL );
             pDelete = pActive;
             pActive = pActive->next;
+            if( isRecall )
+            {
+                // Remove before executing: OnChangeLevel reinitializes game state
+                m_llActiveEffects->Remove( pDelete, true );
+                Recall();
+                return; // world state changed; stop processing this tick
+            }
+            UndoIntrinsicEffects( pEffect );
             m_llActiveEffects->Remove( pDelete, true );
             continue;
         }
@@ -356,6 +365,9 @@ void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
     case INV_FIRE:
         sprintf( meta.header, "Fire which ammo?\n" );
         break;
+    case INV_STAFF:
+        sprintf( meta.header, "Use which staff?\n" );
+        break;
     default:
         sprintf( meta.header, "You are Carrying:\n" );
         break;
@@ -391,6 +403,9 @@ void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
         case INV_FIRE:
             show = IsCompatibleAmmo( pLink );
             break;
+        case INV_STAFF:
+            show = IsStaff( pLink );
+            break;
         default:
             show = true;
             break;
@@ -406,15 +421,15 @@ void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
             {
                 pDT->Printf( "%c - %s\n", cListId, pItem->GetName() );
             }
-        }
-        if( cListId < meta.limit )
-        {
-            cListId++;
-        }
-        else
-        {
-            pDT->Printf( meta.footer );
-            break;
+            if( cListId < meta.limit )
+            {
+                cListId++;
+            }
+            else
+            {
+                pDT->Printf( meta.footer );
+                break;
+            }
         }
         pLink = m_llInventory->GetNext( pLink );
     }
@@ -721,12 +736,6 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
     // Now put on the new item.
     m_llInventory->Remove( pLink, false );
     pItem->m_pllLink = m_llEquipment->Add( pItem, pItem->EquipType(), pItem->GetInstanceId() );
-    m_fArmorClass += pItem->m_id->m_fBaseAC + pItem->m_fACBonus;
-    if( pItem->m_id->m_szBaseDamage != NULL )
-        Util::jstrcpy( m_szDamage, pItem->m_id->m_szBaseDamage );
-    m_fDamageModifier += pItem->m_fBonusToDamage;
-    m_fToHitModifier += pItem->m_fBonusToHit;
-    m_fSpeed += pItem->m_fSpeedBonus;
 
     // Defensive: if this is a two-handed weapon, ensure off-hand is clear.
     if( pItem->m_id && ( pItem->m_id->m_dwFlags & ITEM_FLAG_2HANDED ) )
@@ -752,6 +761,8 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
             RemoveEquipment( pOffCheck );
         }
     }
+
+    RecalcCombatStats();
 
     return JSUCCESS;
 }
@@ -785,14 +796,49 @@ bool CPlayer::RemoveEquipment( CLink<CItem> *pLink )
 
     m_llEquipment->Remove( pLink, false );
     pItem->m_pllLink = m_llInventory->Add( pItem, pItem->m_id->m_dwIndex, pItem->GetInstanceId() );
-    m_fArmorClass -= pItem->m_id->m_fBaseAC + pItem->m_fACBonus;
-    if( pItem->m_id->m_szBaseDamage != NULL )
-        Util::jstrcpy( m_szDamage, PLAYER_BASE_DAMAGE );
-    m_fDamageModifier -= pItem->m_fBonusToDamage;
-    m_fToHitModifier -= pItem->m_fBonusToHit;
-    m_fSpeed -= pItem->m_fSpeedBonus;
+    RecalcCombatStats();
 
     return true;
+}
+
+void CPlayer::RecalcCombatStats()
+{
+    // Reset to base values
+    m_fArmorClass = 1.0f;
+    Util::jstrcpy( m_szDamage, PLAYER_BASE_DAMAGE );
+    m_fDamageModifier = 0.0f;
+    m_fToHitModifier = 0.0f;
+    m_fSpeed = 1.0f;
+
+    // Re-add contributions from all active equipment slots
+    CLink<CItem> *pLink = m_llEquipment->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData )
+        {
+            CItem *pItem = pLink->m_lpData;
+            bool isActive =
+                ( pLink->m_dwIndex == EQUIP_IDX_MAIN_HAND ||
+                  pLink->m_dwIndex == EQUIP_IDX_OFF_HAND || pLink->m_dwIndex == EQUIP_IDX_HELMET ||
+                  pLink->m_dwIndex == EQUIP_IDX_AMULET || pLink->m_dwIndex == EQUIP_IDX_ARMOR ||
+                  pLink->m_dwIndex == EQUIP_IDX_CLOAK || pLink->m_dwIndex == EQUIP_IDX_GLOVES ||
+                  pLink->m_dwIndex == EQUIP_IDX_BELT || pLink->m_dwIndex == EQUIP_IDX_BOOTS ||
+                  pLink->m_dwIndex == EQUIP_IDX_LRING || pLink->m_dwIndex == EQUIP_IDX_RRING ||
+                  pLink->m_dwIndex == EQUIP_IDX_TORCH );
+
+            if( isActive && pItem->m_id )
+            {
+                m_fArmorClass += pItem->m_id->m_fBaseAC + pItem->m_fACBonus;
+                if( pItem->m_id->m_szBaseDamage != NULL )
+                    Util::jstrcpy( m_szDamage, pItem->m_id->m_szBaseDamage );
+                m_fDamageModifier += pItem->m_fBonusToDamage;
+                m_fToHitModifier += pItem->m_fBonusToHit;
+                m_fSpeed += pItem->m_fSpeedBonus;
+            }
+        }
+        pLink = m_llEquipment->GetNext( pLink );
+    }
+    m_fArmorClass += m_fACBonus;
 }
 
 void CPlayer::XchangeWeapons()
@@ -819,43 +865,7 @@ void CPlayer::XchangeWeapons()
     m_llEquipment->SwapData( pMainHand, p2ndMain );
     m_llEquipment->SwapData( pOffHand, p2ndOff );
 
-    // Recalculate all combat stats from scratch
-    // Start with base values
-    m_fArmorClass = 10.0f; // Base AC
-    Util::jstrcpy( m_szDamage, PLAYER_BASE_DAMAGE );
-    m_fDamageModifier = 0.0f;
-    m_fToHitModifier = 0.0f;
-    m_fSpeed = 1.0f; // Base speed multiplier
-
-    // Re-add contributions from all equipped items
-    CLink<CItem> *pLink = m_llEquipment->GetHead();
-    while( pLink )
-    {
-        if( pLink->m_lpData )
-        {
-            CItem *pItem = pLink->m_lpData;
-            // Only count items in active slots (not secondary slots)
-            bool isActive =
-                ( pLink->m_dwIndex == EQUIP_IDX_MAIN_HAND ||
-                  pLink->m_dwIndex == EQUIP_IDX_OFF_HAND || pLink->m_dwIndex == EQUIP_IDX_HELMET ||
-                  pLink->m_dwIndex == EQUIP_IDX_AMULET || pLink->m_dwIndex == EQUIP_IDX_ARMOR ||
-                  pLink->m_dwIndex == EQUIP_IDX_CLOAK || pLink->m_dwIndex == EQUIP_IDX_GLOVES ||
-                  pLink->m_dwIndex == EQUIP_IDX_BELT || pLink->m_dwIndex == EQUIP_IDX_BOOTS ||
-                  pLink->m_dwIndex == EQUIP_IDX_LRING || pLink->m_dwIndex == EQUIP_IDX_RRING ||
-                  pLink->m_dwIndex == EQUIP_IDX_TORCH );
-
-            if( isActive && pItem->m_id )
-            {
-                m_fArmorClass += pItem->m_id->m_fBaseAC + pItem->m_fACBonus;
-                if( pItem->m_id->m_szBaseDamage != NULL )
-                    Util::jstrcpy( m_szDamage, pItem->m_id->m_szBaseDamage );
-                m_fDamageModifier += pItem->m_fBonusToDamage;
-                m_fToHitModifier += pItem->m_fBonusToHit;
-                m_fSpeed += pItem->m_fSpeedBonus;
-            }
-        }
-        pLink = m_llEquipment->GetNext( pLink );
-    }
+    RecalcCombatStats();
 
     // Print feedback message
     CLink<CItem> *pNewMain = m_llEquipment->GetLink( EQUIP_IDX_MAIN_HAND );
@@ -1093,13 +1103,52 @@ void CPlayer::OnKillMonster( CMonster *pMon, float fKillingBlow )
 
 bool CPlayer::DamageMonster( CMonster *pMon, float fDamage )
 {
+    bool bWasSleeping = ( pMon->m_dwActiveEffects & EFFECT_FLAG_SLEEP ) != 0;
+    if( bWasSleeping )
+        fDamage *= 4.0f;
     if( pMon->TakeDamage( fDamage ) == STATUS_DEAD )
     {
         OnKillMonster( pMon, fDamage );
         g_pGame->GetDungeon()->RemoveMonster( pMon );
         return true;
     }
+    if( bWasSleeping )
+    {
+        pMon->m_dwActiveEffects &= ~EFFECT_FLAG_SLEEP;
+        pMon->m_pBrain->SetState( BRAINSTATE_SEEK );
+        g_pGame->GetMsgs()->Printf( "The %s wakes up!\n", pMon->GetName() );
+    }
     return false;
+}
+
+float CPlayer::GetStealth() const
+{
+    float fNoise = 0.0f;
+    // Boots contribution
+    CLink<CItem> *pBoots = m_llEquipment->GetLink( EQUIP_IDX_BOOTS );
+    if( pBoots == NULL || pBoots->m_lpData == NULL )
+    {
+        fNoise -= 2.0f; // barefoot: very quiet
+    }
+    else
+    {
+        CItem *pItem = pBoots->m_lpData;
+        if( pItem->m_id->m_dwFlags & ITEM_FLAG_METAL )
+            fNoise += 3.0f;
+        else if( pItem->m_id->m_dwFlags & ITEM_FLAG_SILENT )
+            fNoise -= 1.0f;
+    }
+    // Body armor contribution
+    CLink<CItem> *pArmor = m_llEquipment->GetLink( EQUIP_IDX_ARMOR );
+    if( pArmor != NULL && pArmor->m_lpData != NULL )
+    {
+        CItem *pItem = pArmor->m_lpData;
+        if( pItem->m_id->m_dwFlags & ITEM_FLAG_METAL )
+            fNoise += 3.0f;
+        else if( pItem->m_id->m_dwFlags & ITEM_FLAG_SILENT )
+            fNoise -= 1.0f;
+    }
+    return fNoise;
 }
 
 void CPlayer::GainLevel()
@@ -1251,15 +1300,14 @@ bool CPlayer::CanDropHere()
 JResult CPlayer::Quaff( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
-    bool wasIdentified = pItem->IsIdentified();
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
-    if( !wasIdentified && m_bLastEffectNoticed )
+    if( !( pItem->IsIdentified() ) && m_bLastEffectNoticed )
     {
         pItem->Identify();
         g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
     }
-    else if( !wasIdentified && !m_bLastEffectNoticed )
+    else if( !( pItem->IsIdentified() ) && !m_bLastEffectNoticed )
     {
         pItem->m_id->m_bTried = true;
     }
@@ -1270,19 +1318,18 @@ JResult CPlayer::Quaff( CLink<CItem> *pLink )
 JResult CPlayer::Read( CLink<CItem> *pLink )
 {
     CItem *pItem = pLink->m_lpData;
-    bool wasIdentified = pItem->IsIdentified();
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
-    if( !wasIdentified && m_bLastEffectNoticed )
+    if( !( pItem->IsIdentified() ) && m_bLastEffectNoticed )
     {
         pItem->Identify();
         g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
     }
-    else if( !wasIdentified && !m_bLastEffectNoticed )
+    else if( !( pItem->IsIdentified() ) && !m_bLastEffectNoticed )
     {
         pItem->m_id->m_bTried = true;
     }
-    ConsumeItem( pLink ); // Unified consumption
+    ConsumeItem( pLink );
     return retval;
 }
 
@@ -1293,6 +1340,15 @@ JResult CPlayer::Zap( CLink<CItem> *pLink )
     CItem *pItem = pLink->m_lpData;
     CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
     JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
+    if( !( pItem->IsIdentified() ) && m_bLastEffectNoticed )
+    {
+        pItem->Identify();
+        g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
+    }
+    else if( !( pItem->IsIdentified() ) && !m_bLastEffectNoticed )
+    {
+        pItem->m_id->m_bTried = true;
+    }
     return retval;
 }
 
@@ -1362,6 +1418,10 @@ void CPlayer::ConsolidateInventory()
     while( pOuter != NULL )
     {
         CItem *pOuterItem = pOuter->m_lpData;
+        // Snapshot name now — GetName() returns a static buffer, so calling it twice in the
+        // same expression would compare the inner item's name against itself.
+        char szOuterName[128];
+        Util::jstrcpy( szOuterName, pOuterItem->GetName() );
         CLink<CItem> *pInner = m_llInventory->GetNext( pOuter );
 
         while( pInner != NULL )
@@ -1372,7 +1432,7 @@ void CPlayer::ConsolidateInventory()
             // Check if these items can stack together
             if( pOuterItem->m_id->m_dwIndex == pInnerItem->m_id->m_dwIndex &&
                 pOuterItem->IsStackable() &&
-                Util::jstrcmp( pOuterItem->GetName(), pInnerItem->GetName() ) == 0 &&
+                Util::jstrcmp( szOuterName, pInnerItem->GetName() ) == 0 &&
                 ( ( pOuterItem->m_dwFlags & ITEM_FLAG_IDENTIFIED ) ==
                   ( pInnerItem->m_dwFlags & ITEM_FLAG_IDENTIFIED ) ) )
             {
@@ -1463,6 +1523,7 @@ JResult CPlayer::Fuel( CLink<CItem> *pLink )
 JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwItemFlags )
 {
     CEffect *pEffect;
+    JResult retval = JSUCCESS;
     m_bLastEffectNoticed = false;
     while( plEffect != NULL )
     {
@@ -1471,44 +1532,17 @@ JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwIte
               g_Constants.IndexToString( EFFECT_TYPE, pEffect->m_dwEffect ),
               g_Constants.EffectFlagToString( pEffect->m_dwFlags, pEffect->m_dwFlags2 ),
               g_Constants.IndexToString( EFFECT_MOD, pEffect->m_dwModifier ) );
-        switch( pEffect->m_dwEffect )
+        if( pEffect->GetTargetType() != EFFECT_TARGET_NONE )
         {
-        case EFFECT_TYPE_HEAL:
-            DoHealEffects( pEffect );
-            break;
-        case EFFECT_TYPE_HIT:
-            DoHitEffects( pEffect );
-            break;
-        case EFFECT_TYPE_CREATE:
-            DoCreateEffects( pEffect );
-            break;
-        case EFFECT_TYPE_DESTROY:
-            JLog( LOG_LEVEL_DEBUG, true, "Destroying\n" );
-            DoDestroyEffects( pEffect, dwItemFlags );
-            break;
-        case EFFECT_TYPE_INTRINSIC:
-            JLog( LOG_LEVEL_DEBUG, true, "Setting intrinsic\n" );
-            DoIntrinsicEffects( pEffect, fDuration );
-            break;
-        case EFFECT_TYPE_RESTORE:
-            DoRestoreEffects( pEffect );
-            break;
-        case EFFECT_TYPE_GAIN:
-            DoGainEffects( pEffect );
-            break;
-        case EFFECT_TYPE_LOSE:
-            DoLoseEffects( pEffect );
-            break;
-        case EFFECT_TYPE_SEE:
-            DoSeeEffects( pEffect );
-            break;
-        default:
-            JLog( LOG_LEVEL_ERROR, true, "bad effect type: %d\n", pEffect->m_dwEffect );
-            break;
+            // Targeting effects are dispatched by the state machine after player input;
+            // DoEffects skips them here.
+            plEffect = plEffect->next;
+            continue;
         }
+        pEffect->Dispatch( fDuration, dwItemFlags );
         plEffect = plEffect->next;
     }
-    return JSUCCESS;
+    return retval;
 }
 
 JResult CPlayer::DoHealEffects( CEffect *pEffect )
@@ -1602,201 +1636,37 @@ JResult CPlayer::DoHealHP( CEffect *pEffect )
     return JSUCCESS;
 }
 
-JResult CPlayer::DoHitEffects( CEffect *pEffect )
+JResult CPlayer::DoACBuff( CEffect *pEffect )
 {
-    switch( pEffect->m_dwFlags )
+    // If a previous AC buff is still active, remove it so only one entry exists.
+    CLink<CEffect> *pLink = m_llActiveEffects->GetHead();
+    while( pLink )
     {
-    case EFFECT_FLAG_LIGHT:
-        return DoLightRay( pEffect );
-        break;
-    case EFFECT_FLAG_FIRE:
-    case EFFECT_FLAG_COLD:
-    case EFFECT_FLAG_ELECTRICITY:
-    case EFFECT_FLAG_ACID:
-        return DoElementalHit( pEffect );
-        break;
-    default:
-        return DoPhysicalHit( pEffect );
-        break;
-    }
-    return JSUCCESS;
-}
-
-JResult CPlayer::DoPhysicalHit( CEffect *pEffect )
-{
-    bool bCriticalHit = false;
-    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vRangedHitPosition );
-    if( !pTile )
-    {
-        return JBOGUSKEY;
-    }
-    CMonster *pMon = pTile->m_pCurMonster;
-    if( !pMon )
-    {
-        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
-        return JBOGUSKEY;
-    }
-    // Save monster name before it's potentially deleted
-    const char *szMonName = pMon->GetName();
-
-    // If this is a ranged attack (arrow/ammo with bow), perform to-hit check
-    if( m_pCurrentRangedAmmo )
-    {
-        // Get the arrow as a CLink
-        CLink<CItem> *pArrowLink = NULL;
-        CLink<CItem> *pInvItem = m_llInventory->GetHead();
-        while( pInvItem )
+        CLink<CEffect> *pNext = pLink->next;
+        if( pLink->m_lpData && pLink->m_lpData->m_dwFlags == EFFECT_FLAG_AC )
         {
-            if( pInvItem->m_lpData == m_pCurrentRangedAmmo )
-            {
-                pArrowLink = pInvItem;
-                break;
-            }
-            pInvItem = m_llInventory->GetNext( pInvItem );
+            m_llActiveEffects->Remove( pLink, true );
+            break;
         }
-
-        float fRoll = RangedAttack( pArrowLink );
-        bool bHit = pMon->Hit( fRoll );
-
-        if( !bHit )
-        {
-            g_pGame->GetMsgs()->Printf( "You miss the %s.\n", szMonName );
-            JLog( LOG_LEVEL_INFO, true, "Ranged miss: roll %.2f vs AC %d\n", fRoll,
-                  (int)pMon->m_fCurAC );
-            return JSUCCESS; // Arrow missed, no damage
-        }
-
-        if( fRoll > 80.0f )
-        {
-            g_pGame->GetMsgs()->Printf( "(Critical hit!)\n" );
-            bCriticalHit = true;
-        }
+        pLink = pNext;
     }
-    const char *szAmount = pEffect->m_szAmount;
-    if( !szAmount && pEffect->m_ed )
-        szAmount = pEffect->m_ed->m_szAmount;
-    if( !szAmount )
-        szAmount = "1d2";
 
-    float fDamage = Util::Roll( szAmount );
+    // Apply a timed AC bonus to the player.
+    float fBonus = pEffect->m_szAmount ? Util::Roll( pEffect->m_szAmount ) : 5.0f;
+    float fDuration = pEffect->m_fDuration > 0.0f ? pEffect->m_fDuration : 0.0f;
 
-    // For ranged attacks, add arrow's damage bonus
-    if( m_pCurrentRangedAmmo )
+    m_fACBonus = fBonus;
+    RecalcCombatStats();
+
+    g_pGame->GetMsgs()->Printf( "You feel more protected. (+%d AC)\n", (int)fBonus );
+    m_bLastEffectNoticed = true;
+
+    if( fDuration )
     {
-        fDamage += m_pCurrentRangedAmmo->m_fBonusToDamage;
+        CEffect *pActive = new CEffect( *pEffect );
+        pActive->m_fDuration = fDuration;
+        m_llActiveEffects->Add( pActive, pActive->m_dwFlags );
     }
-
-    if( bCriticalHit )
-    {
-        fDamage *= 2.0f;
-    }
-
-    if( DamageMonster( pMon, fDamage ) )
-    {
-        g_pGame->GetMsgs()->Printf( "The %s dies.\n", szMonName );
-    }
-    else
-    {
-        g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
-    }
-    return JSUCCESS;
-}
-
-JResult CPlayer::DoLightRay( CEffect *pEffect )
-{
-    // if there is a monster at the position
-    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vRangedHitPosition );
-    if( !pTile )
-    {
-        return JBOGUSKEY;
-    }
-
-    CMonster *pMon = pTile->m_pCurMonster;
-    if( !pMon )
-    {
-        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
-
-        return JBOGUSKEY;
-    }
-
-    // Save monster name before it's potentially deleted
-    const char *szMonName = pMon->GetName();
-
-    JLog( LOG_LEVEL_INFO, true, "monster: %s\n", szMonName );
-    // TODO: this should be "weaknesses" and re-use effect_flag_light instead of new "general flag"
-    if( ( pMon->m_md->m_dwFlags & MON_FLAG_HURT_BY_LIGHT ) == MON_FLAG_HURT_BY_LIGHT )
-    {
-        JLog( LOG_LEVEL_NOISE, true, "that's gonna hurt\n" );
-
-        float fDamage = Util::Roll( "1d5" ); // pEffect->m_szAmount );
-
-        if( DamageMonster( pMon, fDamage ) )
-        {
-            g_pGame->GetMsgs()->Printf( "The %s shrivels away in the bright light!\n", szMonName );
-        }
-        else
-        {
-            g_pGame->GetMsgs()->Printf( "The %s screams in agony.\n", szMonName );
-        }
-    }
-    else
-    {
-        g_pGame->GetMsgs()->Printf( "The %s is unaffected.\n", szMonName );
-    }
-
-    return JSUCCESS;
-}
-
-JResult CPlayer::DoElementalHit( CEffect *pEffect )
-{
-    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vRangedHitPosition );
-    if( !pTile )
-    {
-        return JBOGUSKEY;
-    }
-
-    CMonster *pMon = pTile->m_pCurMonster;
-    if( !pMon )
-    {
-        JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
-        return JBOGUSKEY;
-    }
-
-    const char *szElement = g_Constants.IndexToString( EFFECT_FLAG, pEffect->m_dwFlags );
-    JLog( LOG_LEVEL_INFO, true, "elemental hit (%s) on %s\n", szElement, pMon->GetName() );
-
-    // Save monster name before it's potentially deleted
-    const char *szMonName = pMon->GetName();
-    // Print effect description message
-    if( pEffect->m_ed && pEffect->m_ed->m_szName )
-    {
-        g_pGame->GetMsgs()->Printf( "The %s strikes the %s with %s.\n", pEffect->m_ed->m_szName,
-                                    szMonName, szElement );
-    }
-
-    const char *szAmount = pEffect->m_szAmount;
-    if( !szAmount && pEffect->m_ed )
-        szAmount = pEffect->m_ed->m_szAmount;
-    if( !szAmount )
-        szAmount = "1d6";
-
-    float fDamage = Util::Roll( szAmount );
-
-    // For ranged attacks, add arrow's damage bonus
-    if( m_pCurrentRangedAmmo )
-    {
-        fDamage += m_pCurrentRangedAmmo->m_fBonusToDamage;
-    }
-
-    if( DamageMonster( pMon, fDamage ) )
-    {
-        g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );
-    }
-    else
-    {
-        g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
-    }
-
     return JSUCCESS;
 }
 
@@ -1812,9 +1682,7 @@ JResult CPlayer::DoDamageInventory( uint32 dwElement )
     // Immunity protects items
     if( fResistMult == 0.0f )
         return JBOGUSKEY;
-
-    // Base 3% chance per inventory slot; halved when player resists
-    float fChance = ( fResistMult < 1.0f ) ? 0.015f : 0.03f;
+    float fChance = ItemDestroyChance( fResistMult );
 
     const char *szVerb = "are destroyed";
     if( element == EFFECT_FLAG_FIRE )
@@ -1856,9 +1724,7 @@ JResult CPlayer::DoDamageEquipment( uint32 dwElement )
     float fResistMult = Resist( dwElement );
     if( fResistMult == 0.0f )
         return JBOGUSKEY;
-
-    float fChance = ( fResistMult < 1.0f ) ? 0.015f : 0.03f;
-
+    float fChance = ItemDestroyChance( fResistMult );
     const char *szElement = ( element == EFFECT_FLAG_FIRE ) ? "fire" : "acid";
 
     CLink<CItem> *pLink = m_llEquipment->GetHead();
@@ -1919,7 +1785,7 @@ JResult CPlayer::DoCreateEffects( CEffect *pEffect )
         retval = DoMagicMapping( pEffect );
         break;
     case EFFECT_FLAG_RECALL:
-        retval = DoRecall();
+        retval = BeginRecall();
         break;
     case EFFECT_FLAG_SUMMON:
         retval = DoSummonMonsters();
@@ -1937,8 +1803,32 @@ JResult CPlayer::DoLightArea()
     {
         pRoom->SetFlags( DUNG_FLAG_LIT );
         g_pGame->GetDungeon()->LightRoom( pRoom );
+
+        // Wake sleeping monsters in the room with high probability
+        CDungeon *pDungeon = g_pGame->GetDungeon();
+        CLink<CMonster> *pLink = pDungeon->m_llMonsters->GetHead();
+        while( pLink != NULL )
+        {
+            CMonster *pMon = pLink->m_lpData;
+            CLink<CMonster> *pNext = pDungeon->m_llMonsters->GetNext( pLink );
+            if( pMon && ( pMon->m_dwActiveEffects & EFFECT_FLAG_SLEEP ) )
+            {
+                JVector vMon = pMon->GetPos();
+                CRoom *pMonRoom = pDungeon->InRoom( vMon );
+                if( pMonRoom == pRoom && Util::GetRandom( 0.0f, 1.0f ) < SLEEP_LIGHT_WAKE_CHANCE )
+                {
+                    pMon->m_dwActiveEffects &= ~EFFECT_FLAG_SLEEP;
+                    pMon->m_pBrain->SetState( BRAINSTATE_SEEK );
+                    g_pGame->GetMsgs()->Printf( "The %s wakes up!\n", pMon->GetName() );
+                }
+            }
+            pLink = pNext;
+        }
+
+        g_pGame->GetMsgs()->Printf( "The room is flooded with light!\n" );
         return JSUCCESS;
     }
+    g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
     return JBOGUSKEY;
 }
 
@@ -1993,30 +1883,54 @@ JResult CPlayer::DoMagicMapping( CEffect *pEffect )
     return JSUCCESS;
 }
 
-JResult CPlayer::DoRecall()
+JResult CPlayer::BeginRecall()
+{
+    // Check if recall is already pending
+    CLink<CEffect> *pLink = m_llActiveEffects->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData && pLink->m_lpData->m_dwFlags == EFFECT_FLAG_RECALL )
+        {
+            g_pGame->GetMsgs()->Printf( "You already feel the pull of recall.\n" );
+            return JSUCCESS;
+        }
+        pLink = pLink->next;
+    }
+
+    CEffect *pActive = new CEffect();
+    pActive->m_dwEffect = EFFECT_TYPE_CREATE;
+    pActive->m_dwFlags = EFFECT_FLAG_RECALL;
+    pActive->m_fDuration = (float)RECALL_DURATION;
+    m_llActiveEffects->Add( pActive, pActive->m_dwFlags );
+
+    g_pGame->GetMsgs()->Printf( "You feel yourself starting to drift...\n" );
+    return JSUCCESS;
+}
+
+void CPlayer::Recall()
 {
     CDungeon *pDungeon = g_pGame->GetDungeon();
+    int delta = pDungeon->depth > 0 ? -pDungeon->depth : -m_dwRecallDepth;
+
+    // In dungeon: save current depth, return to town
     if( pDungeon->depth > 0 )
     {
-        // In dungeon: save current depth, return to town
         if( m_dwRecallDepth > (uint8)pDungeon->depth )
         {
             g_pGame->GetMsgs()->Printf( "Recall depth reset (was: %dft)\n", m_dwRecallDepth * 50 );
         }
         m_dwRecallDepth = pDungeon->depth;
-        int delta = -pDungeon->depth; // go to depth 0
+
+        // go to depth 0
         g_pGame->GetMsgs()->Printf( "The world spins and you find yourself in town.\n" );
-        pDungeon->OnChangeLevel( delta );
     }
     else
     {
-        // In town: return to last-visited dungeon depth
-        int delta = m_dwRecallDepth; // go from 0 to recall depth
         g_pGame->GetMsgs()->Printf( "The world spins and you are back at %d ft.\n",
                                     m_dwRecallDepth * 50 );
-        pDungeon->OnChangeLevel( delta );
     }
-    return JSUCCESS;
+
+    pDungeon->OnChangeLevel( delta );
 }
 
 JResult CPlayer::DoSummonMonsters()
@@ -2221,6 +2135,11 @@ JResult CPlayer::UndoIntrinsicEffects( CEffect *pEffect )
         break;
     case EFFECT_FLAG_LIGHT:
         break;
+    case EFFECT_FLAG_AC:
+        m_fACBonus = 0.0f;
+        RecalcCombatStats();
+        g_pGame->GetMsgs()->Printf( "You feel less protected.\n" );
+        break;
     default:
         JLog( LOG_LEVEL_ERROR, true, "unknown intrinsic type: %d\n", pEffect->m_dwFlags );
         return JBOGUSKEY;
@@ -2233,9 +2152,6 @@ JResult CPlayer::DoRestoreEffects( CEffect *pEffect )
 {
     switch( pEffect->m_dwFlags )
     {
-    case EFFECT_FLAG_IDENTIFY:
-        m_bLastEffectNoticed = true;
-        return DoIdentify();
     case EFFECT_FLAG_HP:
         if( m_fCurHitPoints < m_fHitPoints )
         {
@@ -2253,13 +2169,6 @@ JResult CPlayer::DoRestoreEffects( CEffect *pEffect )
     }
     return JSUCCESS;
 }
-
-JResult CPlayer::DoIdentify()
-{
-    m_bPendingIdentify = true;
-    return JSUCCESS;
-}
-
 JResult CPlayer::DoGainEffects( CEffect *pEffect )
 {
     switch( pEffect->m_dwFlags )
@@ -2419,6 +2328,35 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
         m_bLastEffectNoticed = true;
     }
 
+    if( pEffect->m_dwFlags & EFFECT_FLAG_TREASURE )
+    {
+        // Reveal all items within range by marking their tiles as seen.
+        CLink<CItem> *pLink = pDungeon->m_llItems->GetHead();
+        bool bFound = false;
+        while( pLink )
+        {
+            CItem *pItem = pLink->m_lpData;
+            if( pItem )
+            {
+                int dx = abs( (int)pItem->m_vPos.x - vPlayer.x );
+                int dy = abs( (int)pItem->m_vPos.y - vPlayer.y );
+                if( dx <= range && dy <= range )
+                {
+                    CDungeonTile *pTile = pDungeon->GetTile( pItem->m_vPos );
+                    if( pTile )
+                        pTile->SetFlags( DUNG_FLAG_SEEN );
+                    bFound = true;
+                }
+            }
+            pLink = pLink->next;
+        }
+        if( bFound )
+            g_pGame->GetMsgs()->Printf( "You sense the presence of treasure!\n" );
+        else
+            g_pGame->GetMsgs()->Printf( "You sense no treasure nearby.\n" );
+        m_bLastEffectNoticed = true;
+    }
+
     return JSUCCESS;
 }
 
@@ -2517,6 +2455,32 @@ bool CPlayer::IsZappable( CLink<CItem> *pLink )
     return retval;
 }
 
+bool CPlayer::IsStaff( CLink<CItem> *pLink )
+{
+    if( !pLink || !pLink->m_lpData || !pLink->m_lpData->m_id )
+        return false;
+    return pLink->m_lpData->m_id->m_dwIndex == ITEM_IDX_STAFF;
+}
+
+JResult CPlayer::UseStaff( CLink<CItem> *pLink )
+{
+    // Staves fire at player position (no targeting). m_vRangedHitPosition was already
+    // set to player position by OnHandleStaff before this is called.
+    CItem *pItem = pLink->m_lpData;
+    CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
+    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
+    if( !( pItem->IsIdentified() ) && m_bLastEffectNoticed )
+    {
+        pItem->Identify();
+        g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
+    }
+    else if( !( pItem->IsIdentified() ) && !m_bLastEffectNoticed )
+    {
+        pItem->m_id->m_bTried = true;
+    }
+    return retval;
+}
+
 bool CPlayer::SetName( const char *szName )
 {
     if( Util::jstrlen( szName ) > MAX_STRING_LENGTH - 1 )
@@ -2596,4 +2560,110 @@ JLinkList<CMonster> *CPlayer::GetVisibleMonsters()
     if( !m_llVisibleMonsters )
         UpdateVisibleMonsters();
     return m_llVisibleMonsters;
+}
+
+void CPlayer::GiveAllWandsAndStaves()
+{
+    int nGiven = 0;
+    CLink<CItemDef> *pLink = g_pGame->GetDungeon()->GetItemDefs()->GetHead();
+    while( pLink )
+    {
+        CItemDef *pid = pLink->m_lpData;
+        if( pid && ( pid->m_dwIndex == ITEM_IDX_WAND || pid->m_dwIndex == ITEM_IDX_STAFF ) )
+        {
+            CItem *pItem = new CItem;
+            pItem->Init( pid );
+            pItem->m_pllLink = m_llInventory->Add( pItem );
+            nGiven++;
+        }
+        pLink = pLink->next;
+    }
+
+    g_pGame->GetMsgs()->Printf( "Wizard: added %d wands/staves to inventory.\n", nGiven );
+}
+
+void CPlayer::IdentifyAllInventory()
+{
+    CLink<CItem> *pLink = m_llInventory->GetHead();
+    int nIdentified = 0;
+    while( pLink )
+    {
+        pLink->m_lpData->Identify();
+        nIdentified++;
+        pLink = m_llInventory->GetNext( pLink );
+    }
+    g_pGame->GetMsgs()->Printf( "Wizard: identified %d items.\n", nIdentified );
+}
+
+JResult CPlayer::ApplyChosenItem( CLink<CItem> *pChosen, CEffect *pEffect, int dwItemFlags )
+{
+    if( !pEffect || !pChosen )
+        return JBOGUSKEY;
+    CItem *pItem = pChosen->m_lpData;
+
+    if( !pEffect->IsValidTarget( pItem ) )
+    {
+        g_pGame->GetMsgs()->Printf( "%s\n", pEffect->GetTargetPrompt() );
+        return JSUCCESS;
+    }
+
+    switch( pEffect->m_dwFlags )
+    {
+    case EFFECT_FLAG_IDENTIFY:
+        pItem->Identify();
+        g_pGame->GetMsgs()->Printf( "It is %s.\n", pItem->GetName() );
+        break;
+    case EFFECT_FLAG_FUEL: // Recharge
+    {
+        uint32 gain = pEffect->m_szAmount ? (uint32)Util::Roll( pEffect->m_szAmount ) : 1;
+        pItem->m_dwCharges += gain;
+        pItem->m_dwKnownProps |= KNOWN_CHARGES;
+        if( pItem->m_dwCharges > pItem->m_dwMaxCharges )
+        {
+            pItem->m_dwCharges = 0;
+            g_pGame->GetMsgs()->Printf( "The %s explodes in a shower of sparks!\n",
+                                        pItem->GetName() );
+            m_llInventory->Remove( pItem->m_pllLink, true );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "The %s glows with magical energy. (%d charges)\n",
+                                        pItem->GetName(), pItem->m_dwCharges );
+        }
+        break;
+    }
+    case EFFECT_FLAG_TOHIT: // Enchant weapon to-hit
+        pItem->m_fBonusToHit += 1.0f;
+        g_pGame->GetMsgs()->Printf( "It glows with power.\n" );
+        RecalcCombatStats();
+        break;
+    case EFFECT_FLAG_TODAM: // Enchant weapon to-damage
+        pItem->m_fBonusToDamage += 1.0f;
+        g_pGame->GetMsgs()->Printf( "It glows with power.\n" );
+        RecalcCombatStats();
+        break;
+    default:
+        if( pEffect->m_dwFlags == EFFECT_FLAG_AC && ( pEffect->m_dwModifier & EFFECT_MOD_ENCHANT ) )
+        {
+            pItem->m_fACBonus += 1.0f;
+            g_pGame->GetMsgs()->Printf( "It glows with a soft light.\n" );
+            RecalcCombatStats();
+        }
+        else if( pEffect->HasFlag( "EFFECT_FLAG_CURSE" ) &&
+                 pEffect->m_dwEffect == EFFECT_TYPE_DESTROY )
+        {
+            if( dwItemFlags & ITEM_FLAG_CURSED )
+            {
+                pItem->m_dwFlags |= ITEM_FLAG_CURSED;
+                g_pGame->GetMsgs()->Printf( "It is now cursed.\n" );
+            }
+            else
+            {
+                pItem->m_dwFlags &= ~ITEM_FLAG_CURSED;
+                g_pGame->GetMsgs()->Printf( "It is no longer cursed.\n" );
+            }
+        }
+        break;
+    }
+    return JSUCCESS;
 }

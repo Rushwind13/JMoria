@@ -75,6 +75,12 @@ int CTargetState::OnHandleTarget( JKeysym *keysym )
     return 0;
 }
 
+void CTargetState::Begin( int previousState )
+{
+    m_dwPreviousState = previousState;
+    DoInit();
+}
+
 int CTargetState::DoInit()
 {
     m_eCurModifier = TARGET_TARGET;
@@ -207,7 +213,8 @@ int CTargetState::OnBaseHandleKey( JKeysym *keysym )
     }
     else if( keysym->sym == JKEY_ESCAPE )
     {
-        // ESC key gets us out of target mode
+        // ESC key gets us out of target mode; clear the current target
+        g_pGame->GetPlayer()->SetTarget( NULL );
         ResetToState( m_dwPreviousState );
         return JRESETSTATE;
     }

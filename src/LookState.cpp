@@ -148,7 +148,7 @@ int CLookState::OnBaseHandleKey( JKeysym *keysym )
         if( pTile->m_dtd->m_dwType != DUNG_IDX_WALL )
         {
             JLog( LOG_LEVEL_DEBUG, true, "LOOK command sees an item\n" );
-            char dungeon[32];
+            char dungeon[64];
             switch( pTile->m_dtd->m_dwType )
             {
             case DUNG_IDX_DOOR:

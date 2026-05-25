@@ -6,6 +6,10 @@
 
 #define AI_TURNS_PER_HP 16
 
+#define SLEEP_BASE_WAKE_RANGE 5.0f    // base radius (tiles) at which player can wake sleeper
+#define SLEEP_LIT_ROOM_PENALTY 4.0f   // additional wake range when monster is in a lit room
+#define SLEEP_WAKE_CHANCE_SCALE 0.10f // probability scale: (range-dist)/range * scale per turn
+
 // all the states which the game can run in
 // this modifies the event handling
 enum eBrainState
@@ -14,20 +18,23 @@ enum eBrainState
     BRAINSTATE_REST = 0,
     BRAINSTATE_GOTODEST = 1,
     BRAINSTATE_SEEK,
+    BRAINSTATE_ATTACK,
     BRAINSTATE_IDLE,
     BRAINSTATE_MAX
 };
 
 class CMonster;
+class CAttack;
 
 class CAIBrain
 {
 public:
     CAIBrain();
-    virtual ~CAIBrain() {}
+    virtual ~CAIBrain();
 
     float m_fSpeed;
     int m_dwMoveType;
+    int m_nEffectTurns; // remaining turns for active timed status effect
     JFVector m_vPos;
     JVector m_vTargetPos;
     CLink<CAIBrain> *m_pllLink;
@@ -37,13 +44,16 @@ public:
 
     bool SetRandomDest( float fCurTime );
     bool WalkSeek( float fCurTime );
-    bool WalkSeek( float fCurTime, JVector &vPlayerPos, int dwCollideType );
+    bool GotoDest( float fCurTime, JVector &vVel );
     bool Update( float fCurTime );
 
     bool UpdateRest( float fCurTime );
     bool UpdateIdle( float fCurTime );
     bool UpdateGoToDest( float fCurTime );
     bool UpdateSeek( float fCurTime );
+    bool UpdateAttack( float fCurTime );
+    void BuildEligibleAttacks();
+    bool ChooseAction( float fCurTime );
 
     void SetState( eBrainState newState )
     {
@@ -63,7 +73,7 @@ protected:
     float m_fStateTicks;
     JVector m_vVel;
     eBrainState m_eBrainState;
-
+    JLinkList<CAttack> *m_pEligibleAttacks; // non-owning; Terminate()+reused each tick
     CMonster *m_pParent;
 };
 

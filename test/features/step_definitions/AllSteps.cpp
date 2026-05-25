@@ -1,16 +1,18 @@
-#define UNIT_TEST
 #include "TestContext.hpp"
 
 #include "FirstSteps.cpp"
 
 #include "BrainSteps.cpp"
 #include "BresenhamSteps.cpp"
+#include "DoorSteps.cpp"
 #include "DungeonMapSteps.cpp"
 #include "EffectSteps.cpp"
 #include "ElementalDamageSteps.cpp"
+#include "ElementalImmunitySteps.cpp"
 #include "EquipmentSteps.cpp"
 #include "GameSteps.cpp"
 #include "ItemSteps.cpp"
+#include "LOSItemsSteps.cpp"
 #include "LightSteps.cpp"
 #include "MonsterRecallSteps.cpp"
 #include "MonsterSteps.cpp"

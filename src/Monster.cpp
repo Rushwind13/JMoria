@@ -319,7 +319,7 @@ int CMonster::TakeDamage( float fDamage )
 
 // Returns the OR of all EFFECT_FLAG_FIRE/COLD/ELECTRICITY/ACID bits found in this monster's
 // attack effects.  This bitmask represents both the elements the monster uses and the elements
-// it is immune to.  Pass the result to Util::CheckAffinity() to resolve a damage multiplier.
+// it is immune to.  Pass the result to CheckAffinity() to resolve a damage multiplier.
 uint32 CMonster::GetElementFlags() const
 {
     static const uint32 kElementMask =
@@ -335,19 +335,6 @@ uint32 CMonster::GetElementFlags() const
         pLink = m_md->m_llAttacks->GetNext( pLink );
     }
     return dwFlags;
-}
-
-bool CMonster::IsImmuneToEffect( uint32 dwFlag ) const
-{
-    // Map monster intrinsic flags to the EFFECT_FLAG_* bits they block,
-    // then delegate to Util::CheckAffinity for the overlap test.
-    // PARALYZE is notably absent — it is a physical effect, not mental.
-    uint32 dwIntrinsic = 0;
-    if( m_md->m_dwFlags & ( MON_FLAG_NEVER_SLEEP ) )
-        dwIntrinsic |= EFFECT_FLAG_SLEEP;
-    if( m_md->m_dwFlags & MON_FLAG_EMPTY_MIND )
-        dwIntrinsic |= EFFECT_FLAG_SLEEP | EFFECT_FLAG_AFRAID | EFFECT_FLAG_CONFUSE;
-    return Util::CheckAffinity( dwFlag, dwIntrinsic ) == 0.0f;
 }
 
 // draw routines

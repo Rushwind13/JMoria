@@ -189,7 +189,7 @@ JResult CEffect::Elemental( JVector vOrigin )
     if( pPlayer->m_pCurrentRangedAmmo )
         fDamage += pPlayer->m_pCurrentRangedAmmo->m_fBonusToDamage;
 
-    float fAffinityMult = Util::CheckAffinity( m_dwFlags, pMon->GetElementFlags() );
+    float fAffinityMult = CheckAffinity( m_dwFlags, pMon->GetElementFlags() );
     if( fAffinityMult == 0.0f )
     {
         pMon->m_fCurHP += fDamage;
@@ -239,7 +239,7 @@ JResult CEffect::Area( JVector vOrigin )
             float fDamage = szAmount ? Util::Roll( szAmount ) : Util::Roll( "1d6" );
             const char *szMonName = pMon->GetName();
 
-            float fAffinityMult = Util::CheckAffinity( m_dwFlags, pMon->GetElementFlags() );
+            float fAffinityMult = CheckAffinity( m_dwFlags, pMon->GetElementFlags() );
             if( fAffinityMult == 0.0f )
             {
                 pMon->m_fCurHP += fDamage;
@@ -260,7 +260,7 @@ JResult CEffect::Area( JVector vOrigin )
         }
         else
         {
-            if( !pMon->IsImmuneToEffect( m_dwFlags ) )
+            if( !CheckAffinity( m_dwFlags, pMon->m_md->m_dwFlags ) )
             {
                 pMon->m_dwActiveEffects |= m_dwFlags;
                 if( m_dwFlags & ( EFFECT_FLAG_SLEEP | EFFECT_FLAG_PARALYZE ) )
@@ -320,7 +320,7 @@ JResult CEffect::Ball( JVector vOrigin )
         float fDamage = Util::Roll( szAmount );
         const char *szMonName = pMon->GetName();
 
-        float fAffinityMult = Util::CheckAffinity( m_dwFlags, pMon->GetElementFlags() );
+        float fAffinityMult = CheckAffinity( m_dwFlags, pMon->GetElementFlags() );
         if( fAffinityMult == 0.0f )
         {
             pMon->m_fCurHP += fDamage;
@@ -374,7 +374,7 @@ JResult CEffect::Line( JVector vOrigin )
         g_pGame->GetMsgs()->Printf( "The %s strikes the %s with %s.\n", m_ed->m_szName, szMonName,
                                     szEffect );
 
-    float fAffinityMult = Util::CheckAffinity( m_dwFlags, pMon->GetElementFlags() );
+    float fAffinityMult = CheckAffinity( m_dwFlags, pMon->GetElementFlags() );
     if( fAffinityMult == 0.0f )
     {
         pMon->m_fCurHP += fDamage;
@@ -428,7 +428,7 @@ JResult CEffect::Status( JVector vOrigin, uint32 dwFlag )
         return JBOGUSKEY;
     }
 
-    if( pMon->IsImmuneToEffect( dwFlag ) )
+    if( CheckAffinity( dwFlag, pMon->m_md->m_dwFlags ) == 0.0f )
     {
         g_pGame->GetMsgs()->Printf( "The %s is unaffected.\n", pMon->GetName() );
         return JSUCCESS;
@@ -860,4 +860,46 @@ const char *CEffect::GetTargetPrompt() const
     }
 
     return "Use on which item? [a-z inv, A-J equip]";
+}
+
+// Returns 0.0 (immune), 1.0 (normal), or 2.0 (weak) based on the relationship between
+// the incoming effect's element and the subject's elemental nature.
+//
+// Immune:  incoming element overlaps with subject's own element (fire creature vs fire attack).
+// Weak:    incoming element is the opposite of the subject's element
+//          (fire creature vs cold attack).
+// Normal:  no relationship.
+//
+// Also used for status-effect immunity: pass EFFECT_FLAG_SLEEP as dwEffect and
+// (MON_FLAG_EMPTY_MIND | EFFECT_FLAG_FREE_ACTION) as dwSubject to block sleep on immune targets.
+float CEffect::CheckAffinity( uint32 dwEffect, uint32 dwSubject )
+{
+    if( dwEffect == 0 || dwSubject == 0 )
+        return 1.0f;
+
+    // Direct overlap → immune.
+    if( dwEffect & dwSubject )
+        return 0.0f;
+
+    // Static opposite table: fire<->cold, electricity<->acid.
+    static const struct
+    {
+        uint32 a;
+        uint32 b;
+    } kOpposites[] = { { EFFECT_FLAG_FIRE, EFFECT_FLAG_COLD },
+                       { EFFECT_FLAG_ELECTRICITY, EFFECT_FLAG_ACID },
+                       { 0, 0 } };
+
+    for( int i = 0; kOpposites[i].a; i++ )
+    {
+        uint32 pair_a = kOpposites[i].a;
+        uint32 pair_b = kOpposites[i].b;
+        // Subject has element A and incoming effect is element B (or vice versa) → weak.
+        if( ( dwSubject & pair_a ) && ( dwEffect & pair_b ) )
+            return 2.0f;
+        if( ( dwSubject & pair_b ) && ( dwEffect & pair_a ) )
+            return 2.0f;
+    }
+
+    return 1.0f;
 }

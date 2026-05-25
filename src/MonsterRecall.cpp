@@ -390,7 +390,7 @@ void CMonsterRecall::PrintRecall( const CMonsterDef *pmd, CDisplayText *pDT ) co
         }
         for( int i = 0; kElems[i].flag; i++ )
         {
-            if( Util::CheckAffinity( kElems[i].flag, dwMonElements ) > 1.0f )
+            if( CEffect::CheckAffinity( kElems[i].flag, dwMonElements ) > 1.0f )
             {
                 sep();
                 pDT->Printf( "%s", kElems[i].weakLabel );

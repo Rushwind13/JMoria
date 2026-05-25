@@ -505,47 +505,4 @@ double GetTimeInMillis()
     gettimeofday( &tv, NULL );
     return ( tv.tv_sec * 1000.0 ) + ( tv.tv_usec / 1000.0 );
 }
-
-// Returns 0.0 (immune), 1.0 (normal), or 2.0 (weak) based on the relationship between
-// the incoming effect's element and the subject's elemental nature.
-//
-// Immune:  incoming element overlaps with subject's own element (fire creature vs fire attack).
-// Weak:    incoming element is the opposite of the subject's element
-//          (fire creature vs cold attack).
-// Normal:  no relationship.
-//
-// Also used for status-effect immunity: pass EFFECT_FLAG_SLEEP as dwEffect and
-// (MON_FLAG_EMPTY_MIND | EFFECT_FLAG_FREE_ACTION) as dwSubject to block sleep on immune targets.
-float CheckAffinity( uint32 dwEffect, uint32 dwSubject )
-{
-    if( dwEffect == 0 || dwSubject == 0 )
-        return 1.0f;
-
-    // Direct overlap → immune.
-    if( dwEffect & dwSubject )
-        return 0.0f;
-
-    // Static opposite table: fire<->cold, electricity<->acid.
-    static const struct
-    {
-        uint32 a;
-        uint32 b;
-    } kOpposites[] = { { EFFECT_FLAG_FIRE, EFFECT_FLAG_COLD },
-                       { EFFECT_FLAG_ELECTRICITY, EFFECT_FLAG_ACID },
-                       { 0, 0 } };
-
-    for( int i = 0; kOpposites[i].a; i++ )
-    {
-        uint32 pair_a = kOpposites[i].a;
-        uint32 pair_b = kOpposites[i].b;
-        // Subject has element A and incoming effect is element B (or vice versa) → weak.
-        if( ( dwSubject & pair_a ) && ( dwEffect & pair_b ) )
-            return 2.0f;
-        if( ( dwSubject & pair_b ) && ( dwEffect & pair_a ) )
-            return 2.0f;
-    }
-
-    return 1.0f;
-}
-
 } // namespace Util

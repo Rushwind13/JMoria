@@ -57,13 +57,6 @@ int jstrlen( const char *s1 );
 int jstrcmp( const char *s1, const char *s2 );
 int jstrncmp( const char *s1, const char *s2, const uint32 count );
 double GetTimeInMillis(); // High-resolution timing for performance measurement
-
-// Returns an elemental affinity multiplier for an incoming effect vs a subject's element flags.
-// dwEffect   — EFFECT_FLAG_* bits describing the incoming attack/effect.
-// dwSubject  — EFFECT_FLAG_* bits describing the subject's elemental nature (attacks / intrinsics).
-// Returns: 0.0 = immune, 1.0 = normal, 2.0 = weak.
-// Opposite pairs: FIRE<->COLD, ELECTRICITY<->ACID.
-float CheckAffinity( uint32 dwEffect, uint32 dwSubject );
 }; // namespace Util
 
 #endif // __UTIL_H__

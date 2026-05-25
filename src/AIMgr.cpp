@@ -123,7 +123,7 @@ bool CAIBrain::UpdateSeek( float fCurTime )
     // Afraid monsters flee from the player regardless of their movement type.
     // Empty-minded creatures are immune to fear.
     if( ( m_pParent->m_dwActiveEffects & EFFECT_FLAG_AFRAID ) &&
-        !m_pParent->IsImmuneToEffect( EFFECT_FLAG_AFRAID ) )
+        !CEffect::CheckAffinity( EFFECT_FLAG_AFRAID, m_pParent->m_md->m_dwFlags ) )
     {
         JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
         float dx = m_vPos.x - vPlayerPos.x;

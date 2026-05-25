@@ -136,6 +136,13 @@ public:
     JResult Aggravate( JVector vOrigin );
     JResult LockDoor( JVector vOrigin );
 
+    // Returns an elemental affinity multiplier for an incoming effect vs a subject's element flags.
+    // dwEffect   — EFFECT_FLAG_* bits describing the incoming attack/effect.
+    // dwSubject  — EFFECT_FLAG_* bits describing the subject's elemental nature (attacks /
+    // intrinsics). Returns: 0.0 = immune, 1.0 = normal, 2.0 = weak. Opposite pairs: FIRE<->COLD,
+    // ELECTRICITY<->ACID.
+    static float CheckAffinity( uint32 dwEffect, uint32 dwSubject );
+
     // Fire a named effect from the loaded definitions at a given origin.
     // Stack-allocated; no heap allocation or memory leak.
     static JResult Fire( const char *szEffectName, JVector vOrigin );

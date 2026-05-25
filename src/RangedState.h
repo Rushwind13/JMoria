@@ -60,18 +60,18 @@ public:
     virtual void OnUpdate( float fCurTime )
     {
         m_fStateTicks += fCurTime;
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_DEBUG, true,
               "RangedState::OnUpdate CALLED - fCurTime=%f, m_fStateTicks=%f, threshold=%f, "
               "modifier=%d\n",
               fCurTime, m_fStateTicks, PROJECTILE_UPDATE_INTERVAL, m_eCurModifier );
         if( m_fStateTicks >= PROJECTILE_UPDATE_INTERVAL )
         {
-            JLog( LOG_LEVEL_WARN, true,
+            JLog( LOG_LEVEL_DEBUG, true,
                   "RangedState::OnUpdate - modifier=%d, clock=%d, trajectory=%d\n", m_eCurModifier,
                   m_dwClock, m_dwTrajectory );
             if( m_eCurModifier == RANGED_TRAJECTORY )
             {
-                JLog( LOG_LEVEL_WARN, true, "  ->About to call DoTrajectory\n" );
+                JLog( LOG_LEVEL_DEBUG, true, "  ->About to call DoTrajectory\n" );
                 DoTrajectory();
             }
             m_fStateTicks -= PROJECTILE_UPDATE_INTERVAL;
@@ -87,7 +87,7 @@ public:
     void SetCurrentPosition( JVector vPos )
     {
         m_vCurrentPosition = JIVector( vPos.x, vPos.y );
-        JLog( LOG_LEVEL_WARN, true,
+        JLog( LOG_LEVEL_DEBUG, true,
               ">>SetCurrentPosition called: vPos=<%f %f>, m_vCurrentPosition now=<%d %d>\n", vPos.x,
               vPos.y, m_vCurrentPosition.x, m_vCurrentPosition.y );
     };

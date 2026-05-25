@@ -63,24 +63,24 @@
 #define DUNG_IDX_WALL 1
 #define DUNG_IDX_DOOR 2
 #define DUNG_IDX_OPEN_DOOR 3
-#define DUNG_IDX_UPSTAIRS 4
-#define DUNG_IDX_LONG_UPSTAIRS 5
-#define DUNG_IDX_DOWNSTAIRS 6
-#define DUNG_IDX_LONG_DOWNSTAIRS 7
-#define DUNG_IDX_RUBBLE 8
-#define DUNG_IDX_SECRET_DOOR 9
+#define DUNG_IDX_BROKEN_DOOR 4
+#define DUNG_IDX_UPSTAIRS 5
+#define DUNG_IDX_LONG_UPSTAIRS 6
+#define DUNG_IDX_DOWNSTAIRS 7
+#define DUNG_IDX_LONG_DOWNSTAIRS 8
+#define DUNG_IDX_RUBBLE 9
+#define DUNG_IDX_SECRET_DOOR 10
 // JUNK,
-#define DUNG_IDX_PLAYER 10
-#define DUNG_IDX_MAX 11
+#define DUNG_IDX_PLAYER 11
+#define DUNG_IDX_MAX 12
 
 // Dungeon Tile flags
 #define DUNG_FLAG_LIT 0x00000001
 #define DUNG_FLAG_SEEN 0x00000002
 #define DUNG_FLAG_ROOM 0x00000004
 #define DUNG_FLAG_HALL 0x00000008
-
 #define DUNG_FLAG_TRAP 0x00000010
-#define DUNG_FLAG_LOCKED 0x00000020
+#define DUNG_FLAG_LOCKED 0x00000020 // door is spiked or wizard-locked
 #define DUNG_FLAG_VISIBLE 0x00000040
 
 // Door and search chance percentages (1-100)
@@ -89,14 +89,27 @@
 #define CHANCE_FIND_SECRET_BUMP 20
 #define CHANCE_SEARCH_ACTIVE 25
 #define CHANCE_SEARCH_PASSIVE 5
-// Ranged attack percentages (1-100)
+
+#define DOOR_BASH_NOISE_RADIUS 12.0f
+#define DOOR_OPEN_NOISE_RADIUS 8.0f
+
+#ifdef UNIT_TEST
+#define CHANCE_ARROW_BREAK 0
+#define ITEM_DESTROY_CHANCE 1.1f
+#define RECALL_DURATION 1
+#define SLEEP_LIGHT_WAKE_CHANCE 1.0f // always wake in tests
+#else
 #define CHANCE_ARROW_BREAK 33 // ~1 in 3 chance arrow breaks on landing
+#define ITEM_DESTROY_CHANCE 0.03f // 3% base chance per inventory slot
+#define RECALL_DURATION ( Util::Roll( 1, 20 ) + 30 )
+#define SLEEP_LIGHT_WAKE_CHANCE 0.85f // 85% chance to wake sleeping monsters when lighting a room
+#endif
+
 // Ranged attack limits
 #define MAX_PROJECTILE_RANGE 20 // Maximum trajectory length for projectiles (wands, arrows, bolts)
 
 // UI / Display constants
 #define MSGS_ROWS 5 // height of the Messages pane in text rows (8px each)
-// #define DUNG_FLAG_x  0x00000080
 
 // Dungeon Flags
 #ifdef FIXED_DUNGEON
@@ -196,11 +209,13 @@
 // #define MON_FLAG_x          0x00001000
 // #define MON_FLAG_x          0x00002000
 // #define MON_FLAG_x          0x00004000
+#define MON_FLAG_HANDS 0x00001000 // can open doors non-destructively
+#define MON_FLAG_LARGE 0x00002000 // large/heavy enough to bash through doors
 #define MON_FLAG_BREED 0x00008000
 
 #define MON_FLAG_INVISIBLE 0x00100000
 // #define MON_FLAG_x          0x00200000
-// #define MON_FLAG_x          0x00400000
+#define MON_FLAG_NEVER_SLEEP 0x00400000
 #define MON_FLAG_MAXHP 0x00800000
 
 #define MON_AI_DONTMOVE 0x01000000
@@ -213,7 +228,7 @@
 // #define MON_COLOR_x          0x40000000
 // #define MON_COLOR_x          0x80000000
 
-#define NUM_MON_FLAGS 20
+#define NUM_MON_FLAGS 23
 
 // Effect Flags
 #define EFFECT_FLAG_FIRE 0x00000001
@@ -266,10 +281,10 @@
 
 #define EFFECT_FLAG_CURSE 0x00000010
 #define EFFECT_FLAG_SEARCH 0x00000020
-// #define EFFECT_FLAG_x 0x00000040
-// #define EFFECT_FLAG_x 0x00000080
+#define EFFECT_FLAG_AGGRAVATE 0x00000040
+#define EFFECT_FLAG_LOCK 0x00000080 // door is spiked or wizard-locked
 
-#define NUM_EFFECT_FLAGS2 6
+#define NUM_EFFECT_FLAGS2 8
 
 // Effect Modifiers
 #define EFFECT_MOD_RESIST 0x000000001
@@ -362,7 +377,8 @@
 #define ITEM_IDX_2H_SWORD 28
 #define ITEM_IDX_BELT 29
 #define ITEM_IDX_FUEL 30
-#define ITEM_IDX_MAX 31
+#define ITEM_IDX_SPIKE 31
+#define ITEM_IDX_MAX 32
 
 // TODO: Might need to switch from "ITEM/MONSTER"
 //       to "types of harm" / "types of aid"
@@ -380,8 +396,8 @@
 #define ITEM_FLAG_MAINHAND 0x00000040
 #define ITEM_FLAG_NEEDSAMMO 0x00000080
 
-// #define ITEM_FLAG_x 0x00000100
-// #define ITEM_FLAG_x 0x00000200
+#define ITEM_FLAG_METAL 0x00000100  // metal armor/boots: noisy
+#define ITEM_FLAG_SILENT 0x00000200 // leather/padded armor/boots: quiet
 // #define ITEM_FLAG_x 0x00000400
 // #define ITEM_FLAG_x 0x00000800
 
@@ -398,7 +414,7 @@
 #define KNOWN_CHARGES 0x00000004
 #define KNOWN_TRIED 0x00000008
 
-#define NUM_ITEM_FLAGS 11
+#define NUM_ITEM_FLAGS 13
 
 // Make sure you change below here if you added any flags.
 #define NUM_STRINGS                                                                                \
@@ -419,6 +435,7 @@
 #define NUM_POTION_TYPES 32
 #define NUM_SCROLL_TYPES 32
 #define NUM_LUMBER_TYPES 32
+#define NUM_METAL_TYPES 32
 
 #include "TextEntry.h"
 class Constants
@@ -515,7 +532,10 @@ public:
         m_StringTable[i++].Init( "MON_FLAG_REGENERATE", MON_FLAG_REGENERATE );
         m_StringTable[i++].Init( "MON_FLAG_HURT_BY_LIGHT", MON_FLAG_HURT_BY_LIGHT );
         m_StringTable[i++].Init( "MON_FLAG_BREED", MON_FLAG_BREED );
+        m_StringTable[i++].Init( "MON_FLAG_HANDS", MON_FLAG_HANDS );
+        m_StringTable[i++].Init( "MON_FLAG_LARGE", MON_FLAG_LARGE );
         m_StringTable[i++].Init( "MON_FLAG_INVISIBLE", MON_FLAG_INVISIBLE );
+        m_StringTable[i++].Init( "MON_FLAG_NEVER_SLEEP", MON_FLAG_NEVER_SLEEP );
         m_StringTable[i++].Init( "MON_FLAG_MAXHP", MON_FLAG_MAXHP );
         m_StringTable[i++].Init( "MON_AI_DONTMOVE", MON_AI_DONTMOVE );
         m_StringTable[i++].Init( "MON_AI_100RANDOMMOVE", MON_AI_100RANDOMMOVE );
@@ -572,6 +592,8 @@ public:
         m_StringTable[i++].Init( "EFFECT_FLAG_NO_COLLIDE", EFFECT_FLAG_NO_COLLIDE, EFFECT_FLAG2 );
         m_StringTable[i++].Init( "EFFECT_FLAG_CURSE", EFFECT_FLAG_CURSE, EFFECT_FLAG2 );
         m_StringTable[i++].Init( "EFFECT_FLAG_SEARCH", EFFECT_FLAG_SEARCH, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG_AGGRAVATE", EFFECT_FLAG_AGGRAVATE, EFFECT_FLAG2 );
+        m_StringTable[i++].Init( "EFFECT_FLAG_LOCK", EFFECT_FLAG_LOCK, EFFECT_FLAG2 );
 
         // Effect Modifiers
         m_StringTable[i++].Init( "EFFECT_MOD_RESIST", EFFECT_MOD_RESIST );
@@ -647,6 +669,7 @@ public:
         m_StringTable[i++].Init( "ITEM_IDX_SHOVEL", ITEM_IDX_SHOVEL );
         m_StringTable[i++].Init( "ITEM_IDX_BELT", ITEM_IDX_BELT );
         m_StringTable[i++].Init( "ITEM_IDX_FUEL", ITEM_IDX_FUEL );
+        m_StringTable[i++].Init( "ITEM_IDX_SPIKE", ITEM_IDX_SPIKE );
 
         // Item flags
         m_StringTable[i++].Init( "ITEM_FLAG_CURSED", ITEM_FLAG_CURSED );
@@ -657,6 +680,8 @@ public:
         m_StringTable[i++].Init( "ITEM_FLAG_OFFHAND", ITEM_FLAG_OFFHAND );
         m_StringTable[i++].Init( "ITEM_FLAG_MAINHAND", ITEM_FLAG_MAINHAND );
         m_StringTable[i++].Init( "ITEM_FLAG_NEEDSAMMO", ITEM_FLAG_NEEDSAMMO );
+        m_StringTable[i++].Init( "ITEM_FLAG_METAL", ITEM_FLAG_METAL );
+        m_StringTable[i++].Init( "ITEM_FLAG_SILENT", ITEM_FLAG_SILENT );
         m_StringTable[i++].Init( "ITEM_FLAG_BLESSED", ITEM_FLAG_BLESSED );
         m_StringTable[i++].Init( "ITEM_FLAG_HOLDING", ITEM_FLAG_HOLDING );
         m_StringTable[i++].Init( "ITEM_COLOR_MULTI", ITEM_COLOR_MULTI );
@@ -919,6 +944,67 @@ public:
         };
 
         return LumberRGBAs[dwIndex];
+    }
+
+    const char *Metal( const uint32 dwIndex )
+    {
+        if( dwIndex >= NUM_METAL_TYPES )
+            return "";
+
+        const char *myMetal[] = {
+            "Token",    "Matte",     "Bright",   "Shiny",    "Sparkly", "Gaudy",    "Wedding",
+            "Electrum", "Rubber",    "Woven",    "Obsidian", "Topaz",   "Pearl",    "Opal",
+            "Jet",      "Tanzanite", "Sapphire", "Emerald",  "Ruby",    "Diamond",  "Mithril",
+            "Platinum", "Brass",     "Steel",    "Glass",    "Plastic", "Aluminum", "Dragonbone",
+            "Iron",     "Silver",    "Gold",     "Bronze" };
+
+        return myMetal[dwIndex];
+    }
+
+    const char *MetalRGBA( const uint32 dwIndex )
+    {
+        if( dwIndex >= NUM_METAL_TYPES )
+            return "0,0,0,0";
+
+        const char *MetalRGBAs[] = {
+            "255,215,0,255",   // Token (Classic Gold)
+            "100,100,100,255", // Matte (Neutral Grey)
+            "240,240,255,255", // Bright (Cool White)
+            "220,220,220,255", // Shiny (High Polish Silver)
+            "255,250,205,255", // Sparkly (Pale Champagne)
+            "255,0,255,255",   // Gaudy (Magenta/Electric Purple)
+            "255,248,220,255", // Wedding (Cream/Ivory)
+            "212,255,170,255", // Electrum (Pale Gold-Green alloy)
+
+            "40,40,40,255",    // Rubber (Soft Black)
+            "139,115,85,255",  // Woven (Burlap/Tan)
+            "20,20,25,255",    // Obsidian (Deep Inky Black)
+            "255,200,0,255",   // Topaz (Golden Amber)
+            "245,245,220,255", // Pearl (Creamy Off-white)
+            "230,230,250,255", // Opal (Iridescent Blue-white)
+            "10,10,10,255",    // Jet (Pure Coal Black)
+            "106,90,205,255",  // Tanzanite (Deep Violet-Blue)
+
+            "15,82,186,255",   // Sapphire (Royal Blue)
+            "80,200,120,255",  // Emerald (Deep Green)
+            "224,17,95,255",   // Ruby (Deep Red)
+            "185,242,255,255", // Diamond (Light Refractive Blue)
+            "135,206,235,255", // Mithril (Pale Ethereal Blue)
+            "229,228,226,255", // Platinum (Bright White-Grey)
+            "181,166,66,255",  // Brass (Muted Yellow-Brown)
+            "176,196,222,255", // Steel (Blue-Grey Metal)
+
+            "173,216,230,128", // Glass (Translucent Pale Blue)
+            "255,255,255,255", // Plastic (Plain White)
+            "169,171,173,255", // Aluminum (Dull Light Grey)
+            "240,230,190,255", // Dragonbone (Weathered Bone/Tan)
+            "67,70,75,255",    // Iron (Heavy Dark Grey)
+            "192,192,192,255", // Silver (Traditional Silver)
+            "255,215,0,255",   // Gold (Metallic Gold)
+            "205,127,50,255"   // Bronze (Metallic Brown)
+        };
+
+        return MetalRGBAs[dwIndex];
     }
 
 public:

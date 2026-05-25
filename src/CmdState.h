@@ -20,8 +20,11 @@ public:
 
 protected:
     virtual int OnHandleKey( JKeysym *keysym );
-
+#ifdef UNIT_TEST
+public:
+#else
 private:
+#endif // UNIT_TEST
     bool IsModifierNeeded( JKeysym *keysym );
     bool IsUseCommand( JKeysym *keysym );
     bool IsStairsCommand( JKeysym *keysym );
@@ -35,9 +38,12 @@ private:
     bool IsSetIntrinsicCommand( JKeysym *keysym );
     bool IsFireCommand( JKeysym *keysym );
     bool IsZapCommand( JKeysym *keysym );
+    bool IsStaffCommand( JKeysym *keysym );
     bool IsXchangeCommand( JKeysym *keysym );
     bool IsCreateItemCommand( JKeysym *keysym );
     bool IsSummonMonsterCommand( JKeysym *keysym );
+    bool IsGiveAllWandsCommand( JKeysym *keysym );
+    bool IsIdentifyAllCommand( JKeysym *keysym );
     bool IsPickupCommand( JKeysym *keysym );
     bool IsExitWizardCommand( JKeysym *keysym );
     bool IsSearchCommand( JKeysym *keysym );

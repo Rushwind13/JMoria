@@ -4,6 +4,11 @@ Feature: Brains
     As a game engine
     I want to make sure my Brains is working
 
+    Background:
+        Given I have a game
+        And I initialize the game
+        And the game has a player
+
     Scenario: Can set brain state
         Given I have a brain
         And I set the move type to MON_AI_SEEKPLAYER

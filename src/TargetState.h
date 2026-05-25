@@ -33,9 +33,13 @@ public:
     virtual void OnUpdate( float fCurTime ) {}
     virtual int OnBaseHandleKey( JKeysym *keysym );
     virtual int OnHandleKey( JKeysym *keysym );
-
+    void Begin( int previousState ) override;
+#ifdef UNIT_TEST
+public:
+#else
 protected:
 private:
+#endif // UNIT_TEST
     TargetKeyHandler m_pKeyHandlers[TARGET_MAX];
     TargetKeyHandler m_pCurKeyHandler;
 

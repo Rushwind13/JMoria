@@ -7,25 +7,27 @@
 // TODO: this is for the collision defines; should move those someplace more useful --Jimbo
 #include "CmdState.h"
 #include "DisplayText.h"
+#include "Effect.h"
 #include "FileParse.h"
 #include "Player.h"
 #include "RenderBase.h"
 
 extern unsigned char ItemIDs[];
 
-unsigned char TileIDs[DUNG_IDX_MAX + 1] = ".#+'<<>>:#@";
+unsigned char TileIDs[DUNG_IDX_MAX + 1] = ".#+''<<>>:#@";
 int ModifiedTileTypes[DUNG_IDX_MAX + 1] = {
     DUNG_IDX_INVALID,   // 0  FLOOR: can't modify
     DUNG_IDX_INVALID,   // 1  WALL: can't modify
     DUNG_IDX_OPEN_DOOR, // 2  DOOR: opens
     DUNG_IDX_DOOR,      // 3  OPEN_DOOR: closes
-    DUNG_IDX_INVALID,   // 4  UPSTAIRS: can't modify
-    DUNG_IDX_INVALID,   // 5  LONG_UPSTAIRS: can't modify
-    DUNG_IDX_INVALID,   // 6  DOWNSTAIRS: can't modify
-    DUNG_IDX_INVALID,   // 7  LONG_DOWNSTAIRS: can't modify
-    DUNG_IDX_FLOOR,     // 8  RUBBLE: tunnels to floor
-    DUNG_IDX_DOOR,      // 9  SECRET_DOOR: reveals as closed door
-    DUNG_IDX_INVALID,   // 10 PLAYER: can't modify
+    DUNG_IDX_INVALID,   // 4  BROKEN_DOOR: can't modify
+    DUNG_IDX_INVALID,   // 5  UPSTAIRS: can't modify
+    DUNG_IDX_INVALID,   // 6  LONG_UPSTAIRS: can't modify
+    DUNG_IDX_INVALID,   // 7  DOWNSTAIRS: can't modify
+    DUNG_IDX_INVALID,   // 8  LONG_DOWNSTAIRS: can't modify
+    DUNG_IDX_FLOOR,     // 9  RUBBLE: tunnels to floor
+    DUNG_IDX_DOOR,      // 10 SECRET_DOOR: reveals as closed door
+    DUNG_IDX_INVALID,   // 11 PLAYER: can't modify
 };
 // extern Uint8 dungeontiles[DUNG_HEIGHT][DUNG_WIDTH];
 
@@ -57,6 +59,9 @@ void CDungeon::Init( const char *szBasedir )
             break;
         case DUNG_IDX_DOOR:
             m_dtdlist[i].m_Color.SetColor( 64, 32, 128, 255 );
+            break;
+        case DUNG_IDX_BROKEN_DOOR:
+            m_dtdlist[i].m_Color.SetColor( 100, 60, 40, 255 );
             break;
         case DUNG_IDX_OPEN_DOOR:
             m_dtdlist[i].m_Color.SetColor( 192, 192, 192, 255 );
@@ -998,8 +1003,9 @@ void CDungeon::UpdateVisibility()
                     continue;
             }
 
-            // +1 because GenerateLine counts the source tile as a step
-            int target_distance = chebyshev + 1;
+            // Manhattan distance + 1: the Bresenham staircase needs dx x-steps
+            // and dy y-steps so the safety cap must be at least dx+dy+1.
+            int target_distance = dx + dy + 1;
 
             if( Util::Bresenham( vPlayer, viCheck, target_distance, SightCollisionTest ) )
             {
@@ -1093,9 +1099,9 @@ bool CDungeon::CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFla
     // rather than continuing past it into potential walls
     int dx = Util::abs( vTarget.x - vSource.x );
     int dy = Util::abs( vTarget.y - vSource.y );
-    int target_distance = MAX( dx, dy );
-    // +1 because GenerateLine counts the source tile as a step
-    target_distance += 1;
+    // Manhattan distance + 1: the Bresenham staircase needs dx x-steps and
+    // dy y-steps so the safety cap must be at least dx+dy+1.
+    int target_distance = dx + dy + 1;
 
     // No "see through walls" effects are active
     // Check for obstacles along the line between
@@ -1214,7 +1220,8 @@ void CDungeon::DrawDungeon()
 
             if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
             {
-                ; // need to display this tile
+                if( curTile == NULL )
+                    continue; // safety: don't crash on out-of-bounds look position
             }
 
             // In CLOCKSTEP mode, show all tiles regardless of visibility
@@ -1229,11 +1236,7 @@ void CDungeon::DrawDungeon()
 
             // Determine tile color based on game state
             bool bRangedBeamTile = false;
-            if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
-            {
-                color = JColor( 100, 0, 100, 255 );
-            }
-            else if( g_pGame->GetGameStateIndex() == STATE_RANGED )
+            if( g_pGame->GetGameStateIndex() == STATE_RANGED )
             {
                 // Set default color for projectiles (white)
                 color = JColor( 255, 255, 255, 255 );
@@ -1278,7 +1281,11 @@ void CDungeon::DrawDungeon()
             if( !bRangedBeamTile )
             {
                 // Normal tile coloring logic (for non-beam tiles or when no multicolor effect)
-                if( g_pGame->GetGameStateIndex() == STATE_RANGED && vScreen == vProjectile )
+                if( g_pGame->GetGameStateIndex() == STATE_LOOK && vScreen == vLook )
+                {
+                    color = JColor( 100, 0, 100, 255 );
+                }
+                else if( g_pGame->GetGameStateIndex() == STATE_RANGED && vScreen == vProjectile )
                 {
                     color = JColor( 255, 255, 85, 255 );
                     bRangedBeamTile = true; // Draw beam character at current projectile position
@@ -1466,6 +1473,13 @@ void CDungeon::Term()
         m_llItemDefs = NULL;
     }
 
+    if( m_llEffectDefs )
+    {
+        m_llEffectDefs->Terminate();
+        delete m_llEffectDefs;
+        m_llEffectDefs = NULL;
+    }
+
     ClearLOSLine();
 }
 
@@ -1631,7 +1645,9 @@ bool CDungeon::IsOpenable( JVector &vPos )
         }
         return false;
     }
-    return ( curTile->m_dtd->m_dwType == DUNG_IDX_DOOR );
+    if( curTile->m_dtd->m_dwType == DUNG_IDX_DOOR )
+        return !curTile->HasFlags( DUNG_FLAG_LOCKED );
+    return false;
 }
 
 bool CDungeon::IsTunnelable( JVector &vPos )
@@ -1792,3 +1808,23 @@ void CDungeon::Drop( CItem *pItem, JVector &vDropPos )
     pItem->m_vPos = vFinalPos;
     pItem->m_pllLink = m_llItems->Add( pItem, pItem->m_id->m_dwIndex, pItem->GetInstanceId() );
 }
+
+bool CDungeon::LockDoor( JVector pos )
+{
+    CDungeonTile *pTile = GetTile( pos );
+    if( !pTile || !pTile->m_dtd || pTile->m_dtd->m_dwType != DUNG_IDX_DOOR )
+        return false;
+    pTile->SetFlags( DUNG_FLAG_LOCKED );
+    return true;
+}
+
+bool CDungeon::UnlockDoor( JVector pos )
+{
+    CDungeonTile *pTile = GetTile( pos );
+    if( !pTile || !pTile->m_dtd || pTile->m_dtd->m_dwType != DUNG_IDX_DOOR )
+        return false;
+    pTile->UnsetFlags( DUNG_FLAG_LOCKED );
+    return true;
+}
+
+void CDungeon::Aggravate( JVector vOrigin ) { CEffect::Fire( "Aggravate Monsters", vOrigin ); }

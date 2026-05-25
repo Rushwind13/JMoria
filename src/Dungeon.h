@@ -92,6 +92,9 @@ public:
     bool CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFlags = 0 );
     bool PlayerCanSee( JVector vCheck, uint32 dwFlags = 0 );
     void DisturbPlayer();
+    bool LockDoor( JVector pos );
+    bool UnlockDoor( JVector pos );
+    void Aggravate( JVector vOrigin );
 
     void SetLookPosition( JVector vNewPos ) { m_vLookPos.Init( VEC_EXPAND( vNewPos ) ); }
     JVector GetLookPosition() { return m_vLookPos; }
@@ -179,6 +182,7 @@ public:
     CMonsterDef *GetMonsterDef( int which_monster );
     CItemDef *GetItemDef( const char *szItemName );
     CItemDef *GetItemDef( int which_item );
+    JLinkList<CItemDef> *GetItemDefs() { return m_llItemDefs; }
     CEffectDef *GetEffectDef( const char *szEffectName );
     bool SpawnMonster( int which_monster );
     void RemoveMonster( CMonster *pMon );

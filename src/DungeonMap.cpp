@@ -1717,9 +1717,9 @@ bool CDungeonMap::ValidateAllRoomsReachable() const
 bool CDungeonMap::IsWalkable( Uint8 type ) const
 {
     return type == DUNG_IDX_FLOOR || type == DUNG_IDX_DOOR || type == DUNG_IDX_OPEN_DOOR ||
-           type == DUNG_IDX_SECRET_DOOR || type == DUNG_IDX_UPSTAIRS ||
-           type == DUNG_IDX_LONG_UPSTAIRS || type == DUNG_IDX_DOWNSTAIRS ||
-           type == DUNG_IDX_LONG_DOWNSTAIRS;
+           type == DUNG_IDX_SECRET_DOOR || type == DUNG_IDX_BROKEN_DOOR ||
+           type == DUNG_IDX_UPSTAIRS || type == DUNG_IDX_LONG_UPSTAIRS ||
+           type == DUNG_IDX_DOWNSTAIRS || type == DUNG_IDX_LONG_DOWNSTAIRS;
 }
 
 // Post-generation pass: find hallway floor tiles with only one walkable neighbor (dead ends)

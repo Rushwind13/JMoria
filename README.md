@@ -22,7 +22,7 @@ JMoria supports three build configurations:
 ### Panel toggles (display-only, no turn consumed)
 * *i* - show character inventory
 * *e* - show equipment
-* *C* - show character stats
+* *@* - show character stats
 * *v* - show visible monsters sidebar
 * *V* - show monster recall panel
 * *(* - show item recall panel
@@ -47,14 +47,16 @@ JMoria supports three build configurations:
 * *r* - read a scroll
 * *z* - zap a wand
 * *F* - fill/fuel a light source
-* *s* - search
+* *S* - spike a door shut (requires iron spike in inventory)
+* *s* - search for secret doors and traps
+* *O* - bash open a door (Shift+O)
 * *.* - rest one turn
 * *R* - rest until at full health, or until disturbed
 
 ### Interaction
 * *** - choose target monster (choose target with *.*)
 * *:* - look (choose target with movement keys)
-* *N* - set character name
+* *Ctrl-N* - set character name
 * *p* - purchase something in a store
 
 ### Wizard Mode (disables score saving)
@@ -62,6 +64,8 @@ JMoria supports three build configurations:
 * *Ctrl-F* - set player intrinsic flag (needs Wizard Mode)
 * *Ctrl-I* - create item (needs Wizard Mode)
 * *Ctrl-S* - summon monster (needs Wizard Mode)
+* *Ctrl-D* - identify all inventory (needs Wizard Mode)
+* *Ctrl-E* - give all wands and staves (needs Wizard Mode)
 * *Ctrl-W* - exit wizard mode
 
 ### System

@@ -185,6 +185,18 @@ int CCmdState::OnHandleKey( JKeysym *keysym )
         retval = 0;
     }
 
+    else if( IsGiveAllWandsCommand( keysym ) )
+    {
+        g_pGame->GetPlayer()->GiveAllWandsAndStaves();
+        retval = 0;
+    }
+
+    else if( IsIdentifyAllCommand( keysym ) )
+    {
+        g_pGame->GetPlayer()->IdentifyAllInventory();
+        retval = 0;
+    }
+
     /*
     // These commands will bring up a ""
     // Inventory, Equipment
@@ -261,6 +273,13 @@ bool CCmdState::IsModifierNeeded( JKeysym *keysym )
             return true;
         }
         break;
+        // S (Shift+s = spike door; plain s = search, handled separately)
+    case JKEY_s:
+        if( keysym->mod & JMOD_SHIFT && !( keysym->mod & JMOD_CTRL ) )
+        {
+            return true;
+        }
+        break;
     default:
         return false;
         break;
@@ -281,6 +300,15 @@ bool CCmdState::IsUseCommand( JKeysym *keysym )
     case JKEY_w:
     {
         if( !( keysym->mod & JMOD_SHIFT ) && !( keysym->mod & JMOD_CTRL ) )
+        {
+            return true;
+        }
+        break;
+    }
+    case JKEY_z:
+    {
+        // Z (shift+z) for staff
+        if( ( keysym->mod & JMOD_SHIFT ) && !( keysym->mod & JMOD_CTRL ) )
         {
             return true;
         }
@@ -307,8 +335,8 @@ bool CCmdState::IsStringInputCommand( JKeysym *keysym )
 {
     switch( keysym->sym )
     {
-    case JKEY_n: // name your character
-        if( keysym->mod & JMOD_SHIFT )
+    case JKEY_n: // name your character (^n)
+        if( keysym->mod & JMOD_CTRL )
         {
             return true;
         }
@@ -432,6 +460,20 @@ bool CCmdState::IsZapCommand( JKeysym *keysym )
     return false;
 }
 
+bool CCmdState::IsStaffCommand( JKeysym *keysym )
+{
+    // Z (uppercase) — use a staff (no targeting required)
+    switch( keysym->sym )
+    {
+    case JKEY_z:
+        if( keysym->mod & JMOD_SHIFT )
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool CCmdState::IsFireCommand( JKeysym *keysym )
 {
     switch( keysym->sym )
@@ -490,6 +532,36 @@ bool CCmdState::IsSummonMonsterCommand( JKeysym *keysym )
     return false;
 }
 
+bool CCmdState::IsGiveAllWandsCommand( JKeysym *keysym )
+{
+    switch( keysym->sym )
+    {
+    case JKEY_e:
+        return ( keysym->mod & JMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
+        break;
+    default:
+        return false;
+        break;
+    }
+
+    return false;
+}
+
+bool CCmdState::IsIdentifyAllCommand( JKeysym *keysym )
+{
+    switch( keysym->sym )
+    {
+    case JKEY_d:
+        return ( keysym->mod & JMOD_CTRL ) ? g_pGame->GetPlayer()->IsWizard() : false;
+        break;
+    default:
+        return false;
+        break;
+    }
+
+    return false;
+}
+
 bool CCmdState::IsPickupCommand( JKeysym *keysym )
 {
     return ( keysym->sym == JKEY_g && !( keysym->mod & ( JMOD_SHIFT | JMOD_CTRL ) ) );
@@ -527,7 +599,7 @@ bool CCmdState::IsToggleCommand( JKeysym *keysym )
         g_pGame->ToggleEquip();
         return true;
     }
-    if( keysym->sym == JKEY_c && ( keysym->mod & JMOD_SHIFT ) )
+    if( keysym->sym == JKEY_2 && ( keysym->mod & JMOD_SHIFT ) )
     {
         g_pGame->ToggleStats();
         return true;

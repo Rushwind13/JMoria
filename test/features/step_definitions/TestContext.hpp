@@ -1,5 +1,6 @@
 #ifndef __TEST_CONTEXT__
 #define __TEST_CONTEXT__
+#define UNIT_TEST
 #include <gtest/gtest.h>
 
 #include <cucumber-cpp/autodetect.hpp>
@@ -104,6 +105,8 @@ struct TestCtx
     int result_int;
     float result_float;
     JResult result;
+    CItemDef *pendingSourceItemDef = nullptr;
+    int pendingSourceItemFlags = 0;
 
     int index;
     int lo;

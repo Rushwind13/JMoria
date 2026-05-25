@@ -10,7 +10,7 @@ c - close
 T - tunnel
 i - show inventory
 e - show equipment
-C - show stats
+@ - show stats
 v - show visible monsters
 V - show monster recall panel
 ( - show item recall panel
@@ -26,16 +26,21 @@ d - drop
 R - rest until at full health, or until disturbed
 q - quaff a potion
 r - read a scroll
-z - zap a wand
+z - zap a wand (aimed — targets a specific tile or monster)
+Z - use a staff (no targeting — affects the player or the surrounding area)
 F - fill/fuel a light source
-N - set character name
+^n - set character name
 p - purchase something in a store
+S - spike a door shut (requires iron spike in inventory)
 s - search
+O - bash open a door (Shift+O)
 g - get/pickup
 ^c - exit game
 ^t - wizard teleport (Note: will turn on Wizard Mode, which prevents score being saved)
 ^f - wizard set flag (Note: needs Wizard Mode)
 ^i - wizard item (Note: needs Wizard Mode)
+^d - wizard identify all inventory (Note: needs Wizard Mode)
+^e - wizard give all wands and staves (Note: needs Wizard Mode)
 ^s - wizard summon (Note: needs Wizard Mode)
 ^w - exit wizard mode
 

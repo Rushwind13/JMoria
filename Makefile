@@ -93,7 +93,10 @@ opengl:
 ascii-test:
 	$(MAKE) RENDER_MODE=ascii test
 
-.PHONY: ascii opengl ascii-test test clean
+build:
+	$(MAKE) clean ascii test
+
+.PHONY: ascii opengl ascii-test build bdd test clean
 
 $(TEST_EXEC): $(TEST_DIR) $(TEST_OBJECTS) $(filter-out src/main.o, $(OBJECTS))
 	$(CC) $(TEST_OBJECTS) $(filter-out src/main.o, $(OBJECTS)) $(TEST_LD_FLAGS) -o $(TEST_DIR)/$(TEST_EXEC)
@@ -103,6 +106,9 @@ $(SCORE_FILE):
 
 $(TEST_DIR):
 	mkdir -p $(TEST_DIR)
+
+bdd:
+	cd test; ./runtests.sh; cd -
 
 test: $(TEST_EXEC)
 

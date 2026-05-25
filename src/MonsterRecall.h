@@ -15,6 +15,7 @@ struct CRecallAttack
 {
     int dwType;                            // MON_FLAG_BITE/CLAW/etc
     char szEffect[RECALL_EFFECT_NAME_LEN]; // effect name, or "" for none
+    uint32 dwElementFlags;                 // EFFECT_FLAG_* bits observed for this attack
     int dwTimesObserved;
     int dwDamageMin;   // lowest damage seen
     int dwDamageMax;   // highest damage seen
@@ -61,7 +62,7 @@ public:
     void RecordKill( const char *szName, float fEstimatedHP );
     void RecordObservation( const char *szName, int dwFlag );
     void RecordAttackObservation( const char *szName, int dwType, float fDamage,
-                                  const char *szEffect );
+                                  const char *szEffect, uint32 dwEffectFlags = 0 );
     const CRecallEntry *GetEntry( const char *szName ) const;
     void PrintRecall( const CMonsterDef *pmd, CDisplayText *pDT ) const;
 

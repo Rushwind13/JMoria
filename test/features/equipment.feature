@@ -145,6 +145,7 @@ Feature: Equipment
         # Given A dagger is in the primary weapon equipment slot
         Given the player has a Dagger in equipment at 0
         When the player reads the scroll in inventory at 0
+        When the player applies the pending effect to equipment at 0
         Then the equipped Dagger at 0 is not cursed
 
     Scenario: Cursed scroll of remove curse curses an equipped item
@@ -157,6 +158,7 @@ Feature: Equipment
         Given the player has a Scroll of Remove Curse in inventory
         Given the player has a Dagger in equipment at 0
         When the player reads the scroll in inventory at 0
+        When the player applies the pending effect to equipment at 0
         Then the equipped Dagger at 0 is cursed
         When the player takes off the Dagger at 0
         Then the player has a Dagger in equipment at 0

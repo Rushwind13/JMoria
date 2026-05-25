@@ -49,11 +49,15 @@ private:
     int ScrollIndex[NUM_SCROLL_TYPES];
     int WandIndex[NUM_LUMBER_TYPES];
     int StaffIndex[NUM_LUMBER_TYPES];
+    int AmuletIndex[NUM_METAL_TYPES];
+    int RingIndex[NUM_METAL_TYPES];
 
     uint32 m_dwPotionCount = 0;
     uint32 m_dwScrollCount = 0;
     uint32 m_dwWandCount = 0;
     uint32 m_dwStaffCount = 0;
+    uint32 m_dwAmuletCount = 0;
+    uint32 m_dwRingCount = 0;
     // Member functions
 public:
 protected:

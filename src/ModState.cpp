@@ -6,6 +6,7 @@
 #include "JMDefs.h"
 
 #include "Dungeon.h"
+#include "Item.h"
 #include "Player.h"
 
 extern CGame *g_pGame;
@@ -16,6 +17,8 @@ CModState::CModState() : m_cCommand( 0 ), m_vNewPos( 0, 0 )
     m_pKeyHandlers[MOD_TUNNEL] = &CModState::OnHandleTunnel;
     m_pKeyHandlers[MOD_INIT] = &CModState::OnHandleInit;
     m_pKeyHandlers[MOD_CLOSE] = &CModState::OnHandleClose;
+    m_pKeyHandlers[MOD_SPIKE] = &CModState::OnHandleSpike;
+    m_pKeyHandlers[MOD_BASH] = &CModState::OnHandleBash;
 
     m_eCurModifier = MOD_INIT;
     m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
@@ -63,7 +66,16 @@ int CModState::OnHandleOpen( JKeysym *keysym )
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "I do not see anything to open there.\n" );
+        CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vNewPos );
+        if( pTile && pTile->m_dtd->m_dwType == DUNG_IDX_DOOR &&
+            pTile->HasFlags( DUNG_FLAG_LOCKED ) )
+        {
+            g_pGame->GetMsgs()->Printf( "The door is held fast.\n" );
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "I do not see anything to open there.\n" );
+        }
     }
 
     JLog( LOG_LEVEL_DEBUG, true,
@@ -174,10 +186,25 @@ int CModState::OnHandleInit( JKeysym *keysym )
         switch( m_cCommand )
         {
         case JKEY_o:
-            mod = MOD_OPEN;
+            if( keysym->mod & JMOD_SHIFT )
+                mod = MOD_BASH;
+            else
+                mod = MOD_OPEN;
             break;
         case JKEY_c:
             mod = MOD_CLOSE;
+            break;
+        case JKEY_s:
+            if( keysym->mod & JMOD_SHIFT )
+            {
+                mod = MOD_SPIKE;
+            }
+            else
+            {
+                JLog( LOG_LEVEL_INFO, true, "SEARCH not handled here.\n" );
+                ResetToState( STATE_COMMAND );
+                return 0;
+            }
             break;
         case JKEY_t:
             if( keysym->mod & JMOD_SHIFT )
@@ -276,6 +303,158 @@ bool CModState::DoClose()
     if( Util::GetRandom( 1, 100 ) <= CHANCE_CLOSE_DOOR )
     {
         g_pGame->GetDungeon()->Modify( m_vNewPos );
+        return true;
+    }
+    return false;
+}
+
+//// Spike commands
+int CModState::OnHandleSpike( JKeysym *keysym )
+{
+    int retval;
+    JLog( LOG_LEVEL_DEBUG, true, "Handling SPIKE modifier\n" );
+    retval = OnBaseHandleKey( keysym );
+
+    if( retval == JRESETSTATE )
+    {
+        return 0;
+    }
+
+    if( retval != JSUCCESS )
+    {
+        g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
+        return 0;
+    }
+
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vNewPos );
+    if( !pTile || pTile->m_dtd->m_dwType != DUNG_IDX_DOOR )
+    {
+        g_pGame->GetMsgs()->Printf( "I do not see a closed door there.\n" );
+    }
+    else if( pTile->HasFlags( DUNG_FLAG_LOCKED ) )
+    {
+        // Already spiked — break it free (spikes are single-use)
+        if( DoUnspike() )
+        {
+            g_pGame->GetMsgs()->Printf( "The spike breaks.\n" );
+        }
+    }
+    else
+    {
+        // Spike the door shut
+        if( TestSpike() )
+        {
+            if( DoSpike() )
+            {
+                g_pGame->GetMsgs()->Printf( "You spike the door shut.\n" );
+            }
+        }
+        else
+        {
+            g_pGame->GetMsgs()->Printf( "You have no iron spikes.\n" );
+        }
+    }
+
+    ResetToState( STATE_COMMAND );
+    return 0;
+}
+
+bool CModState::TestSpike()
+{
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vNewPos );
+    if( !pTile || pTile->m_dtd->m_dwType != DUNG_IDX_DOOR )
+        return false;
+    if( pTile->HasFlags( DUNG_FLAG_LOCKED ) )
+        return false;
+    CLink<CItem> *pSpike = g_pGame->GetPlayer()->m_llInventory->GetLink( ITEM_IDX_SPIKE );
+    return ( pSpike != nullptr && pSpike->m_lpData != nullptr );
+}
+
+bool CModState::DoSpike()
+{
+    if( !g_pGame->GetDungeon()->LockDoor( m_vNewPos ) )
+        return false;
+    CLink<CItem> *pSpike = g_pGame->GetPlayer()->m_llInventory->GetLink( ITEM_IDX_SPIKE );
+    g_pGame->GetPlayer()->ConsumeItem( pSpike );
+    return true;
+}
+
+bool CModState::DoUnspike() { return g_pGame->GetDungeon()->UnlockDoor( m_vNewPos ); }
+
+//// Bash commands
+int CModState::OnHandleBash( JKeysym *keysym )
+{
+    int retval;
+    JLog( LOG_LEVEL_DEBUG, true, "Handling BASH modifier\n" );
+    retval = OnBaseHandleKey( keysym );
+
+    if( retval == JRESETSTATE )
+    {
+        return 0;
+    }
+
+    if( retval != JSUCCESS )
+    {
+        g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
+        return 0;
+    }
+
+    if( !TestBash() )
+    {
+        g_pGame->GetMsgs()->Printf( "I do not see a door there.\n" );
+    }
+    else if( DoBash() )
+    {
+        g_pGame->GetMsgs()->Printf( "You bash the door open!\n" );
+        g_pGame->GetDungeon()->Aggravate( m_vNewPos );
+        g_pGame->GetDungeon()->DisturbPlayer();
+    }
+    else
+    {
+        g_pGame->GetMsgs()->Printf( "You slam against the door but it holds.\n" );
+    }
+
+    ResetToState( STATE_COMMAND );
+    return 0;
+}
+
+bool CModState::TestBash()
+{
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vNewPos );
+    return pTile && pTile->m_dtd && pTile->m_dtd->m_dwType == DUNG_IDX_DOOR;
+}
+
+bool CModState::DoBash()
+{
+    CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vNewPos );
+    if( !pTile || !pTile->m_dtd )
+        return false;
+
+    bool bLocked = pTile->HasFlags( DUNG_FLAG_LOCKED );
+    int nDC = bLocked ? 15 : 10;
+
+    float fBonus = g_pGame->GetPlayer()->m_fDamageModifier;
+
+    // Metal armor/boots add heft to the blow
+    CLink<CItem> *pEquip = g_pGame->GetPlayer()->m_llEquipment->GetHead();
+    while( pEquip )
+    {
+        CItem *pItem = pEquip->m_lpData;
+        if( pItem && pItem->m_id && ( pItem->m_id->m_dwFlags & ITEM_FLAG_METAL ) )
+        {
+            fBonus += 2.0f;
+            break;
+        }
+        pEquip = g_pGame->GetPlayer()->m_llEquipment->GetNext( pEquip );
+    }
+
+    float fRoll = Util::Roll( 1, 20 ) + fBonus;
+    JLog( LOG_LEVEL_INFO, true, "DoBash: roll=%.1f bonus=%.1f DC=%d locked=%d\n", fRoll, fBonus,
+          nDC, bLocked );
+    if( fRoll >= nDC )
+    {
+        pTile->m_dtd = g_pGame->GetDungeon()->GetTileDef( DUNG_IDX_BROKEN_DOOR );
+        pTile->UnsetFlags( DUNG_FLAG_LOCKED );
         return true;
     }
     return false;

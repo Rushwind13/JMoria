@@ -16,6 +16,8 @@ CMonster::CMonster()
       m_fColorChangeInterval( COLOR_CHANGE_TIMEOUT + 1 ),
       m_fLastBreed( BREED_INTERVAL ),
       m_dwInstanceId( 0 ),
+      m_dwActiveEffects( 0 ),
+      m_dwActiveEffects2( 0 ),
       m_bDetected( false )
 {
     m_pBrain = new CAIBrain;
@@ -114,6 +116,14 @@ JResult CMonster::InitAndSpawn( CMonsterDef *pmd, JIVector vRequestedSpawnPoint 
         // Put the monster in the world
         SpawnAt( vSpawnPoint );
 
+        // monsters spawn asleep
+        if( !( pmd->m_dwFlags & MON_FLAG_NEVER_SLEEP ) )
+        {
+            m_dwActiveEffects |= EFFECT_FLAG_SLEEP;
+            m_pBrain->SetState( BRAINSTATE_REST );
+            // m_nEffectTurns intentionally NOT set: spawn-sleep is indefinite until woken
+        }
+
         // Now that the monster is set up, add it to the global lists (monsters, brains)
         m_pllLink = g_pGame->GetDungeon()->m_llMonsters->Add( this );
         m_pBrain->m_pllLink = g_pGame->GetAIMgr()->m_llAIBrains->Add( m_pBrain );
@@ -211,20 +221,7 @@ const char *CMonster::AttackEffect()
 {
     if( m_pCurrentAttack == NULL || m_pCurrentAttack->m_pEffect == NULL )
         return "thoughts and prayers";
-    switch( m_pCurrentAttack->m_pEffect->m_dwFlags )
-    {
-    case EFFECT_FLAG_ACID:
-        return "acid";
-    case EFFECT_FLAG_COLD:
-        return "cold";
-    case EFFECT_FLAG_ELECTRICITY:
-        return "lightning";
-    case EFFECT_FLAG_FIRE:
-        return "fire";
-    case EFFECT_FLAG_POISON:
-        return "poison gas";
-    }
-    return "hot air";
+    return m_pCurrentAttack->m_pEffect->Effect();
 }
 
 const char *CMonster::AttackFlavorText()
@@ -320,9 +317,32 @@ int CMonster::TakeDamage( float fDamage )
     return retval;
 }
 
+// Returns the OR of all EFFECT_FLAG_FIRE/COLD/ELECTRICITY/ACID bits found in this monster's
+// attack effects.  This bitmask represents both the elements the monster uses and the elements
+// it is immune to.  Pass the result to CheckAffinity() to resolve a damage multiplier.
+uint32 CMonster::GetElementFlags() const
+{
+    static const uint32 kElementMask =
+        EFFECT_FLAG_FIRE | EFFECT_FLAG_COLD | EFFECT_FLAG_ELECTRICITY | EFFECT_FLAG_ACID;
+
+    uint32 dwFlags = 0;
+    CLink<CAttack> *pLink = m_md->m_llAttacks->GetHead();
+    while( pLink != NULL )
+    {
+        CAttack *pAtk = pLink->m_lpData;
+        if( pAtk && pAtk->m_pEffect )
+            dwFlags |= ( pAtk->m_pEffect->m_dwFlags & kElementMask );
+        pLink = m_md->m_llAttacks->GetNext( pLink );
+    }
+    return dwFlags;
+}
+
 // draw routines
 void CMonster::Breed()
 {
+    if( m_dwActiveEffects & EFFECT_FLAG_SLEEP )
+        return;
+
     if( ( m_md->m_dwFlags & MON_FLAG_BREED ) != MON_FLAG_BREED )
         return;
 

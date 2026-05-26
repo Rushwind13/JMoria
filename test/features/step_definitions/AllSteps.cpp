@@ -12,6 +12,7 @@
 #include "EquipmentSteps.cpp"
 #include "GameSteps.cpp"
 #include "ItemSteps.cpp"
+#include "ItemVisibilitySteps.cpp"
 #include "LOSItemsSteps.cpp"
 #include "LightSteps.cpp"
 #include "MonsterRecallSteps.cpp"

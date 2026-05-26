@@ -293,11 +293,13 @@ void CPlayer::DisplayStats()
     if( GetIntrinsic( EFFECT_FLAG_ESP ) != 0 )
         g_pGame->GetStats()->Printf( "Telepathy\n" );
     if( GetIntrinsic( EFFECT_FLAG_POISON ) != 0 )
-        g_pGame->GetStats()->Printf( "Poisoned\n" );
+        g_pGame->GetStats()->Printf( HasActiveResistFor( EFFECT_FLAG_POISON ) ? "Res: Poison\n"
+                                                                              : "Poisoned\n" );
     if( GetIntrinsic( EFFECT_FLAG_PARALYZE ) != 0 )
         g_pGame->GetStats()->Printf( "Paralyzed\n" );
     if( GetIntrinsic( EFFECT_FLAG_AFRAID ) != 0 )
-        g_pGame->GetStats()->Printf( "Afraid\n" );
+        g_pGame->GetStats()->Printf( HasActiveResistFor( EFFECT_FLAG_AFRAID ) ? "Res: Fear\n"
+                                                                              : "Afraid\n" );
     if( GetIntrinsic( EFFECT_FLAG_BLIND ) != 0 )
         g_pGame->GetStats()->Printf( "Blind\n" );
     if( GetIntrinsic( EFFECT_FLAG_SLEEP ) != 0 )
@@ -2016,12 +2018,28 @@ JResult CPlayer::DoApplyCurse()
     return JSUCCESS;
 }
 
+bool CPlayer::HasActiveResistFor( uint32 flag ) const
+{
+    CLink<CEffect> *pLink = m_llActiveEffects->GetHead();
+    while( pLink )
+    {
+        CEffect *pEffect = pLink->m_lpData;
+        if( ( pEffect->m_dwFlags & flag ) && ( pEffect->m_dwModifier & EFFECT_MOD_RESIST ) )
+            return true;
+        pLink = pLink->next;
+    }
+    return false;
+}
+
 JResult CPlayer::DoIntrinsicEffects( CEffect *pEffect, float fDuration )
 {
     switch( pEffect->m_dwFlags )
     {
     case EFFECT_FLAG_AFRAID:
-        g_pGame->GetMsgs()->Printf( "You are afraid!\n" );
+        if( pEffect->m_dwModifier & EFFECT_MOD_RESIST )
+            g_pGame->GetMsgs()->Printf( "You feel resistant to fear.\n" );
+        else
+            g_pGame->GetMsgs()->Printf( "You are afraid!\n" );
         break;
     case EFFECT_FLAG_BLIND:
         g_pGame->GetMsgs()->Printf( "You are blind.\n" );
@@ -2030,7 +2048,10 @@ JResult CPlayer::DoIntrinsicEffects( CEffect *pEffect, float fDuration )
         g_pGame->GetMsgs()->Printf( "You are confused.\n" );
         break;
     case EFFECT_FLAG_POISON:
-        g_pGame->GetMsgs()->Printf( "You are poisoned.\n" );
+        if( pEffect->m_dwModifier & EFFECT_MOD_RESIST )
+            g_pGame->GetMsgs()->Printf( "You feel resistant to poison.\n" );
+        else
+            g_pGame->GetMsgs()->Printf( "You are poisoned.\n" );
         break;
     case EFFECT_FLAG_PARALYZE:
         g_pGame->GetMsgs()->Printf( "You can't move!\n" );
@@ -2095,9 +2116,25 @@ JResult CPlayer::UndoIntrinsicEffects( CEffect *pEffect )
     switch( pEffect->m_dwFlags )
     {
     case EFFECT_FLAG_AFRAID:
+        if( pEffect->m_dwModifier & EFFECT_MOD_RESIST )
+        {
+            g_pGame->GetMsgs()->Printf( "You are no longer resistant to fear.\n" );
+            UnsetIntrinsic( pEffect->m_dwFlags );
+            return JSUCCESS;
+        }
+        return DoHealEffects( pEffect );
+        break;
+    case EFFECT_FLAG_POISON:
+        if( pEffect->m_dwModifier & EFFECT_MOD_RESIST )
+        {
+            g_pGame->GetMsgs()->Printf( "You are no longer resistant to poison.\n" );
+            UnsetIntrinsic( pEffect->m_dwFlags );
+            return JSUCCESS;
+        }
+        return DoHealEffects( pEffect );
+        break;
     case EFFECT_FLAG_BLIND:
     case EFFECT_FLAG_CONFUSE:
-    case EFFECT_FLAG_POISON:
     case EFFECT_FLAG_PARALYZE:
     case EFFECT_FLAG_SLEEP:
         return DoHealEffects( pEffect );

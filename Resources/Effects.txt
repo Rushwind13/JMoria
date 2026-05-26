@@ -632,6 +632,7 @@ Effect <Resist Poison>
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_POISON>
     Modifier    <EFFECT_MOD_RESIST>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    100.0
 }
 Effect <Light>
@@ -649,6 +650,7 @@ Effect <Resist Fear>
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_AFRAID>
     Modifier    <EFFECT_MOD_RESIST>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    50.0
 }
 Effect <Cause Blindness>

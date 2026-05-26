@@ -489,13 +489,14 @@ void CAIBrain::BuildEligibleAttacks()
         CAttack *pAtk = pLink->m_lpData;
         if( pAtk )
         {
-            bool bRanged =
-                pAtk->m_pEffect && pAtk->m_pEffect->m_ed && pAtk->m_pEffect->m_ed->m_fRange > 0.0f;
-            bool bInRange = true;
-            if( bRanged )
-            {
-                bInRange = vPos.WithinRange( vPlayer, pAtk->m_pEffect->m_ed->m_fRange );
-            }
+            // Range=0: GoToDest (CollideWithPlayer required)
+            // Range=1: melee (fires in-place, requires adjacency)
+            // Range>1: ranged (fires in-place, requires LOS + range)
+            float fRange = ( pAtk->m_pEffect && pAtk->m_pEffect->m_ed )
+                               ? pAtk->m_pEffect->m_ed->m_fRange
+                               : 0.0f;
+            bool bRanged = fRange > 1.0f;
+            bool bInRange = bRanged ? vPos.WithinRange( vPlayer, fRange ) : true;
             if( bAdjacent || ( bInLOS && bRanged && bInRange ) )
                 m_pEligibleAttacks->Add( pAtk );
         }
@@ -568,8 +569,10 @@ bool CAIBrain::UpdateAttack( float fCurTime )
     CAttack *pAtk = m_pEligibleAttacks->GetNthLink( nIdx )->m_lpData;
     m_pParent->m_pCurrentAttack = pAtk;
 
-    bool bRanged =
-        pAtk->m_pEffect && pAtk->m_pEffect->m_ed && pAtk->m_pEffect->m_ed->m_fRange > 0.0f;
+    // Range=0: GoToDest path (CollideWithPlayer). Range>=1: fire in-place (melee or ranged).
+    float fRange =
+        ( pAtk->m_pEffect && pAtk->m_pEffect->m_ed ) ? pAtk->m_pEffect->m_ed->m_fRange : 0.0f;
+    bool bRanged = fRange >= 1.0f;
     JVector vMonPos = m_vPos;
     JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
     if( bRanged )

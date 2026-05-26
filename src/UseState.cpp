@@ -388,31 +388,24 @@ int CUseState::OnHandleInit( JKeysym *keysym )
         {
         case JKEY_w:
             mod = USE_WIELD;
-            g_pGame->GetMsgs()->Printf( "Wield which item? [a-z]\n" );
             break;
         case JKEY_t:
             mod = USE_REMOVE;
-            g_pGame->GetMsgs()->Printf( "Remove which item? [a-j]\n" );
             break;
         case JKEY_d:
             mod = USE_DROP;
-            g_pGame->GetMsgs()->Printf( "Drop which item? [a-z]\n" );
             break;
         case JKEY_r:
             mod = USE_READ;
-            g_pGame->GetMsgs()->Printf( "Read which item? [a-z]\n" );
             break;
         case JKEY_q:
             mod = USE_QUAFF;
-            g_pGame->GetMsgs()->Printf( "Quaff which item? [a-z]\n" );
             break;
         case JKEY_f:
             mod = USE_FUEL;
-            g_pGame->GetMsgs()->Printf( "Fill with which fuel? [a-z]\n" );
             break;
         case JKEY_z:
             mod = USE_STAFF;
-            g_pGame->GetMsgs()->Printf( "Use which staff? [a-z]\n" );
             break;
         default:
             JLog( LOG_LEVEL_ERROR, true,

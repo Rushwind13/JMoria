@@ -258,12 +258,14 @@ void CDungeon::PopulateLevel( const int depth )
     if( depth <= 0 )
     {
         JLog( LOG_LEVEL_INFO, false, "You are in town.\n" );
+        g_pGame->GetMsgs()->Clear();
         g_pGame->GetMsgs()->Printf( "You are in town.\n" );
     }
     else
     {
         JLog( LOG_LEVEL_INFO, false, "You pass through a one-way door, to arrive on level %d.\n",
               depth );
+        g_pGame->GetMsgs()->Clear();
         g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
                                     depth );
     }
@@ -1002,7 +1004,7 @@ void CDungeon::UpdateVisibility()
 
             if( Util::Bresenham( vPlayer, viCheck, target_distance, SightCollisionTest ) )
             {
-                pTile->SetFlags( DUNG_FLAG_VISIBLE );
+                pTile->SetFlags( DUNG_FLAG_VISIBLE | DUNG_FLAG_SEEN );
             }
         }
     }

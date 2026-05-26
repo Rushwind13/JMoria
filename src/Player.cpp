@@ -423,15 +423,12 @@ void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
             {
                 pDT->Printf( "%c - %s\n", cListId, pItem->GetName() );
             }
-            if( cListId < meta.limit )
-            {
-                cListId++;
-            }
-            else
-            {
-                pDT->Printf( meta.footer );
-                break;
-            }
+        }
+        cListId++;
+        if( cListId > meta.limit )
+        {
+            pDT->Printf( meta.footer );
+            break;
         }
         pLink = m_llInventory->GetNext( pLink );
     }

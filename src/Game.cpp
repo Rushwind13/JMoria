@@ -14,6 +14,7 @@
 #include "IntroState.h"
 #include "LookState.h"
 #include "ModState.h"
+#include "MoreState.h"
 #include "RangedState.h"
 #include "RestState.h"
 #include "RunState.h"
@@ -53,6 +54,7 @@ CGame::CGame()
       m_pStringInputState( NULL ),
       m_pTargetState( NULL ),
       m_pUseState( NULL ),
+      m_pMoreState( NULL ),
       m_pMonRecall( NULL ),
       m_eCurState( STATE_INVALID ),
       m_fGameTime( 0.0f ),
@@ -77,6 +79,7 @@ CGame::CGame()
     m_pStringInputState = new CStringInputState;
     m_pTargetState = new CTargetState;
     m_pUseState = new CUseState;
+    m_pMoreState = new CMoreState;
 #ifdef TURN_BASED
     m_bReadyForUpdate = false;
 #endif // TURN_BASED
@@ -125,6 +128,7 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
 
     m_pMsgsDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, MSGS_ROWS * 8 ), 255 );
     m_pMsgsDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE );
+    m_pMsgsDT->EnableMore();
 
     m_pStatsDT = new CDisplayText( szBasedir, JRect( 0, 50, 150, 480 ), 220 );
     m_pStatsDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
@@ -315,6 +319,12 @@ void CGame::Term()
         m_pUseState = NULL;
     }
 
+    if( m_pMoreState )
+    {
+        delete m_pMoreState;
+        m_pMoreState = NULL;
+    }
+
     JLog( LOG_LEVEL_DEBUG, true, "Message boxes..." );
     if( m_pMsgsDT )
     {
@@ -415,6 +425,9 @@ void CGame::SetState( int eNewState )
         break;
     case STATE_USE:
         m_pCurState = reinterpret_cast<CStateBase *>( m_pUseState );
+        break;
+    case STATE_MORE:
+        m_pCurState = reinterpret_cast<CStateBase *>( m_pMoreState );
         break;
     case STATE_ENDGAME:
     {

@@ -133,9 +133,9 @@ int CLookState::OnBaseHandleKey( JKeysym *keysym )
             g_pGame->GetPlayer()->SetTarget( pTile->m_pCurMonster );
             if( g_pGame->RecallMonster() && pTile->m_pCurMonster->m_md )
             {
-                g_pGame->GetMsgs()->Clear();
+                g_pGame->GetMonsterRecall()->Clear();
                 g_pGame->RecallMonster()->PrintRecall( pTile->m_pCurMonster->m_md,
-                                                       g_pGame->GetMsgs() );
+                                                       g_pGame->GetMonsterRecall() );
             }
         }
         // item

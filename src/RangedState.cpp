@@ -310,7 +310,7 @@ int CRangedState::OnHandleZap( JKeysym *keysym )
         {
             JLog( LOG_LEVEL_DEBUG, true, "need a target\n" );
             // set target
-            g_pGame->GetMsgs()->Printf( "Choose target with * or Directional (1 2 3 4 6 7 8 9)\n" );
+            g_pGame->GetUse()->Printf( "Choose target with * or Directional (1 2 3 4 6 7 8 9)\n" );
             m_eCurModifier = RANGED_TARGET;
             m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
             return JSUCCESS;
@@ -318,7 +318,7 @@ int CRangedState::OnHandleZap( JKeysym *keysym )
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "You can't zap a %s!\n", m_pSelected->m_lpData->GetName() );
+        g_pGame->GetUse()->Printf( "You can't zap a %s!\n", m_pSelected->m_lpData->GetName() );
         ResetToState( STATE_COMMAND );
         return JCOMPLETESTATE;
     }
@@ -466,8 +466,8 @@ int CRangedState::OnBaseHandleKey( JKeysym *keysym )
             m_pSelected = GetResponse( m_eCurModifier );
             if( m_pSelected == NULL )
             {
-                g_pGame->GetMsgs()->Printf( "Nothing valid to %s.\n",
-                                            m_eCurModifier == RANGED_FIRE ? "fire" : "zap" );
+                g_pGame->GetUse()->Printf( "Nothing valid to %s.\n",
+                                           m_eCurModifier == RANGED_FIRE ? "fire" : "zap" );
                 ResetToState( STATE_COMMAND );
                 return JRESETSTATE;
             }
@@ -582,14 +582,13 @@ bool CRangedState::DoLaunch()
         pEffectDef = plEffect->m_lpData->m_ed;
     }
 
-    if( szEffectDesc )
+    if( szEffectDesc && pItem->IsIdentified() )
     {
-        g_pGame->GetMsgs()->Printf( "The %s emits a %s.\n", m_pSelected->m_lpData->GetName(),
-                                    szEffectDesc );
+        g_pGame->GetMsgs()->Printf( "The %s emits a %s.\n", pItem->GetName(), szEffectDesc );
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "The %s glows.\n", m_pSelected->m_lpData->GetName() );
+        g_pGame->GetMsgs()->Printf( "The %s glows.\n", pItem->GetName() );
     }
 
     // Pass effect definition and trajectory to dungeon for multicolor beam rendering

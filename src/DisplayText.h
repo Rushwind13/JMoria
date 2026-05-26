@@ -22,6 +22,8 @@
 #define FLAG_TEXT_IGNORE_WHITESPACE 0x4
 #define FLAG_TEXT_WRAP_WHITESPACE 0x8
 #define FLAG_TEXT_TRIM_TAIL 0x10
+
+#define TEXT_MAXCHARS 12288
 class CItem;
 class CScore;
 
@@ -50,6 +52,12 @@ public:
     void SetContentMargin( int left, int top );
     void DrawStr( int x, int y, const char *szString );
     void Printf( const char *fmt, ... );
+    // Enable page-break mode: \n in Printf triggers a -more- prompt instead
+    // of a plain newline.  Call once on the Msgs panel instance.
+    void EnableMore() { m_bMoreOnNewline = true; }
+    // Advance to the next buffered page; called by CMorePromptState on keypress.
+    // Switches to STATE_COMMAND when the buffer is exhausted.
+    void AdvancePage();
     void DisplayFixedList( JLinkList<CItem> *pList, const CDisplayMeta *pMeta,
                            const uint8 dwIndex = DUNG_IDX_INVALID );
     void DisplayList( JLinkList<CItem> *pList, const CDisplayMeta *pMeta,
@@ -98,6 +106,11 @@ public:
 
 private:
     char *m_szDrawPtr;
+
+    // Page-break mode (enabled on the Msgs panel via EnableMore()).
+    bool m_bMoreOnNewline;
+    // Buffered remainder for multi-page messages.
+    char m_szMoreBuffer[TEXT_MAXCHARS];
 
     // Auxiliary
     int m_dwUsedLines;

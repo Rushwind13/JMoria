@@ -98,8 +98,10 @@ int CTargetState::DoInit()
             g_pGame->GetPlayer()->SetTarget( pFirst );
             if( g_pGame->RecallMonster() && pFirst->m_md )
             {
-                g_pGame->GetMsgs()->Clear();
-                g_pGame->RecallMonster()->PrintRecall( pFirst->m_md, g_pGame->GetMsgs() );
+                if( !g_pGame->IsShowingMonsterRecall() )
+                    g_pGame->ToggleMonsterRecall();
+                g_pGame->GetMonsterRecall()->Clear();
+                g_pGame->RecallMonster()->PrintRecall( pFirst->m_md, g_pGame->GetMonsterRecall() );
             }
         }
         UpdateLOSLine();
@@ -187,8 +189,8 @@ int CTargetState::OnBaseHandleKey( JKeysym *keysym )
         UpdateLOSLine();
         if( g_pGame->RecallMonster() && pMon->m_md )
         {
-            g_pGame->GetMsgs()->Clear();
-            g_pGame->RecallMonster()->PrintRecall( pMon->m_md, g_pGame->GetMsgs() );
+            g_pGame->GetMonsterRecall()->Clear();
+            g_pGame->RecallMonster()->PrintRecall( pMon->m_md, g_pGame->GetMonsterRecall() );
         }
         return JSUCCESS;
     }

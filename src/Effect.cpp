@@ -456,15 +456,45 @@ JResult CEffect::StoneToMud( JVector vOrigin )
     if( !pTile || !pTile->m_dtd )
         return JBOGUSKEY;
 
-    if( pTile->m_dtd->m_dwType == DUNG_IDX_WALL )
+    JResult retval = JBOGUSKEY;
+
+    // Damage rock-type monsters on the tile
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( pMon && ( pMon->m_md->m_dwFlags & MON_FLAG_ROCK ) )
     {
-        pTile->m_dtd = g_pGame->GetDungeon()->GetTileDef( DUNG_IDX_FLOOR );
-        g_pGame->GetMsgs()->Printf( "The wall turns to mud and collapses!\n" );
-        return JSUCCESS;
+        float fDamage = Util::Roll( "3d8" );
+        const char *szMonName = pMon->GetName();
+        if( g_pGame->GetPlayer()->DamageMonster( pMon, fDamage ) )
+            g_pGame->GetMsgs()->Printf( "The %s crumbles to dust!\n", szMonName );
+        else
+            g_pGame->GetMsgs()->Printf( "The %s cracks!\n", szMonName );
+        retval = JSUCCESS;
     }
 
-    g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
-    return JSUCCESS;
+    // Melt stone tiles (closed door, secret door, or wall; not open/broken doors)
+    switch( pTile->m_dtd->m_dwType )
+    {
+    case DUNG_IDX_WALL:
+        pTile->m_dtd = g_pGame->GetDungeon()->GetTileDef( DUNG_IDX_FLOOR );
+        g_pGame->GetMsgs()->Printf( "The wall turns to mud and collapses!\n" );
+        retval = JSUCCESS;
+        break;
+    case DUNG_IDX_DOOR:
+        pTile->m_dtd = g_pGame->GetDungeon()->GetTileDef( DUNG_IDX_FLOOR );
+        g_pGame->GetMsgs()->Printf( "The door dissolves!\n" );
+        retval = JSUCCESS;
+        break;
+    case DUNG_IDX_SECRET_DOOR:
+        pTile->m_dtd = g_pGame->GetDungeon()->GetTileDef( DUNG_IDX_FLOOR );
+        g_pGame->GetMsgs()->Printf( "The secret door dissolves!\n" );
+        retval = JSUCCESS;
+        break;
+    }
+
+    if( retval == JBOGUSKEY )
+        g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+
+    return retval;
 }
 
 JResult CEffect::TeleportAway( JVector vOrigin )

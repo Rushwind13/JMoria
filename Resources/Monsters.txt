@@ -1145,7 +1145,7 @@ Monster <Stone Golem>
     Level       42
     ExpValue	450.0
     Type		<MON_IDX_GOLEM>
-    Flags		<MON_FLAG_EMPTY_MIND>
+    Flags		<MON_FLAG_EMPTY_MIND,MON_FLAG_ROCK>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Color		<128,128,128,255>
 }
@@ -4327,7 +4327,7 @@ Monster <Stone Giant>
     Level       38
     ExpValue	400.0
     Type		<MON_IDX_GIANT>
-    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE>
+    Flags		<MON_FLAG_WARM,MON_FLAG_HANDS,MON_FLAG_LARGE,MON_FLAG_ROCK>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d8
     Attack             <MON_FLAG_TRAMPLE>, <Physical Hit>, 2d8
     Color		<128,128,128,255>

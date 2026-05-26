@@ -209,6 +209,7 @@
 // #define MON_FLAG_x          0x00004000
 #define MON_FLAG_HANDS 0x00001000 // can open doors non-destructively
 #define MON_FLAG_LARGE 0x00002000 // large/heavy enough to bash through doors
+#define MON_FLAG_ROCK 0x00004000  // made of stone/rock; hurt by Stone to Mud
 #define MON_FLAG_BREED 0x00008000
 
 #define MON_FLAG_INVISIBLE 0x00100000
@@ -226,7 +227,7 @@
 // #define MON_COLOR_x          0x40000000
 // #define MON_COLOR_x          0x80000000
 
-#define NUM_MON_FLAGS 23
+#define NUM_MON_FLAGS 24
 
 // Effect Flags
 #define EFFECT_FLAG_FIRE 0x00000001
@@ -532,6 +533,7 @@ public:
         m_StringTable[i++].Init( "MON_FLAG_BREED", MON_FLAG_BREED );
         m_StringTable[i++].Init( "MON_FLAG_HANDS", MON_FLAG_HANDS );
         m_StringTable[i++].Init( "MON_FLAG_LARGE", MON_FLAG_LARGE );
+        m_StringTable[i++].Init( "MON_FLAG_ROCK", MON_FLAG_ROCK );
         m_StringTable[i++].Init( "MON_FLAG_INVISIBLE", MON_FLAG_INVISIBLE );
         m_StringTable[i++].Init( "MON_FLAG_NEVER_SLEEP", MON_FLAG_NEVER_SLEEP );
         m_StringTable[i++].Init( "MON_FLAG_MAXHP", MON_FLAG_MAXHP );

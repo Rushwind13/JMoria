@@ -1,86 +1,65 @@
 # Phase 3d: Shiny - Prioritized Roadmap
 
-**Status**: Roadmap for upcoming phase following Phase 3c Polish (PR#306 merged into develop)  
-**Last Updated**: May 18, 2026  
+**Repo**: `Rushwind13/JMoria`
+**Build**: `make build`
+**Test**: `make bdd`
+**Status**: Roadmap for upcoming phase 
+**Last Updated**: May 25, 2026 (session 2)
 **Total Issues**: 12
+
 
 ---
 
 ## Overview
 
-Phase 3d: Shiny focuses on visual polish, effect refinements, and bug fixes for core gameplay systems. This roadmap assumes Phase 3c Polish (PR#306) has been fully integrated into `develop`.
+Phase 3d: Shiny focuses on visual polish, effect refinements, and bug fixes for core gameplay systems.
 
 ---
 
 ## Priority 1: Critical Bugs (P0)
 
-### [#173](https://github.com/Rushwind13/JMoria/issues/173) - Items disappear at wrong view distance during gameplay
+### ~~[#173](https://github.com/Rushwind13/JMoria/issues/173) - Items disappear at wrong view distance during gameplay~~ ✅ DONE
 **Type**: Bug | **Severity**: High | **Components**: Rendering, View Distance  
-**Description**: Items are disappearing from view at incorrect distances. Items visible 2 steps away become invisible when adjacent, only reappearing when stepped on. Dropped items don't render until player stands on them.
-**Impact**: Core gameplay UX - players cannot see items they're trying to pick up
-**Acceptance Criteria**:
-- Items remain visible in all adjacent tiles (full 8-direction visibility)
-- Dropped items render immediately when placed
-- Item visibility matches movement range
-**Related Code**: RenderASCII.cpp, Render.cpp, possibly DungeonMap.cpp or Draw.h
+**Resolution**: Coordinate-truncation fix (`roundf` → `(int)` cast) in `RenderASCII::MapX/MapY` was already applied. Added BDD regression tests in `test/features/item_visibility.feature` (20 scenarios covering all 8 adjacent directions, distances 2–5, and the 5-step Chebyshev boundary). Issue closed May 25, 2026.
 
-### [#317](https://github.com/Rushwind13/JMoria/issues/317) - Melee "touch" attacks are being emitted at range
+### ~~[#317](https://github.com/Rushwind13/JMoria/issues/317) - Melee "touch" attacks are being emitted at range~~ ✅ DONE
 **Type**: Bug | **Severity**: High | **Components**: Combat, Attacks  
-**Description**: Non-adjacent, non-moving monsters (e.g., White Jelly, Gas Spore) are landing melee "touch" attacks from a distance with no damage, creating confusing combat feedback.
-**Impact**: Combat is unclear and misleading to player
-**Related Code**: Attack resolution in Monster.cpp or AIMgr.cpp
+**Resolution**: Introduced a three-tier attack range classification in `BuildEligibleAttacks()` and `UpdateAttack()` in `src/AIMgr.cpp`: Range=0 → GoToDest (requires `CollideWithPlayer`), Range=1 → melee (fires in-place, requires adjacency), Range>1 → ranged (fires in-place at LOS distance). Previously, `bRanged = fRange > 0.0f` caused Range=1 "Cold Touch" and "Physical Hit" effects to be treated as ranged, firing without physical adjacency. Fix: `bRanged = fRange > 1.0f` in eligibility check; `bRanged = fRange >= 1.0f` in attack dispatch. Issue closed May 25, 2026.
 
-### [#266](https://github.com/Rushwind13/JMoria/issues/266) - Town level spawn warnings
+### ~~[#266](https://github.com/Rushwind13/JMoria/issues/266) - Town level spawn warnings~~ ✅ NOT REPRODUCIBLE
 **Type**: Bug | **Severity**: Medium | **Components**: Item/Monster Spawning  
-**Description**: When spawning items or monsters at town depth (depth 0), warnings are logged: "Couldn't find a suitable item for this depth" and "got an invalid item: -1". Should have town-appropriate spawning.
-**Impact**: Test suite warnings; may indicate logic issues in depth-appropriate spawning
-**Related Code**: Dungeon.cpp monster/item spawn logic
+**Resolution**: Not reproducible. `ChooseItemForDepth` / `ChooseMonsterForDepth` use `windowed_bell` with `sigma=10.0`, giving positive weights at depth 0 for level-1 items/monsters (`|delta|=1 < sigma=10` → weight ≈ 0.98). No "invalid item/monster" warnings appear in any of the 227 passing BDD scenarios. Issue closed May 25, 2026.
 
-### [#309](https://github.com/Rushwind13/JMoria/issues/309) - Intrinsic effects seem backwards
+### ~~[#309](https://github.com/Rushwind13/JMoria/issues/309) - Intrinsic effects seem backwards~~ ✅ DONE
 **Type**: Bug | **Severity**: Medium | **Components**: Effects, Status Display  
-**Description**: 
-- Quaff Potion of Courage shows "afraid" on Character Stats (should show resistance to fear); player can still attack
-- Potion of Slow Poison shows "poisoned" intrinsic but no HP loss occurs
-**Impact**: Player confusion about active effects and status
-**Acceptance Criteria**: Intrinsic display matches actual effect state
+**Resolution**: `DoIntrinsicEffects` was not checking `EFFECT_MOD_RESIST`, so "Resist Fear" (`EFFECT_FLAG_AFRAID + EFFECT_MOD_RESIST`) fell into the same case as the afraid debuff, printing "You are afraid!" and setting the AFRAID bit. Stats display then showed "Afraid" instead of "Res: Fear". Fixed by: (1) adding `EFFECT_MOD_TIMED` to `Resist Fear` and `Resist Poison` in `Effects.txt` so they expire correctly and are stored in `m_llActiveEffects`; (2) checking `EFFECT_MOD_RESIST` in `DoIntrinsicEffects` and `UndoIntrinsicEffects` for AFRAID/POISON cases; (3) adding `HasActiveResistFor()` helper and using it in the stats display to show "Res: Fear" / "Res: Poison" vs "Afraid" / "Poisoned". Issue closed May 25, 2026.
 
 ---
 
 ## Priority 2: Code Cleanup & Refactoring (P1)
 
-### [#310](https://github.com/Rushwind13/JMoria/issues/310) - Refactor "noticeable effect" identification
+### ~~[#310](https://github.com/Rushwind13/JMoria/issues/310) - Refactor "noticeable effect" identification~~ ✅ DONE
 **Type**: Cleanup | **Severity**: Medium | **Components**: Effects, UseState  
-**Description**: The same identification code block exists in at least 4 places:
-```cpp
-JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
-if( !(pItem->IsIdentified()) && m_bLastEffectNoticed )
-{
-    pItem->Identify();
-    g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
-}
-return retval;
-```
-Should consolidate into one location (likely near where quaff/read/use paths are chosen) or move inside `Identify()`.
-**Related Code**: Multiple locations in Player.cpp, UseState.cpp, and effect handling
+**Resolution**: Extracted the duplicate identify-on-notice block from `Quaff()`, `Read()`, `Zap()`, and `UseStaff()` into a single `DoEffectsAndMaybeIdentify(CLink<CItem>*)` helper on `CPlayer`. Each caller now delegates to that helper. Issue closed May 25, 2026.
 
-### [#315](https://github.com/Rushwind13/JMoria/issues/315) - Refactor "Player" Effects
+### ~~[#315](https://github.com/Rushwind13/JMoria/issues/315) - Refactor "Player" Effects~~ ✅ DONE
 **Type**: Cleanup | **Severity**: Medium | **Components**: Player, Effects  
-**Description**: Many `Do*` functions on `CPlayer` belong elsewhere:
-- `DoSummonMonsters` → `CEffect`
-- `DoRemove/ApplyCurse` → `CItem`
-- `DoLightArea` / `DoMagicMapping` → `CDungeon`
-- `NeedsItemChoice()` → `CEffect` (UseState cycle context)
-- `FindNeedsChoiceEffect()` → `CItemDef`
+**Resolution**: Moved dungeon-specific and effect-specific logic out of `CPlayer`:
+- `DoLightArea()` → `CDungeon::LightAreaAt(JVector vPos)` (Dungeon.h/.cpp)
+- `DoMagicMapping()` eliminated — logic inlined into `DoCreateEffects()` using existing `CDungeon::RevealMap()`
+- `DoSummonMonsters()` → `CEffect::SummonMonsters(JVector vOrigin)` (Effect.h/.cpp)
+- `DoRemoveCurse()` / `DoApplyCurse()` eliminated — inlined into `DoDestroyEffects()` using existing `CItem::SetCursed(bool)`
 
-**Outcome**: Better separation of concerns, cleaner CPlayer interface
+Net result: 5 private methods removed from `CPlayer`. Issue closed May 25, 2026.
 
-### [#311](https://github.com/Rushwind13/JMoria/issues/311) - Stone to Mud should melt doors
+**Follow-on cleanup (session 2, May 25 2026)**:
+- `CDungeon::RevealMap()` refactored from `(int, int, int, int)` to `(JRect)` — both call sites in `DoCreateEffects` updated (area mapping uses `Util::Nearby`, full-dungeon uses `JRect(0,0,DUNG_WIDTH-1,DUNG_HEIGHT-1)`)
+- Lit-room monster-wake loop removed from `CDungeon::LightAreaAt()` — `CAIBrain::UpdateRest()` already reads `pRoom->HasFlags(DUNG_FLAG_LIT)` per-tick via `SLEEP_LIT_ROOM_PENALTY`; `SLEEP_LIGHT_WAKE_CHANCE` constant deleted
+- `IsDrinkable`, `IsReadable`, `IsZappable`, `IsStaff`, `IsFireable`, `IsWieldable`, `IsFuel` moved from `CPlayer` to `CItem` as inline methods; all call sites in `Player.cpp`, `UseState.cpp`, `RangedState.cpp` updated to call directly on `CItem`
+
+### ~~[#311](https://github.com/Rushwind13/JMoria/issues/311) - Stone to Mud should melt doors~~ ✅ DONE
 **Type**: Enhancement/Cleanup | **Severity**: Low | **Components**: Effects  
-**Description**: Stone to Mud effect currently melts stone walls. Should also:
-- Melt doors and secret doors (but not open doors)
-- Leave treasure behind (when treasure system exists)
-- Damage "rock" type monsters (stone golems, stone giants, etc.)
-**Related Code**: Effect execution in Effect.cpp; may need CEffectFlag additions
+**Resolution**: Extended `CEffect::StoneToMud()` to handle three cases beyond walls: closed doors (`DUNG_IDX_DOOR`) and secret doors (`DUNG_IDX_SECRET_DOOR`) are converted to floor; open/broken doors are unaffected (naturally, since they're already passable). Added `MON_FLAG_ROCK` (0x00004000) for stone/rock monsters; `StoneToMud` now deals `3d8` damage to any `MON_FLAG_ROCK` monster on the target tile, printing "The X cracks!" or "The X crumbles to dust!". Tagged `Stone Golem` and `Stone Giant` in `Monsters.txt` with `MON_FLAG_ROCK`. Issue closed May 25, 2026.
 
 ### [#316](https://github.com/Rushwind13/JMoria/issues/316) - Strings Table / Messages wrap
 **Type**: Enhancement/Cleanup | **Severity**: Medium | **Components**: UI, Strings, DisplayText  
@@ -98,7 +77,7 @@ Should consolidate into one location (likely near where quaff/read/use paths are
 ### [#289](https://github.com/Rushwind13/JMoria/issues/289) - Multicolor beam effects for wands
 **Type**: Enhancement | **Severity**: Low | **Components**: Rendering, Effects, Ranged  
 **Description**: Extend single-color beam support (added April 27, 2026) to support multicolor beams for visual distinction:
-- **Fire ray**: red, orange, yellow-red (*, r, R pattern)
+- **Fire ray**: red, orange, yellow-red (wWw pattern, use alternating normal and bold colors)
 - **Cold ray**: blue, light blue, white (~, ^, *)
 - **Acid ray**: black, chartreuse, purple (*, o, *)
 - **Lightning ray**: yellow, white, yellow-orange (*, |, *)
@@ -140,9 +119,9 @@ Alternative: non-trail beam with flickering/pulsing effect.
 
 ---
 
-## Implementation Notes
+## Implementation
 
-### Dependencies & Ordering
+### Suggested Ordering
 1. **#173** should be addressed first - blocks core gameplay UX
 2. **#317** and **#266** are blockers for clean test suite
 3. **#309** should follow after #317 to ensure combat effects are working correctly
@@ -150,11 +129,6 @@ Alternative: non-trail beam with flickering/pulsing effect.
 5. **#316** is foundational for future feature work but not blocking
 6. **#289**, **#312**, **#314**, **#305** are polish items that can be done after core fixes
 
-### Phase 3c Polish Assumptions
-- PR#306 has been merged to `develop`
-- All Phase 3c polish features are available for use in Phase 3d
-- Equipment system uses ITEM_FLAG_EQUIPMENT (data-driven)
-- Basic effect system is stable
 
 ### Testing Strategy
 - Unit tests in test/features/ for critical bugs (#173, #317, #309)

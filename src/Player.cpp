@@ -2336,13 +2336,23 @@ void CPlayer::GiveAllWandsAndStaves()
 
 void CPlayer::IdentifyAllInventory()
 {
-    CLink<CItem> *pLink = m_llInventory->GetHead();
     int nIdentified = 0;
+    CLink<CItem> *pLink = m_llInventory->GetHead();
     while( pLink )
     {
         pLink->m_lpData->Identify();
         nIdentified++;
         pLink = m_llInventory->GetNext( pLink );
+    }
+    pLink = m_llEquipment->GetHead();
+    while( pLink )
+    {
+        if( pLink->m_lpData )
+        {
+            pLink->m_lpData->Identify();
+            nIdentified++;
+        }
+        pLink = m_llEquipment->GetNext( pLink );
     }
     g_pGame->GetMsgs()->Printf( "Wizard: identified %d items.\n", nIdentified );
 }

@@ -114,6 +114,7 @@ enum eEndGameModifier
     ENDGAME_INIT = 0,
     ENDGAME_TOMB = 1,
     ENDGAME_MAP,
+    ENDGAME_INVENTORY,
     ENDGAME_SCORES,
     ENDGAME_MAX
 };
@@ -145,6 +146,7 @@ protected:
 private:
     int OnHandleTomb( JKeysym *keysym );
     int OnHandleMap( JKeysym *keysym );
+    int OnHandleInventory( JKeysym *keysym );
     int OnHandleScores( JKeysym *keysym );
     int OnHandleInit( JKeysym *keysym );
 
@@ -160,6 +162,7 @@ private:
 
 private:
     bool DoMap();
+    bool DoInventory();
     bool InitScores();
     bool DoScores();
 };

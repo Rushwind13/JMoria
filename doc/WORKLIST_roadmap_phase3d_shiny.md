@@ -109,7 +109,7 @@ Alternative: non-trail beam with flickering/pulsing effect.
 **Use Case**: Ranged monsters (warlocks, archers, etc.) that want to maintain distance
 **Related Code**: AIMgr.cpp, add MON_AI_SEEKRANGED to Constants.h
 
-### [#305](https://github.com/Rushwind13/JMoria/issues/305) - Display inventory upon player death
+### [#305](https://github.com/Rushwind13/JMoria/issues/305) - Display inventory upon player death ✅ DONE
 **Type**: Enhancement | **Severity**: Low | **Components**: End Game, UI  
 **Description**: Improve post-death sequence:
 - Upon death, all inventory and equipment become fully identified

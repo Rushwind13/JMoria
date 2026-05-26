@@ -97,12 +97,10 @@
 #define CHANCE_ARROW_BREAK 0
 #define ITEM_DESTROY_CHANCE 1.1f
 #define RECALL_DURATION 1
-#define SLEEP_LIGHT_WAKE_CHANCE 1.0f // always wake in tests
 #else
 #define CHANCE_ARROW_BREAK 33 // ~1 in 3 chance arrow breaks on landing
 #define ITEM_DESTROY_CHANCE 0.03f // 3% base chance per inventory slot
 #define RECALL_DURATION ( Util::Roll( 1, 20 ) + 30 )
-#define SLEEP_LIGHT_WAKE_CHANCE 0.85f // 85% chance to wake sleeping monsters when lighting a room
 #endif
 
 // Ranged attack limits

@@ -7,7 +7,9 @@
 //
 
 #include "Item.h"
+#include "DisplayText.h"
 #include "Dungeon.h"
+#include "Effect.h"
 #include "Player.h"
 
 // Simple instance id generator for items
@@ -147,9 +149,8 @@ void CItem::Consume()
             m_dwCharges--;
         }
     }
-    else if( m_id->m_dwIndex == ITEM_IDX_ARROW || m_id->m_dwIndex == ITEM_IDX_BOLT )
+    else if( IsConsumable() )
     {
-        // Ammo: decrement count
         if( m_dwCount > 0 )
         {
             m_dwCount--;
@@ -164,9 +165,7 @@ bool CItem::IsConsumed()
         return false;
     if( m_id->m_dwIndex == ITEM_IDX_WAND || m_id->m_dwIndex == ITEM_IDX_STAFF )
         return false; // Wands/staves stay in inventory when depleted; recharge to restore
-    if( m_id->m_dwIndex == ITEM_IDX_ARROW || m_id->m_dwIndex == ITEM_IDX_BOLT )
-        return ( m_dwCount == 0 );
-    return false;
+    return ( IsConsumable() && m_dwCount == 0 );
 }
 
 void CItem::SetCursed( bool bCursed )
@@ -565,3 +564,27 @@ void CItem::Draw()
 void CItem::PreDraw() { g_pGame->GetDungeon()->PreDraw(); }
 
 void CItem::PostDraw() { g_pGame->GetDungeon()->PostDraw(); }
+
+void CItem::NoticeEffect( JResult bNoticed )
+{
+    if( IsIdentified() )
+        return;
+
+    if( bNoticed == JSUCCESS )
+    {
+        Identify();
+        g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", GetName() );
+    }
+    else
+    {
+        m_id->m_bTried = true;
+    }
+}
+
+JResult CItem::UseEffects()
+{
+    JResult bNoticed =
+        CEffect::DispatchAll( m_id->m_llEffects->GetHead(), m_id->m_fDuration, m_dwFlags );
+    NoticeEffect( bNoticed );
+    return bNoticed;
+}

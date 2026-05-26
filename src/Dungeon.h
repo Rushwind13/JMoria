@@ -76,7 +76,7 @@ public:
           m_dmCurLevel( NULL ) {};
     ~CDungeon() { Term(); }
     char *DumpMap();
-    void RevealMap( int xMin, int yMin, int xMax, int yMax );
+    void RevealMap( JRect rc );
     void PreDraw();
     void Draw();
     void DrawDungeon();
@@ -89,6 +89,7 @@ public:
     bool Update( float fCurTime );
     JResult UpdateSeen();
     void LightRoom( CRoom *pRoom );
+    JResult LightArea( JVector vPos );
     bool CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFlags = 0 );
     bool PlayerCanSee( JVector vCheck, uint32 dwFlags = 0 );
     void DisturbPlayer();

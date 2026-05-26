@@ -693,7 +693,7 @@ CLink<CItem> *CUseState::GetResponse( eUseModifier whichUse )
 /// command-specific fcns go below
 
 //// Open commands
-bool CUseState::TestWield() { return g_pGame->GetPlayer()->IsWieldable( m_pSelected ); }
+bool CUseState::TestWield() { return m_pSelected->m_lpData->IsWieldable(); }
 
 bool CUseState::DoWield() { return g_pGame->GetPlayer()->Wield( m_pSelected ) == JSUCCESS; }
 
@@ -707,22 +707,22 @@ bool CUseState::TestDrop() { return g_pGame->GetPlayer()->CanDropHere(); }
 
 bool CUseState::DoDrop() { return g_pGame->GetPlayer()->Drop( m_pSelected->m_lpData ); }
 //// Quaff commands
-bool CUseState::TestQuaff() { return g_pGame->GetPlayer()->IsDrinkable( m_pSelected ); }
+bool CUseState::TestQuaff() { return m_pSelected->m_lpData->IsDrinkable(); }
 
 bool CUseState::DoQuaff() { return g_pGame->GetPlayer()->Quaff( m_pSelected ) == JSUCCESS; }
 
 //// Read commands
-bool CUseState::TestRead() { return g_pGame->GetPlayer()->IsReadable( m_pSelected ); }
+bool CUseState::TestRead() { return m_pSelected->m_lpData->IsReadable(); }
 
 JResult CUseState::DoRead() { return g_pGame->GetPlayer()->Read( m_pSelected ); }
 
 //// Fuel commands
-bool CUseState::TestFuel() { return g_pGame->GetPlayer()->IsFuel( m_pSelected ); }
+bool CUseState::TestFuel() { return m_pSelected->m_lpData->IsFuel(); }
 
 bool CUseState::DoFuel() { return g_pGame->GetPlayer()->Fuel( m_pSelected ) == JSUCCESS; }
 
 //// Staff commands
-bool CUseState::TestStaff() { return g_pGame->GetPlayer()->IsStaff( m_pSelected ); }
+bool CUseState::TestStaff() { return m_pSelected->m_lpData->IsStaff(); }
 
 JResult CUseState::DoStaff() { return g_pGame->GetPlayer()->UseStaff( m_pSelected ); }
 
@@ -781,7 +781,7 @@ int CUseState::OnHandleStaff( JKeysym *keysym )
     if( pTargetEffect )
     {
         uint32 dwItemFlags = pItem->m_dwFlags;
-        g_pGame->GetPlayer()->ConsumeAndRemoveIfEmpty( m_pSelected );
+        g_pGame->GetPlayer()->ConsumeItem( m_pSelected );
         m_pSelected = NULL;
         TargetEffect( pTargetEffect, dwItemFlags );
         return 0;
@@ -796,7 +796,7 @@ int CUseState::OnHandleStaff( JKeysym *keysym )
     }
 
     JResult staffResult = DoStaff();
-    g_pGame->GetPlayer()->ConsumeAndRemoveIfEmpty( m_pSelected );
+    g_pGame->GetPlayer()->ConsumeItem( m_pSelected );
     m_pSelected = NULL;
 
     JLog( LOG_LEVEL_DEBUG, true, "STAFF resetting game state to COMMAND, USE state to INIT\n" );

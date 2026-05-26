@@ -279,7 +279,6 @@ JResult CEffect::Area( JVector vOrigin )
 
     if( nAffected > 0 )
     {
-        g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
         const char *szEffName = ( m_ed && m_ed->m_szName ) ? m_ed->m_szName : "something";
         g_pGame->GetMsgs()->Printf( "The %s affects %d creature%s.\n", szEffName, nAffected,
                                     nAffected == 1 ? "" : "s" );
@@ -340,9 +339,7 @@ JResult CEffect::Ball( JVector vOrigin )
         nAffected++;
     }
 
-    if( nAffected > 0 )
-        g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
-    else
+    if( nAffected == 0 )
         g_pGame->GetMsgs()->Printf( "The ball explodes harmlessly.\n" );
 
     return JSUCCESS;
@@ -381,7 +378,6 @@ JResult CEffect::Line( JVector vOrigin )
         if( pMon->m_fCurHP > pMon->m_fHP )
             pMon->m_fCurHP = pMon->m_fHP;
         g_pGame->GetMsgs()->Printf( "The %s shrugs off the attack!\n", szMonName );
-        g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
         return JSUCCESS;
     }
     fDamage *= fAffinityMult;
@@ -393,7 +389,6 @@ JResult CEffect::Line( JVector vOrigin )
     else
         g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
 
-    g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
     return JSUCCESS;
 }
 
@@ -421,7 +416,6 @@ JResult CEffect::Status( JVector vOrigin, uint32 dwFlag )
                 szStatusName = "feel confused";
             g_pGame->GetMsgs()->Printf( "You %s.\n", szStatusName );
             pPlayer->SetIntrinsic( dwFlag );
-            pPlayer->m_bLastEffectNoticed = true;
             return JSUCCESS;
         }
         JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
@@ -435,7 +429,6 @@ JResult CEffect::Status( JVector vOrigin, uint32 dwFlag )
     }
 
     pMon->m_dwActiveEffects |= dwFlag;
-    g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
 
     if( dwFlag & ( EFFECT_FLAG_SLEEP | EFFECT_FLAG_PARALYZE ) )
     {
@@ -466,7 +459,6 @@ JResult CEffect::StoneToMud( JVector vOrigin )
     if( pTile->m_dtd->m_dwType == DUNG_IDX_WALL )
     {
         pTile->m_dtd = g_pGame->GetDungeon()->GetTileDef( DUNG_IDX_FLOOR );
-        g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
         g_pGame->GetMsgs()->Printf( "The wall turns to mud and collapses!\n" );
         return JSUCCESS;
     }
@@ -499,7 +491,6 @@ JResult CEffect::TeleportAway( JVector vOrigin )
         {
             pMon->SetPos( JVector( vNew.x, vNew.y ) );
             pNewTile->m_pCurMonster = pMon;
-            g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
             g_pGame->GetMsgs()->Printf( "The %s vanishes!\n", szMonName );
             return JSUCCESS;
         }
@@ -527,7 +518,6 @@ JResult CEffect::Probe( JVector vOrigin )
     g_pGame->GetMsgs()->Printf( "The %s: HP %d/%d  AC %d  Lvl %d  Spd %.1f\n", pMon->GetName(),
                                 (int)pMon->m_fCurHP, (int)pMon->m_fHP, (int)pmd->m_fBaseAC,
                                 pmd->m_dwLevel, pmd->m_fSpeed );
-    g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
     return JSUCCESS;
 }
 
@@ -550,7 +540,6 @@ JResult CEffect::HealMonster( JVector vOrigin )
         pMon->m_fCurHP = pMon->m_fHP;
 
     g_pGame->GetMsgs()->Printf( "The %s looks healthier.\n", pMon->GetName() );
-    g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
     return JSUCCESS;
 }
 
@@ -686,7 +675,6 @@ JResult CEffect::Aggravate( JVector vOrigin )
             g_pGame->GetMsgs()->Printf( "The %s emits a horrible wail!\n", szName );
             if( bOutOfSight )
                 g_pGame->GetMsgs()->Printf( "You hear a stirring in the distance!\n" );
-            pPlayer->m_bLastEffectNoticed = true;
         }
         else
         {
@@ -714,7 +702,6 @@ JResult CEffect::Aggravate( JVector vOrigin )
         pMon->m_pBrain->SetState( BRAINSTATE_SEEK );
 
         g_pGame->GetMsgs()->Printf( "The %s looks enraged!\n", pMon->GetName() );
-        pPlayer->m_bLastEffectNoticed = true;
     }
 
     return JSUCCESS;
@@ -729,7 +716,6 @@ JResult CEffect::LockDoor( JVector vOrigin )
         return JSUCCESS;
     }
     g_pGame->GetMsgs()->Printf( "The door clicks shut.\n" );
-    g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
     return JSUCCESS;
 }
 
@@ -902,4 +888,54 @@ float CEffect::CheckAffinity( uint32 dwEffect, uint32 dwSubject )
     }
 
     return 1.0f;
+}
+
+JResult CEffect::SummonMonsters( JVector vOrigin )
+{
+    CDungeon *pDungeon = g_pGame->GetDungeon();
+    JIVector vPos( VEC_EXPAND( vOrigin ) );
+    int count = Util::Roll( 1, 3 );
+
+    // Summon as if 20 levels deeper — punishes careless reading
+    int effectiveDepth = pDungeon->depth + 20;
+    if( effectiveDepth > DUNG_MAXDEPTH )
+        effectiveDepth = DUNG_MAXDEPTH;
+
+    for( int i = 0; i < count; i++ )
+    {
+        int which = pDungeon->ChooseMonsterForDepth( effectiveDepth, 15.0f );
+        if( which == MON_IDX_INVALID )
+            continue;
+        CMonsterDef *pDef = pDungeon->GetMonsterDef( which );
+        if( pDef )
+            CMonster::CreateMonster( pDef, vPos, true );
+    }
+
+    g_pGame->GetMsgs()->Printf(
+        "Monsters appear around %s!\n",
+        vOrigin.WithinRange( g_pGame->GetPlayer()->m_vPos, 0.0f ) ? "you" : "the summoner" );
+    return JSUCCESS;
+}
+
+JResult CEffect::DispatchAll( CLink<CEffect> *plEffect, float fDuration, int dwItemFlags )
+{
+    JResult bNoticed = JBOGUSKEY;
+    while( plEffect != NULL )
+    {
+        CEffect *pEffect = plEffect->m_lpData;
+        JLog( LOG_LEVEL_DEBUG, true, "Effect: %s Flag: %s Mod: %s\n",
+              g_Constants.IndexToString( EFFECT_TYPE, pEffect->m_dwEffect ),
+              g_Constants.EffectFlagToString( pEffect->m_dwFlags, pEffect->m_dwFlags2 ),
+              g_Constants.IndexToString( EFFECT_MOD, pEffect->m_dwModifier ) );
+        if( pEffect->GetTargetType() != EFFECT_TARGET_NONE )
+        {
+            // Targeting effects are dispatched by the state machine after player input.
+            plEffect = plEffect->next;
+            continue;
+        }
+        if( pEffect->Dispatch( fDuration, dwItemFlags ) == JSUCCESS )
+            bNoticed = JSUCCESS;
+        plEffect = plEffect->next;
+    }
+    return bNoticed;
 }

@@ -391,22 +391,22 @@ void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
         switch( filter )
         {
         case INV_QUAFF:
-            show = IsDrinkable( pLink );
+            show = pLink->m_lpData->IsDrinkable();
             break;
         case INV_READ:
-            show = IsReadable( pLink );
+            show = pLink->m_lpData->IsReadable();
             break;
         case INV_WIELD:
-            show = IsWieldable( pLink );
+            show = pLink->m_lpData->IsWieldable();
             break;
         case INV_ZAP:
-            show = IsZappable( pLink );
+            show = pLink->m_lpData->IsZappable();
             break;
         case INV_FIRE:
             show = IsCompatibleAmmo( pLink );
             break;
         case INV_STAFF:
-            show = IsStaff( pLink );
+            show = pLink->m_lpData->IsStaff();
             break;
         default:
             show = true;
@@ -486,7 +486,7 @@ void CPlayer::DisplayEquipment( uint8 dwPlacement, eInvFilter filter )
             switch( filter )
             {
             case INV_FIRE:
-                show = IsFireable( pLink );
+                show = pLink->m_lpData->IsFireable();
                 break;
             default:
                 show = true;
@@ -640,17 +640,6 @@ void CPlayer::PickUp( JVector &vPickupPos )
 
         g_pGame->GetDungeon()->GetTile( vPickupPos )->m_pCurItem = NULL;
     }
-}
-
-bool CPlayer::IsWieldable( CLink<CItem> *pLink )
-{
-    CItem *pItem = pLink->m_lpData;
-    if( pItem == NULL )
-        return false;
-    // Exclude ammo items (arrows, bolts) from wield list
-    if( pItem->m_id->m_dwIndex == ITEM_IDX_ARROW || pItem->m_id->m_dwIndex == ITEM_IDX_BOLT )
-        return false;
-    return ( pItem->EquipType() != EQUIP_IDX_INVALID );
 }
 
 JResult CPlayer::Wield( CLink<CItem> *pLink )
@@ -1301,108 +1290,54 @@ bool CPlayer::CanDropHere()
 
 JResult CPlayer::Quaff( CLink<CItem> *pLink )
 {
-    CItem *pItem = pLink->m_lpData;
-    CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
-    if( !( pItem->IsIdentified() ) && m_bLastEffectNoticed )
-    {
-        pItem->Identify();
-        g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
-    }
-    else if( !( pItem->IsIdentified() ) && !m_bLastEffectNoticed )
-    {
-        pItem->m_id->m_bTried = true;
-    }
-    ConsumeItem( pLink ); // Unified consumption
+    JResult retval = pLink->m_lpData->UseEffects();
+    ConsumeItem( pLink );
     return retval;
 }
 
 JResult CPlayer::Read( CLink<CItem> *pLink )
 {
-    CItem *pItem = pLink->m_lpData;
-    CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
-    if( !( pItem->IsIdentified() ) && m_bLastEffectNoticed )
-    {
-        pItem->Identify();
-        g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
-    }
-    else if( !( pItem->IsIdentified() ) && !m_bLastEffectNoticed )
-    {
-        pItem->m_id->m_bTried = true;
-    }
+    JResult retval = pLink->m_lpData->UseEffects();
     ConsumeItem( pLink );
     return retval;
+}
+
+JResult CPlayer::UseStaff( CLink<CItem> *pLink )
+{
+    // Staves fire at player position (no targeting). m_vRangedHitPosition was already
+    // set to player position by OnHandleStaff before this is called.
+    return pLink->m_lpData->UseEffects();
 }
 
 JResult CPlayer::Zap( CLink<CItem> *pLink )
 {
     // this will get called multiple times for a single shot, if EFFECT_FLAG_NO_COLLIDE is set,
     // this function is to do damage to the monster in the current position
-    CItem *pItem = pLink->m_lpData;
-    CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
-    if( !( pItem->IsIdentified() ) && m_bLastEffectNoticed )
-    {
-        pItem->Identify();
-        g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
-    }
-    else if( !( pItem->IsIdentified() ) && !m_bLastEffectNoticed )
-    {
-        pItem->m_id->m_bTried = true;
-    }
-    return retval;
+    return pLink->m_lpData->UseEffects();
 }
 
 JResult CPlayer::Fire( CLink<CItem> *pLink )
 {
     // Apply effects on impact (called when projectile hits a monster)
     // NOTE: Consumption happens in RangedState::DoLaunch(), not here
-    CItem *pItem = pLink->m_lpData;
-
-    // Track this ammo for ranged to-hit calculations in DoElementalHit
-    m_pCurrentRangedAmmo = pItem;
-
-    CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
-
-    // Clear the ranged ammo tracker
+    // m_pCurrentRangedAmmo is read by DoElementalHit during DispatchAll for to-hit/to-damage.
+    m_pCurrentRangedAmmo = pLink->m_lpData;
+    JResult retval = pLink->m_lpData->UseEffects();
     m_pCurrentRangedAmmo = NULL;
-
     return retval;
 }
 
 void CPlayer::ConsumeItem( CLink<CItem> *pLink )
-{
-    // Unified consumption: remove item from inventory when used
-    // Stack decrements are handled by CItem::Consume() (for charges/counts)
-    // This handles inventory removal when the last unit is consumed
-    if( pLink == NULL || pLink->m_lpData == NULL )
-    {
-        return;
-    }
-
-    CItem *pItem = pLink->m_lpData;
-    if( pItem->m_dwCount > 1 )
-    {
-        pItem->m_dwCount--;
-    }
-    else
-    {
-        m_llInventory->Remove( pItem->m_pllLink, false );
-    }
-}
-
-void CPlayer::ConsumeAndRemoveIfEmpty( CLink<CItem> *pLink )
 {
     // Consume an item and remove it from inventory if it becomes empty
     if( pLink == NULL || pLink->m_lpData == NULL )
     {
         return;
     }
+    CItem *pItem = pLink->m_lpData;
 
-    pLink->m_lpData->Consume();
-    if( pLink->m_lpData->IsConsumed() )
+    pItem->Consume();
+    if( pItem->IsConsumed() )
     {
         m_llInventory->Remove( pLink, false );
     }
@@ -1477,14 +1412,7 @@ JResult CPlayer::Magic( CLink<CItem> *pLink )
     // type) and will probably pass a CSpell rather than a CItem This was to demonstrate that Read
     // Quaff and Magic are similar but magic is multi-use
     CItem *pItem = pLink->m_lpData;
-    CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
-    return retval;
-}
-
-bool CPlayer::IsFuel( CLink<CItem> *pLink )
-{
-    return ( pLink->m_lpData->m_id->m_dwIndex == ITEM_IDX_FUEL );
+    return pItem->UseEffects();
 }
 
 #define LANTERN_MAX_FUEL 15000.0f
@@ -1522,47 +1450,23 @@ JResult CPlayer::Fuel( CLink<CItem> *pLink )
     return JSUCCESS;
 }
 
-JResult CPlayer::DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwItemFlags )
-{
-    CEffect *pEffect;
-    JResult retval = JSUCCESS;
-    m_bLastEffectNoticed = false;
-    while( plEffect != NULL )
-    {
-        pEffect = plEffect->m_lpData;
-        JLog( LOG_LEVEL_DEBUG, true, "Effect: %s Flag: %s Mod: %s\n",
-              g_Constants.IndexToString( EFFECT_TYPE, pEffect->m_dwEffect ),
-              g_Constants.EffectFlagToString( pEffect->m_dwFlags, pEffect->m_dwFlags2 ),
-              g_Constants.IndexToString( EFFECT_MOD, pEffect->m_dwModifier ) );
-        if( pEffect->GetTargetType() != EFFECT_TARGET_NONE )
-        {
-            // Targeting effects are dispatched by the state machine after player input;
-            // DoEffects skips them here.
-            plEffect = plEffect->next;
-            continue;
-        }
-        pEffect->Dispatch( fDuration, dwItemFlags );
-        plEffect = plEffect->next;
-    }
-    return retval;
-}
-
 JResult CPlayer::DoHealEffects( CEffect *pEffect )
 {
+    JResult retval = JBOGUSKEY;
     char effect[32];
     bool needsHeal = GetIntrinsic( pEffect->m_dwFlags ) != 0;
     switch( pEffect->m_dwFlags )
     {
     case EFFECT_FLAG_HP:
         DoHealHP( pEffect );
-        m_bLastEffectNoticed = true;
+        retval = JSUCCESS;
         break;
     case EFFECT_FLAG_AFRAID:
         if( needsHeal )
         {
             g_pGame->GetMsgs()->Printf( "You are no longer afraid.\n" );
             UnsetIntrinsic( pEffect->m_dwFlags );
-            m_bLastEffectNoticed = true;
+            retval = JSUCCESS;
         }
         break;
     case EFFECT_FLAG_BLIND:
@@ -1570,7 +1474,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
         {
             g_pGame->GetMsgs()->Printf( "You can see again.\n" );
             UnsetIntrinsic( pEffect->m_dwFlags );
-            m_bLastEffectNoticed = true;
+            retval = JSUCCESS;
         }
         break;
     case EFFECT_FLAG_CONFUSE:
@@ -1578,7 +1482,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
         {
             g_pGame->GetMsgs()->Printf( "You can think clearly again.\n" );
             UnsetIntrinsic( pEffect->m_dwFlags );
-            m_bLastEffectNoticed = true;
+            retval = JSUCCESS;
         }
         break;
     case EFFECT_FLAG_POISON:
@@ -1586,7 +1490,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
         {
             g_pGame->GetMsgs()->Printf( "You are no longer poisoned.\n" );
             UnsetIntrinsic( pEffect->m_dwFlags );
-            m_bLastEffectNoticed = true;
+            retval = JSUCCESS;
         }
         break;
     case EFFECT_FLAG_PARALYZE:
@@ -1594,7 +1498,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
         {
             g_pGame->GetMsgs()->Printf( "You can move again.\n" );
             UnsetIntrinsic( pEffect->m_dwFlags );
-            m_bLastEffectNoticed = true;
+            retval = JSUCCESS;
         }
         break;
     case EFFECT_FLAG_SLEEP:
@@ -1602,13 +1506,13 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
         {
             g_pGame->GetMsgs()->Printf( "You wake up.\n" );
             UnsetIntrinsic( pEffect->m_dwFlags );
-            m_bLastEffectNoticed = true;
+            retval = JSUCCESS;
         }
         break;
     default:
         break;
     }
-    return JSUCCESS;
+    return retval;
 }
 
 JResult CPlayer::DoHealHP( CEffect *pEffect )
@@ -1661,7 +1565,6 @@ JResult CPlayer::DoACBuff( CEffect *pEffect )
     RecalcCombatStats();
 
     g_pGame->GetMsgs()->Printf( "You feel more protected. (+%d AC)\n", (int)fBonus );
-    m_bLastEffectNoticed = true;
 
     if( fDuration )
     {
@@ -1778,60 +1681,33 @@ JResult CPlayer::DoCreateEffects( CEffect *pEffect )
     switch( pEffect->m_dwFlags )
     {
     case EFFECT_FLAG_LIGHT:
-        retval = DoLightArea();
+        retval = g_pGame->GetDungeon()->LightArea( m_vPos );
         break;
     case EFFECT_FLAG_TELEPORT:
         retval = DoTeleport( pEffect );
         break;
     case EFFECT_FLAG_MAPPING:
-        retval = DoMagicMapping( pEffect );
+        if( pEffect->m_dwModifier & EFFECT_MOD_AREA )
+        {
+            g_pGame->GetDungeon()->RevealMap(
+                Util::Nearby( JIVector( VEC_EXPAND( m_vPos ) ), MAGIC_MAPPING_RANGE ) );
+            g_pGame->GetMsgs()->Printf( "The area around you is revealed.\n" );
+        }
+        else
+        {
+            g_pGame->GetDungeon()->RevealMap( JRect( 0, 0, DUNG_WIDTH - 1, DUNG_HEIGHT - 1 ) );
+            g_pGame->GetMsgs()->Printf( "The dungeon is revealed to you.\n" );
+        }
+        retval = JSUCCESS;
         break;
     case EFFECT_FLAG_RECALL:
         retval = BeginRecall();
         break;
     case EFFECT_FLAG_SUMMON:
-        retval = DoSummonMonsters();
+        retval = pEffect->SummonMonsters( m_vPos );
         break;
     }
-    if( retval == JSUCCESS )
-        m_bLastEffectNoticed = true;
     return retval;
-}
-
-JResult CPlayer::DoLightArea()
-{
-    CRoom *pRoom = g_pGame->GetDungeon()->InRoom( m_vPos );
-    if( pRoom )
-    {
-        pRoom->SetFlags( DUNG_FLAG_LIT );
-        g_pGame->GetDungeon()->LightRoom( pRoom );
-
-        // Wake sleeping monsters in the room with high probability
-        CDungeon *pDungeon = g_pGame->GetDungeon();
-        CLink<CMonster> *pLink = pDungeon->m_llMonsters->GetHead();
-        while( pLink != NULL )
-        {
-            CMonster *pMon = pLink->m_lpData;
-            CLink<CMonster> *pNext = pDungeon->m_llMonsters->GetNext( pLink );
-            if( pMon && ( pMon->m_dwActiveEffects & EFFECT_FLAG_SLEEP ) )
-            {
-                JVector vMon = pMon->GetPos();
-                CRoom *pMonRoom = pDungeon->InRoom( vMon );
-                if( pMonRoom == pRoom && Util::GetRandom( 0.0f, 1.0f ) < SLEEP_LIGHT_WAKE_CHANCE )
-                {
-                    pMon->m_dwActiveEffects &= ~EFFECT_FLAG_SLEEP;
-                    pMon->m_pBrain->SetState( BRAINSTATE_SEEK );
-                    g_pGame->GetMsgs()->Printf( "The %s wakes up!\n", pMon->GetName() );
-                }
-            }
-            pLink = pNext;
-        }
-
-        g_pGame->GetMsgs()->Printf( "The room is flooded with light!\n" );
-        return JSUCCESS;
-    }
-    g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
-    return JBOGUSKEY;
 }
 
 JResult CPlayer::DoTeleport( CEffect *pEffect )
@@ -1863,25 +1739,6 @@ JResult CPlayer::DoTeleport( CEffect *pEffect )
     m_bHasSpawned = false;
     SpawnPlayer();
     g_pGame->GetMsgs()->Printf( "You feel a wrenching sensation.\n" );
-    return JSUCCESS;
-}
-
-JResult CPlayer::DoMagicMapping( CEffect *pEffect )
-{
-    if( pEffect->m_dwModifier & EFFECT_MOD_AREA )
-    {
-        // Limited range mapping
-        int xMin = (int)m_vPos.x - MAGIC_MAPPING_RANGE;
-        int xMax = (int)m_vPos.x + MAGIC_MAPPING_RANGE;
-        int yMin = (int)m_vPos.y - MAGIC_MAPPING_RANGE;
-        int yMax = (int)m_vPos.y + MAGIC_MAPPING_RANGE;
-        g_pGame->GetDungeon()->RevealMap( xMin, yMin, xMax, yMax );
-        g_pGame->GetMsgs()->Printf( "The area around you is revealed.\n" );
-        return JSUCCESS;
-    }
-    // Full dungeon mapping
-    g_pGame->GetDungeon()->RevealMap( 0, 0, DUNG_WIDTH - 1, DUNG_HEIGHT - 1 );
-    g_pGame->GetMsgs()->Printf( "The dungeon is revealed to you.\n" );
     return JSUCCESS;
 }
 
@@ -1935,31 +1792,6 @@ void CPlayer::Recall()
     pDungeon->OnChangeLevel( delta );
 }
 
-JResult CPlayer::DoSummonMonsters()
-{
-    CDungeon *pDungeon = g_pGame->GetDungeon();
-    JIVector vPlayerPos( (int)m_vPos.x, (int)m_vPos.y );
-    int count = Util::Roll( 1, 3 );
-
-    // Summon as if 20 levels deeper — punishes careless reading
-    int effectiveDepth = pDungeon->depth + 20;
-    if( effectiveDepth > DUNG_MAXDEPTH )
-        effectiveDepth = DUNG_MAXDEPTH;
-
-    for( int i = 0; i < count; i++ )
-    {
-        int which = pDungeon->ChooseMonsterForDepth( effectiveDepth, 15.0f );
-        if( which == MON_IDX_INVALID )
-            continue;
-        CMonsterDef *pDef = pDungeon->GetMonsterDef( which );
-        if( pDef )
-            CMonster::CreateMonster( pDef, vPlayerPos, true );
-    }
-
-    g_pGame->GetMsgs()->Printf( "Monsters appear around you!\n" );
-    return JSUCCESS;
-}
-
 JResult CPlayer::DoDestroyEffects( CEffect *pEffect, int dwItemFlags )
 {
     if( pEffect->HasFlag( "EFFECT_FLAG_CURSE" ) )
@@ -1967,55 +1799,41 @@ JResult CPlayer::DoDestroyEffects( CEffect *pEffect, int dwItemFlags )
         if( dwItemFlags & ITEM_FLAG_CURSED )
         {
             JLog( LOG_LEVEL_DEBUG, true, "Cursing\n" );
-            return DoApplyCurse();
+            CLink<CItem> *pLink = m_llEquipment->GetHead();
+            while( pLink != NULL )
+            {
+                if( ( pLink->m_lpData->m_dwFlags & ITEM_FLAG_CURSED ) == 0 )
+                {
+                    JLog( LOG_LEVEL_NOISE, true, "Item is not cursed %s, cursing it.\n",
+                          pLink->m_lpData->GetName() );
+                    pLink->m_lpData->SetCursed( true );
+                    g_pGame->GetMsgs()->Printf( "It is now cursed.\n" );
+                    break;
+                }
+                pLink = pLink->next;
+            }
+            return JSUCCESS;
         }
         else
         {
             JLog( LOG_LEVEL_DEBUG, true, "Uncursing\n" );
-            return DoRemoveCurse();
+            CLink<CItem> *pLink = m_llEquipment->GetHead();
+            while( pLink != NULL )
+            {
+                if( pLink->m_lpData->m_dwFlags & ITEM_FLAG_CURSED )
+                {
+                    JLog( LOG_LEVEL_DEBUG, true, "Item is cursed %s, uncursing it.\n",
+                          pLink->m_lpData->GetName() );
+                    pLink->m_lpData->SetCursed( false );
+                    break;
+                }
+                pLink = pLink->next;
+            }
+            g_pGame->GetMsgs()->Printf( "It is no longer cursed.\n" );
+            return JSUCCESS;
         }
     }
     return JBOGUSKEY;
-}
-
-JResult CPlayer::DoRemoveCurse()
-{
-    CItem *cursed;
-    CLink<CItem> *pLink = m_llEquipment->GetHead();
-    while( pLink != NULL )
-    {
-        if( pLink->m_lpData->m_dwFlags & ITEM_FLAG_CURSED )
-        {
-            JLog( LOG_LEVEL_DEBUG, true, "Item is cursed %s, uncursing it.\n",
-                  pLink->m_lpData->GetName() );
-            pLink->m_lpData->m_dwFlags &= ~ITEM_FLAG_CURSED;
-            break;
-        }
-        pLink = pLink->next;
-    }
-    g_pGame->GetMsgs()->Printf( "It is no longer cursed.\n" );
-
-    return JSUCCESS;
-}
-
-JResult CPlayer::DoApplyCurse()
-{
-    CItem *cursed;
-    CLink<CItem> *pLink = m_llEquipment->GetHead();
-    while( pLink != NULL )
-    {
-        if( ( pLink->m_lpData->m_dwFlags & ITEM_FLAG_CURSED ) == 0 )
-        {
-            JLog( LOG_LEVEL_NOISE, true, "Item is not cursed %s, cursing it.\n",
-                  pLink->m_lpData->GetName() );
-            pLink->m_lpData->m_dwFlags |= ITEM_FLAG_CURSED;
-            g_pGame->GetMsgs()->Printf( "It is now cursed.\n" );
-            break;
-        }
-        pLink = pLink->next;
-    }
-
-    return JSUCCESS;
 }
 
 bool CPlayer::HasActiveResistFor( uint32 flag ) const
@@ -2102,7 +1920,6 @@ JResult CPlayer::DoIntrinsicEffects( CEffect *pEffect, float fDuration )
     }
     CEffect *pActive = new CEffect( *pEffect );
     SetIntrinsic( pActive->m_dwFlags );
-    m_bLastEffectNoticed = true;
     if( ( pActive->m_dwModifier & EFFECT_MOD_TIMED ) != 0 )
     {
         pActive->m_fDuration = (int)fDuration;
@@ -2194,17 +2011,14 @@ JResult CPlayer::DoRestoreEffects( CEffect *pEffect )
         {
             m_fCurHitPoints = m_fHitPoints;
             g_pGame->GetMsgs()->Printf( "You feel completely healthy.\n" );
-            m_bLastEffectNoticed = true;
+            return JSUCCESS;
         }
-        else
-        {
-            g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
-        }
-        return JSUCCESS;
+        g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+        return JBOGUSKEY;
     default:
         break;
     }
-    return JSUCCESS;
+    return JBOGUSKEY;
 }
 JResult CPlayer::DoGainEffects( CEffect *pEffect )
 {
@@ -2212,20 +2026,18 @@ JResult CPlayer::DoGainEffects( CEffect *pEffect )
     {
     case EFFECT_FLAG_FUEL:
         // Fuel gain is handled by the Fuel command in UseState
-        m_bLastEffectNoticed = true;
         return JSUCCESS;
     case EFFECT_FLAG_XP:
     {
         float fGain = pEffect->m_szAmount ? Util::Roll( pEffect->m_szAmount ) : 50.0f;
         m_fExperience += fGain;
         g_pGame->GetMsgs()->Printf( "You feel more experienced.\n" );
-        m_bLastEffectNoticed = true;
         return JSUCCESS;
     }
     default:
         break;
     }
-    return JSUCCESS;
+    return JBOGUSKEY;
 }
 
 JResult CPlayer::DoLoseEffects( CEffect *pEffect )
@@ -2239,7 +2051,6 @@ JResult CPlayer::DoLoseEffects( CEffect *pEffect )
         if( m_fExperience < 0.0f )
             m_fExperience = 0.0f;
         g_pGame->GetMsgs()->Printf( "You feel less experienced.\n" );
-        m_bLastEffectNoticed = true;
         return JSUCCESS;
     }
     case EFFECT_FLAG_HP:
@@ -2251,13 +2062,12 @@ JResult CPlayer::DoLoseEffects( CEffect *pEffect )
         if( m_fCurHitPoints > m_fHitPoints )
             m_fCurHitPoints = m_fHitPoints;
         g_pGame->GetMsgs()->Printf( "You feel weakened.\n" );
-        m_bLastEffectNoticed = true;
         return JSUCCESS;
     }
     default:
         break;
     }
-    return JSUCCESS;
+    return JBOGUSKEY;
 }
 
 JResult CPlayer::DoSeeEffects( CEffect *pEffect )
@@ -2310,7 +2120,6 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
             g_pGame->GetMsgs()->Printf( "You sense the presence of doors!\n" );
         if( bFoundStairs )
             g_pGame->GetMsgs()->Printf( "You sense the presence of stairs!\n" );
-        m_bLastEffectNoticed = true;
     }
 
     if( pEffect->m_dwFlags2 & EFFECT_FLAG_TRAP )
@@ -2332,7 +2141,6 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
         }
         if( bFound )
             g_pGame->GetMsgs()->Printf( "You sense traps.\n" );
-        m_bLastEffectNoticed = true;
     }
 
     if( pEffect->m_dwFlags2 & EFFECT_FLAG_MONSTERS )
@@ -2362,7 +2170,6 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
         }
         if( bFound )
             g_pGame->GetMsgs()->Printf( "You sense the presence of monsters!\n" );
-        m_bLastEffectNoticed = true;
     }
 
     if( pEffect->m_dwFlags & EFFECT_FLAG_TREASURE )
@@ -2391,51 +2198,15 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
             g_pGame->GetMsgs()->Printf( "You sense the presence of treasure!\n" );
         else
             g_pGame->GetMsgs()->Printf( "You sense no treasure nearby.\n" );
-        m_bLastEffectNoticed = true;
     }
 
     return JSUCCESS;
 }
 
-bool CPlayer::IsDrinkable( CLink<CItem> *pLink )
-{
-    bool retval = false;
-    switch( pLink->m_lpData->m_id->m_dwIndex )
-    {
-    case ITEM_IDX_POTION:
-        retval = true;
-        break;
-    default:
-        retval = false;
-        break;
-    }
-    return retval;
-}
-
-bool CPlayer::IsFireable( CLink<CItem> *pLink )
-{
-    bool retval = false;
-    CItem *pItem = pLink->m_lpData;
-    if( pItem == NULL || pItem->m_id == NULL )
-        return false;
-
-    switch( pItem->m_id->m_dwIndex )
-    {
-    case ITEM_IDX_ARROW:
-    case ITEM_IDX_BOLT:
-        // Only fireable if we have ammo remaining
-        retval = ( pItem->m_dwCount > 0 );
-        break;
-    default:
-        break;
-    }
-    return retval;
-}
-
 bool CPlayer::IsCompatibleAmmo( CLink<CItem> *pLink )
 {
     // Check if this ammo is compatible with the equipped primary weapon
-    if( !IsFireable( pLink ) )
+    if( !pLink->m_lpData->IsFireable() )
     {
         return false;
     }
@@ -2460,62 +2231,6 @@ bool CPlayer::IsCompatibleAmmo( CLink<CItem> *pLink )
     }
 
     return false;
-}
-
-bool CPlayer::IsReadable( CLink<CItem> *pLink )
-{
-    bool retval = false;
-    switch( pLink->m_lpData->m_id->m_dwIndex )
-    {
-    case ITEM_IDX_BOOK:
-    case ITEM_IDX_SCROLL:
-        retval = true;
-        break;
-    default:
-        retval = false;
-        break;
-    }
-    return retval;
-}
-
-bool CPlayer::IsZappable( CLink<CItem> *pLink )
-{
-    bool retval = false;
-    switch( pLink->m_lpData->m_id->m_dwIndex )
-    {
-    case ITEM_IDX_WAND:
-        retval = true;
-        break;
-    default:
-        break;
-    }
-    return retval;
-}
-
-bool CPlayer::IsStaff( CLink<CItem> *pLink )
-{
-    if( !pLink || !pLink->m_lpData || !pLink->m_lpData->m_id )
-        return false;
-    return pLink->m_lpData->m_id->m_dwIndex == ITEM_IDX_STAFF;
-}
-
-JResult CPlayer::UseStaff( CLink<CItem> *pLink )
-{
-    // Staves fire at player position (no targeting). m_vRangedHitPosition was already
-    // set to player position by OnHandleStaff before this is called.
-    CItem *pItem = pLink->m_lpData;
-    CLink<CEffect> *plEffect = pItem->m_id->m_llEffects->GetHead();
-    JResult retval = DoEffects( plEffect, pItem->m_id->m_fDuration, pItem->m_dwFlags );
-    if( !( pItem->IsIdentified() ) && m_bLastEffectNoticed )
-    {
-        pItem->Identify();
-        g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", pItem->GetName() );
-    }
-    else if( !( pItem->IsIdentified() ) && !m_bLastEffectNoticed )
-    {
-        pItem->m_id->m_bTried = true;
-    }
-    return retval;
 }
 
 bool CPlayer::SetName( const char *szName )

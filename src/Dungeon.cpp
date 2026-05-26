@@ -428,20 +428,13 @@ char *CDungeon::DumpMap()
     return result;
 }
 
-void CDungeon::RevealMap( int xMin, int yMin, int xMax, int yMax )
+void CDungeon::RevealMap( JRect rc )
 {
-    if( xMin < 0 )
-        xMin = 0;
-    if( yMin < 0 )
-        yMin = 0;
-    if( xMax >= DUNG_WIDTH )
-        xMax = DUNG_WIDTH - 1;
-    if( yMax >= DUNG_HEIGHT )
-        yMax = DUNG_HEIGHT - 1;
+    rc.ClampToWorld();
 
-    for( int y = yMin; y <= yMax; y++ )
+    for( int y = rc.top; y <= rc.bottom; y++ )
     {
-        for( int x = xMin; x <= xMax; x++ )
+        for( int x = rc.left; x <= rc.right; x++ )
         {
             JIVector v( x, y );
             CDungeonTile *pTile = GetITile( v );
@@ -1828,3 +1821,18 @@ bool CDungeon::UnlockDoor( JVector pos )
 }
 
 void CDungeon::Aggravate( JVector vOrigin ) { CEffect::Fire( "Aggravate Monsters", vOrigin ); }
+
+JResult CDungeon::LightArea( JVector vPos )
+{
+    CRoom *pRoom = InRoom( vPos );
+    if( pRoom )
+    {
+        pRoom->SetFlags( DUNG_FLAG_LIT );
+        LightRoom( pRoom );
+
+        g_pGame->GetMsgs()->Printf( "The room is flooded with light!\n" );
+        return JSUCCESS;
+    }
+    g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+    return JBOGUSKEY;
+}

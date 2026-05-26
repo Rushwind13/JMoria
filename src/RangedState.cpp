@@ -623,12 +623,12 @@ bool CRangedState::DoLaunch()
         pItem->m_dwCount--;
 
         // Consume the copy and remove if depleted
-        g_pGame->GetPlayer()->ConsumeAndRemoveIfEmpty( pSingleCopy->m_pllLink );
+        g_pGame->GetPlayer()->ConsumeItem( pSingleCopy->m_pllLink );
     }
     else
     {
         // Non-charged or non-stacked: just consume and remove if empty
-        g_pGame->GetPlayer()->ConsumeAndRemoveIfEmpty( m_pSelected );
+        g_pGame->GetPlayer()->ConsumeItem( m_pSelected );
     }
 
     g_pGame->SetReadyForUpdate( false );
@@ -864,10 +864,10 @@ CLink<CItem> *CRangedState::GetResponse( eRangedModifier whichUse )
 bool CRangedState::ReadyToLaunch() { return !m_vTarget.IsZero(); }
 
 //// Zap commands
-bool CRangedState::TestFire() { return g_pGame->GetPlayer()->IsFireable( m_pSelected ); }
+bool CRangedState::TestFire() { return m_pSelected->m_lpData->IsFireable(); }
 bool CRangedState::DoFire() { return g_pGame->GetPlayer()->Fire( m_pSelected ) == JSUCCESS; }
 
-bool CRangedState::TestZap() { return g_pGame->GetPlayer()->IsZappable( m_pSelected ); }
+bool CRangedState::TestZap() { return m_pSelected->m_lpData->IsZappable(); }
 bool CRangedState::DoZap() { return g_pGame->GetPlayer()->Zap( m_pSelected ) == JSUCCESS; }
 
 void CRangedState::DropAmmo( JVector vFinalPos )

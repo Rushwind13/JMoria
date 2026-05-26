@@ -219,6 +219,8 @@ public:
         m_id->m_bIdentified = true;
         m_dwKnownProps |= ( KNOWN_CURSED | KNOWN_BONUSES | KNOWN_CHARGES );
     }
+    void NoticeEffect( JResult bNoticed );
+    JResult UseEffects();
     bool KnowsProperty( uint32 prop ) { return ( m_dwKnownProps & prop ) != 0; }
     void RevealProperty( uint32 prop ) { m_dwKnownProps |= prop; }
     bool IsOpenable() { return false; }   // for chests, etc.
@@ -228,6 +230,24 @@ public:
     {
         return m_id->m_dwIndex == ITEM_IDX_BOW || m_id->m_dwIndex == ITEM_IDX_XBOW;
     };
+    inline bool IsDrinkable() { return m_id->m_dwIndex == ITEM_IDX_POTION; }
+    inline bool IsReadable()
+    {
+        return m_id->m_dwIndex == ITEM_IDX_BOOK || m_id->m_dwIndex == ITEM_IDX_SCROLL;
+    }
+    inline bool IsZappable() { return m_id->m_dwIndex == ITEM_IDX_WAND; }
+    inline bool IsStaff() { return m_id->m_dwIndex == ITEM_IDX_STAFF; }
+    inline bool IsFireable()
+    {
+        return ( m_id->m_dwIndex == ITEM_IDX_ARROW || m_id->m_dwIndex == ITEM_IDX_BOLT ) &&
+               m_dwCount > 0;
+    }
+    inline bool IsWieldable()
+    {
+        return m_id->m_dwIndex != ITEM_IDX_ARROW && m_id->m_dwIndex != ITEM_IDX_BOLT &&
+               EquipType() != EQUIP_IDX_INVALID;
+    }
+    inline bool IsFuel() { return m_id->m_dwIndex == ITEM_IDX_FUEL; }
     inline bool NeedsFuel()
     {
         return m_id->m_dwIndex == ITEM_IDX_STAFF || m_id->m_dwIndex == ITEM_IDX_WAND ||
@@ -239,6 +259,12 @@ public:
         int type = EquipType();
         return type == EQUIP_IDX_ARMOR || type == EQUIP_IDX_OFF_HAND || type == EQUIP_IDX_HELMET ||
                type == EQUIP_IDX_CLOAK || type == EQUIP_IDX_GLOVES || type == EQUIP_IDX_BOOTS;
+    };
+    inline bool IsConsumable()
+    {
+        return ( m_id->m_dwIndex == ITEM_IDX_ARROW || m_id->m_dwIndex == ITEM_IDX_BOLT ||
+                 m_id->m_dwIndex == ITEM_IDX_POTION || m_id->m_dwIndex == ITEM_IDX_SCROLL ||
+                 m_id->m_dwIndex == ITEM_IDX_FOOD || m_id->m_dwIndex == ITEM_IDX_SPIKE );
     };
     int EquipType();
     bool IsWeakTo( uint32 dwElement );

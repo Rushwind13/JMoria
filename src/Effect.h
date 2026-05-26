@@ -146,6 +146,9 @@ public:
     // Fire a named effect from the loaded definitions at a given origin.
     // Stack-allocated; no heap allocation or memory leak.
     static JResult Fire( const char *szEffectName, JVector vOrigin );
+    static JResult DispatchAll( CLink<CEffect> *plEffect, float fDuration, int dwItemFlags );
+
+    JResult SummonMonsters( JVector vOrigin );
 
     // Top-level dispatch — called once per effect in the effect list.
     JResult Dispatch( float fDuration, int dwItemFlags );

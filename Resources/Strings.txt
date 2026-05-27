@@ -1,19 +1,19 @@
 // Strings.txt — JMoria player-visible message table
-// Format: String <STR_KEY> { Text <message text> }
+// Format: String <STR_KEY\n> { Text <message text\n> }
 // Parsed by CDataFile::ReadStringEntry() via LoadStrings().
-// Do NOT use \n in Text values; newlines are added by the Printf() callers.
+// Text values include \n where needed; vsprintf handles them as newlines.
 
 // ---------------------------------------------------------------------------
 // Shared composition templates
 // ---------------------------------------------------------------------------
 String <STR_STATUS_CHANGE>
 {
-    Text    <You %s.>
+    Text    <You %s.\n>
 }
 
 String <STR_STATUS_CHANGE_MON>
 {
-    Text    <The %s %s.>
+    Text    <The %s %s.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -72,37 +72,37 @@ String <STR_ATTACK_MISS>
 
 String <STR_ATTACK_HIT>
 {
-    Text    <The %s %s you.>
+    Text    <The %s %s you.\n>
 }
 
 String <STR_CRITICAL_HIT>
 {
-    Text    <It was an excellent hit! (x2 damage)>
+    Text    <It was an excellent hit! (x2 damage)\n>
 }
 
 String <STR_CRITICAL_HIT_EFF>
 {
-    Text    <(Critical hit!)>
+    Text    <(Critical hit!)\n>
 }
 
 String <STR_YOU_MISS>
 {
-    Text    <You miss the %s.>
+    Text    <You miss the %s.\n>
 }
 
 String <STR_YOU_HIT>
 {
-    Text    <You %s the %s.>
+    Text    <You %s the %s.\n>
 }
 
 String <STR_BUMPED_INTO>
 {
-    Text    <Ouch! You bumped into %s!>
+    Text    <Ouch! You bumped into %s!\n>
 }
 
 String <STR_EXCELLENT_HIT>
 {
-    Text    <It was an excellent hit! (x2 damage)>
+    Text    <It was an excellent hit! (x2 damage)\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -110,97 +110,97 @@ String <STR_EXCELLENT_HIT>
 // ---------------------------------------------------------------------------
 String <STR_MON_WAKES>
 {
-    Text    <The %s wakes up!>
+    Text    <The %s wakes up!\n>
 }
 
 String <STR_MON_DIES>
 {
-    Text    <The %s dies.>
+    Text    <The %s dies.\n>
 }
 
 String <STR_MON_IS_HIT>
 {
-    Text    <The %s is hit.>
+    Text    <The %s is hit.\n>
 }
 
 String <STR_MON_SHRIVELS>
 {
-    Text    <The %s shrivels away in the bright light!>
+    Text    <The %s shrivels away in the bright light!\n>
 }
 
 String <STR_MON_SCREAMS>
 {
-    Text    <The %s screams in agony.>
+    Text    <The %s screams in agony.\n>
 }
 
 String <STR_MON_UNAFFECTED>
 {
-    Text    <The %s is unaffected.>
+    Text    <The %s is unaffected.\n>
 }
 
 String <STR_MON_STRIKES>
 {
-    Text    <The %s strikes the %s with %s.>
+    Text    <The %s strikes the %s with %s.\n>
 }
 
 String <STR_MON_SHRUGS>
 {
-    Text    <The %s shrugs off the attack!>
+    Text    <The %s shrugs off the attack!\n>
 }
 
 String <STR_MON_VULNERABLE>
 {
-    Text    <The %s is especially vulnerable!>
+    Text    <The %s is especially vulnerable!\n>
 }
 
 String <STR_MON_DESTROYED>
 {
-    Text    <The %s is destroyed!>
+    Text    <The %s is destroyed!\n>
 }
 
 String <STR_MON_AFFECTS>
 {
-    Text    <The %s affects %d creature%s.>
+    Text    <The %s affects %d creature%s.\n>
 }
 
 String <STR_MON_CRUMBLES>
 {
-    Text    <The %s crumbles to dust!>
+    Text    <The %s crumbles to dust!\n>
 }
 
 String <STR_MON_CRACKS>
 {
-    Text    <The %s cracks!>
+    Text    <The %s cracks!\n>
 }
 
 String <STR_MON_VANISHES>
 {
-    Text    <The %s vanishes!>
+    Text    <The %s vanishes!\n>
 }
 
 String <STR_MON_INFO>
 {
-    Text    <The %s: HP %d/%d  AC %d  Lvl %d  Spd %.1f>
+    Text    <The %s: HP %d/%d  AC %d  Lvl %d  Spd %.1f\n>
 }
 
 String <STR_MON_HEALTHIER>
 {
-    Text    <The %s looks healthier.>
+    Text    <The %s looks healthier.\n>
 }
 
 String <STR_MON_DISAPPEARS>
 {
-    Text    <The %s disappears.>
+    Text    <The %s disappears.\n>
 }
 
 String <STR_MON_EMITS>
 {
-    Text    <The %s emits a %s.>
+    Text    <The %s emits a %s.\n>
 }
 
 String <STR_MON_GLOWS>
 {
-    Text    <The %s glows.>
+    Text    <The %s glows.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -208,47 +208,47 @@ String <STR_MON_GLOWS>
 // ---------------------------------------------------------------------------
 String <STR_IN_TOWN>
 {
-    Text    <You are in town.>
+    Text    <You are in town.\n>
 }
 
 String <STR_ONE_WAY_DOOR>
 {
-    Text    <You pass through a one-way door, to arrive on level %d.>
+    Text    <You pass through a one-way door, to arrive on level %d.\n>
 }
 
 String <STR_FOUND_SECRET_DOOR>
 {
-    Text    <You have found a secret door!>
+    Text    <You have found a secret door!\n>
 }
 
 String <STR_LIGHT_FLOOD>
 {
-    Text    <The room is flooded with light!>
+    Text    <The room is flooded with light!\n>
 }
 
 String <STR_NOTHING_HAPPENS>
 {
-    Text    <Nothing happens.>
+    Text    <Nothing happens.\n>
 }
 
 String <STR_BALL_HARMLESS>
 {
-    Text    <The ball explodes harmlessly.>
+    Text    <The ball explodes harmlessly.\n>
 }
 
 String <STR_WALL_COLLAPSES>
 {
-    Text    <The wall turns to mud and collapses!>
+    Text    <The wall turns to mud and collapses!\n>
 }
 
 String <STR_DOOR_DISSOLVES>
 {
-    Text    <The door dissolves!>
+    Text    <The door dissolves!\n>
 }
 
 String <STR_SECRET_DOOR_DISSOLVES>
 {
-    Text    <The secret door dissolves!>
+    Text    <The secret door dissolves!\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -256,82 +256,82 @@ String <STR_SECRET_DOOR_DISSOLVES>
 // ---------------------------------------------------------------------------
 String <STR_DOOR_SMASH>
 {
-    Text    <You hear a door smash open.>
+    Text    <You hear a door smash open.\n>
 }
 
 String <STR_DOOR_CREAK>
 {
-    Text    <You hear a door creak open.>
+    Text    <You hear a door creak open.\n>
 }
 
 String <STR_LOCK_PICKED>
 {
-    Text    <You have picked the lock.>
+    Text    <You have picked the lock.\n>
 }
 
 String <STR_LOCK_FAILED>
 {
-    Text    <You failed to pick the lock.>
+    Text    <You failed to pick the lock.\n>
 }
 
 String <STR_DOOR_HELD>
 {
-    Text    <The door is held fast.>
+    Text    <The door is held fast.\n>
 }
 
 String <STR_NO_OPEN_THERE>
 {
-    Text    <I do not see anything to open there.>
+    Text    <I do not see anything to open there.\n>
 }
 
 String <STR_DOOR_CLOSED_MSG>
 {
-    Text    <You have closed the door.>
+    Text    <You have closed the door.\n>
 }
 
 String <STR_CLOSE_FAILED>
 {
-    Text    <You failed to close the door.>
+    Text    <You failed to close the door.\n>
 }
 
 String <STR_NO_CLOSE_THERE>
 {
-    Text    <I do not see anything to close there.>
+    Text    <I do not see anything to close there.\n>
 }
 
 String <STR_NO_CLOSED_DOOR>
 {
-    Text    <I do not see a closed door there.>
+    Text    <I do not see a closed door there.\n>
 }
 
 String <STR_SPIKE_BREAKS>
 {
-    Text    <The spike breaks.>
+    Text    <The spike breaks.\n>
 }
 
 String <STR_DOOR_SPIKED>
 {
-    Text    <You spike the door shut.>
+    Text    <You spike the door shut.\n>
 }
 
 String <STR_NO_SPIKES>
 {
-    Text    <You have no iron spikes.>
+    Text    <You have no iron spikes.\n>
 }
 
 String <STR_NO_DOOR_THERE>
 {
-    Text    <I do not see a door there.>
+    Text    <I do not see a door there.\n>
 }
 
 String <STR_DOOR_BASHED>
 {
-    Text    <You bash the door open!>
+    Text    <You bash the door open!\n>
 }
 
 String <STR_DOOR_HOLDS>
 {
-    Text    <You slam against the door but it holds.>
+    Text    <You slam against the door but it holds.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -339,17 +339,17 @@ String <STR_DOOR_HOLDS>
 // ---------------------------------------------------------------------------
 String <STR_RUBBLE_REMOVED>
 {
-    Text    <You have removed the rubble.>
+    Text    <You have removed the rubble.\n>
 }
 
 String <STR_DIG_RUBBLE>
 {
-    Text    <You dig in the rubble...>
+    Text    <You dig in the rubble...\n>
 }
 
 String <STR_TUNNEL_AIR>
 {
-    Text    <Tunnel through what? Empty air?.>
+    Text    <Tunnel through what? Empty air?.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -357,32 +357,32 @@ String <STR_TUNNEL_AIR>
 // ---------------------------------------------------------------------------
 String <STR_NO_STAIRS>
 {
-    Text    <I do not see any stairs here.>
+    Text    <I do not see any stairs here.\n>
 }
 
 String <STR_STAIR_UP>
 {
-    Text    <You enter a maze of up staircases.>
+    Text    <You enter a maze of up staircases.\n>
 }
 
 String <STR_STAIR_UP_LONG>
 {
-    Text    <You enter a long maze of up staircases.>
+    Text    <You enter a long maze of up staircases.\n>
 }
 
 String <STR_STAIR_DOWN>
 {
-    Text    <You enter a maze of down staircases.>
+    Text    <You enter a maze of down staircases.\n>
 }
 
 String <STR_STAIR_DOWN_LONG>
 {
-    Text    <You enter a long maze of down staircases.>
+    Text    <You enter a long maze of down staircases.\n>
 }
 
 String <STR_CANT_DO_THAT>
 {
-    Text    <You can't do that here.>
+    Text    <You can't do that here.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -390,27 +390,27 @@ String <STR_CANT_DO_THAT>
 // ---------------------------------------------------------------------------
 String <STR_DIRECTION_PROMPT>
 {
-    Text    <Direction(1 2 3 4 6 7 8 9):>
+    Text    <Direction(1 2 3 4 6 7 8 9):\n>
 }
 
 String <STR_CANT_SEE_THAT>
 {
-    Text    <You can't see that from here.>
+    Text    <You can't see that from here.\n>
 }
 
 String <STR_SEE_ITEM_TARGET>
 {
-    Text    <You see here a %s.\nTarget selected.>
+    Text    <You see here a %s.\nTarget selected.\n>
 }
 
 String <STR_SEE_ITEM>
 {
-    Text    <You see here a %s>
+    Text    <You see here a %s\n>
 }
 
 String <STR_YOU_SEE>
 {
-    Text    <You see %s.>
+    Text    <You see %s.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -418,22 +418,22 @@ String <STR_YOU_SEE>
 // ---------------------------------------------------------------------------
 String <STR_LIGHT_OUT>
 {
-    Text    <Your light has gone out!>
+    Text    <Your light has gone out!\n>
 }
 
 String <STR_LIGHT_VERY_FAINT>
 {
-    Text    <Your light is growing very faint.>
+    Text    <Your light is growing very faint.\n>
 }
 
 String <STR_LIGHT_FAINT>
 {
-    Text    <Your light is growing faint.>
+    Text    <Your light is growing faint.\n>
 }
 
 String <STR_CANT_REFUEL>
 {
-    Text    <Your %s cannot be refueled.>
+    Text    <Your %s cannot be refueled.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -441,202 +441,202 @@ String <STR_CANT_REFUEL>
 // ---------------------------------------------------------------------------
 String <STR_FOUND_NOTHING>
 {
-    Text    <You found nothing.>
+    Text    <You found nothing.\n>
 }
 
 String <STR_HAVE_ITEMS>
 {
-    Text    <You have %d %s.>
+    Text    <You have %d %s.\n>
 }
 
 String <STR_HAVE_ITEM>
 {
-    Text    <You have a %s.>
+    Text    <You have a %s.\n>
 }
 
 String <STR_WAS_WIELDING>
 {
-    Text    <You were wielding the %s...>
+    Text    <You were wielding the %s...\n>
 }
 
 String <STR_CANT_REMOVE_CURSED>
 {
-    Text    <You can't remove the %s... it seems to be cursed.>
+    Text    <You can't remove the %s... it seems to be cursed.\n>
 }
 
 String <STR_SWITCH_WEAPON>
 {
-    Text    <You switch to your %s.>
+    Text    <You switch to your %s.\n>
 }
 
 String <STR_SWITCH_BARE_HANDS>
 {
-    Text    <You switch to your bare hands.>
+    Text    <You switch to your bare hands.\n>
 }
 
 String <STR_ORGANIZE_PACK>
 {
-    Text    <You organize your pack.>
+    Text    <You organize your pack.\n>
 }
 
 String <STR_NOW_WIELDING>
 {
-    Text    <You are now wielding the %s.>
+    Text    <You are now wielding the %s.\n>
 }
 
 String <STR_NOW_WEARING>
 {
-    Text    <You are now wearing the %s.>
+    Text    <You are now wearing the %s.\n>
 }
 
 String <STR_CANT_WIELD>
 {
-    Text    <You can't wield a %s!>
+    Text    <You can't wield a %s!\n>
 }
 
 String <STR_TOOK_OFF>
 {
-    Text    <You take off the %s.>
+    Text    <You take off the %s.\n>
 }
 
 String <STR_CANT_REMOVE>
 {
-    Text    <You can't remove that!>
+    Text    <You can't remove that!\n>
 }
 
 String <STR_WELDED>
 {
-    Text    <The %s is welded to your body!>
+    Text    <The %s is welded to your body!\n>
 }
 
 String <STR_HOW_MANY>
 {
-    Text    <How many? (1-%d, * for all): >
+    Text    <How many? (1-%d, * for all): \n>
 }
 
 String <STR_DROPPED_ITEM>
 {
-    Text    <You dropped the %s.>
+    Text    <You dropped the %s.\n>
 }
 
 String <STR_DROPPED_N_ITEMS>
 {
-    Text    <You dropped %d %s.>
+    Text    <You dropped %d %s.\n>
 }
 
 String <STR_DROPPED_N>
 {
-    Text    <You dropped %d.>
+    Text    <You dropped %d.\n>
 }
 
 String <STR_CANT_DROP_HERE>
 {
-    Text    <You can't drop a %s here!>
+    Text    <You can't drop a %s here!\n>
 }
 
 String <STR_COULD_NOT_DROP>
 {
-    Text    <Could not drop items.>
+    Text    <Could not drop items.\n>
 }
 
 String <STR_YOU_READ>
 {
-    Text    <You read the %s.>
+    Text    <You read the %s.\n>
 }
 
 String <STR_CANT_READ>
 {
-    Text    <You can't read a %s!>
+    Text    <You can't read a %s!\n>
 }
 
 String <STR_SCROLL_SLIPS>
 {
-    Text    <The %s slips from your fingers and returns to your pack!>
+    Text    <The %s slips from your fingers and returns to your pack!\n>
 }
 
 String <STR_YOU_DRANK>
 {
-    Text    <You drank the %s.>
+    Text    <You drank the %s.\n>
 }
 
 String <STR_YOU_DRANK_N>
 {
-    Text    <You drank %d %s.>
+    Text    <You drank %d %s.\n>
 }
 
 String <STR_CANT_DRINK>
 {
-    Text    <You can't drink a %s!>
+    Text    <You can't drink a %s!\n>
 }
 
 String <STR_SELECT_VALID>
 {
-    Text    <Please select a valid item.>
+    Text    <Please select a valid item.\n>
 }
 
 String <STR_NO_SUCH_ITEM>
 {
-    Text    <No such item. %s>
+    Text    <No such item. %s\n>
 }
 
 String <STR_INVALID_QTY>
 {
-    Text    <Invalid quantity.>
+    Text    <Invalid quantity.\n>
 }
 
 String <STR_CANT_USE_STAFF>
 {
-    Text    <You can't use a %s as a staff!>
+    Text    <You can't use a %s as a staff!\n>
 }
 
 String <STR_FILL_LANTERN>
 {
-    Text    <You fill your lantern with the %s.>
+    Text    <You fill your lantern with the %s.\n>
 }
 
 String <STR_NO_LANTERN>
 {
-    Text    <You have no lantern to fill.>
+    Text    <You have no lantern to fill.\n>
 }
 
 String <STR_CANT_USE_FUEL>
 {
-    Text    <You can't use a %s as fuel!>
+    Text    <You can't use a %s as fuel!\n>
 }
 
 String <STR_CANT_FIRE>
 {
-    Text    <You can't fire a %s!>
+    Text    <You can't fire a %s!\n>
 }
 
 String <STR_CANT_ZAP>
 {
-    Text    <You can't zap a %s!>
+    Text    <You can't zap a %s!\n>
 }
 
 String <STR_NOTHING_VALID>
 {
-    Text    <Nothing valid to %s.>
+    Text    <Nothing valid to %s.\n>
 }
 
 String <STR_NOTHING_TO_FIRE_WITH>
 {
-    Text    <You have nothing to fire with.>
+    Text    <You have nothing to fire with.\n>
 }
 
 String <STR_NOTHING_TO_FIRE>
 {
-    Text    <You have nothing to fire.>
+    Text    <You have nothing to fire.\n>
 }
 
 String <STR_ARROW_BREAKS>
 {
-    Text    <The arrow breaks.>
+    Text    <The arrow breaks.\n>
 }
 
 String <STR_CANCELLED>
 {
-    Text    <Cancelled.>
+    Text    <Cancelled.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -644,22 +644,22 @@ String <STR_CANCELLED>
 // ---------------------------------------------------------------------------
 String <STR_ITEM_BURNS>
 {
-    Text    <Your %s %s!>
+    Text    <Your %s %s!\n>
 }
 
 String <STR_ITEM_PITTED_TOHIT>
 {
-    Text    <Your %s is pitted by %s! (to-hit reduced)>
+    Text    <Your %s is pitted by %s! (to-hit reduced)\n>
 }
 
 String <STR_ITEM_PITTED_TODAM>
 {
-    Text    <Your %s is pitted by %s! (to-damage reduced)>
+    Text    <Your %s is pitted by %s! (to-damage reduced)\n>
 }
 
 String <STR_ITEM_DAMAGED>
 {
-    Text    <Your %s is damaged by %s!>
+    Text    <Your %s is damaged by %s!\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -667,27 +667,27 @@ String <STR_ITEM_DAMAGED>
 // ---------------------------------------------------------------------------
 String <STR_IDENTIFY>
 {
-    Text    <It is %s.>
+    Text    <It is %s.\n>
 }
 
 String <STR_WAND_EXPLODES>
 {
-    Text    <The %s explodes in a shower of sparks!>
+    Text    <The %s explodes in a shower of sparks!\n>
 }
 
 String <STR_WAND_GLOWS>
 {
-    Text    <The %s glows with magical energy. (%d charges)>
+    Text    <The %s glows with magical energy. (%d charges)\n>
 }
 
 String <STR_GLOWS_POWER>
 {
-    Text    <It glows with power.>
+    Text    <It glows with power.\n>
 }
 
 String <STR_GLOWS_SOFT>
 {
-    Text    <It glows with a soft light.>
+    Text    <It glows with a soft light.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -695,42 +695,42 @@ String <STR_GLOWS_SOFT>
 // ---------------------------------------------------------------------------
 String <STR_AREA_REVEALED>
 {
-    Text    <The area around you is revealed.>
+    Text    <The area around you is revealed.\n>
 }
 
 String <STR_DUNGEON_REVEALED>
 {
-    Text    <The dungeon is revealed to you.>
+    Text    <The dungeon is revealed to you.\n>
 }
 
 String <STR_SENSE_DOORS>
 {
-    Text    <You sense the presence of doors!>
+    Text    <You sense the presence of doors!\n>
 }
 
 String <STR_SENSE_STAIRS>
 {
-    Text    <You sense the presence of stairs!>
+    Text    <You sense the presence of stairs!\n>
 }
 
 String <STR_SENSE_TRAPS>
 {
-    Text    <You sense traps.>
+    Text    <You sense traps.\n>
 }
 
 String <STR_SENSE_MONSTERS>
 {
-    Text    <You sense the presence of monsters!>
+    Text    <You sense the presence of monsters!\n>
 }
 
 String <STR_SENSE_TREASURE>
 {
-    Text    <You sense the presence of treasure!>
+    Text    <You sense the presence of treasure!\n>
 }
 
 String <STR_NO_TREASURE>
 {
-    Text    <You sense no treasure nearby.>
+    Text    <You sense no treasure nearby.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -738,37 +738,37 @@ String <STR_NO_TREASURE>
 // ---------------------------------------------------------------------------
 String <STR_BRIEF_SHIMMER>
 {
-    Text    <You feel a brief shimmer.>
+    Text    <You feel a brief shimmer.\n>
 }
 
 String <STR_WRENCHING>
 {
-    Text    <You feel a wrenching sensation.>
+    Text    <You feel a wrenching sensation.\n>
 }
 
 String <STR_RECALL_ACTIVE>
 {
-    Text    <You already feel the pull of recall.>
+    Text    <You already feel the pull of recall.\n>
 }
 
 String <STR_RECALL_DRIFT>
 {
-    Text    <You feel yourself starting to drift...>
+    Text    <You feel yourself starting to drift...\n>
 }
 
 String <STR_RECALL_RESET>
 {
-    Text    <Recall depth reset (was: %dft)>
+    Text    <Recall depth reset (was: %dft)\n>
 }
 
 String <STR_RECALL_TO_TOWN>
 {
-    Text    <The world spins and you find yourself in town.>
+    Text    <The world spins and you find yourself in town.\n>
 }
 
 String <STR_RECALL_TO_DEPTH>
 {
-    Text    <The world spins and you are back at %d ft.>
+    Text    <The world spins and you are back at %d ft.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -776,12 +776,12 @@ String <STR_RECALL_TO_DEPTH>
 // ---------------------------------------------------------------------------
 String <STR_NOW_CURSED>
 {
-    Text    <It is now cursed.>
+    Text    <It is now cursed.\n>
 }
 
 String <STR_NO_LONGER_CURSED>
 {
-    Text    <It is no longer cursed.>
+    Text    <It is no longer cursed.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -789,17 +789,17 @@ String <STR_NO_LONGER_CURSED>
 // ---------------------------------------------------------------------------
 String <STR_IMMUNE>
 {
-    Text    <You are immune!>
+    Text    <You are immune!\n>
 }
 
 String <STR_RESIST>
 {
-    Text    <You resist!>
+    Text    <You resist!\n>
 }
 
 String <STR_WELCOME_LEVEL>
 {
-    Text    <Welcome to level %d.>
+    Text    <Welcome to level %d.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -807,37 +807,37 @@ String <STR_WELCOME_LEVEL>
 // ---------------------------------------------------------------------------
 String <STR_FEEL_AMAZING>
 {
-    Text    <You feel amazing!>
+    Text    <You feel amazing!\n>
 }
 
 String <STR_FEEL_LOT_BETTER>
 {
-    Text    <You feel a lot better.>
+    Text    <You feel a lot better.\n>
 }
 
 String <STR_FEEL_BETTER>
 {
-    Text    <You feel better.>
+    Text    <You feel better.\n>
 }
 
 String <STR_FEEL_BIT_BETTER>
 {
-    Text    <You feel a bit better.>
+    Text    <You feel a bit better.\n>
 }
 
 String <STR_FEEL_PROTECTED>
 {
-    Text    <You feel more protected. (+%d AC)>
+    Text    <You feel more protected. (+%d AC)\n>
 }
 
 String <STR_LESS_PROTECTED>
 {
-    Text    <You feel less protected.>
+    Text    <You feel less protected.\n>
 }
 
 String <STR_COMPLETELY_HEALTHY>
 {
-    Text    <You feel completely healthy.>
+    Text    <You feel completely healthy.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -845,92 +845,92 @@ String <STR_COMPLETELY_HEALTHY>
 // ---------------------------------------------------------------------------
 String <STR_RES_FEAR>
 {
-    Text    <You feel resistant to fear.>
+    Text    <You feel resistant to fear.\n>
 }
 
 String <STR_YOU_AFRAID>
 {
-    Text    <You are afraid!>
+    Text    <You are afraid!\n>
 }
 
 String <STR_YOU_BLIND>
 {
-    Text    <You are blind.>
+    Text    <You are blind.\n>
 }
 
 String <STR_YOU_CONFUSED>
 {
-    Text    <You are confused.>
+    Text    <You are confused.\n>
 }
 
 String <STR_RES_POISON>
 {
-    Text    <You feel resistant to poison.>
+    Text    <You feel resistant to poison.\n>
 }
 
 String <STR_YOU_POISONED>
 {
-    Text    <You are poisoned.>
+    Text    <You are poisoned.\n>
 }
 
 String <STR_YOU_CANT_MOVE>
 {
-    Text    <You can't move!>
+    Text    <You can't move!\n>
 }
 
 String <STR_FALL_ASLEEP>
 {
-    Text    <You fall asleep.>
+    Text    <You fall asleep.\n>
 }
 
 String <STR_EYES_TINGLY>
 {
-    Text    <Your eyes feel tingly.>
+    Text    <Your eyes feel tingly.\n>
 }
 
 String <STR_SENSE_THOUGHTS>
 {
-    Text    <You sense stray thoughts around you.>
+    Text    <You sense stray thoughts around you.\n>
 }
 
 String <STR_RES_FIRE>
 {
-    Text    <You feel resistant to fire.>
+    Text    <You feel resistant to fire.\n>
 }
 
 String <STR_RES_COLD>
 {
-    Text    <You feel resistant to cold.>
+    Text    <You feel resistant to cold.\n>
 }
 
 String <STR_RES_ELEC>
 {
-    Text    <You feel resistant to electricity.>
+    Text    <You feel resistant to electricity.\n>
 }
 
 String <STR_RES_ACID>
 {
-    Text    <You feel resistant to acid.>
+    Text    <You feel resistant to acid.\n>
 }
 
 String <STR_FADE_FROM_VIEW>
 {
-    Text    <You fade from view.>
+    Text    <You fade from view.\n>
 }
 
 String <STR_LIGHT_FEET>
 {
-    Text    <You feel light on your feet.>
+    Text    <You feel light on your feet.\n>
 }
 
 String <STR_FREE_TO_MOVE>
 {
-    Text    <You feel free to move.>
+    Text    <You feel free to move.\n>
 }
 
 String <STR_MOVING_FASTER>
 {
-    Text    <You feel yourself moving faster.>
+    Text    <You feel yourself moving faster.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -938,92 +938,92 @@ String <STR_MOVING_FASTER>
 // ---------------------------------------------------------------------------
 String <STR_NO_LONGER_AFRAID>
 {
-    Text    <You are no longer afraid.>
+    Text    <You are no longer afraid.\n>
 }
 
 String <STR_CAN_SEE>
 {
-    Text    <You can see again.>
+    Text    <You can see again.\n>
 }
 
 String <STR_CAN_THINK>
 {
-    Text    <You can think clearly again.>
+    Text    <You can think clearly again.\n>
 }
 
 String <STR_NOT_POISONED>
 {
-    Text    <You are no longer poisoned.>
+    Text    <You are no longer poisoned.\n>
 }
 
 String <STR_CAN_MOVE_AGAIN>
 {
-    Text    <You can move again.>
+    Text    <You can move again.\n>
 }
 
 String <STR_WAKE_UP>
 {
-    Text    <You wake up.>
+    Text    <You wake up.\n>
 }
 
 String <STR_NO_LONGER_RES_FEAR>
 {
-    Text    <You are no longer resistant to fear.>
+    Text    <You are no longer resistant to fear.\n>
 }
 
 String <STR_NO_LONGER_RES_POISON>
 {
-    Text    <You are no longer resistant to poison.>
+    Text    <You are no longer resistant to poison.\n>
 }
 
 String <STR_EYES_STOP>
 {
-    Text    <Your eyes stop tinging.>
+    Text    <Your eyes stop tinging.\n>
 }
 
 String <STR_NO_SENSE_THOUGHTS>
 {
-    Text    <You no longer sense stray thoughts.>
+    Text    <You no longer sense stray thoughts.\n>
 }
 
 String <STR_NO_RES_FIRE>
 {
-    Text    <You no longer feel resistant to fire.>
+    Text    <You no longer feel resistant to fire.\n>
 }
 
 String <STR_NO_RES_COLD>
 {
-    Text    <You no longer feel resistant to cold.>
+    Text    <You no longer feel resistant to cold.\n>
 }
 
 String <STR_NO_RES_ELEC>
 {
-    Text    <You no longer feel resistant to electricity.>
+    Text    <You no longer feel resistant to electricity.\n>
 }
 
 String <STR_NO_RES_ACID>
 {
-    Text    <You no longer feel resistant to acid.>
+    Text    <You no longer feel resistant to acid.\n>
 }
 
 String <STR_REAPPEAR>
 {
-    Text    <You reappear.>
+    Text    <You reappear.\n>
 }
 
 String <STR_FLOAT_DOWN>
 {
-    Text    <You float gently to the ground.>
+    Text    <You float gently to the ground.\n>
 }
 
 String <STR_SLUGGISH>
 {
-    Text    <You feel sluggish.>
+    Text    <You feel sluggish.\n>
 }
 
 String <STR_SLOWING_DOWN>
 {
-    Text    <You feel yourself slowing down.>
+    Text    <You feel yourself slowing down.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -1031,17 +1031,17 @@ String <STR_SLOWING_DOWN>
 // ---------------------------------------------------------------------------
 String <STR_MORE_EXPERIENCED>
 {
-    Text    <You feel more experienced.>
+    Text    <You feel more experienced.\n>
 }
 
 String <STR_LESS_EXPERIENCED>
 {
-    Text    <You feel less experienced.>
+    Text    <You feel less experienced.\n>
 }
 
 String <STR_WEAKENED>
 {
-    Text    <You feel weakened.>
+    Text    <You feel weakened.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -1049,107 +1049,107 @@ String <STR_WEAKENED>
 // ---------------------------------------------------------------------------
 String <STR_INV_QUAFF>
 {
-    Text    <Quaff which potion?>
+    Text    <Quaff which potion?\n>
 }
 
 String <STR_INV_READ>
 {
-    Text    <Read which scroll?>
+    Text    <Read which scroll?\n>
 }
 
 String <STR_INV_WIELD>
 {
-    Text    <Wield which item?>
+    Text    <Wield which item?\n>
 }
 
 String <STR_INV_ZAP>
 {
-    Text    <Zap which wand?>
+    Text    <Zap which wand?\n>
 }
 
 String <STR_INV_FIRE_AMMO>
 {
-    Text    <Fire which ammo?>
+    Text    <Fire which ammo?\n>
 }
 
 String <STR_INV_USE_STAFF>
 {
-    Text    <Use which staff?>
+    Text    <Use which staff?\n>
 }
 
 String <STR_INV_CARRYING>
 {
-    Text    <You are Carrying:>
+    Text    <You are Carrying:\n>
 }
 
 String <STR_INV_PAST_PAGE>
 {
-    Text    <Inventory past first page not shown.>
+    Text    <Inventory past first page not shown.\n>
 }
 
 String <STR_EQUIP_LIMIT>
 {
-    Text    <Equipment is limited to 10 items...>
+    Text    <Equipment is limited to 10 items...\n>
 }
 
 String <STR_INV_FIRE_WEAPON>
 {
-    Text    <Fire which weapon?>
+    Text    <Fire which weapon?\n>
 }
 
 String <STR_INV_WEARING>
 {
-    Text    <You are wearing:>
+    Text    <You are wearing:\n>
 }
 
 String <STR_ZAP_PROMPT>
 {
-    Text    <Zap which wand? [a-z]>
+    Text    <Zap which wand? [a-z]\n>
 }
 
 String <STR_CHOOSE_AMMO>
 {
-    Text    <Choose ammo from inventory (a to z):>
+    Text    <Choose ammo from inventory (a to z):\n>
 }
 
 String <STR_CHOOSE_INV>
 {
-    Text    <Choose an item from inventory(a to z):>
+    Text    <Choose an item from inventory(a to z):\n>
 }
 
 String <STR_CHOOSE_INV_SPACE>
 {
-    Text    <Choose an item from inventory (a to z):>
+    Text    <Choose an item from inventory (a to z):\n>
 }
 
 String <STR_CHOOSE_EQUIP>
 {
-    Text    <Choose an item from equipment(a to z):>
+    Text    <Choose an item from equipment(a to z):\n>
 }
 
 String <STR_CHOOSE_TARGET_DIR>
 {
-    Text    <Choose target with * or Directional (1 2 3 4 6 7 8 9)>
+    Text    <Choose target with * or Directional (1 2 3 4 6 7 8 9)\n>
 }
 
 String <STR_CHOOSE_TARGET>
 {
-    Text    <Choose target: * or Direction (1 2 3 4 6 7 8 9)>
+    Text    <Choose target: * or Direction (1 2 3 4 6 7 8 9)\n>
 }
 
 String <STR_TARGET_PROMPT>
 {
-    Text    <(* for target, . to choose, ESC to exit):>
+    Text    <(* for target, . to choose, ESC to exit):\n>
 }
 
 String <STR_TARGET_SELECTED>
 {
-    Text    <Target selected.>
+    Text    <Target selected.\n>
 }
 
 String <STR_TARGET_LOST>
 {
-    Text    <You can no longer see that target.>
+    Text    <You can no longer see that target.\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -1157,137 +1157,147 @@ String <STR_TARGET_LOST>
 // ---------------------------------------------------------------------------
 String <STR_STAT_NAME>
 {
-    Text    <Name: %s>
+    Text    <Name: %s\n>
 }
 
 String <STR_STAT_RACE>
 {
-    Text    <Race: %s>
+    Text    <Race: %s\n>
 }
 
 String <STR_STAT_CLASS>
 {
-    Text    <Class: %s>
+    Text    <Class: %s\n>
 }
 
 String <STR_STAT_AC>
 {
-    Text    <AC: %d>
+    Text    <AC: %d\n>
 }
 
 String <STR_STAT_HP>
 {
-    Text    <HP: %d / %d>
+    Text    <HP: %d / %d\n>
 }
 
 String <STR_STAT_DAMAGE>
 {
-    Text    <Damage: %s>
+    Text    <Damage: %s\n>
 }
 
 String <STR_STAT_TOHIT>
 {
-    Text    <+to Hit: %d>
+    Text    <+to Hit: %d\n>
 }
 
 String <STR_STAT_TODAM>
 {
-    Text    <+to Dam: %d>
+    Text    <+to Dam: %d\n>
 }
 
 String <STR_STAT_SPEED_FAST>
 {
-    Text    <Speed: Fast(+%d)>
+    Text    <Speed: Fast(+%d)\n>
 }
 
 String <STR_STAT_SPEED_SLOW>
 {
-    Text    <Speed: Slow(%d)>
+    Text    <Speed: Slow(%d)\n>
 }
 
 String <STR_STAT_LEVEL>
 {
-    Text    <Level: %d>
+    Text    <Level: %d\n>
 }
 
 String <STR_STAT_DEPTH>
 {
-    Text    <Depth: %d'>
+    Text    <Depth: %d'\n>
 }
 
 String <STR_STAT_EXP>
 {
-    Text    <Exp: %d>
+    Text    <Exp: %d\n>
+}
+
+String <STR_STAT_EXP_NEXT>
+{
+    Text    <Exp to Next: %d\n>
 }
 
 String <STR_STAT_LIGHT>
 {
-    Text    <Light: %d turns>
+    Text    <Light: %d turns\n>
 }
 
 String <STR_STAT_INFRAVISION>
 {
-    Text    <Infravision>
+    Text    <Infravision\n>
 }
 
 String <STR_STAT_TELEPATHY>
 {
-    Text    <Telepathy>
+    Text    <Telepathy\n>
 }
 
 String <STR_STAT_RES_POISON>
 {
-    Text    <Res: Poison>
+    Text    <Res: Poison\n>
+}
+
+String <STR_STAT_POISONED>
+{
+    Text    <Poisoned\n>
 }
 
 String <STR_STAT_RES_FEAR>
 {
-    Text    <Res: Fear>
+    Text    <Res: Fear\n>
 }
 
 String <STR_STAT_AFRAID>
 {
-    Text    <Afraid>
+    Text    <Afraid\n>
 }
 
 String <STR_STAT_PARALYZED>
 {
-    Text    <Paralyzed>
+    Text    <Paralyzed\n>
 }
 
 String <STR_STAT_BLIND>
 {
-    Text    <Blind>
+    Text    <Blind\n>
 }
 
 String <STR_STAT_ASLEEP>
 {
-    Text    <Asleep>
+    Text    <Asleep\n>
 }
 
 String <STR_STAT_CONFUSED>
 {
-    Text    <Confused>
+    Text    <Confused\n>
 }
 
 String <STR_STAT_TARGET>
 {
-    Text    <Target: %s>
+    Text    <Target: %s\n>
 }
 
 String <STR_STAT_POS>
 {
-    Text    <Pos: <%.0f %.0f>>
+    Text    <Pos: <%.0f %.0f>\n>
 }
 
 String <STR_STAT_TARGET_POS>
 {
-    Text    <Target Pos: <%.0f %.0f>>
+    Text    <Target Pos: <%.0f %.0f>\n>
 }
 
 String <STR_STAT_PLAYER_POS>
 {
-    Text    <Player Pos: <%.0f %.0f>>
+    Text    <Player Pos: <%.0f %.0f>\n>
 }
 
 // ---------------------------------------------------------------------------
@@ -1295,20 +1305,20 @@ String <STR_STAT_PLAYER_POS>
 // ---------------------------------------------------------------------------
 String <STR_WIZ_ON>
 {
-    Text    <*** Wizard Mode: On *** your score will not be saved.>
+    Text    <*** Wizard Mode: On *** your score will not be saved.\n>
 }
 
 String <STR_WIZ_ADDED_ITEMS>
 {
-    Text    <Wizard: added %d wands/staves to inventory.>
+    Text    <Wizard: added %d wands/staves to inventory.\n>
 }
 
 String <STR_WIZ_IDENTIFIED>
 {
-    Text    <Wizard: identified %d items.>
+    Text    <Wizard: identified %d items.\n>
 }
 
 String <STR_WIZ_LABEL>
 {
-    Text    <** WIZARD MODE **>
+    Text    <** WIZARD MODE **\n>
 }

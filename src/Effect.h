@@ -18,6 +18,21 @@ enum eEffectTargetType
     EFFECT_TARGET_ITEM,      // player must choose an item (inv or equip) first
 };
 
+// Per-effect string slot indices — used to index CEffectDef::m_dwStrIds[].
+// Each slot stores a eStringId value (or STR_INVALID if not set).
+enum eEffectStrSlot
+{
+    EFFECT_STR_NAME = 0,       // display name for "The %s emits a %s." etc.
+    EFFECT_STR_HIT_PLAYER,     // "You are hit by %s."  (overrides generic)
+    EFFECT_STR_HIT_MONSTER,    // "The %s is hit by %s."  (overrides generic)
+    EFFECT_STR_EMIT_PLAYER,    // emitting string for player-fired beams
+    EFFECT_STR_EMIT_MONSTER,   // emitting string for monster-fired beams
+    EFFECT_STR_STATUS_PLAYER,  // status verb fragment for player ("are paralyzed")
+    EFFECT_STR_STATUS_MONSTER, // status verb fragment for monster ("is paralyzed")
+    EFFECT_STR_STAT_LABEL,     // stats-panel status label ("Paralyzed")
+    EFFECT_STR_SLOT_MAX
+};
+
 // Named effect template — shared catalog entry parsed from Effects.txt.
 // Items, monsters, and spells reference these by name.
 class CEffectDef
@@ -37,6 +52,8 @@ public:
           m_llColors( NULL )
     {
         m_llColors = new JLinkList<JColor>;
+        for( int i = 0; i < EFFECT_STR_SLOT_MAX; i++ )
+            m_dwStrIds[i] = STR_INVALID;
     }
     ~CEffectDef()
     {
@@ -68,6 +85,7 @@ public:
     float m_fRadius;               // AoE radius (0 = single target)
     char m_cBeamChar;              // character for beam rendering (default '*')
     JLinkList<JColor> *m_llColors; // multicolor beam cycling
+    int m_dwStrIds[EFFECT_STR_SLOT_MAX]; // per-slot string IDs (eStringId values)
 };
 
 class CEffect

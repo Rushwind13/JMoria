@@ -1735,7 +1735,7 @@ CItem *CDungeon::PickUp( JVector &vPickupPos )
 
 void CDungeon::Drop( CItem *pItem, JVector &vDropPos )
 {
-    JLog( LOG_LEVEL_WARN, true, "CDungeon::Drop called - pItem=%p, type=%s, count=%d at <%f %f>\n",
+    JLog( LOG_LEVEL_DEBUG, true, "CDungeon::Drop called - pItem=%p, type=%s, count=%d at <%f %f>\n",
           pItem, pItem ? pItem->GetName() : "NULL", pItem ? pItem->m_dwCount : 0,
           VEC_EXPAND( vDropPos ) );
 

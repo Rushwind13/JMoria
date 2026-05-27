@@ -1,0 +1,1314 @@
+// Strings.txt — JMoria player-visible message table
+// Format: String <STR_KEY> { Text <message text> }
+// Parsed by CDataFile::ReadStringEntry() via LoadStrings().
+// Do NOT use \n in Text values; newlines are added by the Printf() callers.
+
+// ---------------------------------------------------------------------------
+// Shared composition templates
+// ---------------------------------------------------------------------------
+String <STR_STATUS_CHANGE>
+{
+    Text    <You %s.>
+}
+
+String <STR_STATUS_CHANGE_MON>
+{
+    Text    <The %s %s.>
+}
+
+// ---------------------------------------------------------------------------
+// Status verb fragments — player (used with STR_STATUS_CHANGE)
+// ---------------------------------------------------------------------------
+String <STR_STATUS_SLEEP>
+{
+    Text    <fall asleep>
+}
+
+String <STR_STATUS_PARALYZE>
+{
+    Text    <are paralyzed>
+}
+
+String <STR_STATUS_AFRAID>
+{
+    Text    <flee in terror>
+}
+
+String <STR_STATUS_CONFUSE>
+{
+    Text    <feel confused>
+}
+
+// ---------------------------------------------------------------------------
+// Status verb fragments — monster (used with STR_STATUS_CHANGE_MON)
+// ---------------------------------------------------------------------------
+String <STR_STATUS_SLEEP_MON>
+{
+    Text    <falls asleep>
+}
+
+String <STR_STATUS_PARALYZE_MON>
+{
+    Text    <is paralyzed>
+}
+
+String <STR_STATUS_AFRAID_MON>
+{
+    Text    <flees in terror>
+}
+
+String <STR_STATUS_CONFUSE_MON>
+{
+    Text    <looks confused>
+}
+
+// ---------------------------------------------------------------------------
+// Attack / combat
+// ---------------------------------------------------------------------------
+String <STR_ATTACK_MISS>
+{
+    Text    <misses>
+}
+
+String <STR_ATTACK_HIT>
+{
+    Text    <The %s %s you.>
+}
+
+String <STR_CRITICAL_HIT>
+{
+    Text    <It was an excellent hit! (x2 damage)>
+}
+
+String <STR_CRITICAL_HIT_EFF>
+{
+    Text    <(Critical hit!)>
+}
+
+String <STR_YOU_MISS>
+{
+    Text    <You miss the %s.>
+}
+
+String <STR_YOU_HIT>
+{
+    Text    <You %s the %s.>
+}
+
+String <STR_BUMPED_INTO>
+{
+    Text    <Ouch! You bumped into %s!>
+}
+
+String <STR_EXCELLENT_HIT>
+{
+    Text    <It was an excellent hit! (x2 damage)>
+}
+
+// ---------------------------------------------------------------------------
+// Monster state messages
+// ---------------------------------------------------------------------------
+String <STR_MON_WAKES>
+{
+    Text    <The %s wakes up!>
+}
+
+String <STR_MON_DIES>
+{
+    Text    <The %s dies.>
+}
+
+String <STR_MON_IS_HIT>
+{
+    Text    <The %s is hit.>
+}
+
+String <STR_MON_SHRIVELS>
+{
+    Text    <The %s shrivels away in the bright light!>
+}
+
+String <STR_MON_SCREAMS>
+{
+    Text    <The %s screams in agony.>
+}
+
+String <STR_MON_UNAFFECTED>
+{
+    Text    <The %s is unaffected.>
+}
+
+String <STR_MON_STRIKES>
+{
+    Text    <The %s strikes the %s with %s.>
+}
+
+String <STR_MON_SHRUGS>
+{
+    Text    <The %s shrugs off the attack!>
+}
+
+String <STR_MON_VULNERABLE>
+{
+    Text    <The %s is especially vulnerable!>
+}
+
+String <STR_MON_DESTROYED>
+{
+    Text    <The %s is destroyed!>
+}
+
+String <STR_MON_AFFECTS>
+{
+    Text    <The %s affects %d creature%s.>
+}
+
+String <STR_MON_CRUMBLES>
+{
+    Text    <The %s crumbles to dust!>
+}
+
+String <STR_MON_CRACKS>
+{
+    Text    <The %s cracks!>
+}
+
+String <STR_MON_VANISHES>
+{
+    Text    <The %s vanishes!>
+}
+
+String <STR_MON_INFO>
+{
+    Text    <The %s: HP %d/%d  AC %d  Lvl %d  Spd %.1f>
+}
+
+String <STR_MON_HEALTHIER>
+{
+    Text    <The %s looks healthier.>
+}
+
+String <STR_MON_DISAPPEARS>
+{
+    Text    <The %s disappears.>
+}
+
+String <STR_MON_EMITS>
+{
+    Text    <The %s emits a %s.>
+}
+
+String <STR_MON_GLOWS>
+{
+    Text    <The %s glows.>
+}
+
+// ---------------------------------------------------------------------------
+// Dungeon / environment
+// ---------------------------------------------------------------------------
+String <STR_IN_TOWN>
+{
+    Text    <You are in town.>
+}
+
+String <STR_ONE_WAY_DOOR>
+{
+    Text    <You pass through a one-way door, to arrive on level %d.>
+}
+
+String <STR_FOUND_SECRET_DOOR>
+{
+    Text    <You have found a secret door!>
+}
+
+String <STR_LIGHT_FLOOD>
+{
+    Text    <The room is flooded with light!>
+}
+
+String <STR_NOTHING_HAPPENS>
+{
+    Text    <Nothing happens.>
+}
+
+String <STR_BALL_HARMLESS>
+{
+    Text    <The ball explodes harmlessly.>
+}
+
+String <STR_WALL_COLLAPSES>
+{
+    Text    <The wall turns to mud and collapses!>
+}
+
+String <STR_DOOR_DISSOLVES>
+{
+    Text    <The door dissolves!>
+}
+
+String <STR_SECRET_DOOR_DISSOLVES>
+{
+    Text    <The secret door dissolves!>
+}
+
+// ---------------------------------------------------------------------------
+// Doors / obstacles
+// ---------------------------------------------------------------------------
+String <STR_DOOR_SMASH>
+{
+    Text    <You hear a door smash open.>
+}
+
+String <STR_DOOR_CREAK>
+{
+    Text    <You hear a door creak open.>
+}
+
+String <STR_LOCK_PICKED>
+{
+    Text    <You have picked the lock.>
+}
+
+String <STR_LOCK_FAILED>
+{
+    Text    <You failed to pick the lock.>
+}
+
+String <STR_DOOR_HELD>
+{
+    Text    <The door is held fast.>
+}
+
+String <STR_NO_OPEN_THERE>
+{
+    Text    <I do not see anything to open there.>
+}
+
+String <STR_DOOR_CLOSED_MSG>
+{
+    Text    <You have closed the door.>
+}
+
+String <STR_CLOSE_FAILED>
+{
+    Text    <You failed to close the door.>
+}
+
+String <STR_NO_CLOSE_THERE>
+{
+    Text    <I do not see anything to close there.>
+}
+
+String <STR_NO_CLOSED_DOOR>
+{
+    Text    <I do not see a closed door there.>
+}
+
+String <STR_SPIKE_BREAKS>
+{
+    Text    <The spike breaks.>
+}
+
+String <STR_DOOR_SPIKED>
+{
+    Text    <You spike the door shut.>
+}
+
+String <STR_NO_SPIKES>
+{
+    Text    <You have no iron spikes.>
+}
+
+String <STR_NO_DOOR_THERE>
+{
+    Text    <I do not see a door there.>
+}
+
+String <STR_DOOR_BASHED>
+{
+    Text    <You bash the door open!>
+}
+
+String <STR_DOOR_HOLDS>
+{
+    Text    <You slam against the door but it holds.>
+}
+
+// ---------------------------------------------------------------------------
+// Digging / rubble
+// ---------------------------------------------------------------------------
+String <STR_RUBBLE_REMOVED>
+{
+    Text    <You have removed the rubble.>
+}
+
+String <STR_DIG_RUBBLE>
+{
+    Text    <You dig in the rubble...>
+}
+
+String <STR_TUNNEL_AIR>
+{
+    Text    <Tunnel through what? Empty air?.>
+}
+
+// ---------------------------------------------------------------------------
+// Navigation / stairs
+// ---------------------------------------------------------------------------
+String <STR_NO_STAIRS>
+{
+    Text    <I do not see any stairs here.>
+}
+
+String <STR_STAIR_UP>
+{
+    Text    <You enter a maze of up staircases.>
+}
+
+String <STR_STAIR_UP_LONG>
+{
+    Text    <You enter a long maze of up staircases.>
+}
+
+String <STR_STAIR_DOWN>
+{
+    Text    <You enter a maze of down staircases.>
+}
+
+String <STR_STAIR_DOWN_LONG>
+{
+    Text    <You enter a long maze of down staircases.>
+}
+
+String <STR_CANT_DO_THAT>
+{
+    Text    <You can't do that here.>
+}
+
+// ---------------------------------------------------------------------------
+// Looking
+// ---------------------------------------------------------------------------
+String <STR_DIRECTION_PROMPT>
+{
+    Text    <Direction(1 2 3 4 6 7 8 9):>
+}
+
+String <STR_CANT_SEE_THAT>
+{
+    Text    <You can't see that from here.>
+}
+
+String <STR_SEE_ITEM_TARGET>
+{
+    Text    <You see here a %s.\nTarget selected.>
+}
+
+String <STR_SEE_ITEM>
+{
+    Text    <You see here a %s>
+}
+
+String <STR_YOU_SEE>
+{
+    Text    <You see %s.>
+}
+
+// ---------------------------------------------------------------------------
+// Light
+// ---------------------------------------------------------------------------
+String <STR_LIGHT_OUT>
+{
+    Text    <Your light has gone out!>
+}
+
+String <STR_LIGHT_VERY_FAINT>
+{
+    Text    <Your light is growing very faint.>
+}
+
+String <STR_LIGHT_FAINT>
+{
+    Text    <Your light is growing faint.>
+}
+
+String <STR_CANT_REFUEL>
+{
+    Text    <Your %s cannot be refueled.>
+}
+
+// ---------------------------------------------------------------------------
+// Inventory / equipment actions
+// ---------------------------------------------------------------------------
+String <STR_FOUND_NOTHING>
+{
+    Text    <You found nothing.>
+}
+
+String <STR_HAVE_ITEMS>
+{
+    Text    <You have %d %s.>
+}
+
+String <STR_HAVE_ITEM>
+{
+    Text    <You have a %s.>
+}
+
+String <STR_WAS_WIELDING>
+{
+    Text    <You were wielding the %s...>
+}
+
+String <STR_CANT_REMOVE_CURSED>
+{
+    Text    <You can't remove the %s... it seems to be cursed.>
+}
+
+String <STR_SWITCH_WEAPON>
+{
+    Text    <You switch to your %s.>
+}
+
+String <STR_SWITCH_BARE_HANDS>
+{
+    Text    <You switch to your bare hands.>
+}
+
+String <STR_ORGANIZE_PACK>
+{
+    Text    <You organize your pack.>
+}
+
+String <STR_NOW_WIELDING>
+{
+    Text    <You are now wielding the %s.>
+}
+
+String <STR_NOW_WEARING>
+{
+    Text    <You are now wearing the %s.>
+}
+
+String <STR_CANT_WIELD>
+{
+    Text    <You can't wield a %s!>
+}
+
+String <STR_TOOK_OFF>
+{
+    Text    <You take off the %s.>
+}
+
+String <STR_CANT_REMOVE>
+{
+    Text    <You can't remove that!>
+}
+
+String <STR_WELDED>
+{
+    Text    <The %s is welded to your body!>
+}
+
+String <STR_HOW_MANY>
+{
+    Text    <How many? (1-%d, * for all): >
+}
+
+String <STR_DROPPED_ITEM>
+{
+    Text    <You dropped the %s.>
+}
+
+String <STR_DROPPED_N_ITEMS>
+{
+    Text    <You dropped %d %s.>
+}
+
+String <STR_DROPPED_N>
+{
+    Text    <You dropped %d.>
+}
+
+String <STR_CANT_DROP_HERE>
+{
+    Text    <You can't drop a %s here!>
+}
+
+String <STR_COULD_NOT_DROP>
+{
+    Text    <Could not drop items.>
+}
+
+String <STR_YOU_READ>
+{
+    Text    <You read the %s.>
+}
+
+String <STR_CANT_READ>
+{
+    Text    <You can't read a %s!>
+}
+
+String <STR_SCROLL_SLIPS>
+{
+    Text    <The %s slips from your fingers and returns to your pack!>
+}
+
+String <STR_YOU_DRANK>
+{
+    Text    <You drank the %s.>
+}
+
+String <STR_YOU_DRANK_N>
+{
+    Text    <You drank %d %s.>
+}
+
+String <STR_CANT_DRINK>
+{
+    Text    <You can't drink a %s!>
+}
+
+String <STR_SELECT_VALID>
+{
+    Text    <Please select a valid item.>
+}
+
+String <STR_NO_SUCH_ITEM>
+{
+    Text    <No such item. %s>
+}
+
+String <STR_INVALID_QTY>
+{
+    Text    <Invalid quantity.>
+}
+
+String <STR_CANT_USE_STAFF>
+{
+    Text    <You can't use a %s as a staff!>
+}
+
+String <STR_FILL_LANTERN>
+{
+    Text    <You fill your lantern with the %s.>
+}
+
+String <STR_NO_LANTERN>
+{
+    Text    <You have no lantern to fill.>
+}
+
+String <STR_CANT_USE_FUEL>
+{
+    Text    <You can't use a %s as fuel!>
+}
+
+String <STR_CANT_FIRE>
+{
+    Text    <You can't fire a %s!>
+}
+
+String <STR_CANT_ZAP>
+{
+    Text    <You can't zap a %s!>
+}
+
+String <STR_NOTHING_VALID>
+{
+    Text    <Nothing valid to %s.>
+}
+
+String <STR_NOTHING_TO_FIRE_WITH>
+{
+    Text    <You have nothing to fire with.>
+}
+
+String <STR_NOTHING_TO_FIRE>
+{
+    Text    <You have nothing to fire.>
+}
+
+String <STR_ARROW_BREAKS>
+{
+    Text    <The arrow breaks.>
+}
+
+String <STR_CANCELLED>
+{
+    Text    <Cancelled.>
+}
+
+// ---------------------------------------------------------------------------
+// Item damage messages
+// ---------------------------------------------------------------------------
+String <STR_ITEM_BURNS>
+{
+    Text    <Your %s %s!>
+}
+
+String <STR_ITEM_PITTED_TOHIT>
+{
+    Text    <Your %s is pitted by %s! (to-hit reduced)>
+}
+
+String <STR_ITEM_PITTED_TODAM>
+{
+    Text    <Your %s is pitted by %s! (to-damage reduced)>
+}
+
+String <STR_ITEM_DAMAGED>
+{
+    Text    <Your %s is damaged by %s!>
+}
+
+// ---------------------------------------------------------------------------
+// Item effect messages
+// ---------------------------------------------------------------------------
+String <STR_IDENTIFY>
+{
+    Text    <It is %s.>
+}
+
+String <STR_WAND_EXPLODES>
+{
+    Text    <The %s explodes in a shower of sparks!>
+}
+
+String <STR_WAND_GLOWS>
+{
+    Text    <The %s glows with magical energy. (%d charges)>
+}
+
+String <STR_GLOWS_POWER>
+{
+    Text    <It glows with power.>
+}
+
+String <STR_GLOWS_SOFT>
+{
+    Text    <It glows with a soft light.>
+}
+
+// ---------------------------------------------------------------------------
+// Sensing / detection
+// ---------------------------------------------------------------------------
+String <STR_AREA_REVEALED>
+{
+    Text    <The area around you is revealed.>
+}
+
+String <STR_DUNGEON_REVEALED>
+{
+    Text    <The dungeon is revealed to you.>
+}
+
+String <STR_SENSE_DOORS>
+{
+    Text    <You sense the presence of doors!>
+}
+
+String <STR_SENSE_STAIRS>
+{
+    Text    <You sense the presence of stairs!>
+}
+
+String <STR_SENSE_TRAPS>
+{
+    Text    <You sense traps.>
+}
+
+String <STR_SENSE_MONSTERS>
+{
+    Text    <You sense the presence of monsters!>
+}
+
+String <STR_SENSE_TREASURE>
+{
+    Text    <You sense the presence of treasure!>
+}
+
+String <STR_NO_TREASURE>
+{
+    Text    <You sense no treasure nearby.>
+}
+
+// ---------------------------------------------------------------------------
+// Recall / teleport
+// ---------------------------------------------------------------------------
+String <STR_BRIEF_SHIMMER>
+{
+    Text    <You feel a brief shimmer.>
+}
+
+String <STR_WRENCHING>
+{
+    Text    <You feel a wrenching sensation.>
+}
+
+String <STR_RECALL_ACTIVE>
+{
+    Text    <You already feel the pull of recall.>
+}
+
+String <STR_RECALL_DRIFT>
+{
+    Text    <You feel yourself starting to drift...>
+}
+
+String <STR_RECALL_RESET>
+{
+    Text    <Recall depth reset (was: %dft)>
+}
+
+String <STR_RECALL_TO_TOWN>
+{
+    Text    <The world spins and you find yourself in town.>
+}
+
+String <STR_RECALL_TO_DEPTH>
+{
+    Text    <The world spins and you are back at %d ft.>
+}
+
+// ---------------------------------------------------------------------------
+// Curses
+// ---------------------------------------------------------------------------
+String <STR_NOW_CURSED>
+{
+    Text    <It is now cursed.>
+}
+
+String <STR_NO_LONGER_CURSED>
+{
+    Text    <It is no longer cursed.>
+}
+
+// ---------------------------------------------------------------------------
+// General combat results
+// ---------------------------------------------------------------------------
+String <STR_IMMUNE>
+{
+    Text    <You are immune!>
+}
+
+String <STR_RESIST>
+{
+    Text    <You resist!>
+}
+
+String <STR_WELCOME_LEVEL>
+{
+    Text    <Welcome to level %d.>
+}
+
+// ---------------------------------------------------------------------------
+// Health / healing messages
+// ---------------------------------------------------------------------------
+String <STR_FEEL_AMAZING>
+{
+    Text    <You feel amazing!>
+}
+
+String <STR_FEEL_LOT_BETTER>
+{
+    Text    <You feel a lot better.>
+}
+
+String <STR_FEEL_BETTER>
+{
+    Text    <You feel better.>
+}
+
+String <STR_FEEL_BIT_BETTER>
+{
+    Text    <You feel a bit better.>
+}
+
+String <STR_FEEL_PROTECTED>
+{
+    Text    <You feel more protected. (+%d AC)>
+}
+
+String <STR_LESS_PROTECTED>
+{
+    Text    <You feel less protected.>
+}
+
+String <STR_COMPLETELY_HEALTHY>
+{
+    Text    <You feel completely healthy.>
+}
+
+// ---------------------------------------------------------------------------
+// Intrinsics / status gained
+// ---------------------------------------------------------------------------
+String <STR_RES_FEAR>
+{
+    Text    <You feel resistant to fear.>
+}
+
+String <STR_YOU_AFRAID>
+{
+    Text    <You are afraid!>
+}
+
+String <STR_YOU_BLIND>
+{
+    Text    <You are blind.>
+}
+
+String <STR_YOU_CONFUSED>
+{
+    Text    <You are confused.>
+}
+
+String <STR_RES_POISON>
+{
+    Text    <You feel resistant to poison.>
+}
+
+String <STR_YOU_POISONED>
+{
+    Text    <You are poisoned.>
+}
+
+String <STR_YOU_CANT_MOVE>
+{
+    Text    <You can't move!>
+}
+
+String <STR_FALL_ASLEEP>
+{
+    Text    <You fall asleep.>
+}
+
+String <STR_EYES_TINGLY>
+{
+    Text    <Your eyes feel tingly.>
+}
+
+String <STR_SENSE_THOUGHTS>
+{
+    Text    <You sense stray thoughts around you.>
+}
+
+String <STR_RES_FIRE>
+{
+    Text    <You feel resistant to fire.>
+}
+
+String <STR_RES_COLD>
+{
+    Text    <You feel resistant to cold.>
+}
+
+String <STR_RES_ELEC>
+{
+    Text    <You feel resistant to electricity.>
+}
+
+String <STR_RES_ACID>
+{
+    Text    <You feel resistant to acid.>
+}
+
+String <STR_FADE_FROM_VIEW>
+{
+    Text    <You fade from view.>
+}
+
+String <STR_LIGHT_FEET>
+{
+    Text    <You feel light on your feet.>
+}
+
+String <STR_FREE_TO_MOVE>
+{
+    Text    <You feel free to move.>
+}
+
+String <STR_MOVING_FASTER>
+{
+    Text    <You feel yourself moving faster.>
+}
+
+// ---------------------------------------------------------------------------
+// Intrinsics / status lost
+// ---------------------------------------------------------------------------
+String <STR_NO_LONGER_AFRAID>
+{
+    Text    <You are no longer afraid.>
+}
+
+String <STR_CAN_SEE>
+{
+    Text    <You can see again.>
+}
+
+String <STR_CAN_THINK>
+{
+    Text    <You can think clearly again.>
+}
+
+String <STR_NOT_POISONED>
+{
+    Text    <You are no longer poisoned.>
+}
+
+String <STR_CAN_MOVE_AGAIN>
+{
+    Text    <You can move again.>
+}
+
+String <STR_WAKE_UP>
+{
+    Text    <You wake up.>
+}
+
+String <STR_NO_LONGER_RES_FEAR>
+{
+    Text    <You are no longer resistant to fear.>
+}
+
+String <STR_NO_LONGER_RES_POISON>
+{
+    Text    <You are no longer resistant to poison.>
+}
+
+String <STR_EYES_STOP>
+{
+    Text    <Your eyes stop tinging.>
+}
+
+String <STR_NO_SENSE_THOUGHTS>
+{
+    Text    <You no longer sense stray thoughts.>
+}
+
+String <STR_NO_RES_FIRE>
+{
+    Text    <You no longer feel resistant to fire.>
+}
+
+String <STR_NO_RES_COLD>
+{
+    Text    <You no longer feel resistant to cold.>
+}
+
+String <STR_NO_RES_ELEC>
+{
+    Text    <You no longer feel resistant to electricity.>
+}
+
+String <STR_NO_RES_ACID>
+{
+    Text    <You no longer feel resistant to acid.>
+}
+
+String <STR_REAPPEAR>
+{
+    Text    <You reappear.>
+}
+
+String <STR_FLOAT_DOWN>
+{
+    Text    <You float gently to the ground.>
+}
+
+String <STR_SLUGGISH>
+{
+    Text    <You feel sluggish.>
+}
+
+String <STR_SLOWING_DOWN>
+{
+    Text    <You feel yourself slowing down.>
+}
+
+// ---------------------------------------------------------------------------
+// Experience / stats
+// ---------------------------------------------------------------------------
+String <STR_MORE_EXPERIENCED>
+{
+    Text    <You feel more experienced.>
+}
+
+String <STR_LESS_EXPERIENCED>
+{
+    Text    <You feel less experienced.>
+}
+
+String <STR_WEAKENED>
+{
+    Text    <You feel weakened.>
+}
+
+// ---------------------------------------------------------------------------
+// Inventory / prompt headers
+// ---------------------------------------------------------------------------
+String <STR_INV_QUAFF>
+{
+    Text    <Quaff which potion?>
+}
+
+String <STR_INV_READ>
+{
+    Text    <Read which scroll?>
+}
+
+String <STR_INV_WIELD>
+{
+    Text    <Wield which item?>
+}
+
+String <STR_INV_ZAP>
+{
+    Text    <Zap which wand?>
+}
+
+String <STR_INV_FIRE_AMMO>
+{
+    Text    <Fire which ammo?>
+}
+
+String <STR_INV_USE_STAFF>
+{
+    Text    <Use which staff?>
+}
+
+String <STR_INV_CARRYING>
+{
+    Text    <You are Carrying:>
+}
+
+String <STR_INV_PAST_PAGE>
+{
+    Text    <Inventory past first page not shown.>
+}
+
+String <STR_EQUIP_LIMIT>
+{
+    Text    <Equipment is limited to 10 items...>
+}
+
+String <STR_INV_FIRE_WEAPON>
+{
+    Text    <Fire which weapon?>
+}
+
+String <STR_INV_WEARING>
+{
+    Text    <You are wearing:>
+}
+
+String <STR_ZAP_PROMPT>
+{
+    Text    <Zap which wand? [a-z]>
+}
+
+String <STR_CHOOSE_AMMO>
+{
+    Text    <Choose ammo from inventory (a to z):>
+}
+
+String <STR_CHOOSE_INV>
+{
+    Text    <Choose an item from inventory(a to z):>
+}
+
+String <STR_CHOOSE_INV_SPACE>
+{
+    Text    <Choose an item from inventory (a to z):>
+}
+
+String <STR_CHOOSE_EQUIP>
+{
+    Text    <Choose an item from equipment(a to z):>
+}
+
+String <STR_CHOOSE_TARGET_DIR>
+{
+    Text    <Choose target with * or Directional (1 2 3 4 6 7 8 9)>
+}
+
+String <STR_CHOOSE_TARGET>
+{
+    Text    <Choose target: * or Direction (1 2 3 4 6 7 8 9)>
+}
+
+String <STR_TARGET_PROMPT>
+{
+    Text    <(* for target, . to choose, ESC to exit):>
+}
+
+String <STR_TARGET_SELECTED>
+{
+    Text    <Target selected.>
+}
+
+String <STR_TARGET_LOST>
+{
+    Text    <You can no longer see that target.>
+}
+
+// ---------------------------------------------------------------------------
+// Stats panel labels
+// ---------------------------------------------------------------------------
+String <STR_STAT_NAME>
+{
+    Text    <Name: %s>
+}
+
+String <STR_STAT_RACE>
+{
+    Text    <Race: %s>
+}
+
+String <STR_STAT_CLASS>
+{
+    Text    <Class: %s>
+}
+
+String <STR_STAT_AC>
+{
+    Text    <AC: %d>
+}
+
+String <STR_STAT_HP>
+{
+    Text    <HP: %d / %d>
+}
+
+String <STR_STAT_DAMAGE>
+{
+    Text    <Damage: %s>
+}
+
+String <STR_STAT_TOHIT>
+{
+    Text    <+to Hit: %d>
+}
+
+String <STR_STAT_TODAM>
+{
+    Text    <+to Dam: %d>
+}
+
+String <STR_STAT_SPEED_FAST>
+{
+    Text    <Speed: Fast(+%d)>
+}
+
+String <STR_STAT_SPEED_SLOW>
+{
+    Text    <Speed: Slow(%d)>
+}
+
+String <STR_STAT_LEVEL>
+{
+    Text    <Level: %d>
+}
+
+String <STR_STAT_DEPTH>
+{
+    Text    <Depth: %d'>
+}
+
+String <STR_STAT_EXP>
+{
+    Text    <Exp: %d>
+}
+
+String <STR_STAT_LIGHT>
+{
+    Text    <Light: %d turns>
+}
+
+String <STR_STAT_INFRAVISION>
+{
+    Text    <Infravision>
+}
+
+String <STR_STAT_TELEPATHY>
+{
+    Text    <Telepathy>
+}
+
+String <STR_STAT_RES_POISON>
+{
+    Text    <Res: Poison>
+}
+
+String <STR_STAT_RES_FEAR>
+{
+    Text    <Res: Fear>
+}
+
+String <STR_STAT_AFRAID>
+{
+    Text    <Afraid>
+}
+
+String <STR_STAT_PARALYZED>
+{
+    Text    <Paralyzed>
+}
+
+String <STR_STAT_BLIND>
+{
+    Text    <Blind>
+}
+
+String <STR_STAT_ASLEEP>
+{
+    Text    <Asleep>
+}
+
+String <STR_STAT_CONFUSED>
+{
+    Text    <Confused>
+}
+
+String <STR_STAT_TARGET>
+{
+    Text    <Target: %s>
+}
+
+String <STR_STAT_POS>
+{
+    Text    <Pos: <%.0f %.0f>>
+}
+
+String <STR_STAT_TARGET_POS>
+{
+    Text    <Target Pos: <%.0f %.0f>>
+}
+
+String <STR_STAT_PLAYER_POS>
+{
+    Text    <Player Pos: <%.0f %.0f>>
+}
+
+// ---------------------------------------------------------------------------
+// Wizard / debug
+// ---------------------------------------------------------------------------
+String <STR_WIZ_ON>
+{
+    Text    <*** Wizard Mode: On *** your score will not be saved.>
+}
+
+String <STR_WIZ_ADDED_ITEMS>
+{
+    Text    <Wizard: added %d wands/staves to inventory.>
+}
+
+String <STR_WIZ_IDENTIFIED>
+{
+    Text    <Wizard: identified %d items.>
+}
+
+String <STR_WIZ_LABEL>
+{
+    Text    <** WIZARD MODE **>
+}

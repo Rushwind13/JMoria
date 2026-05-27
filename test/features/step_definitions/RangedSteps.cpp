@@ -94,7 +94,7 @@ WHEN( "^I fire slot ([a-z])$" )
     // Get the current state
     if( g_pGame->GetGameStateIndex() != STATE_RANGED )
     {
-        JLog( LOG_LEVEL_WARN, true, "FireSlot: Not in RANGED state! state=%d\n",
+        JLog( LOG_LEVEL_DEBUG, true, "FireSlot: Not in RANGED state! state=%d\n",
               g_pGame->GetGameStateIndex() );
         return;
     }
@@ -106,16 +106,16 @@ WHEN( "^I fire slot ([a-z])$" )
 
     // Step 1: Send the ammo slot key (e.g., 'a')
     keysym.sym = slot[0];
-    JLog( LOG_LEVEL_WARN, true, "FireSlot: Sending ammo slot key '%c' to RANGED handler\n",
+    JLog( LOG_LEVEL_DEBUG, true, "FireSlot: Sending ammo slot key '%c' to RANGED handler\n",
           slot[0] );
     g_pGame->GetGameState()->HandleKey( &keysym );
 
     // Step 2: Send direction key 'h' (west) - command sequence is "a h"
     keysym.sym = JKEY_h;
-    JLog( LOG_LEVEL_WARN, true, "FireSlot: Sending direction key 'h' (west)\n" );
+    JLog( LOG_LEVEL_DEBUG, true, "FireSlot: Sending direction key 'h' (west)\n" );
     g_pGame->GetGameState()->HandleKey( &keysym );
 
-    JLog( LOG_LEVEL_WARN, true,
+    JLog( LOG_LEVEL_DEBUG, true,
           "FireSlot: After slot key - modifier=%d, command=%c, NeedsSelection=%s\n",
           pRS->GetModifier(), pRS->GetCommand(), pRS->NeedsSelection() ? "YES" : "NO" );
 }

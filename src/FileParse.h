@@ -27,6 +27,7 @@ public:
     CMonsterDef *ReadMonster( CMonsterDef &mdIn );
     CItemDef *ReadItem( CItemDef &idIn );
     CEffectDef *ReadEffect( CEffectDef &edIn );
+    bool ReadStringEntry( int &outKey, char *&outText );
     CScore *ReadScore( CScore &sIn );
     bool WriteScore( CScore *sIn );
     CRecallEntry *ReadMonsterRecall( CRecallEntry &rIn );

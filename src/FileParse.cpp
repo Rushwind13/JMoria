@@ -917,6 +917,46 @@ CEffectDef *CDataFile::ReadEffect( CEffectDef &edIn )
                     edIn.m_cBeamChar = szValue[0];
                 }
             }
+            else if( strncasecmp( szLine, "namestr", 7 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwStrIds[EFFECT_STR_NAME] = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "hitplayerstr", 12 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwStrIds[EFFECT_STR_HIT_PLAYER] = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "hitmonsterstr", 13 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwStrIds[EFFECT_STR_HIT_MONSTER] = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "emitplayerstr", 13 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwStrIds[EFFECT_STR_EMIT_PLAYER] = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "emitmonsterstr", 14 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwStrIds[EFFECT_STR_EMIT_MONSTER] = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "playerstatus", 12 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwStrIds[EFFECT_STR_STATUS_PLAYER] = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "monsterstatus", 13 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwStrIds[EFFECT_STR_STATUS_MONSTER] = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "statlabel", 9 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwStrIds[EFFECT_STR_STAT_LABEL] = g_Constants.LookupString( szValue );
+            }
             else if( strncasecmp( szLine, "color", 5 ) == 0 )
             {
                 char *color = chomp( szLine, szValue );
@@ -949,6 +989,64 @@ CEffectDef *CDataFile::ReadEffect( CEffectDef &edIn )
     }
 
     return &edIn;
+}
+
+bool CDataFile::ReadStringEntry( int &outKey, char *&outText )
+{
+    char szRaw[1024];
+    char *szLine;
+    char *szValue = NULL;
+    bool bFound = false;
+    bool bStarted = false;
+    bool bEnded = false;
+
+    outKey = -1;
+    outText = NULL;
+
+    while( !bEnded && fgets( szRaw, 1024, m_fp ) != NULL )
+    {
+        szLine = Strip( szRaw );
+        if( szLine == NULL )
+            continue;
+
+        if( !bFound )
+        {
+            if( strncasecmp( szLine, "string", 6 ) == 0 )
+            {
+                bFound = true;
+                szValue = GetValue( szLine, szValue );
+                if( szValue != NULL )
+                {
+                    outKey = g_Constants.LookupString( szValue );
+                    delete[] szValue;
+                    szValue = NULL;
+                }
+            }
+            continue;
+        }
+
+        if( !bStarted )
+        {
+            if( *szLine == '{' )
+                bStarted = true;
+            continue;
+        }
+
+        if( strncasecmp( szLine, "text", 4 ) == 0 )
+        {
+            outText = GetValue( szLine, outText );
+        }
+        else if( *szLine == '}' )
+        {
+            bEnded = true;
+        }
+        else
+        {
+            JLog( LOG_LEVEL_WARN, true, "ReadStringEntry: unparseable line: %s\n", szLine );
+        }
+    }
+
+    return bEnded && outKey >= 0 && outText != NULL;
 }
 
 CScore *CDataFile::ReadScore( CScore &sIn )

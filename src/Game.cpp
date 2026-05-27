@@ -6,6 +6,7 @@
 #include "Dungeon.h"
 #include "MonsterRecall.h"
 #include "Player.h"
+#include "Strings.h"
 #include "TileSet.h"
 
 #include "ClockStepState.h"
@@ -93,6 +94,7 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     Util::SeedRandomFromClock();
 
     g_Constants.Init();
+    LoadStrings( szBasedir );
 
     m_eRenderMode = mode;
 

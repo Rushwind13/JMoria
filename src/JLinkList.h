@@ -92,6 +92,107 @@ protected:
 private:
 };
 
+template <class T> class JMap
+{
+public:
+    inline JMap<T>() : m_lpRoot( NULL ), m_iNumElements( 0 ) {}
+    virtual inline ~JMap( void ) { Terminate(); }
+    CLink<T> *GetRoot() { return m_lpRoot; }
+
+    CLink<T> *Get( int dwIndex )
+    {
+        CLink<T> *curr_link = GetRoot();
+        while( curr_link )
+        {
+            if( curr_link->m_dwIndex == dwIndex )
+            {
+                return curr_link;
+            }
+            if( dwIndex < curr_link->m_dwIndex )
+            {
+                curr_link = curr_link->prev;
+            }
+            else
+            {
+                curr_link = curr_link->next;
+            }
+        }
+        return NULL;
+    }
+
+    void Add( T *pData, int dwIndex = -1 )
+    {
+        CLink<T> *pLink = new CLink<T>( pData, dwIndex );
+        if( m_lpRoot == NULL )
+        {
+            m_lpRoot = pLink;
+            m_iNumElements = 1;
+            return;
+        }
+        CLink<T> *curr_link = GetRoot();
+        CLink<T> *parent_link = NULL;
+        while( curr_link )
+        {
+            parent_link = curr_link;
+            if( dwIndex < curr_link->m_dwIndex )
+            {
+                curr_link = curr_link->prev;
+            }
+            else if( dwIndex > curr_link->m_dwIndex )
+            {
+                curr_link = curr_link->next;
+            }
+            else
+            {
+                // duplicate index
+                throw "Duplicate index in JMap";
+            }
+        }
+        if( dwIndex < parent_link->m_dwIndex )
+        {
+            parent_link->prev = pLink;
+        }
+        else
+        {
+            parent_link->next = pLink;
+        }
+        m_iNumElements++;
+    }
+    // Note: This is a recursive delete. Use with caution.
+    void Remove( CLink<T> *pLink )
+    {
+        if( pLink == NULL )
+        {
+            return;
+        }
+        Remove( pLink->prev );
+        Remove( pLink->next );
+        delete pLink;
+        pLink = NULL;
+    }
+
+    void Terminate()
+    {
+        if( m_lpRoot == NULL )
+        {
+            return;
+        }
+        Remove( m_lpRoot );
+        m_lpRoot = NULL;
+        m_iNumElements = 0;
+        // TODO: implement a recursive delete of the tree
+        m_lpRoot = NULL;
+        m_iNumElements = 0;
+    }
+    int length() { return m_iNumElements; }
+
+protected:
+    CLink<T> *m_lpRoot;
+    int m_iNumElements;
+
+private:
+};
+
 template <class T> class JLinkList
 {
 public:

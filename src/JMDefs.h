@@ -51,6 +51,7 @@ extern eLogLevel g_eLogLevel;
 #include "DungeonConstants.h"
 #include "Game.h"
 #include "JColor.h"
+#include "StringTable.h"
 #include "Util.h"
 
 class CGame;

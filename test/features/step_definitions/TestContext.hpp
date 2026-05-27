@@ -115,10 +115,14 @@ struct TestCtx
     int hi_f;
 
     char szBuffer[1024];
+    JString strBuffer;
 
     // MonsterRecall
     CMonsterRecall *recall = nullptr;
     CDisplayText *recallDT = nullptr;
+
+    JMap<JString> *pMap = nullptr;
+    CLink<JString> *pLink = nullptr;
 };
 
 #endif // __TEST_CONTEXT__

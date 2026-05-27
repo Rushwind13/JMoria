@@ -869,10 +869,12 @@ public:
         m_StringTable[i++].Init( "STR_STAT_LEVEL", STR_STAT_LEVEL );
         m_StringTable[i++].Init( "STR_STAT_DEPTH", STR_STAT_DEPTH );
         m_StringTable[i++].Init( "STR_STAT_EXP", STR_STAT_EXP );
+        m_StringTable[i++].Init( "STR_STAT_EXP_NEXT", STR_STAT_EXP_NEXT );
         m_StringTable[i++].Init( "STR_STAT_LIGHT", STR_STAT_LIGHT );
         m_StringTable[i++].Init( "STR_STAT_INFRAVISION", STR_STAT_INFRAVISION );
         m_StringTable[i++].Init( "STR_STAT_TELEPATHY", STR_STAT_TELEPATHY );
         m_StringTable[i++].Init( "STR_STAT_RES_POISON", STR_STAT_RES_POISON );
+        m_StringTable[i++].Init( "STR_STAT_POISONED", STR_STAT_POISONED );
         m_StringTable[i++].Init( "STR_STAT_RES_FEAR", STR_STAT_RES_FEAR );
         m_StringTable[i++].Init( "STR_STAT_AFRAID", STR_STAT_AFRAID );
         m_StringTable[i++].Init( "STR_STAT_PARALYZED", STR_STAT_PARALYZED );

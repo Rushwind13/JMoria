@@ -27,14 +27,12 @@ enum eStringId
     STR_STATUS_CONFUSE_MON,  // "looks confused"
 
     // Attack / combat
-    STR_ATTACK_MISS,      // "misses"
-    STR_ATTACK_HIT,       // "The %s %s you."
-    STR_CRITICAL_HIT,     // "(It was an excellent hit! (x2 damage)"
-    STR_CRITICAL_HIT_EFF, // "(Critical hit!)"
-    STR_YOU_MISS,         // "You miss the %s."
-    STR_YOU_HIT,          // "You %s the %s."
-    STR_BUMPED_INTO,      // "Ouch! You bumped into %s!"
-    STR_EXCELLENT_HIT,    // "(It was an excellent hit! (x2 damage)"  (player-side variant)
+    STR_ATTACK_MISS,  // "misses"
+    STR_ATTACK_HIT,   // "The %s %s you."
+    STR_CRITICAL_HIT, // "It was an excellent hit! (x2 damage)"
+    STR_YOU_MISS,     // "You miss the %s."
+    STR_YOU_HIT,      // "You %s the %s."
+    STR_BUMPED_INTO,  // "Ouch! You bumped into %s!"
 
     // Monster state messages
     STR_MON_WAKES,      // "The %s wakes up!"
@@ -53,15 +51,15 @@ enum eStringId
     STR_MON_VANISHES,   // "The %s vanishes!"
     STR_MON_INFO,       // "The %s: HP %d/%d  AC %d  Lvl %d  Spd %.1f"
     STR_MON_HEALTHIER,  // "The %s looks healthier."
-    STR_MON_DISAPPEARS, // "The %s disappears."
+    STR_IT_DISAPPEARS,  // "The %s disappears."
     STR_MON_EMITS,      // "The %s emits a %s."
     STR_MON_GLOWS,      // "The %s glows."
 
     // Dungeon / environment
     STR_IN_TOWN,               // "You are in town."
-    STR_ONE_WAY_DOOR,          // "You pass through a one-way door, to arrive on level %d."
+    STR_SPAWN,                 // "You pass through a one-way door, to arrive on level %d."
     STR_FOUND_SECRET_DOOR,     // "You have found a secret door!"
-    STR_LIGHT_FLOOD,           // "The room is flooded with light!"
+    STR_LIGHT_AREA,            // "The room is flooded with light!"
     STR_NOTHING_HAPPENS,       // "Nothing happens."
     STR_BALL_HARMLESS,         // "The ball explodes harmlessly."
     STR_WALL_COLLAPSES,        // "The wall turns to mud and collapses!"
@@ -102,9 +100,18 @@ enum eStringId
     // Looking
     STR_DIRECTION_PROMPT, // "Direction(1 2 3 4 6 7 8 9):"
     STR_CANT_SEE_THAT,    // "You can't see that from here."
-    STR_SEE_ITEM_TARGET,  // "You see here a %s.\nTarget selected."
-    STR_SEE_ITEM,         // "You see here a %s"
+    STR_LOOK_SEE,         // "You see here a %s"
     STR_YOU_SEE,          // "You see %s."
+
+    // Dungeon tile descriptions (for look mode)
+    STR_DUNGEON_OPEN_DOOR,        // "an open door"
+    STR_DUNGEON_SECRET_DOOR,      // "You can't see that from here"
+    STR_DUNGEON_STAIRS_UP,        // "a staircase, going up"
+    STR_DUNGEON_STAIRS_UP_LONG,   // "a long staircase, going up"
+    STR_DUNGEON_STAIRS_DOWN,      // "a set of stairs, going down"
+    STR_DUNGEON_STAIRS_DOWN_LONG, // "a long set of stairs, going down"
+    STR_DUNGEON_FLOOR,            // "open floor"
+    STR_DUNGEON_UNKNOWN,          // "... what is *that*?! .."
 
     // Light
     STR_LIGHT_OUT,        // "Your light has gone out!"
@@ -124,20 +131,17 @@ enum eStringId
     STR_NOW_WIELDING,         // "You are now wielding the %s."
     STR_NOW_WEARING,          // "You are now wearing the %s."
     STR_CANT_WIELD,           // "You can't wield a %s!"
-    STR_TOOK_OFF,             // "You take off the %s."
+    STR_REMOVED,              // "You take off the %s."
     STR_CANT_REMOVE,          // "You can't remove that!"
-    STR_WELDED,               // "The %s is welded to your body!"
     STR_HOW_MANY,             // "How many? (1-%d, * for all): "
     STR_DROPPED_ITEM,         // "You dropped the %s."
     STR_DROPPED_N_ITEMS,      // "You dropped %d %s."
-    STR_DROPPED_N,            // "You dropped %d."
     STR_CANT_DROP_HERE,       // "You can't drop a %s here!"
     STR_COULD_NOT_DROP,       // "Could not drop items."
     STR_YOU_READ,             // "You read the %s."
     STR_CANT_READ,            // "You can't read a %s!"
-    STR_SCROLL_SLIPS,         // "The %s slips from your fingers and returns to your pack!"
+    STR_USE_FAIL,             // "The %s slips from your fingers and returns to your pack!"
     STR_YOU_DRANK,            // "You drank the %s."
-    STR_YOU_DRANK_N,          // "You drank %d %s."
     STR_CANT_DRINK,           // "You can't drink a %s!"
     STR_SELECT_VALID,         // "Please select a valid item."
     STR_NO_SUCH_ITEM,         // "No such item. %s"
@@ -161,116 +165,121 @@ enum eStringId
     STR_ITEM_DAMAGED,      // "Your %s is damaged by %s!"
 
     // Item effect messages
-    STR_IDENTIFY,      // "It is %s."
-    STR_WAND_EXPLODES, // "The %s explodes in a shower of sparks!"
-    STR_WAND_GLOWS,    // "The %s glows with magical energy. (%d charges)"
-    STR_GLOWS_POWER,   // "It glows with power."
-    STR_GLOWS_SOFT,    // "It glows with a soft light."
+    STR_IDENTIFY,   // "It is %s."
+    STR_OVERCHARGE, // "The %s explodes in a shower of sparks!"
+    STR_RECHARGE,   // "The %s glows with magical energy. (%d charges)"
+    STR_ENCHANT,    // "It glows with power."
 
     // Sensing / detection
-    STR_AREA_REVEALED,    // "The area around you is revealed."
-    STR_DUNGEON_REVEALED, // "The dungeon is revealed to you."
-    STR_SENSE_DOORS,      // "You sense the presence of doors!"
-    STR_SENSE_STAIRS,     // "You sense the presence of stairs!"
-    STR_SENSE_TRAPS,      // "You sense traps."
-    STR_SENSE_MONSTERS,   // "You sense the presence of monsters!"
-    STR_SENSE_TREASURE,   // "You sense the presence of treasure!"
-    STR_NO_TREASURE,      // "You sense no treasure nearby."
+    STR_MAGIC_MAP,      // "The area around you is revealed."
+    STR_FULL_MAP,       // "The dungeon is revealed to you."
+    STR_SENSE_DOORS,    // "You sense the presence of doors!"
+    STR_SENSE_STAIRS,   // "You sense the presence of stairs!"
+    STR_SENSE_TRAPS,    // "You sense traps."
+    STR_SENSE_MONSTERS, // "You sense the presence of monsters!"
+    STR_SENSE_TREASURE, // "You sense the presence of treasure!"
+    STR_NO_TREASURE,    // "You sense no treasure nearby."
 
     // Recall / teleport
-    STR_BRIEF_SHIMMER,   // "You feel a brief shimmer."
-    STR_WRENCHING,       // "You feel a wrenching sensation."
-    STR_RECALL_ACTIVE,   // "You already feel the pull of recall."
-    STR_RECALL_DRIFT,    // "You feel yourself starting to drift..."
-    STR_RECALL_RESET,    // "Recall depth reset (was: %dft)"
-    STR_RECALL_TO_TOWN,  // "The world spins and you find yourself in town."
-    STR_RECALL_TO_DEPTH, // "The world spins and you are back at %d ft."
+    STR_TELEPORT,          // "You feel a brief shimmer."
+    STR_RECALL,            // "You feel a wrenching sensation."
+    STR_RECALL_ACTIVE,     // "You already feel the pull of recall."
+    STR_BEGIN_RECALL,      // "You feel yourself starting to drift..."
+    STR_RECALL_RESET,      // "Recall depth reset (was: %dft)"
+    STR_RECALL_TO_TOWN,    // "The world spins and you find yourself in town."
+    STR_RECALL_TO_DUNGEON, // "The world spins and you are back at %d ft."
 
     // Curses
-    STR_NOW_CURSED,       // "It is now cursed."
-    STR_NO_LONGER_CURSED, // "It is no longer cursed."
+    STR_CURSED,   // "It is now cursed."
+    STR_UNCURSED, // "It is no longer cursed."
 
     // General combat results
-    STR_IMMUNE,        // "You are immune!"
-    STR_RESIST,        // "You resist!"
-    STR_WELCOME_LEVEL, // "Welcome to level %d."
+    STR_IMMUNE,   // "You are immune!"
+    STR_RESIST,   // "You resist!"
+    STR_LEVEL_UP, // "Welcome to level %d."
 
     // Health / healing messages
-    STR_FEEL_AMAZING,       // "You feel amazing!"
-    STR_FEEL_LOT_BETTER,    // "You feel a lot better."
-    STR_FEEL_BETTER,        // "You feel better."
-    STR_FEEL_BIT_BETTER,    // "You feel a bit better."
-    STR_FEEL_PROTECTED,     // "You feel more protected. (+%d AC)"
-    STR_LESS_PROTECTED,     // "You feel less protected."
-    STR_COMPLETELY_HEALTHY, // "You feel completely healthy."
+    STR_GAIN_HP_XLARGE,  // "You feel amazing!"
+    STR_GAIN_HP_LARGE,   // "You feel a lot better."
+    STR_GAIN_HP_MEDIUM,  // "You feel better."
+    STR_GAIN_HP_SMALL,   // "You feel a bit better."
+    STR_PROTECTION,      // "You feel more protected. (+%d AC)"
+    STR_LOSE_PROTECTION, // "You feel less protected."
+    STR_FULL_HP,         // "You feel completely healthy."
 
     // Intrinsics / status gained
-    STR_RES_FEAR,       // "You feel resistant to fear."
-    STR_YOU_AFRAID,     // "You are afraid!"
-    STR_YOU_BLIND,      // "You are blind."
-    STR_YOU_CONFUSED,   // "You are confused."
-    STR_RES_POISON,     // "You feel resistant to poison."
-    STR_YOU_POISONED,   // "You are poisoned."
-    STR_YOU_CANT_MOVE,  // "You can't move!"
-    STR_FALL_ASLEEP,    // "You fall asleep."
-    STR_EYES_TINGLY,    // "Your eyes feel tingly."
-    STR_SENSE_THOUGHTS, // "You sense stray thoughts around you."
-    STR_RES_FIRE,       // "You feel resistant to fire."
-    STR_RES_COLD,       // "You feel resistant to cold."
-    STR_RES_ELEC,       // "You feel resistant to electricity."
-    STR_RES_ACID,       // "You feel resistant to acid."
-    STR_FADE_FROM_VIEW, // "You fade from view."
-    STR_LIGHT_FEET,     // "You feel light on your feet."
-    STR_FREE_TO_MOVE,   // "You feel free to move."
-    STR_MOVING_FASTER,  // "You feel yourself moving faster."
+    STR_RES_FEAR,         // "You feel resistant to fear."
+    STR_AFRAID,           // "You are afraid!"
+    STR_YOU_BLIND,        // "You are blind."
+    STR_CONFUSED,         // "You are confused."
+    STR_RES_POISON,       // "You feel resistant to poison."
+    STR_POISON,           // "You are poisoned."
+    STR_PARALYZE,         // "You can't move!"
+    STR_SLEEP,            // "You fall asleep."
+    STR_GAIN_INFRAVISION, // "Your eyes feel tingly."
+    STR_GAIN_ESP,         // "You sense stray thoughts around you."
+    STR_RES_FIRE,         // "You feel resistant to fire."
+    STR_RES_COLD,         // "You feel resistant to cold."
+    STR_RES_ELEC,         // "You feel resistant to electricity."
+    STR_RES_ACID,         // "You feel resistant to acid."
+    STR_GAIN_INVISIBLE,   // "You fade from view."
+    STR_GAIN_LEVITATE,    // "You feel light on your feet."
+    STR_GAIN_FREEACTION,  // "You feel free to move."
+    STR_GAIN_SPEED,       // "You feel yourself moving faster."
 
     // Intrinsics / status lost
-    STR_NO_LONGER_AFRAID,     // "You are no longer afraid."
-    STR_CAN_SEE,              // "You can see again."
-    STR_CAN_THINK,            // "You can think clearly again."
-    STR_NOT_POISONED,         // "You are no longer poisoned."
-    STR_CAN_MOVE_AGAIN,       // "You can move again."
-    STR_WAKE_UP,              // "You wake up."
-    STR_NO_LONGER_RES_FEAR,   // "You are no longer resistant to fear."
-    STR_NO_LONGER_RES_POISON, // "You are no longer resistant to poison."
-    STR_EYES_STOP,            // "Your eyes stop tinging."
-    STR_NO_SENSE_THOUGHTS,    // "You no longer sense stray thoughts."
-    STR_NO_RES_FIRE,          // "You no longer feel resistant to fire."
-    STR_NO_RES_COLD,          // "You no longer feel resistant to cold."
-    STR_NO_RES_ELEC,          // "You no longer feel resistant to electricity."
-    STR_NO_RES_ACID,          // "You no longer feel resistant to acid."
-    STR_REAPPEAR,             // "You reappear."
-    STR_FLOAT_DOWN,           // "You float gently to the ground."
-    STR_SLUGGISH,             // "You feel sluggish."
-    STR_SLOWING_DOWN,         // "You feel yourself slowing down."
+    STR_HEAL_FEAR,         // "You are no longer afraid."
+    STR_HEAL_BLIND,        // "You can see again."
+    STR_HEAL_CONFUSE,      // "You can think clearly again."
+    STR_HEAL_POISON,       // "You are no longer poisoned."
+    STR_HEAL_PARALYZE,     // "You can move again."
+    STR_HEAL_ASLEEP,       // "You wake up."
+    STR_LOSE_RES_FEAR,     // "You are no longer resistant to fear."
+    STR_LOSE_RES_POISON,   // "You are no longer resistant to poison."
+    STR_LOSE_INFRAVISION,  // "Your eyes stop tinging."
+    STR_LOSE_ESP,          // "You no longer sense stray thoughts."
+    STR_LOSE_RES_FIRE,     // "You no longer feel resistant to fire."
+    STR_LOSE_RES_COLD,     // "You no longer feel resistant to cold."
+    STR_LOSE_RES_ELEC,     // "You no longer feel resistant to electricity."
+    STR_LOSE_RES_ACID,     // "You no longer feel resistant to acid."
+    STR_LOSE_INVISIBILITY, // "You reappear."
+    STR_LOSE_LEVITATE,     // "You float gently to the ground."
+    STR_LOSE_FREEACTION,   // "You feel sluggish."
+    STR_LOSE_SPEED,        // "You feel yourself slowing down."
 
     // Experience / stats
-    STR_MORE_EXPERIENCED, // "You feel more experienced."
-    STR_LESS_EXPERIENCED, // "You feel less experienced."
-    STR_WEAKENED,         // "You feel weakened."
+    STR_GAIN_XP, // "You feel more experienced."
+    STR_LOSE_XP, // "You feel less experienced."
+    STR_LOSE_HP, // "You feel weakened."
 
     // Inventory / prompt headers
-    STR_INV_QUAFF,         // "Quaff which potion?"
-    STR_INV_READ,          // "Read which scroll?"
-    STR_INV_WIELD,         // "Wield which item?"
-    STR_INV_ZAP,           // "Zap which wand?"
-    STR_INV_FIRE_AMMO,     // "Fire which ammo?"
-    STR_INV_USE_STAFF,     // "Use which staff?"
-    STR_INV_CARRYING,      // "You are Carrying:"
-    STR_INV_PAST_PAGE,     // "Inventory past first page not shown."
-    STR_EQUIP_LIMIT,       // "Equipment is limited to 10 items..."
-    STR_INV_FIRE_WEAPON,   // "Fire which weapon?"
-    STR_INV_WEARING,       // "You are wearing:"
-    STR_ZAP_PROMPT,        // "Zap which wand? [a-z]"
-    STR_CHOOSE_AMMO,       // "Choose ammo from inventory (a to z):"
-    STR_CHOOSE_INV,        // "Choose an item from inventory(a to z):"
-    STR_CHOOSE_INV_SPACE,  // "Choose an item from inventory (a to z):"
-    STR_CHOOSE_EQUIP,      // "Choose an item from equipment(a to z):"
-    STR_CHOOSE_TARGET_DIR, // "Choose target with * or Directional (1 2 3 4 6 7 8 9)"
-    STR_CHOOSE_TARGET,     // "Choose target: * or Direction (1 2 3 4 6 7 8 9)"
-    STR_TARGET_PROMPT,     // "(* for target, . to choose, ESC to exit):"
-    STR_TARGET_SELECTED,   // "Target selected."
-    STR_TARGET_LOST,       // "You can no longer see that target."
+    STR_CHOOSE_POTION,   // "Quaff which potion?"
+    STR_CHOOSE_SCROLL,   // "Read which scroll?"
+    STR_CHOOSE_WIELD,    // "Wield which item?"
+    STR_CHOOSE_STAFF,    // "Use which staff?"
+    STR_INV_CARRYING,    // "You are Carrying:"
+    STR_INV_PAST_PAGE,   // "Inventory past first page not shown."
+    STR_EQUIP_LIMIT,     // "Equipment is limited to 10 items..."
+    STR_CHOOSE_WEAPON,   // "Fire which weapon?"
+    STR_INV_WEARING,     // "You are wearing:"
+    STR_CHOOSE_WAND,     // "Zap which wand? [a-z]"
+    STR_CHOOSE_AMMO,     // "Choose ammo from inventory (a to z):"
+    STR_CHOOSE_INV,      // "Choose an item from inventory (a to z):"
+    STR_CHOOSE_EQUIP,    // "Choose an item from equipment(a to z):"
+    STR_CHOOSE_TARGET,   // "Choose target: * or Direction (1 2 3 4 6 7 8 9)"
+    STR_TARGET_PROMPT,   // "(* for target, . to choose, ESC to exit):"
+    STR_TARGET_SELECTED, // "Target selected."
+    STR_TARGET_LOST,     // "You can no longer see that target."
+
+    // Effect targeting prompts
+    STR_PROMPT_WHICH_DIRECTION, // "Which direction? [arrow keys or numpad]"
+    STR_PROMPT_RECHARGE_WAND,   // "Recharge which wand/staff? [a-z inv, A-J equip]"
+    STR_PROMPT_ENCHANT_WEAPON,  // "Enchant which weapon? [a-z inv, A-J equip]"
+    STR_PROMPT_IDENTIFY_ITEM,   // "Identify which item? "
+    STR_PROMPT_REMOVE_CURSE,    // "Remove curse from which item? "
+    STR_PROMPT_USE_ON_ITEM,     // "Use on which item? "
+    STR_PROMPT_CHOOSE_ITEM,     // "Choose an item "
+    STR_ITEM_SELECTION_SUFFIX,  // "[a-z inv, A-J equip]:"
 
     // Stats panel labels
     STR_STAT_NAME,        // "Name: %s"
@@ -307,7 +316,132 @@ enum eStringId
     STR_WIZ_ON,          // "*** Wizard Mode: On *** your score will not be saved."
     STR_WIZ_ADDED_ITEMS, // "Wizard: added %d wands/staves to inventory."
     STR_WIZ_IDENTIFIED,  // "Wizard: identified %d items."
-    STR_WIZ_LABEL,       // "** WIZARD MODE **"
+    STR_WIZ,             // "** WIZARD MODE **"
+
+    // Printf strings (auto-generated for migration)
+    STR_INDENT,
+    STR_NONE,
+    STR_KILLED,
+    STR_NO_KNOWLEDGE,
+    STR_SEEN,
+    STR_DMGAVG,
+    STR_LIST_ITEM_WITH_COUNT,
+    STR_LIST_ITEM,
+    STR_HIGH_SCORE,
+    STR_FPS,
+    STR_FMT_STRING,
+    STR_VISIBLE_MONSTER,
+    STR_FMT_STRING_LF,
+    STR_RECALL_MONSTER_HEADER,
+    STR_N_TIMES,
+    STR_CONFLICTS,
+    STR_CLOCKSTEP_MODE,
+    STR_CHARACTER_CREATION_SCREEN_GOES_HERE,
+    STR_NAME,
+    STR_DEPTH,
+    STR_DUNGEON_LEVEL_FT,
+    STR_DUNGEON_CREATION_COMPLETE,
+    STR_ERROR_DUNGEON_NOT_INITIALIZED,
+    STR_ENTER_A_NUMBER,
+    STR_FLAG_NAME,
+    STR_HP_RANGE,
+    STR_HP_RANGE_APPROX,
+    STR_HALLS,
+    STR_INCORRECT_PASSWORD,
+    STR_INVENTORY,
+    STR_ITEM_NAME,
+    STR_MONSTER_NAME,
+    STR_SUMMON_MONSTERS,
+    STR_NO_CURRENT_TARGET,
+    STR_NOT_YET_IMPLEMENTED,
+    STR_NOTHING_STIRS,
+    STR_PASSWORD,
+    STR_POPULATE,
+    STR_START_PLAYING,
+    STR_SPAWN_PLAYER,
+    STR_DUNGEON_GENERATION_COMPLETE,
+    STR_STEPS_PER_SEC,
+    STR_ROOMS_HALLS,
+    STR_ROOMS,
+    STR_SEED_U,
+    STR_STACK,
+    STR_SUCCESS,
+    STR_THE_EMITS_A_HORRIBLE_WAIL,
+    STR_THE_IS_AFFECTED,
+    STR_THE_LOOKS_ENRAGED,
+    STR_THE_DOOR_CLICKS_SHUT,
+    STR_TICK,
+    STR_TIME_MS,
+    STR_TIME_MS_SEC,
+    STR_UNKNOWN_ITEM,
+    STR_UNKNOWN_MONSTER,
+    STR_UNRECOGNIZED_COMMAND_0X,
+    STR_VISIBLE_MONSTERS,
+    STR_WIZARD_MODE_OFF_YOU_ARE,
+    STR_N_TIMESP,
+    STR_YOU_ARE_AFFECTED,
+    STR_YOU_CANT_SEE_THAT_TARGET,
+    STR_YOU_HEAR_A_STIRRING_IN,
+    STR_YOU_RECOGNIZE_IT_AS_A,
+    STR_YOU_WERE_WIELDING_THE,
+    STR_YOUR_OFFER,
+    STR_FMT_BRACKETED,
+    STR_ITEM_RECALL,
+    STR_MAP,
+    STR_LF,
+    STR_EQUIPMENT,
+    STR_GENERATION_COMPLETE,
+    STR_PLAYER_POS,
+    STR_STATS_GO_HERE,
+    STR_N_TAU,
+    STR_SOMETHING_HAPPENED,
+
+    // Combat action results
+    STR_COMBAT_HIT,        // "hit"
+    STR_COMBAT_MISS,       // "miss"
+    STR_COMBAT_HAVE_SLAIN, // "have slain"
+
+    // Combat target descriptions
+    STR_DUNGEON_WALL,   // "a wall"
+    STR_DUNGEON_DOOR,   // "a door"
+    STR_DUNGEON_RUBBLE, // "some rubble"
+    STR_COMBAT_UNKNOWN, // "um, something?"
+
+    // Monster attack
+    STR_MONSTER_BREATHES_ON, // "breathes %s on"
+
+    // Item display format strings
+    STR_ITEM_POTION,  // "%s Potion"
+    STR_ITEM_POTIONS, // "%s Potions"
+    STR_ITEM_SCROLL,  // "Scroll labeled %s"
+    STR_ITEM_SCROLLS, // "Scrolls labeled %s"
+    STR_ITEM_STAFF,   // "%s Staff"
+    STR_ITEM_STAVES,  // "%s Staves"
+    STR_ITEM_WAND,    // "%s Wand"
+    STR_ITEM_WANDS,   // "%s Wands"
+    STR_ITEM_RING,    // "%s Ring"
+    STR_ITEM_RINGS,   // "%s Rings"
+    STR_ITEM_AMULET,  // "%s Amulet"
+    STR_ITEM_AMULETS, // "%s Amulets"
+
+    // EndGame display
+    STR_ENDGAME_HIGH_SCORES, // "High Score List\n"
+    STR_ENDGAME_PAST_PAGE,   // "Scores past first page not shown.\n"
+
+    // UI window title
+    STR_WINDOW_TITLE, // "JMoria %s"
+
+    // Dungeon generation (wizard/debug mode)
+    STR_DUNGEON_OPEN,   // "open "
+    STR_DUNGEON_SECRET, // "secret "
+
+    // Item display properties
+    STR_ITEM_TRIED,        // " {tried}"
+    STR_ITEM_CURSED,       // " {cursed}"
+    STR_ITEM_CHARGES,      // " (%d charges)"
+    STR_ITEM_WEAPON_BONUS, // " (%+.0f, %+.0f)"
+    STR_ITEM_AC_BONUS,     // " [%+.0f]"
+    STR_ITEM_WITH_FLAVOR,  // "%s %s"
 
     STR_MAX
 };

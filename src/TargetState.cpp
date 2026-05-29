@@ -4,6 +4,7 @@
 #include "Game.h"
 #include "JMDefs.h"
 #include "MonsterRecall.h"
+#include "Strings.h"
 
 #include "Dungeon.h"
 #include "Player.h"
@@ -46,7 +47,7 @@ int CTargetState::OnHandleTarget( JKeysym *keysym )
     if( retval != JSUCCESS )
     {
         JLog( LOG_LEVEL_DEBUG, true, "TARGET cmd still waiting for a valid key.\n" );
-        g_pGame->GetMsgs()->Printf( "(* for target, . to choose, ESC to exit):\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_TARGET_PROMPT] );
         return 0;
     }
 
@@ -60,12 +61,12 @@ int CTargetState::OnHandleTarget( JKeysym *keysym )
     //     }
     //     else
     //     {
-    //         g_pGame->GetMsgs()->Printf( "something happened? ...\n" );
+    //         g_pGame->GetMsgs()->Printf( g_Strings[STR_SOMETHING_HAPPENED] );
     //     }
     // }
     // else
     // {
-    //     g_pGame->GetMsgs()->Printf( "You can't see that target.\n" );
+    //     g_pGame->GetMsgs()->Printf( g_Strings[STR_YOU_CANT_SEE_THAT_TARGET] );
     // }
 
     // JLog( LOG_LEVEL_DEBUG, true,
@@ -202,11 +203,11 @@ int CTargetState::OnBaseHandleKey( JKeysym *keysym )
                            pTarget->GetPos(),
                            pTarget->m_md->m_dwFlags & ( MON_FLAG_WARM | MON_FLAG_EMPTY_MIND ) ) )
         {
-            g_pGame->GetMsgs()->Printf( "Target selected.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_TARGET_SELECTED] );
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "You can no longer see that target.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_TARGET_LOST] );
             g_pGame->GetPlayer()->SetTarget( NULL );
         }
         // now reset

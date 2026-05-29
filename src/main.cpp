@@ -116,7 +116,7 @@ int main( int argc, char **argv )
             {
 // 			if( g_pGame->GetPlayer() != NULL )
 //			{
-// 			g_pGame->GetStats()->Printf( "\nplayer pos:<%f %f>\n",
+// 			g_pGame->GetStats()->Printf( g_Strings[STR_PLAYER_POS],
 // VEC_EXPAND(g_pGame->GetPlayer()->m_vPos));
 //			}
 #ifdef CLOCKSTEP

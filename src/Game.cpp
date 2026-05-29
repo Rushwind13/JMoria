@@ -494,7 +494,7 @@ bool CGame::WaitForTick()
         // Calculate Tau to some decimal places.
         int n = Util::Roll( 1, 100 );
         float tau = plouffBig( n );
-        GetMsgs()->Printf( "n: %d, tau: %f\n", n, tau );
+        GetMsgs()->Printf( g_Strings[STR_N_TAU], n, tau );
         count++;
         if( count > 10000 )
             break;
@@ -511,7 +511,7 @@ int CGame::Update()
                 curTime = GetTickCount();
                 if( curTime > nextTime )
                 {
-                        g_pGame->GetStats()->Printf( "\nstats go here...\n");
+                        g_pGame->GetStats()->Printf( g_Strings[STR_STATS_GO_HERE]);
                         nextTime = curTime + 2000;
                 }
 
@@ -783,7 +783,7 @@ void CGame::HandleEvents( int &isActive, int &done )
             if( retval == JBOGUSKEY )
             {
                 JLog( LOG_LEVEL_INFO, true, "Bogus command: 0x%x\n", event.keysym.sym );
-                GetMsgs()->Printf( "Unrecognized command: 0x%x\n", event.keysym.sym );
+                GetMsgs()->Printf( g_Strings[STR_UNRECOGNIZED_COMMAND_0X], event.keysym.sym );
             }
             else if( retval == JQUITREQUEST )
             {

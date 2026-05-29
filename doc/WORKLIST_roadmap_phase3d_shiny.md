@@ -61,7 +61,7 @@ Net result: 5 private methods removed from `CPlayer`. Issue closed May 25, 2026.
 **Type**: Enhancement/Cleanup | **Severity**: Low | **Components**: Effects  
 **Resolution**: Extended `CEffect::StoneToMud()` to handle three cases beyond walls: closed doors (`DUNG_IDX_DOOR`) and secret doors (`DUNG_IDX_SECRET_DOOR`) are converted to floor; open/broken doors are unaffected (naturally, since they're already passable). Added `MON_FLAG_ROCK` (0x00004000) for stone/rock monsters; `StoneToMud` now deals `3d8` damage to any `MON_FLAG_ROCK` monster on the target tile, printing "The X cracks!" or "The X crumbles to dust!". Tagged `Stone Golem` and `Stone Giant` in `Monsters.txt` with `MON_FLAG_ROCK`. Issue closed May 25, 2026.
 
-### [#316](https://github.com/Rushwind13/JMoria/issues/316) - Strings Table / Messages wrap
+### ~~[#316](https://github.com/Rushwind13/JMoria/issues/316) - Strings Table / Messages wrap~~ ✅ DONE
 **Type**: Enhancement/Cleanup | **Severity**: Medium | **Components**: UI, Strings, DisplayText  
 **Description**: Move all hardcoded strings visible to player to a string table with lookups. Support proper message wrapping:
 - Interpret `\n` as "emit '-more-' prompt and pause for user input" rather than wrapping to next line

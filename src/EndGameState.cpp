@@ -271,9 +271,9 @@ int CEndGameState::OnHandleInventory( JKeysym *keysym )
 bool CEndGameState::DoMap()
 {
     char *map = g_pGame->GetDungeon()->DumpMap();
-    g_pGame->GetEnd()->Printf( "Dungeon Level %d (%d ft)\n\n", g_pGame->GetDungeon()->depth,
+    g_pGame->GetEnd()->Printf( g_Strings[STR_DUNGEON_LEVEL_FT], g_pGame->GetDungeon()->depth,
                                g_pGame->GetDungeon()->depth * 50 );
-    g_pGame->GetEnd()->Printf( "%s", map );
+    g_pGame->GetEnd()->Printf( g_Strings[STR_FMT_STRING], map );
     delete[] map;
     return true;
 }
@@ -281,36 +281,11 @@ bool CEndGameState::DoMap()
 bool CEndGameState::DoInventory()
 {
     CPlayer *pPlayer = g_pGame->GetPlayer();
-    g_pGame->GetEnd()->Printf( "Inventory at time of death:\n\n" );
+    g_pGame->GetEnd()->Printf( g_Strings[STR_INVENTORY] );
+    pPlayer->DisplayInventory( PLACEMENT_ENDGAME );
 
-    CLink<CItem> *pLink = pPlayer->m_llInventory->GetHead();
-    char cId = 'a';
-    if( pLink == NULL )
-        g_pGame->GetEnd()->Printf( "  (none)\n" );
-    while( pLink != NULL )
-    {
-        CItem *pItem = pLink->m_lpData;
-        if( pItem->IsStackable() && pItem->m_dwCount > 1 )
-            g_pGame->GetEnd()->Printf( "  %c - %d %s\n", cId, pItem->m_dwCount,
-                                       pItem->GetPlural() );
-        else
-            g_pGame->GetEnd()->Printf( "  %c - %s\n", cId, pItem->GetName() );
-        cId++;
-        pLink = pPlayer->m_llInventory->GetNext( pLink );
-    }
-
-    g_pGame->GetEnd()->Printf( "\nEquipment:\n\n" );
-
-    pLink = pPlayer->m_llEquipment->GetHead();
-    if( pLink == NULL )
-        g_pGame->GetEnd()->Printf( "  (none)\n" );
-    while( pLink != NULL )
-    {
-        CItem *pItem = pLink->m_lpData;
-        if( pItem )
-            g_pGame->GetEnd()->Printf( "  %s\n", pItem->GetName() );
-        pLink = pPlayer->m_llEquipment->GetNext( pLink );
-    }
+    g_pGame->GetEnd()->Printf( g_Strings[STR_EQUIPMENT] );
+    pPlayer->DisplayEquipment( PLACEMENT_ENDGAME );
 
     return true;
 }
@@ -360,9 +335,9 @@ bool CEndGameState::DoScores()
 {
     // append this numeral to the running string (only send it back when complete)
     CDisplayMeta meta;
-    sprintf( meta.header, "High Score List\n" );
+    strcpy( meta.header, g_Strings[STR_ENDGAME_HIGH_SCORES] );
     meta.limit = 25;
-    sprintf( meta.footer, "Scores past first page not shown.\n" );
+    strcpy( meta.footer, g_Strings[STR_ENDGAME_PAST_PAGE] );
     g_pGame->GetEnd()->DisplayList( m_llScores, &meta );
     // copy PLayer::DisplayInventory (or similar) to list the first N scores. Number them 1-N
     // make sure to display the current player's score, with its rank number, even if it's not on

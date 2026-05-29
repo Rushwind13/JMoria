@@ -4,6 +4,26 @@
 
 const char *g_Strings[STR_MAX] = {};
 
+// Convert \n two-char escape sequences to real newlines in-place.
+// chomp() reads file bytes literally, so we must expand escapes after loading.
+static void UnescapeNewlines( char *s )
+{
+    char *r = s, *w = s;
+    while( *r )
+    {
+        if( *r == '\\' && *( r + 1 ) == 'n' )
+        {
+            *w++ = '\n';
+            r += 2;
+        }
+        else
+        {
+            *w++ = *r++;
+        }
+    }
+    *w = '\0';
+}
+
 void LoadStrings( const char *szBasedir )
 {
     char szPath[512];
@@ -23,6 +43,7 @@ void LoadStrings( const char *szBasedir )
     {
         if( key >= 0 && key < STR_MAX )
         {
+            UnescapeNewlines( text );
             g_Strings[key] = text; // owned: allocated by CDataFile::chomp (new char[])
             count++;
         }

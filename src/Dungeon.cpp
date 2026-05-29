@@ -11,6 +11,7 @@
 #include "FileParse.h"
 #include "Player.h"
 #include "RenderBase.h"
+#include "Strings.h"
 
 extern unsigned char ItemIDs[];
 
@@ -259,15 +260,14 @@ void CDungeon::PopulateLevel( const int depth )
     {
         JLog( LOG_LEVEL_INFO, false, "You are in town.\n" );
         g_pGame->GetMsgs()->Clear();
-        g_pGame->GetMsgs()->Printf( "You are in town.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_IN_TOWN] );
     }
     else
     {
         JLog( LOG_LEVEL_INFO, false, "You pass through a one-way door, to arrive on level %d.\n",
               depth );
         g_pGame->GetMsgs()->Clear();
-        g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
-                                    depth );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_SPAWN], depth );
     }
 }
 
@@ -1634,7 +1634,7 @@ bool CDungeon::IsOpenable( JVector &vPos )
     {
         if( Util::GetRandom( 1, 100 ) <= CHANCE_FIND_SECRET_BUMP )
         {
-            g_pGame->GetMsgs()->Printf( "You have found a secret door!\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_FOUND_SECRET_DOOR] );
             g_pGame->GetDungeon()->Modify( curTile->m_vPos );
             return true;
         }
@@ -1791,7 +1791,7 @@ void CDungeon::Drop( CItem *pItem, JVector &vDropPos )
         {
             // No adjacent spot found; cannot drop here - item disappears
             JLog( LOG_LEVEL_DEBUG, true, ">>Drop: No adjacent spot found, item disappears\n" );
-            g_pGame->GetMsgs()->Printf( "The %s disappears.\n", pItem->GetName() );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_IT_DISAPPEARS], pItem->GetName() );
             delete pItem;
             return;
         }
@@ -1832,9 +1832,9 @@ JResult CDungeon::LightArea( JVector vPos )
         pRoom->SetFlags( DUNG_FLAG_LIT );
         LightRoom( pRoom );
 
-        g_pGame->GetMsgs()->Printf( "The room is flooded with light!\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LIGHT_AREA] );
         return JSUCCESS;
     }
-    g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_NOTHING_HAPPENS] );
     return JBOGUSKEY;
 }

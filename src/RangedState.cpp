@@ -11,6 +11,7 @@
 #include "DisplayText.h"
 #include "Game.h"
 #include "Player.h"
+#include "Strings.h"
 #include "Util.h"
 
 #include "assert.h"
@@ -79,7 +80,7 @@ int CRangedState::OnHandleInit( JKeysym *keysym )
             if( pMainWeapon == NULL ||
                 !( pMainWeapon->m_lpData->m_id->m_dwFlags & ITEM_FLAG_NEEDSAMMO ) )
             {
-                g_pGame->GetMsgs()->Printf( "You have nothing to fire with.\n" );
+                g_pGame->GetMsgs()->Printf( g_Strings[STR_NOTHING_TO_FIRE_WITH] );
                 ResetToState( STATE_COMMAND );
                 return JRESETSTATE;
             }
@@ -99,7 +100,7 @@ int CRangedState::OnHandleInit( JKeysym *keysym )
 
             if( !hasAmmo )
             {
-                g_pGame->GetMsgs()->Printf( "You have nothing to fire.\n" );
+                g_pGame->GetMsgs()->Printf( g_Strings[STR_NOTHING_TO_FIRE] );
                 ResetToState( STATE_COMMAND );
                 return JRESETSTATE;
             }
@@ -113,7 +114,7 @@ int CRangedState::OnHandleInit( JKeysym *keysym )
         }
         case JKEY_z:
             mod = RANGED_ZAP;
-            g_pGame->GetMsgs()->Printf( "Zap which wand? [a-z]\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_CHOOSE_WAND] );
             break;
         default:
             JLog( LOG_LEVEL_ERROR, true,
@@ -188,7 +189,7 @@ int CRangedState::OnHandleFire( JKeysym *keysym )
         {
             JLog( LOG_LEVEL_DEBUG, true,
                   "FIRE cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
-            g_pGame->GetMsgs()->Printf( "Choose ammo from inventory (a to z):\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_CHOOSE_AMMO] );
             return JSUCCESS;
         }
 
@@ -226,7 +227,7 @@ int CRangedState::OnHandleFire( JKeysym *keysym )
             else
             {
                 // no ammo (shouldn't happen if validation in OnHandleInit worked)
-                g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+                g_pGame->GetMsgs()->Printf( g_Strings[STR_NOTHING_HAPPENS] );
                 ResetToState( STATE_COMMAND );
                 return JCOMPLETESTATE;
             }
@@ -234,7 +235,7 @@ int CRangedState::OnHandleFire( JKeysym *keysym )
         else
         {
             // set target
-            g_pGame->GetMsgs()->Printf( "Choose target with * or Directional (1 2 3 4 6 7 8 9)\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_CHOOSE_TARGET] );
             m_eCurModifier = RANGED_TARGET;
             m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
             return JSUCCESS;
@@ -242,7 +243,7 @@ int CRangedState::OnHandleFire( JKeysym *keysym )
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "You can't fire a %s!\n", m_pSelected->m_lpData->GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CANT_FIRE], m_pSelected->m_lpData->GetName() );
         ResetToState( STATE_COMMAND );
         return JCOMPLETESTATE;
     }
@@ -267,7 +268,7 @@ int CRangedState::OnHandleZap( JKeysym *keysym )
         {
             JLog( LOG_LEVEL_DEBUG, true,
                   "ZAP cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
-            g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_CHOOSE_INV] );
             return JSUCCESS;
         }
     }
@@ -301,7 +302,7 @@ int CRangedState::OnHandleZap( JKeysym *keysym )
             else
             {
                 // no charges
-                g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+                g_pGame->GetMsgs()->Printf( g_Strings[STR_NOTHING_HAPPENS] );
                 ResetToState( STATE_COMMAND );
                 return JCOMPLETESTATE;
             }
@@ -310,7 +311,7 @@ int CRangedState::OnHandleZap( JKeysym *keysym )
         {
             JLog( LOG_LEVEL_DEBUG, true, "need a target\n" );
             // set target
-            g_pGame->GetUse()->Printf( "Choose target with * or Directional (1 2 3 4 6 7 8 9)\n" );
+            g_pGame->GetUse()->Printf( g_Strings[STR_CHOOSE_TARGET] );
             m_eCurModifier = RANGED_TARGET;
             m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
             return JSUCCESS;
@@ -318,7 +319,7 @@ int CRangedState::OnHandleZap( JKeysym *keysym )
     }
     else
     {
-        g_pGame->GetUse()->Printf( "You can't zap a %s!\n", m_pSelected->m_lpData->GetName() );
+        g_pGame->GetUse()->Printf( g_Strings[STR_CANT_ZAP], m_pSelected->m_lpData->GetName() );
         ResetToState( STATE_COMMAND );
         return JCOMPLETESTATE;
     }
@@ -340,7 +341,7 @@ int CRangedState::OnHandleTarget( JKeysym *keysym )
 
         if( retval != JSUCCESS )
         {
-            g_pGame->GetMsgs()->Printf( "Choose target: * or Direction (1 2 3 4 6 7 8 9)\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_CHOOSE_TARGET] );
             return JSUCCESS;
         }
     }
@@ -466,7 +467,7 @@ int CRangedState::OnBaseHandleKey( JKeysym *keysym )
             m_pSelected = GetResponse( m_eCurModifier );
             if( m_pSelected == NULL )
             {
-                g_pGame->GetUse()->Printf( "Nothing valid to %s.\n",
+                g_pGame->GetUse()->Printf( g_Strings[STR_NOTHING_VALID],
                                            m_eCurModifier == RANGED_FIRE ? "fire" : "zap" );
                 ResetToState( STATE_COMMAND );
                 return JRESETSTATE;
@@ -566,7 +567,7 @@ bool CRangedState::DoLaunch()
 
     if( availability <= 0 )
     {
-        g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_NOTHING_HAPPENS] );
         return false;
     }
     JLog( LOG_LEVEL_DEBUG, true, "RANGED state firing projectile...\n" );
@@ -584,11 +585,11 @@ bool CRangedState::DoLaunch()
 
     if( szEffectDesc && pItem->IsIdentified() )
     {
-        g_pGame->GetMsgs()->Printf( "The %s emits a %s.\n", pItem->GetName(), szEffectDesc );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_EMITS], pItem->GetName(), szEffectDesc );
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "The %s glows.\n", pItem->GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_GLOWS], pItem->GetName() );
     }
 
     // Pass effect definition and trajectory to dungeon for multicolor beam rendering
@@ -895,7 +896,7 @@ void CRangedState::DropAmmo( JVector vFinalPos )
     int breakChance = Util::GetRandom( 1, 100 );
     if( breakChance <= CHANCE_ARROW_BREAK )
     {
-        g_pGame->GetMsgs()->Printf( "The arrow breaks.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_ARROW_BREAKS] );
         JLog( LOG_LEVEL_DEBUG, true, ">>Arrow broke on landing (roll=%d)\n", breakChance );
         return;
     }

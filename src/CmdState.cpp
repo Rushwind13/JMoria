@@ -7,6 +7,7 @@
 #include "JMDefs.h"
 #include "MonsterRecall.h"
 #include "Player.h"
+#include "Strings.h"
 
 extern CGame *g_pGame;
 
@@ -637,14 +638,14 @@ int CCmdState::OnHandleStairs( JKeysym *keysym )
     int stair_dir = TestStairs();
     if( stair_dir == DUNG_IDX_INVALID )
     {
-        g_pGame->GetMsgs()->Printf( "I do not see any stairs here.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_NO_STAIRS] );
         return JSUCCESS;
     }
 
     // if on <, go up stairs
     if( keysym->sym == JKEY_COMMA && stair_dir == DUNG_IDX_UPSTAIRS )
     {
-        g_pGame->GetMsgs()->Printf( "You enter a maze of up staircases.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_STAIR_UP] );
         // dungeon_level--, make sure not to go less than 0
         // respawn new dungeon level
         g_pGame->GetDungeon()->OnChangeLevel( -Util::Roll( 1, 5 ) );
@@ -652,7 +653,7 @@ int CCmdState::OnHandleStairs( JKeysym *keysym )
     }
     else if( keysym->sym == JKEY_COMMA && stair_dir == DUNG_IDX_LONG_UPSTAIRS )
     {
-        g_pGame->GetMsgs()->Printf( "You enter a long maze of up staircases.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_STAIR_UP_LONG] );
         // dungeon_level-- (a bunch), make sure not to go less than 0
         // respawn new dungeon level
         g_pGame->GetDungeon()->OnChangeLevel( -1 );
@@ -661,7 +662,7 @@ int CCmdState::OnHandleStairs( JKeysym *keysym )
     // if on >, go down stairs
     else if( keysym->sym == JKEY_PERIOD && stair_dir == DUNG_IDX_DOWNSTAIRS )
     {
-        g_pGame->GetMsgs()->Printf( "You enter a maze of down staircases.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_STAIR_DOWN] );
         // dungeon_level++
         // respawn new dungeon level
         g_pGame->GetDungeon()->OnChangeLevel( 1 );
@@ -669,7 +670,7 @@ int CCmdState::OnHandleStairs( JKeysym *keysym )
     }
     else if( keysym->sym == JKEY_PERIOD && stair_dir == DUNG_IDX_LONG_DOWNSTAIRS )
     {
-        g_pGame->GetMsgs()->Printf( "You enter a long maze of down staircases.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_STAIR_DOWN_LONG] );
         // dungeon_level++ (a bunch)
         // respawn new dungeon level
         g_pGame->GetDungeon()->OnChangeLevel( Util::Roll( 1, 5 ) );
@@ -677,7 +678,7 @@ int CCmdState::OnHandleStairs( JKeysym *keysym )
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "You can't do that here.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CANT_DO_THAT] );
         return JSUCCESS;
     }
 }

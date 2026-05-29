@@ -64,14 +64,14 @@ int CStringInputState::OnHandleName( JKeysym *keysym )
     if( retval != JSUCCESS )
     {
         JLog( LOG_LEVEL_DEBUG, true, "Name cmd still waiting for a Alphanumeric key.\n" );
-        //        g_pGame->GetMsgs()->Printf("Direction(1 2 3 4 6 7 8 9):\n");
+        //        g_pGame->GetMsgs()->Printf( g_Strings[STR_DIRECTION_PROMPT]);
         return 0;
     }
 
     // We got a alpha key; append it to the name
     JLog( LOG_LEVEL_NOISE, true, "NAME modifier got a alpha\n" );
     g_pGame->GetMsgs()->Clear();
-    g_pGame->GetMsgs()->Printf( "Character Name: %s", m_szInput );
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_NAME], m_szInput );
 
     return 0;
 }
@@ -101,7 +101,7 @@ int CStringInputState::OnHandleItem( JKeysym *keysym )
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "Unknown item: %s\n", m_szInput );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_UNKNOWN_ITEM], m_szInput );
         }
 
         memset( m_szInput, 0, MAX_STRING_LENGTH );
@@ -118,7 +118,7 @@ int CStringInputState::OnHandleItem( JKeysym *keysym )
     // We got a alpha key; append it to the name
     JLog( LOG_LEVEL_NOISE, true, "ITEM modifier got a alpha\n" );
     g_pGame->GetMsgs()->Clear();
-    g_pGame->GetMsgs()->Printf( "Item Name: %s", m_szInput );
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_ITEM_NAME], m_szInput );
 
     return 0;
 }
@@ -161,7 +161,7 @@ int CStringInputState::OnHandleFlag( JKeysym *keysym )
     // We got a alpha key; append it to the name
     JLog( LOG_LEVEL_NOISE, true, "FLAG modifier got a alpha\n" );
     g_pGame->GetMsgs()->Clear();
-    g_pGame->GetMsgs()->Printf( "Flag Name: %s", m_szInput );
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_FLAG_NAME], m_szInput );
 
     return 0;
 }
@@ -191,7 +191,7 @@ int CStringInputState::OnHandleMonster( JKeysym *keysym )
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "Unknown monster: %s\n", m_szInput );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_UNKNOWN_MONSTER], m_szInput );
         }
 
         memset( m_szInput, 0, MAX_STRING_LENGTH );
@@ -208,7 +208,7 @@ int CStringInputState::OnHandleMonster( JKeysym *keysym )
     // We got a alpha key; append it to the name
     JLog( LOG_LEVEL_NOISE, true, "MONSTER modifier got a alpha\n" );
     g_pGame->GetMsgs()->Clear();
-    g_pGame->GetMsgs()->Printf( "Monster Name: %s", m_szInput );
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_MONSTER_NAME], m_szInput );
 
     return 0;
 }
@@ -232,12 +232,12 @@ int CStringInputState::OnHandlePassword( JKeysym *keysym )
         if( Util::jstrcmp( m_szInput, "xyzzy" ) == 0 )
         {
             g_pGame->GetPlayer()->ClearWizard();
-            g_pGame->GetMsgs()->Printf( "Wizard Mode: Off. You are still a cheater.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_WIZARD_MODE_OFF_YOU_ARE] );
             JLog( LOG_LEVEL_WARN, true, "Wizard Mode: Off. You are still a cheater.\n" );
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "Incorrect password.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_INCORRECT_PASSWORD] );
         }
 
         memset( m_szInput, 0, MAX_STRING_LENGTH );
@@ -254,7 +254,7 @@ int CStringInputState::OnHandlePassword( JKeysym *keysym )
     // We got a alpha key; append it to the name
     JLog( LOG_LEVEL_NOISE, true, "PASSWORD modifier got a alpha\n" );
     g_pGame->GetMsgs()->Clear();
-    g_pGame->GetMsgs()->Printf( "Password: %s", m_szInput );
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_PASSWORD], m_szInput );
 
     return 0;
 }
@@ -273,7 +273,7 @@ int CStringInputState::OnHandleHaggle( JKeysym *keysym )
     if( retval != JSUCCESS )
     {
         JLog( LOG_LEVEL_DEBUG, true, "HAGGLE cmd still waiting for a Numeric key.\n" );
-        g_pGame->GetMsgs()->Printf( "Enter a number.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_ENTER_A_NUMBER] );
         return 0;
     }
 
@@ -283,18 +283,18 @@ int CStringInputState::OnHandleHaggle( JKeysym *keysym )
     {
         if( DoHaggle() )
         {
-            g_pGame->GetMsgs()->Printf( "Your offer: %s", m_szInput );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_YOUR_OFFER], m_szInput );
         }
         else
         {
             // can't get here?
-            //            g_pGame->GetMsgs()->Printf("You failed to close the door.\n");
+            //            g_pGame->GetMsgs()->Printf( g_Strings[STR_CLOSE_FAILED]);
         }
     }
     else
     {
         // can't get here? how to handle bad input?
-        //        g_pGame->GetMsgs()->Printf("I do not see anything to close there.\n");
+        //        g_pGame->GetMsgs()->Printf( g_Strings[STR_NO_CLOSE_THERE]);
     }
 
     if( retval == JRESETSTATE )
@@ -320,7 +320,7 @@ int CStringInputState::OnHandleInit( JKeysym *keysym )
         case JKEY_n:
             mod = SI_NAME;
             g_pGame->GetMsgs()->Clear();
-            g_pGame->GetMsgs()->Printf( "Character Name: %s", m_szInput );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_NAME], m_szInput );
             break;
         case JKEY_p:
             mod = SI_HAGGLE;
@@ -328,22 +328,22 @@ int CStringInputState::OnHandleInit( JKeysym *keysym )
         case JKEY_f:
             mod = SI_FLAG;
             g_pGame->GetMsgs()->Clear();
-            g_pGame->GetMsgs()->Printf( "Flag Name: %s", m_szInput );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_FLAG_NAME], m_szInput );
             break;
         case JKEY_i:
             mod = SI_ITEM;
             g_pGame->GetMsgs()->Clear();
-            g_pGame->GetMsgs()->Printf( "Item Name: %s", m_szInput );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_ITEM_NAME], m_szInput );
             break;
         case JKEY_s:
             mod = SI_MONSTER;
             g_pGame->GetMsgs()->Clear();
-            g_pGame->GetMsgs()->Printf( "Monster Name: %s", m_szInput );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_MONSTER_NAME], m_szInput );
             break;
         case JKEY_w:
             mod = SI_PASSWORD;
             g_pGame->GetMsgs()->Clear();
-            g_pGame->GetMsgs()->Printf( "Password: %s", m_szInput );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_PASSWORD], m_szInput );
             break;
         default:
             JLog( LOG_LEVEL_ERROR, true,

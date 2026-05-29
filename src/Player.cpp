@@ -9,6 +9,7 @@
 #include "JLinkList.h"
 #include "MonsterRecall.h"
 #include "StateBase.h"
+#include "Strings.h"
 #include "TileSet.h"
 #include <cmath>
 
@@ -165,7 +166,7 @@ void CPlayer::Search()
                 {
                     JVector vPos( vCheck.x, vCheck.y );
                     g_pGame->GetDungeon()->Modify( vPos );
-                    g_pGame->GetMsgs()->Printf( "You have found a secret door!\n" );
+                    g_pGame->GetMsgs()->Printf( g_Strings[STR_FOUND_SECRET_DOOR] );
                     bFound = true;
                 }
             }
@@ -173,7 +174,7 @@ void CPlayer::Search()
     }
     if( !bFound )
     {
-        g_pGame->GetMsgs()->Printf( "You found nothing.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_FOUND_NOTHING] );
     }
 }
 
@@ -197,7 +198,7 @@ void CPlayer::PassiveSearch()
                 {
                     JVector vPos( vCheck.x, vCheck.y );
                     g_pGame->GetDungeon()->Modify( vPos );
-                    g_pGame->GetMsgs()->Printf( "You have found a secret door!\n" );
+                    g_pGame->GetMsgs()->Printf( g_Strings[STR_FOUND_SECRET_DOOR] );
                     m_bIsDisturbed = true;
                 }
             }
@@ -237,9 +238,6 @@ JResult CPlayer::SpawnPlayer()
         vTryPos.Init( VEC_EXPAND( *vOpen ) );
 
         // JLog( LOG_LEVEL_NOISE, true, "Trying to spawn player at <%.2f %.2f>...\n", vTryPos.x,
-        //       vTryPos.y );
-        // g_pGame->GetMsgs()->Printf( "Trying to spawn player at <%.2f %.2f>...\n", vTryPos.x,
-        // vTryPos.y );
 
         // try changing this to "iswalkable" -- might need to move that to dungeon. --Jimbo
         if( g_pGame->GetDungeon()->IsWalkableFor( vTryPos, true ) == DUNG_COLL_NO_COLLISION )
@@ -249,7 +247,7 @@ JResult CPlayer::SpawnPlayer()
             m_bHasSpawned = true;
             JLog( LOG_LEVEL_INFO, false, "Success! Spawned at <%.2f %.2f>\n",
                   VEC_EXPAND( m_vPos ) );
-            // g_pGame->GetMsgs()->Printf( "Success!\n" );
+            // g_pGame->GetMsgs()->Printf( g_Strings[STR_SUCCESS] );
         }
     }
 
@@ -259,74 +257,77 @@ JResult CPlayer::SpawnPlayer()
 void CPlayer::DisplayStats()
 {
     g_pGame->GetStats()->Clear();
-    g_pGame->GetStats()->Printf( "Name: %s\n", m_szName );
-    g_pGame->GetStats()->Printf( "Race: %s\n", m_pRace->m_szName );
-    g_pGame->GetStats()->Printf( "Class: %s\n", m_pClass->m_szName );
-    g_pGame->GetStats()->Printf( "\n" );
-    g_pGame->GetStats()->Printf( "AC: %d\n", (int)m_fArmorClass );
-    g_pGame->GetStats()->Printf( "HP: %d / %d\n", (int)m_fCurHitPoints, (int)m_fHitPoints );
-    g_pGame->GetStats()->Printf( "\n" );
-    g_pGame->GetStats()->Printf( "Damage: %s\n", m_szDamage );
-    g_pGame->GetStats()->Printf( "+to Hit: %d\n", (int)m_fToHitModifier );
-    g_pGame->GetStats()->Printf( "+to Dam: %d\n", (int)m_fDamageModifier );
+    g_pGame->GetStats()->Printf( g_Strings[STR_STAT_NAME], m_szName );
+    g_pGame->GetStats()->Printf( g_Strings[STR_STAT_RACE], m_pRace->m_szName );
+    g_pGame->GetStats()->Printf( g_Strings[STR_STAT_CLASS], m_pClass->m_szName );
+    g_pGame->GetStats()->Printf( g_Strings[STR_LF] );
+    g_pGame->GetStats()->Printf( g_Strings[STR_STAT_AC], (int)m_fArmorClass );
+    g_pGame->GetStats()->Printf( g_Strings[STR_STAT_HP], (int)m_fCurHitPoints, (int)m_fHitPoints );
+    g_pGame->GetStats()->Printf( g_Strings[STR_LF] );
+    g_pGame->GetStats()->Printf( g_Strings[STR_STAT_DAMAGE], m_szDamage );
+    g_pGame->GetStats()->Printf( g_Strings[STR_STAT_TOHIT], (int)m_fToHitModifier );
+    g_pGame->GetStats()->Printf( g_Strings[STR_STAT_TODAM], (int)m_fDamageModifier );
     {
         // Speed display: hidden at base (1.0); show Fast(+N) or Slow(-N) as integer offset from 10
         int nSpeedOffset = (int)roundf( m_fSpeed * 10.0f ) - 10;
         if( nSpeedOffset > 0 )
-            g_pGame->GetStats()->Printf( "Speed: Fast(+%d)\n", nSpeedOffset );
+            g_pGame->GetStats()->Printf( g_Strings[STR_STAT_SPEED_FAST], nSpeedOffset );
         else if( nSpeedOffset < 0 )
-            g_pGame->GetStats()->Printf( "Speed: Slow(%d)\n", nSpeedOffset );
+            g_pGame->GetStats()->Printf( g_Strings[STR_STAT_SPEED_SLOW], nSpeedOffset );
     }
-    g_pGame->GetStats()->Printf( "\n" );
-    g_pGame->GetStats()->Printf( "\n" );
-    g_pGame->GetStats()->Printf( "Level: %d\n", (int)m_fLevel );
-    g_pGame->GetStats()->Printf( "Depth: %d'\n", g_pGame->GetDungeon()->depth * 50 );
+    g_pGame->GetStats()->Printf( g_Strings[STR_LF] );
+    g_pGame->GetStats()->Printf( g_Strings[STR_LF] );
+    g_pGame->GetStats()->Printf( g_Strings[STR_STAT_LEVEL], (int)m_fLevel );
+    g_pGame->GetStats()->Printf( g_Strings[STR_STAT_DEPTH], g_pGame->GetDungeon()->depth * 50 );
     if( IsWizard() || ShowPlayerPosInStats() )
-        g_pGame->GetStats()->Printf( "Pos: <%.0f %.0f>\n", VEC_EXPAND( m_vPos ) );
-    g_pGame->GetStats()->Printf( "Exp: %d\n", (int)m_fExperience );
+        g_pGame->GetStats()->Printf( g_Strings[STR_STAT_POS], VEC_EXPAND( m_vPos ) );
+    g_pGame->GetStats()->Printf( g_Strings[STR_STAT_EXP], (int)m_fExperience );
     g_pGame->GetStats()->Printf(
-        "Exp to Next: %d\n", (int)( m_pClass->m_fExpNeeded[(int)m_fLevel - 1] - m_fExperience ) );
-    g_pGame->GetStats()->Printf( "\n" );
-    g_pGame->GetStats()->Printf( "\n" );
+        g_Strings[STR_STAT_EXP_NEXT],
+        (int)( m_pClass->m_fExpNeeded[(int)m_fLevel - 1] - m_fExperience ) );
+    g_pGame->GetStats()->Printf( g_Strings[STR_LF] );
+    g_pGame->GetStats()->Printf( g_Strings[STR_LF] );
     if( GetIntrinsic( EFFECT_FLAG_INFRA ) != 0 )
-        g_pGame->GetStats()->Printf( "Infravision\n" );
+        g_pGame->GetStats()->Printf( g_Strings[STR_STAT_INFRAVISION] );
     if( GetIntrinsic( EFFECT_FLAG_ESP ) != 0 )
-        g_pGame->GetStats()->Printf( "Telepathy\n" );
+        g_pGame->GetStats()->Printf( g_Strings[STR_STAT_TELEPATHY] );
     if( GetIntrinsic( EFFECT_FLAG_POISON ) != 0 )
-        g_pGame->GetStats()->Printf( HasActiveResistFor( EFFECT_FLAG_POISON ) ? "Res: Poison\n"
-                                                                              : "Poisoned\n" );
+        g_pGame->GetStats()->Printf( HasActiveResistFor( EFFECT_FLAG_POISON )
+                                         ? g_Strings[STR_STAT_RES_POISON]
+                                         : g_Strings[STR_STAT_POISONED] );
     if( GetIntrinsic( EFFECT_FLAG_PARALYZE ) != 0 )
-        g_pGame->GetStats()->Printf( "Paralyzed\n" );
+        g_pGame->GetStats()->Printf( g_Strings[STR_STAT_PARALYZED] );
     if( GetIntrinsic( EFFECT_FLAG_AFRAID ) != 0 )
-        g_pGame->GetStats()->Printf( HasActiveResistFor( EFFECT_FLAG_AFRAID ) ? "Res: Fear\n"
-                                                                              : "Afraid\n" );
+        g_pGame->GetStats()->Printf( HasActiveResistFor( EFFECT_FLAG_AFRAID )
+                                         ? g_Strings[STR_STAT_RES_FEAR]
+                                         : g_Strings[STR_STAT_AFRAID] );
     if( GetIntrinsic( EFFECT_FLAG_BLIND ) != 0 )
-        g_pGame->GetStats()->Printf( "Blind\n" );
+        g_pGame->GetStats()->Printf( g_Strings[STR_STAT_BLIND] );
     if( GetIntrinsic( EFFECT_FLAG_SLEEP ) != 0 )
-        g_pGame->GetStats()->Printf( "Asleep\n" );
+        g_pGame->GetStats()->Printf( g_Strings[STR_STAT_ASLEEP] );
     if( GetIntrinsic( EFFECT_FLAG_CONFUSE ) != 0 )
-        g_pGame->GetStats()->Printf( "Confused\n" );
-    g_pGame->GetStats()->Printf( "\n" );
-    g_pGame->GetStats()->Printf( "\n" );
-    g_pGame->GetStats()->Printf( "Light: %d turns\n", (int)LightSource() );
-    g_pGame->GetStats()->Printf( "\n" );
-    g_pGame->GetStats()->Printf( "\n" );
+        g_pGame->GetStats()->Printf( g_Strings[STR_STAT_CONFUSED] );
+    g_pGame->GetStats()->Printf( g_Strings[STR_LF] );
+    g_pGame->GetStats()->Printf( g_Strings[STR_LF] );
+    g_pGame->GetStats()->Printf( g_Strings[STR_STAT_LIGHT], (int)LightSource() );
+    g_pGame->GetStats()->Printf( g_Strings[STR_LF] );
+    g_pGame->GetStats()->Printf( g_Strings[STR_LF] );
     if( m_pTarget )
     {
-        g_pGame->GetStats()->Printf( "Target: %s\n", m_pTarget->GetName() );
-        g_pGame->GetStats()->Printf( "\n" );
-        g_pGame->GetStats()->Printf( "\n" );
+        g_pGame->GetStats()->Printf( g_Strings[STR_STAT_TARGET], m_pTarget->GetName() );
+        g_pGame->GetStats()->Printf( g_Strings[STR_LF] );
+        g_pGame->GetStats()->Printf( g_Strings[STR_LF] );
         if( IsWizard() )
         {
-            g_pGame->GetStats()->Printf( "Target Pos: <%.0f %.0f>\n",
+            g_pGame->GetStats()->Printf( g_Strings[STR_STAT_TARGET_POS],
                                          VEC_EXPAND( m_pTarget->GetPos() ) );
         }
     }
     if( IsWizard() )
     {
-        g_pGame->GetStats()->Printf( "** WIZARD MODE **\n" );
-        g_pGame->GetStats()->Printf( "\n" );
-        g_pGame->GetStats()->Printf( "Player Pos: <%.0f %.0f>\n", VEC_EXPAND( m_vPos ) );
+        g_pGame->GetStats()->Printf( g_Strings[STR_WIZ] );
+        g_pGame->GetStats()->Printf( g_Strings[STR_LF] );
+        g_pGame->GetStats()->Printf( g_Strings[STR_STAT_PLAYER_POS], VEC_EXPAND( m_vPos ) );
     }
 }
 
@@ -334,7 +335,7 @@ void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
 {
     CDisplayMeta meta;
     meta.limit = 'z';
-    sprintf( meta.footer, "Inventory past first page not shown.\n" );
+    strcpy( meta.footer, g_Strings[STR_INV_PAST_PAGE] );
     CDisplayText *pDT = NULL;
     switch( dwPlacement )
     {
@@ -343,6 +344,9 @@ void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
         break;
     case PLACEMENT_USE:
         pDT = g_pGame->GetUse();
+        break;
+    case PLACEMENT_ENDGAME:
+        pDT = g_pGame->GetEnd();
         break;
     default:
         JLog( LOG_LEVEL_ERROR, true, "DisplayInventory got bad placement: %d\n", dwPlacement );
@@ -353,25 +357,25 @@ void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
     switch( filter )
     {
     case INV_QUAFF:
-        sprintf( meta.header, "Quaff which potion?\n" );
+        strcpy( meta.header, g_Strings[STR_CHOOSE_POTION] );
         break;
     case INV_READ:
-        sprintf( meta.header, "Read which scroll?\n" );
+        strcpy( meta.header, g_Strings[STR_CHOOSE_SCROLL] );
         break;
     case INV_WIELD:
-        sprintf( meta.header, "Wield which item?\n" );
+        strcpy( meta.header, g_Strings[STR_CHOOSE_WIELD] );
         break;
     case INV_ZAP:
-        sprintf( meta.header, "Zap which wand?\n" );
+        strcpy( meta.header, g_Strings[STR_CHOOSE_WAND] );
         break;
     case INV_FIRE:
-        sprintf( meta.header, "Fire which ammo?\n" );
+        strcpy( meta.header, g_Strings[STR_CHOOSE_AMMO] );
         break;
     case INV_STAFF:
-        sprintf( meta.header, "Use which staff?\n" );
+        strcpy( meta.header, g_Strings[STR_CHOOSE_STAFF] );
         break;
     default:
-        sprintf( meta.header, "You are Carrying:\n" );
+        strcpy( meta.header, g_Strings[STR_INV_CARRYING] );
         break;
     }
 
@@ -417,11 +421,12 @@ void CPlayer::DisplayInventory( uint8 dwPlacement, eInvFilter filter )
             CItem *pItem = pLink->m_lpData;
             if( pItem->IsStackable() && pItem->m_dwCount > 1 )
             {
-                pDT->Printf( "%c - %d %s\n", cListId, pItem->m_dwCount, pItem->GetPlural() );
+                pDT->Printf( g_Strings[STR_LIST_ITEM_WITH_COUNT], cListId, pItem->m_dwCount,
+                             pItem->GetPlural() );
             }
             else
             {
-                pDT->Printf( "%c - %s\n", cListId, pItem->GetName() );
+                pDT->Printf( g_Strings[STR_LIST_ITEM], cListId, pItem->GetName() );
             }
         }
         cListId++;
@@ -438,15 +443,15 @@ void CPlayer::DisplayEquipment( uint8 dwPlacement, eInvFilter filter )
 {
     CDisplayMeta meta;
     meta.limit = 'm';
-    sprintf( meta.footer, "Equipment is limited to 10 items, one each for specific body parts.\n" );
+    strcpy( meta.footer, g_Strings[STR_EQUIP_LIMIT] );
 
     switch( filter )
     {
     case INV_FIRE:
-        sprintf( meta.header, "Fire which weapon?\n" );
+        strcpy( meta.header, g_Strings[STR_CHOOSE_WEAPON] );
         break;
     default:
-        sprintf( meta.header, "You are wearing:\n" );
+        strcpy( meta.header, g_Strings[STR_INV_WEARING] );
         break;
     }
 
@@ -458,6 +463,9 @@ void CPlayer::DisplayEquipment( uint8 dwPlacement, eInvFilter filter )
         break;
     case PLACEMENT_USE:
         pDT = g_pGame->GetUse();
+        break;
+    case PLACEMENT_ENDGAME:
+        pDT = g_pGame->GetEnd();
         break;
     default:
         JLog( LOG_LEVEL_ERROR, true, "DisplayEquipment got bad placement: %d\n", dwPlacement );
@@ -491,7 +499,7 @@ void CPlayer::DisplayEquipment( uint8 dwPlacement, eInvFilter filter )
             }
             if( show )
             {
-                pDT->Printf( "%c - %s\n", cListId, pLink->m_lpData->GetName() );
+                pDT->Printf( g_Strings[STR_LIST_ITEM], cListId, pLink->m_lpData->GetName() );
             }
             pLink = m_llEquipment->GetNext( pLink );
         }
@@ -506,46 +514,73 @@ void CPlayer::DisplayVisibleMonsters()
 
     CDisplayText *pDT = g_pGame->GetMonsters();
     pDT->Clear();
-    pDT->Printf( "Visible monsters:\n" );
+    pDT->Printf( g_Strings[STR_VISIBLE_MONSTERS] );
 
     JLinkList<CMonster> *pList = GetVisibleMonsters();
+    int nVisible = pList->length();
+    if( nVisible <= 0 )
+        return;
 
-    // First pass: count each monster type (m_md->m_dwIndex = type slot)
-    int counts[MON_IDX_MAX] = {};
+    // Aggregate in one pass while preserving first-seen order.
+    // Use monster definition pointer (m_md) as the key. This avoids string
+    // hashing/allocation and still keeps Red Jelly vs Green Jelly separate.
+    CMonsterDef **defs = new CMonsterDef *[nVisible];
+    CMonster **firstMons = new CMonster *[nVisible];
+    int *counts = new int[nVisible];
+    for( int i = 0; i < nVisible; i++ )
+    {
+        defs[i] = NULL;
+        firstMons[i] = NULL;
+        counts[i] = 0;
+    }
+    int uniqueCount = 0;
+
     CLink<CMonster> *pLink = pList->GetHead();
     while( pLink != NULL )
     {
         CMonster *pMon = pLink->m_lpData;
-        if( pMon && pMon->m_md && pMon->m_md->m_dwIndex >= 0 &&
-            pMon->m_md->m_dwIndex < MON_IDX_MAX )
+        if( pMon && pMon->m_md && pMon->m_md->m_szName )
         {
-            counts[pMon->m_md->m_dwIndex]++;
-        }
-        pLink = pLink->next;
-    }
-
-    // Second pass: list is sorted by distance (ascending), so the first
-    // occurrence of each type is the closest one — use that ordering.
-    bool seen[MON_IDX_MAX] = {};
-    pLink = pList->GetHead();
-    while( pLink != NULL )
-    {
-        CMonster *pMon = pLink->m_lpData;
-        if( pMon && pMon->m_md && pMon->m_md->m_dwIndex >= 0 &&
-            pMon->m_md->m_dwIndex < MON_IDX_MAX )
-        {
-            int idx = pMon->m_md->m_dwIndex;
-            if( !seen[idx] )
+            int idx = -1;
+            for( int i = 0; i < uniqueCount; i++ )
             {
-                seen[idx] = true;
-                if( counts[idx] > 1 )
-                    pDT->Printf( "%s (%d)\n", pMon->GetName(), counts[idx] );
-                else
-                    pDT->Printf( "%s\n", pMon->GetName() );
+                if( defs[i] == pMon->m_md )
+                {
+                    idx = i;
+                    break;
+                }
+            }
+
+            if( idx < 0 )
+            {
+                idx = uniqueCount++;
+                defs[idx] = pMon->m_md;
+                firstMons[idx] = pMon;
+                counts[idx] = 1;
+            }
+            else
+            {
+                counts[idx]++;
             }
         }
         pLink = pLink->next;
     }
+
+    for( int i = 0; i < uniqueCount; i++ )
+    {
+        CMonster *pMon = firstMons[i];
+        if( !pMon )
+            continue;
+
+        if( counts[i] > 1 )
+            pDT->Printf( g_Strings[STR_VISIBLE_MONSTER], pMon->GetName(), counts[i] );
+        else
+            pDT->Printf( g_Strings[STR_FMT_STRING_LF], pMon->GetName() );
+    }
+
+    delete[] defs;
+    delete[] firstMons;
+    delete[] counts;
 }
 
 void CPlayer::DisplayMonsterRecall()
@@ -564,7 +599,7 @@ void CPlayer::DisplayMonsterRecall()
     }
     else
     {
-        pDT->Printf( "No current target.\n" );
+        pDT->Printf( g_Strings[STR_NO_CURRENT_TARGET] );
     }
 }
 
@@ -577,8 +612,8 @@ void CPlayer::DisplayItemRecall()
     pDT->Clear();
 
     // TODO: Display item recall information
-    pDT->Printf( "[Item Recall]\n" );
-    pDT->Printf( "Not yet implemented\n" );
+    pDT->Printf( g_Strings[STR_ITEM_RECALL] );
+    pDT->Printf( g_Strings[STR_NOT_YET_IMPLEMENTED] );
 }
 
 void CPlayer::DisplayMap()
@@ -588,8 +623,8 @@ void CPlayer::DisplayMap()
 
     CDisplayText *pDT = g_pGame->GetMap();
     pDT->Clear();
-    pDT->Printf( "[Map]\n" );
-    pDT->Printf( "Not yet implemented\n" );
+    pDT->Printf( g_Strings[STR_MAP] );
+    pDT->Printf( g_Strings[STR_NOT_YET_IMPLEMENTED] );
 }
 
 void CPlayer::PickUp( JVector &vPickupPos )
@@ -622,7 +657,7 @@ void CPlayer::PickUp( JVector &vPickupPos )
                 if( nameMatches && identStatusMatches && chargesMatch )
                 {
                     pExisting->m_dwCount++;
-                    g_pGame->GetMsgs()->Printf( "You have %d %s.\n", pExisting->m_dwCount,
+                    g_pGame->GetMsgs()->Printf( g_Strings[STR_HAVE_ITEMS], pExisting->m_dwCount,
                                                 pExisting->GetPlural() );
 
                     g_pGame->GetDungeon()->GetTile( vPickupPos )->m_pCurItem = NULL;
@@ -633,7 +668,7 @@ void CPlayer::PickUp( JVector &vPickupPos )
         }
         pItem->m_pllLink =
             m_llInventory->Add( pItem, pItem->m_id->m_dwIndex, pItem->GetInstanceId() );
-        g_pGame->GetMsgs()->Printf( "You have a %s.\n", pItem->GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_HAVE_ITEM], pItem->GetName() );
 
         g_pGame->GetDungeon()->GetTile( vPickupPos )->m_pCurItem = NULL;
     }
@@ -690,7 +725,7 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
                     }
                     else
                     {
-                        g_pGame->GetMsgs()->Printf( "You were wielding the %s...",
+                        g_pGame->GetMsgs()->Printf( g_Strings[STR_YOU_WERE_WIELDING_THE],
                                                     pEquipped->GetName() );
                     }
                 }
@@ -709,7 +744,7 @@ JResult CPlayer::Wield( CLink<CItem> *pLink )
         bool removed = RemoveEquipment( pCurrEquip );
         if( removed )
         {
-            g_pGame->GetMsgs()->Printf( "You were wielding the %s...",
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_YOU_WERE_WIELDING_THE],
                                         pCurrEquip->m_lpData->GetName() );
             JLog( LOG_LEVEL_INFO, true, "You were wielding the %s\n",
                   pCurrEquip->m_lpData->GetName() );
@@ -774,8 +809,7 @@ bool CPlayer::RemoveEquipment( CLink<CItem> *pLink )
     if( pItem && pItem->m_dwFlags & ITEM_FLAG_CURSED )
     {
         pItem->RevealProperty( KNOWN_CURSED );
-        g_pGame->GetMsgs()->Printf( "You can't remove the %s... it seems to be cursed.\n",
-                                    pItem->GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CANT_REMOVE_CURSED], pItem->GetName() );
 
         JLog( LOG_LEVEL_INFO, true, "You can't remove the %s... it seems to be cursed.\n",
               pItem->GetName() );
@@ -859,11 +893,11 @@ void CPlayer::XchangeWeapons()
     CLink<CItem> *pNewMain = m_llEquipment->GetLink( EQUIP_IDX_MAIN_HAND );
     if( pNewMain && pNewMain->m_lpData )
     {
-        g_pGame->GetMsgs()->Printf( "You switch to your %s.\n", pNewMain->m_lpData->GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_SWITCH_WEAPON], pNewMain->m_lpData->GetName() );
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "You switch to your bare hands.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_SWITCH_BARE_HANDS] );
     }
 }
 
@@ -916,15 +950,15 @@ void CPlayer::UpdateLight( float fValue, bool bReset )
     int duration = (int)pTorch->GetDuration();
     if( duration == 0 )
     {
-        g_pGame->GetMsgs()->Printf( "Your light has gone out!\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LIGHT_OUT] );
     }
     else if( duration <= 100 && duration % 25 == 0 )
     {
-        g_pGame->GetMsgs()->Printf( "Your light is growing very faint.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LIGHT_VERY_FAINT] );
     }
     else if( duration <= 500 && duration % 100 == 0 )
     {
-        g_pGame->GetMsgs()->Printf( "Your light is growing faint.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LIGHT_FAINT] );
     }
 }
 
@@ -968,20 +1002,20 @@ void CPlayer::HandleCollision( JVector vPos, int dwCollideType )
         bHit = pMon->Hit( fRoll );
         if( bHit )
         {
-            sprintf( szStatus, "hit" );
+            strcpy( szStatus, g_Strings[STR_COMBAT_HIT] );
         }
         else
         {
-            sprintf( szStatus, "miss" );
+            strcpy( szStatus, g_Strings[STR_COMBAT_MISS] );
         }
 
-        g_pGame->GetMsgs()->Printf( "You %s the %s.\n", szStatus, szMonster );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_YOU_HIT], szStatus, szMonster );
 
         if( bHit )
         {
             if( fRoll > 80.0f )
             {
-                g_pGame->GetMsgs()->Printf( "(It was an excellent hit! (x2 damage)\n" );
+                g_pGame->GetMsgs()->Printf( g_Strings[STR_CRITICAL_HIT] );
                 fDamageMult = 2.0f;
             }
 
@@ -989,8 +1023,8 @@ void CPlayer::HandleCollision( JVector vPos, int dwCollideType )
 
             if( DamageMonster( pMon, fDamage ) )
             {
-                sprintf( szStatus, "have slain" );
-                g_pGame->GetMsgs()->Printf( "You %s the %s.\n", szStatus, szMonster );
+                strcpy( szStatus, g_Strings[STR_COMBAT_HAVE_SLAIN] );
+                g_pGame->GetMsgs()->Printf( g_Strings[STR_YOU_HIT], szStatus, szMonster );
             }
         }
     }
@@ -1006,19 +1040,19 @@ void CPlayer::HandleCollision( JVector vPos, int dwCollideType )
         {
         case DUNG_IDX_WALL:
         case DUNG_IDX_SECRET_DOOR:
-            sprintf( what, "a wall" );
+            strcpy( what, g_Strings[STR_DUNGEON_WALL] );
             break;
         case DUNG_IDX_DOOR:
-            sprintf( what, "a door" );
+            strcpy( what, g_Strings[STR_DUNGEON_DOOR] );
             break;
         case DUNG_IDX_RUBBLE:
-            sprintf( what, "some rubble" );
+            strcpy( what, g_Strings[STR_DUNGEON_RUBBLE] );
             break;
         default:
-            sprintf( what, "um, something?" );
+            strcpy( what, g_Strings[STR_COMBAT_UNKNOWN] );
             break;
         }
-        g_pGame->GetMsgs()->Printf( "Ouch! You bumped into %s!\n", what );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_BUMPED_INTO], what );
     }
 }
 
@@ -1104,7 +1138,7 @@ bool CPlayer::DamageMonster( CMonster *pMon, float fDamage )
     {
         pMon->m_dwActiveEffects &= ~EFFECT_FLAG_SLEEP;
         pMon->m_pBrain->SetState( BRAINSTATE_SEEK );
-        g_pGame->GetMsgs()->Printf( "The %s wakes up!\n", pMon->GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_WAKES], pMon->GetName() );
     }
     return false;
 }
@@ -1147,7 +1181,7 @@ void CPlayer::GainLevel()
         float fAddedHP = Util::Roll( m_pClass->m_szHD );
         m_fHitPoints += fAddedHP;
         m_fCurHitPoints += fAddedHP;
-        g_pGame->GetMsgs()->Printf( "Welcome to level %d.\n", (int)m_fLevel );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LEVEL_UP], (int)m_fLevel );
         // TODO: Gain Spells or &c here.
     }
 }
@@ -1215,9 +1249,9 @@ int CPlayer::TakeDamage( float fDamage, const char *szMon, uint32 dwElement )
     if( fMult != 1.0f )
     {
         if( fMult == 0.0f )
-            g_pGame->GetMsgs()->Printf( "You are immune!\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_IMMUNE] );
         else if( fMult < 1.0f )
-            g_pGame->GetMsgs()->Printf( "You resist!\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_RESIST] );
         fDamage *= fMult;
     }
 
@@ -1399,7 +1433,7 @@ void CPlayer::ConsolidateInventory()
 
     if( anyMerged )
     {
-        g_pGame->GetMsgs()->Printf( "You organize your pack.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_ORGANIZE_PACK] );
     }
 }
 
@@ -1423,7 +1457,7 @@ JResult CPlayer::Fuel( CLink<CItem> *pLink )
     CItem *pTorch = pLantern->m_lpData;
     if( !( pTorch->m_id->m_dwFlags & ITEM_FLAG_NEEDSAMMO ) )
     {
-        g_pGame->GetMsgs()->Printf( "Your %s cannot be refueled.\n", pTorch->GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CANT_REFUEL], pTorch->GetName() );
         return JERROR();
     }
 
@@ -1461,7 +1495,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
     case EFFECT_FLAG_AFRAID:
         if( needsHeal )
         {
-            g_pGame->GetMsgs()->Printf( "You are no longer afraid.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_HEAL_FEAR] );
             UnsetIntrinsic( pEffect->m_dwFlags );
             retval = JSUCCESS;
         }
@@ -1469,7 +1503,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
     case EFFECT_FLAG_BLIND:
         if( needsHeal )
         {
-            g_pGame->GetMsgs()->Printf( "You can see again.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_HEAL_BLIND] );
             UnsetIntrinsic( pEffect->m_dwFlags );
             retval = JSUCCESS;
         }
@@ -1477,7 +1511,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
     case EFFECT_FLAG_CONFUSE:
         if( needsHeal )
         {
-            g_pGame->GetMsgs()->Printf( "You can think clearly again.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_HEAL_CONFUSE] );
             UnsetIntrinsic( pEffect->m_dwFlags );
             retval = JSUCCESS;
         }
@@ -1485,7 +1519,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
     case EFFECT_FLAG_POISON:
         if( needsHeal )
         {
-            g_pGame->GetMsgs()->Printf( "You are no longer poisoned.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_HEAL_POISON] );
             UnsetIntrinsic( pEffect->m_dwFlags );
             retval = JSUCCESS;
         }
@@ -1493,7 +1527,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
     case EFFECT_FLAG_PARALYZE:
         if( needsHeal )
         {
-            g_pGame->GetMsgs()->Printf( "You can move again.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_HEAL_PARALYZE] );
             UnsetIntrinsic( pEffect->m_dwFlags );
             retval = JSUCCESS;
         }
@@ -1501,7 +1535,7 @@ JResult CPlayer::DoHealEffects( CEffect *pEffect )
     case EFFECT_FLAG_SLEEP:
         if( needsHeal )
         {
-            g_pGame->GetMsgs()->Printf( "You wake up.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_HEAL_ASLEEP] );
             UnsetIntrinsic( pEffect->m_dwFlags );
             retval = JSUCCESS;
         }
@@ -1522,19 +1556,19 @@ JResult CPlayer::DoHealHP( CEffect *pEffect )
     }
     if( fHeal > 100.0f )
     {
-        g_pGame->GetMsgs()->Printf( "You feel amazing!\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_GAIN_HP_XLARGE] );
     }
     else if( fHeal > 50.0f )
     {
-        g_pGame->GetMsgs()->Printf( "You feel a lot better.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_GAIN_HP_LARGE] );
     }
     else if( fHeal > 25.0f )
     {
-        g_pGame->GetMsgs()->Printf( "You feel better.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_GAIN_HP_MEDIUM] );
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "You feel a bit better.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_GAIN_HP_SMALL] );
     }
     return JSUCCESS;
 }
@@ -1561,7 +1595,7 @@ JResult CPlayer::DoACBuff( CEffect *pEffect )
     m_fACBonus = fBonus;
     RecalcCombatStats();
 
-    g_pGame->GetMsgs()->Printf( "You feel more protected. (+%d AC)\n", (int)fBonus );
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_PROTECTION], (int)fBonus );
 
     if( fDuration )
     {
@@ -1604,7 +1638,7 @@ JResult CPlayer::DoDamageInventory( uint32 dwElement )
 
         if( pItem->IsWeakTo( element ) && Util::GetRandom( 0.0f, 1.0f ) < fChance )
         {
-            g_pGame->GetMsgs()->Printf( "Your %s %s!\n", pItem->GetPlural(), szVerb );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_ITEM_BURNS], pItem->GetPlural(), szVerb );
             if( pItem->m_dwCount > 1 )
                 pItem->m_dwCount--;
             else
@@ -1644,14 +1678,14 @@ JResult CPlayer::DoDamageEquipment( uint32 dwElement )
                 if( bReduceToHit )
                 {
                     pItem->m_fBonusToHit -= 1.0f;
-                    g_pGame->GetMsgs()->Printf( "Your %s is pitted by %s! (to-hit reduced)\n",
-                                                pItem->GetName(), szElement );
+                    g_pGame->GetMsgs()->Printf( g_Strings[STR_ITEM_PITTED_TOHIT], pItem->GetName(),
+                                                szElement );
                 }
                 else
                 {
                     pItem->m_fBonusToDamage -= 1.0f;
-                    g_pGame->GetMsgs()->Printf( "Your %s is pitted by %s! (to-damage reduced)\n",
-                                                pItem->GetName(), szElement );
+                    g_pGame->GetMsgs()->Printf( g_Strings[STR_ITEM_PITTED_TODAM], pItem->GetName(),
+                                                szElement );
                 }
             }
             else
@@ -1661,7 +1695,7 @@ JResult CPlayer::DoDamageEquipment( uint32 dwElement )
                 if( pItem->m_fACBonus > fFloor )
                 {
                     pItem->m_fACBonus -= 1.0f;
-                    g_pGame->GetMsgs()->Printf( "Your %s is damaged by %s!\n", pItem->GetName(),
+                    g_pGame->GetMsgs()->Printf( g_Strings[STR_ITEM_DAMAGED], pItem->GetName(),
                                                 szElement );
                 }
             }
@@ -1688,12 +1722,12 @@ JResult CPlayer::DoCreateEffects( CEffect *pEffect )
         {
             g_pGame->GetDungeon()->RevealMap(
                 Util::Nearby( JIVector( VEC_EXPAND( m_vPos ) ), MAGIC_MAPPING_RANGE ) );
-            g_pGame->GetMsgs()->Printf( "The area around you is revealed.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_MAGIC_MAP] );
         }
         else
         {
             g_pGame->GetDungeon()->RevealMap( JRect( 0, 0, DUNG_WIDTH - 1, DUNG_HEIGHT - 1 ) );
-            g_pGame->GetMsgs()->Printf( "The dungeon is revealed to you.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_FULL_MAP] );
         }
         retval = JSUCCESS;
         break;
@@ -1724,18 +1758,18 @@ JResult CPlayer::DoTeleport( CEffect *pEffect )
                     DUNG_COLL_NO_COLLISION )
                 {
                     m_vPos = vTarget;
-                    g_pGame->GetMsgs()->Printf( "You feel a brief shimmer.\n" );
+                    g_pGame->GetMsgs()->Printf( g_Strings[STR_TELEPORT] );
                     return JSUCCESS;
                 }
             }
         }
-        g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_NOTHING_HAPPENS] );
         return JSUCCESS;
     }
     // Full teleport: reuse SpawnPlayer logic
     m_bHasSpawned = false;
     SpawnPlayer();
-    g_pGame->GetMsgs()->Printf( "You feel a wrenching sensation.\n" );
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_RECALL] );
     return JSUCCESS;
 }
 
@@ -1747,7 +1781,7 @@ JResult CPlayer::BeginRecall()
     {
         if( pLink->m_lpData && pLink->m_lpData->m_dwFlags == EFFECT_FLAG_RECALL )
         {
-            g_pGame->GetMsgs()->Printf( "You already feel the pull of recall.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_RECALL_ACTIVE] );
             return JSUCCESS;
         }
         pLink = pLink->next;
@@ -1759,7 +1793,7 @@ JResult CPlayer::BeginRecall()
     pActive->m_fDuration = (float)RECALL_DURATION;
     m_llActiveEffects->Add( pActive, pActive->m_dwFlags );
 
-    g_pGame->GetMsgs()->Printf( "You feel yourself starting to drift...\n" );
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_BEGIN_RECALL] );
     return JSUCCESS;
 }
 
@@ -1773,17 +1807,16 @@ void CPlayer::Recall()
     {
         if( m_dwRecallDepth > (uint8)pDungeon->depth )
         {
-            g_pGame->GetMsgs()->Printf( "Recall depth reset (was: %dft)\n", m_dwRecallDepth * 50 );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_RECALL_RESET], m_dwRecallDepth * 50 );
         }
         m_dwRecallDepth = pDungeon->depth;
 
         // go to depth 0
-        g_pGame->GetMsgs()->Printf( "The world spins and you find yourself in town.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_RECALL_TO_TOWN] );
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "The world spins and you are back at %d ft.\n",
-                                    m_dwRecallDepth * 50 );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_RECALL_TO_DUNGEON], m_dwRecallDepth * 50 );
     }
 
     pDungeon->OnChangeLevel( delta );
@@ -1804,7 +1837,7 @@ JResult CPlayer::DoDestroyEffects( CEffect *pEffect, int dwItemFlags )
                     JLog( LOG_LEVEL_NOISE, true, "Item is not cursed %s, cursing it.\n",
                           pLink->m_lpData->GetName() );
                     pLink->m_lpData->SetCursed( true );
-                    g_pGame->GetMsgs()->Printf( "It is now cursed.\n" );
+                    g_pGame->GetMsgs()->Printf( g_Strings[STR_CURSED] );
                     break;
                 }
                 pLink = pLink->next;
@@ -1826,7 +1859,7 @@ JResult CPlayer::DoDestroyEffects( CEffect *pEffect, int dwItemFlags )
                 }
                 pLink = pLink->next;
             }
-            g_pGame->GetMsgs()->Printf( "It is no longer cursed.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_UNCURSED] );
             return JSUCCESS;
         }
     }
@@ -1852,61 +1885,61 @@ JResult CPlayer::DoIntrinsicEffects( CEffect *pEffect, float fDuration )
     {
     case EFFECT_FLAG_AFRAID:
         if( pEffect->m_dwModifier & EFFECT_MOD_RESIST )
-            g_pGame->GetMsgs()->Printf( "You feel resistant to fear.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_RES_FEAR] );
         else
-            g_pGame->GetMsgs()->Printf( "You are afraid!\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_AFRAID] );
         break;
     case EFFECT_FLAG_BLIND:
-        g_pGame->GetMsgs()->Printf( "You are blind.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_YOU_BLIND] );
         break;
     case EFFECT_FLAG_CONFUSE:
-        g_pGame->GetMsgs()->Printf( "You are confused.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CONFUSED] );
         break;
     case EFFECT_FLAG_POISON:
         if( pEffect->m_dwModifier & EFFECT_MOD_RESIST )
-            g_pGame->GetMsgs()->Printf( "You feel resistant to poison.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_RES_POISON] );
         else
-            g_pGame->GetMsgs()->Printf( "You are poisoned.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_POISON] );
         break;
     case EFFECT_FLAG_PARALYZE:
-        g_pGame->GetMsgs()->Printf( "You can't move!\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_PARALYZE] );
         break;
     case EFFECT_FLAG_SLEEP:
-        g_pGame->GetMsgs()->Printf( "You fall asleep.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_SLEEP] );
         break;
     case EFFECT_FLAG_INFRA:
-        g_pGame->GetMsgs()->Printf( "Your eyes feel tingly.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_GAIN_INFRAVISION] );
         break;
     case EFFECT_FLAG_ESP:
-        g_pGame->GetMsgs()->Printf( "You sense stray thoughts around you.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_GAIN_ESP] );
         break;
     case EFFECT_FLAG_FIRE:
         if( pEffect->m_dwModifier & EFFECT_MOD_RESIST )
-            g_pGame->GetMsgs()->Printf( "You feel resistant to fire.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_RES_FIRE] );
         break;
     case EFFECT_FLAG_COLD:
         if( pEffect->m_dwModifier & EFFECT_MOD_RESIST )
-            g_pGame->GetMsgs()->Printf( "You feel resistant to cold.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_RES_COLD] );
         break;
     case EFFECT_FLAG_ELECTRICITY:
         if( pEffect->m_dwModifier & EFFECT_MOD_RESIST )
-            g_pGame->GetMsgs()->Printf( "You feel resistant to electricity.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_RES_ELEC] );
         break;
     case EFFECT_FLAG_ACID:
         if( pEffect->m_dwModifier & EFFECT_MOD_RESIST )
-            g_pGame->GetMsgs()->Printf( "You feel resistant to acid.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_RES_ACID] );
         break;
     case EFFECT_FLAG_INVISIBLE:
-        g_pGame->GetMsgs()->Printf( "You fade from view.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_GAIN_INVISIBLE] );
         break;
     case EFFECT_FLAG_LEVITATE:
-        g_pGame->GetMsgs()->Printf( "You feel light on your feet.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_GAIN_LEVITATE] );
         break;
     case EFFECT_FLAG_FREE_ACTION:
-        g_pGame->GetMsgs()->Printf( "You feel free to move.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_GAIN_FREEACTION] );
         break;
     case EFFECT_FLAG_SPEED:
-        g_pGame->GetMsgs()->Printf( "You feel yourself moving faster.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_GAIN_SPEED] );
         m_fSpeed += 1.0f;
         break;
     case EFFECT_FLAG_LIGHT:
@@ -1932,7 +1965,7 @@ JResult CPlayer::UndoIntrinsicEffects( CEffect *pEffect )
     case EFFECT_FLAG_AFRAID:
         if( pEffect->m_dwModifier & EFFECT_MOD_RESIST )
         {
-            g_pGame->GetMsgs()->Printf( "You are no longer resistant to fear.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_LOSE_RES_FEAR] );
             UnsetIntrinsic( pEffect->m_dwFlags );
             return JSUCCESS;
         }
@@ -1941,7 +1974,7 @@ JResult CPlayer::UndoIntrinsicEffects( CEffect *pEffect )
     case EFFECT_FLAG_POISON:
         if( pEffect->m_dwModifier & EFFECT_MOD_RESIST )
         {
-            g_pGame->GetMsgs()->Printf( "You are no longer resistant to poison.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_LOSE_RES_POISON] );
             UnsetIntrinsic( pEffect->m_dwFlags );
             return JSUCCESS;
         }
@@ -1954,34 +1987,34 @@ JResult CPlayer::UndoIntrinsicEffects( CEffect *pEffect )
         return DoHealEffects( pEffect );
         break;
     case EFFECT_FLAG_INFRA:
-        g_pGame->GetMsgs()->Printf( "Your eyes stop tinging.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LOSE_INFRAVISION] );
         break;
     case EFFECT_FLAG_ESP:
-        g_pGame->GetMsgs()->Printf( "You no longer sense stray thoughts.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LOSE_ESP] );
         break;
     case EFFECT_FLAG_FIRE:
-        g_pGame->GetMsgs()->Printf( "You no longer feel resistant to fire.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LOSE_RES_FIRE] );
         break;
     case EFFECT_FLAG_COLD:
-        g_pGame->GetMsgs()->Printf( "You no longer feel resistant to cold.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LOSE_RES_COLD] );
         break;
     case EFFECT_FLAG_ELECTRICITY:
-        g_pGame->GetMsgs()->Printf( "You no longer feel resistant to electricity.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LOSE_RES_ELEC] );
         break;
     case EFFECT_FLAG_ACID:
-        g_pGame->GetMsgs()->Printf( "You no longer feel resistant to acid.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LOSE_RES_ACID] );
         break;
     case EFFECT_FLAG_INVISIBLE:
-        g_pGame->GetMsgs()->Printf( "You reappear.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LOSE_INVISIBILITY] );
         break;
     case EFFECT_FLAG_LEVITATE:
-        g_pGame->GetMsgs()->Printf( "You float gently to the ground.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LOSE_LEVITATE] );
         break;
     case EFFECT_FLAG_FREE_ACTION:
-        g_pGame->GetMsgs()->Printf( "You feel sluggish.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LOSE_FREEACTION] );
         break;
     case EFFECT_FLAG_SPEED:
-        g_pGame->GetMsgs()->Printf( "You feel yourself slowing down.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LOSE_SPEED] );
         m_fSpeed -= 1.0f;
         break;
     case EFFECT_FLAG_LIGHT:
@@ -1989,7 +2022,7 @@ JResult CPlayer::UndoIntrinsicEffects( CEffect *pEffect )
     case EFFECT_FLAG_AC:
         m_fACBonus = 0.0f;
         RecalcCombatStats();
-        g_pGame->GetMsgs()->Printf( "You feel less protected.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LOSE_PROTECTION] );
         break;
     default:
         JLog( LOG_LEVEL_ERROR, true, "unknown intrinsic type: %d\n", pEffect->m_dwFlags );
@@ -2007,10 +2040,10 @@ JResult CPlayer::DoRestoreEffects( CEffect *pEffect )
         if( m_fCurHitPoints < m_fHitPoints )
         {
             m_fCurHitPoints = m_fHitPoints;
-            g_pGame->GetMsgs()->Printf( "You feel completely healthy.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_FULL_HP] );
             return JSUCCESS;
         }
-        g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_NOTHING_HAPPENS] );
         return JBOGUSKEY;
     default:
         break;
@@ -2028,7 +2061,7 @@ JResult CPlayer::DoGainEffects( CEffect *pEffect )
     {
         float fGain = pEffect->m_szAmount ? Util::Roll( pEffect->m_szAmount ) : 50.0f;
         m_fExperience += fGain;
-        g_pGame->GetMsgs()->Printf( "You feel more experienced.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_GAIN_XP] );
         return JSUCCESS;
     }
     default:
@@ -2047,7 +2080,7 @@ JResult CPlayer::DoLoseEffects( CEffect *pEffect )
         m_fExperience -= fLoss;
         if( m_fExperience < 0.0f )
             m_fExperience = 0.0f;
-        g_pGame->GetMsgs()->Printf( "You feel less experienced.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LOSE_XP] );
         return JSUCCESS;
     }
     case EFFECT_FLAG_HP:
@@ -2058,7 +2091,7 @@ JResult CPlayer::DoLoseEffects( CEffect *pEffect )
             m_fHitPoints = 1.0f;
         if( m_fCurHitPoints > m_fHitPoints )
             m_fCurHitPoints = m_fHitPoints;
-        g_pGame->GetMsgs()->Printf( "You feel weakened.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LOSE_HP] );
         return JSUCCESS;
     }
     default:
@@ -2114,9 +2147,9 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
             }
         }
         if( bFoundDoors )
-            g_pGame->GetMsgs()->Printf( "You sense the presence of doors!\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_SENSE_DOORS] );
         if( bFoundStairs )
-            g_pGame->GetMsgs()->Printf( "You sense the presence of stairs!\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_SENSE_STAIRS] );
     }
 
     if( pEffect->m_dwFlags2 & EFFECT_FLAG_TRAP )
@@ -2137,7 +2170,7 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
             }
         }
         if( bFound )
-            g_pGame->GetMsgs()->Printf( "You sense traps.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_SENSE_TRAPS] );
     }
 
     if( pEffect->m_dwFlags2 & EFFECT_FLAG_MONSTERS )
@@ -2166,7 +2199,7 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
             pLink = pLink->next;
         }
         if( bFound )
-            g_pGame->GetMsgs()->Printf( "You sense the presence of monsters!\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_SENSE_MONSTERS] );
     }
 
     if( pEffect->m_dwFlags & EFFECT_FLAG_TREASURE )
@@ -2192,9 +2225,9 @@ JResult CPlayer::DoSeeEffects( CEffect *pEffect )
             pLink = pLink->next;
         }
         if( bFound )
-            g_pGame->GetMsgs()->Printf( "You sense the presence of treasure!\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_SENSE_TREASURE] );
         else
-            g_pGame->GetMsgs()->Printf( "You sense no treasure nearby.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_NO_TREASURE] );
     }
 
     return JSUCCESS;
@@ -2247,7 +2280,7 @@ void CPlayer::SetWizard()
     if( !m_bWizardMode )
     {
         SetName( "** Wizard Mode **" );
-        g_pGame->GetMsgs()->Printf( "*** Wizard Mode: On *** your score will not be saved.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_WIZ_ON] );
         JLog( LOG_LEVEL_WARN, true, "*** Wizard Mode: On *** your score will not be saved.\n" );
     }
     m_bWizardMode = true;
@@ -2328,7 +2361,7 @@ void CPlayer::GiveAllWandsAndStaves()
         pLink = pLink->next;
     }
 
-    g_pGame->GetMsgs()->Printf( "Wizard: added %d wands/staves to inventory.\n", nGiven );
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_WIZ_ADDED_ITEMS], nGiven );
 }
 
 void CPlayer::IdentifyAllInventory()
@@ -2351,7 +2384,7 @@ void CPlayer::IdentifyAllInventory()
         }
         pLink = m_llEquipment->GetNext( pLink );
     }
-    g_pGame->GetMsgs()->Printf( "Wizard: identified %d items.\n", nIdentified );
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_WIZ_IDENTIFIED], nIdentified );
 }
 
 JResult CPlayer::ApplyChosenItem( CLink<CItem> *pChosen, CEffect *pEffect, int dwItemFlags )
@@ -2362,7 +2395,7 @@ JResult CPlayer::ApplyChosenItem( CLink<CItem> *pChosen, CEffect *pEffect, int d
 
     if( !pEffect->IsValidTarget( pItem ) )
     {
-        g_pGame->GetMsgs()->Printf( "%s\n", pEffect->GetTargetPrompt() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_FMT_STRING_LF], pEffect->GetTargetPrompt() );
         return JSUCCESS;
     }
 
@@ -2370,7 +2403,7 @@ JResult CPlayer::ApplyChosenItem( CLink<CItem> *pChosen, CEffect *pEffect, int d
     {
     case EFFECT_FLAG_IDENTIFY:
         pItem->Identify();
-        g_pGame->GetMsgs()->Printf( "It is %s.\n", pItem->GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_IDENTIFY], pItem->GetName() );
         break;
     case EFFECT_FLAG_FUEL: // Recharge
     {
@@ -2380,32 +2413,31 @@ JResult CPlayer::ApplyChosenItem( CLink<CItem> *pChosen, CEffect *pEffect, int d
         if( pItem->m_dwCharges > pItem->m_dwMaxCharges )
         {
             pItem->m_dwCharges = 0;
-            g_pGame->GetMsgs()->Printf( "The %s explodes in a shower of sparks!\n",
-                                        pItem->GetName() );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_OVERCHARGE], pItem->GetName() );
             m_llInventory->Remove( pItem->m_pllLink, true );
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "The %s glows with magical energy. (%d charges)\n",
-                                        pItem->GetName(), pItem->m_dwCharges );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_RECHARGE], pItem->GetName(),
+                                        pItem->m_dwCharges );
         }
         break;
     }
     case EFFECT_FLAG_TOHIT: // Enchant weapon to-hit
         pItem->m_fBonusToHit += 1.0f;
-        g_pGame->GetMsgs()->Printf( "It glows with power.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_ENCHANT] );
         RecalcCombatStats();
         break;
     case EFFECT_FLAG_TODAM: // Enchant weapon to-damage
         pItem->m_fBonusToDamage += 1.0f;
-        g_pGame->GetMsgs()->Printf( "It glows with power.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_ENCHANT] );
         RecalcCombatStats();
         break;
     default:
         if( pEffect->m_dwFlags == EFFECT_FLAG_AC && ( pEffect->m_dwModifier & EFFECT_MOD_ENCHANT ) )
         {
             pItem->m_fACBonus += 1.0f;
-            g_pGame->GetMsgs()->Printf( "It glows with a soft light.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_ENCHANT] );
             RecalcCombatStats();
         }
         else if( pEffect->HasFlag( "EFFECT_FLAG_CURSE" ) &&
@@ -2414,12 +2446,12 @@ JResult CPlayer::ApplyChosenItem( CLink<CItem> *pChosen, CEffect *pEffect, int d
             if( dwItemFlags & ITEM_FLAG_CURSED )
             {
                 pItem->m_dwFlags |= ITEM_FLAG_CURSED;
-                g_pGame->GetMsgs()->Printf( "It is now cursed.\n" );
+                g_pGame->GetMsgs()->Printf( g_Strings[STR_CURSED] );
             }
             else
             {
                 pItem->m_dwFlags &= ~ITEM_FLAG_CURSED;
-                g_pGame->GetMsgs()->Printf( "It is no longer cursed.\n" );
+                g_pGame->GetMsgs()->Printf( g_Strings[STR_UNCURSED] );
             }
         }
         break;

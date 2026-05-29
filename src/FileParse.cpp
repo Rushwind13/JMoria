@@ -551,13 +551,15 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                             new char[Util::jstrlen( g_Constants.PotionColor( potion_index ) ) + 1];
                         Util::jstrcpy( idIn.m_szFlavor, g_Constants.PotionColor( potion_index ) );
                         char szUnID[100];
-                        sprintf( szUnID, "%s Potion", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_POTION],
+                                  idIn.m_szFlavor );
                         JLog( LOG_LEVEL_DEBUG, true, "Potion #%d - index %d color %s\n",
                               m_dwPotionCount, potion_index, szUnID );
                         idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
 
-                        sprintf( szUnID, "%s Potions", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_POTIONS],
+                                  idIn.m_szFlavor );
                         idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
 
@@ -572,10 +574,12 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                             new char[Util::jstrlen( g_Constants.ScrollName( scroll_index ) ) + 1];
                         Util::jstrcpy( idIn.m_szFlavor, g_Constants.ScrollName( scroll_index ) );
                         char szUnID[100];
-                        sprintf( szUnID, "Scroll labeled %s", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_SCROLL],
+                                  idIn.m_szFlavor );
                         idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
-                        sprintf( szUnID, "Scrolls labeled %s", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_SCROLLS],
+                                  idIn.m_szFlavor );
                         idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
                         m_dwScrollCount++;
@@ -587,13 +591,15 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                             new char[Util::jstrlen( g_Constants.Lumber( staff_index ) ) + 1];
                         Util::jstrcpy( idIn.m_szFlavor, g_Constants.Lumber( staff_index ) );
                         char szUnID[100];
-                        sprintf( szUnID, "%s Staff", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_STAFF],
+                                  idIn.m_szFlavor );
                         JLog( LOG_LEVEL_DEBUG, true, "Staff #%d - index %d color %s\n",
                               m_dwStaffCount, staff_index, szUnID );
                         idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
 
-                        sprintf( szUnID, "%s Staves", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_STAVES],
+                                  idIn.m_szFlavor );
                         idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
 
@@ -608,13 +614,15 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                             new char[Util::jstrlen( g_Constants.Lumber( wand_index ) ) + 1];
                         Util::jstrcpy( idIn.m_szFlavor, g_Constants.Lumber( wand_index ) );
                         char szUnID[100];
-                        sprintf( szUnID, "%s Wand", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_WAND],
+                                  idIn.m_szFlavor );
                         JLog( LOG_LEVEL_DEBUG, true, "Wand #%d - index %d color %s\n",
                               m_dwWandCount, wand_index, szUnID );
                         idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
 
-                        sprintf( szUnID, "%s Wands", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_WANDS],
+                                  idIn.m_szFlavor );
                         idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
 
@@ -629,13 +637,15 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                             new char[Util::jstrlen( g_Constants.Metal( ring_index ) ) + 1];
                         Util::jstrcpy( idIn.m_szFlavor, g_Constants.Metal( ring_index ) );
                         char szUnID[100];
-                        sprintf( szUnID, "%s Ring", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_RING],
+                                  idIn.m_szFlavor );
                         JLog( LOG_LEVEL_DEBUG, true, "Ring #%d - index %d color %s\n",
                               m_dwRingCount, ring_index, szUnID );
                         idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
 
-                        sprintf( szUnID, "%s Rings", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_RINGS],
+                                  idIn.m_szFlavor );
                         idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
 
@@ -650,13 +660,15 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                             new char[Util::jstrlen( g_Constants.Metal( amulet_index ) ) + 1];
                         Util::jstrcpy( idIn.m_szFlavor, g_Constants.Metal( amulet_index ) );
                         char szUnID[100];
-                        sprintf( szUnID, "%s Amulet", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_AMULET],
+                                  idIn.m_szFlavor );
                         JLog( LOG_LEVEL_DEBUG, true, "Amulet #%d - index %d color %s\n",
                               m_dwAmuletCount, amulet_index, szUnID );
                         idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
 
-                        sprintf( szUnID, "%s Amulets", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_AMULETS],
+                                  idIn.m_szFlavor );
                         idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
 

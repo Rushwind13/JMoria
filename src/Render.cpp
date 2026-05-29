@@ -86,7 +86,7 @@ JResult CRender::InitSDL()
 
     // Allocate window and context.
     char window_title[32];
-    sprintf( window_title, "JMoria %s", VERSION );
+    sprintf( window_title, g_Strings[STR_WINDOW_TITLE], VERSION );
     m_hWindow =
         SDL_CreateWindow( window_title, 0, 0, m_dwScreenWidth, m_dwScreenHeight, m_dwWindowFlags );
     if( m_hWindow != NULL )
@@ -194,7 +194,7 @@ void CRender::PostDraw()
             // #ifdef _DEBUG
             GLfloat seconds = ( t - m_dwT0 ) / 1000.0f;
             GLfloat fps = m_dwFrames / seconds;
-            m_fps->Printf( "%g FPS\n", fps );
+            m_fps->Printf( g_Strings[STR_FPS], fps );
             // #endif // _DEBUG
             m_dwT0 = t;
             m_dwFrames = 0;

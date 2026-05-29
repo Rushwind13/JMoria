@@ -190,7 +190,7 @@ JResult CMonster::SpawnAt( JIVector vPos )
         SetPos( vSpawn );
         g_pGame->GetDungeon()->GetTile( vSpawn )->m_pCurMonster = this;
         JLog( LOG_LEVEL_INFO, false, "Success! Spawned at <%d %d>\n", VEC_EXPAND( vPos ) );
-        // g_pGame->GetMsgs()->Printf( "Success!\n" );
+        // g_pGame->GetMsgs()->Printf( g_Strings[STR_SUCCESS] );
 
         return JSUCCESS;
     }
@@ -256,7 +256,7 @@ const char *CMonster::AttackFlavorText()
         break;
     case MON_FLAG_BREATHE:
         char retval[64];
-        sprintf( retval, "breathes %s on", AttackEffect() );
+        sprintf( retval, g_Strings[STR_MONSTER_BREATHES_ON], AttackEffect() );
         Util::jstrcpy( m_szCurrentFlavorText, retval );
         break;
     default:

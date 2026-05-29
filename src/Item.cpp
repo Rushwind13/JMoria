@@ -272,9 +272,7 @@ JResult CItem::SpawnItem( JVector vSpawnPoint )
         vTryPos.Init( VEC_EXPAND( *vOpen ) );
 
         // JLog( LOG_LEVEL_NOISE, false, "Trying to spawn item type: %d at <%.2f %.2f>...\n",
-        // m_md->m_dwType, vTryPos.x, vTryPos.y ); g_pGame->GetMsgs()->Printf( "Trying to spawn item
-        // type: %d at <%.2f
-        // %.2f>...\n", m_md->m_dwType, vTryPos.x, vTryPos.y );
+        // m_md->m_dwType, vTryPos.x, vTryPos.y );
 
         if( SpawnAt( vTryPos ) == JSUCCESS )
         {
@@ -292,7 +290,7 @@ JResult CItem::SpawnAt( JVector vSpawnPoint )
         g_pGame->GetDungeon()->GetTile( m_vPos )->m_pCurItem = this;
 
         JLog( LOG_LEVEL_INFO, false, "Success! Spawned at <%.2f %.2f>\n", VEC_EXPAND( m_vPos ) );
-        // g_pGame->GetMsgs()->Printf( "Success!\n" );
+        // g_pGame->GetMsgs()->Printf( g_Strings[STR_SUCCESS] );
 
         return JSUCCESS;
     }
@@ -447,8 +445,8 @@ void CItemDef::FormatProperties( char *szOut, int maxLen, uint32 knownProps, uin
         case ITEM_IDX_POLEARM:
         case ITEM_IDX_2H_SWORD:
             if( fBonusToHit != 0.0f || fBonusToDamage != 0.0f )
-                pos += snprintf( szOut + pos, maxLen - pos, " (%+.0f, %+.0f)", fBonusToHit,
-                                 fBonusToDamage );
+                pos += snprintf( szOut + pos, maxLen - pos, g_Strings[STR_ITEM_WEAPON_BONUS],
+                                 fBonusToHit, fBonusToDamage );
             break;
         case ITEM_IDX_ARMOR:
         case ITEM_IDX_SHIELD:
@@ -457,15 +455,17 @@ void CItemDef::FormatProperties( char *szOut, int maxLen, uint32 knownProps, uin
         case ITEM_IDX_GLOVES:
         case ITEM_IDX_BOOTS:
             if( fACBonus != 0.0f )
-                pos += snprintf( szOut + pos, maxLen - pos, " [%+.0f]", fACBonus );
+                pos +=
+                    snprintf( szOut + pos, maxLen - pos, g_Strings[STR_ITEM_AC_BONUS], fACBonus );
             break;
         case ITEM_IDX_RING:
         case ITEM_IDX_AMULET:
             if( fBonusToHit != 0.0f || fBonusToDamage != 0.0f )
-                pos += snprintf( szOut + pos, maxLen - pos, " (%+.0f, %+.0f)", fBonusToHit,
-                                 fBonusToDamage );
+                pos += snprintf( szOut + pos, maxLen - pos, g_Strings[STR_ITEM_WEAPON_BONUS],
+                                 fBonusToHit, fBonusToDamage );
             else if( fACBonus != 0.0f )
-                pos += snprintf( szOut + pos, maxLen - pos, " [%+.0f]", fACBonus );
+                pos +=
+                    snprintf( szOut + pos, maxLen - pos, g_Strings[STR_ITEM_AC_BONUS], fACBonus );
             break;
 
         default:
@@ -475,11 +475,11 @@ void CItemDef::FormatProperties( char *szOut, int maxLen, uint32 knownProps, uin
     if( ( knownProps & KNOWN_CHARGES ) &&
         ( m_dwIndex == ITEM_IDX_WAND || m_dwIndex == ITEM_IDX_STAFF ) )
     {
-        pos += snprintf( szOut + pos, maxLen - pos, " (%d charges)", charges );
+        pos += snprintf( szOut + pos, maxLen - pos, g_Strings[STR_ITEM_CHARGES], charges );
     }
     if( ( knownProps & KNOWN_CURSED ) && ( itemFlags & ITEM_FLAG_CURSED ) )
     {
-        pos += snprintf( szOut + pos, maxLen - pos, " {cursed}" );
+        pos += snprintf( szOut + pos, maxLen - pos, g_Strings[STR_ITEM_CURSED] );
     }
 }
 
@@ -496,16 +496,16 @@ const char *CItem::GetName()
         baseName = m_id->m_szUnidentifiedName;
         if( m_id->m_bTried )
         {
-            snprintf( szDisplay, sizeof( szDisplay ), "%s {tried}", baseName );
+            sprintf( szDisplay, g_Strings[STR_ITEM_TRIED], baseName );
             return szDisplay;
         }
         return baseName;
     }
 
     if( m_id->m_szFlavor )
-        snprintf( szDisplay, sizeof( szDisplay ), "%s %s", m_id->m_szFlavor, baseName );
+        sprintf( szDisplay, g_Strings[STR_ITEM_WITH_FLAVOR], m_id->m_szFlavor, baseName );
     else
-        snprintf( szDisplay, sizeof( szDisplay ), "%s", baseName );
+        strcpy( szDisplay, baseName );
     int baseLen = strlen( szDisplay );
     m_id->FormatProperties( szDisplay + baseLen, sizeof( szDisplay ) - baseLen, m_dwKnownProps,
                             m_dwFlags, m_dwCharges, m_fACBonus, m_fBonusToHit, m_fBonusToDamage );
@@ -525,16 +525,16 @@ const char *CItem::GetPlural()
         baseName = m_id->m_szUnidentifiedPlural;
         if( m_id->m_bTried )
         {
-            snprintf( szDisplay, sizeof( szDisplay ), "%s {tried}", baseName );
+            sprintf( szDisplay, g_Strings[STR_ITEM_TRIED], baseName );
             return szDisplay;
         }
         return baseName;
     }
 
     if( m_id->m_szFlavor )
-        snprintf( szDisplay, sizeof( szDisplay ), "%s %s", m_id->m_szFlavor, baseName );
+        sprintf( szDisplay, g_Strings[STR_ITEM_WITH_FLAVOR], m_id->m_szFlavor, baseName );
     else
-        snprintf( szDisplay, sizeof( szDisplay ), "%s", baseName );
+        strcpy( szDisplay, baseName );
     int baseLen = strlen( szDisplay );
     m_id->FormatProperties( szDisplay + baseLen, sizeof( szDisplay ) - baseLen, m_dwKnownProps,
                             m_dwFlags, m_dwCharges, m_fACBonus, m_fBonusToHit, m_fBonusToDamage );
@@ -573,7 +573,7 @@ void CItem::NoticeEffect( JResult bNoticed )
     if( bNoticed == JSUCCESS )
     {
         Identify();
-        g_pGame->GetMsgs()->Printf( "You recognize it as a %s.\n", GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_YOU_RECOGNIZE_IT_AS_A], GetName() );
     }
     else
     {

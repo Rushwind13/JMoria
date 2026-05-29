@@ -298,48 +298,48 @@ void CMonsterRecall::PrintRecall( const CMonsterDef *pmd, CDisplayText *pDT ) co
     const CRecallEntry *pEntry = GetEntry( pmd->m_szName );
 
     // ── Line 1: name + sighting/kill counts ──────────────────────────────────
-    pDT->Printf( "+++ %s +++", pmd->m_szName );
+    pDT->Printf( g_Strings[STR_RECALL_MONSTER_HEADER], pmd->m_szName );
 
     bool anyKnowledge = pEntry && ( pEntry->dwEncounters > 0 || pEntry->dwKills > 0 ||
                                     pEntry->nAttacks > 0 || pEntry->dwKnownFlags != 0 );
     if( !anyKnowledge )
     {
-        pDT->Printf( "  No knowledge.\n" );
+        pDT->Printf( g_Strings[STR_NO_KNOWLEDGE] );
         return;
     }
 
     if( pEntry->dwEncounters > 0 )
-        pDT->Printf( "  Seen:%d", pEntry->dwEncounters );
+        pDT->Printf( g_Strings[STR_SEEN], pEntry->dwEncounters );
     if( pEntry->dwKills > 0 )
-        pDT->Printf( "  Killed:%d", pEntry->dwKills );
-    pDT->Printf( "\n" );
+        pDT->Printf( g_Strings[STR_KILLED], pEntry->dwKills );
+    pDT->Printf( g_Strings[STR_LF] );
 
     // ── Line 2: depth / HP / XP / flags (all on one line, skip missing) ──────
     bool anyLine2 = false;
     auto sep = [&]()
     {
         if( anyLine2 )
-            pDT->Printf( "  " );
+            pDT->Printf( g_Strings[STR_INDENT] );
         anyLine2 = true;
     };
 
     if( pEntry->bDepthKnown && pmd->m_dwLevel > 0 )
     {
         sep();
-        pDT->Printf( "Depth:%dft", pmd->m_dwLevel * 50 );
+        pDT->Printf( g_Strings[STR_DEPTH], pmd->m_dwLevel * 50 );
     }
     if( pEntry->dwHPObsMin > 0 )
     {
         sep();
         if( pEntry->dwHPObsMin == pEntry->dwHPObsMax )
-            pDT->Printf( "HP:~%d", pEntry->dwHPObsMin );
+            pDT->Printf( g_Strings[STR_HP_RANGE_APPROX], pEntry->dwHPObsMin );
         else
-            pDT->Printf( "HP:%d-%d", pEntry->dwHPObsMin, pEntry->dwHPObsMax );
+            pDT->Printf( g_Strings[STR_HP_RANGE], pEntry->dwHPObsMin, pEntry->dwHPObsMax );
     }
     if( pEntry->bXPKnown )
     {
         sep();
-        pDT->Printf( "XP:%d", (int)pmd->m_fExpValue );
+        pDT->Printf( g_Strings[STR_N_TIMESP], (int)pmd->m_fExpValue );
     }
 
     static const struct
@@ -358,7 +358,7 @@ void CMonsterRecall::PrintRecall( const CMonsterDef *pmd, CDisplayText *pDT ) co
         if( pEntry->dwKnownFlags & kFlagLabels[i].flag )
         {
             sep();
-            pDT->Printf( "%s", kFlagLabels[i].label );
+            pDT->Printf( g_Strings[STR_FMT_STRING], kFlagLabels[i].label );
         }
     }
 
@@ -385,7 +385,7 @@ void CMonsterRecall::PrintRecall( const CMonsterDef *pmd, CDisplayText *pDT ) co
             if( dwMonElements & kElems[i].flag )
             {
                 sep();
-                pDT->Printf( "%s", kElems[i].immuneLabel );
+                pDT->Printf( g_Strings[STR_FMT_STRING], kElems[i].immuneLabel );
             }
         }
         for( int i = 0; kElems[i].flag; i++ )
@@ -393,13 +393,13 @@ void CMonsterRecall::PrintRecall( const CMonsterDef *pmd, CDisplayText *pDT ) co
             if( CEffect::CheckAffinity( kElems[i].flag, dwMonElements ) > 1.0f )
             {
                 sep();
-                pDT->Printf( "%s", kElems[i].weakLabel );
+                pDT->Printf( g_Strings[STR_FMT_STRING], kElems[i].weakLabel );
             }
         }
     }
 
     if( anyLine2 )
-        pDT->Printf( "\n" );
+        pDT->Printf( g_Strings[STR_LF] );
 
     // ── Line 3: attacks, all comma-separated on one line ─────────────────────
     if( pEntry->nAttacks > 0 )
@@ -408,16 +408,15 @@ void CMonsterRecall::PrintRecall( const CMonsterDef *pmd, CDisplayText *pDT ) co
         {
             const CRecallAttack &atk = pEntry->attacks[i];
             if( i > 0 )
-                pDT->Printf( "  " );
+                pDT->Printf( g_Strings[STR_INDENT] );
             int avg = atk.dwTimesObserved > 0 ? atk.dwDamageTotal / atk.dwTimesObserved : 0;
-            pDT->Printf( "%s", RecallAttackVerb( atk.dwType ) );
+            pDT->Printf( g_Strings[STR_FMT_STRING], RecallAttackVerb( atk.dwType ) );
             if( atk.szEffect[0] )
-                pDT->Printf( "[%s]", atk.szEffect );
-            pDT->Printf( " %d-%ddmg(avg%d", atk.dwDamageMin, atk.dwDamageMax, avg );
+                pDT->Printf( g_Strings[STR_FMT_BRACKETED], atk.szEffect );
+            pDT->Printf( g_Strings[STR_DMGAVG], atk.dwDamageMin, atk.dwDamageMax, avg );
             if( atk.dwTimesObserved > 1 )
-                pDT->Printf( ",%dx", atk.dwTimesObserved );
-            pDT->Printf( ")" );
+                pDT->Printf( g_Strings[STR_N_TIMES], atk.dwTimesObserved );
         }
-        pDT->Printf( "\n" );
+        pDT->Printf( g_Strings[STR_LF] );
     }
 }

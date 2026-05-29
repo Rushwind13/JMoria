@@ -237,16 +237,12 @@ public:
     }
     inline bool IsZappable() { return m_id->m_dwIndex == ITEM_IDX_WAND; }
     inline bool IsStaff() { return m_id->m_dwIndex == ITEM_IDX_STAFF; }
-    inline bool IsFireable()
+    inline bool IsAmmo()
     {
-        return ( m_id->m_dwIndex == ITEM_IDX_ARROW || m_id->m_dwIndex == ITEM_IDX_BOLT ) &&
-               m_dwCount > 0;
+        return m_id->m_dwIndex == ITEM_IDX_ARROW || m_id->m_dwIndex == ITEM_IDX_BOLT;
     }
-    inline bool IsWieldable()
-    {
-        return m_id->m_dwIndex != ITEM_IDX_ARROW && m_id->m_dwIndex != ITEM_IDX_BOLT &&
-               EquipType() != EQUIP_IDX_INVALID;
-    }
+    inline bool IsFireable() { return IsAmmo() && m_dwCount > 0; }
+    inline bool IsWieldable() { return !IsAmmo() && EquipType() != EQUIP_IDX_INVALID; }
     inline bool IsFuel() { return m_id->m_dwIndex == ITEM_IDX_FUEL; }
     inline bool NeedsFuel()
     {

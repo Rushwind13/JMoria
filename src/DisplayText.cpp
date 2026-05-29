@@ -216,10 +216,16 @@ void CDisplayText::Paginate()
     if( usedLines < 1 )
         usedLines = 1;
 
-    // +1 so that counting N newlines from the end positions ptr at the START
-    // of the Nth-from-last line (not the (N-1)th), eliminating the blank-bottom-
-    // row that appeared when the window was full.
-    dwAddLinesMax = usedLines + 1 + m_dwFreeLines;
+    // If the buffer ends with '\n', the nul terminator is "after" that newline,
+    // so scanning N newlines back undershoots by one — we need +1 to land at
+    // the start of the Nth-from-last line rather than (N-1)th.
+    // If it does NOT end with '\n' (normal in m_bMoreOnNewline mode where \n is
+    // stripped), the last line is unterminated and the nul IS the line boundary,
+    // so no +1 is needed — adding it causes Paginate to overshoot and show from
+    // the beginning while clipping the newest content.
+    char *pEnd = strchr( m_szText, nul );
+    int trailingNL = ( pEnd > m_szText && *( pEnd - 1 ) == '\n' ) ? 1 : 0;
+    dwAddLinesMax = usedLines + trailingNL + m_dwFreeLines;
 
     ptr = strchr( m_szText, nul );
     while( ptr > m_szText )
@@ -456,14 +462,13 @@ void CDisplayText::DisplayFixedList( JLinkList<CItem> *pList, const CDisplayMeta
     {
         if( pLink != NULL && pLink->m_dwIndex == cListId - 'a' )
         {
-            Printf( "%c - %s\n", cListId, pLink->m_lpData->GetName() );
+            Printf( g_Strings[STR_LIST_ITEM], cListId, pLink->m_lpData->GetName() );
             pLink = pList->GetNext( pLink );
         }
 #ifdef SHOW_EMPTY
         else
         {
-
-            Printf( "%c - (None)\n", cListId );
+            Printf( g_Strings[STR_LIST_ITEM], cListId, g_Strings[STR_NONE] );
         }
 #endif // SHOW_EMPTY
         cListId++;
@@ -484,11 +489,12 @@ void CDisplayText::DisplayList( JLinkList<CItem> *pList, const CDisplayMeta *pMe
         pItem = pLink->m_lpData;
         if( pItem->IsStackable() && pItem->m_dwCount > 1 )
         {
-            Printf( "%c - %d %s\n", cListId, pItem->m_dwCount, pItem->GetPlural() );
+            Printf( g_Strings[STR_LIST_ITEM_WITH_COUNT], cListId, pItem->m_dwCount,
+                    pItem->GetPlural() );
         }
         else
         {
-            Printf( "%c - %s\n", cListId, pItem->GetName() );
+            Printf( g_Strings[STR_LIST_ITEM], cListId, pItem->GetName() );
         }
 
         if( cListId < pMeta->limit )
@@ -515,7 +521,7 @@ void CDisplayText::DisplayList( JLinkList<CScore> *pList, const CDisplayMeta *pM
     while( pLink != NULL )
     {
         pItem = pLink->m_lpData;
-        Printf( "%d - %s\n", cListId, pItem->GetName() );
+        Printf( g_Strings[STR_HIGH_SCORE], cListId, pItem->GetName() );
 
         if( cListId < pMeta->limit )
         {

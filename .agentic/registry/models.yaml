@@ -1,0 +1,69 @@
+# Model registry — the authority for WHICH vendor/model each role gets.
+# Roles declare a capability_profile; this file resolves it to a concrete model.
+# Swapping vendors is an edit here, never in roles/ or contracts/.
+# Adapter manifests (adapters/*/manifest.json) re-spell these bindings in each
+# runner's model vocabulary (e.g. anthropic/claude-fable-5 -> "fable" in Claude
+# Code) — when you change a binding here, update the manifests and re-render.
+#
+# Model IDs below are ILLUSTRATIVE. Pin to your org's approved, current models
+# and re-verify pricing/limits when you do.
+
+profiles:
+  frontier-reasoning:
+    # Deepest reasoning available; used where judgment concentrates and errors
+    # are expensive (architecture, review, orchestration). Cost-insensitive.
+    default: anthropic/claude-fable-5
+    alternates:
+      - openai/<current-frontier-model>
+      - google/<current-frontier-model>
+
+  balanced:
+    # Strong general capability at moderate cost; the workhorse tier.
+    default: anthropic/claude-sonnet-5
+    alternates:
+      - openai/<current-workhorse-model>
+      - google/<current-workhorse-model>
+
+  fast-cheap:
+    # High-volume, low-stakes work. No core role binds here yet; reserved for
+    # extension roles (triage, summarization, formatting).
+    default: anthropic/claude-haiku-4-5
+    alternates:
+      - openai/<current-small-model>
+
+pricing:
+  # $ per million tokens, keyed by the model IDs above. ILLUSTRATIVE like the
+  # IDs themselves — re-verify against your org's rates when pinning models.
+  # The v1 orchestrator prices each dispatch's usage from this map into the
+  # run's budget.ledger[] (docs/ORCHESTRATOR.md §6). A model with no entry
+  # here cannot be metered; the dispatch seam refuses it rather than guessing.
+  anthropic/claude-fable-5:   {usd_per_mtok_in: 15, usd_per_mtok_out: 75}
+  anthropic/claude-sonnet-5:  {usd_per_mtok_in: 3,  usd_per_mtok_out: 15}
+  anthropic/claude-haiku-4-5: {usd_per_mtok_in: 1,  usd_per_mtok_out: 5}
+
+dispatch_estimates_usd:
+  # Conservative static per-dispatch estimates for the pre-flight budget check
+  # (settled 2026-07-10: static for v1; trailing ledger averages are a possible
+  # later upgrade). Before any dispatch: ledger sum + this estimate projected
+  # over the limit → pause `budget-exhausted` and escalate. Pause, never degrade.
+  orchestrator: 0.50   # single-shot judgment calls (escalation summary, triage)
+  analyst: 2
+  architect: 5
+  implementer: 8
+  reviewer: 4
+  verifier: 6
+  ops: 2
+
+bindings:
+  orchestrator: {profile: frontier-reasoning}
+  analyst:      {profile: balanced}
+  architect:    {profile: frontier-reasoning}
+  implementer:  {profile: balanced}
+
+  # P5 decorrelation: reviewer and verifier must not resolve to the same vendor
+  # as implementer. `avoid_vendor_of` makes the constraint explicit so an
+  # orchestrator (or a human doing v0 dispatch) can enforce it.
+  reviewer:     {profile: frontier-reasoning, avoid_vendor_of: implementer}
+  verifier:     {profile: balanced,           avoid_vendor_of: implementer}
+
+  ops:          {profile: balanced}

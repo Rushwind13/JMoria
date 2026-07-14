@@ -1,0 +1,67 @@
+{
+  "adapter": "copilot-cli",
+  "output_dir": "../.github/agents",
+  "filename": "{role}.agent.md",
+  "roles": [
+    "analyst",
+    "architect",
+    "implementer",
+    "reviewer",
+    "verifier",
+    "ops",
+    "integrator"
+  ],
+  "tools_style": "flow-list",
+  "tool_map": {
+    "read": [
+      "read"
+    ],
+    "search": [
+      "search"
+    ],
+    "write-artifacts": [
+      "edit"
+    ],
+    "edit-code": [
+      "edit"
+    ],
+    "shell": [
+      "execute"
+    ]
+  },
+  "_comment_models": "Runner-specific spellings of the registry bindings. Multi-vendor harness: model_overrides implement the P5 vendor pins (reviewer/verifier decorrelated from the Claude-backed implementer).",
+  "model_map": {
+    "frontier-reasoning": "claude-fable-5",
+    "balanced": "claude-sonnet-5"
+  },
+  "model_overrides": {
+    "reviewer": "gpt-5.4",
+    "verifier": "gemini-3-flash"
+  },
+  "_comment_model_vendors": "Vendor of each runner spelling above, for the orchestrator's dispatch-time P5 check (avoid_vendor_of).",
+  "model_vendors": {
+    "claude-fable-5": "anthropic",
+    "claude-sonnet-5": "anthropic",
+    "gpt-5.4": "openai",
+    "gemini-3-flash": "google"
+  },
+  "extra_frontmatter": {
+    "disable-model-invocation": true,
+    "user-invocable": true
+  },
+  "_comment_headless": "v1 orchestrator dispatch, fast-follow milestone (docs/ORCHESTRATOR.md \u00a75.3). --agent selects the rendered custom agent, whose frontmatter (incl. model_overrides above) pins the model \u2014 this is the P5-completing dispatcher. usage_report format static-estimate: Copilot CLI does not document per-invocation usage output; until verified live, metering falls back to the registry's dispatch_estimates_usd entry, recorded in the ledger with tokens null.",
+  "headless": {
+    "command": [
+      "copilot",
+      "-p",
+      "{prompt}",
+      "--agent",
+      "{role}",
+      "--allow-all-tools"
+    ],
+    "dispatch_prompt": "{body}",
+    "usage_report": {
+      "format": "static-estimate"
+    }
+  }
+}

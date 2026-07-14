@@ -1,0 +1,166 @@
+integration:
+  run_id: 000-integration
+  start_date: '2026-07-14'
+  start_time: '12:30:23Z'
+  phase: integration
+  status: ready_for_gi_review
+  framework_version: 1.0.70
+
+host:
+  name: JMoria
+  repo: github.com/Rushwind13/JMoria
+  owner: Rushwind13
+  repo_url: git@github.com:Rushwind13/JMoria.git
+  active_branch: develop
+  platform_primary: darwin
+  platforms_supported: [darwin, linux, raspberry_pi_os]
+  language: cpp17
+
+environment:
+  os: macOS 26.5.2 (Darwin 25F84)
+  compiler: Apple clang 21.0.0
+  make_version: GNU Make 3.81
+  git_version: 2.50.1
+  clang_format_version: 21.1.8
+  cpp_standard: c++17
+  build_verified: true
+  build_status: make_ascii_succeeds
+
+gates:
+  configured:
+    - id: G1
+      name: Build Integrity (Render Check)
+      status: working
+      automation: github_actions
+      workflow: agentic-render-check.yml
+  documented:
+    - id: G0
+      name: Code Style (clang-format)
+      status: manual
+      enforcement: pre_commit_hook_template_exists
+  not_configured:
+    - id: G2
+      name: Approval/Review
+      automation: none
+      notes: No branch protection rules configured
+    - id: G3
+      name: Deployment
+      automation: none
+      notes: No CD pipeline
+
+conventions:
+  code_style:
+    tool: clang-format
+    config_file: .clang-format
+    version: 21.1.8
+    status: present
+    enforcement: manual_before_commit
+  build_system:
+    tool: Makefile
+    platform_detection: uname
+    render_modes: [ascii, opengl, both]
+  resource_data:
+    formats: [Monsters.txt, Items.txt]
+    parser: FileParse utility (src/FileParse.cpp)
+  testing:
+    framework: Cucumber-CPP with GoogleTest
+    features_dir: test/features/
+    step_definitions_dir: test/features/step_definitions/
+  documentation:
+    locations: [doc/Developer-Setup-Guide.md, doc/coding-standards.md, doc/_JMoria Developer's Guide.md]
+    readability: all_in_repo
+
+artifacts_produced:
+  integration_profile: .agentic/runs/000-integration/integration-profile.md
+  intent_brief: .agentic/runs/000-integration/intent-brief.md
+  plan: .agentic/runs/000-integration/plan.md
+  state: .agentic/runs/000-integration/state.yaml
+  universal_overlay: .agentic/overlays/_all.md
+  role_overlays:
+    - .agentic/overlays/integrator.md
+    - .agentic/overlays/analyst.md
+    - .agentic/overlays/architect.md
+    - .agentic/overlays/implementer.md
+    - .agentic/overlays/reviewer.md
+    - .agentic/overlays/verifier.md
+    - .agentic/overlays/ops.md
+    - .agentic/overlays/orchestrator.md
+  rendered_agents:
+    - .github/agents/integrator.agent.md
+    - .github/agents/analyst.agent.md
+    - .github/agents/architect.agent.md
+    - .github/agents/implementer.agent.md
+    - .github/agents/reviewer.agent.md
+    - .github/agents/verifier.agent.md
+    - .github/agents/ops.agent.md
+
+framework_status:
+  core_files_read_only: true
+  overlays_writable: true
+  rendered_agents_current: true
+  render_agents_check_pass: true
+  framework_integrity: verified
+
+guardrails_count: 7
+guardrails_status: all_traced_to_findings
+
+decorrelation:
+  vendor_reachability:
+    github: reachable
+    anthropic: reachable
+    openai: assume_configured
+  p5_plan_persistence: satisfied_by_in_repo_runs
+
+dispatch_reality:
+  mode: interactive_operator_sessions
+  automation_level: human_initiated
+  orchestrator_deployed: false
+  future_ready: true
+
+known_issues:
+  - id: g0_not_automated
+    description: Code style gate (G0) documented but not machine-enforced
+    severity: medium
+    remediation: Install pre-commit hook or add CI gate
+  - id: test_deps_not_in_ci
+    description: Cucumber-CPP and GoogleTest require manual setup
+    severity: low
+    remediation: Document and provide install scripts
+  - id: hardcoded_test_path
+    description: Makefile has hardcoded googletest path for macOS Homebrew
+    severity: low
+    remediation: Use dynamic detection or CMake (future)
+  - id: no_branch_protection
+    description: GitHub branch protection not configured
+    severity: low
+    remediation: Not a blocker for small/active teams; policy-enforced via PR review
+
+recommendations:
+  - Install pre-commit hook from doc/Developer-Setup-Guide.md to enforce G0
+  - Monitor test infrastructure status; consider CI enhancement for automated test runs
+  - Verify Linux/Pi compatibility on next feature branch test
+  - Document orchestrator deployment prerequisites if automation becomes valuable
+
+successor_agents_ready: true
+successor_context_available:
+  - integrator
+  - analyst
+  - architect
+  - implementer
+  - reviewer
+  - verifier
+  - ops
+  - orchestrator
+
+next_gate: gi_review
+gate_entry_human_only: true
+
+metadata:
+  run_directory: .agentic/runs/000-integration/
+  framework_lock_file: .agentic/framework-lock.json
+  registry_file: .agentic/registry/models.yaml
+  integration_complete: true
+  all_deliverables_present: true
+  build_validation_passed: true
+  framework_validation_passed: true
+  ready_for_gi_review: true

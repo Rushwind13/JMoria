@@ -1,0 +1,8 @@
+name: agentic-render-check
+on: [push, pull_request]
+jobs:
+  render-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 .agentic/scripts/render-agents.py --check

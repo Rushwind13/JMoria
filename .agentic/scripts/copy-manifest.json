@@ -1,0 +1,30 @@
+{
+  "_comment": "The copy manifest (docs/INTEGRATION.md §2): the list of core-layer files a release offers a host. 'always' travels with every take; groups are the menu --take selects from. integrate.py init records the taken subset in the host's framework-lock.json. Until non-SDLC content exists upstream, --take all and --take sdlc resolve to the same set.",
+  "version": 1,
+  "always": [
+    "scripts/render-agents.py",
+    "scripts/integrate.py",
+    "scripts/copy-manifest.json",
+    "scripts/framework-lock.schema.json",
+    "roles/integrator.md",
+    "contracts/integration-profile.md"
+  ],
+  "groups": {
+    "sdlc": [
+      "roles/analyst.md",
+      "roles/architect.md",
+      "roles/implementer.md",
+      "roles/reviewer.md",
+      "roles/verifier.md",
+      "roles/ops.md",
+      "roles/orchestrator.md",
+      "contracts/intent-brief.md",
+      "contracts/spec.md",
+      "contracts/plan.md",
+      "contracts/work-item.yaml",
+      "contracts/review-report.md",
+      "contracts/verification-report.md",
+      "contracts/state.yaml"
+    ]
+  }
+}

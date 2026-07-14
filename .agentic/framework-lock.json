@@ -1,0 +1,61 @@
+{
+  "source": {
+    "repo": "git@github.com:nathancrtr/agentic-sandbox.git",
+    "ref": "1aef44ebb4cd5152f1713127541c755b8fec638a",
+    "version": "unreleased"
+  },
+  "integrated_at": "2026-07-14",
+  "method": "integrate.py v0.1",
+  "adapters_rendered": [
+    "copilot-cli"
+  ],
+  "taken": [
+    "scripts/render-agents.py",
+    "scripts/integrate.py",
+    "scripts/copy-manifest.json",
+    "scripts/framework-lock.schema.json",
+    "roles/integrator.md",
+    "contracts/integration-profile.md",
+    "roles/analyst.md",
+    "roles/architect.md",
+    "roles/implementer.md",
+    "roles/reviewer.md",
+    "roles/verifier.md",
+    "roles/ops.md",
+    "roles/orchestrator.md",
+    "contracts/intent-brief.md",
+    "contracts/spec.md",
+    "contracts/plan.md",
+    "contracts/work-item.yaml",
+    "contracts/review-report.md",
+    "contracts/verification-report.md",
+    "contracts/state.yaml"
+  ],
+  "files": {
+    ".agentic/scripts/render-agents.py": "1f21e94f3a1e27f638219a3c4e7b65ea857e69f31ebbecb741cb8068c4de791b",
+    ".agentic/scripts/integrate.py": "a4846b95d1665d0048b456308980519ef79951186337c63bd3b08909ec3cde44",
+    ".agentic/scripts/copy-manifest.json": "5ada1075bc63a3d76061c7a672d5e65328a863fb3103fff4215046c6586983ac",
+    ".agentic/scripts/framework-lock.schema.json": "aacd4e4312853d668336c579aa0c6554294850ee48e120f8a99d1ab1ec696f84",
+    ".agentic/roles/integrator.md": "3ca66d79e67fa67c6bdf19b5e2e54031c9cfee33321f7970b9bcfde1ce3a4d87",
+    ".agentic/contracts/integration-profile.md": "9041828dde2d699095e0788dc62846c962fd37614b901e2d7490045affefd7fa",
+    ".agentic/roles/analyst.md": "6a504bcca343ecad563050a4e8a7a43c3688c631358ac0078841243110e372fd",
+    ".agentic/roles/architect.md": "d7b15dfbd37da8422753e5744d7c1c7ea48af9e691521ca74f6075584076706c",
+    ".agentic/roles/implementer.md": "e30b228e81622d6613128de46e940c9eb7727d37e78873a3b87067596d95553d",
+    ".agentic/roles/reviewer.md": "96a56fc427fa1d73f49b6f603d7586d8ef33c0fd2719092ef4f88a0eec25ee39",
+    ".agentic/roles/verifier.md": "4d52dbf388a1f39302357b1c8bd30d4a46fd9bbfa5ac8c7827e8f0c1d6b46ee9",
+    ".agentic/roles/ops.md": "03165c22a6b7f84ece758cf8d646df9fd2006d94a8864dd05021f663f9ce8bfc",
+    ".agentic/roles/orchestrator.md": "452a9ec23d75e7823b2657eacfacae7d8de301675a782f05dd89144e01611735",
+    ".agentic/contracts/intent-brief.md": "3bdc0aae4d8e7b2cfb19d391a8c5fc2c7a7c14f5aebc22751d92275dae1d0650",
+    ".agentic/contracts/spec.md": "4d0d0708a0a0b5354912c6899dbb15b47ef544e88bb532f98062fb7aed889467",
+    ".agentic/contracts/plan.md": "937ea120b247e12b9437bdc9ef50d5366495a4fbe6fdbbb4f01a7163b372ea26",
+    ".agentic/contracts/work-item.yaml": "57f35b1c332de68e21d83ba5a646096e657546df09e0a9271db011b3fc18309c",
+    ".agentic/contracts/review-report.md": "c58f090fca7074dd683b1aa07f9feaa0ed787dba7db6e0d71242440506458f62",
+    ".agentic/contracts/verification-report.md": "3c468488c7891f3831cbca924e8ea7a6843180a1b84754b3d34957f8488ca8ca",
+    ".agentic/contracts/state.yaml": "4207d478ba4e9223f7aba89373668400ae3b1661a28566f68b6735bcd91c8fb6"
+  },
+  "forks": {},
+  "instance_layer": [],
+  "provenance_mode": "private",
+  "layout": "prefixed",
+  "prefix": ".agentic"
+}

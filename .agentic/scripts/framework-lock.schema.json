@@ -1,0 +1,53 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "framework-lock.schema.json",
+  "title": "framework-lock.json",
+  "description": "Normative schema for the integration lockfile (docs/INTEGRATION.md §3). Written by integrate.py init; hand-written locks from pre-tool integrations must conform when re-pinned.",
+  "type": "object",
+  "required": [
+    "source", "integrated_at", "method", "adapters_rendered", "taken",
+    "files", "forks", "instance_layer", "provenance_mode", "layout", "prefix"
+  ],
+  "properties": {
+    "source": {
+      "type": "object",
+      "required": ["repo", "ref", "version"],
+      "properties": {
+        "repo": {"type": ["string", "null"], "description": "Framework repo URL or slug; null when init ran from a tarball with no git metadata"},
+        "ref": {"type": "string", "description": "Pinned ref: a release tag once releases exist, a bare commit hash before"},
+        "version": {"type": "string", "description": "Framework version string; 'unreleased' before the first tag"}
+      }
+    },
+    "integrated_at": {"type": "string", "description": "ISO-8601 date of the last init/upgrade that wrote this lock"},
+    "method": {"type": "string", "description": "Tool and version that wrote the lock, or 'hand-executed' for pre-tool instances"},
+    "adapters_rendered": {"type": "array", "items": {"type": "string"}},
+    "taken": {
+      "type": "array", "items": {"type": "string"},
+      "description": "The copy-manifest subset this host adopted; everything downstream (overlay stubs, validate, smoke) scopes to it"
+    },
+    "files": {
+      "type": "object",
+      "additionalProperties": {"type": "string"},
+      "description": "Per-file sha256 of every taken core-layer file, keyed by host-relative path"
+    },
+    "forks": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["base_sha256", "reason", "review_at_upgrade"],
+        "properties": {
+          "base_sha256": {"type": "string", "description": "Checksum of the retained pristine upstream copy the fork diverged from"},
+          "reason": {"type": "string"},
+          "review_at_upgrade": {"type": "boolean"}
+        }
+      }
+    },
+    "instance_layer": {
+      "type": "array", "items": {"type": "string"},
+      "description": "Host-original trees that follow framework conventions but are not copies"
+    },
+    "provenance_mode": {"enum": ["redistribute", "private"]},
+    "layout": {"enum": ["prefixed", "root"]},
+    "prefix": {"type": "string", "description": "The metadata prefix directory (default .agentic)"}
+  }
+}

@@ -1,0 +1,29 @@
+# Contract: produced by Architect; consumed by exactly one Implementer.
+# Filename: tasks/NN-slug.yaml (NN orders display, not execution — `depends_on` orders execution).
+# All top-level keys required; `notes` starts empty and is append-only during the run.
+
+id: 01-example-slug
+title: One-line description of the work
+requirements: [R1]        # spec requirement numbers this task covers
+
+scope: |
+  What to build, in a few sentences. The Implementer gets only this file,
+  plan.md, and spec.md — write accordingly.
+
+file_contact_surface:     # files this task will create or modify — the
+  - src/example/thing.py  # Orchestrator parallelizes tasks with disjoint surfaces
+  - tests/test_thing.py
+
+acceptance_tests:         # how the Implementer knows they're done;
+  - AC1.1                 # reference spec criteria and/or add task-specific ones
+  - "pytest tests/test_thing.py passes"
+
+depends_on: []            # ids of tasks that must merge first
+
+status: pending           # pending | in-progress | in-review | review-approved | verified | done
+                          # (review_rounds is tracked ONLY in the run's state.yaml —
+                          #  duplicating it here caused drift in the wordfreq run)
+
+notes: |
+  # Append-only log: Implementer deviations/discoveries, finding rebuttals,
+  # anything the Reviewer or a future reader needs.

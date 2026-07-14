@@ -98,7 +98,7 @@ files changed.
 ## Testing
 - **Framework**: Cucumber-CPP + GoogleTest
 - **Location**: `test/features/` (feature files) + `test/features/step_definitions/` (C++ steps)
-- **Run tests**: `./test/runtests.sh --build` (requires test dependencies)
+- **Run tests**: `make clean ascii test; cd test; ./runtests.sh` (requires test dependencies)
 - **Test dependencies** (macOS): `brew install googletest cucumber-cpp`; `sudo gem install cucumber -v 7.1.0`
 - **Known constraint**: Hardcoded googletest path in Makefile (`/opt/homebrew/Cellar/googletest/1.17.0/`); works on macOS with Homebrew; Linux may differ
 - **If adding test files**: Ensure they build and link before committing
@@ -205,7 +205,7 @@ clang-format -i src/YourFile.cpp src/YourFile.h
 ### Debugging
 - **ASCII build recommended for development**: Faster than OpenGL, no framework dependencies
 - **Game logs**: `clockstep_log*.txt` auto-created in repo root (may be useful for debugging)
-- **Manual testing**: Play the game after changes; test the specific feature you implemented
+- **Manual testing**: Use `tmux` to play the game after changes; test the specific feature you implemented
 - **Wizard mode**: `Ctrl-T` (teleport), `Ctrl-S` (summon), etc. — useful for testing without long runs
 
 ### Before Committing

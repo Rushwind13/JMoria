@@ -108,7 +108,7 @@ ADRs the G1 human must weigh in on.
 ## Testing
 - **Framework**: Cucumber-CPP + GoogleTest
 - **Location**: `test/features/` (feature files) + `test/features/step_definitions/` (C++ steps)
-- **Run tests**: `./test/runtests.sh --build` (requires test dependencies)
+- **Run tests**: `make clean ascii test; cd test; ./runtests.sh` (requires test dependencies)
 - **Test dependencies** (macOS): `brew install googletest cucumber-cpp`; `sudo gem install cucumber -v 7.1.0`
 - **Known constraint**: Hardcoded googletest path in Makefile (`/opt/homebrew/Cellar/googletest/1.17.0/`); works on macOS with Homebrew; Linux may differ
 - **If adding test files**: Ensure they build and link before committing

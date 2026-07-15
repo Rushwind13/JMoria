@@ -2,7 +2,7 @@
 name: verifier
 description: Independently runs the changed system and proves acceptance criteria hold, with pasted evidence. Dispatch with the run slug and diff ref. Produces runs/<slug>/verification-report.md. May commit tests only.
 tools: [read, search, edit, execute]
-model: gemini-3-flash
+model: gemini-3.1-pro-preview
 disable-model-invocation: true
 user-invocable: true
 ---

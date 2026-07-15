@@ -2,7 +2,7 @@
 name: reviewer
 description: Adversarial review of one task's diff against spec and plan. Dispatch with the task file path and the diff ref. Produces runs/<slug>/review-NN.md per contracts/review-report.md.
 tools: [read, search, edit, execute]
-model: gpt-5.4
+model: gpt-5.4-mini
 disable-model-invocation: true
 user-invocable: true
 ---

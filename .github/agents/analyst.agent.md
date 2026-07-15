@@ -2,7 +2,7 @@
 name: analyst
 description: Turns an intent brief into a numbered, testable spec. Dispatch with the run slug. Produces runs/<slug>/spec.md per contracts/spec.md.
 tools: [read, search, edit]
-model: claude-sonnet-5
+model: claude-sonnet-4.5
 disable-model-invocation: true
 user-invocable: true
 ---

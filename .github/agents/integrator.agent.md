@@ -2,7 +2,7 @@
 name: integrator
 description: Probes a freshly scaffolded host repository and produces the integration profile plus the project overlay layer. Dispatch with the integration run directory. Produces runs/000-integration/integration-profile.md per contracts/integration-profile.md.
 tools: [read, search, edit, execute]
-model: claude-fable-5
+model: claude-sonnet-4.6
 disable-model-invocation: true
 user-invocable: true
 ---

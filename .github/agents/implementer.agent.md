@@ -2,7 +2,7 @@
 name: implementer
 description: Executes exactly one work item from runs/<slug>/tasks/. Dispatch with the task file path. Writes code on the run branch within the task's declared file-contact surface.
 tools: [read, search, edit, execute]
-model: claude-sonnet-5
+model: claude-sonnet-4.5
 disable-model-invocation: true
 user-invocable: true
 ---

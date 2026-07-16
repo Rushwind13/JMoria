@@ -2,6 +2,7 @@
 
 #include "FirstSteps.cpp"
 
+#include "BeamsMulticolorSteps.cpp"
 #include "BrainSteps.cpp"
 #include "BresenhamSteps.cpp"
 #include "DoorSteps.cpp"

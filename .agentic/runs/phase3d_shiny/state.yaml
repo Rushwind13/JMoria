@@ -1,0 +1,59 @@
+# Contract: maintained by Orchestrator (human in v0, orchestrator engine in v1);
+# read by everyone. Lives at runs/<slug>/state.yaml — the single source of truth
+# for a run.
+#
+# Writers and provenance (docs/ORCHESTRATOR.md §4.3, §7):
+#   - Gate entries are written ONLY by the named human approver.
+#   - The v1 orchestrator co-writes bookkeeping (phase, task status, ledger,
+#     escalations) under a dedicated bot identity — never a person's git
+#     config — so machine bookkeeping and human decisions stay distinguishable.
+#   - Commit messages touching this file are structured for the audit trail
+#     and the metrics reader:
+#       human decision grammar (reserved for humans):
+#         state(<slug>): G2 approved by <name> [burden: light-correction]
+#       orchestrator bookkeeping verbs (bot identity only):
+#         state(<slug>): dispatched|bounced|advanced|escalated|paused|metered …
+
+run: phase3d_shiny
+branch: feat/phase3d_shiny
+phase: spec               # spec | plan | implement | integrate | release | done | paused
+paused_reason: null       # set when phase=paused: budget-exhausted | round-cap | escalation | gate-declined
+
+budget:
+  cost_limit_usd: 50      # exhaustion pauses the run; it never silently degrades
+  cost_spent_usd: 0       # derived: the sum of ledger[].cost_usd. v0: update it when
+                          # appending a ledger entry; v1: the orchestrator updates it
+                          # in the same commit as each dispatch's closing bookkeeping.
+  ledger: []              # append-only, one entry per model invocation:
+                          #   {at, role, task, round, adapter, model,
+                          #    tokens_in, tokens_out, cost_usd}
+                          # task/round null when not applicable. v0: append by hand
+                          # from harness usage output (a smaller, more concrete ask
+                          # than maintaining a total); v1: the dispatch seam appends
+                          # automatically. Facts, not a running total — totals are
+                          # derived, so races and audits survive.
+
+gates:                    # a gate entry is written ONLY by the named human.
+                          # `at` should be an ISO-8601 timestamp (a bare date
+                          # parses, but decision-latency metrics degrade).
+                          # A decided entry may carry `burden` — how much work
+                          # the review took: confirmation | light-correction |
+                          # heavy-correction. The gate frontend records it in
+                          # the act of deciding; it is the pilot's headline
+                          # metric, so hand-recorded decisions should set it too.
+  G0: {approved: true, by: Jimbo, at: "2026-07-14T16:51:00", notes: "3 issues remaining in phase 3d"}
+  G1: {approved: false, by: null, at: null, notes: null}
+  G2: {approved: false, by: null, at: null, notes: null}
+  G3: {approved: false, by: null, at: null, notes: null}
+
+tasks:                    # mirrors tasks/*.yaml status; the ONLY home of review_rounds
+                          # status: pending | dispatched | in-progress | in-review |
+                          #         review-approved | verified | done
+                          # `dispatched`: a producer was launched but has not yet
+                          # committed its artifact — the v1 commit-then-launch guard
+                          # (docs/ORCHESTRATOR.md §4.4). `review-approved`: review
+                          # passed, verification still pending (first improvised in
+                          # the wordfreq run, contractual since).
+  - {id: 01-phase3d_shiny, status: pending, review_rounds: 0}
+
+escalations: []           # append-only: {at, from_role, reason, resolved}

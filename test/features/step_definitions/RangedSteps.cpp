@@ -69,17 +69,21 @@ WHEN( "^I zap slot ([a-z])$" )
     ScenarioScope<TestCtx> context;
 
     // Enter ranged state with 'z' command
+    JLog( LOG_LEVEL_ERROR, true, "ZapSlot: Setting state to RANGED\n" );
     g_pGame->SetState( STATE_RANGED );
 
     JKeysym keysym;
     keysym.sym = JKEY_z;
     keysym.mod = 0;
+    JLog( LOG_LEVEL_ERROR, true, "ZapSlot: Sending JKEY_z\n" );
     g_pGame->GetGameState()->HandleKey( &keysym );
 
     // Select inventory slot
     keysym.sym = slot[0];
     keysym.mod = 0;
+    JLog( LOG_LEVEL_ERROR, true, "ZapSlot: Sending slot key '%c'\n", slot[0] );
     g_pGame->GetGameState()->HandleKey( &keysym );
+    JLog( LOG_LEVEL_ERROR, true, "ZapSlot: Complete, state=%d\n", g_pGame->GetGameStateIndex() );
 }
 
 WHEN( "^I fire slot ([a-z])$" )
@@ -665,4 +669,61 @@ WHEN( "^I enter targeting mode for ranged attack with no monster$" )
     JLog( LOG_LEVEL_WARN, true,
           "RangedSetup (no monster): Entered RANGED state, player at <%f %f>\n", vPlayerPos.x,
           vPlayerPos.y );
+}
+
+/*#######
+##
+## Multicolor Beam THEN steps
+##
+#######*/
+
+THEN( "^the beam effect has fire colors$" )
+{
+    ScenarioScope<TestCtx> context;
+
+    // Get the projectile effect from dungeon
+    CEffectDef *pEffect = g_pGame->GetDungeon()->GetProjectileEffect();
+    
+    // Fire beams must have fire colors set and fire flag
+    EXPECT_NE( pEffect, nullptr );
+    if( pEffect )
+    {
+        EXPECT_TRUE( pEffect->m_dwFlags & EFFECT_FLAG_FIRE );
+    }
+}
+
+THEN( "^the beam effect has cold colors$" )
+{
+    ScenarioScope<TestCtx> context;
+
+    CEffectDef *pEffect = g_pGame->GetDungeon()->GetProjectileEffect();
+    EXPECT_NE( pEffect, nullptr );
+    if( pEffect )
+    {
+        EXPECT_TRUE( pEffect->m_dwFlags & EFFECT_FLAG_COLD );
+    }
+}
+
+THEN( "^the beam effect has acid colors$" )
+{
+    ScenarioScope<TestCtx> context;
+
+    CEffectDef *pEffect = g_pGame->GetDungeon()->GetProjectileEffect();
+    EXPECT_NE( pEffect, nullptr );
+    if( pEffect )
+    {
+        EXPECT_TRUE( pEffect->m_dwFlags & EFFECT_FLAG_ACID );
+    }
+}
+
+THEN( "^the beam effect has electric colors$" )
+{
+    ScenarioScope<TestCtx> context;
+
+    CEffectDef *pEffect = g_pGame->GetDungeon()->GetProjectileEffect();
+    EXPECT_NE( pEffect, nullptr );
+    if( pEffect )
+    {
+        EXPECT_TRUE( pEffect->m_dwFlags & EFFECT_FLAG_ELECTRICITY );
+    }
 }

@@ -122,6 +122,10 @@ public:
     JLinkList<JIVector> *GetProjectileTrajectory() { return m_llProjectileTrajectory; }
     int GetProjectileColorIndex() { return m_dwProjectileColorIndex; }
 
+    // Multicolor beam helpers - map effect flags to colors/characters at render time
+    JColor GetBeamColorForEffect( CEffectDef *pEffect, int pathIndex );
+    char GetBeamCharForEffect( CEffectDef *pEffect );
+
     void SetLOSLine( JLinkList<JIVector> *pLine )
     {
         ClearLOSLine();

@@ -123,6 +123,9 @@ struct TestCtx
 
     JMap<JString> *pMap = nullptr;
     CLink<JString> *pLink = nullptr;
+
+    // Beams - cache projectile effect for testing while active
+    CEffectDef *cachedProjectileEffect = nullptr;
 };
 
 #endif // __TEST_CONTEXT__

@@ -1246,24 +1246,13 @@ void CDungeon::DrawDungeon()
                         JIVector curPos = *( plPos->m_lpData );
                         if( (int)vScreen.x == curPos.x && (int)vScreen.y == curPos.y )
                         {
-                            // On trajectory - use effect colors if available
+                            // On trajectory - use flag-based color lookup (R1 requirement)
                             if( m_pProjectileEffect )
                             {
-                                bRangedBeamTile =
-                                    m_pProjectileEffect->m_cBeamChar != ItemIDs[ITEM_IDX_ARROW];
-                                // Get color from effect definition, cycling through colors
-                                if( m_pProjectileEffect->m_llColors &&
-                                    m_pProjectileEffect->m_llColors->length() > 0 )
-                                {
-                                    int colorIndex =
-                                        pathIndex % m_pProjectileEffect->m_llColors->length();
-                                    CLink<JColor> *plColor =
-                                        m_pProjectileEffect->m_llColors->GetNthLink( colorIndex );
-                                    if( plColor )
-                                    {
-                                        color = *( plColor->m_lpData );
-                                    }
-                                }
+                                bRangedBeamTile = GetBeamCharForEffect( m_pProjectileEffect ) !=
+                                                  ItemIDs[ITEM_IDX_ARROW];
+                                // Get color from effect flags (not metadata) as per R1
+                                color = GetBeamColorForEffect( m_pProjectileEffect, pathIndex );
                             }
                             break;
                         }
@@ -1310,7 +1299,7 @@ void CDungeon::DrawDungeon()
             }
             m_TileSet->SetTileColor( color );
             char chDraw = ( bRangedBeamTile && m_pProjectileEffect )
-                              ? m_pProjectileEffect->m_cBeamChar
+                              ? GetBeamCharForEffect( m_pProjectileEffect )
                               : curTile->m_dtd->m_chTile;
             m_TileSet->DrawChar( chDraw, vScreen, vSize );
         }
@@ -1332,6 +1321,96 @@ bool CDungeon::IsOnLOSLine( JVector vPos )
         pLink = pLink->next;
     }
     return false;
+}
+
+// Multicolor beam rendering: map effect flags to colors at render time
+// Colors determined from CEffectDef::m_dwFlags as per R1 requirement
+JColor CDungeon::GetBeamColorForEffect( CEffectDef *pEffect, int pathIndex )
+{
+    if( !pEffect )
+        return JColor( 255, 255, 255, 255 ); // Default white
+
+    // Check effect flags and return hardcoded color based on type
+    // R1 specification: Fire=RGB(255,128,0), Cold=RGB(100,200,255),
+    // Acid=RGB(0,200,0), Electricity=RGB(255,255,100)
+    if( pEffect->m_dwFlags & EFFECT_FLAG_FIRE )
+    {
+        // Fire: red/orange gradient
+        // Cycle between shades based on path position for gradient effect
+        switch( pathIndex % 3 )
+        {
+        case 0:
+            return JColor( 255, 0, 0, 255 ); // Red
+        case 1:
+            return JColor( 255, 128, 0, 255 ); // Orange (spec color)
+        case 2:
+            return JColor( 255, 200, 0, 255 ); // Yellow-orange
+        }
+    }
+    else if( pEffect->m_dwFlags & EFFECT_FLAG_COLD )
+    {
+        // Cold: blue/white gradient
+        switch( pathIndex % 3 )
+        {
+        case 0:
+            return JColor( 100, 200, 255, 255 ); // Spec color
+        case 1:
+            return JColor( 150, 220, 255, 255 ); // Lighter blue
+        case 2:
+            return JColor( 200, 240, 255, 255 ); // Near-white blue
+        }
+    }
+    else if( pEffect->m_dwFlags & EFFECT_FLAG_ACID )
+    {
+        // Acid: green gradient
+        switch( pathIndex % 3 )
+        {
+        case 0:
+            return JColor( 0, 200, 0, 255 ); // Spec color
+        case 1:
+            return JColor( 100, 220, 100, 255 ); // Light green
+        case 2:
+            return JColor( 150, 255, 150, 255 ); // Lighter green
+        }
+    }
+    else if( pEffect->m_dwFlags & EFFECT_FLAG_ELECTRICITY )
+    {
+        // Electricity: yellow/white gradient
+        switch( pathIndex % 3 )
+        {
+        case 0:
+            return JColor( 255, 255, 100, 255 ); // Spec color
+        case 1:
+            return JColor( 255, 255, 200, 255 ); // Lighter yellow
+        case 2:
+            return JColor( 255, 255, 255, 255 ); // White
+        }
+    }
+
+    // Default: white beam for unknown effect types
+    return JColor( 255, 255, 255, 255 );
+}
+
+// Multicolor beam rendering: map effect flags to ASCII characters at render time
+// Characters determined from CEffectDef::m_dwFlags as per R1 requirement
+char CDungeon::GetBeamCharForEffect( CEffectDef *pEffect )
+{
+    if( !pEffect )
+        return '*'; // Default
+
+    // Check effect flags and return hardcoded character based on type
+    // R1 specification: Fire='*', Cold='~', Acid='#', Electricity='+'
+    if( pEffect->m_dwFlags & EFFECT_FLAG_FIRE )
+        return '*';
+    else if( pEffect->m_dwFlags & EFFECT_FLAG_COLD )
+        return '~';
+    else if( pEffect->m_dwFlags & EFFECT_FLAG_ACID )
+        return '#';
+    else if( pEffect->m_dwFlags & EFFECT_FLAG_ELECTRICITY )
+        return '+';
+
+    // Default character for unknown effect types
+    return '*';
 }
 
 void CDungeon::DrawItems()

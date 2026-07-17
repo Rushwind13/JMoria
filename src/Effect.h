@@ -97,10 +97,10 @@ public:
     // Returns white if no colors are defined.
     JColor GetColor( int frame ) const
     {
-         if( m_llColors && m_llColors->length() > 0 )
+        if( m_llColors && m_llColors->length() > 0 )
         {
             int idx = frame % m_llColors->length();
-            CLink<JColor> *pLink = m_llColors->GetNthLink(idx);
+            CLink<JColor> *pLink = m_llColors->GetNthLink( idx );
             if( pLink && pLink->m_lpData )
             {
                 return *( pLink->m_lpData );

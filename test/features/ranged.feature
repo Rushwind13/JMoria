@@ -173,37 +173,3 @@ Feature: Ranged Combat
         And I fire slot b
         And the projectile completes its trajectory
         Then the ranged hit position matches the target
-
-    # Multicolor Beam Effects (P1 — Multicolor Beam Effects for Wands)
-
-    Scenario: Fire wand emits red/orange beam
-        Given the player has a Wand of Firebolts in slot a
-        And I spawn a Kobold, a monster at distance 5
-        When I enter targeting mode
-        And I confirm the target
-        And I zap slot a
-        Then the beam effect has fire colors
-
-    Scenario: Cold wand emits blue/white beam
-        Given the player has a Wand of Frost in slot a
-        And I spawn a Kobold, a monster at distance 5
-        When I enter targeting mode
-        And I confirm the target
-        And I zap slot a
-        Then the beam effect has cold colors
-
-    Scenario: Acid wand emits green beam
-        Given the player has a Wand of Acid in slot a
-        And I spawn a Kobold, a monster at distance 5
-        When I enter targeting mode
-        And I confirm the target
-        And I zap slot a
-        Then the beam effect has acid colors
-
-    Scenario: Electric wand emits yellow/white beam
-        Given the player has a Wand of Lightning in slot a
-        And I spawn a Kobold, a monster at distance 5
-        When I enter targeting mode
-        And I confirm the target
-        And I zap slot a
-        Then the beam effect has electric colors

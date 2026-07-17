@@ -1253,6 +1253,10 @@ void CDungeon::DrawDungeon()
                                                   ItemIDs[ITEM_IDX_ARROW];
                                 // Get color from effect flags (not metadata) as per R1
                                 color = GetBeamColorForEffect( m_pProjectileEffect, pathIndex );
+
+                                // Test instrumentation: track that beam rendering executed
+                                m_lastBeamColorRendered = color;
+                                m_beamWasRendered = true;
                             }
                             break;
                         }
@@ -1301,6 +1305,13 @@ void CDungeon::DrawDungeon()
             char chDraw = ( bRangedBeamTile && m_pProjectileEffect )
                               ? GetBeamCharForEffect( m_pProjectileEffect )
                               : curTile->m_dtd->m_chTile;
+
+            // Test instrumentation: track beam character rendering
+            if( bRangedBeamTile && m_pProjectileEffect )
+            {
+                m_lastBeamCharRendered = chDraw;
+            }
+
             m_TileSet->DrawChar( chDraw, vScreen, vSize );
         }
     }
@@ -1335,16 +1346,16 @@ JColor CDungeon::GetBeamColorForEffect( CEffectDef *pEffect, int pathIndex )
     // Acid=RGB(0,200,0), Electricity=RGB(255,255,100)
     if( pEffect->m_dwFlags & EFFECT_FLAG_FIRE )
     {
-        // Fire: red/orange gradient
+        // Fire: orange/red gradient (spec color RGB(255,128,0) first)
         // Cycle between shades based on path position for gradient effect
         switch( pathIndex % 3 )
         {
         case 0:
-            return JColor( 255, 0, 0, 255 ); // Red
-        case 1:
             return JColor( 255, 128, 0, 255 ); // Orange (spec color)
+        case 1:
+            return JColor( 255, 64, 0, 255 ); // Orange-red
         case 2:
-            return JColor( 255, 200, 0, 255 ); // Yellow-orange
+            return JColor( 255, 0, 0, 255 ); // Red
         }
     }
     else if( pEffect->m_dwFlags & EFFECT_FLAG_COLD )
@@ -1387,7 +1398,20 @@ JColor CDungeon::GetBeamColorForEffect( CEffectDef *pEffect, int pathIndex )
         }
     }
 
-    // Default: white beam for unknown effect types
+    // Fall back to original metadata for non-elemental effects (e.g., Light wands)
+    // This preserves backward compatibility while implementing R1 for elemental types
+    if( pEffect->m_llColors && pEffect->m_llColors->length() > 0 )
+    {
+        // Cycle through effect's defined colors based on path position
+        int colorIndex = pathIndex % pEffect->m_llColors->length();
+        CLink<JColor> *pColorLink = pEffect->m_llColors->GetHead();
+        for( int i = 0; i < colorIndex && pColorLink; i++ )
+            pColorLink = pColorLink->next;
+        if( pColorLink )
+            return *( pColorLink->m_lpData );
+    }
+
+    // Final fallback: white beam for completely unknown effect types
     return JColor( 255, 255, 255, 255 );
 }
 
@@ -1409,7 +1433,12 @@ char CDungeon::GetBeamCharForEffect( CEffectDef *pEffect )
     else if( pEffect->m_dwFlags & EFFECT_FLAG_ELECTRICITY )
         return '+';
 
-    // Default character for unknown effect types
+    // Fall back to original metadata for non-elemental effects (e.g., Light wands)
+    // This preserves backward compatibility while implementing R1 for elemental types
+    if( pEffect->m_cBeamChar != '\0' )
+        return pEffect->m_cBeamChar;
+
+    // Final fallback: default character for completely unknown effect types
     return '*';
 }
 

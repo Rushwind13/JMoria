@@ -36,6 +36,11 @@ public:
     JLinkList<JIVector> *m_llOpenArea;
     JLinkList<CEffectDef> *m_llEffectDefs;
 
+    // Test instrumentation for beam rendering verification (R1)
+    JColor m_lastBeamColorRendered; // Last color passed to SetTileColor for beam
+    char m_lastBeamCharRendered;    // Last char passed to DrawChar for beam
+    bool m_beamWasRendered;         // True if beam rendering path executed
+
 protected:
     CDungeonTileDef *m_dtdlist;
     JLinkList<CMonsterDef> *m_llMonsterDefs;
@@ -73,6 +78,9 @@ public:
           m_pProjectileEffect( NULL ),
           m_llProjectileTrajectory( NULL ),
           m_dwProjectileColorIndex( 0 ),
+          m_lastBeamColorRendered( 0, 0, 0, 0 ),
+          m_lastBeamCharRendered( '\0' ),
+          m_beamWasRendered( false ),
           m_dmCurLevel( NULL ) {};
     ~CDungeon() { Term(); }
     char *DumpMap();

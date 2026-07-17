@@ -683,7 +683,7 @@ THEN( "^the beam effect has fire colors$" )
 
     // Get the projectile effect from dungeon
     CEffectDef *pEffect = g_pGame->GetDungeon()->GetProjectileEffect();
-    
+
     // Fire beams must have fire colors set and fire flag
     EXPECT_NE( pEffect, nullptr );
     if( pEffect )

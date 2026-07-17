@@ -114,7 +114,7 @@ public:
     char *m_szFlavor; // "Green" Potion
     float m_fAttackSpeed;
     float m_fSpeedBonus; // for rings of speed, boots/gloves of swiftness, etc.
-    char *m_szACBonus; // NdM dice string for magical AC bonus (rolled per-instance)
+    char *m_szACBonus;   // NdM dice string for magical AC bonus (rolled per-instance)
     float m_fBaseAC;
     char *m_szBaseDamage;
     char *m_szBonusToHit;    // NdM dice string for magical to-hit bonus (rolled per-instance)
@@ -126,10 +126,10 @@ public:
     float m_fValue;
     float m_fWeight;
     int m_dwFlags;
-    int m_dwIndex;     // ITEM_IDX_SWORD, ITEM_IDX_WAND, etc.
-    int m_dwBaseHP;    // for busting down walls, disarming traps, etc.
-    float m_fDuration; // for potions, scrolls, torches -- "How long will this last?"
-    float m_fRadius;   // for AoE effects -- "How big is the badaboom?"
+    int m_dwIndex;       // ITEM_IDX_SWORD, ITEM_IDX_WAND, etc.
+    int m_dwBaseHP;      // for busting down walls, disarming traps, etc.
+    float m_fDuration;   // for potions, scrolls, torches -- "How long will this last?"
+    float m_fRadius;     // for AoE effects -- "How big is the badaboom?"
     uint32 m_dwMinRange; // for ranged weapons -- minimum trajectory length
     uint32 m_dwMaxRange; // for ranged weapons -- maximum trajectory length
     JLinkList<JColor> *m_Colors;

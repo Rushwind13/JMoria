@@ -100,7 +100,7 @@
 #define ITEM_DESTROY_CHANCE 1.1f
 #define RECALL_DURATION 1
 #else
-#define CHANCE_ARROW_BREAK 33 // ~1 in 3 chance arrow breaks on landing
+#define CHANCE_ARROW_BREAK 33     // ~1 in 3 chance arrow breaks on landing
 #define ITEM_DESTROY_CHANCE 0.03f // 3% base chance per inventory slot
 #define RECALL_DURATION ( Util::Roll( 1, 20 ) + 30 )
 #endif

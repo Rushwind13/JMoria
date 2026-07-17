@@ -903,7 +903,7 @@ void CRangedState::DropAmmo( JVector vFinalPos )
 
     // Arrow survives: create new item and drop it
     // Drop() will handle stacking if same-type arrow is on ground, or scattering to adjacent
-    CItem *pDropArrow = pAmmo->Copy(1);
+    CItem *pDropArrow = pAmmo->Copy( 1 );
 
     // Drop the arrow (Drop() now handles stacking and scattering)
     JLog( LOG_LEVEL_DEBUG, true, ">>About to call Drop with pos=<%f %f>\n",

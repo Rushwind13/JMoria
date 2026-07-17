@@ -74,17 +74,17 @@ public:
             m_llColors = NULL;
         }
     }
-    char *m_szName;                // "Firebolt", "Light Ray", etc.
-    int m_dwEffect;                // EFFECT_TYPE_HIT, EFFECT_TYPE_HEAL, etc.
-    uint32 m_dwFlags;              // EFFECT_FLAG_FIRE, EFFECT_FLAG_LIGHT, etc.
-    uint32 m_dwFlags2;             // EFFECT_FLAG_DOOR, EFFECT_FLAG_NO_COLLIDE, etc.
-    int m_dwModifier;              // EFFECT_MOD_LINE, EFFECT_MOD_BALL, etc.
-    char *m_szAmount;              // NdM dice string for damage/healing per use
-    float m_fDuration;             // for timed effects
-    float m_fRange;                // max range in tiles
-    float m_fRadius;               // AoE radius (0 = single target)
-    char m_cBeamChar;              // character for beam rendering (default '*')
-    JLinkList<JColor> *m_llColors; // multicolor beam cycling
+    char *m_szName;                      // "Firebolt", "Light Ray", etc.
+    int m_dwEffect;                      // EFFECT_TYPE_HIT, EFFECT_TYPE_HEAL, etc.
+    uint32 m_dwFlags;                    // EFFECT_FLAG_FIRE, EFFECT_FLAG_LIGHT, etc.
+    uint32 m_dwFlags2;                   // EFFECT_FLAG_DOOR, EFFECT_FLAG_NO_COLLIDE, etc.
+    int m_dwModifier;                    // EFFECT_MOD_LINE, EFFECT_MOD_BALL, etc.
+    char *m_szAmount;                    // NdM dice string for damage/healing per use
+    float m_fDuration;                   // for timed effects
+    float m_fRange;                      // max range in tiles
+    float m_fRadius;                     // AoE radius (0 = single target)
+    char m_cBeamChar;                    // character for beam rendering (default '*')
+    JLinkList<JColor> *m_llColors;       // multicolor beam cycling
     int m_dwStrIds[EFFECT_STR_SLOT_MAX]; // per-slot string IDs (eStringId values)
 };
 

@@ -97,7 +97,7 @@ protected:
 public:
 #else
 private:
-#endif // UNIT_TEST    
+#endif // UNIT_TEST
     int OnHandleFire( JKeysym *keysym );
     int OnHandleInit( JKeysym *keysym );
     int OnHandleLaunch( JKeysym *keysym );
@@ -108,7 +108,7 @@ private:
     void ResetToState( int newstate );
     void GosubState( int newstate );
     CLink<CItem> *GetResponse( eRangedModifier whichUse );
-    
+
     bool ReadyToLaunch();
     bool DoLaunch();
 

@@ -108,6 +108,7 @@ void CDungeon::Init( const char *szBasedir )
         ped = new CEffectDef;
     }
     delete ped;
+    dfEffects.Close();
 
     // Load the monster list from config
     // TODO: Make this a method on CMonsterDef.
@@ -132,6 +133,7 @@ void CDungeon::Init( const char *szBasedir )
     }
 
     delete pmd;
+    dfMonsters.Close();
 
     // Load the item list from config
     // TODO: Make this a method on CItemDef.
@@ -156,6 +158,7 @@ void CDungeon::Init( const char *szBasedir )
     }
 
     delete pid;
+    dfItems.Close();
 
     // Load the graphics
     // Just one tile set at the moment.

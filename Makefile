@@ -94,7 +94,7 @@ ascii-test:
 	$(MAKE) RENDER_MODE=ascii test
 
 build:
-	$(MAKE) clean ascii test
+	$(MAKE) RENDER_MODE=ascii clean $(EXEC) $(TEST_EXEC)
 
 .PHONY: ascii opengl ascii-test build bdd test clean
 
@@ -108,7 +108,9 @@ $(TEST_DIR):
 	mkdir -p $(TEST_DIR)
 
 bdd:
-	cd test; ./runtests.sh; cd -
+	./test/runtests.sh $(ARGS)
+
+verify: build bdd
 
 test: $(TEST_EXEC)
 

@@ -35,6 +35,7 @@ public:
     JLinkList<CItem> *m_llItems;
     JLinkList<JIVector> *m_llOpenArea;
     JLinkList<CEffectDef> *m_llEffectDefs;
+    JLinkList<CPalette> *m_llPalettes;
 
     // Test instrumentation for beam rendering verification (R1)
     JColor m_lastBeamColorRendered; // Last color passed to SetTileColor for beam
@@ -73,6 +74,7 @@ public:
           m_llOpenArea( NULL ),
           m_llItemDefs( NULL ),
           m_llEffectDefs( NULL ),
+          m_llPalettes( NULL ),
           m_llMonsterDefs( NULL ),
           m_llLOSLine( NULL ),
           m_pProjectileEffect( NULL ),
@@ -129,10 +131,6 @@ public:
     CEffectDef *GetProjectileEffect() { return m_pProjectileEffect; }
     JLinkList<JIVector> *GetProjectileTrajectory() { return m_llProjectileTrajectory; }
     int GetProjectileColorIndex() { return m_dwProjectileColorIndex; }
-
-    // Multicolor beam helpers - map effect flags to colors/characters at render time
-    JColor GetBeamColorForEffect( CEffectDef *pEffect, int pathIndex );
-    char GetBeamCharForEffect( CEffectDef *pEffect );
 
     void SetLOSLine( JLinkList<JIVector> *pLine )
     {
@@ -197,6 +195,7 @@ public:
     CItemDef *GetItemDef( int which_item );
     JLinkList<CItemDef> *GetItemDefs() { return m_llItemDefs; }
     CEffectDef *GetEffectDef( const char *szEffectName );
+    const CPalette *GetPalette( const char *szName );
     bool SpawnMonster( int which_monster );
     void RemoveMonster( CMonster *pMon );
 

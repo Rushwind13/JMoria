@@ -5,6 +5,20 @@
 #include "MonsterRecall.h"
 static uint32 s_nextMonsterInstanceId = 1;
 
+JColor CMonsterDef::GetColor( int frame ) const
+{
+    if( m_llColors && m_llColors->length() > 0 )
+    {
+        int idx = frame % m_llColors->length();
+        CLink<JColor> *pLink = m_llColors->GetNthLink(idx);
+        if( pLink && pLink->m_lpData )
+        {
+            return *( pLink->m_lpData );
+        }
+    }
+    return m_Color;
+}
+
 CMonster::CMonster()
     : m_fHP( 0.0f ),
       m_fCurHP( 0.0f ),
@@ -385,8 +399,8 @@ void CMonster::SetColor()
 
     if( ( m_md->m_dwFlags & MON_COLOR_MULTI ) == MON_COLOR_MULTI )
     {
-        int which_color = Util::GetRandom( 0, m_md->m_Colors->length() - 1 );
-        ( m_md->m_Color ).SetColor( *( m_md->m_Colors->GetNthLink( which_color )->m_lpData ) );
+        int which_color = Util::GetRandom( 0, m_md->m_llColors->length() - 1 );
+        ( m_md->m_Color ).SetColor( *( m_md->m_llColors->GetNthLink( which_color )->m_lpData ) );
     }
     m_fColorChangeInterval = 0.0f;
 }

@@ -4,30 +4,20 @@ using cucumber::ScenarioScope;
 GIVEN( "^A map with a single level$" )
 {
     ScenarioScope<TestCtx> context;
-    g_Constants.Init();
-    context->map.CreateDungeon( 1 );
-
-    // Create dungeon and set up effect definitions
-    context->dungeon = new CDungeon();
-    context->dungeon->m_llEffectDefs = new JLinkList<CEffectDef>;
-
-    // Load Effects.txt
-    CDataFile dfEffects;
-    dfEffects.Open( "../../JMoria/Resources/Effects.txt" );
-
-    CEffectDef *ped = new CEffectDef;
-    while( dfEffects.ReadEffect( *ped ) )
+    if( g_pGame != NULL )
     {
-        context->dungeon->m_llEffectDefs->Add( ped );
-        ped = new CEffectDef;
+        g_pGame->Term();
+        delete g_pGame;
     }
-    delete ped;
+    g_pGame = new CGame;
+    g_pGame->Init( "../../JMoria/", RenderMode::None );
+    context->dungeon = g_pGame->GetDungeon();
+    context->map.CreateDungeon( 1 );
 }
 GIVEN( "^The monster configuration file$" )
 {
     ScenarioScope<TestCtx> context;
     context->dfMonsters.Open( "../../JMoria/Resources/Monsters.txt" );
-    context->dfMonsters.SetDungeon( context->dungeon );
 }
 WHEN( "^I read a monster from the config file$" )
 {

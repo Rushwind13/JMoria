@@ -1,15 +1,133 @@
 #include "FileParse.h"
 #include "Dungeon.h"
 #include "EndGameState.h"
+#include "Game.h"
 #include "Item.h"
 #include "Monster.h"
 
-CEffect *CDataFile::EffectFromName( const char *szName )
+CPalette *CDataFile::ReadPalette( CPalette &ceIn )
 {
-    if( m_pDungeon == NULL || szName == NULL || *szName == '\0' )
+    char szRaw[1024];
+    char *szLine;
+    char *szValue = NULL;
+    bool bFoundEntry = false;
+    bool bInBlock = false;
+    bool bEndEntry = false;
+
+    while( !bEndEntry && fgets( szRaw, 1024, m_fp ) != NULL )
+    {
+        szLine = Strip( szRaw );
+        if( szLine == NULL )
+            continue;
+
+        if( !bFoundEntry )
+        {
+            if( strncasecmp( szLine, "color", 5 ) == 0 )
+            {
+                bFoundEntry = true;
+                ceIn.m_szName = GetValue( szLine, ceIn.m_szName );
+                JLog( LOG_LEVEL_NOISE, true, "Found color entry: %s\n", ceIn.m_szName );
+            }
+        }
+        else if( !bInBlock )
+        {
+            if( *szLine == '{' )
+                bInBlock = true;
+        }
+        else
+        {
+            if( *szLine == '}' )
+            {
+                bEndEntry = true;
+            }
+            else if( strncasecmp( szLine, "color", 5 ) == 0 )
+            {
+                char *color = chomp( szLine, szValue );
+                if( color )
+                {
+                    JLinkList<JColor> *parsed = ParseColors( color );
+                    CLink<JColor> *p = parsed->GetHead();
+                    while( p )
+                    {
+                        ceIn.m_llColors->Add( new JColor( *p->m_lpData ) );
+                        p = p->next;
+                    }
+                    parsed->Terminate();
+                    delete parsed;
+                    delete[] color;
+                }
+            }
+            else
+            {
+                JLog( LOG_LEVEL_WARN, true, "Unparseable line in color entry: %s\n", szLine );
+            }
+        }
+    }
+
+    if( szValue )
+        delete[] szValue;
+
+    if( !bEndEntry )
         return NULL;
 
-    CEffectDef *pFound = m_pDungeon->GetEffectDef( szName );
+    return &ceIn;
+}
+
+bool CDataFile::ApplyPalette( const char *szName, JLinkList<JColor> *dest )
+{
+    if( g_pGame == NULL || g_pGame->GetDungeon() == NULL || szName == NULL || dest == NULL )
+        return false;
+
+    const CPalette *entry = g_pGame->GetDungeon()->GetPalette( szName );
+    if( entry == NULL )
+    {
+        JLog( LOG_LEVEL_WARN, true, "ApplyPalette: unknown color name '%s'\n", szName );
+        return false;
+    }
+
+    CLink<JColor> *p = entry->m_llColors->GetHead();
+    while( p )
+    {
+        dest->Add( new JColor( *p->m_lpData ) );
+        p = p->next;
+    }
+    return true;
+}
+
+bool CDataFile::ReadColor( const char *color, JColor &outSingle, JLinkList<JColor> *outMulti )
+{
+    if( strchr( color, ',' ) == NULL && strchr( color, '<' ) == NULL )
+    {
+        // Named palette reference — always multi (palette defines the list)
+        return ApplyPalette( color, outMulti );
+    }
+
+    JLinkList<JColor> *parsed = ParseColors( const_cast<char *>( color ) );
+    bool isMulti = parsed->length() > 1;
+    if( isMulti )
+    {
+        CLink<JColor> *p = parsed->GetHead();
+        while( p )
+        {
+            outMulti->Add( new JColor( *p->m_lpData ) );
+            p = p->next;
+        }
+    }
+    else if( parsed->length() == 1 )
+    {
+        outSingle.SetColor( *parsed->GetHead()->m_lpData );
+    }
+    parsed->Terminate();
+    delete parsed;
+    return isMulti;
+}
+
+CEffect *CDataFile::EffectFromName( const char *szName )
+{
+    if( g_pGame == NULL || g_pGame->GetDungeon() == NULL || szName == NULL || *szName == '\0' )
+        return NULL;
+
+    CEffectDef *pFound = g_pGame->GetDungeon()->GetEffectDef( szName );
     if( pFound == NULL )
     {
         JLog( LOG_LEVEL_WARN, true, "EffectFromName: unknown effect '%s'\n", szName );
@@ -299,7 +417,7 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                     curAttack->m_szDamage = new char[Util::jstrlen( cur ) + 1];
                     Util::jstrcpy( curAttack->m_szDamage, cur );
                 }
-                else if( m_pDungeon != NULL )
+                else if( g_pGame != NULL && g_pGame->GetDungeon() != NULL )
                 {
                     // --- New named-effect format ---
                     // first token is delivery type (MON_FLAG_*)
@@ -369,21 +487,8 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
             else if( strncasecmp( szLine, "color", 5 ) == 0 )
             {
                 char *color = chomp( szLine, szValue );
-                if( strchr( color, '<' ) != NULL )
-                {
-                    // multi-hued
-                    // <<rgb1>,<rgb2>,...,<rgbn>>
-                    JLog( LOG_LEVEL_DEBUG, true, "Found multi-hued monster: %s\n", color );
-                    mdIn.m_Colors = ParseColors( color );
-
+                if( ReadColor( color, mdIn.m_Color, mdIn.m_llColors ) )
                     mdIn.m_dwFlags |= MON_COLOR_MULTI;
-                }
-                else
-                {
-                    // single-hued
-                    // <rgb1>
-                    mdIn.m_Color.SetColor( color );
-                }
                 delete[] color;
             }
             else if( *szLine == '}' )
@@ -703,21 +808,8 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
             else if( strncasecmp( szLine, "color", 5 ) == 0 )
             {
                 char *color = chomp( szLine, szValue );
-                if( strchr( color, '<' ) != NULL )
-                {
-                    // multi-hued
-                    // <<rgb1>,<rgb2>,...,<rgbn>>
-                    JLog( LOG_LEVEL_DEBUG, true, "Found multi-hued item: %s\n", color );
-                    idIn.m_Colors = ParseColors( color );
-
+                if( ReadColor( color, idIn.m_Color, idIn.m_llColors ) )
                     idIn.m_dwFlags |= ITEM_COLOR_MULTI;
-                }
-                else
-                {
-                    // single-hued
-                    // <rgb1>
-                    idIn.m_Color.SetColor( color );
-                }
                 delete[] color;
             }
             else if( strncasecmp( szLine, "effect", 6 ) == 0 )
@@ -745,7 +837,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 char *nextAngle = strchr( end + 1, '<' );
                 bool bIsNamed = ( comma == NULL && nextAngle == NULL );
 
-                if( bIsNamed && m_pDungeon != NULL )
+                if( bIsNamed && g_pGame != NULL && g_pGame->GetDungeon() != NULL )
                 {
                     char nameBuf[128];
                     int nameLen = (int)( end - begin - 1 );
@@ -972,17 +1064,11 @@ CEffectDef *CDataFile::ReadEffect( CEffectDef &edIn )
             else if( strncasecmp( szLine, "color", 5 ) == 0 )
             {
                 char *color = chomp( szLine, szValue );
-                if( strchr( color, '<' ) != NULL )
-                {
-                    JLog( LOG_LEVEL_DEBUG, true, "Found multi-hued effect: %s\n", color );
-                    edIn.m_llColors = ParseColors( color );
-                }
+                JColor single;
+                if( ReadColor( color, single, edIn.m_llColors ) )
+                    ; // multi already appended to m_llColors
                 else
-                {
-                    JColor col;
-                    col.SetColor( color );
-                    edIn.m_llColors->Add( new JColor( col ) );
-                }
+                    edIn.m_llColors->Add( new JColor( single ) );
                 delete[] color;
             }
             else if( *szLine == '}' )
@@ -1353,6 +1439,13 @@ JLinkList<JColor> *CDataFile::ParseColors( char *szLine )
     {
         char *tok = szToken[i];
         temp = chomp( tok, temp );
+        if( temp == NULL )
+        {
+            // Bare R,G,B,A token without angle brackets (e.g. "64,64,0,255")
+            int len = Util::jstrlen( tok );
+            temp = new char[len + 1];
+            Util::jstrcpy( temp, tok );
+        }
         outcolor = new JColor();
         outcolor->SetColor( temp );
         retval->Add( outcolor );

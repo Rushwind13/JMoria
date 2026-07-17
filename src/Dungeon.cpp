@@ -87,6 +87,29 @@ void CDungeon::Init( const char *szBasedir )
         }
     }
 
+    // Load the named color palette before any resource files that reference it.
+    m_llPalettes = new JLinkList<CPalette>;
+
+    CPalette *palette;
+    CDataFile dfColors;
+    char szColorsFilename[256];
+    sprintf( szColorsFilename, "%s%s", szBasedir, "Resources/Colors.txt" );
+    if( !dfColors.Open( szColorsFilename ) )
+    {
+        JLog( LOG_LEVEL_WARN, true, "Cannot open Colors.txt at: %s\n", szColorsFilename );
+    }
+    else
+    {
+        palette = new CPalette;
+        while( dfColors.ReadPalette( *palette ) )
+        {
+            m_llPalettes->Add( palette );
+            palette = new CPalette;
+        }
+        delete palette;
+        dfColors.Close();
+    }
+
     // Load the effect catalog from config (before monsters and items, so both can reference by
     // name)
     m_llEffectDefs = new JLinkList<CEffectDef>;
@@ -123,7 +146,6 @@ void CDungeon::Init( const char *szBasedir )
         JLog( LOG_LEVEL_ERROR, true, "FATAL: Cannot open Monsters.txt at: %s\n", szMonsterFile );
         exit( 1 );
     }
-    dfMonsters.SetDungeon( this );
 
     pmd = new CMonsterDef;
     while( dfMonsters.ReadMonster( *pmd ) )
@@ -148,7 +170,6 @@ void CDungeon::Init( const char *szBasedir )
         JLog( LOG_LEVEL_ERROR, true, "FATAL: Cannot open Items.txt at: %s\n", szItemFilename );
         exit( 1 );
     }
-    dfItems.SetDungeon( this );
 
     pid = new CItemDef;
     while( dfItems.ReadItem( *pid ) )
@@ -726,6 +747,21 @@ CEffectDef *CDungeon::GetEffectDef( const char *szEffectName )
     return NULL;
 }
 
+const CPalette *CDungeon::GetPalette( const char *szName )
+{
+    if( m_llPalettes == NULL || szName == NULL )
+        return NULL;
+    CLink<CPalette> *pLink = m_llPalettes->GetHead();
+    while( pLink != NULL )
+    {
+        CPalette *palette = pLink->m_lpData;
+        if( palette && Util::jstrcmp( palette->m_szName, szName ) == 0 )
+            return palette;
+        pLink = pLink->next;
+    }
+    return NULL;
+}
+
 int CDungeon::ChooseItemForDepth( const int depth )
 {
     // Build Gaussian weights: w = exp(-0.5 * ((depth - peak) / sigma)^2)
@@ -1249,13 +1285,12 @@ void CDungeon::DrawDungeon()
                         JIVector curPos = *( plPos->m_lpData );
                         if( (int)vScreen.x == curPos.x && (int)vScreen.y == curPos.y )
                         {
-                            // On trajectory - use flag-based color lookup (R1 requirement)
+                            // On trajectory - color driven by the effect's palette
                             if( m_pProjectileEffect )
                             {
-                                bRangedBeamTile = GetBeamCharForEffect( m_pProjectileEffect ) !=
-                                                  ItemIDs[ITEM_IDX_ARROW];
-                                // Get color from effect flags (not metadata) as per R1
-                                color = GetBeamColorForEffect( m_pProjectileEffect, pathIndex );
+                                bRangedBeamTile =
+                                    m_pProjectileEffect->GetBeamChar() != ItemIDs[ITEM_IDX_ARROW];
+                                color = m_pProjectileEffect->GetColor( pathIndex );
 
                                 // Test instrumentation: track that beam rendering executed
                                 m_lastBeamColorRendered = color;
@@ -1306,7 +1341,7 @@ void CDungeon::DrawDungeon()
             }
             m_TileSet->SetTileColor( color );
             char chDraw = ( bRangedBeamTile && m_pProjectileEffect )
-                              ? GetBeamCharForEffect( m_pProjectileEffect )
+                              ? m_pProjectileEffect->GetBeamChar()
                               : curTile->m_dtd->m_chTile;
 
             // Test instrumentation: track beam character rendering
@@ -1335,114 +1370,6 @@ bool CDungeon::IsOnLOSLine( JVector vPos )
         pLink = pLink->next;
     }
     return false;
-}
-
-// Multicolor beam rendering: map effect flags to colors at render time
-// Colors determined from CEffectDef::m_dwFlags as per R1 requirement
-JColor CDungeon::GetBeamColorForEffect( CEffectDef *pEffect, int pathIndex )
-{
-    if( !pEffect )
-        return JColor( 255, 255, 255, 255 ); // Default white
-
-    // Check effect flags and return hardcoded color based on type
-    // R1 specification: Fire=RGB(255,128,0), Cold=RGB(100,200,255),
-    // Acid=RGB(0,200,0), Electricity=RGB(255,255,100)
-    if( pEffect->m_dwFlags & EFFECT_FLAG_FIRE )
-    {
-        // Fire: orange/red gradient (spec color RGB(255,128,0) first)
-        // Cycle between shades based on path position for gradient effect
-        switch( pathIndex % 3 )
-        {
-        case 0:
-            return JColor( 255, 128, 0, 255 ); // Orange (spec color)
-        case 1:
-            return JColor( 255, 64, 0, 255 ); // Orange-red
-        case 2:
-            return JColor( 255, 0, 0, 255 ); // Red
-        }
-    }
-    else if( pEffect->m_dwFlags & EFFECT_FLAG_COLD )
-    {
-        // Cold: blue/white gradient
-        switch( pathIndex % 3 )
-        {
-        case 0:
-            return JColor( 100, 200, 255, 255 ); // Spec color
-        case 1:
-            return JColor( 150, 220, 255, 255 ); // Lighter blue
-        case 2:
-            return JColor( 200, 240, 255, 255 ); // Near-white blue
-        }
-    }
-    else if( pEffect->m_dwFlags & EFFECT_FLAG_ACID )
-    {
-        // Acid: green gradient
-        switch( pathIndex % 3 )
-        {
-        case 0:
-            return JColor( 0, 200, 0, 255 ); // Spec color
-        case 1:
-            return JColor( 100, 220, 100, 255 ); // Light green
-        case 2:
-            return JColor( 150, 255, 150, 255 ); // Lighter green
-        }
-    }
-    else if( pEffect->m_dwFlags & EFFECT_FLAG_ELECTRICITY )
-    {
-        // Electricity: yellow/white gradient
-        switch( pathIndex % 3 )
-        {
-        case 0:
-            return JColor( 255, 255, 100, 255 ); // Spec color
-        case 1:
-            return JColor( 255, 255, 200, 255 ); // Lighter yellow
-        case 2:
-            return JColor( 255, 255, 255, 255 ); // White
-        }
-    }
-
-    // Fall back to original metadata for non-elemental effects (e.g., Light wands)
-    // This preserves backward compatibility while implementing R1 for elemental types
-    if( pEffect->m_llColors && pEffect->m_llColors->length() > 0 )
-    {
-        // Cycle through effect's defined colors based on path position
-        int colorIndex = pathIndex % pEffect->m_llColors->length();
-        CLink<JColor> *pColorLink = pEffect->m_llColors->GetHead();
-        for( int i = 0; i < colorIndex && pColorLink; i++ )
-            pColorLink = pColorLink->next;
-        if( pColorLink )
-            return *( pColorLink->m_lpData );
-    }
-
-    // Final fallback: white beam for completely unknown effect types
-    return JColor( 255, 255, 255, 255 );
-}
-
-// Multicolor beam rendering: map effect flags to ASCII characters at render time
-// Characters determined from CEffectDef::m_dwFlags as per R1 requirement
-char CDungeon::GetBeamCharForEffect( CEffectDef *pEffect )
-{
-    if( !pEffect )
-        return '*'; // Default
-
-    // Check effect flags and return hardcoded character based on type
-    // R1 specification: Fire='*', Cold='~', Acid='#', Electricity='+'
-    if( pEffect->m_dwFlags & EFFECT_FLAG_FIRE )
-        return '*';
-    else if( pEffect->m_dwFlags & EFFECT_FLAG_COLD )
-        return '~';
-    else if( pEffect->m_dwFlags & EFFECT_FLAG_ACID )
-        return '#';
-    else if( pEffect->m_dwFlags & EFFECT_FLAG_ELECTRICITY )
-        return '+';
-
-    // Fall back to original metadata for non-elemental effects (e.g., Light wands)
-    // This preserves backward compatibility while implementing R1 for elemental types
-    if( pEffect->m_cBeamChar != '\0' )
-        return pEffect->m_cBeamChar;
-
-    // Final fallback: default character for completely unknown effect types
-    return '*';
 }
 
 void CDungeon::DrawItems()
@@ -1584,6 +1511,13 @@ void CDungeon::Term()
         m_llEffectDefs->Terminate();
         delete m_llEffectDefs;
         m_llEffectDefs = NULL;
+    }
+
+    if( m_llPalettes )
+    {
+        m_llPalettes->Terminate();
+        delete m_llPalettes;
+        m_llPalettes = NULL;
     }
 
     ClearLOSLine();

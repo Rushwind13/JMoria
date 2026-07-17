@@ -1553,7 +1553,7 @@ Monster <Opal Icky Thing>
     ExpValue	4.0
     Type		<MON_IDX_ICKY>
     Attack             <MON_FLAG_TOUCH>, <Physical Hit>, 1d2
-    Color		<<240,240,240,255>;<135,201,190,255>;<236,161,180,255>;<205,235,238,255>;<238,203,179,255>>
+    Color		<Opal Icky Thing>
 }
 Monster <Red Icky Thing>
 {
@@ -3186,7 +3186,7 @@ Monster <Balrog>
     Attack             <MON_FLAG_CLAW>, <Physical Hit>, 4d10
     Attack             <MON_FLAG_BITE>, <Fire Touch>, 5d10
     Attack             <MON_FLAG_BREATHE>, <Fireball>, 15d8, 5
-    Color		<<255,60,0,255>;<255,200,0,255>>
+    Color		<Balrog>
 }
 
 # --- DOGS / HOUNDS (C) ---
@@ -3294,7 +3294,7 @@ Monster <Shadow Mastiff>
     Type		<MON_IDX_DOG>
     Flags       <MON_FLAG_WARM,MON_FLAG_HURT_BY_LIGHT>
     Attack             <MON_FLAG_BITE>, <Physical Hit>, 2d8
-    Color		<<255,255,255,32>;<0,0,0,255>>
+    Color		<Shadow Mastiff>
 }
 Monster <Warg>
 {
@@ -3424,7 +3424,7 @@ Monster <Ancient Multi-hued Dragon>
     Attack             <MON_FLAG_BREATHE>, <Lightning Ball>, 15d8, 5
     Attack             <MON_FLAG_BREATHE>, <Acid Ball>, 15d8, 5
     Attack             <MON_FLAG_BREATHE>, <Poison Ball>, 15d8, 5
-    Color		<<255,0,0,255>;<255,123,0,255>;<255,233,0,255>;<12,255,0,255>;<0,59,255,255>;<152,0,255,255>>
+    Color		<Ancient Multi-hued Dragon>
 }
 
 # --- DINOSAURS (D) - shares tile with ANCIENT_DRAGON ---

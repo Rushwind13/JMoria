@@ -74,34 +74,31 @@ THEN( "^the beam renders with red/orange gradient colors$" )
     // All conditions met → lines 1255 and 1302 will call our helpers
     pDungeon->DrawDungeon();
 
-    // F1 fix: Verify beam was ACTUALLY rendered (not just helpers exist)
-    // If DrawDungeon() skipped calling helpers, this would be false
+    // Verify beam was rendered
     EXPECT_TRUE( pDungeon->m_beamWasRendered )
         << "Beam rendering path was not executed in DrawDungeon()";
 
-    // Verify the ACTUAL color that was rendered (F1 fix)
-    // This is the exact value passed to SetTileColor() at line 1304
+    // Verify the rendered color comes from the Fire palette (frame 0 = first trajectory tile)
+    // Colors.txt Fire[0] = (255,0,0)
     Uint8 r, g, b, a;
     pDungeon->m_lastBeamColorRendered.GetColor( r, g, b, a );
-    // F2 fix: Fire should start with orange (255,128,0), not red
     EXPECT_EQ( r, 255 ) << "Fire beam red component wrong";
-    EXPECT_EQ( g, 128 ) << "Fire beam green component wrong (should be 128 for orange)";
+    EXPECT_EQ( g, 0 ) << "Fire beam green component wrong";
     EXPECT_EQ( b, 0 ) << "Fire beam blue component wrong";
 
-    // Also verify helper returns correct colors for reference
-    JColor color0 = pDungeon->GetBeamColorForEffect( pEffect, 0 );
-    JColor color1 = pDungeon->GetBeamColorForEffect( pEffect, 1 );
+    // Verify GetColor() returns the correct palette frames
+    // Colors.txt Fire: (255,0,0) ; (255,165,0) ; (255,255,0)
+    JColor color0 = pEffect->GetColor( 0 );
+    JColor color1 = pEffect->GetColor( 1 );
 
-    // Check first color is orange (F2 fix - spec color RGB(255,128,0))
     color0.GetColor( r, g, b, a );
     EXPECT_EQ( r, 255 );
-    EXPECT_EQ( g, 128 );
+    EXPECT_EQ( g, 0 );
     EXPECT_EQ( b, 0 );
 
-    // Check second color is orange-red gradient
     color1.GetColor( r, g, b, a );
     EXPECT_EQ( r, 255 );
-    EXPECT_EQ( g, 64 );
+    EXPECT_EQ( g, 165 );
     EXPECT_EQ( b, 0 );
 }
 
@@ -135,34 +132,32 @@ THEN( "^the beam renders with cyan/blue/white gradient colors$" )
     // Rendering code at Dungeon.cpp:1234-1262 only executes if all conditions met
     pDungeon->DrawDungeon();
 
-    // F1 fix: Verify beam was ACTUALLY rendered (not just helpers exist)
+    // Verify beam was rendered
     EXPECT_TRUE( pDungeon->m_beamWasRendered )
         << "Beam rendering path was not executed in DrawDungeon()";
 
-    // Verify the ACTUAL color that was rendered (F1 fix)
+    // Verify the rendered color comes from the Cold palette (frame 0 = first trajectory tile)
+    // Colors.txt Cold[0] = (0,255,255)
     Uint8 r, g, b, a;
     pDungeon->m_lastBeamColorRendered.GetColor( r, g, b, a );
-    EXPECT_EQ( r, 100 ) << "Cold beam red component wrong";
-    EXPECT_EQ( g, 200 ) << "Cold beam green component wrong";
+    EXPECT_EQ( r, 0 ) << "Cold beam red component wrong";
+    EXPECT_EQ( g, 255 ) << "Cold beam green component wrong";
     EXPECT_EQ( b, 255 ) << "Cold beam blue component wrong";
 
-    // Also verify helper returns correct colors for cold
-    // Expected: RGB(100,200,255) (spec color), RGB(150,220,255), RGB(200,240,255)
-    // These are the EXACT values DrawDungeon() passes to SetTileColor() at line 1255
-    JColor color0 = pDungeon->GetBeamColorForEffect( pEffect, 0 );
-    JColor color1 = pDungeon->GetBeamColorForEffect( pEffect, 1 );
+    // Verify GetColor() returns the correct palette frames
+    // Colors.txt Cold: (0,255,255) ; (135,206,250) ; (240,248,255)
+    JColor color0 = pEffect->GetColor( 0 );
+    JColor color1 = pEffect->GetColor( 1 );
 
-    // Check first color (task spec color - what DrawDungeon renders at pathIndex=0)
     color0.GetColor( r, g, b, a );
-    EXPECT_EQ( r, 100 );
-    EXPECT_EQ( g, 200 );
+    EXPECT_EQ( r, 0 );
+    EXPECT_EQ( g, 255 );
     EXPECT_EQ( b, 255 );
 
-    // Check second color is lighter blue (what DrawDungeon renders at pathIndex=1)
     color1.GetColor( r, g, b, a );
-    EXPECT_EQ( r, 150 );
-    EXPECT_EQ( g, 220 );
-    EXPECT_EQ( b, 255 );
+    EXPECT_EQ( r, 135 );
+    EXPECT_EQ( g, 206 );
+    EXPECT_EQ( b, 250 );
 }
 
 THEN( "^the beam renders with green gradient colors$" )
@@ -195,34 +190,32 @@ THEN( "^the beam renders with green gradient colors$" )
     // Rendering code at Dungeon.cpp:1234-1262 only executes if all conditions met
     pDungeon->DrawDungeon();
 
-    // F1 fix: Verify beam was ACTUALLY rendered (not just helpers exist)
+    // Verify beam was rendered
     EXPECT_TRUE( pDungeon->m_beamWasRendered )
         << "Beam rendering path was not executed in DrawDungeon()";
 
-    // Verify the ACTUAL color that was rendered (F1 fix)
+    // Verify the rendered color comes from the Acid palette (frame 0 = first trajectory tile)
+    // Colors.txt Acid[0] = (50,205,50)
     Uint8 r, g, b, a;
     pDungeon->m_lastBeamColorRendered.GetColor( r, g, b, a );
-    EXPECT_EQ( r, 0 ) << "Acid beam red component wrong";
-    EXPECT_EQ( g, 200 ) << "Acid beam green component wrong";
-    EXPECT_EQ( b, 0 ) << "Acid beam blue component wrong";
+    EXPECT_EQ( r, 50 ) << "Acid beam red component wrong";
+    EXPECT_EQ( g, 205 ) << "Acid beam green component wrong";
+    EXPECT_EQ( b, 50 ) << "Acid beam blue component wrong";
 
-    // Also verify helper returns correct colors for acid
-    // Expected: RGB(0,200,0) (spec color), RGB(100,220,100), RGB(150,255,150)
-    // These are the EXACT values DrawDungeon() passes to SetTileColor() at line 1255
-    JColor color0 = pDungeon->GetBeamColorForEffect( pEffect, 0 );
-    JColor color1 = pDungeon->GetBeamColorForEffect( pEffect, 1 );
+    // Verify GetColor() returns the correct palette frames
+    // Colors.txt Acid: (50,205,50) ; (144,238,144) ; (173,255,47)
+    JColor color0 = pEffect->GetColor( 0 );
+    JColor color1 = pEffect->GetColor( 1 );
 
-    // Check first color (task spec color - what DrawDungeon renders at pathIndex=0)
     color0.GetColor( r, g, b, a );
-    EXPECT_EQ( r, 0 );
-    EXPECT_EQ( g, 200 );
-    EXPECT_EQ( b, 0 );
+    EXPECT_EQ( r, 50 );
+    EXPECT_EQ( g, 205 );
+    EXPECT_EQ( b, 50 );
 
-    // Check second color is light green (what DrawDungeon renders at pathIndex=1)
     color1.GetColor( r, g, b, a );
-    EXPECT_EQ( r, 100 );
-    EXPECT_EQ( g, 220 );
-    EXPECT_EQ( b, 100 );
+    EXPECT_EQ( r, 144 );
+    EXPECT_EQ( g, 238 );
+    EXPECT_EQ( b, 144 );
 }
 
 THEN( "^the beam renders with yellow/white gradient colors$" )
@@ -255,41 +248,38 @@ THEN( "^the beam renders with yellow/white gradient colors$" )
     // Rendering code at Dungeon.cpp:1234-1262 only executes if all conditions met
     pDungeon->DrawDungeon();
 
-    // F1 fix: Verify beam was ACTUALLY rendered (not just helpers exist)
+    // Verify beam was rendered
     EXPECT_TRUE( pDungeon->m_beamWasRendered )
         << "Beam rendering path was not executed in DrawDungeon()";
 
-    // Verify the ACTUAL color that was rendered (F1 fix)
+    // Verify the rendered color comes from the Lightning palette (frame 0 = first trajectory tile)
+    // Colors.txt Lightning[0] = (255,255,0)
     Uint8 r, g, b, a;
     pDungeon->m_lastBeamColorRendered.GetColor( r, g, b, a );
     EXPECT_EQ( r, 255 ) << "Electric beam red component wrong";
     EXPECT_EQ( g, 255 ) << "Electric beam green component wrong";
-    EXPECT_EQ( b, 100 ) << "Electric beam blue component wrong";
+    EXPECT_EQ( b, 0 ) << "Electric beam blue component wrong";
 
-    // Also verify helper returns correct colors for electricity
-    // Expected: RGB(255,255,100) (spec color), RGB(255,255,200), RGB(255,255,255) white
-    // These are the EXACT values DrawDungeon() passes to SetTileColor() at line 1255
-    JColor color0 = pDungeon->GetBeamColorForEffect( pEffect, 0 );
-    JColor color1 = pDungeon->GetBeamColorForEffect( pEffect, 1 );
-    JColor color2 = pDungeon->GetBeamColorForEffect( pEffect, 2 );
+    // Verify GetColor() returns the correct palette frames
+    // Colors.txt Lightning: (255,255,0) ; (255,255,255) ; (255,215,0)
+    JColor color0 = pEffect->GetColor( 0 );
+    JColor color1 = pEffect->GetColor( 1 );
+    JColor color2 = pEffect->GetColor( 2 );
 
-    // Check first color (task spec color - what DrawDungeon renders at pathIndex=0)
     color0.GetColor( r, g, b, a );
     EXPECT_EQ( r, 255 );
     EXPECT_EQ( g, 255 );
-    EXPECT_EQ( b, 100 );
+    EXPECT_EQ( b, 0 );
 
-    // Check second color is lighter yellow (what DrawDungeon renders at pathIndex=1)
     color1.GetColor( r, g, b, a );
     EXPECT_EQ( r, 255 );
     EXPECT_EQ( g, 255 );
-    EXPECT_EQ( b, 200 );
+    EXPECT_EQ( b, 255 );
 
-    // Check third color is white (what DrawDungeon renders at pathIndex=2)
     color2.GetColor( r, g, b, a );
     EXPECT_EQ( r, 255 );
-    EXPECT_EQ( g, 255 );
-    EXPECT_EQ( b, 255 );
+    EXPECT_EQ( g, 215 );
+    EXPECT_EQ( b, 0 );
 }
 
 THEN( "^the beam renders with character '(.)'$" )
@@ -339,9 +329,7 @@ THEN( "^the beam renders with character '(.)'$" )
     EXPECT_EQ( pDungeon->m_lastBeamCharRendered, expectedChar )
         << "Rendered beam character does not match expected";
 
-    // Also verify the beam character comes from flag-based lookup (R1 requirement)
-    // GetBeamCharForEffect maps flags to characters at render time
-    // This is the value DrawDungeon() gets from the helper at line 1306
-    char actualChar = pDungeon->GetBeamCharForEffect( pEffect );
+    // Verify the beam character comes from the effect definition
+    char actualChar = pEffect->GetBeamChar();
     EXPECT_EQ( actualChar, expectedChar );
 }

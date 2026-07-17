@@ -19,7 +19,7 @@ Feature: Multicolor Beam Effects
         And I zap slot a
         Then the beam effect has EFFECT_FLAG_FIRE
         And the beam renders with red/orange gradient colors
-        And the beam renders with character '*'
+        And the beam renders with character 'w'
 
     # AC1.2: Cold wands emit blue/white gradient beam in OpenGL mode
     Scenario: Cold wand emits blue/white beam
@@ -30,7 +30,7 @@ Feature: Multicolor Beam Effects
         And I zap slot a
         Then the beam effect has EFFECT_FLAG_COLD
         And the beam renders with cyan/blue/white gradient colors
-        And the beam renders with character '~'
+        And the beam renders with character 'x'
 
     # AC1.3: Acid wands emit green beam in OpenGL mode
     Scenario: Acid wand emits green beam
@@ -41,7 +41,7 @@ Feature: Multicolor Beam Effects
         And I zap slot a
         Then the beam effect has EFFECT_FLAG_ACID
         And the beam renders with green gradient colors
-        And the beam renders with character '#'
+        And the beam renders with character '*'
 
     # AC1.4: Electric wands emit yellow/white beam in OpenGL mode
     Scenario: Electric wand emits yellow/white beam
@@ -52,44 +52,44 @@ Feature: Multicolor Beam Effects
         And I zap slot a
         Then the beam effect has EFFECT_FLAG_ELECTRICITY
         And the beam renders with yellow/white gradient colors
-        And the beam renders with character '+'
+        And the beam renders with character '-'
 
-    # AC1.5: ASCII mode renders beams with distinct characters per type
-    Scenario: Fire beam uses character '*' in ASCII mode
+    # AC1.5: ASCII mode renders beams with distinct characters per type (data-driven from Effects.txt Beam field)
+    Scenario: Fire beam uses character 'w' in ASCII mode
         Given the player has a Wand of Firebolts in slot a
         And I spawn a Kobold, a monster at distance 3
         When I enter targeting mode
         And I confirm the target
         And I zap slot a
         Then the beam effect has EFFECT_FLAG_FIRE
-        And the beam renders with character '*'
+        And the beam renders with character 'w'
 
-    Scenario: Cold beam uses character '~' in ASCII mode
+    Scenario: Cold beam uses character 'x' in ASCII mode
         Given the player has a Wand of Frost in slot a
         And I spawn a Kobold, a monster at distance 3
         When I enter targeting mode
         And I confirm the target
         And I zap slot a
         Then the beam effect has EFFECT_FLAG_COLD
-        And the beam renders with character '~'
+        And the beam renders with character 'x'
 
-    Scenario: Acid beam uses character '#' in ASCII mode
+    Scenario: Acid beam uses character '*' in ASCII mode
         Given the player has a Wand of Acid in slot a
         And I spawn a Kobold, a monster at distance 3
         When I enter targeting mode
         And I confirm the target
         And I zap slot a
         Then the beam effect has EFFECT_FLAG_ACID
-        And the beam renders with character '#'
+        And the beam renders with character '*'
 
-    Scenario: Electric beam uses character '+' in ASCII mode
+    Scenario: Electric beam uses character '-' in ASCII mode
         Given the player has a Wand of Lightning in slot a
         And I spawn a Kobold, a monster at distance 3
         When I enter targeting mode
         And I confirm the target
         And I zap slot a
         Then the beam effect has EFFECT_FLAG_ELECTRICITY
-        And the beam renders with character '+'
+        And the beam renders with character '-'
 
     # AC1.7: Existing beam trajectory/range mechanics unchanged
     Scenario: Beam trajectory mechanics remain unchanged

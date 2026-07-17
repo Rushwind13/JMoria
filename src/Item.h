@@ -39,7 +39,7 @@ public:
           m_bIdentified( false ),
           m_bTried( false )
     {
-        m_Colors = new JLinkList<JColor>;
+        m_llColors = new JLinkList<JColor>;
         m_llEffects = new JLinkList<CEffect>;
     }
     ~CItemDef()
@@ -94,11 +94,11 @@ public:
             delete[] m_szCharges;
             m_szCharges = NULL;
         }
-        if( m_Colors )
+        if( m_llColors )
         {
-            m_Colors->Terminate();
-            delete m_Colors;
-            m_Colors = NULL;
+            m_llColors->Terminate();
+            delete m_llColors;
+            m_llColors = NULL;
         }
         if( m_llEffects )
         {
@@ -132,11 +132,15 @@ public:
     float m_fRadius;     // for AoE effects -- "How big is the badaboom?"
     uint32 m_dwMinRange; // for ranged weapons -- minimum trajectory length
     uint32 m_dwMaxRange; // for ranged weapons -- maximum trajectory length
-    JLinkList<JColor> *m_Colors;
+    JLinkList<JColor> *m_llColors;
     JLinkList<CEffect> *m_llEffects;
     JColor m_Color;
     bool m_bIdentified; // has this item type been identified?
     bool m_bTried;      // has this item type been used without identifying?
+
+    // Return the color for a given animation frame, cycling through m_llColors.
+    // frame=0 returns the first palette color; falls back to m_Color for single-hued.
+    JColor GetColor( int frame ) const;
 
 protected:
 private:

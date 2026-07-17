@@ -43,7 +43,7 @@ Effect <Fireball>
     Range       20
     Radius      3
     Beam        <W>
-    Color       <<255,0,0,255>;<255,165,0,255>;<255,255,0,255>>
+    Color       <Fire>
 }
 Effect <Firebolt>
 {
@@ -53,7 +53,7 @@ Effect <Firebolt>
     Amount      <2d8>
     Range       15
     Beam        <w>
-    Color       <<255,0,0,255>;<255,165,0,255>;<255,255,0,255>>
+    Color       <Fire>
 }
 Effect <Inflict Fire>
 {
@@ -79,7 +79,7 @@ Effect <Frost Ball>
     Range       20
     Radius      3
     Beam        <X>
-    Color       <<0,255,255,255>;<135,206,250,255>;<240,248,255,255>>
+    Color       <Cold>
 }
 Effect <Frost Bolt>
 {
@@ -89,7 +89,7 @@ Effect <Frost Bolt>
     Amount      <2d8>
     Range       15
     Beam        <x>
-    Color       <<0,255,255,255>;<135,206,250,255>;<240,248,255,255>>
+    Color       <Cold>
 }
 # --- EFFECT_FLAG_ELECTRICITY ---
 
@@ -102,7 +102,7 @@ Effect <Lightning Ball>
     Range       20
     Radius      3
     Beam        </>
-    Color       <<255,255,0,255>;<255,255,255,255>;<255,215,0,255>>
+    Color       <Lightning>
 }
 Effect <Lightning Bolt>
 {
@@ -113,7 +113,7 @@ Effect <Lightning Bolt>
     Amount      <3d6>
     Range       20
     Beam        <->
-    Color       <<255,255,0,255>;<255,255,255,255>;<255,215,0,255>>
+    Color       <Lightning>
 }
 Effect <Lightning Touch>
 {
@@ -133,7 +133,7 @@ Effect <Acid Ball>
     Range       20
     Radius      3
     Beam        <O>
-    Color       <<50,205,50,255>;<144,238,144,255>;<173,255,47,255>>
+    Color       <Acid>
 }
 Effect <Acid Bolt>
 {
@@ -143,7 +143,7 @@ Effect <Acid Bolt>
     Amount      <2d8>
     Range       15
     Beam        <*>
-    Color       <<50,205,50,255>;<144,238,144,255>;<173,255,47,255>>
+    Color       <Acid>
 }
 Effect <Acid Touch>
 {
@@ -163,7 +163,7 @@ Effect <Poison Ball>
     Range       5
     Radius      3
     Beam        <O>
-    Color       <<0,255,0,255>;<34,139,34,255>;<75,0,130,255>>
+    Color       <Poison>
 }
 Effect <Poison Bolt>
 {
@@ -173,7 +173,7 @@ Effect <Poison Bolt>
     Amount      <2d8>
     Range       8
     Beam        <->
-    Color       <<0,255,0,255>;<34,139,34,255>;<75,0,130,255>>
+    Color       <Poison>
 }
 Effect <Poison Sting>
 {
@@ -199,7 +199,7 @@ Effect <Light Ray>
     Amount      <1d5>
     Range       15
     Beam        <~>
-    Color       <<255,255,255,255>;<255,255,200,255>;<255,255,100,255>>
+    Color       <Light>
 }
 Effect <Light Touch>
 {
@@ -436,7 +436,7 @@ Effect <Arrow Shot>
     Amount      <1d8>
     Beam        <}>
     Range       20
-    Color       <64, 64, 0, 255>
+    Color       <Arrow>
 }
 
 # --- HEAL - restore HP and cure status ---

@@ -12,6 +12,20 @@
 #include "Effect.h"
 #include "Player.h"
 
+JColor CItemDef::GetColor( int frame ) const
+{
+    if( m_llColors && m_llColors->length() > 0 )
+    {
+        int idx = frame % m_llColors->length();
+        CLink<JColor> *pLink = m_llColors->GetNthLink(idx);
+        if( pLink && pLink->m_lpData )
+        {
+            return *( pLink->m_lpData );
+        }
+    }
+    return m_Color;
+}
+
 // Simple instance id generator for items
 static uint32 s_nextItemInstanceId = 1;
 
@@ -324,8 +338,8 @@ void CItem::SetColor()
 
     if( ( m_id->m_dwFlags & ITEM_COLOR_MULTI ) == ITEM_COLOR_MULTI )
     {
-        int which_color = Util::GetRandom( 0, m_id->m_Colors->length() - 1 );
-        m_Color.SetColor( *( m_id->m_Colors->GetNthLink( which_color )->m_lpData ) );
+        int which_color = Util::GetRandom( 0, m_id->m_llColors->length() - 1 );
+        m_Color.SetColor( *( m_id->m_llColors->GetNthLink( which_color )->m_lpData ) );
     }
     m_fColorChangeInterval = 0.0f;
 }

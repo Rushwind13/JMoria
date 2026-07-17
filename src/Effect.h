@@ -49,6 +49,7 @@ public:
           m_fRange( 0.0f ),
           m_fRadius( 0.0f ),
           m_cBeamChar( '*' ),
+          m_Color( 255, 255, 255, 255 ),
           m_llColors( NULL )
     {
         m_llColors = new JLinkList<JColor>;
@@ -84,8 +85,29 @@ public:
     float m_fRange;                      // max range in tiles
     float m_fRadius;                     // AoE radius (0 = single target)
     char m_cBeamChar;                    // character for beam rendering (default '*')
+    JColor m_Color;                      // default color for beam rendering (if no palette)
     JLinkList<JColor> *m_llColors;       // multicolor beam cycling
     int m_dwStrIds[EFFECT_STR_SLOT_MAX]; // per-slot string IDs (eStringId values)
+
+    // Return the ASCII character used when rendering this effect as a beam.
+    char GetBeamChar() const { return m_cBeamChar; }
+
+    // Return the color for a given animation frame, cycling through m_llColors.
+    // frame=0 returns the first color; wraps if frame >= number of colors.
+    // Returns white if no colors are defined.
+    JColor GetColor( int frame ) const
+    {
+         if( m_llColors && m_llColors->length() > 0 )
+        {
+            int idx = frame % m_llColors->length();
+            CLink<JColor> *pLink = m_llColors->GetNthLink(idx);
+            if( pLink && pLink->m_lpData )
+            {
+                return *( pLink->m_lpData );
+            }
+        }
+        return m_Color;
+    }
 };
 
 class CEffect

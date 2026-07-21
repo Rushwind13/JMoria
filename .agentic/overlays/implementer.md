@@ -2,90 +2,72 @@
      the implementer rendered agent(s) by render-agents.py. This is the ONLY writable
      policy surface: never edit core role copies in place. -->
 
-## Implementer: JMoria Development Workflow
+## Implementer Role Specifics for JMoria
 
-### Your Scope
-You implement features and fixes in C++ for JMoria. All changes must:
-1. **Compile and link**: `make ascii` or `make` on macOS (verify with clean build)
-2. **Pass clang-format**: Run `clang-format -i <files>` on staged changes before commit
-3. **Not break platforms**: If you modify build scripts, test cross-platform assumptions (or document test status)
-4. **Respect architecture**: Use state machine for modes; data-driven for content (see Architect overlay for patterns)
+### Coding Standards
+- **Language:** C++17 (set in Makefile, `-std=c++17`)
+- **Style:** clang-format (`.clang-format` config; Allman braces, 100-char column limit)
+- **Enforcement:** Pre-commit hook blocks commits that don't pass `git clang-format`
+- **Action:** Before pushing, run `clang-format -i src/YourFile.cpp` or fix hook failures
 
-### Build & Test Workflow
+### State Machine Pattern (Architecture Pattern)
+- **Base class:** `CStateBase` (all game states inherit from this)
+- **State activation:** `CGame::SetState(new CYourState())`
+- **Input handling:** Override `OnHandleKey(int key)` to process keyboard
+- **Update loop:** Override `OnUpdate(float elapsed_ms)` for per-frame logic
+- **Exit cleanup:** Destructor or `OnExit()` method to release resources
+- **Pattern example:** `CmdState` (command input), `TargetState` (targeting), `UseState` (inventory use)
 
-**Build the game**:
-```bash
-make clean
-make ascii        # Terminal-only (fastest for development)
-# or: make        # Both renderers, runtime selection
-# or: make opengl # Graphics-only
-```
+### Interdependencies & Module Structure
+- **CGame** — central coordinator; holds references to `CDungeon`, `CPlayer`, `CAIMgr`, `CRender`, `CDisplayText`
+- **CDungeon** — 100×100 tile grid; manages room/hallway generation via `DungeonMap::FillArea()`
+- **CPlayer** — player state, inventory, equipment, intrinsics
+- **CAIMgr** — monster AI controller (behavior per `MoveType` in resource file)
+- **CRender** — abstraction layer; routes to `RenderASCII` or `RenderOpenGL`
+- **CDisplayText** — UI text regions (Msgs, Stats, Inv, Equip, Use, EndGame)
+- **Dependency rule:** Avoid circular includes; use forward declarations in headers
 
-**Build and run tests** (if test dependencies are installed):
-```bash
-cd test
-./runtests.sh --build
-```
+### Build & Linking
+- **Object files:** `.cpp` → `.o` in same directory (Makefile `src/%.o: src/%.cpp`)
+- **Platform flags:** Do NOT hardcode paths; use `$(LOCAL_INCLUDE_PATHS)`, `$(LOCAL_LIB_PATHS)`
+- **Render mode:** Check `#ifdef RENDER_ASCII` / `#ifdef RENDER_OPENGL` if render-specific logic needed
+- **Linking:** Ensure new `.cpp` files compile to `.o` (Makefile will auto-link); test all render modes
 
-**Code formatting** (required before commit):
-```bash
-clang-format -i src/YourFile.cpp src/YourFile.h
-```
+### Data-Driven Design (Enforce Separation)
+- **Game logic:** C++ code; no stat tables, no monster definitions, no item balancing numbers
+- **Game balance:** `Resources/Monsters.txt`, `Resources/Items.txt`; parsed at runtime by `CDataFile` class
+- **Format:** Custom; parsed by `FileParse` utility (angle-bracket delimiters, NdM dice notation)
+- **Constraint:** If your feature needs tuning (damage, AC, spawn rates), add to resource file, NOT `.cpp`
+- **Why:** Designers can iterate balance without recompilation
 
-**Verify no build/test regressions**:
-- Baseline: Run `make ascii` on clean repo → verify executable works
-- After changes: Run same build → must succeed
-- If tests exist: `./test/runtests.sh --build` must pass or report known breakage
+### Multi-Renderer Support
+- **Build targets:** `make ascii`, `make opengl`, `make` (both)
+- **Test requirement:** Verify new feature builds in ALL three modes
+- **Platform differences:** macOS defaults to `-framework OpenGL`; Linux uses `-lGL`
+- **Conditional code:** Use `#ifdef RENDER_ASCII` / `#ifdef RENDER_OPENGL` sparingly; prefer abstraction via `CRender` interface
+- **Example:** Don't call SDL or ncurses directly; route through `CRender::DrawTile()` or similar
 
-### Common Development Tasks
+### Testing & Validation
+- **BDD framework:** Cucumber-CPP with GoogleTest wire protocol
+- **Test files:** `.feature` (Gherkin) in `test/features/`; step implementations in `test/features/step_definitions/`
+- **Test context:** `TestContext.hpp` sets up game state for each scenario
+- **Build before test:** `make build` produces `test/bin/AllSteps`; then `./test/runtests.sh`
+- **Feature coverage:** Add `.feature` files for significant behavioral changes (e.g., new AI, item effects)
+- **Example:** `test/features/monster_ai.feature` might test chase, flee, ranged attack behaviors
 
-**Adding a new monster**:
-1. Edit `Resources/Monsters.txt` (add stats, type, behavior)
-2. Add `MON_IDX_*` constant to `src/Constants.h`
-3. Add emoji to `MonIds` list in `src/Monster.cpp`
-4. Rebuild: `make ascii` → test in game
+### Cross-Platform Code
+- **Platform detection:** Use `#ifdef __APPLE__` (macOS), `#ifdef __linux__` (Linux), not `uname -s`
+- **Path handling:** Use relative paths or `getenv()` for runtime config; avoid `/usr/local` hardcoding
+- **Dependency checks:** If adding a library, verify it's available on all three platforms (Homebrew, apt-get, Raspberry Pi repos)
+- **Testing:** Changes to Makefile or build-related `.cpp` must be tested on macOS and Linux
 
-**Adding a new item effect**:
-1. Edit `Resources/Items.txt` or effects data
-2. If code needed: implement handler in `src/Effect.cpp`
-3. Add `EFFECT_IDX_*` constant to `src/Constants.h`
-4. Rebuild and test
-
-**Adding a new game mode**:
-1. Create `src/CNewModeState.cpp` + `.h` (extends `CStateBase`)
-2. Implement `OnHandleKey()`, `OnUpdate()`, enter/exit handlers
-3. Add enum to `StateEnum` in `src/Constants.h`
-4. Link from existing state via `CGame::SetState()`
-5. Test via manual gameplay or Cucumber feature
-
-### Files You'll Work With Frequently
-- `src/*.cpp` / `src/*.h` — Game logic, states, AI, rendering
-- `src/Constants.h` — Indices, enums, magic numbers
-- `Resources/Monsters.txt`, `Resources/Items.txt` — Data definitions
-- `Makefile` — Build configuration (rarely; only if adding dependencies or platforms)
-- `test/features/*.feature` — Cucumber tests (if adding testable feature)
-
-### Guardrails for Implementer
-1. **clang-format is mandatory**: Staged changes MUST pass `git clang-format --diff --staged`; documentation note or CI will enforce
-2. **Makefile is finicky**: If you add a file, update `SOURCES` list; if you add a dependency, test both Darwin and Linux branching
-3. **Test path trap**: Makefile has hardcoded googletest path `/opt/homebrew/Cellar/googletest/1.17.0/`; test link will fail if path differs on your machine; see `doc/Developer-Setup-Guide.md` for workaround
-4. **Platform compatibility check**: If you modify *any* build script, shell command, or preprocessor flag, document which platforms you tested on
-5. **No breaking changes**: If refactoring core classes (Game, Player, Dungeon), ensure existing feature tests still pass
-
-### Debugging
-- **ASCII build recommended for development**: Faster than OpenGL, no framework dependencies
-- **Game logs**: `clockstep_log*.txt` auto-created in repo root (may be useful for debugging)
-- **Manual testing**: Use `tmux` to play the game after changes; test the specific feature you implemented
-- **Wizard mode**: `Ctrl-T` (teleport), `Ctrl-S` (summon), etc. — useful for testing without long runs
-
-### Before Committing
-1. ✓ Code compiles: `make clean && make ascii`
-2. ✓ Code is formatted: `clang-format -i src/Changed*.cpp src/Changed*.h`
-3. ✓ Existing tests pass: `./test/runtests.sh --build` (if test dependencies installed)
-4. ✓ Manual test of feature (play the game or verify expected behavior)
-5. ✓ Commit message is clear (describe *what* and *why*, not just *how*)
-
-### Integration Profile Available
-- Location: `.agentic/runs/000-integration/integration-profile.md`
-- Contains: build platforms, test infrastructure status, conventions, known traps
-- Reference if build fails or you're unsure about cross-platform impact
+### Code Review Self-Checklist
+Before submitting a PR:
+- [ ] `clang-format` passes (`git clang-format --check`)
+- [ ] Builds on all three render modes: `make ascii`, `make opengl`, `make`
+- [ ] No hardcoded paths or platform-specific `#ifdef` blocks without fallback
+- [ ] Game data (numbers, definitions) lives in `Resources/`, not .cpp
+- [ ] State machine pattern followed (if adding new state)
+- [ ] Test coverage added or verified (BDD feature files or unit tests)
+- [ ] Cross-platform Makefile edits tested on macOS and Linux (or Docker)
+- [ ] No breaking changes to `CGame` interface without updating all state classes

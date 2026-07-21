@@ -2,27 +2,39 @@
      the integrator rendered agent(s) by render-agents.py. This is the ONLY writable
      policy surface: never edit core role copies in place. -->
 
-## Integrator: JMoria Host Context
+## Integrator Role Specifics for JMoria
 
-You are integrating the agentic framework into **JMoria**, a from-scratch C++ roguelike game engine with:
-- **State machine architecture**: Game modes as separate state classes; states transition via `CGame::SetState()`
-- **Data-driven monsters/items**: Parsed from `Resources/Monsters.txt` and `Resources/Items.txt` (custom format)
-- **Cross-platform build**: Darwin (macOS), Linux, Raspberry Pi OS via single Makefile with `uname` branching
-- **Three render modes**: ASCII (ncurses), OpenGL (SDL2), or both at runtime
+### Integration Success Criteria
+A successful integration for JMoria means:
+1. **Platform matrix tested:** Builds pass on macOS (primary), Linux (Docker OK), conceptual Raspberry Pi support validated (Makefile conditional)
+2. **CI gate functional:** `agentic-render-check` runs on push/PR, validates rendered framework files
+3. **Framework visibility:** `.agentic/runs/` visible in repository; agent run records part of project history
+4. **No guardrail breaks:** Code submitted by any agent respects G1–G7 guardrails without human override
+5. **Cold-start capability verified:** Fresh clone can immediately run `make ascii`, `make verify` without external setup beyond OS package install
 
-### Host's Current Integration Status
-- ✓ Framework installed (`.agentic/`, `framework-lock.json`)
-- ✓ CI workflow present (`agentic-render-check.yml`)
-- ⚠️ Code style gate (G0) documented but not machine-enforced; pre-commit hook template exists
-- ⚠️ Test infrastructure ready but test dependencies not yet installed in CI
+### Probe Points (Findings Already Recorded)
+- ✅ Environment: g++, GNU Make, Homebrew (macOS), platform detection via uname
+- ✅ Gate: Single CI gate (render-check); no CD pipeline
+- ✅ Conventions: Accessible in-repo (Copilot instructions, Developer's Guide, Makefile)
+- ✅ Cross-platform: Makefile conditionals in place; Linux support unverified in CI
+- ⚠️ Test infrastructure: Requires full build pre-step; sequential `make build` then `runtests.sh`
 
-### Key Guardrails for Integrator
-1. **Do not edit core copies**: `.agentic/contracts/`, `.agentic/roles/`, `.agentic/scripts/` are read-only
-2. **Overlays are writable**: Update `overlays/_all.md` and per-role overlays as needed for project policy
-3. **After overlay changes**: Run `.agentic/scripts/render-agents.py` to regenerate `.github/agents/`; commit both
-4. **Platform testing**: If you modify Makefile or build scripts, verify on macOS and at least document assumptions for Linux/Pi
+### Documentation Artifacts Created
+- **Integration profile:** `.agentic/runs/000-integration/integration-profile.md` (this run's findings)
+- **Project layer:** `overlays/_all.md` (global policy), role-specific overlays (agent guidelines)
+- **Registry bindings:** `registry/models.yaml` (model assignments for each role)
 
-### Integration Profile Location
-- `integration-profile.md` in this run directory (`.agentic/runs/000-integration/`)
-- Contains: environment probe, gate mapping, conventions, guardrails, dispatch reality
-- Use as reference for subsequent runs and for human GI review
+### Known Risks & Mitigations
+| Risk | Mitigation |
+|------|-----------|
+| Linux build not CI-tested; implementer changes might break it | Require manual Linux verification or Docker test before merge; document in overlay |
+| Wizard Mode score-save constraint not enforced by compiler | Code review checklist; automated linting could detect `SaveScore()` without `IsWizardMode()` guard |
+| Test executable wire protocol fragile (manual invocation breaks it) | Developer docs + in-code comments; ops runbook should highlight this |
+| Resource file parsing custom format (not JSON/YAML) | Backward-compatible; agents should use existing FileParse utilities, not rewrite parsing |
+
+### Integrator's Sign-Off Requirements
+- [ ] All guardrails (G1–G7) trace to verified probe findings or cited host policy
+- [ ] Role-specific overlays are non-empty and actionable (not just templates)
+- [ ] Registry bindings reviewed for model tier appropriateness (frontier-reasoning for architect, balanced for implementer)
+- [ ] No manual edits to `.agentic/roles/` or `.agentic/contracts/`; all project policy in `overlays/`
+- [ ] GI human approver review scheduled

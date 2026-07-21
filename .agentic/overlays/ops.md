@@ -2,64 +2,119 @@
      the ops rendered agent(s) by render-agents.py. This is the ONLY writable
      policy surface: never edit core role copies in place. -->
 
-## Ops: JMoria Deployment & Operations
+## Ops Role Specifics for JMoria
 
-### Current Deployment Status
-- **No CD pipeline**: Merges to `develop` do not auto-deploy
-- **Release model**: Semantic versioning; tagged releases (`v0.6.0`, `v0.7.0`) in git
-- **Distribution**: Source available on GitHub; pre-built executables not auto-published (manual if needed)
+### Deployment & Release Model
+JMoria is an **open-source game engine**, not a deployed service. Ops responsibilities focus on:
+1. **Build & packaging** (create distributable binaries)
+2. **Release tagging** (GitHub releases)
+3. **Dependency updates** (Homebrew, apt-get packages)
+4. **Documentation & setup guides** (for developers and players)
 
-### Development & Release Branches
-- **Active development**: `develop` branch (origin/develop tracked locally)
-- **Release tags**: `v0.x.x` (semantic versioning); see `doc/RELEASE-*.md` for release notes
-- **Feature branches**: `feat/*`, `fix/*`, `issue/*`, `phase*` prefixes
+### Build & Distribution
 
-### Build Artifacts & Deployment
+**Build targets:**
+- `make ascii` — ASCII-only binary (smallest, headless-friendly)
+- `make opengl` — OpenGL-only binary (graphical, requires X11 on Linux)
+- `make` (default) — Universal binary with runtime renderer selection
 
-**Local builds**:
-- Executable: `./jmoria` in repository root (created by `make` or `make ascii` or `make opengl`)
-- Score file: `Resources/Scores.txt` (auto-created if missing; gitignored)
-- Logs: `clockstep_log*.txt` (debug logs; gitignored)
+**Distribution checklist:**
+- [ ] Build on macOS: `make clean && make` produces `./jmoria`
+- [ ] Build on Linux: Docker verification or native Linux box
+- [ ] Build on Raspberry Pi: Conceptual (same Makefile, verify Debian packages available)
+- [ ] Create release tarball: `jmoria-v0.x.x.tar.gz` with `jmoria` executable + `Resources/` directory
+- [ ] Include: `README.md`, `Player Docs.txt`, keyboard commands
+- [ ] Sign: If applicable, GPG-sign the tarball
 
-**CI gates**:
-- GitHub Actions: `agentic-render-check.yml` verifies framework rendering (passes on `develop` branch)
-- No deployment gate; merges proceed if render check passes (human review via PR)
+**Release versioning:**
+- Tags follow `v0.x.x` format (see git history: `v0.6.0` exists)
+- Changelog: Document major features, bug fixes, breaking changes
+- Platform notes: List tested platforms and known issues
 
-### Monitoring & Incidents
+### Dependency Management
 
-**Known operational traps**:
-- Resource files missing: Game exits cleanly with error message (see `doc/Developer-Setup-Guide.md`)
-- macOS Homebrew paths: If Homebrew installs libraries in different path, Makefile linking fails (update LOCAL_LIB_PATHS)
-- Test path hardcoding: googletest path (`/opt/homebrew/Cellar/googletest/1.17.0/`) may differ; tests fail to link if not updated
+**Primary dependencies:**
+- C++ compiler: g++ (C++17 support required)
+- Build: GNU Make
+- Rendering (optional): SDL2, SDL2_image, OpenGL framework/library, ncurses
+- Testing (optional): googletest, libboost, cucumber-cpp gem
 
-**Troubleshooting**:
-- Build fails: Check `uname` branching in Makefile; verify required libraries installed
-- Tests fail to link: Check googletest path; update Makefile if needed
-- Game won't start: Ensure `Resources/` directory present with `Monsters.txt`, `Items.txt`, `Courier.png` (for OpenGL)
+**Package availability (verify before release):**
+- **macOS:** Homebrew (`sdl2`, `sdl2_image`); OpenGL framework built-in
+- **Linux/Debian:** apt-get (`libsdl2-dev`, `libsdl2-image-dev`, `libgl-dev`, `libncurses-dev`)
+- **Raspberry Pi OS:** Debian packages (same as Linux/Debian)
 
-### Operational Checklist
+**Dependency update procedure:**
+- [ ] Test new version on all platforms before updating Makefile
+- [ ] Document any version-specific quirks in `Developer-Setup-Guide.md`
+- [ ] Notify developers of breaking changes (e.g., new build flags)
 
-**Monthly or pre-release**:
-- ✓ CI pipeline healthy? (`agentic-render-check.yml` green on `develop`)
-- ✓ Build verified on macOS? (`make ascii` succeeds)
-- ✓ Test suite passes (if dependencies installed)? (`./test/runtests.sh --build`)
-- ✓ Manual smoke test: Game playable, no crash on startup
-- ✓ Resource files intact: `Resources/Monsters.txt`, `Resources/Items.txt`, graphics present
+### Continuous Integration & Automation
 
-**Pre-release**:
-- ✓ Release branch created if needed (or tag directly on `develop`)
-- ✓ Version bumped in code/docs (if applicable)
-- ✓ Release notes drafted in `doc/RELEASE-x.y.z.md`
-- ✓ Executable built and tested on macOS
-- ✓ Tag pushed: `git tag -a vX.Y.Z -m "Release X.Y.Z"` and `git push origin vX.Y.Z`
+**Current CI gate:** `.github/workflows/agentic-render-check.yml`
+- Runs on push and pull_request
+- Validates framework file rendering (not game build)
+- Single job: `render-check` on ubuntu-latest
 
-### Framework Compliance
-- ✓ `.agentic/` files untouched and read-only (managed by `render-agents.py`)
-- ✓ Overlays committed alongside rendered agents (`.github/agents/*.agent.md`)
-- ✓ Integration profile available for operator reference (`.agentic/runs/000-integration/`)
+**Suggested enhancements (ops consideration, not required):**
+1. **Build gate:** Compile on ubuntu-latest to catch Linux build issues early
+2. **Test gate:** Run `make verify` on ubuntu-latest (BDD suite)
+3. **Platform matrix:** Separate jobs for macOS, Linux, Raspberry Pi (if GitHub-hosted runner available)
 
-### No Automated Deployment
-- This project is a source distribution; users build locally
-- No cloud infrastructure, CDN, or auto-deployment pipeline
-- Releases are GitHub tags and source archives
-- Future: If deployment needed, create separate CD workflow (not in scope for this integration)
+### Monitoring & Issue Triage
+
+**Post-release monitoring:**
+- [ ] Monitor GitHub issues for crash reports
+- [ ] Watch for platform-specific issues (e.g., "doesn't compile on Raspberry Pi")
+- [ ] Track dependencies becoming outdated (e.g., Homebrew package removals)
+
+**Severity levels:**
+- **P0 (Critical):** Game crashes on startup, data loss, security issue
+- **P1 (High):** Gameplay-breaking bug, major feature broken
+- **P2 (Medium):** UI glitch, performance issue, minor feature broken
+- **P3 (Low):** Cosmetic issue, nice-to-have improvement
+
+### Documentation & Player Support
+
+**Keep current:**
+- `README.md` — Build instructions, quick start
+- `Player Docs.txt` — Keyboard commands, gameplay tips
+- `Developer-Setup-Guide.md` — Environment setup for developers
+- `_JMoria Developer's Guide.md` — Architecture and design patterns
+- Release notes: What's new in each version
+
+**Accessibility:**
+- Ensure docs are readable in fresh clone (`git clone && cat README.md`)
+- Link to GitHub Wiki (if used) from README
+- Provide issue template for bug reports (GitHub issue templates)
+
+### Runbook: Release Process
+
+1. **Preparation:**
+   - [ ] Merge all features for release into develop branch
+   - [ ] Update WORKLIST.txt with completed items
+   - [ ] Create release notes (features, fixes, breaking changes)
+   - [ ] Bump version in docs (if versioning file exists)
+
+2. **Build verification:**
+   - [ ] `make clean && make ascii` on macOS
+   - [ ] `make clean && make opengl` on macOS
+   - [ ] `make clean && make` on macOS (both)
+   - [ ] Test on Linux via Docker: `docker run -it ubuntu:latest /bin/bash` then install deps and build
+   - [ ] Spot-check gameplay: new features work, no regressions
+
+3. **Release:**
+   - [ ] Tag: `git tag v0.x.x && git push origin v0.x.x`
+   - [ ] GitHub release: Upload `jmoria-v0.x.x.tar.gz` executable + Resources/ directory
+   - [ ] Announce: Update README.md if needed; post release notes
+
+4. **Post-release:**
+   - [ ] Monitor for crash reports (first 24 hours critical)
+   - [ ] Prepare hotfix branch if P0 issues found
+   - [ ] Plan next release features in WORKLIST.txt
+
+### Known Ops Constraints
+- No deployment pipeline (this is source code, not a service)
+- Release is manual git tag + GitHub release upload
+- No automated scaling, load balancing, or infrastructure changes
+- Platform testing responsibility shared with developers (no dedicated CI/CD platform farm)

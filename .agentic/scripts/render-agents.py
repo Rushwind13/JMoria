@@ -61,7 +61,7 @@ def parse_list(value):
     return [item.strip() for item in value.strip("[]").split(",") if item.strip()]
 
 
-def render_tools(capabilities, manifest):
+def merge_tools(capabilities, manifest):
     tools = []
     for cap in capabilities:
         if cap not in manifest["tool_map"]:
@@ -71,9 +71,25 @@ def render_tools(capabilities, manifest):
         for tool in manifest["tool_map"][cap]:
             if tool not in tools:
                 tools.append(tool)
+    return tools
+
+
+def render_tools(capabilities, manifest):
+    tools = merge_tools(capabilities, manifest)
     if manifest["tools_style"] == "comma":
         return ", ".join(tools)
     return "[" + ", ".join(tools) + "]"
+
+
+def render_permission_map(capabilities, manifest):
+    """opencode-style scoping: agents carry a permission map (allow/deny), not a
+    tool list. Deny-by-default plus explicit allows keeps the adapter rule
+    (narrow, never widen) a rendered property, and new harness tools stay denied
+    until a capability grants them."""
+    lines = ["permission:", '  "*": deny']
+    for key in merge_tools(capabilities, manifest):
+        lines.append("  %s: allow" % key)
+    return lines
 
 
 def render_agent(role, manifest):
@@ -93,9 +109,13 @@ def render_agent(role, manifest):
         "---",
         "name: %s" % role,
         "description: %s" % front["dispatch"],
-        "tools: %s" % render_tools(parse_list(front["capabilities"]), manifest),
-        "model: %s" % model,
     ]
+    capabilities = parse_list(front["capabilities"])
+    if manifest["tools_style"] == "permission-map":
+        lines += render_permission_map(capabilities, manifest)
+    else:
+        lines.append("tools: %s" % render_tools(capabilities, manifest))
+    lines.append("model: %s" % model)
     for key, value in manifest.get("extra_frontmatter", {}).items():
         lines.append("%s: %s" % (key, json.dumps(value)))
     lines += ["---", "", HEADER.format(role=role), "", body.rstrip()]

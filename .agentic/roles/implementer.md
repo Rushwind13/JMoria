@@ -24,8 +24,11 @@ scopes — no more. Work on the current (run) branch; leave changes uncommitted 
 your dispatch says otherwise.
 
 **Round 2+:** if dispatched with a review report, address every finding — fix it, or
-rebut it finding-by-finding in the task file's `notes:`. Round 3 without convergence
-→ escalate.
+rebut it finding-by-finding in the task file's `notes:`. Either way, **always append
+a response entry to `notes:`** (one line per finding: fixed how, or rebutted why) —
+the note is the machine-visible signal that you have responded; without it the
+orchestrator re-derives your dispatch instead of the verify round (found by the
+dupefind shadow replay). Round 3 without convergence → escalate.
 
 ## Rules
 

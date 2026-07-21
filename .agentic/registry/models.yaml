@@ -53,6 +53,7 @@ dispatch_estimates_usd:
   reviewer: 4
   verifier: 6
   ops: 2
+  historian: 1
 
 bindings:
   orchestrator: {profile: frontier-reasoning}
@@ -67,3 +68,6 @@ bindings:
   verifier:     {profile: balanced,           avoid_vendor_of: implementer}
 
   ops:          {profile: balanced}
+  # Historian is scheduled, not gate-driven (orchestrator.yaml `schedules:`);
+  # its sweep branch is human-reviewed before merge, so the cheap tier is safe.
+  historian:    {profile: fast-cheap}

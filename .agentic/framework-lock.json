@@ -1,10 +1,10 @@
 {
   "source": {
     "repo": "git@github.com:nathancrtr/agentic-sandbox.git",
-    "ref": "1aef44ebb4cd5152f1713127541c755b8fec638a",
+    "ref": "7c76950a809eaa65ec629da0535417cdf9ca0223",
     "version": "unreleased"
   },
-  "integrated_at": "2026-07-14",
+  "integrated_at": "2026-07-21",
   "method": "integrate.py v0.1",
   "adapters_rendered": [
     "copilot-cli"
@@ -32,7 +32,7 @@
     "contracts/state.yaml"
   ],
   "files": {
-    ".agentic/scripts/render-agents.py": "1f21e94f3a1e27f638219a3c4e7b65ea857e69f31ebbecb741cb8068c4de791b",
+    ".agentic/scripts/render-agents.py": "3886ff31c0d377a83a794722480c9306c479381876eeb06b4d8c9ff6710f981f",
     ".agentic/scripts/integrate.py": "a4846b95d1665d0048b456308980519ef79951186337c63bd3b08909ec3cde44",
     ".agentic/scripts/copy-manifest.json": "5ada1075bc63a3d76061c7a672d5e65328a863fb3103fff4215046c6586983ac",
     ".agentic/scripts/framework-lock.schema.json": "aacd4e4312853d668336c579aa0c6554294850ee48e120f8a99d1ab1ec696f84",
@@ -40,8 +40,8 @@
     ".agentic/contracts/integration-profile.md": "9041828dde2d699095e0788dc62846c962fd37614b901e2d7490045affefd7fa",
     ".agentic/roles/analyst.md": "6a504bcca343ecad563050a4e8a7a43c3688c631358ac0078841243110e372fd",
     ".agentic/roles/architect.md": "d7b15dfbd37da8422753e5744d7c1c7ea48af9e691521ca74f6075584076706c",
-    ".agentic/roles/implementer.md": "e30b228e81622d6613128de46e940c9eb7727d37e78873a3b87067596d95553d",
-    ".agentic/roles/reviewer.md": "96a56fc427fa1d73f49b6f603d7586d8ef33c0fd2719092ef4f88a0eec25ee39",
+    ".agentic/roles/implementer.md": "babf7fbeb8faaed4e6b317b2cfeba8adb4120919796197a252bcd0e7c17ab363",
+    ".agentic/roles/reviewer.md": "65940c8a8c86f7a84e66c91fe4982cdc6b8ecab45d4006c708db659fc0d0de58",
     ".agentic/roles/verifier.md": "4d52dbf388a1f39302357b1c8bd30d4a46fd9bbfa5ac8c7827e8f0c1d6b46ee9",
     ".agentic/roles/ops.md": "03165c22a6b7f84ece758cf8d646df9fd2006d94a8864dd05021f663f9ce8bfc",
     ".agentic/roles/orchestrator.md": "452a9ec23d75e7823b2657eacfacae7d8de301675a782f05dd89144e01611735",

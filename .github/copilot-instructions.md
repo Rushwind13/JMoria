@@ -26,11 +26,11 @@ JMoria is a from-scratch C++ roguelike implementation (homage to IMoria) using S
 1. New flavor of existing type: Edit `Monsters.txt` or `Items.txt` only
 2. New type: Edit data file + add `MON_IDX_*` or `ITEM_IDX_*` to [src/Constants.h](src/Constants.h) + add emoji to `MonIds`/`ItemIds` list in [src/Monster.cpp](src/Monster.cpp) or [src/Item.cpp](src/Item.cpp)
 
-**Utility scripts**: Use `./scripts/find_monster.sh`, `./scripts/find_item.sh`, `./scripts/list_monster.sh`, `./scripts/list_item.sh` to search resource files.
+**Utility scripts**: Use `./util/find_monster.sh`, `./util/find_item.sh`, `./util/list_monster.sh`, `./util/list_item.sh` to search resource files.
 
 ## Build & Test Workflow
 
-**Build**: `make` (creates `jmoria` executable with both OpenGL and ASCII renderer support)
+**Build**: `make verify` (cleans and creates `jmoria` executable with both ASCII renderer, and builds and runs the BDD tests.)
 - `make ascii` — builds ASCII-only executable (ncurses, no SDL/OpenGL required at runtime). Use this for headless/bot use.
 - `make opengl` — builds OpenGL-only executable
 - `make` — builds with both renderers (default)
@@ -45,10 +45,9 @@ JMoria is a from-scratch C++ roguelike implementation (homage to IMoria) using S
 - Build googletest: `cd /usr/src/googletest && sudo cmake . && sudo cmake --build . --target install`
 - Build cucumber-cpp: Clone from github.com/cucumber/cucumber-cpp, build with `cmake .. -DCUKE_ENABLE_GTEST=ON && cmake --build . && sudo cmake --build . --target install`
 - Install cucumber gem: `sudo gem install cucumber -v 7.1.0` (version 7.x required for wire protocol support; versions 8.0+ removed it)
-- Run: `./test/runtests.sh` or `make test` (builds test executable)
-- Tests require `SDL_VIDEODRIVER=dummy` for headless operation
+- Run: `./test/runtests.sh` or `make verify` (builds test executable)
 - Test structure: Feature files in [test/features/](test/features/), step definitions in [test/features/step_definitions/](test/features/step_definitions/)
-- Test executable: `test/bin/AllSteps` runs as background process during cucumber execution
+- Test executable: `test/bin/AllSteps` runs as background process during cucumber execution DO NOT RUN THIS MANUALLY, only use `runtests.sh` or `make verify` to start the test executable.
 - Setup context defined in [test/features/step_definitions/TestContext.hpp](test/features/step_definitions/TestContext.hpp)
 
 **Code Style**: Must use `clang-format` before committing. Pre-commit hook enforces `git clang-format` on staged changes. Run `clang-format -i <files>` to format.
@@ -66,9 +65,9 @@ JMoria is a from-scratch C++ roguelike implementation (homage to IMoria) using S
 
 **DisplayText Regions** (UI layout):
 - Msgs: Top 2 rows (gameplay output)
-- Stats: Left sidebar (AC, HP, Level, etc.)
-- Inv: Upper right sidebar (inventory)
-- Equip: Lower right sidebar (equipment)
+- Stats: Left sidebar (AC, HP, Level, etc.) toggle with `C`
+- Inv: Upper right sidebar (inventory) toggle with `i`
+- Equip: Lower right sidebar (equipment) toggle with `e`
 - Use: Central popup (shown when needed for inv/equip commands)
 
 **Tile Bindings**: Monster types mapped to ASCII characters (lowercase = minor, uppercase = major). See monster type chart in [_JMoria Developer's Guide.md](_JMoria%20Developer's%20Guide.md) (e.g., `o` = orc, `D` = ancient dragon, `J` = oozes/jellies).
@@ -77,11 +76,8 @@ JMoria is a from-scratch C++ roguelike implementation (homage to IMoria) using S
 
 ## Known Issues & Context
 
-- Dungeon generation has historical bugs (see `WORKLIST.txt` comments from 2003-2005)
 - `DungeonMap::FillArea` is complex - stepwise calculation implemented in 2017 for debugging
-- Equipment system currently hardcoded but moving toward `ITEM_FLAG_EQUIPMENT` data-driven approach
 - Score file auto-created at `Resources/Scores.txt` if missing
-- Graphics tileset: `Resources/Courier.png` (emoji-based)
 
 ## Reference Files
 

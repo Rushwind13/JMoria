@@ -2,61 +2,93 @@
      the architect rendered agent(s) by render-agents.py. This is the ONLY writable
      policy surface: never edit core role copies in place. -->
 
-## Architect: JMoria Design Principles
+## Architect Role Specifics for JMoria
 
-### Project Philosophy
-JMoria is a **from-scratch roguelike** with deep technical ownership and deliberate patterns:
-- **State machine first**: All game modes (command input, targeting, rest, etc.) are separate `CStateBase` subclasses
-- **Data-driven content**: Monsters, items, effects defined in `.txt` resource files; code is renderer/engine
-- **Cross-platform**: Single codebase, three build modes (ASCII terminal, OpenGL graphics, or both)
-- **Test-driven culture**: Cucumber-CPP feature files guide development; state machine makes testing tractable
+### Core Architectural Pattern: State Machine
+JMoria uses a **hierarchical state machine** for game flow. All game modes (command input, targeting, inventory, rest, look, etc.) are separate `CStateBase` subclasses managed by `CGame::SetState()`.
 
-### Architectural Guidelines for New Features
+**Benefits of this pattern:**
+- Clean separation of concerns (each state owns its input handling and update logic)
+- Easy to add new modes without touching existing states
+- Testable in isolation (each state's behavior is independent)
+- Prevents state explosion (vs. large switch statements in a single input handler)
 
-**Rule 1: State Machine for Complex Modes**
-- New gameplay mode? → Create a new `CStateBase` subclass (e.g., `CNewModeState`)
-- Implement `OnHandleKey()`, `OnUpdate()`, `OnEnter()`, `OnExit()` contract
-- Transition via `CGame::SetState(new_state)`
-- This isolates complexity and makes testing clean
+**Design constraints:**
+- States must not directly modify peer states' internals
+- State transitions routed through `CGame::SetState()`, not direct calls
+- Shared state (player, dungeon, etc.) accessed via `CGame` reference
 
-**Rule 2: Data-Driven, Not Code-Driven**
-- New monster type? → Add line to `Resources/Monsters.txt`, constant to `Constants.h`, emoji to `MonIds` (in `Monster.cpp`)
-- New item effect? → Add to `Resources/Items.txt` or effects table
-- Code parses via `CDataFile::ReadMonster()`, `CDataFile::ReadItem()`; no monster-specific logic in code
-- This lets designers iterate without recompilation
+### Module Architecture & Dependencies
+```
+CGame (coordinator)
+  ├─ CDungeon (tile grid, generation)
+  ├─ CPlayer (state, inventory, equipment)
+  ├─ CAIMgr (monster controller)
+  ├─ CRender (renderer abstraction)
+  ├─ CDisplayText (UI layout)
+  └─ CStateBase* (current state)
+```
 
-**Rule 3: Render Abstraction**
-- Game logic (AI, combat, turns) is completely separate from rendering
-- `CRender` is an interface; implementations: `CRenderASCII`, `CRenderOpenGL`
-- New display mode? Implement a new Render subclass; game logic unchanged
-- Build flag `RENDER_ASCII` vs `RENDER_OPENGL` controls which one compiles
+**Dependency flow:**
+1. `CStateBase` subclasses query `CGame` for references to managers
+2. States update player/dungeon via manager interfaces
+3. Render layer called by game loop (not by states directly)
+4. No bidirectional dependencies; managers don't call back into states
 
-**Rule 4: Cross-Platform from Day One**
-- Makefile uses `uname -s` to detect Darwin vs Linux
-- Any new dependencies must be available on both platforms (or conditional build flags)
-- Test changes on macOS (required); Linux assumed to follow same pattern
-- Raspberry Pi OS is Debian-based; treat like Linux
+### Design Patterns in Use
 
-### Design Review Checklist
-- ✓ Does the feature fit the state machine model or require new architectural pattern?
-- ✓ Can logic be data-driven (resources) or must it be in code?
-- ✓ Does the change affect rendering? If so, is render abstraction maintained?
-- ✓ Will it build on Darwin/Linux/Pi with current toolchain?
-- ✓ Is there a feature test (Cucumber) or will it need one?
+**1. Strategy Pattern (Renderer Selection)**
+- `CRender` base class with `RenderASCII` and `RenderOpenGL` implementations
+- Renderer selected at runtime via `--renderer` flag
+- New renderer support: create `RenderFoo.cpp`, inherit from `CRender`, implement abstracted draw methods
 
-### Known Architectural Debt (from WORKLIST)
-- Dungeon generation has historical bugs (comments from 2003–2005 era code); see `DungeonMap.cpp`
-- Equipment system currently hardcoded; moving toward `ITEM_FLAG_EQUIPMENT` data-driven approach
-- Hardcoded test paths in Makefile (googletest path); future: CMake or dynamic detection
-- **Do not redesign these during this integration**; document findings and flag for future phase
+**2. Data-Driven Design (Monster & Item Definitions)**
+- Game objects defined in text files, not compiled code
+- `CDataFile` class reads and caches definitions
+- Extensibility: new monster types require only `.txt` entry + new index in `Constants.h`
+- Benefit: Non-programmers can balance and extend content
 
-### Vendor/Dependency Stance
-- No package manager (C++17, pure Makefile)
-- Core dependencies: SDL2, ncurses, OpenGL (widely available)
-- Test dependencies: GoogleTest, Cucumber-CPP (macOS: Homebrew; Linux: apt)
-- No vendored code; assume system libraries
+**3. Manager Pattern (AI, Dungeon, Display)**
+- `CAIMgr` manages all active monsters and their behaviors
+- `CDungeon` owns the tile map and generation logic
+- `CDisplayText` manages UI regions and text rendering
+- Coordinator pattern: `CGame` holds all managers, states access them via `CGame`
 
-### Integration Profile Reference
-- `.agentic/runs/000-integration/integration-profile.md`
-- Contains: gate capabilities, platform traps, test infrastructure readiness
-- Use to understand what automation is available vs manual effort
+**4. Command Pattern (Potentially)**
+- Future: Player actions (move, attack, cast) could be commands with undo/replay
+- Currently: Direct state modifications; consider command pattern for save/replay features
+
+### Scalability & Future Direction
+
+**Current bottleneck:** DungeonMap::FillArea() is complex stepwise calculation (2017 implementation); well-documented but fragile  
+**Recommendation:** Consider dungeon generation refactor if adding new room types or biomes  
+
+**Extensibility points (low-effort, high-impact):**
+- New monster types: Edit `Resources/Monsters.txt`, add index to `Constants.h`
+- New item effects: Add effect type to `Resources/Items.txt`, implement handler in `Effect.cpp`
+- New UI regions: Add to `CDisplayText`, route rendering in game loop
+- New game states: Subclass `CStateBase`, call `CGame::SetState()` to activate
+
+**High-effort directions (estimate 40+ hours each):**
+- Wizard mode graphical editor for dungeon layout
+- Procedural skill/spell system (vs. fixed attack types)
+- Multi-level dungeon persistence (currently per-level)
+- Network multiplayer (major architectural refactor)
+
+### Cross-Platform Architecture Considerations
+- Renderer abstraction (`CRender` interface) shields platform-specific graphics code
+- Build system detects platform at make-time; Makefile conditionals set platform-specific flags
+- No `#ifdef` guards in game logic; platform-specific code isolated to renderer and build system
+- **Design rule:** If you need platform-specific code, it belongs in a separate implementation file (e.g., `Render_MacOS.cpp`), not scattered in headers
+
+### Test Architecture for Design Validation
+- BDD test structure validates game behaviors at a high level (vs. unit tests)
+- Feature scenarios describe player actions and expected outcomes
+- Step definitions tie scenarios to game state queries/modifications
+- **Design implication:** Features should map cleanly to game states and manager operations; if a feature requires complex glue code, it signals a design issue
+
+### Integration Points with Agent Framework
+- **Implementer** will receive detailed coding standards and dependency rules
+- **Reviewer** needs architecture overview to assess PRs for pattern consistency
+- **Verifier** needs test architecture to understand what BDD tests validate
+- **This document** serves as reference architecture for all downstream agents

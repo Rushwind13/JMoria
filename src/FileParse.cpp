@@ -1,15 +1,133 @@
 #include "FileParse.h"
 #include "Dungeon.h"
 #include "EndGameState.h"
+#include "Game.h"
 #include "Item.h"
 #include "Monster.h"
 
-CEffect *CDataFile::EffectFromName( const char *szName )
+CPalette *CDataFile::ReadPalette( CPalette &ceIn )
 {
-    if( m_pDungeon == NULL || szName == NULL || *szName == '\0' )
+    char szRaw[1024];
+    char *szLine;
+    char *szValue = NULL;
+    bool bFoundEntry = false;
+    bool bInBlock = false;
+    bool bEndEntry = false;
+
+    while( !bEndEntry && fgets( szRaw, 1024, m_fp ) != NULL )
+    {
+        szLine = Strip( szRaw );
+        if( szLine == NULL )
+            continue;
+
+        if( !bFoundEntry )
+        {
+            if( strncasecmp( szLine, "color", 5 ) == 0 )
+            {
+                bFoundEntry = true;
+                ceIn.m_szName = GetValue( szLine, ceIn.m_szName );
+                JLog( LOG_LEVEL_NOISE, true, "Found color entry: %s\n", ceIn.m_szName );
+            }
+        }
+        else if( !bInBlock )
+        {
+            if( *szLine == '{' )
+                bInBlock = true;
+        }
+        else
+        {
+            if( *szLine == '}' )
+            {
+                bEndEntry = true;
+            }
+            else if( strncasecmp( szLine, "color", 5 ) == 0 )
+            {
+                char *color = chomp( szLine, szValue );
+                if( color )
+                {
+                    JLinkList<JColor> *parsed = ParseColors( color );
+                    CLink<JColor> *p = parsed->GetHead();
+                    while( p )
+                    {
+                        ceIn.m_llColors->Add( new JColor( *p->m_lpData ) );
+                        p = p->next;
+                    }
+                    parsed->Terminate();
+                    delete parsed;
+                    delete[] color;
+                }
+            }
+            else
+            {
+                JLog( LOG_LEVEL_WARN, true, "Unparseable line in color entry: %s\n", szLine );
+            }
+        }
+    }
+
+    if( szValue )
+        delete[] szValue;
+
+    if( !bEndEntry )
         return NULL;
 
-    CEffectDef *pFound = m_pDungeon->GetEffectDef( szName );
+    return &ceIn;
+}
+
+bool CDataFile::ApplyPalette( const char *szName, JLinkList<JColor> *dest )
+{
+    if( g_pGame == NULL || g_pGame->GetDungeon() == NULL || szName == NULL || dest == NULL )
+        return false;
+
+    const CPalette *entry = g_pGame->GetDungeon()->GetPalette( szName );
+    if( entry == NULL )
+    {
+        JLog( LOG_LEVEL_WARN, true, "ApplyPalette: unknown color name '%s'\n", szName );
+        return false;
+    }
+
+    CLink<JColor> *p = entry->m_llColors->GetHead();
+    while( p )
+    {
+        dest->Add( new JColor( *p->m_lpData ) );
+        p = p->next;
+    }
+    return true;
+}
+
+bool CDataFile::ReadColor( const char *color, JColor &outSingle, JLinkList<JColor> *outMulti )
+{
+    if( strchr( color, ',' ) == NULL && strchr( color, '<' ) == NULL )
+    {
+        // Named palette reference — always multi (palette defines the list)
+        return ApplyPalette( color, outMulti );
+    }
+
+    JLinkList<JColor> *parsed = ParseColors( const_cast<char *>( color ) );
+    bool isMulti = parsed->length() > 1;
+    if( isMulti )
+    {
+        CLink<JColor> *p = parsed->GetHead();
+        while( p )
+        {
+            outMulti->Add( new JColor( *p->m_lpData ) );
+            p = p->next;
+        }
+    }
+    else if( parsed->length() == 1 )
+    {
+        outSingle.SetColor( *parsed->GetHead()->m_lpData );
+    }
+    parsed->Terminate();
+    delete parsed;
+    return isMulti;
+}
+
+CEffect *CDataFile::EffectFromName( const char *szName )
+{
+    if( g_pGame == NULL || g_pGame->GetDungeon() == NULL || szName == NULL || *szName == '\0' )
+        return NULL;
+
+    CEffectDef *pFound = g_pGame->GetDungeon()->GetEffectDef( szName );
     if( pFound == NULL )
     {
         JLog( LOG_LEVEL_WARN, true, "EffectFromName: unknown effect '%s'\n", szName );
@@ -299,7 +417,7 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
                     curAttack->m_szDamage = new char[Util::jstrlen( cur ) + 1];
                     Util::jstrcpy( curAttack->m_szDamage, cur );
                 }
-                else if( m_pDungeon != NULL )
+                else if( g_pGame != NULL && g_pGame->GetDungeon() != NULL )
                 {
                     // --- New named-effect format ---
                     // first token is delivery type (MON_FLAG_*)
@@ -369,21 +487,8 @@ CMonsterDef *CDataFile::ReadMonster( CMonsterDef &mdIn )
             else if( strncasecmp( szLine, "color", 5 ) == 0 )
             {
                 char *color = chomp( szLine, szValue );
-                if( strchr( color, '<' ) != NULL )
-                {
-                    // multi-hued
-                    // <<rgb1>,<rgb2>,...,<rgbn>>
-                    JLog( LOG_LEVEL_DEBUG, true, "Found multi-hued monster: %s\n", color );
-                    mdIn.m_Colors = ParseColors( color );
-
+                if( ReadColor( color, mdIn.m_Color, mdIn.m_llColors ) )
                     mdIn.m_dwFlags |= MON_COLOR_MULTI;
-                }
-                else
-                {
-                    // single-hued
-                    // <rgb1>
-                    mdIn.m_Color.SetColor( color );
-                }
                 delete[] color;
             }
             else if( *szLine == '}' )
@@ -551,13 +656,15 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                             new char[Util::jstrlen( g_Constants.PotionColor( potion_index ) ) + 1];
                         Util::jstrcpy( idIn.m_szFlavor, g_Constants.PotionColor( potion_index ) );
                         char szUnID[100];
-                        sprintf( szUnID, "%s Potion", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_POTION],
+                                  idIn.m_szFlavor );
                         JLog( LOG_LEVEL_DEBUG, true, "Potion #%d - index %d color %s\n",
                               m_dwPotionCount, potion_index, szUnID );
                         idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
 
-                        sprintf( szUnID, "%s Potions", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_POTIONS],
+                                  idIn.m_szFlavor );
                         idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
 
@@ -572,10 +679,12 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                             new char[Util::jstrlen( g_Constants.ScrollName( scroll_index ) ) + 1];
                         Util::jstrcpy( idIn.m_szFlavor, g_Constants.ScrollName( scroll_index ) );
                         char szUnID[100];
-                        sprintf( szUnID, "Scroll labeled %s", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_SCROLL],
+                                  idIn.m_szFlavor );
                         idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
-                        sprintf( szUnID, "Scrolls labeled %s", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_SCROLLS],
+                                  idIn.m_szFlavor );
                         idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
                         m_dwScrollCount++;
@@ -587,13 +696,15 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                             new char[Util::jstrlen( g_Constants.Lumber( staff_index ) ) + 1];
                         Util::jstrcpy( idIn.m_szFlavor, g_Constants.Lumber( staff_index ) );
                         char szUnID[100];
-                        sprintf( szUnID, "%s Staff", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_STAFF],
+                                  idIn.m_szFlavor );
                         JLog( LOG_LEVEL_DEBUG, true, "Staff #%d - index %d color %s\n",
                               m_dwStaffCount, staff_index, szUnID );
                         idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
 
-                        sprintf( szUnID, "%s Staves", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_STAVES],
+                                  idIn.m_szFlavor );
                         idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
 
@@ -608,13 +719,15 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                             new char[Util::jstrlen( g_Constants.Lumber( wand_index ) ) + 1];
                         Util::jstrcpy( idIn.m_szFlavor, g_Constants.Lumber( wand_index ) );
                         char szUnID[100];
-                        sprintf( szUnID, "%s Wand", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_WAND],
+                                  idIn.m_szFlavor );
                         JLog( LOG_LEVEL_DEBUG, true, "Wand #%d - index %d color %s\n",
                               m_dwWandCount, wand_index, szUnID );
                         idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
 
-                        sprintf( szUnID, "%s Wands", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_WANDS],
+                                  idIn.m_szFlavor );
                         idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
 
@@ -629,13 +742,15 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                             new char[Util::jstrlen( g_Constants.Metal( ring_index ) ) + 1];
                         Util::jstrcpy( idIn.m_szFlavor, g_Constants.Metal( ring_index ) );
                         char szUnID[100];
-                        sprintf( szUnID, "%s Ring", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_RING],
+                                  idIn.m_szFlavor );
                         JLog( LOG_LEVEL_DEBUG, true, "Ring #%d - index %d color %s\n",
                               m_dwRingCount, ring_index, szUnID );
                         idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
 
-                        sprintf( szUnID, "%s Rings", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_RINGS],
+                                  idIn.m_szFlavor );
                         idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
 
@@ -650,13 +765,15 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                             new char[Util::jstrlen( g_Constants.Metal( amulet_index ) ) + 1];
                         Util::jstrcpy( idIn.m_szFlavor, g_Constants.Metal( amulet_index ) );
                         char szUnID[100];
-                        sprintf( szUnID, "%s Amulet", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_AMULET],
+                                  idIn.m_szFlavor );
                         JLog( LOG_LEVEL_DEBUG, true, "Amulet #%d - index %d color %s\n",
                               m_dwAmuletCount, amulet_index, szUnID );
                         idIn.m_szUnidentifiedName = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedName, szUnID );
 
-                        sprintf( szUnID, "%s Amulets", idIn.m_szFlavor );
+                        snprintf( szUnID, sizeof( szUnID ), g_Strings[STR_ITEM_AMULETS],
+                                  idIn.m_szFlavor );
                         idIn.m_szUnidentifiedPlural = new char[Util::jstrlen( szUnID ) + 1];
                         Util::jstrcpy( idIn.m_szUnidentifiedPlural, szUnID );
 
@@ -691,21 +808,8 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
             else if( strncasecmp( szLine, "color", 5 ) == 0 )
             {
                 char *color = chomp( szLine, szValue );
-                if( strchr( color, '<' ) != NULL )
-                {
-                    // multi-hued
-                    // <<rgb1>,<rgb2>,...,<rgbn>>
-                    JLog( LOG_LEVEL_DEBUG, true, "Found multi-hued item: %s\n", color );
-                    idIn.m_Colors = ParseColors( color );
-
+                if( ReadColor( color, idIn.m_Color, idIn.m_llColors ) )
                     idIn.m_dwFlags |= ITEM_COLOR_MULTI;
-                }
-                else
-                {
-                    // single-hued
-                    // <rgb1>
-                    idIn.m_Color.SetColor( color );
-                }
                 delete[] color;
             }
             else if( strncasecmp( szLine, "effect", 6 ) == 0 )
@@ -733,7 +837,7 @@ CItemDef *CDataFile::ReadItem( CItemDef &idIn )
                 char *nextAngle = strchr( end + 1, '<' );
                 bool bIsNamed = ( comma == NULL && nextAngle == NULL );
 
-                if( bIsNamed && m_pDungeon != NULL )
+                if( bIsNamed && g_pGame != NULL && g_pGame->GetDungeon() != NULL )
                 {
                     char nameBuf[128];
                     int nameLen = (int)( end - begin - 1 );
@@ -917,20 +1021,54 @@ CEffectDef *CDataFile::ReadEffect( CEffectDef &edIn )
                     edIn.m_cBeamChar = szValue[0];
                 }
             }
+            else if( strncasecmp( szLine, "namestr", 7 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwStrIds[EFFECT_STR_NAME] = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "hitplayerstr", 12 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwStrIds[EFFECT_STR_HIT_PLAYER] = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "hitmonsterstr", 13 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwStrIds[EFFECT_STR_HIT_MONSTER] = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "emitplayerstr", 13 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwStrIds[EFFECT_STR_EMIT_PLAYER] = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "emitmonsterstr", 14 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwStrIds[EFFECT_STR_EMIT_MONSTER] = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "playerstatus", 12 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwStrIds[EFFECT_STR_STATUS_PLAYER] = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "monsterstatus", 13 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwStrIds[EFFECT_STR_STATUS_MONSTER] = g_Constants.LookupString( szValue );
+            }
+            else if( strncasecmp( szLine, "statlabel", 9 ) == 0 )
+            {
+                szValue = GetValue( szLine, szValue );
+                edIn.m_dwStrIds[EFFECT_STR_STAT_LABEL] = g_Constants.LookupString( szValue );
+            }
             else if( strncasecmp( szLine, "color", 5 ) == 0 )
             {
                 char *color = chomp( szLine, szValue );
-                if( strchr( color, '<' ) != NULL )
-                {
-                    JLog( LOG_LEVEL_DEBUG, true, "Found multi-hued effect: %s\n", color );
-                    edIn.m_llColors = ParseColors( color );
-                }
+                JColor single;
+                if( ReadColor( color, single, edIn.m_llColors ) )
+                    ; // multi already appended to m_llColors
                 else
-                {
-                    JColor col;
-                    col.SetColor( color );
-                    edIn.m_llColors->Add( new JColor( col ) );
-                }
+                    edIn.m_llColors->Add( new JColor( single ) );
                 delete[] color;
             }
             else if( *szLine == '}' )
@@ -949,6 +1087,64 @@ CEffectDef *CDataFile::ReadEffect( CEffectDef &edIn )
     }
 
     return &edIn;
+}
+
+bool CDataFile::ReadStringEntry( int &outKey, char *&outText )
+{
+    char szRaw[1024];
+    char *szLine;
+    char *szValue = NULL;
+    bool bFound = false;
+    bool bStarted = false;
+    bool bEnded = false;
+
+    outKey = -1;
+    outText = NULL;
+
+    while( !bEnded && fgets( szRaw, 1024, m_fp ) != NULL )
+    {
+        szLine = Strip( szRaw );
+        if( szLine == NULL )
+            continue;
+
+        if( !bFound )
+        {
+            if( strncasecmp( szLine, "string", 6 ) == 0 )
+            {
+                bFound = true;
+                szValue = GetValue( szLine, szValue );
+                if( szValue != NULL )
+                {
+                    outKey = g_Constants.LookupString( szValue );
+                    delete[] szValue;
+                    szValue = NULL;
+                }
+            }
+            continue;
+        }
+
+        if( !bStarted )
+        {
+            if( *szLine == '{' )
+                bStarted = true;
+            continue;
+        }
+
+        if( strncasecmp( szLine, "text", 4 ) == 0 )
+        {
+            outText = GetValue( szLine, outText );
+        }
+        else if( *szLine == '}' )
+        {
+            bEnded = true;
+        }
+        else
+        {
+            JLog( LOG_LEVEL_WARN, true, "ReadStringEntry: unparseable line: %s\n", szLine );
+        }
+    }
+
+    return bEnded && outKey >= 0 && outText != NULL;
 }
 
 CScore *CDataFile::ReadScore( CScore &sIn )
@@ -1243,6 +1439,13 @@ JLinkList<JColor> *CDataFile::ParseColors( char *szLine )
     {
         char *tok = szToken[i];
         temp = chomp( tok, temp );
+        if( temp == NULL )
+        {
+            // Bare R,G,B,A token without angle brackets (e.g. "64,64,0,255")
+            int len = Util::jstrlen( tok );
+            temp = new char[len + 1];
+            Util::jstrcpy( temp, tok );
+        }
         outcolor = new JColor();
         outcolor->SetColor( temp );
         retval->Add( outcolor );

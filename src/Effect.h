@@ -18,6 +18,21 @@ enum eEffectTargetType
     EFFECT_TARGET_ITEM,      // player must choose an item (inv or equip) first
 };
 
+// Per-effect string slot indices — used to index CEffectDef::m_dwStrIds[].
+// Each slot stores a eStringId value (or STR_INVALID if not set).
+enum eEffectStrSlot
+{
+    EFFECT_STR_NAME = 0,       // display name for "The %s emits a %s." etc.
+    EFFECT_STR_HIT_PLAYER,     // "You are hit by %s."  (overrides generic)
+    EFFECT_STR_HIT_MONSTER,    // "The %s is hit by %s."  (overrides generic)
+    EFFECT_STR_EMIT_PLAYER,    // emitting string for player-fired beams
+    EFFECT_STR_EMIT_MONSTER,   // emitting string for monster-fired beams
+    EFFECT_STR_STATUS_PLAYER,  // status verb fragment for player ("are paralyzed")
+    EFFECT_STR_STATUS_MONSTER, // status verb fragment for monster ("is paralyzed")
+    EFFECT_STR_STAT_LABEL,     // stats-panel status label ("Paralyzed")
+    EFFECT_STR_SLOT_MAX
+};
+
 // Named effect template — shared catalog entry parsed from Effects.txt.
 // Items, monsters, and spells reference these by name.
 class CEffectDef
@@ -34,9 +49,12 @@ public:
           m_fRange( 0.0f ),
           m_fRadius( 0.0f ),
           m_cBeamChar( '*' ),
+          m_Color( 255, 255, 255, 255 ),
           m_llColors( NULL )
     {
         m_llColors = new JLinkList<JColor>;
+        for( int i = 0; i < EFFECT_STR_SLOT_MAX; i++ )
+            m_dwStrIds[i] = STR_INVALID;
     }
     ~CEffectDef()
     {
@@ -57,17 +75,39 @@ public:
             m_llColors = NULL;
         }
     }
-    char *m_szName;                // "Firebolt", "Light Ray", etc.
-    int m_dwEffect;                // EFFECT_TYPE_HIT, EFFECT_TYPE_HEAL, etc.
-    uint32 m_dwFlags;              // EFFECT_FLAG_FIRE, EFFECT_FLAG_LIGHT, etc.
-    uint32 m_dwFlags2;             // EFFECT_FLAG_DOOR, EFFECT_FLAG_NO_COLLIDE, etc.
-    int m_dwModifier;              // EFFECT_MOD_LINE, EFFECT_MOD_BALL, etc.
-    char *m_szAmount;              // NdM dice string for damage/healing per use
-    float m_fDuration;             // for timed effects
-    float m_fRange;                // max range in tiles
-    float m_fRadius;               // AoE radius (0 = single target)
-    char m_cBeamChar;              // character for beam rendering (default '*')
-    JLinkList<JColor> *m_llColors; // multicolor beam cycling
+    char *m_szName;                      // "Firebolt", "Light Ray", etc.
+    int m_dwEffect;                      // EFFECT_TYPE_HIT, EFFECT_TYPE_HEAL, etc.
+    uint32 m_dwFlags;                    // EFFECT_FLAG_FIRE, EFFECT_FLAG_LIGHT, etc.
+    uint32 m_dwFlags2;                   // EFFECT_FLAG_DOOR, EFFECT_FLAG_NO_COLLIDE, etc.
+    int m_dwModifier;                    // EFFECT_MOD_LINE, EFFECT_MOD_BALL, etc.
+    char *m_szAmount;                    // NdM dice string for damage/healing per use
+    float m_fDuration;                   // for timed effects
+    float m_fRange;                      // max range in tiles
+    float m_fRadius;                     // AoE radius (0 = single target)
+    char m_cBeamChar;                    // character for beam rendering (default '*')
+    JColor m_Color;                      // default color for beam rendering (if no palette)
+    JLinkList<JColor> *m_llColors;       // multicolor beam cycling
+    int m_dwStrIds[EFFECT_STR_SLOT_MAX]; // per-slot string IDs (eStringId values)
+
+    // Return the ASCII character used when rendering this effect as a beam.
+    char GetBeamChar() const { return m_cBeamChar; }
+
+    // Return the color for a given animation frame, cycling through m_llColors.
+    // frame=0 returns the first color; wraps if frame >= number of colors.
+    // Returns white if no colors are defined.
+    JColor GetColor( int frame ) const
+    {
+        if( m_llColors && m_llColors->length() > 0 )
+        {
+            int idx = frame % m_llColors->length();
+            CLink<JColor> *pLink = m_llColors->GetNthLink( idx );
+            if( pLink && pLink->m_lpData )
+            {
+                return *( pLink->m_lpData );
+            }
+        }
+        return m_Color;
+    }
 };
 
 class CEffect
@@ -146,6 +186,9 @@ public:
     // Fire a named effect from the loaded definitions at a given origin.
     // Stack-allocated; no heap allocation or memory leak.
     static JResult Fire( const char *szEffectName, JVector vOrigin );
+    static JResult DispatchAll( CLink<CEffect> *plEffect, float fDuration, int dwItemFlags );
+
+    JResult SummonMonsters( JVector vOrigin );
 
     // Top-level dispatch — called once per effect in the effect list.
     JResult Dispatch( float fDuration, int dwItemFlags );

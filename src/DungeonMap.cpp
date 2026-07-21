@@ -599,7 +599,7 @@ bool CDungeonMap::ProcessStep()
         m_diagnostics.total_time_ms = m_diagnostics.end_time_ms - m_diagnostics.start_time_ms;
 
         if( g_pGame )
-            g_pGame->GetStats()->Printf( "Dungeon creation complete.\n" );
+            g_pGame->GetStats()->Printf( g_Strings[STR_DUNGEON_CREATION_COMPLETE] );
         JLog( LOG_LEVEL_INFO, true,
               "[DUNGEN] Generation complete: %d steps, %d rooms, %d halls, "
               "%d skipped, %d fill ops, %d abandoned, %d truncated\n",
@@ -767,17 +767,17 @@ void CDungeonMap::AddDoor( const JIVector vHall, int direction )
     char flavor[32];
     if( roll <= normal )
     {
-        sprintf( flavor, "" );
+        strcpy( flavor, "" );
         door_type = DUNG_IDX_DOOR;
     }
     else if( roll <= open )
     {
-        sprintf( flavor, "open " );
+        strcpy( flavor, g_Strings[STR_DUNGEON_OPEN] );
         door_type = DUNG_IDX_OPEN_DOOR;
     }
     else
     {
-        sprintf( flavor, "secret " );
+        strcpy( flavor, g_Strings[STR_DUNGEON_SECRET] );
         door_type = DUNG_IDX_SECRET_DOOR;
     }
     JLog( LOG_LEVEL_DEBUG, false, "Placing a %sdoor at <%d %d>\n", flavor, VEC_EXPAND( vDoor ) );
@@ -1021,7 +1021,7 @@ CDungeonCreationStep *CDungeonMap::CreateStep( int step_type, const JIVector &vP
     {
         JLog( LOG_LEVEL_NOISIER, true, "[DUNGEN] %s <%d %d> failed after %d attempts (conflicts)\n",
               type_name, vPos.x, vPos.y, attempt_count );
-        g_pGame->GetStats()->Printf( "...%s <%d %d> conflicts. terminated.\n",
+        g_pGame->GetStats()->Printf( g_Strings[STR_CONFLICTS],
                                      step_type == DUNG_CREATE_STEP_MAKE_ROOM ? "room" : "hall",
                                      VEC_EXPAND( vPos ) );
         JLog( LOG_LEVEL_NOISIER, true, "...%s <%d %d> conflicts. terminated.\n",

@@ -35,6 +35,12 @@ public:
     JLinkList<CItem> *m_llItems;
     JLinkList<JIVector> *m_llOpenArea;
     JLinkList<CEffectDef> *m_llEffectDefs;
+    JLinkList<CPalette> *m_llPalettes;
+
+    // Test instrumentation for beam rendering verification (R1)
+    JColor m_lastBeamColorRendered; // Last color passed to SetTileColor for beam
+    char m_lastBeamCharRendered;    // Last char passed to DrawChar for beam
+    bool m_beamWasRendered;         // True if beam rendering path executed
 
 protected:
     CDungeonTileDef *m_dtdlist;
@@ -68,15 +74,19 @@ public:
           m_llOpenArea( NULL ),
           m_llItemDefs( NULL ),
           m_llEffectDefs( NULL ),
+          m_llPalettes( NULL ),
           m_llMonsterDefs( NULL ),
           m_llLOSLine( NULL ),
           m_pProjectileEffect( NULL ),
           m_llProjectileTrajectory( NULL ),
           m_dwProjectileColorIndex( 0 ),
+          m_lastBeamColorRendered( 0, 0, 0, 0 ),
+          m_lastBeamCharRendered( '\0' ),
+          m_beamWasRendered( false ),
           m_dmCurLevel( NULL ) {};
     ~CDungeon() { Term(); }
     char *DumpMap();
-    void RevealMap( int xMin, int yMin, int xMax, int yMax );
+    void RevealMap( JRect rc );
     void PreDraw();
     void Draw();
     void DrawDungeon();
@@ -89,6 +99,7 @@ public:
     bool Update( float fCurTime );
     JResult UpdateSeen();
     void LightRoom( CRoom *pRoom );
+    JResult LightArea( JVector vPos );
     bool CanSeeEachOther( JIVector vSource, JIVector vTarget, uint32 dwFlags = 0 );
     bool PlayerCanSee( JVector vCheck, uint32 dwFlags = 0 );
     void DisturbPlayer();
@@ -184,6 +195,7 @@ public:
     CItemDef *GetItemDef( int which_item );
     JLinkList<CItemDef> *GetItemDefs() { return m_llItemDefs; }
     CEffectDef *GetEffectDef( const char *szEffectName );
+    const CPalette *GetPalette( const char *szName );
     bool SpawnMonster( int which_monster );
     void RemoveMonster( CMonster *pMon );
 

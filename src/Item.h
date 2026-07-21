@@ -39,7 +39,7 @@ public:
           m_bIdentified( false ),
           m_bTried( false )
     {
-        m_Colors = new JLinkList<JColor>;
+        m_llColors = new JLinkList<JColor>;
         m_llEffects = new JLinkList<CEffect>;
     }
     ~CItemDef()
@@ -94,11 +94,11 @@ public:
             delete[] m_szCharges;
             m_szCharges = NULL;
         }
-        if( m_Colors )
+        if( m_llColors )
         {
-            m_Colors->Terminate();
-            delete m_Colors;
-            m_Colors = NULL;
+            m_llColors->Terminate();
+            delete m_llColors;
+            m_llColors = NULL;
         }
         if( m_llEffects )
         {
@@ -114,7 +114,7 @@ public:
     char *m_szFlavor; // "Green" Potion
     float m_fAttackSpeed;
     float m_fSpeedBonus; // for rings of speed, boots/gloves of swiftness, etc.
-    char *m_szACBonus; // NdM dice string for magical AC bonus (rolled per-instance)
+    char *m_szACBonus;   // NdM dice string for magical AC bonus (rolled per-instance)
     float m_fBaseAC;
     char *m_szBaseDamage;
     char *m_szBonusToHit;    // NdM dice string for magical to-hit bonus (rolled per-instance)
@@ -126,17 +126,21 @@ public:
     float m_fValue;
     float m_fWeight;
     int m_dwFlags;
-    int m_dwIndex;     // ITEM_IDX_SWORD, ITEM_IDX_WAND, etc.
-    int m_dwBaseHP;    // for busting down walls, disarming traps, etc.
-    float m_fDuration; // for potions, scrolls, torches -- "How long will this last?"
-    float m_fRadius;   // for AoE effects -- "How big is the badaboom?"
+    int m_dwIndex;       // ITEM_IDX_SWORD, ITEM_IDX_WAND, etc.
+    int m_dwBaseHP;      // for busting down walls, disarming traps, etc.
+    float m_fDuration;   // for potions, scrolls, torches -- "How long will this last?"
+    float m_fRadius;     // for AoE effects -- "How big is the badaboom?"
     uint32 m_dwMinRange; // for ranged weapons -- minimum trajectory length
     uint32 m_dwMaxRange; // for ranged weapons -- maximum trajectory length
-    JLinkList<JColor> *m_Colors;
+    JLinkList<JColor> *m_llColors;
     JLinkList<CEffect> *m_llEffects;
     JColor m_Color;
     bool m_bIdentified; // has this item type been identified?
     bool m_bTried;      // has this item type been used without identifying?
+
+    // Return the color for a given animation frame, cycling through m_llColors.
+    // frame=0 returns the first palette color; falls back to m_Color for single-hued.
+    JColor GetColor( int frame ) const;
 
 protected:
 private:
@@ -219,6 +223,8 @@ public:
         m_id->m_bIdentified = true;
         m_dwKnownProps |= ( KNOWN_CURSED | KNOWN_BONUSES | KNOWN_CHARGES );
     }
+    void NoticeEffect( JResult bNoticed );
+    JResult UseEffects();
     bool KnowsProperty( uint32 prop ) { return ( m_dwKnownProps & prop ) != 0; }
     void RevealProperty( uint32 prop ) { m_dwKnownProps |= prop; }
     bool IsOpenable() { return false; }   // for chests, etc.
@@ -228,6 +234,20 @@ public:
     {
         return m_id->m_dwIndex == ITEM_IDX_BOW || m_id->m_dwIndex == ITEM_IDX_XBOW;
     };
+    inline bool IsDrinkable() { return m_id->m_dwIndex == ITEM_IDX_POTION; }
+    inline bool IsReadable()
+    {
+        return m_id->m_dwIndex == ITEM_IDX_BOOK || m_id->m_dwIndex == ITEM_IDX_SCROLL;
+    }
+    inline bool IsZappable() { return m_id->m_dwIndex == ITEM_IDX_WAND; }
+    inline bool IsStaff() { return m_id->m_dwIndex == ITEM_IDX_STAFF; }
+    inline bool IsAmmo()
+    {
+        return m_id->m_dwIndex == ITEM_IDX_ARROW || m_id->m_dwIndex == ITEM_IDX_BOLT;
+    }
+    inline bool IsFireable() { return IsAmmo() && m_dwCount > 0; }
+    inline bool IsWieldable() { return !IsAmmo() && EquipType() != EQUIP_IDX_INVALID; }
+    inline bool IsFuel() { return m_id->m_dwIndex == ITEM_IDX_FUEL; }
     inline bool NeedsFuel()
     {
         return m_id->m_dwIndex == ITEM_IDX_STAFF || m_id->m_dwIndex == ITEM_IDX_WAND ||
@@ -239,6 +259,12 @@ public:
         int type = EquipType();
         return type == EQUIP_IDX_ARMOR || type == EQUIP_IDX_OFF_HAND || type == EQUIP_IDX_HELMET ||
                type == EQUIP_IDX_CLOAK || type == EQUIP_IDX_GLOVES || type == EQUIP_IDX_BOOTS;
+    };
+    inline bool IsConsumable()
+    {
+        return ( m_id->m_dwIndex == ITEM_IDX_ARROW || m_id->m_dwIndex == ITEM_IDX_BOLT ||
+                 m_id->m_dwIndex == ITEM_IDX_POTION || m_id->m_dwIndex == ITEM_IDX_SCROLL ||
+                 m_id->m_dwIndex == ITEM_IDX_FOOD || m_id->m_dwIndex == ITEM_IDX_SPIKE );
     };
     int EquipType();
     bool IsWeakTo( uint32 dwElement );

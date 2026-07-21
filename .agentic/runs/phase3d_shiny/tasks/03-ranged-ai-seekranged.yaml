@@ -1,0 +1,62 @@
+id: 03-ranged-ai-seekranged
+title: MON_AI_SEEKRANGED – Ranged Monster AI (R3)
+requirements: [R3]
+
+scope: |
+  Implement a new AI brain type MON_AI_SEEKRANGED that makes monsters maintain optimal attack distance
+  (5–8 tiles). Ranged monsters advance if prey is too close, retreat if too far, improving tactical gameplay.
+  
+  - Add MON_AI_SEEKRANGED constant to Constants.h (next available bit in MON_AI_* flags)
+  - Implement distance-based decision logic in CAIBrain::UpdateSeek()
+  - If distance < 5: Retreat (move away; strafe if blocked)
+  - If distance > 8: Advance (move toward)
+  - If 5 <= distance <= 8: Attack (stay put, attack when in range)
+  - Update Resources/Monsters.txt to assign ranged AI to archer, mage, and similar monsters
+  - Use existing CAIBrain::GotoDest() for movement; only change distance heuristic
+
+file_contact_surface:
+  - src/Constants.h
+  - src/AIMgr.cpp
+  - src/AIMgr.h
+  - Resources/Monsters.txt
+  - test/features/ranged_ai_seekranged.feature
+  - test/features/step_definitions/ranged_ai_seekranged_steps.cpp
+
+acceptance_tests:
+  - AC3.1: MON_AI_SEEKRANGED constant added to Constants.h
+  - AC3.2: Ranged monsters (e.g., orc archer, frost mage) use this brain in Resources/Monsters.txt
+  - AC3.3: Pathfinding: monster moves toward player if range < 5 optimal
+  - AC3.4: Pathfinding: monster moves away if range > 8 optimal
+  - AC3.5: When blocked, monster strafes perpendicular to player or waits for line-of-sight
+  - AC3.6: Monster still attacks when in range (no range-finding bug prevents ranged attacks)
+  - BDD test: "When ranged monster sees player within close range, it retreats" (verify movement direction)
+  - BDD test: "When ranged monster sees player too far, it advances" (verify movement direction)
+
+depends_on: []
+
+status: pending
+
+notes: |
+  This task is independent and can run in parallel. It spans Constants.h (1 line), AIMgr logic (~30 lines),
+  and data file updates (non-conflicting entries).
+  
+  Implementer should:
+  1. Create ranged_ai_seekranged.feature in test/features/ with advance/retreat/hold scenarios
+  2. Create step_definitions/ranged_ai_seekranged_steps.cpp with monster position tracking helpers
+  3. Add MON_AI_SEEKRANGED to Constants.h: #define MON_AI_SEEKRANGED 0x10000000
+  4. Add related constants for optimal range:
+     #define RANGED_AI_OPTIMAL_MIN 5
+     #define RANGED_AI_OPTIMAL_MAX 8
+  5. Modify CAIBrain::UpdateSeek() to branch on MON_AI_SEEKRANGED flag:
+     - Check distance to player
+     - If too close: call GotoDest() with a retreat target (inverse direction)
+     - If too far: call GotoDest() with player as target
+     - If in range: stay put (UpdateAttack instead)
+  6. Update Resources/Monsters.txt: Add MON_AI_SEEKRANGED flag to archer variants, mages, etc.
+  7. Test: `make test` to verify monster movement behavior in scenarios
+  8. Run clang-format before staging
+  
+  Strafing fallback (if blocked):
+  - If monster fails to move toward/away for 3+ consecutive turns, try perpendicular movement
+  - Simplest: Try moving 90° left/right of player direction; if that works, use it
+  - Prevents AI from appearing stuck while maintaining ranged distance logic

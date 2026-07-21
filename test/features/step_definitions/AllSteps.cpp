@@ -2,6 +2,7 @@
 
 #include "FirstSteps.cpp"
 
+#include "BeamsMulticolorSteps.cpp"
 #include "BrainSteps.cpp"
 #include "BresenhamSteps.cpp"
 #include "DoorSteps.cpp"
@@ -12,8 +13,10 @@
 #include "EquipmentSteps.cpp"
 #include "GameSteps.cpp"
 #include "ItemSteps.cpp"
+#include "ItemVisibilitySteps.cpp"
 #include "LOSItemsSteps.cpp"
 #include "LightSteps.cpp"
+#include "MapSteps.cpp"
 #include "MonsterRecallSteps.cpp"
 #include "MonsterSteps.cpp"
 #include "RangedSteps.cpp"

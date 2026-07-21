@@ -2,79 +2,152 @@
      the verifier rendered agent(s) by render-agents.py. This is the ONLY writable
      policy surface: never edit core role copies in place. -->
 
-## Verifier: JMoria Integration & Acceptance Testing
+## Verifier Role Specifics for JMoria
 
-### Verification Scope
-You verify that changes work as intended and don't break existing behavior. For JMoria:
+### Verification Strategy
 
-**Unit & Feature Level**:
-- Build succeeds: `make ascii` compiles all source files, links correctly
-- Cucumber tests pass: `./test/runtests.sh --build` runs feature suite (if dependencies installed)
-- Formatters pass: `git clang-format --diff --staged` produces no output (clean format)
+**Goal:** Ensure that a merged PR works correctly across all three platforms and doesn't break existing functionality.
 
-**Integration Level**:
-- Game is playable after changes (manual smoke test)
-- No regressions in existing game modes (command input, movement, combat, inventory, etc.)
-- No console errors or memory issues during normal play
+**Verification phases:**
+1. **Build phase:** Compile on all render modes and platforms
+2. **Test phase:** Run BDD tests; ensure no regressions
+3. **Functionality phase:** Manual testing of new features (if applicable)
+4. **Regression phase:** Spot-check existing gameplay features
 
-**Cross-Platform**:
-- Build flags and Makefile changes verified on Darwin (macOS) and at least one Linux variant
-- Dependencies still available on all supported platforms
+### Build Verification
 
-### Test Execution Checklist
-
-**Before merge**:
-1. ✓ Clone fresh, checkout feature branch
-2. ✓ Run `make clean && make ascii` — must succeed
-3. ✓ Check formatting: `git clang-format --diff` on staged changes — must be clean
-4. ✓ If test deps available: `cd test && ./runtests.sh --build` — must pass
-5. ✓ Manual play test: `./jmoria --renderer=ascii`, test the feature, exit cleanly
-6. ✓ No new compiler warnings or errors (check `-w` flag in Makefile if needed)
-
-**Platform verification** (for Makefile or build script changes):
-- Minimum: Verify `uname` branching logic is correct and both Darwin/Linux paths defined
-- Ideal: Test build on Linux/Raspberry Pi (or document test assumptions)
-- No new platform-specific #ifdef in game code; must be in Makefile or build scripts
-
-**Framework integrity** (integration-specific):
-- ✓ Overlay changes regenerated agents? (Run `.agentic/scripts/render-agents.py`)
-- ✓ Rendered files (`.github/agents/*.agent.md`) committed alongside overlays?
-- ✓ Agentic render-check CI workflow passes (`agentic-render-check.yml` green)?
-
-### Known Constraints for Testing
-
-**Hardcoded googletest path**: Makefile assumes googletest at `/opt/homebrew/Cellar/googletest/1.17.0/lib/` (macOS Homebrew specific). If tests fail to link on your system:
-- Check installed googletest version: `brew list googletest`
-- Update Makefile `LOCAL_LIB_PATHS` if path differs
-- Document workaround for team
-
-**Test dependencies not in CI yet**: `test/runtests.sh` requires manual setup (Homebrew, gem install). If CI doesn't have these:
-- Mark tests as "requires manual verification" in acceptance notes
-- Flag for future GitHub Actions setup
-
-### Red Flags That Block Merge
-
-- ❌ `make ascii` fails to build or link
-- ❌ clang-format violations present
-- ❌ Existing Cucumber tests fail
-- ❌ Game crashes or hangs during basic play (movement, combat, menus)
-- ❌ Framework files edited directly (use overlays only)
-- ❌ Platform-specific code not portable (e.g., hardcoded /usr/local/lib on Linux)
-
-### Acceptance Criteria Template
-
-For each feature/fix:
-```
-✓ Builds: make ascii succeeds
-✓ Format: clang-format clean
-✓ Tests: [n/a if no test deps] or ./test/runtests.sh --build passes
-✓ Play: Tested in ASCII renderer, no crashes
-✓ Platform: [macOS tested | macOS + Linux tested | assumes Darwin only]
-✓ Framework: No core .agentic/ files edited; overlays regenerated if changed
-✓ Approved by: [Reviewer role]
+**Targets to verify:**
+```bash
+make clean
+make ascii          # ASCII-only build (ncurses)
+make opengl         # OpenGL-only build (SDL2)
+make                # Both renderers (default)
+make build          # Full build including test executable
 ```
 
-### Integration Profile Reference
-- `.agentic/runs/000-integration/integration-profile.md`
-- Contains: build traps, test infrastructure status, cross-platform expectations
-- Use to understand what's automated vs manual in this host
+**Success criteria:**
+- [ ] All three render modes compile without warnings or errors
+- [ ] Executable created: `./jmoria` (or platform-specific binary)
+- [ ] Test executable created: `test/bin/AllSteps`
+- [ ] No linker errors; all object files linked correctly
+
+**Platform verification:**
+- [ ] **macOS (primary):** Run on macOS directly
+- [ ] **Linux:** Use Docker or Linux VM
+  - Base image: `ubuntu:latest` or `debian:bookworm`
+  - Dependencies: `apt-get install build-essential libsdl2-dev libsdl2-image-dev libgl-dev libncurses-dev`
+- [ ] **Raspberry Pi OS:** Conceptual (same as Linux Debian); actual hardware testing optional
+
+**Render mode validation:**
+- [ ] ASCII mode: `./jmoria --renderer=ascii` (if both-mode build)
+- [ ] OpenGL mode: `./jmoria --renderer=opengl` (if both-mode build)
+- [ ] Default (both): `./jmoria` starts interactively with renderer selection
+- [ ] Single-mode builds: `./jmoria` uses that mode only
+
+### Test Verification (BDD)
+
+**Test execution:**
+```bash
+make verify         # Full verification: build + BDD
+# OR
+make build          # Build test executable
+./test/runtests.sh  # Run BDD tests
+```
+
+**Test success criteria:**
+- [ ] All feature scenarios pass (0 failures)
+- [ ] No timeouts (tests hang or timeout = failure)
+- [ ] Wire protocol handshake succeeds (cucumber connects to AllSteps)
+- [ ] Test context sets up game state correctly (no setup failures)
+
+**Test failure investigation:**
+- [ ] Check if test executable built: `ls -la test/bin/AllSteps`
+- [ ] Run with verbosity: `./test/runtests.sh --verbose` or `--tags @debug`
+- [ ] Check for socket/port conflicts (wire protocol default: localhost:3902)
+- [ ] Review step definitions: `test/features/step_definitions/`
+- [ ] Check TestContext setup: `test/features/step_definitions/TestContext.hpp`
+
+**Regression testing:**
+- [ ] Run full test suite (not just new tests)
+- [ ] If new tests added: verify they actually test the feature (not false positives)
+- [ ] Check for skipped tests: `@skip`, `@pending` tags should not accumulate
+
+### Functional Verification (Manual, if applicable)
+
+**Spot-check for new features:**
+- [ ] Feature works in ASCII mode (ncurses rendering)
+- [ ] Feature works in OpenGL mode (if applicable)
+- [ ] Feature doesn't crash the game
+- [ ] Feature integrates with existing gameplay (no blocking bugs)
+- [ ] Wizard mode still functions (if modified)
+- [ ] Score saving not affected (if not intentionally changed)
+
+**Gameplay sanity checks:**
+- [ ] Player can move and fight monsters
+- [ ] Inventory and equipment work
+- [ ] Stairs up/down navigate dungeons
+- [ ] Game responds to all documented keyboard commands
+- [ ] Wizard mode (`Ctrl+T`, etc.) accessible and working
+
+### Failure Triage
+
+| Symptom | Likely Cause | Fix |
+|---------|-------------|-----|
+| `Undefined reference to xyz` at link | Missing .cpp file or wrong object linked | Verify Makefile pattern rule includes new file |
+| `clang: error: linker command failed` (cross-compile) | Platform mismatch in lib paths | Check $(LOCAL_LIB_PATHS) for target platform |
+| Executable crashes on startup | Render initialization failed | Check --renderer flag; verify SDL2/OpenGL installed |
+| `make verify` hangs | Wire protocol connection stuck | Kill any orphaned `test/bin/AllSteps` processes |
+| BDD test timeout | Step definition hangs (infinite loop) | Review step code for blocking calls |
+| Wizard mode can save scores (regression) | `IsWizardMode()` guard removed | Code review: restore guard before `SaveScore()` |
+| New state crashes (e.g., UseState) | State didn't implement `OnUpdate()` or `OnHandleKey()` | Verify state inherits from `CStateBase` properly |
+
+### Verification Checklist (Pre-Merge)
+
+```markdown
+## Verification Checklist
+
+**Build Verification:**
+- [ ] `make ascii` passes (ncurses)
+- [ ] `make opengl` passes (SDL2)
+- [ ] `make` passes (both renderers)
+- [ ] No linker errors or unresolved symbols
+- [ ] Executable runs: `./jmoria --version` or `./jmoria --help` (if supported)
+
+**Test Verification:**
+- [ ] `make build` creates test executable: `test/bin/AllSteps`
+- [ ] `./test/runtests.sh` runs without timeout
+- [ ] All BDD scenarios pass (green)
+- [ ] No new test failures (regression check)
+- [ ] Test feature scenarios are meaningful (not false positives)
+
+**Platform Verification:**
+- [ ] Builds on macOS (or primary platform)
+- [ ] Builds on Linux (Docker acceptable)
+- [ ] No hardcoded platform-specific paths or flags outside conditionals
+
+**Functional Spot-Check (if feature touches gameplay):**
+- [ ] Feature works in ASCII and OpenGL modes
+- [ ] Existing features still work (no blocking regressions)
+- [ ] Wizard mode not bypassed (score saving guard intact)
+- [ ] Game doesn't crash on normal gameplay
+
+**Code Quality:**
+- [ ] Clang-format compliant (100-char limit, Allman braces)
+- [ ] No memory leaks (if valgrind available)
+- [ ] No new compiler warnings
+
+**Result:** Pass ✅ / Fail ❌ (document failures below)
+```
+
+### Continuous Verification (Post-Merge Monitoring)
+
+After merge, monitor for:
+- [ ] User reports of crashes or broken features
+- [ ] New issues filed on GitHub (regression tracking)
+- [ ] Performance degradation (game loop FPS, memory usage)
+- [ ] Wizard mode abuse or exploits (score saving bypass)
+
+**If issues found after merge:**
+- Log issue with reproduction steps
+- Assign to implementer for hotfix or next sprint
+- Update test suite to prevent regression

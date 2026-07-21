@@ -11,6 +11,7 @@
 #include "EndGameState.h"
 #include "Item.h"
 #include "JMDefs.h"
+#include "MoreState.h"
 #include "RenderBase.h"
 
 class CGame;
@@ -18,9 +19,6 @@ class CGame;
 #define FONT_DRAW_W 6
 #define FONT_DRAW_H 8
 
-// 12288 = ~12KB, enough for the 100x100 dungeon map on the death screen
-// (worst case ~100 rows * ~102 chars/row ≈ 10200, plus header/margin)
-#define TEXT_MAXCHARS 12288
 // Constructor
 CDisplayText::CDisplayText( const char *szBasedir, JRect in, uint8 inAlpha )
     : m_Rect( in ),
@@ -34,8 +32,10 @@ CDisplayText::CDisplayText( const char *szBasedir, JRect in, uint8 inAlpha )
       m_dwFlags( FLAG_TEXT_NONE ),
       m_dwMarginLeft( 0 ),
       m_dwMarginTop( 0 ),
-      m_rcViewport( 0, 480, 640, 0 )
+      m_rcViewport( 0, 480, 640, 0 ),
+      m_bMoreOnNewline( false )
 {
+    memset( m_szMoreBuffer, 0, TEXT_MAXCHARS );
     m_szText = new char[TEXT_MAXCHARS];
     memset( m_szText, 0, sizeof( *m_szText ) );
     m_szDrawPtr = m_szText;
@@ -145,6 +145,11 @@ void CDisplayText::DrawStr( int x, int y, bool bBoundsCheck, int dwYMax, const c
     // Do that string parse, baby
     while( *ptr != nul )
     {
+        // Stop before drawing any character whose top pixel is at or below the
+        // clipping boundary — this is what keeps text off the bottom border.
+        if( bBoundsCheck && vScreen.y >= dwYMax )
+            break;
+
         if( *ptr == ' ' )
         {
             vScreen.x += FONT_DRAW_W;
@@ -211,10 +216,16 @@ void CDisplayText::Paginate()
     if( usedLines < 1 )
         usedLines = 1;
 
-    // +1 so that counting N newlines from the end positions ptr at the START
-    // of the Nth-from-last line (not the (N-1)th), eliminating the blank-bottom-
-    // row that appeared when the window was full.
-    dwAddLinesMax = usedLines + 1 + m_dwFreeLines;
+    // If the buffer ends with '\n', the nul terminator is "after" that newline,
+    // so scanning N newlines back undershoots by one — we need +1 to land at
+    // the start of the Nth-from-last line rather than (N-1)th.
+    // If it does NOT end with '\n' (normal in m_bMoreOnNewline mode where \n is
+    // stripped), the last line is unterminated and the nul IS the line boundary,
+    // so no +1 is needed — adding it causes Paginate to overshoot and show from
+    // the beginning while clipping the newest content.
+    char *pEnd = strchr( m_szText, nul );
+    int trailingNL = ( pEnd > m_szText && *( pEnd - 1 ) == '\n' ) ? 1 : 0;
+    dwAddLinesMax = usedLines + trailingNL + m_dwFreeLines;
 
     ptr = strchr( m_szText, nul );
     while( ptr > m_szText )
@@ -240,6 +251,40 @@ void CDisplayText::Paginate()
     m_szDrawPtr = ptr;
 }
 
+// AdvancePage — called by CMorePromptState on any keypress.
+// Uses DrawFormattedStr directly to bypass the m_bMoreOnNewline check in Printf.
+void CDisplayText::AdvancePage()
+{
+    if( m_szMoreBuffer[0] == '\0' )
+    {
+        g_pGame->SetState( STATE_COMMAND );
+        return;
+    }
+
+    char *nl = strchr( m_szMoreBuffer, '\n' );
+    if( nl == NULL )
+    {
+        // Last page — show remainder, no further prompt.
+        Clear();
+        DrawFormattedStr( m_szMoreBuffer );
+        memset( m_szMoreBuffer, 0, TEXT_MAXCHARS );
+        g_pGame->SetState( STATE_COMMAND );
+    }
+    else
+    {
+        // Carve off this page, keep the rest.
+        *nl = '\0';
+        char szPage[TEXT_MAXCHARS];
+        Util::jstrcpy( szPage, m_szMoreBuffer );
+        Util::jstrcpy( m_szMoreBuffer, nl + 1 );
+
+        Clear();
+        DrawFormattedStr( szPage );
+        DrawFormattedStr( "\n-more-" );
+        // Stay in STATE_MORE; next keypress calls AdvancePage() again.
+    }
+}
+
 // Formatted Text Drawing Functions
 void CDisplayText::Printf( const char *fmt, ... )
 {
@@ -249,10 +294,37 @@ void CDisplayText::Printf( const char *fmt, ... )
     // Get resultant output string
     va_start( vList, fmt );
     vsprintf( szBuffer3, fmt, vList );
+    va_end( vList );
+
+    if( m_bMoreOnNewline )
+    {
+        // Convert \n to space so messages concatenate naturally.
+        for( char *p = szBuffer3; *p; p++ )
+            if( *p == '\n' )
+                *p = ' ';
+
+        // If m_szText is non-empty and the new message wouldn't fit on the
+        // current line, start it on a new line instead of mid-line overflow.
+        if( m_szText[0] != '\0' )
+        {
+            int inset = g_pGame->GetRender()->GetTextInset();
+            int insetX = inset * FONT_DRAW_W;
+            int maxW = g_pGame->GetRender()->GetMaxTextWidth();
+            int wrapLeft = m_Rect.Left() + insetX;
+            int wrapRight = m_Rect.Right() - insetX;
+            if( wrapRight > maxW - insetX )
+                wrapRight = maxW - insetX;
+            int lineChars = ( wrapRight - wrapLeft ) / FONT_DRAW_W;
+
+            const char *lastNL = strrchr( m_szText, '\n' );
+            int curLineLen = lastNL ? (int)strlen( lastNL + 1 ) : (int)strlen( m_szText );
+
+            if( curLineLen + (int)strlen( szBuffer3 ) > lineChars )
+                DrawFormattedStr( "\n" );
+        }
+    }
 
     DrawFormattedStr( szBuffer3 );
-
-    va_end( vList );
 }
 
 void CDisplayText::DrawFormattedStr( const char *szString )
@@ -390,14 +462,13 @@ void CDisplayText::DisplayFixedList( JLinkList<CItem> *pList, const CDisplayMeta
     {
         if( pLink != NULL && pLink->m_dwIndex == cListId - 'a' )
         {
-            Printf( "%c - %s\n", cListId, pLink->m_lpData->GetName() );
+            Printf( g_Strings[STR_LIST_ITEM], cListId, pLink->m_lpData->GetName() );
             pLink = pList->GetNext( pLink );
         }
 #ifdef SHOW_EMPTY
         else
         {
-
-            Printf( "%c - (None)\n", cListId );
+            Printf( g_Strings[STR_LIST_ITEM], cListId, g_Strings[STR_NONE] );
         }
 #endif // SHOW_EMPTY
         cListId++;
@@ -418,11 +489,12 @@ void CDisplayText::DisplayList( JLinkList<CItem> *pList, const CDisplayMeta *pMe
         pItem = pLink->m_lpData;
         if( pItem->IsStackable() && pItem->m_dwCount > 1 )
         {
-            Printf( "%c - %d %s\n", cListId, pItem->m_dwCount, pItem->GetPlural() );
+            Printf( g_Strings[STR_LIST_ITEM_WITH_COUNT], cListId, pItem->m_dwCount,
+                    pItem->GetPlural() );
         }
         else
         {
-            Printf( "%c - %s\n", cListId, pItem->GetName() );
+            Printf( g_Strings[STR_LIST_ITEM], cListId, pItem->GetName() );
         }
 
         if( cListId < pMeta->limit )
@@ -449,7 +521,7 @@ void CDisplayText::DisplayList( JLinkList<CScore> *pList, const CDisplayMeta *pM
     while( pLink != NULL )
     {
         pItem = pLink->m_lpData;
-        Printf( "%d - %s\n", cListId, pItem->GetName() );
+        Printf( g_Strings[STR_HIGH_SCORE], cListId, pItem->GetName() );
 
         if( cListId < pMeta->limit )
         {

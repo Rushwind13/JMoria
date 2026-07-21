@@ -185,8 +185,6 @@ bool CIntroState::DoSplash()
 bool CIntroState::DoCharacterCreation()
 {
     g_pGame->GetEnd()->SetContentMargin( 0, 0 );
-    g_pGame->GetEnd()->Printf(
-        "Character Creation Screen goes here...\n\n\nYou are the eldest son of a human merchant. "
-        "You have dark hair and a charming smile.\n\nForward to Battle! Onward for Glory!\n" );
+    g_pGame->GetEnd()->Printf( g_Strings[STR_CHARACTER_CREATION_SCREEN_GOES_HERE] );
     return true;
 }

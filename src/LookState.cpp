@@ -5,6 +5,7 @@
 #include "Game.h"
 #include "JMDefs.h"
 #include "MonsterRecall.h"
+#include "Strings.h"
 
 #include "Dungeon.h"
 #include "Player.h"
@@ -42,7 +43,7 @@ int CLookState::OnHandleLook( JKeysym *keysym )
     {
         JLog( LOG_LEVEL_DEBUG, true,
               "LOOK cmd still waiting for a directional key: Directional key not pressed.\n" );
-        g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_DIRECTION_PROMPT] );
         return 0;
     }
 
@@ -56,12 +57,12 @@ int CLookState::OnHandleLook( JKeysym *keysym )
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "something happened? ...\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_SOMETHING_HAPPENED] );
         }
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "You can't see that from here.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CANT_SEE_THAT] );
     }
 
     // JLog( LOG_LEVEL_DEBUG, true,
@@ -128,61 +129,61 @@ int CLookState::OnBaseHandleKey( JKeysym *keysym )
         if( pTile->m_pCurMonster )
         {
             JLog( LOG_LEVEL_DEBUG, true, "LOOK command sees a monster\n" );
-            g_pGame->GetMsgs()->Printf( "You see here a %s.\nTarget selected.\n",
-                                        pTile->m_pCurMonster->GetName() );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_LOOK_SEE], pTile->m_pCurMonster->GetName() );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_TARGET_SELECTED] );
             g_pGame->GetPlayer()->SetTarget( pTile->m_pCurMonster );
             if( g_pGame->RecallMonster() && pTile->m_pCurMonster->m_md )
             {
-                g_pGame->GetMsgs()->Clear();
+                g_pGame->GetMonsterRecall()->Clear();
                 g_pGame->RecallMonster()->PrintRecall( pTile->m_pCurMonster->m_md,
-                                                       g_pGame->GetMsgs() );
+                                                       g_pGame->GetMonsterRecall() );
             }
         }
         // item
         if( pTile->m_pCurItem )
         {
             JLog( LOG_LEVEL_DEBUG, true, "LOOK command sees an item\n" );
-            g_pGame->GetMsgs()->Printf( "You see here a %s\n", pTile->m_pCurItem->GetName() );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_LOOK_SEE], pTile->m_pCurItem->GetName() );
         }
         // tile
         if( pTile->m_dtd->m_dwType != DUNG_IDX_WALL )
         {
             JLog( LOG_LEVEL_DEBUG, true, "LOOK command sees an item\n" );
-            char dungeon[64];
+            int strIdx = STR_DUNGEON_UNKNOWN;
             switch( pTile->m_dtd->m_dwType )
             {
             case DUNG_IDX_DOOR:
-                Util::jstrcpy( dungeon, "a door. It is closed" );
+                strIdx = STR_DUNGEON_DOOR;
                 break;
             case DUNG_IDX_OPEN_DOOR:
-                Util::jstrcpy( dungeon, "an open door" );
+                strIdx = STR_DUNGEON_OPEN_DOOR;
                 break;
             case DUNG_IDX_SECRET_DOOR:
-                Util::jstrcpy( dungeon, "You can't see that from here" );
+                strIdx = STR_DUNGEON_SECRET_DOOR;
                 break;
             case DUNG_IDX_DOWNSTAIRS:
-                Util::jstrcpy( dungeon, "a set of stairs, going down" );
+                strIdx = STR_DUNGEON_STAIRS_DOWN;
                 break;
             case DUNG_IDX_LONG_DOWNSTAIRS:
-                Util::jstrcpy( dungeon, "a long set of stairs, going down" );
+                strIdx = STR_DUNGEON_STAIRS_DOWN_LONG;
                 break;
             case DUNG_IDX_UPSTAIRS:
-                Util::jstrcpy( dungeon, "a staircase, going up" );
+                strIdx = STR_DUNGEON_STAIRS_UP;
                 break;
             case DUNG_IDX_LONG_UPSTAIRS:
-                Util::jstrcpy( dungeon, "a long staircase, going up" );
+                strIdx = STR_DUNGEON_STAIRS_UP_LONG;
                 break;
             case DUNG_IDX_FLOOR:
-                Util::jstrcpy( dungeon, "open floor" );
+                strIdx = STR_DUNGEON_FLOOR;
                 break;
             case DUNG_IDX_RUBBLE:
-                Util::jstrcpy( dungeon, "some rubble" );
+                strIdx = STR_DUNGEON_RUBBLE;
                 break;
             default:
-                Util::jstrcpy( dungeon, "... what is *that*?! .." );
+                strIdx = STR_DUNGEON_UNKNOWN;
                 break;
             }
-            g_pGame->GetMsgs()->Printf( "You see %s.\n", dungeon );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_YOU_SEE], g_Strings[strIdx] );
         }
         // now reset
         ResetToState( STATE_COMMAND );

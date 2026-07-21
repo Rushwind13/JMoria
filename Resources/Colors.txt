@@ -1,0 +1,73 @@
+# Colors.txt
+#
+# Named color palettes referenced by Effects.txt, Monsters.txt, and Items.txt.
+# Each entry gives a name to one or more RGBA colors (animation frames).
+#
+# Color <name>
+# {
+#     Color   <R,G,B,A>                                  # single color
+# }
+#
+# Color <name>
+# {
+#     Color   <<R,G,B,A>;<R,G,B,A>;<R,G,B,A>>            # animating sequence
+# }
+#
+# Components are 0-255.  Alpha of 255 is fully opaque.
+
+Color <Fire>
+{
+    Color   <<255,0,0,255>;<255,165,0,255>;<255,255,0,255>>
+}
+
+Color <Cold>
+{
+    Color   <<0,255,255,255>;<135,206,250,255>;<240,248,255,255>>
+}
+
+Color <Lightning>
+{
+    Color   <<255,255,0,255>;<255,255,255,255>;<255,215,0,255>>
+}
+
+Color <Acid>
+{
+    Color   <<50,205,50,255>;<144,238,144,255>;<173,255,47,255>>
+}
+
+Color <Poison>
+{
+    Color   <<0,255,0,255>;<34,139,34,255>;<75,0,130,255>>
+}
+
+Color <Light>
+{
+    Color   <<255,255,255,255>;<255,255,200,255>;<255,255,100,255>>
+}
+
+Color <Arrow>
+{
+    Color   <64,64,0,255>
+}
+
+# --- Multi-hued monster palettes ---
+
+Color <Opal Icky Thing>
+{
+    Color   <<240,240,240,255>;<135,201,190,255>;<236,161,180,255>;<205,235,238,255>;<238,203,179,255>>
+}
+
+Color <Balrog>
+{
+    Color   <<255,60,0,255>;<255,200,0,255>>
+}
+
+Color <Shadow Mastiff>
+{
+    Color   <<255,255,255,32>;<0,0,0,255>>
+}
+
+Color <Ancient Multi-hued Dragon>
+{
+    Color   <<255,0,0,255>;<255,123,0,255>;<255,233,0,255>;<12,255,0,255>;<0,59,255,255>;<152,0,255,255>>
+}

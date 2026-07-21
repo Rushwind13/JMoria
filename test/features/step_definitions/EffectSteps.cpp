@@ -120,3 +120,31 @@ THEN( "^the monster count increased$" )
     int after = g_pGame->GetDungeon()->m_llMonsters->length();
     EXPECT_GT( after, before );
 }
+
+THEN( "^the player has an active fear resistance$" )
+{
+    // Intrinsic flag must be set AND tracked as a resist (not a debuff)
+    EXPECT_NE( g_pGame->GetPlayer()->GetIntrinsic( EFFECT_FLAG_AFRAID ), 0 );
+    EXPECT_TRUE( g_pGame->GetPlayer()->HasActiveResistFor( EFFECT_FLAG_AFRAID ) );
+}
+
+THEN( "^the player does not have the afraid debuff$" )
+{
+    // If the AFRAID flag is set it must be as a resist, not a debuff
+    if( g_pGame->GetPlayer()->GetIntrinsic( EFFECT_FLAG_AFRAID ) != 0 )
+        EXPECT_TRUE( g_pGame->GetPlayer()->HasActiveResistFor( EFFECT_FLAG_AFRAID ) );
+}
+
+THEN( "^the player has an active poison resistance$" )
+{
+    // Intrinsic flag must be set AND tracked as a resist (not a debuff)
+    EXPECT_NE( g_pGame->GetPlayer()->GetIntrinsic( EFFECT_FLAG_POISON ), 0 );
+    EXPECT_TRUE( g_pGame->GetPlayer()->HasActiveResistFor( EFFECT_FLAG_POISON ) );
+}
+
+THEN( "^the player does not have the poisoned debuff$" )
+{
+    // If the POISON flag is set it must be as a resist, not a debuff
+    if( g_pGame->GetPlayer()->GetIntrinsic( EFFECT_FLAG_POISON ) != 0 )
+        EXPECT_TRUE( g_pGame->GetPlayer()->HasActiveResistFor( EFFECT_FLAG_POISON ) );
+}

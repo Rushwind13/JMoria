@@ -51,6 +51,7 @@ extern eLogLevel g_eLogLevel;
 #include "DungeonConstants.h"
 #include "Game.h"
 #include "JColor.h"
+#include "StringTable.h"
 #include "Util.h"
 
 class CGame;
@@ -67,7 +68,8 @@ extern Constants g_Constants;
 #define PLACEMENT_INV 1
 #define PLACEMENT_EQUIP 2
 #define PLACEMENT_USE 3
-#define PLACEMENT_MAX 4
+#define PLACEMENT_ENDGAME 4
+#define PLACEMENT_MAX 5
 
 // Build mode flags: define which renderers to include.
 // Both defined = runtime selection via --renderer= (default).

@@ -1,5 +1,6 @@
 #ifndef __JCOLOR_H__
 #define __JCOLOR_H__
+#include "JLinkList.h"
 #include "JMDefs.h"
 #include <cstdlib>
 #include <cstring>
@@ -72,5 +73,29 @@ public:
 
     JIVector m_vRG;
     JIVector m_vBA;
+};
+
+// A named color palette entry: one name mapped to one or more RGBA animation frames.
+// Defined here so any code that deals with colors can use it without pulling in FileParse.
+struct CPalette
+{
+    char *m_szName;
+    JLinkList<JColor> *m_llColors;
+
+    CPalette() : m_szName( NULL ), m_llColors( new JLinkList<JColor> ) {}
+    ~CPalette()
+    {
+        if( m_szName )
+        {
+            delete[] m_szName;
+            m_szName = NULL;
+        }
+        if( m_llColors )
+        {
+            m_llColors->Terminate();
+            delete m_llColors;
+            m_llColors = NULL;
+        }
+    }
 };
 #endif // __JCOLOR_H__

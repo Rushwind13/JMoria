@@ -2,7 +2,7 @@
 name: reviewer
 description: Adversarial review of one task's diff against spec and plan. Dispatch with the task file path and the diff ref. Produces runs/<slug>/review-NN.md per contracts/review-report.md.
 tools: [read, search, edit, execute]
-model: gpt-5.4
+model: gpt-5.4-mini
 disable-model-invocation: true
 user-invocable: true
 ---
@@ -20,8 +20,12 @@ are context, never the standard.
 ## Dispatch
 
 Your dispatch prompt names a task file and a diff (branch or commit range — inspect
-it with git via your shell tool; run nothing else). Produce `runs/<slug>/review-NN.md`
-per `contracts/review-report.md`.
+it with git via your shell tool; run nothing else). The diff must bound **this
+task's changes only**. Sanity-check that before reviewing: if it plainly carries
+other tasks' completed work (a whole multi-task branch diffed against its base, or
+commits owned by other task files' surfaces), the dispatch is malformed — bounce it,
+naming the range you need, rather than reviewing other tasks' changes as boundary
+violations. Produce `runs/<slug>/review-NN.md` per `contracts/review-report.md`.
 
 **Round 2+:** verify each prior finding is genuinely resolved (does the fix actually
 kill the mutant?) and that the delta introduces nothing new. Append a clearly-marked
@@ -67,74 +71,81 @@ The verdict, blocking findings in one line each, and your coverage statement.
      every rendered agent(s) by render-agents.py. This is the ONLY writable
      policy surface: never edit core role copies in place. -->
 
-# JMoria Project Layer: Universal Guardrails
+## JMoria Project Layer Policy
 
-## Code Style & Format (G0)
-- **clang-format**: All code changes MUST pass `clang-format -i` before staging
-  - `.clang-format` configuration is in repo root (read-only)
-  - Run `clang-format -i <file>` on any modified `.cpp` or `.h` files
-  - Pre-commit hook template exists in `doc/Developer-Setup-Guide.md` (currently not installed)
-  - **CI gap**: G0 is not yet automated; enforcement is manual review until hook is installed
+### Host Repository Identity
+**Name:** JMoria  
+**Scope:** From-scratch C++ roguelike engine (homage to IMoria) with state-machine architecture, data-driven monster/item definitions, and dual-renderer support (ASCII/OpenGL)  
+**Primary Language:** C++17  
+**Platforms:** macOS (Darwin), Linux (Debian), Raspberry Pi OS (Debian)  
 
-## Platform Compatibility (G2)
-- JMoria supports **three platforms**: macOS (primary), Linux/Ubuntu, Raspberry Pi OS
-- All build scripts and code MUST remain compatible with all three
-- **Makefile platform detection**: Uses `uname -s` to branch Darwin vs Linux
-- **Tested build modes**:
-  - `make ascii` — terminal-only (ncurses); fastest
-  - `make opengl` — SDL2+OpenGL (graphics); requires framework on macOS
-  - `make` (default) — both renderers, runtime selection
-- **If you modify Makefile, build scripts, or dependencies**:
-  - Test `make ascii` on macOS (required)
-  - Test on Linux or Raspberry Pi if feasible (recommended; if not, document testing assumptions)
-  - Verify `uname` branching logic still works after changes
+### Platform Compatibility (Hard Guardrail)
+All code and build system changes must maintain compatibility across three platforms. Before merging any Makefile edit or build-related change:
+1. Verify platform detection logic uses `uname -s`
+2. Test on macOS and Linux (Docker acceptable for Linux verification)
+3. Document platform-specific flags and paths in inline comments
+4. Ensure conditional compilation (`ifeq`, `else ifeq`) is used, not absolute path assumptions
+5. Homebrew paths (macOS: `/opt/homebrew/`, `/usr/local/`) must not break Linux builds
 
-## Framework Integrity (G1)
-- JMoria uses the agentic framework for AI-assisted development
-- `.agentic/` contains framework core files (read-only); editing them breaks subsequent runs
-- **Only writable files**: `.agentic/overlays/` (project policy) and `.agentic/registry/models.yaml` (vendor bindings)
-- **Before committing overlay changes**:
-  - Run `.agentic/scripts/render-agents.py` to regenerate `.github/agents/*.agent.md`
-  - Commit both overlay changes AND generated agent files
-  - CI workflow `agentic-render-check.yml` will verify consistency
+### Code Style & Formatting (Enforced)
+- **Tool:** clang-format (config in `.clang-format`, committed)
+- **Trigger:** Pre-commit hook enforces `git clang-format` on staged changes
+- **Requirement:** All C++ code must pass clang-format before commit
+- **Action:** Run `clang-format -i <files>` to format; fix hook failures before committing
 
-## Resource Data Files (Convention)
-- Monster definitions: `Resources/Monsters.txt` (custom format, parsed by `CDataFile::ReadMonster()`)
-- Item definitions: `Resources/Items.txt` (custom format, parsed by `CDataFile::ReadItem()`)
-- **To add a new monster or item flavor**: Edit the `.txt` file only
-- **To add a new type**: Edit `.txt` file + add constant to `src/Constants.h` + add emoji to `MonIds`/`ItemIds` in `src/Monster.cpp` or `src/Item.cpp`
-- Utility scripts available: `scripts/find_monster.sh`, `scripts/list_item.sh`, etc.
+### Build System Architecture
+- **Primary builder:** GNU Make with `RENDER_MODE` environment variable
+- **Modes:** ASCII (ncurses), OpenGL (SDL2), both (default)
+- **Command:** `make ascii`, `make opengl`, `make` (or just `make`)
+- **Test:** `make build` (builds test executable), `make verify` (full build + BDD)
+- **Artifact:** `jmoria` executable; `test/bin/AllSteps` for BDD runner
+- **Never hardcode:** Build paths, renderer selection, or platform-specific features in source code
 
-## Testing
-- **Framework**: Cucumber-CPP + GoogleTest
-- **Location**: `test/features/` (feature files) + `test/features/step_definitions/` (C++ steps)
-- **Run tests**: `make clean ascii test; cd test; ./runtests.sh` (requires test dependencies)
-- **Test dependencies** (macOS): `brew install googletest cucumber-cpp`; `sudo gem install cucumber -v 7.1.0`
-- **Known constraint**: Hardcoded googletest path in Makefile (`/opt/homebrew/Cellar/googletest/1.17.0/`); works on macOS with Homebrew; Linux may differ
-- **If adding test files**: Ensure they build and link before committing
+### Data-Driven Design (Project Principle)
+- **Monster definitions:** `Resources/Monsters.txt` (parsed by `CDataFile::ReadMonster()`)
+- **Item definitions:** `Resources/Items.txt` (parsed by `CDataFile::ReadItem()`)
+- **Constraint:** Game-balancing numbers (stats, damage, AC, etc.) belong in resource files, NOT in .cpp code
+- **Enum constants:** Only in `src/Constants.h` as indices (e.g., `MON_IDX_ORC`, `ITEM_IDX_SWORD`)
+- **Resource format:** Custom format with angle-bracket-delimited strings (`<value>`), NdM dice notation
+- **Rationale:** Enables live tuning without recompilation; designers can modify game balance via data files
 
-## Security
-- **No secrets in artifacts**: Do not commit API keys, credentials, or personal data
-- **Gitignore**: Covers local artifacts (scores, logs, temp files); review `.gitignore` if adding new types
-- **.agentic/ state**: Safe to commit; contains no secrets, only framework and run artifacts
+### Wizard Mode Scope (Debug Feature)
+- **Feature:** Debug commands accessible via Ctrl+T, Ctrl+F, Ctrl+I, Ctrl+S
+- **Constraint:** Wizard Mode must disable score saving
+- **Enforcement:** Code review rejects PRs that allow score writes during Wizard Mode
+- **Implementation:** `CGame::IsWizardMode()` check before `SaveScore()` call
 
-## Documentation
-- **Developer guide**: `doc/Developer-Setup-Guide.md` (setup, dependencies, build, hooks)
-- **Code standards**: `doc/coding-standards.md` (style guidelines)
-- **Architecture**: `doc/_JMoria Developer's Guide.md` (dungeon, AI, tile system)
-- **Custom instructions**: `.github/copilot-instructions.md` (Copilot context for this project)
+### Test Architecture & Protocol
+- **Framework:** Cucumber-CPP (BDD) with GoogleTest wire protocol
+- **Test files:** Feature definitions in `test/features/` (Gherkin), step implementations in `test/features/step_definitions/` (C++)
+- **Build sequence:** `make build` produces `test/bin/AllSteps` executable
+- **Execution:** `./test/runtests.sh` starts AllSteps as background process, communicates via wire protocol
+- **Critical:** Never run `test/bin/AllSteps` manually; only via runtests.sh
+- **Reason:** Wire protocol expects specific socket/port handshake; manual invocation breaks cucumber connection
 
-## Branches & Releases
-- **Active branch**: `develop` (tracked from origin/develop)
-- **Releases**: Semantic versioning (0.6.x, 0.7.x); tag as `v<version>`
-- **Feature branches**: Use `feat/*`, `fix/*`, `issue/*` prefixes
-- **No branch protection configured**: Merges to develop are allowed; rely on review via PR (human gate)
+### Code Review Standards
+- **PR requirement:** All merges via PR (Rushwind13/JMoria workflow)
+- **Checks:** CI gate (agentic-render-check) + human review
+- **Focus areas:** Platform compatibility, clang-format compliance, test coverage, data-driven adherence
+- **Cross-platform:** Verify build on multiple platforms or via Docker before approval
 
-## Abbreviations
-- **G0–G3**: Gate set (code style, build integrity, approval/review, deploy)
-- **P5**: Plan persistence (agentic framework requirement; satisfied by in-repo runs)
-- **CI**: GitHub Actions workflows (`.github/workflows/`)
-- **clang-format**: LLVM code formatter; version 21.1.8 available on macOS
+### Repository Structure (Agent-Readable)
+- `src/` — C++ source (state machine, core engine)
+- `test/` — BDD feature files and step definitions
+- `Resources/` — Data files (monsters, items, colors, scores)
+- `util/` — Helper scripts (find_monster.sh, list_item.sh, etc.)
+- `doc/` — Developer guides, architecture docs
+- `.agentic/` — Framework configuration (read-only core, editable overlays)
+- `.clang-format` — Code style config (committed, immutable)
+- `Makefile` — Build recipes (platform-aware)
+
+### Documentation for Agents
+All agents should read:
+1. `.github/copilot-instructions.md` — Architecture, patterns, conventions
+2. `_JMoria Developer's Guide.md` — Monster/item addition, tile bindings
+3. `Developer-Setup-Guide.md` — Platform setup, clang-format hook installation
+4. `Makefile` — Build targets and platform detection logic
+5. `test/features/` — BDD test examples for feature patterns
 
 <!-- OVERLAY from overlays/reviewer.md - project policy layer -->
 
@@ -142,52 +153,114 @@ The verdict, blocking findings in one line each, and your coverage statement.
      the reviewer rendered agent(s) by render-agents.py. This is the ONLY writable
      policy surface: never edit core role copies in place. -->
 
-## Reviewer: JMoria Code Review Checklist
+## Reviewer Role Specifics for JMoria
 
-### Review Criteria for JMoria PRs
+### Code Review Focus Areas (In Priority Order)
 
-**Architectural Fit**:
-- ✓ Does the change respect the state machine model? (New modes → new state class; existing states → extend OnHandleKey/OnUpdate)
-- ✓ Is content data-driven where possible? (Monsters/items → resources; not hardcoded in logic)
-- ✓ Render abstraction maintained? (No platform-specific code in game logic)
+**1. Platform Compatibility (G1 — Hard Guardrail)**
+- [ ] All Makefile edits detect platform via `uname -s` (macOS Darwin, Linux)
+- [ ] No absolute paths like `/usr/local/lib` without conditional fallback
+- [ ] Platform-specific flags in `ifeq ($(OS),...)` blocks, not hardcoded
+- [ ] Homebrew paths (`/opt/homebrew/`) only in macOS conditional
+- [ ] If new dependency added: verify it exists on all three platforms (Homebrew, apt-get, Raspberry Pi)
+- **Action:** Failing this → request platform verification on Linux or Docker; don't approve without it
 
-**Code Quality**:
-- ✓ Passes `clang-format` (run `git clang-format --diff` on PR branch)
-- ✓ Follows coding standards in `doc/coding-standards.md`
-- ✓ No magic numbers; constants go in `src/Constants.h` or resources
-- ✓ Comments only where code needs clarification; avoid over-commenting
+**2. Code Formatting (G2 — Enforced)**
+- [ ] All C++ files conform to `.clang-format` config (100-char line limit, Allman braces)
+- [ ] No manual formatting workarounds or style exceptions
+- [ ] Pre-commit hook would have caught this; check if contributor has hook installed
+- **Action:** Failing → request contributor run `clang-format -i <files>` and re-push
 
-**Platform & Build**:
-- ✓ Makefile unchanged or changes are cross-platform (`uname` branching tested)?
-- ✓ No new hardcoded paths or platform-specific #ifdef spam?
-- ✓ If dependencies added: available on Darwin, Linux, and (ideally) Raspberry Pi?
-- ✓ Build tested: At least `make ascii` on macOS; ideally on Linux too
+**3. Build System & Render Modes (G3)**
+- [ ] Changes to `Makefile` don't break `make ascii`, `make opengl`, or `make` (both)
+- [ ] No hardcoding of `RENDER_MODE`; use `#ifdef RENDER_ASCII` / `#ifdef RENDER_OPENGL` conditionally
+- [ ] New `.cpp` files automatically linked (Makefile pattern rule handles it)
+- [ ] Test binary targets unchanged: `make build` still produces `test/bin/AllSteps`
+- **Action:** Failing → request contributor test all three render modes; document failures
 
-**Testing**:
-- ✓ Existing tests still pass? (`./test/runtests.sh --build` if available)
-- ✓ If new user-facing feature, is there a Cucumber feature file or manual test plan documented?
-- ✓ Game playable after changes? (manual smoke test recommended)
+**4. Data-Driven Design (G4 — Project Principle)**
+- [ ] Game balancing numbers NOT in .cpp code (damage, AC, stat modifiers, spawn rates)
+- [ ] Monster stats in `Resources/Monsters.txt`; item stats in `Resources/Items.txt`
+- [ ] Only enum indices (`MON_IDX_*`, `ITEM_IDX_*`) and gameplay logic in .cpp
+- [ ] If hardcoded values found: request move to resource file
+- **Action:** Failing → comment with `Resources/` location where value belongs; block until moved
 
-**Documentation**:
-- ✓ Architecture changes documented in `doc/_JMoria Developer's Guide.md` or PR notes?
-- ✓ New constants or data structures explained?
-- ✓ Resource format changes (Monsters.txt/Items.txt) noted?
+**5. State Machine Pattern (If adding new game state)**
+- [ ] New state class inherits from `CStateBase`
+- [ ] Implements `OnHandleKey(int key)` and `OnUpdate(float elapsed_ms)`
+- [ ] State transitions via `CGame::SetState()`, not direct instantiation
+- [ ] Destructor or `OnExit()` cleans up resources (prevent leaks)
+- [ ] State doesn't directly modify peer state internals
+- **Action:** Failing → request refactor to match pattern; provide example from existing state
 
-**Red Flags**:
-- ❌ clang-format violations or inconsistent style
-- ❌ Breaking existing tests without clear reason
-- ❌ New platform-specific #ifdef; must use Makefile detection instead
-- ❌ Hardcoded file paths or platform assumptions
-- ❌ Changes to `.agentic/` core files (framework-lock.json, contracts/, roles/, scripts/) — these are read-only; use overlays
-- ❌ Render pipeline logic (game logic that shouldn't know about ASCII vs OpenGL)
+**6. Wizard Mode Scope (G6)**
+- [ ] If modifying wizard commands (`^t`, `^f`, `^i`, `^s`): verify they don't save scores
+- [ ] Check for `IsWizardMode()` guard before any `SaveScore()` call
+- [ ] Game balance must not be bypassable via wizard features
+- **Action:** Failing → request `IsWizardMode()` guard; explain the constraint
 
-### Review Tools
-- `.clang-format` — Check formatting
-- `Makefile` — Verify build logic
-- `doc/coding-standards.md` — Style reference
-- `integration-profile.md` — Gate capabilities, known gaps
+**7. Test Coverage**
+- [ ] Significant behavior changes include BDD feature files
+- [ ] Test scenarios describe player actions and expected outcomes
+- [ ] Step definitions use `TestContext` to set up game state
+- [ ] Existing tests still pass (no test regressions)
+- [ ] If `make verify` fails: request test fixes before approval
+- **Action:** Failing → ask for test scenarios; if minimal change, request brief explanation why tests not needed
 
-### Specific to Integration Phase
-- ✓ Rendered agent files (`.github/agents/*.agent.md`) were regenerated after overlay changes? (See `render-agents.py`)
-- ✓ Integration profile reviewed and signed off by GI? (Human gate)
-- ✓ Framework files (`.agentic/contracts/`, etc.) untouched?
+**8. Dependency & Linking**
+- [ ] New external libraries have platform-specific availability verified
+- [ ] Makefile link flags updated (if adding library)
+- [ ] No missing object files in link step (all .cpp files compile)
+- [ ] Include paths use `$(LOCAL_INCLUDE_PATHS)`, not absolute paths
+- **Action:** Failing → request Makefile fixes and cross-platform testing
+
+### Code Review Checklist (Copy into Each PR)
+```markdown
+### Code Review Checklist for JMoria Contributions
+
+**Platform Compatibility:**
+- [ ] Makefile changes tested on macOS and Linux (or documented platform-specific reasoning)
+- [ ] No hardcoded paths; platform detection via `uname -s`
+- [ ] All three render modes build: `make ascii`, `make opengl`, `make`
+
+**Code Quality:**
+- [ ] Passes `clang-format` (100-char limit, Allman braces)
+- [ ] Builds without warnings (treat warnings as errors in code review)
+- [ ] No memory leaks (valgrind OK if available)
+
+**Architecture:**
+- [ ] New game states inherit from `CStateBase`; use `OnHandleKey()` and `OnUpdate()`
+- [ ] No circular dependencies; states access managers via `CGame` reference
+- [ ] Game balance numbers in `Resources/*.txt`, not .cpp code
+
+**Wizard Mode & Score Saving:**
+- [ ] Wizard commands don't bypass game balance or score saving
+- [ ] `IsWizardMode()` guards before `SaveScore()` calls (if applicable)
+
+**Testing:**
+- [ ] Significant changes include BDD feature files
+- [ ] `make verify` passes (build + BDD tests)
+- [ ] No test regressions
+
+**Cross-Platform:**
+- [ ] Builds on macOS and Linux (Docker acceptable)
+- [ ] New dependencies available on all platforms
+- [ ] Platform-specific code in separate files (e.g., `Render_MacOS.cpp`), not scattered
+```
+
+### Red Flags (Automatic Request for Changes)
+- [ ] Hardcoded paths or `#ifdef` platform checks in game logic code
+- [ ] Game balance numbers in .cpp files (should be in Resources/)
+- [ ] State class doesn't follow `CStateBase` pattern
+- [ ] Wizard mode bypasses score saving or enables cheating
+- [ ] Makefile changes untested on Linux or missing platform detection
+- [ ] New external dependency without cross-platform verification
+- [ ] `make verify` fails; tests not fixed
+
+### Approval Criteria
+- ✅ All red flags resolved
+- ✅ At least one of: tested on Linux OR macOS, or Docker verification provided
+- ✅ Clang-format compliant
+- ✅ No test regressions
+- ✅ Architecture consistent with JMoria patterns
+- ✅ If data-driven design applies: numbers in Resources/, not code

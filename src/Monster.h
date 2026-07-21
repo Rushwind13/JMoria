@@ -55,7 +55,7 @@ public:
           m_szHD( NULL )
     {
         m_llAttacks = new JLinkList<CAttack>;
-        m_Colors = new JLinkList<JColor>;
+        m_llColors = new JLinkList<JColor>;
         m_szAppear = new char[10];
         sprintf( m_szAppear, "1d1" );
     };
@@ -87,11 +87,11 @@ public:
             delete m_llAttacks;
             m_llAttacks = NULL;
         }
-        if( m_Colors )
+        if( m_llColors )
         {
-            m_Colors->Terminate();
-            delete m_Colors;
-            m_Colors = NULL;
+            m_llColors->Terminate();
+            delete m_llColors;
+            m_llColors = NULL;
         }
     }
     int m_dwFlags;
@@ -102,7 +102,7 @@ public:
     char *m_szName;  // What do we call this thing?
     JColor
         m_Color; // What color do we draw this thing? (Make it appropriate to the monster name...)
-    JLinkList<JColor> *m_Colors;     // for multi-hued
+    JLinkList<JColor> *m_llColors;   // for multi-hued
     float m_fSpeed;                  // speed of monster (affects update rate)
     int m_dwMoveType;                // movement type of monster
     char *m_szPlural;                // how to refer to more than one of this monster
@@ -113,6 +113,11 @@ public:
     float m_fLevelSigma;             // spread of bell curve (default 10.0)
     float m_fSpawnWeight;            // scratch: Gaussian weight computed by ChooseMonsterForDepth
     float m_fExpValue;               // how much XP do you get for killing this monster
+
+    // Return the color for a given animation frame, cycling through m_llColors.
+    // frame=0 returns the first palette color; falls back to m_Color for single-hued.
+    JColor GetColor( int frame ) const;
+
 protected:
 private:
     // Member Functions
@@ -137,11 +142,11 @@ public:
     CAttack *m_pCurrentAttack;
     CMonsterDef *m_md;
     CLink<CMonster> *m_pllLink;
-    CAIBrain *m_pBrain;       // this is the place to get info for the AI.
-    uint32 m_dwActiveEffects; // word-1 status flags (confused, blind, afraid, sleep, paralyze...)
+    CAIBrain *m_pBrain;        // this is the place to get info for the AI.
+    uint32 m_dwActiveEffects;  // word-1 status flags (confused, blind, afraid, sleep, paralyze...)
     uint32 m_dwActiveEffects2; // word-2 status flags (aggravate, ...)
-    uint32 m_dwInstanceId;    // unique instance id for this monster
-    bool m_bDetected;         // true for one turn after Detect Monsters
+    uint32 m_dwInstanceId;     // unique instance id for this monster
+    bool m_bDetected;          // true for one turn after Detect Monsters
 
     uint32 GetInstanceId() { return m_dwInstanceId; }
 

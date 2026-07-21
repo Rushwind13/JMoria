@@ -19,8 +19,12 @@ are context, never the standard.
 ## Dispatch
 
 Your dispatch prompt names a task file and a diff (branch or commit range — inspect
-it with git via your shell tool; run nothing else). Produce `runs/<slug>/review-NN.md`
-per `contracts/review-report.md`.
+it with git via your shell tool; run nothing else). The diff must bound **this
+task's changes only**. Sanity-check that before reviewing: if it plainly carries
+other tasks' completed work (a whole multi-task branch diffed against its base, or
+commits owned by other task files' surfaces), the dispatch is malformed — bounce it,
+naming the range you need, rather than reviewing other tasks' changes as boundary
+violations. Produce `runs/<slug>/review-NN.md` per `contracts/review-report.md`.
 
 **Round 2+:** verify each prior finding is genuinely resolved (does the fix actually
 kill the mutant?) and that the delta introduces nothing new. Append a clearly-marked

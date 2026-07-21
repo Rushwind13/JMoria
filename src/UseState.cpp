@@ -6,6 +6,7 @@
 #include "Effect.h"
 #include "Game.h"
 #include "JMDefs.h"
+#include "Strings.h"
 
 #include "Dungeon.h"
 #include "Player.h"
@@ -46,7 +47,7 @@ void CUseState::TargetEffect( CEffect *pEffect, uint32 dwFlags )
 {
     m_pPendingEffect = pEffect;
     m_dwPendingItemFlags = dwFlags;
-    g_pGame->GetMsgs()->Printf( "%s\n", pEffect->GetTargetPrompt() );
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_FMT_STRING_LF], pEffect->GetTargetPrompt() );
     switch( pEffect->GetTargetType() )
     {
     case EFFECT_TARGET_DIRECTION:
@@ -83,7 +84,7 @@ int CUseState::OnHandleTarget( JKeysym *keysym )
     {
         m_pPendingEffect = nullptr;
         m_dwPendingItemFlags = 0;
-        g_pGame->GetMsgs()->Printf( "Cancelled.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CANCELLED] );
         ResetToState( STATE_COMMAND );
         return 0;
     }
@@ -107,8 +108,9 @@ int CUseState::OnHandleTarget( JKeysym *keysym )
         return 0;
     }
 
-    g_pGame->GetMsgs()->Printf( "%s\n", m_pPendingEffect ? m_pPendingEffect->GetTargetPrompt()
-                                                         : "Which direction? (* for target)" );
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_FMT_STRING_LF],
+                                m_pPendingEffect ? m_pPendingEffect->GetTargetPrompt()
+                                                 : g_Strings[STR_CHOOSE_TARGET] );
     return 0;
 }
 
@@ -127,7 +129,7 @@ int CUseState::OnHandleWield( JKeysym *keysym )
     {
         JLog( LOG_LEVEL_DEBUG, true,
               "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
-        g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CHOOSE_INV] );
         return 0;
     }
 
@@ -137,21 +139,19 @@ int CUseState::OnHandleWield( JKeysym *keysym )
     {
         if( DoWield() )
         {
-            g_pGame->GetMsgs()->Printf( "You are now wielding the %s.\n",
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_NOW_WIELDING],
                                         m_pSelected->m_lpData->GetName() );
             JLog( LOG_LEVEL_INFO, true, "Now wielding %s\n", m_pSelected->m_lpData->GetName() );
         }
         else
         {
-            g_pGame->GetMsgs()->Printf(
-                "The %s slips from your fingers and returns to your pack!\n",
-                m_pSelected->m_lpData->GetName() );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_USE_FAIL], m_pSelected->m_lpData->GetName() );
             JLog( LOG_LEVEL_INFO, true, "failed to wield %s\n", m_pSelected->m_lpData->GetName() );
         }
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "You can't wield a %s!\n", m_pSelected->m_lpData->GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CANT_WIELD], m_pSelected->m_lpData->GetName() );
         JLog( LOG_LEVEL_INFO, true, "can't wield %s\n", m_pSelected->m_lpData->GetName() );
     }
     m_pSelected = NULL;
@@ -177,7 +177,7 @@ int CUseState::OnHandleRemove( JKeysym *keysym )
     {
         JLog( LOG_LEVEL_DEBUG, true,
               "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
-        g_pGame->GetMsgs()->Printf( "Choose an item from equipment(a to z):\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CHOOSE_EQUIP] );
         return 0;
     }
 
@@ -187,18 +187,17 @@ int CUseState::OnHandleRemove( JKeysym *keysym )
     {
         if( DoRemove() )
         {
-            g_pGame->GetMsgs()->Printf( "You take off the %s.\n",
-                                        m_pSelected->m_lpData->GetName() );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_REMOVED], m_pSelected->m_lpData->GetName() );
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "You can't remove that!\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_CANT_REMOVE] );
         }
         m_pSelected = NULL;
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "The %s is welded to your body!\n",
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CANT_REMOVE_CURSED],
                                     m_pSelected->m_lpData->GetName() );
     }
 
@@ -230,7 +229,7 @@ int CUseState::OnHandleDrop( JKeysym *keysym )
     {
         JLog( LOG_LEVEL_DEBUG, true,
               "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
-        g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CHOOSE_INV] );
         return 0;
     }
 
@@ -245,25 +244,24 @@ int CUseState::OnHandleDrop( JKeysym *keysym )
         {
             m_dwQuantityPrompt = 0; // Start quantity prompt mode
             memset( m_szQuantityBuffer, 0, sizeof( m_szQuantityBuffer ) );
-            g_pGame->GetMsgs()->Printf( "How many? (1-%d, * for all): ", pItem->m_dwCount );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_HOW_MANY], pItem->m_dwCount );
             return JSUCCESS;
         }
 
         // Non-stackable or single item: drop normally
         if( DoDrop() )
         {
-            g_pGame->GetMsgs()->Printf( "You dropped the %s.\n", m_pSelected->m_lpData->GetName() );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_DROPPED_ITEM],
+                                        m_pSelected->m_lpData->GetName() );
         }
         else
         {
-            g_pGame->GetMsgs()->Printf(
-                "The %s slips from your fingers and returns to your pack!\n",
-                m_pSelected->m_lpData->GetName() );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_USE_FAIL], m_pSelected->m_lpData->GetName() );
         }
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "You can't drop a %s here!\n",
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CANT_DROP_HERE],
                                     m_pSelected->m_lpData->GetName() );
     }
     m_pSelected = NULL;
@@ -289,13 +287,13 @@ int CUseState::OnHandleRead( JKeysym *keysym )
     {
         JLog( LOG_LEVEL_DEBUG, true,
               "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
-        g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CHOOSE_INV] );
         return 0;
     }
     JLog( LOG_LEVEL_NOISE, true, "READ got a selection\n" );
     if( !TestRead() )
     {
-        g_pGame->GetMsgs()->Printf( "You can't read a %s!\n", m_pSelected->m_lpData->GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CANT_READ], m_pSelected->m_lpData->GetName() );
         m_pSelected = NULL;
         ResetToState( STATE_COMMAND );
         return 0;
@@ -306,7 +304,7 @@ int CUseState::OnHandleRead( JKeysym *keysym )
     if( pTargetEffect )
     {
         uint32 dwItemFlags = m_pSelected->m_lpData->m_dwFlags;
-        g_pGame->GetMsgs()->Printf( "You read the %s.\n", m_pSelected->m_lpData->GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_YOU_READ], m_pSelected->m_lpData->GetName() );
         g_pGame->GetPlayer()->ConsumeItem( m_pSelected );
         m_pSelected = NULL;
         TargetEffect( pTargetEffect, dwItemFlags );
@@ -317,12 +315,11 @@ int CUseState::OnHandleRead( JKeysym *keysym )
     JResult readResult = DoRead();
     if( readResult == JSUCCESS )
     {
-        g_pGame->GetMsgs()->Printf( "You read the %s.\n", m_pSelected->m_lpData->GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_YOU_READ], m_pSelected->m_lpData->GetName() );
     }
-    else if( readResult != JSUCCESS )
+    else
     {
-        g_pGame->GetMsgs()->Printf( "The %s slips from your fingers and returns to your pack!\n",
-                                    m_pSelected->m_lpData->GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_USE_FAIL], m_pSelected->m_lpData->GetName() );
     }
 
     JLog( LOG_LEVEL_DEBUG, true, "READ resetting game state to COMMAND, USE state to INIT\n" );
@@ -345,7 +342,7 @@ int CUseState::OnHandleQuaff( JKeysym *keysym )
     {
         JLog( LOG_LEVEL_DEBUG, true,
               "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
-        g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CHOOSE_INV] );
         return 0;
     }
 
@@ -355,18 +352,17 @@ int CUseState::OnHandleQuaff( JKeysym *keysym )
     {
         if( DoQuaff() )
         {
-            g_pGame->GetMsgs()->Printf( "You drank the %s.\n", m_pSelected->m_lpData->GetName() );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_YOU_DRANK],
+                                        m_pSelected->m_lpData->GetName() );
         }
         else
         {
-            g_pGame->GetMsgs()->Printf(
-                "The %s slips from your fingers and returns to your pack!\n",
-                m_pSelected->m_lpData->GetName() );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_USE_FAIL], m_pSelected->m_lpData->GetName() );
         }
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "You can't drink a %s!\n", m_pSelected->m_lpData->GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CANT_DRINK], m_pSelected->m_lpData->GetName() );
     }
     m_pSelected = NULL;
 
@@ -388,31 +384,24 @@ int CUseState::OnHandleInit( JKeysym *keysym )
         {
         case JKEY_w:
             mod = USE_WIELD;
-            g_pGame->GetMsgs()->Printf( "Wield which item? [a-z]\n" );
             break;
         case JKEY_t:
             mod = USE_REMOVE;
-            g_pGame->GetMsgs()->Printf( "Remove which item? [a-j]\n" );
             break;
         case JKEY_d:
             mod = USE_DROP;
-            g_pGame->GetMsgs()->Printf( "Drop which item? [a-z]\n" );
             break;
         case JKEY_r:
             mod = USE_READ;
-            g_pGame->GetMsgs()->Printf( "Read which item? [a-z]\n" );
             break;
         case JKEY_q:
             mod = USE_QUAFF;
-            g_pGame->GetMsgs()->Printf( "Quaff which item? [a-z]\n" );
             break;
         case JKEY_f:
             mod = USE_FUEL;
-            g_pGame->GetMsgs()->Printf( "Fill with which fuel? [a-z]\n" );
             break;
         case JKEY_z:
             mod = USE_STAFF;
-            g_pGame->GetMsgs()->Printf( "Use which staff? [a-z]\n" );
             break;
         default:
             JLog( LOG_LEVEL_ERROR, true,
@@ -442,7 +431,7 @@ int CUseState::OnHandleInit( JKeysym *keysym )
         // Player cancelled targeting; item was already consumed
         m_pPendingEffect = nullptr;
         m_dwPendingItemFlags = 0;
-        g_pGame->GetMsgs()->Printf( "Cancelled.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CANCELLED] );
         ResetToState( STATE_COMMAND );
         return 0;
     }
@@ -466,7 +455,7 @@ int CUseState::OnBaseHandleKey( JKeysym *keysym, eUseModifier whichUse )
         m_pSelected = GetResponse( whichUse );
         if( m_pSelected == NULL )
         {
-            g_pGame->GetMsgs()->Printf( "Please select a valid item.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_SELECT_VALID] );
 
             return -1;
         }
@@ -499,9 +488,19 @@ int CUseState::OnHandleChooseItem( JKeysym *keysym )
     int ch = GetAlpha( keysym );
     if( ch == nul )
     {
-        g_pGame->GetMsgs()->Printf( "%s\n", m_pPendingEffect
-                                                ? m_pPendingEffect->GetTargetPrompt()
-                                                : "Choose an item [a-z inv, A-J equip]:" );
+        static char buffer[256];
+        const char *prompt = nullptr;
+        if( m_pPendingEffect )
+        {
+            prompt = m_pPendingEffect->GetTargetPrompt();
+        }
+        else
+        {
+            snprintf( buffer, sizeof( buffer ), "%s%s", g_Strings[STR_PROMPT_CHOOSE_ITEM],
+                      g_Strings[STR_ITEM_SELECTION_SUFFIX] );
+            prompt = buffer;
+        }
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_FMT_STRING_LF], prompt );
         return 0;
     }
 
@@ -511,16 +510,27 @@ int CUseState::OnHandleChooseItem( JKeysym *keysym )
     m_pSelected = GetResponse( USE_CHOOSE_ITEM );
     if( m_pSelected == NULL )
     {
-        g_pGame->GetMsgs()->Printf( "No such item. %s\n",
-                                    m_pPendingEffect ? m_pPendingEffect->GetTargetPrompt()
-                                                     : "Choose an item [a-z inv, A-J equip]:" );
+        static char buffer[256];
+        const char *prompt = nullptr;
+        if( m_pPendingEffect )
+        {
+            prompt = m_pPendingEffect->GetTargetPrompt();
+        }
+        else
+        {
+            snprintf( buffer, sizeof( buffer ), "%s%s", g_Strings[STR_PROMPT_CHOOSE_ITEM],
+                      g_Strings[STR_ITEM_SELECTION_SUFFIX] );
+            prompt = buffer;
+        }
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_NO_SUCH_ITEM], prompt );
         m_bFromEquipment = false;
         return 0;
     }
 
     if( m_pPendingEffect && !m_pPendingEffect->IsValidTarget( m_pSelected->m_lpData ) )
     {
-        g_pGame->GetMsgs()->Printf( "%s\n", m_pPendingEffect->GetTargetPrompt() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_FMT_STRING_LF],
+                                    m_pPendingEffect->GetTargetPrompt() );
         m_pSelected = NULL;
         m_bFromEquipment = false;
         return 0;
@@ -549,7 +559,7 @@ int CUseState::OnHandleQuantityPrompt( JKeysym *keysym )
         // If empty/blank, cancelled
         if( m_szQuantityBuffer[0] == 0 )
         {
-            g_pGame->GetMsgs()->Printf( "Cancelled.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_CANCELLED] );
             m_dwQuantityPrompt = -1;
             m_pSelected = NULL;
             ResetToState( STATE_COMMAND );
@@ -568,7 +578,7 @@ int CUseState::OnHandleQuantityPrompt( JKeysym *keysym )
 
         if( quantity <= 0 || quantity > pItem->m_dwCount )
         {
-            g_pGame->GetMsgs()->Printf( "Invalid quantity.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_INVALID_QTY] );
             m_dwQuantityPrompt = -1;
             m_pSelected = NULL;
             ResetToState( STATE_COMMAND );
@@ -578,11 +588,12 @@ int CUseState::OnHandleQuantityPrompt( JKeysym *keysym )
         // Execute the drop with the specified quantity
         if( g_pGame->GetPlayer()->Drop( pItem, quantity ) )
         {
-            g_pGame->GetMsgs()->Printf( "You dropped %d.\n", quantity );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_DROPPED_N_ITEMS], quantity,
+                                        pItem->GetPlural() );
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "Could not drop items.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_COULD_NOT_DROP] );
         }
 
         m_dwQuantityPrompt = -1;
@@ -594,7 +605,7 @@ int CUseState::OnHandleQuantityPrompt( JKeysym *keysym )
     // Handle Escape to cancel
     if( keysym->sym == JKEY_ESCAPE )
     {
-        g_pGame->GetMsgs()->Printf( "Cancelled.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CANCELLED] );
         m_dwQuantityPrompt = -1;
         m_pSelected = NULL;
         ResetToState( STATE_COMMAND );
@@ -693,7 +704,7 @@ CLink<CItem> *CUseState::GetResponse( eUseModifier whichUse )
 /// command-specific fcns go below
 
 //// Open commands
-bool CUseState::TestWield() { return g_pGame->GetPlayer()->IsWieldable( m_pSelected ); }
+bool CUseState::TestWield() { return m_pSelected->m_lpData->IsWieldable(); }
 
 bool CUseState::DoWield() { return g_pGame->GetPlayer()->Wield( m_pSelected ) == JSUCCESS; }
 
@@ -707,22 +718,22 @@ bool CUseState::TestDrop() { return g_pGame->GetPlayer()->CanDropHere(); }
 
 bool CUseState::DoDrop() { return g_pGame->GetPlayer()->Drop( m_pSelected->m_lpData ); }
 //// Quaff commands
-bool CUseState::TestQuaff() { return g_pGame->GetPlayer()->IsDrinkable( m_pSelected ); }
+bool CUseState::TestQuaff() { return m_pSelected->m_lpData->IsDrinkable(); }
 
 bool CUseState::DoQuaff() { return g_pGame->GetPlayer()->Quaff( m_pSelected ) == JSUCCESS; }
 
 //// Read commands
-bool CUseState::TestRead() { return g_pGame->GetPlayer()->IsReadable( m_pSelected ); }
+bool CUseState::TestRead() { return m_pSelected->m_lpData->IsReadable(); }
 
 JResult CUseState::DoRead() { return g_pGame->GetPlayer()->Read( m_pSelected ); }
 
 //// Fuel commands
-bool CUseState::TestFuel() { return g_pGame->GetPlayer()->IsFuel( m_pSelected ); }
+bool CUseState::TestFuel() { return m_pSelected->m_lpData->IsFuel(); }
 
 bool CUseState::DoFuel() { return g_pGame->GetPlayer()->Fuel( m_pSelected ) == JSUCCESS; }
 
 //// Staff commands
-bool CUseState::TestStaff() { return g_pGame->GetPlayer()->IsStaff( m_pSelected ); }
+bool CUseState::TestStaff() { return m_pSelected->m_lpData->IsStaff(); }
 
 JResult CUseState::DoStaff() { return g_pGame->GetPlayer()->UseStaff( m_pSelected ); }
 
@@ -741,7 +752,7 @@ int CUseState::OnHandleStaff( JKeysym *keysym )
     {
         JLog( LOG_LEVEL_DEBUG, true,
               "STAFF cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
-        g_pGame->GetMsgs()->Printf( "Choose an item from inventory (a to z):\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CHOOSE_INV] );
         return 0;
     }
 
@@ -749,7 +760,7 @@ int CUseState::OnHandleStaff( JKeysym *keysym )
 
     if( !TestStaff() )
     {
-        g_pGame->GetMsgs()->Printf( "You can't use a %s as a staff!\n",
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CANT_USE_STAFF],
                                     m_pSelected->m_lpData->GetName() );
         m_pSelected = NULL;
         ResetToState( STATE_COMMAND );
@@ -759,7 +770,7 @@ int CUseState::OnHandleStaff( JKeysym *keysym )
     CItem *pItem = m_pSelected->m_lpData;
     if( pItem->m_dwCharges <= 0 )
     {
-        g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_NOTHING_HAPPENS] );
         m_pSelected = NULL;
         ResetToState( STATE_COMMAND );
         return 0;
@@ -781,22 +792,22 @@ int CUseState::OnHandleStaff( JKeysym *keysym )
     if( pTargetEffect )
     {
         uint32 dwItemFlags = pItem->m_dwFlags;
-        g_pGame->GetPlayer()->ConsumeAndRemoveIfEmpty( m_pSelected );
+        g_pGame->GetPlayer()->ConsumeItem( m_pSelected );
         m_pSelected = NULL;
         TargetEffect( pTargetEffect, dwItemFlags );
         return 0;
     }
     else if( szEffectDesc )
     {
-        g_pGame->GetMsgs()->Printf( "The %s emits a %s.\n", pItem->GetName(), szEffectDesc );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_EMITS], pItem->GetName(), szEffectDesc );
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "The %s glows.\n", pItem->GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_GLOWS], pItem->GetName() );
     }
 
     JResult staffResult = DoStaff();
-    g_pGame->GetPlayer()->ConsumeAndRemoveIfEmpty( m_pSelected );
+    g_pGame->GetPlayer()->ConsumeItem( m_pSelected );
     m_pSelected = NULL;
 
     JLog( LOG_LEVEL_DEBUG, true, "STAFF resetting game state to COMMAND, USE state to INIT\n" );
@@ -819,7 +830,7 @@ int CUseState::OnHandleFuel( JKeysym *keysym )
     {
         JLog( LOG_LEVEL_DEBUG, true,
               "Use cmd still waiting for a alphabetic key: Alpha key not pressed.\n" );
-        g_pGame->GetMsgs()->Printf( "Choose an item from inventory(a to z):\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CHOOSE_INV] );
         return 0;
     }
 
@@ -828,17 +839,17 @@ int CUseState::OnHandleFuel( JKeysym *keysym )
     {
         if( DoFuel() )
         {
-            g_pGame->GetMsgs()->Printf( "You fill your lantern with the %s.\n",
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_FILL_LANTERN],
                                         m_pSelected->m_lpData->GetName() );
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "You have no lantern to fill.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_NO_LANTERN] );
         }
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "You can't use a %s as fuel!\n",
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_CANT_USE_FUEL],
                                     m_pSelected->m_lpData->GetName() );
     }
     m_pSelected = NULL;

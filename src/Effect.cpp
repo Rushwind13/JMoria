@@ -3,6 +3,7 @@
 #include "Dungeon.h"
 #include "Item.h"
 #include "Player.h"
+#include "Strings.h"
 void CEffect::SetAmount( const char *szAmount )
 {
     if( m_szAmount )
@@ -88,7 +89,7 @@ JResult CEffect::Physical( JVector vOrigin )
 
         if( !bHit )
         {
-            g_pGame->GetMsgs()->Printf( "You miss the %s.\n", szMonName );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_YOU_MISS], szMonName );
             JLog( LOG_LEVEL_INFO, true, "Ranged miss: roll %.2f vs AC %d\n", fRoll,
                   (int)pMon->m_fCurAC );
             return JSUCCESS;
@@ -96,7 +97,7 @@ JResult CEffect::Physical( JVector vOrigin )
 
         if( fRoll > 80.0f )
         {
-            g_pGame->GetMsgs()->Printf( "(Critical hit!)\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_CRITICAL_HIT] );
             bCriticalHit = true;
         }
     }
@@ -116,9 +117,9 @@ JResult CEffect::Physical( JVector vOrigin )
         fDamage *= 2.0f;
 
     if( pPlayer->DamageMonster( pMon, fDamage ) )
-        g_pGame->GetMsgs()->Printf( "The %s dies.\n", szMonName );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_DIES], szMonName );
     else
-        g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_IS_HIT], szMonName );
 
     return JSUCCESS;
 }
@@ -144,13 +145,13 @@ JResult CEffect::LightRay( JVector vOrigin )
         JLog( LOG_LEVEL_NOISE, true, "that's gonna hurt\n" );
         float fDamage = Util::Roll( "1d5" );
         if( g_pGame->GetPlayer()->DamageMonster( pMon, fDamage ) )
-            g_pGame->GetMsgs()->Printf( "The %s shrivels away in the bright light!\n", szMonName );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_SHRIVELS], szMonName );
         else
-            g_pGame->GetMsgs()->Printf( "The %s screams in agony.\n", szMonName );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_SCREAMS], szMonName );
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "The %s is unaffected.\n", szMonName );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_UNAFFECTED], szMonName );
     }
 
     return JSUCCESS;
@@ -174,7 +175,7 @@ JResult CEffect::Elemental( JVector vOrigin )
     JLog( LOG_LEVEL_INFO, true, "elemental hit (%s) on %s\n", szEffect, szMonName );
 
     if( m_ed && m_ed->m_szName )
-        g_pGame->GetMsgs()->Printf( "The %s strikes the %s with %s.\n", m_ed->m_szName, szMonName,
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_STRIKES], m_ed->m_szName, szMonName,
                                     szEffect );
 
     const char *szAmount = m_szAmount;
@@ -195,17 +196,17 @@ JResult CEffect::Elemental( JVector vOrigin )
         pMon->m_fCurHP += fDamage;
         if( pMon->m_fCurHP > pMon->m_fHP )
             pMon->m_fCurHP = pMon->m_fHP;
-        g_pGame->GetMsgs()->Printf( "The %s shrugs off the attack!\n", szMonName );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_SHRUGS], szMonName );
         return JSUCCESS;
     }
     fDamage *= fAffinityMult;
     if( fAffinityMult > 1.0f )
-        g_pGame->GetMsgs()->Printf( "The %s is especially vulnerable!\n", szMonName );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_VULNERABLE], szMonName );
 
     if( pPlayer->DamageMonster( pMon, fDamage ) )
-        g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_DESTROYED], szMonName );
     else
-        g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_IS_HIT], szMonName );
 
     return JSUCCESS;
 }
@@ -245,17 +246,17 @@ JResult CEffect::Area( JVector vOrigin )
                 pMon->m_fCurHP += fDamage;
                 if( pMon->m_fCurHP > pMon->m_fHP )
                     pMon->m_fCurHP = pMon->m_fHP;
-                g_pGame->GetMsgs()->Printf( "The %s shrugs off the attack!\n", szMonName );
+                g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_SHRUGS], szMonName );
             }
             else
             {
                 fDamage *= fAffinityMult;
                 if( fAffinityMult > 1.0f )
-                    g_pGame->GetMsgs()->Printf( "The %s is especially vulnerable!\n", szMonName );
+                    g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_VULNERABLE], szMonName );
                 if( g_pGame->GetPlayer()->DamageMonster( pMon, fDamage ) )
-                    g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );
+                    g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_DESTROYED], szMonName );
                 else
-                    g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
+                    g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_IS_HIT], szMonName );
             }
         }
         else
@@ -279,14 +280,13 @@ JResult CEffect::Area( JVector vOrigin )
 
     if( nAffected > 0 )
     {
-        g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
         const char *szEffName = ( m_ed && m_ed->m_szName ) ? m_ed->m_szName : "something";
-        g_pGame->GetMsgs()->Printf( "The %s affects %d creature%s.\n", szEffName, nAffected,
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_AFFECTS], szEffName, nAffected,
                                     nAffected == 1 ? "" : "s" );
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_NOTHING_HAPPENS] );
     }
 
     return JSUCCESS;
@@ -326,24 +326,22 @@ JResult CEffect::Ball( JVector vOrigin )
             pMon->m_fCurHP += fDamage;
             if( pMon->m_fCurHP > pMon->m_fHP )
                 pMon->m_fCurHP = pMon->m_fHP;
-            g_pGame->GetMsgs()->Printf( "The %s shrugs off the attack!\n", szMonName );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_SHRUGS], szMonName );
             nAffected++;
             continue;
         }
         fDamage *= fAffinityMult;
         if( fAffinityMult > 1.0f )
-            g_pGame->GetMsgs()->Printf( "The %s is especially vulnerable!\n", szMonName );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_VULNERABLE], szMonName );
         if( g_pGame->GetPlayer()->DamageMonster( pMon, fDamage ) )
-            g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_DESTROYED], szMonName );
         else
-            g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_IS_HIT], szMonName );
         nAffected++;
     }
 
-    if( nAffected > 0 )
-        g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
-    else
-        g_pGame->GetMsgs()->Printf( "The ball explodes harmlessly.\n" );
+    if( nAffected == 0 )
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_BALL_HARMLESS] );
 
     return JSUCCESS;
 }
@@ -371,7 +369,7 @@ JResult CEffect::Line( JVector vOrigin )
     const char *szMonName = pMon->GetName();
     const char *szEffect = Effect();
     if( m_ed && m_ed->m_szName )
-        g_pGame->GetMsgs()->Printf( "The %s strikes the %s with %s.\n", m_ed->m_szName, szMonName,
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_STRIKES], m_ed->m_szName, szMonName,
                                     szEffect );
 
     float fAffinityMult = CheckAffinity( m_dwFlags, pMon->GetElementFlags() );
@@ -380,20 +378,18 @@ JResult CEffect::Line( JVector vOrigin )
         pMon->m_fCurHP += fDamage;
         if( pMon->m_fCurHP > pMon->m_fHP )
             pMon->m_fCurHP = pMon->m_fHP;
-        g_pGame->GetMsgs()->Printf( "The %s shrugs off the attack!\n", szMonName );
-        g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_SHRUGS], szMonName );
         return JSUCCESS;
     }
     fDamage *= fAffinityMult;
     if( fAffinityMult > 1.0f )
-        g_pGame->GetMsgs()->Printf( "The %s is especially vulnerable!\n", szMonName );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_VULNERABLE], szMonName );
 
     if( g_pGame->GetPlayer()->DamageMonster( pMon, fDamage ) )
-        g_pGame->GetMsgs()->Printf( "The %s is destroyed!\n", szMonName );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_DESTROYED], szMonName );
     else
-        g_pGame->GetMsgs()->Printf( "The %s is hit.\n", szMonName );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_IS_HIT], szMonName );
 
-    g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
     return JSUCCESS;
 }
 
@@ -410,18 +406,12 @@ JResult CEffect::Status( JVector vOrigin, uint32 dwFlag )
         CPlayer *pPlayer = g_pGame->GetPlayer();
         if( vOrigin == pPlayer->m_vPos )
         {
-            const char *szStatusName = "affected";
-            if( dwFlag & EFFECT_FLAG_SLEEP )
-                szStatusName = "fall asleep";
-            else if( dwFlag & EFFECT_FLAG_PARALYZE )
-                szStatusName = "are paralyzed";
-            else if( dwFlag & EFFECT_FLAG_AFRAID )
-                szStatusName = "flee in terror";
-            else if( dwFlag & EFFECT_FLAG_CONFUSE )
-                szStatusName = "feel confused";
-            g_pGame->GetMsgs()->Printf( "You %s.\n", szStatusName );
+            int nStrId = m_ed ? m_ed->m_dwStrIds[EFFECT_STR_STATUS_PLAYER] : STR_INVALID;
+            if( nStrId != STR_INVALID && g_Strings[nStrId] )
+                g_pGame->GetMsgs()->Printf( g_Strings[STR_STATUS_CHANGE], g_Strings[nStrId] );
+            else
+                g_pGame->GetMsgs()->Printf( g_Strings[STR_YOU_ARE_AFFECTED] );
             pPlayer->SetIntrinsic( dwFlag );
-            pPlayer->m_bLastEffectNoticed = true;
             return JSUCCESS;
         }
         JLog( LOG_LEVEL_NOISE, true, "no monster\n" );
@@ -430,12 +420,11 @@ JResult CEffect::Status( JVector vOrigin, uint32 dwFlag )
 
     if( CheckAffinity( dwFlag, pMon->m_md->m_dwFlags ) == 0.0f )
     {
-        g_pGame->GetMsgs()->Printf( "The %s is unaffected.\n", pMon->GetName() );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_UNAFFECTED], pMon->GetName() );
         return JSUCCESS;
     }
 
     pMon->m_dwActiveEffects |= dwFlag;
-    g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
 
     if( dwFlag & ( EFFECT_FLAG_SLEEP | EFFECT_FLAG_PARALYZE ) )
     {
@@ -443,17 +432,12 @@ JResult CEffect::Status( JVector vOrigin, uint32 dwFlag )
         pMon->m_pBrain->SetState( BRAINSTATE_REST );
     }
 
-    const char *szStatusName = "affected";
-    if( dwFlag & EFFECT_FLAG_SLEEP )
-        szStatusName = "falls asleep";
-    else if( dwFlag & EFFECT_FLAG_PARALYZE )
-        szStatusName = "is paralyzed";
-    else if( dwFlag & EFFECT_FLAG_AFRAID )
-        szStatusName = "flees in terror";
-    else if( dwFlag & EFFECT_FLAG_CONFUSE )
-        szStatusName = "looks confused";
-
-    g_pGame->GetMsgs()->Printf( "The %s %s.\n", pMon->GetName(), szStatusName );
+    int nStrId = m_ed ? m_ed->m_dwStrIds[EFFECT_STR_STATUS_MONSTER] : STR_INVALID;
+    if( nStrId != STR_INVALID && g_Strings[nStrId] )
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_STATUS_CHANGE_MON], pMon->GetName(),
+                                    g_Strings[nStrId] );
+    else
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_THE_IS_AFFECTED], pMon->GetName() );
     return JSUCCESS;
 }
 
@@ -463,16 +447,45 @@ JResult CEffect::StoneToMud( JVector vOrigin )
     if( !pTile || !pTile->m_dtd )
         return JBOGUSKEY;
 
-    if( pTile->m_dtd->m_dwType == DUNG_IDX_WALL )
+    JResult retval = JBOGUSKEY;
+
+    // Damage rock-type monsters on the tile
+    CMonster *pMon = pTile->m_pCurMonster;
+    if( pMon && ( pMon->m_md->m_dwFlags & MON_FLAG_ROCK ) )
     {
-        pTile->m_dtd = g_pGame->GetDungeon()->GetTileDef( DUNG_IDX_FLOOR );
-        g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
-        g_pGame->GetMsgs()->Printf( "The wall turns to mud and collapses!\n" );
-        return JSUCCESS;
+        float fDamage = Util::Roll( "3d8" );
+        const char *szMonName = pMon->GetName();
+        if( g_pGame->GetPlayer()->DamageMonster( pMon, fDamage ) )
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_CRUMBLES], szMonName );
+        else
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_CRACKS], szMonName );
+        retval = JSUCCESS;
     }
 
-    g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
-    return JSUCCESS;
+    // Melt stone tiles (closed door, secret door, or wall; not open/broken doors)
+    switch( pTile->m_dtd->m_dwType )
+    {
+    case DUNG_IDX_WALL:
+        pTile->m_dtd = g_pGame->GetDungeon()->GetTileDef( DUNG_IDX_FLOOR );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_WALL_COLLAPSES] );
+        retval = JSUCCESS;
+        break;
+    case DUNG_IDX_DOOR:
+        pTile->m_dtd = g_pGame->GetDungeon()->GetTileDef( DUNG_IDX_FLOOR );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_DOOR_DISSOLVES] );
+        retval = JSUCCESS;
+        break;
+    case DUNG_IDX_SECRET_DOOR:
+        pTile->m_dtd = g_pGame->GetDungeon()->GetTileDef( DUNG_IDX_FLOOR );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_SECRET_DOOR_DISSOLVES] );
+        retval = JSUCCESS;
+        break;
+    }
+
+    if( retval == JBOGUSKEY )
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_NOTHING_HAPPENS] );
+
+    return retval;
 }
 
 JResult CEffect::TeleportAway( JVector vOrigin )
@@ -499,14 +512,13 @@ JResult CEffect::TeleportAway( JVector vOrigin )
         {
             pMon->SetPos( JVector( vNew.x, vNew.y ) );
             pNewTile->m_pCurMonster = pMon;
-            g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
-            g_pGame->GetMsgs()->Printf( "The %s vanishes!\n", szMonName );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_VANISHES], szMonName );
             return JSUCCESS;
         }
     }
 
     pTile->m_pCurMonster = pMon;
-    g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_NOTHING_HAPPENS] );
     return JSUCCESS;
 }
 
@@ -524,10 +536,9 @@ JResult CEffect::Probe( JVector vOrigin )
     }
 
     const CMonsterDef *pmd = pMon->m_md;
-    g_pGame->GetMsgs()->Printf( "The %s: HP %d/%d  AC %d  Lvl %d  Spd %.1f\n", pMon->GetName(),
-                                (int)pMon->m_fCurHP, (int)pMon->m_fHP, (int)pmd->m_fBaseAC,
-                                pmd->m_dwLevel, pmd->m_fSpeed );
-    g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_INFO], pMon->GetName(), (int)pMon->m_fCurHP,
+                                (int)pMon->m_fHP, (int)pmd->m_fBaseAC, pmd->m_dwLevel,
+                                pmd->m_fSpeed );
     return JSUCCESS;
 }
 
@@ -549,8 +560,7 @@ JResult CEffect::HealMonster( JVector vOrigin )
     if( pMon->m_fCurHP > pMon->m_fHP )
         pMon->m_fCurHP = pMon->m_fHP;
 
-    g_pGame->GetMsgs()->Printf( "The %s looks healthier.\n", pMon->GetName() );
-    g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_HEALTHIER], pMon->GetName() );
     return JSUCCESS;
 }
 
@@ -673,7 +683,7 @@ JResult CEffect::Aggravate( JVector vOrigin )
             pMon->m_pBrain->SetState( BRAINSTATE_SEEK );
 
             if( pDungeon->PlayerCanSee( pMon->GetPos() ) )
-                g_pGame->GetMsgs()->Printf( "The %s wakes up!\n", pMon->GetName() );
+                g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_WAKES], pMon->GetName() );
             else
                 bOutOfSight = true;
 
@@ -683,14 +693,13 @@ JResult CEffect::Aggravate( JVector vOrigin )
         if( nWoken > 0 )
         {
             const char *szName = ( m_ed && m_ed->m_szName ) ? m_ed->m_szName : "something";
-            g_pGame->GetMsgs()->Printf( "The %s emits a horrible wail!\n", szName );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_THE_EMITS_A_HORRIBLE_WAIL], szName );
             if( bOutOfSight )
-                g_pGame->GetMsgs()->Printf( "You hear a stirring in the distance!\n" );
-            pPlayer->m_bLastEffectNoticed = true;
+                g_pGame->GetMsgs()->Printf( g_Strings[STR_YOU_HEAR_A_STIRRING_IN] );
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "Nothing stirs.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_NOTHING_STIRS] );
         }
     }
     else
@@ -704,7 +713,7 @@ JResult CEffect::Aggravate( JVector vOrigin )
         CMonster *pMon = pTile->m_pCurMonster;
         if( !pMon )
         {
-            g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_NOTHING_HAPPENS] );
             return JBOGUSKEY;
         }
 
@@ -713,8 +722,7 @@ JResult CEffect::Aggravate( JVector vOrigin )
         pMon->m_pBrain->SetTargetPos( vOrigin );
         pMon->m_pBrain->SetState( BRAINSTATE_SEEK );
 
-        g_pGame->GetMsgs()->Printf( "The %s looks enraged!\n", pMon->GetName() );
-        pPlayer->m_bLastEffectNoticed = true;
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_THE_LOOKS_ENRAGED], pMon->GetName() );
     }
 
     return JSUCCESS;
@@ -725,11 +733,10 @@ JResult CEffect::LockDoor( JVector vOrigin )
     // Direct target (wand/spike): lock the specific door tile.
     if( !g_pGame->GetDungeon()->LockDoor( vOrigin ) )
     {
-        g_pGame->GetMsgs()->Printf( "Nothing happens.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_NOTHING_HAPPENS] );
         return JSUCCESS;
     }
-    g_pGame->GetMsgs()->Printf( "The door clicks shut.\n" );
-    g_pGame->GetPlayer()->m_bLastEffectNoticed = true;
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_THE_DOOR_CLICKS_SHUT] );
     return JSUCCESS;
 }
 
@@ -831,35 +838,51 @@ bool CEffect::IsValidTarget( CItem *pItem ) const
 
 const char *CEffect::GetTargetPrompt() const
 {
+    static char buffer[256];
     eEffectTargetType tt = GetTargetType();
     if( tt == EFFECT_TARGET_DIRECTION )
-        return "Which direction? [arrow keys or numpad]";
+        return g_Strings[STR_PROMPT_WHICH_DIRECTION];
 
-    // Item-targeting prompts
+    // Item-targeting prompts: concatenate base prompt with item selection suffix
+    const char *basePrompt = nullptr;
     switch( m_dwFlags )
     {
     case EFFECT_FLAG_FUEL:
-        return "Recharge which wand/staff? [a-z inv, A-J equip]";
+        basePrompt = g_Strings[STR_PROMPT_RECHARGE_WAND];
+        break;
     case EFFECT_FLAG_TOHIT:
     case EFFECT_FLAG_TODAM:
     case EFFECT_FLAG_AC:
-        return "Enchant which weapon? [a-z inv, A-J equip]";
+        basePrompt = g_Strings[STR_PROMPT_ENCHANT_WEAPON];
+        break;
     case EFFECT_FLAG_IDENTIFY:
         if( m_dwEffect == EFFECT_TYPE_RESTORE )
-            return "Identify which item? [a-z inv, A-J equip]";
-    default:
+            basePrompt = g_Strings[STR_PROMPT_IDENTIFY_ITEM];
         break;
-    }
-    switch( m_dwFlags2 )
-    {
-    case EFFECT_FLAG_CURSE:
-        if( m_dwEffect == EFFECT_TYPE_DESTROY )
-            return "Remove curse from which item? [a-z inv, A-J equip]";
     default:
         break;
     }
 
-    return "Use on which item? [a-z inv, A-J equip]";
+    if( !basePrompt )
+    {
+        switch( m_dwFlags2 )
+        {
+        case EFFECT_FLAG_CURSE:
+            if( m_dwEffect == EFFECT_TYPE_DESTROY )
+            {
+                basePrompt = g_Strings[STR_PROMPT_REMOVE_CURSE];
+                break;
+            }
+        default:
+            break;
+        }
+    }
+
+    if( !basePrompt )
+        basePrompt = g_Strings[STR_PROMPT_USE_ON_ITEM];
+
+    snprintf( buffer, sizeof( buffer ), "%s%s", basePrompt, g_Strings[STR_ITEM_SELECTION_SUFFIX] );
+    return buffer;
 }
 
 // Returns 0.0 (immune), 1.0 (normal), or 2.0 (weak) based on the relationship between
@@ -902,4 +925,54 @@ float CEffect::CheckAffinity( uint32 dwEffect, uint32 dwSubject )
     }
 
     return 1.0f;
+}
+
+JResult CEffect::SummonMonsters( JVector vOrigin )
+{
+    CDungeon *pDungeon = g_pGame->GetDungeon();
+    JIVector vPos( VEC_EXPAND( vOrigin ) );
+    int count = Util::Roll( 1, 3 );
+
+    // Summon as if 20 levels deeper — punishes careless reading
+    int effectiveDepth = pDungeon->depth + 20;
+    if( effectiveDepth > DUNG_MAXDEPTH )
+        effectiveDepth = DUNG_MAXDEPTH;
+
+    for( int i = 0; i < count; i++ )
+    {
+        int which = pDungeon->ChooseMonsterForDepth( effectiveDepth, 15.0f );
+        if( which == MON_IDX_INVALID )
+            continue;
+        CMonsterDef *pDef = pDungeon->GetMonsterDef( which );
+        if( pDef )
+            CMonster::CreateMonster( pDef, vPos, true );
+    }
+
+    g_pGame->GetMsgs()->Printf(
+        g_Strings[STR_SUMMON_MONSTERS],
+        vOrigin.WithinRange( g_pGame->GetPlayer()->m_vPos, 0.0f ) ? "you" : "the summoner" );
+    return JSUCCESS;
+}
+
+JResult CEffect::DispatchAll( CLink<CEffect> *plEffect, float fDuration, int dwItemFlags )
+{
+    JResult bNoticed = JBOGUSKEY;
+    while( plEffect != NULL )
+    {
+        CEffect *pEffect = plEffect->m_lpData;
+        JLog( LOG_LEVEL_DEBUG, true, "Effect: %s Flag: %s Mod: %s\n",
+              g_Constants.IndexToString( EFFECT_TYPE, pEffect->m_dwEffect ),
+              g_Constants.EffectFlagToString( pEffect->m_dwFlags, pEffect->m_dwFlags2 ),
+              g_Constants.IndexToString( EFFECT_MOD, pEffect->m_dwModifier ) );
+        if( pEffect->GetTargetType() != EFFECT_TARGET_NONE )
+        {
+            // Targeting effects are dispatched by the state machine after player input.
+            plEffect = plEffect->next;
+            continue;
+        }
+        if( pEffect->Dispatch( fDuration, dwItemFlags ) == JSUCCESS )
+            bNoticed = JSUCCESS;
+        plEffect = plEffect->next;
+    }
+    return bNoticed;
 }

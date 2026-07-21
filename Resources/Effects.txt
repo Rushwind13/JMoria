@@ -43,7 +43,7 @@ Effect <Fireball>
     Range       20
     Radius      3
     Beam        <W>
-    Color       <<255,0,0,255>;<255,165,0,255>;<255,255,0,255>>
+    Color       <Fire>
 }
 Effect <Firebolt>
 {
@@ -53,7 +53,7 @@ Effect <Firebolt>
     Amount      <2d8>
     Range       15
     Beam        <w>
-    Color       <<255,0,0,255>;<255,165,0,255>;<255,255,0,255>>
+    Color       <Fire>
 }
 Effect <Inflict Fire>
 {
@@ -79,7 +79,7 @@ Effect <Frost Ball>
     Range       20
     Radius      3
     Beam        <X>
-    Color       <<0,255,255,255>;<135,206,250,255>;<240,248,255,255>>
+    Color       <Cold>
 }
 Effect <Frost Bolt>
 {
@@ -89,7 +89,7 @@ Effect <Frost Bolt>
     Amount      <2d8>
     Range       15
     Beam        <x>
-    Color       <<0,255,255,255>;<135,206,250,255>;<240,248,255,255>>
+    Color       <Cold>
 }
 # --- EFFECT_FLAG_ELECTRICITY ---
 
@@ -102,7 +102,7 @@ Effect <Lightning Ball>
     Range       20
     Radius      3
     Beam        </>
-    Color       <<255,255,0,255>;<255,255,255,255>;<255,215,0,255>>
+    Color       <Lightning>
 }
 Effect <Lightning Bolt>
 {
@@ -113,7 +113,7 @@ Effect <Lightning Bolt>
     Amount      <3d6>
     Range       20
     Beam        <->
-    Color       <<255,255,0,255>;<255,255,255,255>;<255,215,0,255>>
+    Color       <Lightning>
 }
 Effect <Lightning Touch>
 {
@@ -133,7 +133,7 @@ Effect <Acid Ball>
     Range       20
     Radius      3
     Beam        <O>
-    Color       <<50,205,50,255>;<144,238,144,255>;<173,255,47,255>>
+    Color       <Acid>
 }
 Effect <Acid Bolt>
 {
@@ -143,7 +143,7 @@ Effect <Acid Bolt>
     Amount      <2d8>
     Range       15
     Beam        <*>
-    Color       <<50,205,50,255>;<144,238,144,255>;<173,255,47,255>>
+    Color       <Acid>
 }
 Effect <Acid Touch>
 {
@@ -163,7 +163,7 @@ Effect <Poison Ball>
     Range       5
     Radius      3
     Beam        <O>
-    Color       <<0,255,0,255>;<34,139,34,255>;<75,0,130,255>>
+    Color       <Poison>
 }
 Effect <Poison Bolt>
 {
@@ -173,7 +173,7 @@ Effect <Poison Bolt>
     Amount      <2d8>
     Range       8
     Beam        <->
-    Color       <<0,255,0,255>;<34,139,34,255>;<75,0,130,255>>
+    Color       <Poison>
 }
 Effect <Poison Sting>
 {
@@ -199,7 +199,7 @@ Effect <Light Ray>
     Amount      <1d5>
     Range       15
     Beam        <~>
-    Color       <<255,255,255,255>;<255,255,200,255>;<255,255,100,255>>
+    Color       <Light>
 }
 Effect <Light Touch>
 {
@@ -215,21 +215,33 @@ Effect <Cause Paralysis>
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_PARALYZE>
     Range       15
+    PlayerStatus   <STR_STATUS_PARALYZE>
+    MonsterStatus  <STR_STATUS_PARALYZE_MON>
+    StatLabel      <STR_STAT_PARALYZED>
 }
+
 Effect <Mass Paralyze>
 {
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_PARALYZE>
     Modifier    <EFFECT_MOD_AREA>
     Radius      8
+    PlayerStatus   <STR_STATUS_PARALYZE>
+    MonsterStatus  <STR_STATUS_PARALYZE_MON>
+    StatLabel      <STR_STAT_PARALYZED>
 }
+
 Effect <Paralysis Touch>
 {
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_PARALYZE>
     Duration    1d4
     Range       1
+    PlayerStatus   <STR_STATUS_PARALYZE>
+    MonsterStatus  <STR_STATUS_PARALYZE_MON>
+    StatLabel      <STR_STAT_PARALYZED>
 }
+
 # --- EFFECT_FLAG_TREASURE ---
 
 Effect <Pick Pocket>
@@ -245,21 +257,33 @@ Effect <Cause Fear>
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_AFRAID>
     Range       15
+    PlayerStatus   <STR_STATUS_AFRAID>
+    MonsterStatus  <STR_STATUS_AFRAID_MON>
+    StatLabel      <STR_STAT_AFRAID>
 }
+
 Effect <Fear Touch>
 {
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_AFRAID>
     Duration    5.0
     Range       1
+    PlayerStatus   <STR_STATUS_AFRAID>
+    MonsterStatus  <STR_STATUS_AFRAID_MON>
+    StatLabel      <STR_STAT_AFRAID>
 }
+
 Effect <Mass Fear>
 {
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_AFRAID>
     Modifier    <EFFECT_MOD_AREA>
     Radius      10
+    PlayerStatus   <STR_STATUS_AFRAID>
+    MonsterStatus  <STR_STATUS_AFRAID_MON>
+    StatLabel      <STR_STAT_AFRAID>
 }
+
 # --- EFFECT_FLAG_BLIND ---
 
 Effect <Blindness Touch>
@@ -276,28 +300,44 @@ Effect <Cause Sleep>
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_SLEEP>
     Range       15
+    PlayerStatus   <STR_STATUS_SLEEP>
+    MonsterStatus  <STR_STATUS_SLEEP_MON>
+    StatLabel      <STR_STAT_ASLEEP>
 }
+
 Effect <Sleep Area>
 {
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_SLEEP>
     Modifier    <EFFECT_MOD_AREA>
     Radius      5
+    PlayerStatus   <STR_STATUS_SLEEP>
+    MonsterStatus  <STR_STATUS_SLEEP_MON>
+    StatLabel      <STR_STAT_ASLEEP>
 }
+
 Effect <Mass Sleep>
 {
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_SLEEP>
     Modifier    <EFFECT_MOD_AREA>
     Radius      10
+    PlayerStatus   <STR_STATUS_SLEEP>
+    MonsterStatus  <STR_STATUS_SLEEP_MON>
+    StatLabel      <STR_STAT_ASLEEP>
 }
+
 Effect <Sleep Touch>
 {
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_SLEEP>
     Duration    5.0
     Range       1
+    PlayerStatus   <STR_STATUS_SLEEP>
+    MonsterStatus  <STR_STATUS_SLEEP_MON>
+    StatLabel      <STR_STAT_ASLEEP>
 }
+
 # --- EFFECT_FLAG_AGGRAVATE ---
 
 Effect <Aggravate Monsters>
@@ -318,14 +358,22 @@ Effect <Cause Confusion>
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_CONFUSE>
     Range       15
+    PlayerStatus   <STR_STATUS_CONFUSE>
+    MonsterStatus  <STR_STATUS_CONFUSE_MON>
+    StatLabel      <STR_STAT_CONFUSED>
 }
+
 Effect <Confusion Touch>
 {
     Type        <EFFECT_TYPE_HIT>
     Flag        <EFFECT_FLAG_CONFUSE>
     Duration    7.0
     Range       1
+    PlayerStatus   <STR_STATUS_CONFUSE>
+    MonsterStatus  <STR_STATUS_CONFUSE_MON>
+    StatLabel      <STR_STAT_CONFUSED>
 }
+
 # --- EFFECT_FLAG_STONE_TO_MUD ---
 
 Effect <Stone to Mud>
@@ -388,7 +436,7 @@ Effect <Arrow Shot>
     Amount      <1d8>
     Beam        <}>
     Range       20
-    Color       <64, 64, 0, 255>
+    Color       <Arrow>
 }
 
 # --- HEAL - restore HP and cure status ---
@@ -402,12 +450,20 @@ Effect <Cure Paralysis>
 {
     Type        <EFFECT_TYPE_HEAL>
     Flag        <EFFECT_FLAG_PARALYZE>
+    PlayerStatus   <STR_STATUS_PARALYZE>
+    MonsterStatus  <STR_STATUS_PARALYZE_MON>
+    StatLabel      <STR_STAT_PARALYZED>
 }
+
 Effect <Cure Fear>
 {
     Type        <EFFECT_TYPE_HEAL>
     Flag        <EFFECT_FLAG_AFRAID>
+    PlayerStatus   <STR_STATUS_AFRAID>
+    MonsterStatus  <STR_STATUS_AFRAID_MON>
+    StatLabel      <STR_STAT_AFRAID>
 }
+
 Effect <Cure Blindness>
 {
     Type        <EFFECT_TYPE_HEAL>
@@ -417,12 +473,20 @@ Effect <Cure Sleep>
 {
     Type        <EFFECT_TYPE_HEAL>
     Flag        <EFFECT_FLAG_SLEEP>
+    PlayerStatus   <STR_STATUS_SLEEP>
+    MonsterStatus  <STR_STATUS_SLEEP_MON>
+    StatLabel      <STR_STAT_ASLEEP>
 }
+
 Effect <Cure Confusion>
 {
     Type        <EFFECT_TYPE_HEAL>
     Flag        <EFFECT_FLAG_CONFUSE>
+    PlayerStatus   <STR_STATUS_CONFUSE>
+    MonsterStatus  <STR_STATUS_CONFUSE_MON>
+    StatLabel      <STR_STAT_CONFUSED>
 }
+
 Effect <Cure Light Wounds>
 {
     Type        <EFFECT_TYPE_HEAL>
@@ -632,6 +696,7 @@ Effect <Resist Poison>
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_POISON>
     Modifier    <EFFECT_MOD_RESIST>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    100.0
 }
 Effect <Light>
@@ -649,8 +714,13 @@ Effect <Resist Fear>
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_AFRAID>
     Modifier    <EFFECT_MOD_RESIST>
+    Modifier    <EFFECT_MOD_TIMED>
     Duration    50.0
+    PlayerStatus   <STR_STATUS_AFRAID>
+    MonsterStatus  <STR_STATUS_AFRAID_MON>
+    StatLabel      <STR_STAT_AFRAID>
 }
+
 Effect <Cause Blindness>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
@@ -662,13 +732,21 @@ Effect <Inflict Sleep>
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_SLEEP>
     Duration    30.0
+    PlayerStatus   <STR_STATUS_SLEEP>
+    MonsterStatus  <STR_STATUS_SLEEP_MON>
+    StatLabel      <STR_STAT_ASLEEP>
 }
+
 Effect <Inflict Confusion>
 {
     Type        <EFFECT_TYPE_INTRINSIC>
     Flag        <EFFECT_FLAG_CONFUSE>
     Duration    30.0
+    PlayerStatus   <STR_STATUS_CONFUSE>
+    MonsterStatus  <STR_STATUS_CONFUSE_MON>
+    StatLabel      <STR_STAT_CONFUSED>
 }
+
 Effect <Tunneling>
 {
     Type        <EFFECT_TYPE_INTRINSIC>

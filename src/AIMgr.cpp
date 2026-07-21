@@ -6,6 +6,7 @@
 #include "Monster.h"
 #include "MonsterRecall.h"
 #include "Player.h"
+#include "Strings.h"
 
 CAIBrain::CAIBrain()
     : m_dwMoveType( 0 ),
@@ -245,7 +246,7 @@ bool CAIBrain::UpdateRest( float fCurTime )
                 {
                     m_pParent->m_dwActiveEffects &= ~EFFECT_FLAG_SLEEP;
                     SetState( BRAINSTATE_SEEK );
-                    g_pGame->GetMsgs()->Printf( "The %s wakes up!\n", m_pParent->GetName() );
+                    g_pGame->GetMsgs()->Printf( g_Strings[STR_MON_WAKES], m_pParent->GetName() );
                 }
             }
         }
@@ -303,7 +304,7 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
                 if( bPlayerNearby )
                 {
                     g_pGame->GetDungeon()->DisturbPlayer();
-                    g_pGame->GetMsgs()->Printf( "You hear a door smash open.\n" );
+                    g_pGame->GetMsgs()->Printf( g_Strings[STR_DOOR_SMASH] );
                 }
                 Move();
             }
@@ -313,7 +314,7 @@ bool CAIBrain::UpdateGoToDest( float fCurTime )
                 g_pGame->GetDungeon()->Modify( vTryPos );
                 g_pGame->GetDungeon()->Aggravate( vTryPos );
                 if( bPlayerNearby )
-                    g_pGame->GetMsgs()->Printf( "You hear a door creak open.\n" );
+                    g_pGame->GetMsgs()->Printf( g_Strings[STR_DOOR_CREAK] );
                 Move();
             }
             else
@@ -366,15 +367,15 @@ void CAIBrain::CollideWithPlayer()
     }
     else
     {
-        Util::jstrcpy( szStatus, "misses" );
+        Util::jstrcpy( szStatus, g_Strings[STR_ATTACK_MISS] );
     }
-    g_pGame->GetMsgs()->Printf( "The %s %s you.\n", m_pParent->GetName(), szStatus );
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_ATTACK_HIT], m_pParent->GetName(), szStatus );
 
     if( bHit )
     {
         if( fRoll > 80.0f )
         {
-            g_pGame->GetMsgs()->Printf( "(It was an excellent hit! (x2 damage)\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_CRITICAL_HIT] );
             fDamageMult = 2.0f;
         }
 
@@ -432,15 +433,16 @@ bool CAIBrain::WalkSeek( float fCurTime )
 
 bool CAIBrain::GotoDest( float fCurTime, JVector &delta )
 {
-    JLog( LOG_LEVEL_NOISE, true, "and we're going to dest... <%.2f %.2f> + <%.2f %.2f> = <%.2f %.2f> ",
+    JLog( LOG_LEVEL_NOISE, true,
+          "and we're going to dest... <%.2f %.2f> + <%.2f %.2f> = <%.2f %.2f> ",
           VEC_EXPAND( m_vPos ), VEC_EXPAND( delta ), VEC_EXPAND( m_vPos + delta ) );
     int dwCollideType = DUNG_COLL_NO_COLLISION;
     JVector dest = m_vPos + delta;
 
     if( dest.IsInWorld() )
     {
-        JLog( LOG_LEVEL_NOISE, true, "and we're in the world... %d, %d", &g_pGame, g_pGame->GetDungeon()
-     );
+        JLog( LOG_LEVEL_NOISE, true, "and we're in the world... %d, %d", &g_pGame,
+              g_pGame->GetDungeon() );
         dwCollideType = g_pGame->GetDungeon()->IsWalkableFor( dest );
 
         JLog( LOG_LEVEL_NOISE, true, "and we collide with %d... ", dwCollideType );
@@ -489,13 +491,14 @@ void CAIBrain::BuildEligibleAttacks()
         CAttack *pAtk = pLink->m_lpData;
         if( pAtk )
         {
-            bool bRanged =
-                pAtk->m_pEffect && pAtk->m_pEffect->m_ed && pAtk->m_pEffect->m_ed->m_fRange > 0.0f;
-            bool bInRange = true;
-            if( bRanged )
-            {
-                bInRange = vPos.WithinRange( vPlayer, pAtk->m_pEffect->m_ed->m_fRange );
-            }
+            // Range=0: GoToDest (CollideWithPlayer required)
+            // Range=1: melee (fires in-place, requires adjacency)
+            // Range>1: ranged (fires in-place, requires LOS + range)
+            float fRange = ( pAtk->m_pEffect && pAtk->m_pEffect->m_ed )
+                               ? pAtk->m_pEffect->m_ed->m_fRange
+                               : 0.0f;
+            bool bRanged = fRange > 1.0f;
+            bool bInRange = bRanged ? vPos.WithinRange( vPlayer, fRange ) : true;
             if( bAdjacent || ( bInLOS && bRanged && bInRange ) )
                 m_pEligibleAttacks->Add( pAtk );
         }
@@ -568,8 +571,10 @@ bool CAIBrain::UpdateAttack( float fCurTime )
     CAttack *pAtk = m_pEligibleAttacks->GetNthLink( nIdx )->m_lpData;
     m_pParent->m_pCurrentAttack = pAtk;
 
-    bool bRanged =
-        pAtk->m_pEffect && pAtk->m_pEffect->m_ed && pAtk->m_pEffect->m_ed->m_fRange > 0.0f;
+    // Range=0: GoToDest path (CollideWithPlayer). Range>=1: fire in-place (melee or ranged).
+    float fRange =
+        ( pAtk->m_pEffect && pAtk->m_pEffect->m_ed ) ? pAtk->m_pEffect->m_ed->m_fRange : 0.0f;
+    bool bRanged = fRange >= 1.0f;
     JVector vMonPos = m_vPos;
     JVector vPlayerPos = g_pGame->GetPlayer()->m_vPos;
     if( bRanged )
@@ -580,7 +585,7 @@ bool CAIBrain::UpdateAttack( float fCurTime )
         if( bStatusEffect )
         {
             // Status effects use the existing dispatch (Status() handles the player-tile case)
-            g_pGame->GetMsgs()->Printf( "The %s %s you.\n", m_pParent->GetName(),
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_ATTACK_HIT], m_pParent->GetName(),
                                         m_pParent->AttackFlavorText() );
             pAtk->m_pEffect->DoHitEffects( vMonPos, vPlayerPos );
         }
@@ -590,8 +595,8 @@ bool CAIBrain::UpdateAttack( float fCurTime )
             // monster name reaches TakeDamage (and the death screen).
             float fRoll = m_pParent->Attack();
             bool bHit = g_pGame->GetPlayer()->Hit( fRoll );
-            const char *szVerb = bHit ? m_pParent->AttackFlavorText() : "misses";
-            g_pGame->GetMsgs()->Printf( "The %s %s you.\n", m_pParent->GetName(), szVerb );
+            const char *szVerb = bHit ? m_pParent->AttackFlavorText() : g_Strings[STR_ATTACK_MISS];
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_ATTACK_HIT], m_pParent->GetName(), szVerb );
             if( bHit )
             {
                 float fDamage = m_pParent->Damage( 1.0f );

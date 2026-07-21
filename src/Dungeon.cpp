@@ -11,6 +11,7 @@
 #include "FileParse.h"
 #include "Player.h"
 #include "RenderBase.h"
+#include "Strings.h"
 
 extern unsigned char ItemIDs[];
 
@@ -86,6 +87,29 @@ void CDungeon::Init( const char *szBasedir )
         }
     }
 
+    // Load the named color palette before any resource files that reference it.
+    m_llPalettes = new JLinkList<CPalette>;
+
+    CPalette *palette;
+    CDataFile dfColors;
+    char szColorsFilename[256];
+    sprintf( szColorsFilename, "%s%s", szBasedir, "Resources/Colors.txt" );
+    if( !dfColors.Open( szColorsFilename ) )
+    {
+        JLog( LOG_LEVEL_WARN, true, "Cannot open Colors.txt at: %s\n", szColorsFilename );
+    }
+    else
+    {
+        palette = new CPalette;
+        while( dfColors.ReadPalette( *palette ) )
+        {
+            m_llPalettes->Add( palette );
+            palette = new CPalette;
+        }
+        delete palette;
+        dfColors.Close();
+    }
+
     // Load the effect catalog from config (before monsters and items, so both can reference by
     // name)
     m_llEffectDefs = new JLinkList<CEffectDef>;
@@ -107,6 +131,7 @@ void CDungeon::Init( const char *szBasedir )
         ped = new CEffectDef;
     }
     delete ped;
+    dfEffects.Close();
 
     // Load the monster list from config
     // TODO: Make this a method on CMonsterDef.
@@ -121,7 +146,6 @@ void CDungeon::Init( const char *szBasedir )
         JLog( LOG_LEVEL_ERROR, true, "FATAL: Cannot open Monsters.txt at: %s\n", szMonsterFile );
         exit( 1 );
     }
-    dfMonsters.SetDungeon( this );
 
     pmd = new CMonsterDef;
     while( dfMonsters.ReadMonster( *pmd ) )
@@ -131,6 +155,7 @@ void CDungeon::Init( const char *szBasedir )
     }
 
     delete pmd;
+    dfMonsters.Close();
 
     // Load the item list from config
     // TODO: Make this a method on CItemDef.
@@ -145,7 +170,6 @@ void CDungeon::Init( const char *szBasedir )
         JLog( LOG_LEVEL_ERROR, true, "FATAL: Cannot open Items.txt at: %s\n", szItemFilename );
         exit( 1 );
     }
-    dfItems.SetDungeon( this );
 
     pid = new CItemDef;
     while( dfItems.ReadItem( *pid ) )
@@ -155,6 +179,7 @@ void CDungeon::Init( const char *szBasedir )
     }
 
     delete pid;
+    dfItems.Close();
 
     // Load the graphics
     // Just one tile set at the moment.
@@ -258,14 +283,15 @@ void CDungeon::PopulateLevel( const int depth )
     if( depth <= 0 )
     {
         JLog( LOG_LEVEL_INFO, false, "You are in town.\n" );
-        g_pGame->GetMsgs()->Printf( "You are in town.\n" );
+        g_pGame->GetMsgs()->Clear();
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_IN_TOWN] );
     }
     else
     {
         JLog( LOG_LEVEL_INFO, false, "You pass through a one-way door, to arrive on level %d.\n",
               depth );
-        g_pGame->GetMsgs()->Printf( "You pass through a one-way door, to arrive on level %d.\n",
-                                    depth );
+        g_pGame->GetMsgs()->Clear();
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_SPAWN], depth );
     }
 }
 
@@ -428,20 +454,13 @@ char *CDungeon::DumpMap()
     return result;
 }
 
-void CDungeon::RevealMap( int xMin, int yMin, int xMax, int yMax )
+void CDungeon::RevealMap( JRect rc )
 {
-    if( xMin < 0 )
-        xMin = 0;
-    if( yMin < 0 )
-        yMin = 0;
-    if( xMax >= DUNG_WIDTH )
-        xMax = DUNG_WIDTH - 1;
-    if( yMax >= DUNG_HEIGHT )
-        yMax = DUNG_HEIGHT - 1;
+    rc.ClampToWorld();
 
-    for( int y = yMin; y <= yMax; y++ )
+    for( int y = rc.top; y <= rc.bottom; y++ )
     {
-        for( int x = xMin; x <= xMax; x++ )
+        for( int x = rc.left; x <= rc.right; x++ )
         {
             JIVector v( x, y );
             CDungeonTile *pTile = GetITile( v );
@@ -728,6 +747,21 @@ CEffectDef *CDungeon::GetEffectDef( const char *szEffectName )
     return NULL;
 }
 
+const CPalette *CDungeon::GetPalette( const char *szName )
+{
+    if( m_llPalettes == NULL || szName == NULL )
+        return NULL;
+    CLink<CPalette> *pLink = m_llPalettes->GetHead();
+    while( pLink != NULL )
+    {
+        CPalette *palette = pLink->m_lpData;
+        if( palette && Util::jstrcmp( palette->m_szName, szName ) == 0 )
+            return palette;
+        pLink = pLink->next;
+    }
+    return NULL;
+}
+
 int CDungeon::ChooseItemForDepth( const int depth )
 {
     // Build Gaussian weights: w = exp(-0.5 * ((depth - peak) / sigma)^2)
@@ -1009,7 +1043,7 @@ void CDungeon::UpdateVisibility()
 
             if( Util::Bresenham( vPlayer, viCheck, target_distance, SightCollisionTest ) )
             {
-                pTile->SetFlags( DUNG_FLAG_VISIBLE );
+                pTile->SetFlags( DUNG_FLAG_VISIBLE | DUNG_FLAG_SEEN );
             }
         }
     }
@@ -1251,24 +1285,16 @@ void CDungeon::DrawDungeon()
                         JIVector curPos = *( plPos->m_lpData );
                         if( (int)vScreen.x == curPos.x && (int)vScreen.y == curPos.y )
                         {
-                            // On trajectory - use effect colors if available
+                            // On trajectory - color driven by the effect's palette
                             if( m_pProjectileEffect )
                             {
                                 bRangedBeamTile =
-                                    m_pProjectileEffect->m_cBeamChar != ItemIDs[ITEM_IDX_ARROW];
-                                // Get color from effect definition, cycling through colors
-                                if( m_pProjectileEffect->m_llColors &&
-                                    m_pProjectileEffect->m_llColors->length() > 0 )
-                                {
-                                    int colorIndex =
-                                        pathIndex % m_pProjectileEffect->m_llColors->length();
-                                    CLink<JColor> *plColor =
-                                        m_pProjectileEffect->m_llColors->GetNthLink( colorIndex );
-                                    if( plColor )
-                                    {
-                                        color = *( plColor->m_lpData );
-                                    }
-                                }
+                                    m_pProjectileEffect->GetBeamChar() != ItemIDs[ITEM_IDX_ARROW];
+                                color = m_pProjectileEffect->GetColor( pathIndex );
+
+                                // Test instrumentation: track that beam rendering executed
+                                m_lastBeamColorRendered = color;
+                                m_beamWasRendered = true;
                             }
                             break;
                         }
@@ -1315,8 +1341,15 @@ void CDungeon::DrawDungeon()
             }
             m_TileSet->SetTileColor( color );
             char chDraw = ( bRangedBeamTile && m_pProjectileEffect )
-                              ? m_pProjectileEffect->m_cBeamChar
+                              ? m_pProjectileEffect->GetBeamChar()
                               : curTile->m_dtd->m_chTile;
+
+            // Test instrumentation: track beam character rendering
+            if( bRangedBeamTile && m_pProjectileEffect )
+            {
+                m_lastBeamCharRendered = chDraw;
+            }
+
             m_TileSet->DrawChar( chDraw, vScreen, vSize );
         }
     }
@@ -1480,6 +1513,13 @@ void CDungeon::Term()
         m_llEffectDefs = NULL;
     }
 
+    if( m_llPalettes )
+    {
+        m_llPalettes->Terminate();
+        delete m_llPalettes;
+        m_llPalettes = NULL;
+    }
+
     ClearLOSLine();
 }
 
@@ -1639,7 +1679,7 @@ bool CDungeon::IsOpenable( JVector &vPos )
     {
         if( Util::GetRandom( 1, 100 ) <= CHANCE_FIND_SECRET_BUMP )
         {
-            g_pGame->GetMsgs()->Printf( "You have found a secret door!\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_FOUND_SECRET_DOOR] );
             g_pGame->GetDungeon()->Modify( curTile->m_vPos );
             return true;
         }
@@ -1740,7 +1780,7 @@ CItem *CDungeon::PickUp( JVector &vPickupPos )
 
 void CDungeon::Drop( CItem *pItem, JVector &vDropPos )
 {
-    JLog( LOG_LEVEL_WARN, true, "CDungeon::Drop called - pItem=%p, type=%s, count=%d at <%f %f>\n",
+    JLog( LOG_LEVEL_DEBUG, true, "CDungeon::Drop called - pItem=%p, type=%s, count=%d at <%f %f>\n",
           pItem, pItem ? pItem->GetName() : "NULL", pItem ? pItem->m_dwCount : 0,
           VEC_EXPAND( vDropPos ) );
 
@@ -1796,7 +1836,7 @@ void CDungeon::Drop( CItem *pItem, JVector &vDropPos )
         {
             // No adjacent spot found; cannot drop here - item disappears
             JLog( LOG_LEVEL_DEBUG, true, ">>Drop: No adjacent spot found, item disappears\n" );
-            g_pGame->GetMsgs()->Printf( "The %s disappears.\n", pItem->GetName() );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_IT_DISAPPEARS], pItem->GetName() );
             delete pItem;
             return;
         }
@@ -1828,3 +1868,18 @@ bool CDungeon::UnlockDoor( JVector pos )
 }
 
 void CDungeon::Aggravate( JVector vOrigin ) { CEffect::Fire( "Aggravate Monsters", vOrigin ); }
+
+JResult CDungeon::LightArea( JVector vPos )
+{
+    CRoom *pRoom = InRoom( vPos );
+    if( pRoom )
+    {
+        pRoom->SetFlags( DUNG_FLAG_LIT );
+        LightRoom( pRoom );
+
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_LIGHT_AREA] );
+        return JSUCCESS;
+    }
+    g_pGame->GetMsgs()->Printf( g_Strings[STR_NOTHING_HAPPENS] );
+    return JBOGUSKEY;
+}

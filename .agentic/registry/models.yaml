@@ -12,24 +12,24 @@ profiles:
   frontier-reasoning:
     # Deepest reasoning available; used where judgment concentrates and errors
     # are expensive (architecture, review, orchestration). Cost-insensitive.
-    default: anthropic/claude-fable-5
+    default: anthropic/claude-sonnet-4.6
     alternates:
-      - openai/<current-frontier-model>
-      - google/<current-frontier-model>
+      - openai/gpt-5.4
+      - google/gemini-3.5-flash
 
   balanced:
     # Strong general capability at moderate cost; the workhorse tier.
-    default: anthropic/claude-sonnet-5
+    default: anthropic/claude-sonnet-4.5
     alternates:
-      - openai/<current-workhorse-model>
-      - google/<current-workhorse-model>
+      - openai/gpt-5.4-mini
+      - google/gemini-3.1-pro-preview
 
   fast-cheap:
     # High-volume, low-stakes work. No core role binds here yet; reserved for
     # extension roles (triage, summarization, formatting).
     default: anthropic/claude-haiku-4-5
     alternates:
-      - openai/<current-small-model>
+      - openai/gpt-5-mini
 
 pricing:
   # $ per million tokens, keyed by the model IDs above. ILLUSTRATIVE like the
@@ -37,7 +37,7 @@ pricing:
   # The v1 orchestrator prices each dispatch's usage from this map into the
   # run's budget.ledger[] (docs/ORCHESTRATOR.md §6). A model with no entry
   # here cannot be metered; the dispatch seam refuses it rather than guessing.
-  anthropic/claude-fable-5:   {usd_per_mtok_in: 15, usd_per_mtok_out: 75}
+  anthropic/claude-opus-5:   {usd_per_mtok_in: 15, usd_per_mtok_out: 75}
   anthropic/claude-sonnet-5:  {usd_per_mtok_in: 3,  usd_per_mtok_out: 15}
   anthropic/claude-haiku-4-5: {usd_per_mtok_in: 1,  usd_per_mtok_out: 5}
 
@@ -53,6 +53,7 @@ dispatch_estimates_usd:
   reviewer: 4
   verifier: 6
   ops: 2
+  historian: 1
 
 bindings:
   orchestrator: {profile: frontier-reasoning}
@@ -67,3 +68,6 @@ bindings:
   verifier:     {profile: balanced,           avoid_vendor_of: implementer}
 
   ops:          {profile: balanced}
+  # Historian is scheduled, not gate-driven (orchestrator.yaml `schedules:`);
+  # its sweep branch is human-reviewed before merge, so the cheap tier is safe.
+  historian:    {profile: fast-cheap}

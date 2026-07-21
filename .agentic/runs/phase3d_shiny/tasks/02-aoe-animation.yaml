@@ -1,0 +1,57 @@
+id: 02-aoe-animation
+title: AoE Effect Animation (R2)
+requirements: [R2]
+
+scope: |
+  Implement animated expanding rings for ball spells and full-screen color flashes for mass effects.
+  Add a transient effect queue to the render system to manage animation state independently of game logic.
+  
+  - Ball spells: expanding concentric rings in OpenGL, ASCII art rings in terminal mode
+  - Mass spells: full-screen color flash in OpenGL, inverted/flashing text in ASCII
+  - Animation duration: 500–1000ms configurable via constant
+  - Does not block gameplay; runs asynchronously in render loop
+  - Animations clean up automatically after duration expires
+
+file_contact_surface:
+  - src/Render.cpp
+  - src/Render.h
+  - src/RenderASCII.cpp
+  - src/RenderASCII.h
+  - src/Effect.cpp
+  - src/Effect.h
+  - Resources/Effects.txt
+  - test/features/aoe_animation.feature
+  - test/features/step_definitions/aoe_animation_steps.cpp
+
+acceptance_tests:
+  - AC2.1: Ball spells render as expanding concentric rings in OpenGL
+  - AC2.2: Mass spells render as a full-screen color flash in OpenGL
+  - AC2.3: Ring expansion speed is smooth and proportional to ball radius
+  - AC2.4: Animation duration 500–1000ms (configurable via constant)
+  - AC2.5: ASCII mode renders expanding rings with ASCII art (concentric @, *, o)
+  - AC2.6: Mass effect ASCII shows full-screen flash (inverted text)
+  - AC2.7: Animation does not block gameplay; runs asynchronously
+  - BDD test: "When ball spell cast, rings expand to spell radius" (frame-by-frame animation check)
+
+depends_on: []
+
+status: pending
+
+notes: |
+  This task is independent of the others and can run in parallel. The transient effect queue
+  is a new render-system feature; no game logic changes required.
+  
+  Implementer should:
+  1. Create aoe_animation.feature in test/features/ with OpenGL + ASCII scenarios
+  2. Create step_definitions/aoe_animation_steps.cpp with animation frame verification helpers
+  3. Add CRender::m_llTransientEffects (JLinkList<CTransientEffect>) and related methods
+  4. Create CTransientEffect class or struct to hold animation state (center, radius, duration, elapsed)
+  5. Add CRender::UpdateEffects() method called each frame to step animations
+  6. Modify Effect.cpp::ApplyEffect() to queue transient effects when ball/mass detected
+  7. Add rendering code in CRender::Render() to draw queued effects
+  8. Add CRenderASCII equivalents for ASCII rendering
+  9. Test: `make ascii test` and `make opengl test`
+  10. Run clang-format before staging
+  
+  Key constant to add to Constants.h:
+  #define AoE_ANIMATION_DURATION_MS 750  // milliseconds

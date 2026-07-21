@@ -112,7 +112,6 @@ public:
           m_szKilledBy( NULL ),
           m_bIsRested( true ),
           m_bIsDisturbed( false ),
-          m_bLastEffectNoticed( false ),
           m_fDamageModifier( 0.0f ),
           m_fToHitModifier( 0.0f ),
           m_fArmorClass( 1.0f ),
@@ -236,8 +235,8 @@ public:
     void SetIntrinsic( const uint32 dwIntrinsic ) { m_dwIntrinsics |= dwIntrinsic; };
     void UnsetIntrinsic( const uint32 dwIntrinsic ) { m_dwIntrinsics &= ~dwIntrinsic; };
     int GetIntrinsic( const uint32 dwIntrinsic ) { return m_dwIntrinsics & dwIntrinsic; }
+    bool HasActiveResistFor( uint32 flag ) const;
 
-    bool IsWieldable( CLink<CItem> *pLink );
     JResult Wield( CLink<CItem> *pItem );
 
     bool IsRemovable( CLink<CItem> *pLink );
@@ -246,31 +245,22 @@ public:
     void RecalcCombatStats();
     void XchangeWeapons();
 
-    bool IsDrinkable( CLink<CItem> *pLink );
     JResult Quaff( CLink<CItem> *pLink );
 
-    bool IsFireable( CLink<CItem> *pLink );
     bool IsCompatibleAmmo( CLink<CItem> *pLink );
     JResult Fire( CLink<CItem> *pLink );
 
-    bool IsReadable( CLink<CItem> *pLink );
     JResult Read( CLink<CItem> *pLink );
 
-    bool IsZappable( CLink<CItem> *pLink );
     JResult Zap( CLink<CItem> *pLink );
 
-    bool IsStaff( CLink<CItem> *pLink );
     JResult UseStaff( CLink<CItem> *pLink );
 
-    void
-    ConsumeItem( CLink<CItem> *pLink ); // Unified consumption for ammo/charges: decrement or remove
-    void ConsumeAndRemoveIfEmpty(
-        CLink<CItem> *pLink ); // Consume item and remove from inventory if empty
+    void ConsumeItem( CLink<CItem> *pLink );
 
     bool IsCastable( CLink<CItem> *pLink );
     JResult Magic( CLink<CItem> *pLink );
 
-    bool IsFuel( CLink<CItem> *pLink );
     JResult Fuel( CLink<CItem> *pLink );
 
     void Search();
@@ -280,28 +270,22 @@ public:
     float LightRadius();
     void UpdateLight( float fValue, bool bReset = false );
 
-    JResult DoEffects( CLink<CEffect> *plEffect, float fDuration, int dwFlags );
     JResult DoHealEffects( CEffect *pEffect );
     JResult DoHealHP( CEffect *pEffect );
     JResult DoACBuff( CEffect *pEffect );
     JResult DoDamageInventory( uint32 dwElement );
     JResult DoDamageEquipment( uint32 dwElement );
     JResult DoCreateEffects( CEffect *pEffect );
-    JResult DoLightArea();
     JResult DoDestroyEffects( CEffect *pEffect, int dwFlags );
-    JResult DoRemoveCurse();
     JResult DoIntrinsicEffects( CEffect *pEffect, float fDuration );
     JResult UndoIntrinsicEffects( CEffect *pEffect );
-    JResult DoApplyCurse();
     JResult DoRestoreEffects( CEffect *pEffect );
     JResult DoGainEffects( CEffect *pEffect );
     JResult DoLoseEffects( CEffect *pEffect );
     JResult DoSeeEffects( CEffect *pEffect );
     JResult DoTeleport( CEffect *pEffect );
-    JResult DoMagicMapping( CEffect *pEffect );
     JResult BeginRecall();
     void Recall();
-    JResult DoSummonMonsters();
     JResult ApplyChosenItem( CLink<CItem> *pChosen, CEffect *pEffect, int dwItemFlags );
     void GiveAllWandsAndStaves();
     void IdentifyAllInventory();
@@ -369,7 +353,6 @@ public:
 
     bool m_bIsRested;
     bool m_bIsDisturbed;
-    bool m_bLastEffectNoticed;
 
     float GetSpeed() { return m_fSpeed; }
 

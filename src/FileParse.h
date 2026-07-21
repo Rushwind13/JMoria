@@ -11,11 +11,12 @@ class CItemDef;
 class CDungeon;
 class CScore;
 struct CRecallEntry;
+
 class CDataFile
 {
     // Member variables
 public:
-    CDataFile() : m_pDungeon( NULL ) {}
+    CDataFile() {}
     ~CDataFile() {}
 
     bool Open( const char *szFilename );
@@ -23,10 +24,11 @@ public:
     bool Write( const char *szFilename );
     bool Close();
 
-    void SetDungeon( CDungeon *pDungeon ) { m_pDungeon = pDungeon; }
+    CPalette *ReadPalette( CPalette &ceIn );
     CMonsterDef *ReadMonster( CMonsterDef &mdIn );
     CItemDef *ReadItem( CItemDef &idIn );
     CEffectDef *ReadEffect( CEffectDef &edIn );
+    bool ReadStringEntry( int &outKey, char *&outText );
     CScore *ReadScore( CScore &sIn );
     bool WriteScore( CScore *sIn );
     CRecallEntry *ReadMonsterRecall( CRecallEntry &rIn );
@@ -42,9 +44,17 @@ protected:
     float GetValue( char *szLine, float &fIn );
     CEffect *EffectFromName( const char *szName );
 
+    // Copies all colors from the named palette entry (via g_pGame->GetDungeon()) into dest.
+    // Returns true if the name was found.
+    bool ApplyPalette( const char *szName, JLinkList<JColor> *dest );
+
+    // Parse a chomped color value (named, single raw, or multi raw) into outSingle / outMulti.
+    // Named palette or multi raw → colors appended to outMulti, returns true.
+    // Single raw → outSingle set, returns false.
+    bool ReadColor( const char *color, JColor &outSingle, JLinkList<JColor> *outMulti );
+
 private:
     FILE *m_fp;
-    CDungeon *m_pDungeon;
     int PotionIndex[NUM_POTION_TYPES];
     int ScrollIndex[NUM_SCROLL_TYPES];
     int WandIndex[NUM_LUMBER_TYPES];

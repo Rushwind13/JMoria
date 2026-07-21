@@ -31,19 +31,21 @@
   },
   "_comment_models": "Runner-specific spellings of the registry bindings. Multi-vendor harness: model_overrides implement the P5 vendor pins (reviewer/verifier decorrelated from the Claude-backed implementer).",
   "model_map": {
-    "frontier-reasoning": "claude-fable-5",
-    "balanced": "claude-sonnet-5"
+    "frontier-reasoning": "claude-sonnet-4.6",
+    "balanced": "claude-sonnet-4.5",
+    "fast-cheap": "claude-haiku-4.5"
   },
   "model_overrides": {
-    "reviewer": "gpt-5.4",
-    "verifier": "gemini-3-flash"
+    "reviewer": "gpt-5.4-mini",
+    "verifier": "gemini-3.1-pro-preview"
   },
   "_comment_model_vendors": "Vendor of each runner spelling above, for the orchestrator's dispatch-time P5 check (avoid_vendor_of).",
   "model_vendors": {
-    "claude-fable-5": "anthropic",
-    "claude-sonnet-5": "anthropic",
-    "gpt-5.4": "openai",
-    "gemini-3-flash": "google"
+    "claude-sonnet-4.6": "anthropic",
+    "claude-sonnet-4.5": "anthropic",
+    "claude-haiku-4.5": "anthropic",
+    "gpt-5.4-mini": "openai",
+    "gemini-3.1-pro-preview": "google"
   },
   "extra_frontmatter": {
     "disable-model-invocation": true,

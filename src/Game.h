@@ -20,6 +20,7 @@ class CModState;
 class CRangedState;
 class CRestState;
 class CRunState;
+class CMoreState;
 class CStringInputState;
 class CTargetState;
 class CUseState;
@@ -128,6 +129,7 @@ protected:
     CStringInputState *m_pStringInputState;
     CTargetState *m_pTargetState;
     CUseState *m_pUseState;
+    CMoreState *m_pMoreState;
 
 private:
     IRenderBackend *m_pRender;

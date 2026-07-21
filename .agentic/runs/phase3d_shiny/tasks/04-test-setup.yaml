@@ -1,0 +1,74 @@
+id: 04-test-setup
+title: Test Infrastructure Setup – Beams, AoE, Ranged AI (R1, R2, R3)
+requirements: [R1, R2, R3]
+
+scope: |
+  Create BDD feature files and C++ step definitions to support testing for all three features.
+  Implementers will fill in test logic as they work on tasks 01–03. This task ensures the
+  test infrastructure is in place and initial scenarios are stubbed out.
+  
+  - Create three feature files with acceptance scenarios
+  - Create step definitions skeleton in C++
+  - Set up test context helpers for render verification and monster position tracking
+  - Ensure test executable builds and Cucumber recognizes all steps
+
+file_contact_surface:
+  - test/features/beams_multicolor.feature
+  - test/features/aoe_animation.feature
+  - test/features/ranged_ai_seekranged.feature
+  - test/features/step_definitions/beams_multicolor_steps.cpp
+  - test/features/step_definitions/aoe_animation_steps.cpp
+  - test/features/step_definitions/ranged_ai_seekranged_steps.cpp
+  - test/features/step_definitions/TestContext.hpp (extend if needed)
+
+acceptance_tests:
+  - Feature files exist and parse correctly by cucumber
+  - Step definitions compile and link into test executable
+  - `make test` builds without errors
+  - All feature scenarios show as "pending" or "skipped" initially (not "undefined")
+  - Test context has helpers for render color sampling (OpenGL + ASCII) and monster position queries
+  - BDD test matrix covers OpenGL + ASCII modes for each feature
+
+depends_on: []
+
+status: pending
+
+notes: |
+  This is a test infrastructure task that runs in parallel with the three implementation tasks.
+  
+  Implementer should:
+  1. Create test/features/beams_multicolor.feature with scenarios:
+     - "Fire wand fires red beam in OpenGL"
+     - "Fire wand fires ASCII-char beam"
+     - "Cold wand fires blue beam in OpenGL"
+     - (repeat for Acid, Electricity)
+  
+  2. Create test/features/aoe_animation.feature with scenarios:
+     - "Ball spell animates expanding rings in OpenGL"
+     - "Ball spell animates ASCII rings"
+     - "Mass spell animates full-screen flash in OpenGL"
+     - "Mass spell animates ASCII flash"
+  
+  3. Create test/features/ranged_ai_seekranged.feature with scenarios:
+     - "Ranged monster at close range retreats"
+     - "Ranged monster at far range advances"
+     - "Ranged monster in optimal range attacks"
+  
+  4. Create step_definitions/*.cpp files with GIVEN/WHEN/THEN implementations:
+     - Render verification: Helper to sample pixel color at beam tile, or read ASCII char
+     - Animation tracking: Helper to count ring frames and measure expansion
+     - Monster tracking: Helper to record monster position each turn and compute movement vector
+  
+  5. Extend TestContext.hpp with:
+     - RenderColorSampler class (OpenGL pixel read + ASCII char read)
+     - MonsterPositionTracker class (track position deltas, compute advance/retreat/strafe)
+     - EffectFrameCounter class (count animation frames per effect)
+  
+  6. Build test executable: `cd test && cmake .. && cmake --build . && cd ..`
+  7. Run: `make test` to verify steps are recognized
+  
+  Notes on test flow:
+  - Tests use `SDL_VIDEODRIVER=dummy` for headless mode
+  - Tests can spawn monsters at known positions in a test dungeon
+  - Render verification uses the same rendering pipeline as gameplay (not mocked)
+  - This ensures beams, AoE, and AI behavior are testable end-to-end

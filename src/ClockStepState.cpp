@@ -87,9 +87,9 @@ int CClockStepState::OnHandleInit( JKeysym *keysym )
     if( g_pGame && g_pGame->GetStats() )
     {
         g_pGame->GetStats()->Clear();
-        g_pGame->GetStats()->Printf( "CLOCKSTEP Mode\n" );
-        g_pGame->GetStats()->Printf( "Press SPACE to step through generation\n" );
-        g_pGame->GetStats()->Printf( "Press ESC when done to spawn player\n" );
+        g_pGame->GetStats()->Printf( g_Strings[STR_CLOCKSTEP_MODE] );
+        g_pGame->GetStats()->Printf( g_Strings[STR_DUNGEON_GENERATION_COMPLETE] );
+        g_pGame->GetStats()->Printf( g_Strings[STR_SPAWN_PLAYER] );
     }
 
     m_eCurModifier = CLOCKSTEP_TICK;
@@ -154,7 +154,7 @@ bool CClockStepState::DoTick()
     if( !g_pGame || !g_pGame->GetDungeon() || !g_pGame->GetDungeon()->GetCurLevel() )
     {
         JLog( LOG_LEVEL_ERROR, true, "DoTick called but dungeon not ready!\n" );
-        g_pGame->GetStats()->Printf( "ERROR: Dungeon not initialized\n" );
+        g_pGame->GetStats()->Printf( g_Strings[STR_ERROR_DUNGEON_NOT_INITIALIZED] );
         return false;
     }
 
@@ -164,16 +164,16 @@ bool CClockStepState::DoTick()
         const DungeonGenDiagnostics &diag = pMap->GetDiagnostics();
         double elapsed_ms = Util::GetTimeInMillis() - diag.start_time_ms;
 
-        g_pGame->GetStats()->Printf( "Tick! %d\n", m_dwClock );
-        g_pGame->GetStats()->Printf( "Seed: %u\n", pMap->GetSeed() );
-        g_pGame->GetStats()->Printf( "Stack: %d\n", pMap->GetStackSize() );
-        g_pGame->GetStats()->Printf( "Rooms: %d\n", pMap->GetRoomCount() );
-        g_pGame->GetStats()->Printf( "Halls: %d\n", pMap->GetHallwayCount() );
-        g_pGame->GetStats()->Printf( "Time: %.1f ms\n", elapsed_ms );
+        g_pGame->GetStats()->Printf( g_Strings[STR_TICK], m_dwClock );
+        g_pGame->GetStats()->Printf( g_Strings[STR_SEED_U], pMap->GetSeed() );
+        g_pGame->GetStats()->Printf( g_Strings[STR_STACK], pMap->GetStackSize() );
+        g_pGame->GetStats()->Printf( g_Strings[STR_ROOMS], pMap->GetRoomCount() );
+        g_pGame->GetStats()->Printf( g_Strings[STR_HALLS], pMap->GetHallwayCount() );
+        g_pGame->GetStats()->Printf( g_Strings[STR_TIME_MS], elapsed_ms );
     }
     else
     {
-        g_pGame->GetStats()->Printf( "Tick! %d\n", m_dwClock );
+        g_pGame->GetStats()->Printf( g_Strings[STR_TICK], m_dwClock );
     }
 
     g_pGame->SetReadyForUpdate( true );
@@ -185,7 +185,7 @@ bool CClockStepState::DoTick()
     if( !bStillGenerating && !m_bLevelPopulated )
     {
         CompleteGeneration();
-        g_pGame->GetStats()->Printf( "Press ESC to start playing.\n" );
+        g_pGame->GetStats()->Printf( g_Strings[STR_START_PLAYING] );
     }
 
     // Optional: Add small delay to prevent CPU spike during stepped generation
@@ -201,16 +201,16 @@ void CClockStepState::CompleteGeneration()
     const DungeonGenDiagnostics &diag = pMap->GetDiagnostics();
     double total_ms = Util::GetTimeInMillis() - diag.start_time_ms;
 
-    g_pGame->GetStats()->Printf( "\nGeneration complete!\n" );
-    g_pGame->GetStats()->Printf( "Time: %.2f ms (%.3f sec)\n", total_ms, total_ms / 1000.0 );
-    g_pGame->GetStats()->Printf( "Rooms: %d, Halls: %d\n", pMap->GetRoomCount(),
+    g_pGame->GetStats()->Printf( g_Strings[STR_GENERATION_COMPLETE] );
+    g_pGame->GetStats()->Printf( g_Strings[STR_TIME_MS_SEC], total_ms, total_ms / 1000.0 );
+    g_pGame->GetStats()->Printf( g_Strings[STR_ROOMS_HALLS], pMap->GetRoomCount(),
                                  pMap->GetHallwayCount() );
     if( total_ms > 0.0 )
     {
         double steps_per_sec = ( diag.steps_created * 1000.0 ) / total_ms;
-        g_pGame->GetStats()->Printf( "Rate: %.1f steps/sec\n", steps_per_sec );
+        g_pGame->GetStats()->Printf( g_Strings[STR_STEPS_PER_SEC], steps_per_sec );
     }
-    g_pGame->GetStats()->Printf( "Placing scenery, items, and monsters...\n" );
+    g_pGame->GetStats()->Printf( g_Strings[STR_POPULATE] );
 
     // PopulateLevel() called exactly once after generation completes.
     // m_bLevelPopulated flag prevents duplicate spawns on subsequent ticks.

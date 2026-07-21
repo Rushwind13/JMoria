@@ -23,6 +23,7 @@ CEndGameState::CEndGameState() : m_cCommand( 0 ), m_szTombstone( NULL )
     m_pKeyHandlers[ENDGAME_INIT] = &CEndGameState::OnHandleInit;
     m_pKeyHandlers[ENDGAME_TOMB] = &CEndGameState::OnHandleTomb;
     m_pKeyHandlers[ENDGAME_MAP] = &CEndGameState::OnHandleMap;
+    m_pKeyHandlers[ENDGAME_INVENTORY] = &CEndGameState::OnHandleInventory;
     m_pKeyHandlers[ENDGAME_SCORES] = &CEndGameState::OnHandleScores;
 
     m_eCurModifier = ENDGAME_INIT;
@@ -109,16 +110,10 @@ int CEndGameState::OnHandleMap( JKeysym *keysym )
 
     if( retval == JCOMPLETESTATE )
     {
-        JLog( LOG_LEVEL_DEBUG, true, "MAP modifier complete, ENDGAME state to SCORES\n" );
+        JLog( LOG_LEVEL_DEBUG, true, "MAP modifier complete, ENDGAME state to INVENTORY\n" );
         g_pGame->GetEnd()->Clear();
-        if( g_pGame->GetPlayer()->IsWizard() )
-        {
-            JLog( LOG_LEVEL_WARN, true, "*** Wizard Mode: On *** Score not recorded.\n" );
-            g_pGame->Quit( 0 );
-        }
-        InitScores();
-        DoScores();
-        m_eCurModifier = ENDGAME_SCORES;
+        DoInventory();
+        m_eCurModifier = ENDGAME_INVENTORY;
         m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
     }
 
@@ -166,6 +161,7 @@ int CEndGameState::OnHandleInit( JKeysym *keysym )
 {
     JLog( LOG_LEVEL_DEBUG, true, "Initializing endgame state...\n" );
 
+    g_pGame->GetPlayer()->IdentifyAllInventory();
     m_pScore->InitScore();
 
     g_pGame->GetEnd()->Clear();
@@ -242,14 +238,55 @@ bool CEndGameState::DoTomb()
     return true;
 }
 
+int CEndGameState::OnHandleInventory( JKeysym *keysym )
+{
+    int retval;
+    JLog( LOG_LEVEL_DEBUG, true, "Handling INVENTORY modifier\n" );
+    retval = OnBaseHandleKey( keysym );
+
+    if( retval == JRESETSTATE )
+    {
+        return 0;
+    }
+
+    if( retval == JCOMPLETESTATE )
+    {
+        JLog( LOG_LEVEL_DEBUG, true, "INVENTORY modifier complete, ENDGAME state to SCORES\n" );
+        g_pGame->GetEnd()->Clear();
+        if( g_pGame->GetPlayer()->IsWizard() )
+        {
+            JLog( LOG_LEVEL_WARN, true, "*** Wizard Mode: On *** Score not recorded.\n" );
+            g_pGame->Quit( 0 );
+        }
+        InitScores();
+        DoScores();
+        m_eCurModifier = ENDGAME_SCORES;
+        m_pCurKeyHandler = m_pKeyHandlers[m_eCurModifier];
+    }
+
+    return 0;
+}
+
 //// Map commands
 bool CEndGameState::DoMap()
 {
     char *map = g_pGame->GetDungeon()->DumpMap();
-    g_pGame->GetEnd()->Printf( "Dungeon Level %d (%d ft)\n\n", g_pGame->GetDungeon()->depth,
+    g_pGame->GetEnd()->Printf( g_Strings[STR_DUNGEON_LEVEL_FT], g_pGame->GetDungeon()->depth,
                                g_pGame->GetDungeon()->depth * 50 );
-    g_pGame->GetEnd()->Printf( "%s", map );
+    g_pGame->GetEnd()->Printf( g_Strings[STR_FMT_STRING], map );
     delete[] map;
+    return true;
+}
+
+bool CEndGameState::DoInventory()
+{
+    CPlayer *pPlayer = g_pGame->GetPlayer();
+    g_pGame->GetEnd()->Printf( g_Strings[STR_INVENTORY] );
+    pPlayer->DisplayInventory( PLACEMENT_ENDGAME );
+
+    g_pGame->GetEnd()->Printf( g_Strings[STR_EQUIPMENT] );
+    pPlayer->DisplayEquipment( PLACEMENT_ENDGAME );
+
     return true;
 }
 
@@ -298,9 +335,9 @@ bool CEndGameState::DoScores()
 {
     // append this numeral to the running string (only send it back when complete)
     CDisplayMeta meta;
-    sprintf( meta.header, "High Score List\n" );
+    strcpy( meta.header, g_Strings[STR_ENDGAME_HIGH_SCORES] );
     meta.limit = 25;
-    sprintf( meta.footer, "Scores past first page not shown.\n" );
+    strcpy( meta.footer, g_Strings[STR_ENDGAME_PAST_PAGE] );
     g_pGame->GetEnd()->DisplayList( m_llScores, &meta );
     // copy PLayer::DisplayInventory (or similar) to list the first N scores. Number them 1-N
     // make sure to display the current player's score, with its rank number, even if it's not on

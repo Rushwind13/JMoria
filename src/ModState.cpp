@@ -4,6 +4,7 @@
 #include "DungeonTile.h"
 #include "Game.h"
 #include "JMDefs.h"
+#include "Strings.h"
 
 #include "Dungeon.h"
 #include "Item.h"
@@ -46,7 +47,7 @@ int CModState::OnHandleOpen( JKeysym *keysym )
     {
         JLog( LOG_LEVEL_DEBUG, true,
               "Open cmd still waiting for a directional key: Directional key not pressed.\n" );
-        g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_DIRECTION_PROMPT] );
         return 0;
     }
 
@@ -57,11 +58,11 @@ int CModState::OnHandleOpen( JKeysym *keysym )
         if( DoOpen() )
         {
             // door opened; set up new state and crap
-            g_pGame->GetMsgs()->Printf( "You have picked the lock.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_LOCK_PICKED] );
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "You failed to pick the lock.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_LOCK_FAILED] );
         }
     }
     else
@@ -70,11 +71,11 @@ int CModState::OnHandleOpen( JKeysym *keysym )
         if( pTile && pTile->m_dtd->m_dwType == DUNG_IDX_DOOR &&
             pTile->HasFlags( DUNG_FLAG_LOCKED ) )
         {
-            g_pGame->GetMsgs()->Printf( "The door is held fast.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_DOOR_HELD] );
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "I do not see anything to open there.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_NO_OPEN_THERE] );
         }
     }
 
@@ -100,7 +101,7 @@ int CModState::OnHandleClose( JKeysym *keysym )
     {
         JLog( LOG_LEVEL_DEBUG, true,
               "close cmd still waiting for a directional key: Directional key not pressed.\n" );
-        g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_DIRECTION_PROMPT] );
         return 0;
     }
 
@@ -111,16 +112,16 @@ int CModState::OnHandleClose( JKeysym *keysym )
         if( DoClose() )
         {
             // door closed; set up new state and crap
-            g_pGame->GetMsgs()->Printf( "You have closed the door.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_DOOR_CLOSED_MSG] );
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "You failed to close the door.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_CLOSE_FAILED] );
         }
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "I do not see anything to close there.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_NO_CLOSE_THERE] );
     }
 
     JLog( LOG_LEVEL_DEBUG, true,
@@ -145,7 +146,7 @@ int CModState::OnHandleTunnel( JKeysym *keysym )
     {
         JLog( LOG_LEVEL_DEBUG, true,
               "Tunnel cmd still waiting for a directional key: Directional key not pressed.\n" );
-        g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_DIRECTION_PROMPT] );
         return 0;
     }
 
@@ -156,16 +157,16 @@ int CModState::OnHandleTunnel( JKeysym *keysym )
         if( DoTunnel() )
         {
             // Tunnel cleared; set up new state and crap
-            g_pGame->GetMsgs()->Printf( "You have removed the rubble.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_RUBBLE_REMOVED] );
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "You dig in the rubble...\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_DIG_RUBBLE] );
         }
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "Tunnel through what? Empty air?.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_TUNNEL_AIR] );
     }
 
     JLog( LOG_LEVEL_DEBUG, true,
@@ -322,21 +323,21 @@ int CModState::OnHandleSpike( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_DIRECTION_PROMPT] );
         return 0;
     }
 
     CDungeonTile *pTile = g_pGame->GetDungeon()->GetTile( m_vNewPos );
     if( !pTile || pTile->m_dtd->m_dwType != DUNG_IDX_DOOR )
     {
-        g_pGame->GetMsgs()->Printf( "I do not see a closed door there.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_NO_CLOSED_DOOR] );
     }
     else if( pTile->HasFlags( DUNG_FLAG_LOCKED ) )
     {
         // Already spiked — break it free (spikes are single-use)
         if( DoUnspike() )
         {
-            g_pGame->GetMsgs()->Printf( "The spike breaks.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_SPIKE_BREAKS] );
         }
     }
     else
@@ -346,12 +347,12 @@ int CModState::OnHandleSpike( JKeysym *keysym )
         {
             if( DoSpike() )
             {
-                g_pGame->GetMsgs()->Printf( "You spike the door shut.\n" );
+                g_pGame->GetMsgs()->Printf( g_Strings[STR_DOOR_SPIKED] );
             }
         }
         else
         {
-            g_pGame->GetMsgs()->Printf( "You have no iron spikes.\n" );
+            g_pGame->GetMsgs()->Printf( g_Strings[STR_NO_SPIKES] );
         }
     }
 
@@ -395,23 +396,23 @@ int CModState::OnHandleBash( JKeysym *keysym )
 
     if( retval != JSUCCESS )
     {
-        g_pGame->GetMsgs()->Printf( "Direction(1 2 3 4 6 7 8 9):\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_DIRECTION_PROMPT] );
         return 0;
     }
 
     if( !TestBash() )
     {
-        g_pGame->GetMsgs()->Printf( "I do not see a door there.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_NO_DOOR_THERE] );
     }
     else if( DoBash() )
     {
-        g_pGame->GetMsgs()->Printf( "You bash the door open!\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_DOOR_BASHED] );
         g_pGame->GetDungeon()->Aggravate( m_vNewPos );
         g_pGame->GetDungeon()->DisturbPlayer();
     }
     else
     {
-        g_pGame->GetMsgs()->Printf( "You slam against the door but it holds.\n" );
+        g_pGame->GetMsgs()->Printf( g_Strings[STR_DOOR_HOLDS] );
     }
 
     ResetToState( STATE_COMMAND );

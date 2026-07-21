@@ -6,6 +6,7 @@
 #include "Dungeon.h"
 #include "MonsterRecall.h"
 #include "Player.h"
+#include "Strings.h"
 #include "TileSet.h"
 
 #include "ClockStepState.h"
@@ -14,6 +15,7 @@
 #include "IntroState.h"
 #include "LookState.h"
 #include "ModState.h"
+#include "MoreState.h"
 #include "RangedState.h"
 #include "RestState.h"
 #include "RunState.h"
@@ -53,6 +55,7 @@ CGame::CGame()
       m_pStringInputState( NULL ),
       m_pTargetState( NULL ),
       m_pUseState( NULL ),
+      m_pMoreState( NULL ),
       m_pMonRecall( NULL ),
       m_eCurState( STATE_INVALID ),
       m_fGameTime( 0.0f ),
@@ -77,6 +80,7 @@ CGame::CGame()
     m_pStringInputState = new CStringInputState;
     m_pTargetState = new CTargetState;
     m_pUseState = new CUseState;
+    m_pMoreState = new CMoreState;
 #ifdef TURN_BASED
     m_bReadyForUpdate = false;
 #endif // TURN_BASED
@@ -90,6 +94,7 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
     Util::SeedRandomFromClock();
 
     g_Constants.Init();
+    LoadStrings( szBasedir );
 
     m_eRenderMode = mode;
 
@@ -125,6 +130,7 @@ JResult CGame::Init( const char *szBasedir, RenderMode mode )
 
     m_pMsgsDT = new CDisplayText( szBasedir, JRect( 0, 0, 640, MSGS_ROWS * 8 ), 255 );
     m_pMsgsDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE );
+    m_pMsgsDT->EnableMore();
 
     m_pStatsDT = new CDisplayText( szBasedir, JRect( 0, 50, 150, 480 ), 220 );
     m_pStatsDT->SetFlags( FLAG_TEXT_WRAP_WHITESPACE | FLAG_TEXT_BOUNDING_BOX );
@@ -315,6 +321,12 @@ void CGame::Term()
         m_pUseState = NULL;
     }
 
+    if( m_pMoreState )
+    {
+        delete m_pMoreState;
+        m_pMoreState = NULL;
+    }
+
     JLog( LOG_LEVEL_DEBUG, true, "Message boxes..." );
     if( m_pMsgsDT )
     {
@@ -416,6 +428,9 @@ void CGame::SetState( int eNewState )
     case STATE_USE:
         m_pCurState = reinterpret_cast<CStateBase *>( m_pUseState );
         break;
+    case STATE_MORE:
+        m_pCurState = reinterpret_cast<CStateBase *>( m_pMoreState );
+        break;
     case STATE_ENDGAME:
     {
         m_pCurState = reinterpret_cast<CStateBase *>( m_pEndGameState );
@@ -479,7 +494,7 @@ bool CGame::WaitForTick()
         // Calculate Tau to some decimal places.
         int n = Util::Roll( 1, 100 );
         float tau = plouffBig( n );
-        GetMsgs()->Printf( "n: %d, tau: %f\n", n, tau );
+        GetMsgs()->Printf( g_Strings[STR_N_TAU], n, tau );
         count++;
         if( count > 10000 )
             break;
@@ -496,7 +511,7 @@ int CGame::Update()
                 curTime = GetTickCount();
                 if( curTime > nextTime )
                 {
-                        g_pGame->GetStats()->Printf( "\nstats go here...\n");
+                        g_pGame->GetStats()->Printf( g_Strings[STR_STATS_GO_HERE]);
                         nextTime = curTime + 2000;
                 }
 
@@ -768,7 +783,7 @@ void CGame::HandleEvents( int &isActive, int &done )
             if( retval == JBOGUSKEY )
             {
                 JLog( LOG_LEVEL_INFO, true, "Bogus command: 0x%x\n", event.keysym.sym );
-                GetMsgs()->Printf( "Unrecognized command: 0x%x\n", event.keysym.sym );
+                GetMsgs()->Printf( g_Strings[STR_UNRECOGNIZED_COMMAND_0X], event.keysym.sym );
             }
             else if( retval == JQUITREQUEST )
             {

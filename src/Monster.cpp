@@ -5,6 +5,20 @@
 #include "MonsterRecall.h"
 static uint32 s_nextMonsterInstanceId = 1;
 
+JColor CMonsterDef::GetColor( int frame ) const
+{
+    if( m_llColors && m_llColors->length() > 0 )
+    {
+        int idx = frame % m_llColors->length();
+        CLink<JColor> *pLink = m_llColors->GetNthLink( idx );
+        if( pLink && pLink->m_lpData )
+        {
+            return *( pLink->m_lpData );
+        }
+    }
+    return m_Color;
+}
+
 CMonster::CMonster()
     : m_fHP( 0.0f ),
       m_fCurHP( 0.0f ),
@@ -190,7 +204,7 @@ JResult CMonster::SpawnAt( JIVector vPos )
         SetPos( vSpawn );
         g_pGame->GetDungeon()->GetTile( vSpawn )->m_pCurMonster = this;
         JLog( LOG_LEVEL_INFO, false, "Success! Spawned at <%d %d>\n", VEC_EXPAND( vPos ) );
-        // g_pGame->GetMsgs()->Printf( "Success!\n" );
+        // g_pGame->GetMsgs()->Printf( g_Strings[STR_SUCCESS] );
 
         return JSUCCESS;
     }
@@ -256,7 +270,7 @@ const char *CMonster::AttackFlavorText()
         break;
     case MON_FLAG_BREATHE:
         char retval[64];
-        sprintf( retval, "breathes %s on", AttackEffect() );
+        sprintf( retval, g_Strings[STR_MONSTER_BREATHES_ON], AttackEffect() );
         Util::jstrcpy( m_szCurrentFlavorText, retval );
         break;
     default:
@@ -385,8 +399,8 @@ void CMonster::SetColor()
 
     if( ( m_md->m_dwFlags & MON_COLOR_MULTI ) == MON_COLOR_MULTI )
     {
-        int which_color = Util::GetRandom( 0, m_md->m_Colors->length() - 1 );
-        ( m_md->m_Color ).SetColor( *( m_md->m_Colors->GetNthLink( which_color )->m_lpData ) );
+        int which_color = Util::GetRandom( 0, m_md->m_llColors->length() - 1 );
+        ( m_md->m_Color ).SetColor( *( m_md->m_llColors->GetNthLink( which_color )->m_lpData ) );
     }
     m_fColorChangeInterval = 0.0f;
 }

@@ -7,6 +7,7 @@
 // how to make them work with CL /EP for monsters.dat
 #ifndef __CONSTANTS_H__
 #define __CONSTANTS_H__
+#include "Strings.h"
 #include "Util.h"
 
 #define VERSION "0.70"
@@ -29,7 +30,8 @@
 #define STATE_LOOK 10
 #define STATE_TARGET 11
 #define STATE_RANGED 12
-#define STATE_MAX 13
+#define STATE_MORE 13
+#define STATE_MAX 14
 
 // Various statuses that someone could have
 #define STATUS_INVALID -1
@@ -97,12 +99,10 @@
 #define CHANCE_ARROW_BREAK 0
 #define ITEM_DESTROY_CHANCE 1.1f
 #define RECALL_DURATION 1
-#define SLEEP_LIGHT_WAKE_CHANCE 1.0f // always wake in tests
 #else
-#define CHANCE_ARROW_BREAK 33 // ~1 in 3 chance arrow breaks on landing
+#define CHANCE_ARROW_BREAK 33     // ~1 in 3 chance arrow breaks on landing
 #define ITEM_DESTROY_CHANCE 0.03f // 3% base chance per inventory slot
 #define RECALL_DURATION ( Util::Roll( 1, 20 ) + 30 )
-#define SLEEP_LIGHT_WAKE_CHANCE 0.85f // 85% chance to wake sleeping monsters when lighting a room
 #endif
 
 // Ranged attack limits
@@ -211,6 +211,7 @@
 // #define MON_FLAG_x          0x00004000
 #define MON_FLAG_HANDS 0x00001000 // can open doors non-destructively
 #define MON_FLAG_LARGE 0x00002000 // large/heavy enough to bash through doors
+#define MON_FLAG_ROCK 0x00004000  // made of stone/rock; hurt by Stone to Mud
 #define MON_FLAG_BREED 0x00008000
 
 #define MON_FLAG_INVISIBLE 0x00100000
@@ -228,7 +229,7 @@
 // #define MON_COLOR_x          0x40000000
 // #define MON_COLOR_x          0x80000000
 
-#define NUM_MON_FLAGS 23
+#define NUM_MON_FLAGS 24
 
 // Effect Flags
 #define EFFECT_FLAG_FIRE 0x00000001
@@ -419,7 +420,7 @@
 // Make sure you change below here if you added any flags.
 #define NUM_STRINGS                                                                                \
     MON_IDX_MAX + NUM_MON_FLAGS + EQUIP_IDX_MAX + ITEM_IDX_MAX + NUM_ITEM_FLAGS +                  \
-        NUM_EFFECT_FLAGS + NUM_EFFECT_FLAGS2 + NUM_EFFECT_MODIFIERS + NUM_EFFECT_TYPES
+        NUM_EFFECT_FLAGS + NUM_EFFECT_FLAGS2 + NUM_EFFECT_MODIFIERS + NUM_EFFECT_TYPES + STR_MAX
 
 #define MON_IDX 0
 #define MON_FLAG 1
@@ -534,6 +535,7 @@ public:
         m_StringTable[i++].Init( "MON_FLAG_BREED", MON_FLAG_BREED );
         m_StringTable[i++].Init( "MON_FLAG_HANDS", MON_FLAG_HANDS );
         m_StringTable[i++].Init( "MON_FLAG_LARGE", MON_FLAG_LARGE );
+        m_StringTable[i++].Init( "MON_FLAG_ROCK", MON_FLAG_ROCK );
         m_StringTable[i++].Init( "MON_FLAG_INVISIBLE", MON_FLAG_INVISIBLE );
         m_StringTable[i++].Init( "MON_FLAG_NEVER_SLEEP", MON_FLAG_NEVER_SLEEP );
         m_StringTable[i++].Init( "MON_FLAG_MAXHP", MON_FLAG_MAXHP );
@@ -637,6 +639,262 @@ public:
         m_StringTable[i++].Init( "EQUIP_IDX_2ND_OFF", EQUIP_IDX_2ND_OFF );
         m_StringTable[i++].Init( "EQUIP_IDX_AMMO", EQUIP_IDX_AMMO );
 
+        // String table IDs (for Strings.txt lookup)
+        m_StringTable[i++].Init( "STR_STATUS_CHANGE", STR_STATUS_CHANGE );
+        m_StringTable[i++].Init( "STR_STATUS_CHANGE_MON", STR_STATUS_CHANGE_MON );
+        m_StringTable[i++].Init( "STR_STATUS_SLEEP", STR_STATUS_SLEEP );
+        m_StringTable[i++].Init( "STR_STATUS_PARALYZE", STR_STATUS_PARALYZE );
+        m_StringTable[i++].Init( "STR_STATUS_AFRAID", STR_STATUS_AFRAID );
+        m_StringTable[i++].Init( "STR_STATUS_CONFUSE", STR_STATUS_CONFUSE );
+        m_StringTable[i++].Init( "STR_STATUS_SLEEP_MON", STR_STATUS_SLEEP_MON );
+        m_StringTable[i++].Init( "STR_STATUS_PARALYZE_MON", STR_STATUS_PARALYZE_MON );
+        m_StringTable[i++].Init( "STR_STATUS_AFRAID_MON", STR_STATUS_AFRAID_MON );
+        m_StringTable[i++].Init( "STR_STATUS_CONFUSE_MON", STR_STATUS_CONFUSE_MON );
+        m_StringTable[i++].Init( "STR_ATTACK_MISS", STR_ATTACK_MISS );
+        m_StringTable[i++].Init( "STR_ATTACK_HIT", STR_ATTACK_HIT );
+        m_StringTable[i++].Init( "STR_CRITICAL_HIT", STR_CRITICAL_HIT );
+        m_StringTable[i++].Init( "STR_YOU_MISS", STR_YOU_MISS );
+        m_StringTable[i++].Init( "STR_YOU_HIT", STR_YOU_HIT );
+        m_StringTable[i++].Init( "STR_BUMPED_INTO", STR_BUMPED_INTO );
+        m_StringTable[i++].Init( "STR_MON_WAKES", STR_MON_WAKES );
+        m_StringTable[i++].Init( "STR_MON_DIES", STR_MON_DIES );
+        m_StringTable[i++].Init( "STR_MON_IS_HIT", STR_MON_IS_HIT );
+        m_StringTable[i++].Init( "STR_MON_SHRIVELS", STR_MON_SHRIVELS );
+        m_StringTable[i++].Init( "STR_MON_SCREAMS", STR_MON_SCREAMS );
+        m_StringTable[i++].Init( "STR_MON_UNAFFECTED", STR_MON_UNAFFECTED );
+        m_StringTable[i++].Init( "STR_MON_STRIKES", STR_MON_STRIKES );
+        m_StringTable[i++].Init( "STR_MON_SHRUGS", STR_MON_SHRUGS );
+        m_StringTable[i++].Init( "STR_MON_VULNERABLE", STR_MON_VULNERABLE );
+        m_StringTable[i++].Init( "STR_MON_DESTROYED", STR_MON_DESTROYED );
+        m_StringTable[i++].Init( "STR_MON_AFFECTS", STR_MON_AFFECTS );
+        m_StringTable[i++].Init( "STR_MON_CRUMBLES", STR_MON_CRUMBLES );
+        m_StringTable[i++].Init( "STR_MON_CRACKS", STR_MON_CRACKS );
+        m_StringTable[i++].Init( "STR_MON_VANISHES", STR_MON_VANISHES );
+        m_StringTable[i++].Init( "STR_MON_INFO", STR_MON_INFO );
+        m_StringTable[i++].Init( "STR_MON_HEALTHIER", STR_MON_HEALTHIER );
+        m_StringTable[i++].Init( "STR_IT_DISAPPEARS", STR_IT_DISAPPEARS );
+        m_StringTable[i++].Init( "STR_MON_EMITS", STR_MON_EMITS );
+        m_StringTable[i++].Init( "STR_MON_GLOWS", STR_MON_GLOWS );
+        m_StringTable[i++].Init( "STR_IN_TOWN", STR_IN_TOWN );
+        m_StringTable[i++].Init( "STR_SPAWN", STR_SPAWN );
+        m_StringTable[i++].Init( "STR_FOUND_SECRET_DOOR", STR_FOUND_SECRET_DOOR );
+        m_StringTable[i++].Init( "STR_LIGHT_AREA", STR_LIGHT_AREA );
+        m_StringTable[i++].Init( "STR_NOTHING_HAPPENS", STR_NOTHING_HAPPENS );
+        m_StringTable[i++].Init( "STR_BALL_HARMLESS", STR_BALL_HARMLESS );
+        m_StringTable[i++].Init( "STR_WALL_COLLAPSES", STR_WALL_COLLAPSES );
+        m_StringTable[i++].Init( "STR_DOOR_DISSOLVES", STR_DOOR_DISSOLVES );
+        m_StringTable[i++].Init( "STR_SECRET_DOOR_DISSOLVES", STR_SECRET_DOOR_DISSOLVES );
+        m_StringTable[i++].Init( "STR_DOOR_SMASH", STR_DOOR_SMASH );
+        m_StringTable[i++].Init( "STR_DOOR_CREAK", STR_DOOR_CREAK );
+        m_StringTable[i++].Init( "STR_LOCK_PICKED", STR_LOCK_PICKED );
+        m_StringTable[i++].Init( "STR_LOCK_FAILED", STR_LOCK_FAILED );
+        m_StringTable[i++].Init( "STR_DOOR_HELD", STR_DOOR_HELD );
+        m_StringTable[i++].Init( "STR_NO_OPEN_THERE", STR_NO_OPEN_THERE );
+        m_StringTable[i++].Init( "STR_DOOR_CLOSED_MSG", STR_DOOR_CLOSED_MSG );
+        m_StringTable[i++].Init( "STR_CLOSE_FAILED", STR_CLOSE_FAILED );
+        m_StringTable[i++].Init( "STR_NO_CLOSE_THERE", STR_NO_CLOSE_THERE );
+        m_StringTable[i++].Init( "STR_NO_CLOSED_DOOR", STR_NO_CLOSED_DOOR );
+        m_StringTable[i++].Init( "STR_SPIKE_BREAKS", STR_SPIKE_BREAKS );
+        m_StringTable[i++].Init( "STR_DOOR_SPIKED", STR_DOOR_SPIKED );
+        m_StringTable[i++].Init( "STR_NO_SPIKES", STR_NO_SPIKES );
+        m_StringTable[i++].Init( "STR_NO_DOOR_THERE", STR_NO_DOOR_THERE );
+        m_StringTable[i++].Init( "STR_DOOR_BASHED", STR_DOOR_BASHED );
+        m_StringTable[i++].Init( "STR_DOOR_HOLDS", STR_DOOR_HOLDS );
+        m_StringTable[i++].Init( "STR_RUBBLE_REMOVED", STR_RUBBLE_REMOVED );
+        m_StringTable[i++].Init( "STR_DIG_RUBBLE", STR_DIG_RUBBLE );
+        m_StringTable[i++].Init( "STR_TUNNEL_AIR", STR_TUNNEL_AIR );
+        m_StringTable[i++].Init( "STR_NO_STAIRS", STR_NO_STAIRS );
+        m_StringTable[i++].Init( "STR_STAIR_UP", STR_STAIR_UP );
+        m_StringTable[i++].Init( "STR_STAIR_UP_LONG", STR_STAIR_UP_LONG );
+        m_StringTable[i++].Init( "STR_STAIR_DOWN", STR_STAIR_DOWN );
+        m_StringTable[i++].Init( "STR_STAIR_DOWN_LONG", STR_STAIR_DOWN_LONG );
+        m_StringTable[i++].Init( "STR_CANT_DO_THAT", STR_CANT_DO_THAT );
+        m_StringTable[i++].Init( "STR_DIRECTION_PROMPT", STR_DIRECTION_PROMPT );
+        m_StringTable[i++].Init( "STR_CANT_SEE_THAT", STR_CANT_SEE_THAT );
+        m_StringTable[i++].Init( "STR_LOOK_SEE", STR_LOOK_SEE );
+        m_StringTable[i++].Init( "STR_YOU_SEE", STR_YOU_SEE );
+        m_StringTable[i++].Init( "STR_DUNGEON_OPEN_DOOR", STR_DUNGEON_OPEN_DOOR );
+        m_StringTable[i++].Init( "STR_DUNGEON_SECRET_DOOR", STR_DUNGEON_SECRET_DOOR );
+        m_StringTable[i++].Init( "STR_DUNGEON_STAIRS_UP", STR_DUNGEON_STAIRS_UP );
+        m_StringTable[i++].Init( "STR_DUNGEON_STAIRS_UP_LONG", STR_DUNGEON_STAIRS_UP_LONG );
+        m_StringTable[i++].Init( "STR_DUNGEON_STAIRS_DOWN", STR_DUNGEON_STAIRS_DOWN );
+        m_StringTable[i++].Init( "STR_DUNGEON_STAIRS_DOWN_LONG", STR_DUNGEON_STAIRS_DOWN_LONG );
+        m_StringTable[i++].Init( "STR_DUNGEON_FLOOR", STR_DUNGEON_FLOOR );
+        m_StringTable[i++].Init( "STR_DUNGEON_UNKNOWN", STR_DUNGEON_UNKNOWN );
+        m_StringTable[i++].Init( "STR_LIGHT_OUT", STR_LIGHT_OUT );
+        m_StringTable[i++].Init( "STR_LIGHT_VERY_FAINT", STR_LIGHT_VERY_FAINT );
+        m_StringTable[i++].Init( "STR_LIGHT_FAINT", STR_LIGHT_FAINT );
+        m_StringTable[i++].Init( "STR_CANT_REFUEL", STR_CANT_REFUEL );
+        m_StringTable[i++].Init( "STR_FOUND_NOTHING", STR_FOUND_NOTHING );
+        m_StringTable[i++].Init( "STR_HAVE_ITEMS", STR_HAVE_ITEMS );
+        m_StringTable[i++].Init( "STR_HAVE_ITEM", STR_HAVE_ITEM );
+        m_StringTable[i++].Init( "STR_WAS_WIELDING", STR_WAS_WIELDING );
+        m_StringTable[i++].Init( "STR_CANT_REMOVE_CURSED", STR_CANT_REMOVE_CURSED );
+        m_StringTable[i++].Init( "STR_SWITCH_WEAPON", STR_SWITCH_WEAPON );
+        m_StringTable[i++].Init( "STR_SWITCH_BARE_HANDS", STR_SWITCH_BARE_HANDS );
+        m_StringTable[i++].Init( "STR_ORGANIZE_PACK", STR_ORGANIZE_PACK );
+        m_StringTable[i++].Init( "STR_NOW_WIELDING", STR_NOW_WIELDING );
+        m_StringTable[i++].Init( "STR_NOW_WEARING", STR_NOW_WEARING );
+        m_StringTable[i++].Init( "STR_CANT_WIELD", STR_CANT_WIELD );
+        m_StringTable[i++].Init( "STR_REMOVED", STR_REMOVED );
+        m_StringTable[i++].Init( "STR_CANT_REMOVE", STR_CANT_REMOVE );
+        m_StringTable[i++].Init( "STR_HOW_MANY", STR_HOW_MANY );
+        m_StringTable[i++].Init( "STR_DROPPED_ITEM", STR_DROPPED_ITEM );
+        m_StringTable[i++].Init( "STR_DROPPED_N_ITEMS", STR_DROPPED_N_ITEMS );
+        m_StringTable[i++].Init( "STR_CANT_DROP_HERE", STR_CANT_DROP_HERE );
+        m_StringTable[i++].Init( "STR_COULD_NOT_DROP", STR_COULD_NOT_DROP );
+        m_StringTable[i++].Init( "STR_YOU_READ", STR_YOU_READ );
+        m_StringTable[i++].Init( "STR_CANT_READ", STR_CANT_READ );
+        m_StringTable[i++].Init( "STR_USE_FAIL", STR_USE_FAIL );
+        m_StringTable[i++].Init( "STR_YOU_DRANK", STR_YOU_DRANK );
+        m_StringTable[i++].Init( "STR_CANT_DRINK", STR_CANT_DRINK );
+        m_StringTable[i++].Init( "STR_SELECT_VALID", STR_SELECT_VALID );
+        m_StringTable[i++].Init( "STR_NO_SUCH_ITEM", STR_NO_SUCH_ITEM );
+        m_StringTable[i++].Init( "STR_INVALID_QTY", STR_INVALID_QTY );
+        m_StringTable[i++].Init( "STR_CANT_USE_STAFF", STR_CANT_USE_STAFF );
+        m_StringTable[i++].Init( "STR_FILL_LANTERN", STR_FILL_LANTERN );
+        m_StringTable[i++].Init( "STR_NO_LANTERN", STR_NO_LANTERN );
+        m_StringTable[i++].Init( "STR_CANT_USE_FUEL", STR_CANT_USE_FUEL );
+        m_StringTable[i++].Init( "STR_CANT_FIRE", STR_CANT_FIRE );
+        m_StringTable[i++].Init( "STR_CANT_ZAP", STR_CANT_ZAP );
+        m_StringTable[i++].Init( "STR_NOTHING_VALID", STR_NOTHING_VALID );
+        m_StringTable[i++].Init( "STR_NOTHING_TO_FIRE_WITH", STR_NOTHING_TO_FIRE_WITH );
+        m_StringTable[i++].Init( "STR_NOTHING_TO_FIRE", STR_NOTHING_TO_FIRE );
+        m_StringTable[i++].Init( "STR_ARROW_BREAKS", STR_ARROW_BREAKS );
+        m_StringTable[i++].Init( "STR_CANCELLED", STR_CANCELLED );
+        m_StringTable[i++].Init( "STR_ITEM_BURNS", STR_ITEM_BURNS );
+        m_StringTable[i++].Init( "STR_ITEM_PITTED_TOHIT", STR_ITEM_PITTED_TOHIT );
+        m_StringTable[i++].Init( "STR_ITEM_PITTED_TODAM", STR_ITEM_PITTED_TODAM );
+        m_StringTable[i++].Init( "STR_ITEM_DAMAGED", STR_ITEM_DAMAGED );
+        m_StringTable[i++].Init( "STR_IDENTIFY", STR_IDENTIFY );
+        m_StringTable[i++].Init( "STR_OVERCHARGE", STR_OVERCHARGE );
+        m_StringTable[i++].Init( "STR_RECHARGE", STR_RECHARGE );
+        m_StringTable[i++].Init( "STR_ENCHANT", STR_ENCHANT );
+        m_StringTable[i++].Init( "STR_MAGIC_MAP", STR_MAGIC_MAP );
+        m_StringTable[i++].Init( "STR_FULL_MAP", STR_FULL_MAP );
+        m_StringTable[i++].Init( "STR_SENSE_DOORS", STR_SENSE_DOORS );
+        m_StringTable[i++].Init( "STR_SENSE_STAIRS", STR_SENSE_STAIRS );
+        m_StringTable[i++].Init( "STR_SENSE_TRAPS", STR_SENSE_TRAPS );
+        m_StringTable[i++].Init( "STR_SENSE_MONSTERS", STR_SENSE_MONSTERS );
+        m_StringTable[i++].Init( "STR_SENSE_TREASURE", STR_SENSE_TREASURE );
+        m_StringTable[i++].Init( "STR_NO_TREASURE", STR_NO_TREASURE );
+        m_StringTable[i++].Init( "STR_TELEPORT", STR_TELEPORT );
+        m_StringTable[i++].Init( "STR_RECALL", STR_RECALL );
+        m_StringTable[i++].Init( "STR_RECALL_ACTIVE", STR_RECALL_ACTIVE );
+        m_StringTable[i++].Init( "STR_BEGIN_RECALL", STR_BEGIN_RECALL );
+        m_StringTable[i++].Init( "STR_RECALL_RESET", STR_RECALL_RESET );
+        m_StringTable[i++].Init( "STR_RECALL_TO_TOWN", STR_RECALL_TO_TOWN );
+        m_StringTable[i++].Init( "STR_RECALL_TO_DUNGEON", STR_RECALL_TO_DUNGEON );
+        m_StringTable[i++].Init( "STR_CURSED", STR_CURSED );
+        m_StringTable[i++].Init( "STR_UNCURSED", STR_UNCURSED );
+        m_StringTable[i++].Init( "STR_IMMUNE", STR_IMMUNE );
+        m_StringTable[i++].Init( "STR_RESIST", STR_RESIST );
+        m_StringTable[i++].Init( "STR_LEVEL_UP", STR_LEVEL_UP );
+        m_StringTable[i++].Init( "STR_GAIN_HP_XLARGE", STR_GAIN_HP_XLARGE );
+        m_StringTable[i++].Init( "STR_GAIN_HP_LARGE", STR_GAIN_HP_LARGE );
+        m_StringTable[i++].Init( "STR_GAIN_HP_MEDIUM", STR_GAIN_HP_MEDIUM );
+        m_StringTable[i++].Init( "STR_GAIN_HP_SMALL", STR_GAIN_HP_SMALL );
+        m_StringTable[i++].Init( "STR_PROTECTION", STR_PROTECTION );
+        m_StringTable[i++].Init( "STR_LOSE_PROTECTION", STR_LOSE_PROTECTION );
+        m_StringTable[i++].Init( "STR_FULL_HP", STR_FULL_HP );
+        m_StringTable[i++].Init( "STR_RES_FEAR", STR_RES_FEAR );
+        m_StringTable[i++].Init( "STR_AFRAID", STR_AFRAID );
+        m_StringTable[i++].Init( "STR_YOU_BLIND", STR_YOU_BLIND );
+        m_StringTable[i++].Init( "STR_CONFUSED", STR_CONFUSED );
+        m_StringTable[i++].Init( "STR_RES_POISON", STR_RES_POISON );
+        m_StringTable[i++].Init( "STR_POISON", STR_POISON );
+        m_StringTable[i++].Init( "STR_PARALYZE", STR_PARALYZE );
+        m_StringTable[i++].Init( "STR_SLEEP", STR_SLEEP );
+        m_StringTable[i++].Init( "STR_GAIN_INFRAVISION", STR_GAIN_INFRAVISION );
+        m_StringTable[i++].Init( "STR_GAIN_ESP", STR_GAIN_ESP );
+        m_StringTable[i++].Init( "STR_RES_FIRE", STR_RES_FIRE );
+        m_StringTable[i++].Init( "STR_RES_COLD", STR_RES_COLD );
+        m_StringTable[i++].Init( "STR_RES_ELEC", STR_RES_ELEC );
+        m_StringTable[i++].Init( "STR_RES_ACID", STR_RES_ACID );
+        m_StringTable[i++].Init( "STR_GAIN_INVISIBLE", STR_GAIN_INVISIBLE );
+        m_StringTable[i++].Init( "STR_GAIN_LEVITATE", STR_GAIN_LEVITATE );
+        m_StringTable[i++].Init( "STR_GAIN_FREEACTION", STR_GAIN_FREEACTION );
+        m_StringTable[i++].Init( "STR_GAIN_SPEED", STR_GAIN_SPEED );
+        m_StringTable[i++].Init( "STR_HEAL_FEAR", STR_HEAL_FEAR );
+        m_StringTable[i++].Init( "STR_HEAL_BLIND", STR_HEAL_BLIND );
+        m_StringTable[i++].Init( "STR_HEAL_CONFUSE", STR_HEAL_CONFUSE );
+        m_StringTable[i++].Init( "STR_HEAL_POISON", STR_HEAL_POISON );
+        m_StringTable[i++].Init( "STR_HEAL_PARALYZE", STR_HEAL_PARALYZE );
+        m_StringTable[i++].Init( "STR_HEAL_ASLEEP", STR_HEAL_ASLEEP );
+        m_StringTable[i++].Init( "STR_LOSE_RES_FEAR", STR_LOSE_RES_FEAR );
+        m_StringTable[i++].Init( "STR_LOSE_RES_POISON", STR_LOSE_RES_POISON );
+        m_StringTable[i++].Init( "STR_LOSE_INFRAVISION", STR_LOSE_INFRAVISION );
+        m_StringTable[i++].Init( "STR_LOSE_ESP", STR_LOSE_ESP );
+        m_StringTable[i++].Init( "STR_LOSE_RES_FIRE", STR_LOSE_RES_FIRE );
+        m_StringTable[i++].Init( "STR_LOSE_RES_COLD", STR_LOSE_RES_COLD );
+        m_StringTable[i++].Init( "STR_LOSE_RES_ELEC", STR_LOSE_RES_ELEC );
+        m_StringTable[i++].Init( "STR_LOSE_RES_ACID", STR_LOSE_RES_ACID );
+        m_StringTable[i++].Init( "STR_LOSE_INVISIBILITY", STR_LOSE_INVISIBILITY );
+        m_StringTable[i++].Init( "STR_LOSE_LEVITATE", STR_LOSE_LEVITATE );
+        m_StringTable[i++].Init( "STR_LOSE_FREEACTION", STR_LOSE_FREEACTION );
+        m_StringTable[i++].Init( "STR_LOSE_SPEED", STR_LOSE_SPEED );
+        m_StringTable[i++].Init( "STR_GAIN_XP", STR_GAIN_XP );
+        m_StringTable[i++].Init( "STR_LOSE_XP", STR_LOSE_XP );
+        m_StringTable[i++].Init( "STR_LOSE_HP", STR_LOSE_HP );
+        m_StringTable[i++].Init( "STR_CHOOSE_POTION", STR_CHOOSE_POTION );
+        m_StringTable[i++].Init( "STR_CHOOSE_SCROLL", STR_CHOOSE_SCROLL );
+        m_StringTable[i++].Init( "STR_CHOOSE_WIELD", STR_CHOOSE_WIELD );
+        m_StringTable[i++].Init( "STR_CHOOSE_STAFF", STR_CHOOSE_STAFF );
+        m_StringTable[i++].Init( "STR_INV_CARRYING", STR_INV_CARRYING );
+        m_StringTable[i++].Init( "STR_INV_PAST_PAGE", STR_INV_PAST_PAGE );
+        m_StringTable[i++].Init( "STR_EQUIP_LIMIT", STR_EQUIP_LIMIT );
+        m_StringTable[i++].Init( "STR_CHOOSE_WEAPON", STR_CHOOSE_WEAPON );
+        m_StringTable[i++].Init( "STR_INV_WEARING", STR_INV_WEARING );
+        m_StringTable[i++].Init( "STR_CHOOSE_WAND", STR_CHOOSE_WAND );
+        m_StringTable[i++].Init( "STR_CHOOSE_AMMO", STR_CHOOSE_AMMO );
+        m_StringTable[i++].Init( "STR_CHOOSE_INV", STR_CHOOSE_INV );
+        m_StringTable[i++].Init( "STR_CHOOSE_EQUIP", STR_CHOOSE_EQUIP );
+        m_StringTable[i++].Init( "STR_CHOOSE_TARGET", STR_CHOOSE_TARGET );
+        m_StringTable[i++].Init( "STR_TARGET_PROMPT", STR_TARGET_PROMPT );
+        m_StringTable[i++].Init( "STR_TARGET_SELECTED", STR_TARGET_SELECTED );
+        m_StringTable[i++].Init( "STR_TARGET_LOST", STR_TARGET_LOST );
+        m_StringTable[i++].Init( "STR_PROMPT_WHICH_DIRECTION", STR_PROMPT_WHICH_DIRECTION );
+        m_StringTable[i++].Init( "STR_PROMPT_RECHARGE_WAND", STR_PROMPT_RECHARGE_WAND );
+        m_StringTable[i++].Init( "STR_PROMPT_ENCHANT_WEAPON", STR_PROMPT_ENCHANT_WEAPON );
+        m_StringTable[i++].Init( "STR_PROMPT_IDENTIFY_ITEM", STR_PROMPT_IDENTIFY_ITEM );
+        m_StringTable[i++].Init( "STR_PROMPT_REMOVE_CURSE", STR_PROMPT_REMOVE_CURSE );
+        m_StringTable[i++].Init( "STR_PROMPT_USE_ON_ITEM", STR_PROMPT_USE_ON_ITEM );
+        m_StringTable[i++].Init( "STR_PROMPT_CHOOSE_ITEM", STR_PROMPT_CHOOSE_ITEM );
+        m_StringTable[i++].Init( "STR_ITEM_SELECTION_SUFFIX", STR_ITEM_SELECTION_SUFFIX );
+        m_StringTable[i++].Init( "STR_STAT_NAME", STR_STAT_NAME );
+        m_StringTable[i++].Init( "STR_STAT_RACE", STR_STAT_RACE );
+        m_StringTable[i++].Init( "STR_STAT_CLASS", STR_STAT_CLASS );
+        m_StringTable[i++].Init( "STR_STAT_AC", STR_STAT_AC );
+        m_StringTable[i++].Init( "STR_STAT_HP", STR_STAT_HP );
+        m_StringTable[i++].Init( "STR_STAT_DAMAGE", STR_STAT_DAMAGE );
+        m_StringTable[i++].Init( "STR_STAT_TOHIT", STR_STAT_TOHIT );
+        m_StringTable[i++].Init( "STR_STAT_TODAM", STR_STAT_TODAM );
+        m_StringTable[i++].Init( "STR_STAT_SPEED_FAST", STR_STAT_SPEED_FAST );
+        m_StringTable[i++].Init( "STR_STAT_SPEED_SLOW", STR_STAT_SPEED_SLOW );
+        m_StringTable[i++].Init( "STR_STAT_LEVEL", STR_STAT_LEVEL );
+        m_StringTable[i++].Init( "STR_STAT_DEPTH", STR_STAT_DEPTH );
+        m_StringTable[i++].Init( "STR_STAT_EXP", STR_STAT_EXP );
+        m_StringTable[i++].Init( "STR_STAT_EXP_NEXT", STR_STAT_EXP_NEXT );
+        m_StringTable[i++].Init( "STR_STAT_LIGHT", STR_STAT_LIGHT );
+        m_StringTable[i++].Init( "STR_STAT_INFRAVISION", STR_STAT_INFRAVISION );
+        m_StringTable[i++].Init( "STR_STAT_TELEPATHY", STR_STAT_TELEPATHY );
+        m_StringTable[i++].Init( "STR_STAT_RES_POISON", STR_STAT_RES_POISON );
+        m_StringTable[i++].Init( "STR_STAT_POISONED", STR_STAT_POISONED );
+        m_StringTable[i++].Init( "STR_STAT_RES_FEAR", STR_STAT_RES_FEAR );
+        m_StringTable[i++].Init( "STR_STAT_AFRAID", STR_STAT_AFRAID );
+        m_StringTable[i++].Init( "STR_STAT_PARALYZED", STR_STAT_PARALYZED );
+        m_StringTable[i++].Init( "STR_STAT_BLIND", STR_STAT_BLIND );
+        m_StringTable[i++].Init( "STR_STAT_ASLEEP", STR_STAT_ASLEEP );
+        m_StringTable[i++].Init( "STR_STAT_CONFUSED", STR_STAT_CONFUSED );
+        m_StringTable[i++].Init( "STR_STAT_TARGET", STR_STAT_TARGET );
+        m_StringTable[i++].Init( "STR_STAT_POS", STR_STAT_POS );
+        m_StringTable[i++].Init( "STR_STAT_TARGET_POS", STR_STAT_TARGET_POS );
+        m_StringTable[i++].Init( "STR_STAT_PLAYER_POS", STR_STAT_PLAYER_POS );
+        m_StringTable[i++].Init( "STR_WIZ_ON", STR_WIZ_ON );
+        m_StringTable[i++].Init( "STR_WIZ_ADDED_ITEMS", STR_WIZ_ADDED_ITEMS );
+        m_StringTable[i++].Init( "STR_WIZ_IDENTIFIED", STR_WIZ_IDENTIFIED );
+        m_StringTable[i++].Init( "STR_WIZ", STR_WIZ );
+
         // Item Types
         m_StringTable[i++].Init( "ITEM_IDX_SWORD", ITEM_IDX_SWORD );
         m_StringTable[i++].Init( "ITEM_IDX_SHIELD", ITEM_IDX_SHIELD );
@@ -685,6 +943,118 @@ public:
         m_StringTable[i++].Init( "ITEM_FLAG_BLESSED", ITEM_FLAG_BLESSED );
         m_StringTable[i++].Init( "ITEM_FLAG_HOLDING", ITEM_FLAG_HOLDING );
         m_StringTable[i++].Init( "ITEM_COLOR_MULTI", ITEM_COLOR_MULTI );
+
+        // String definitions
+        m_StringTable[i++].Init( "STR_CHARACTER_CREATION_SCREEN_GOES_HERE",
+                                 STR_CHARACTER_CREATION_SCREEN_GOES_HERE );
+        m_StringTable[i++].Init( "STR_NAME", STR_NAME );
+        m_StringTable[i++].Init( "STR_CLOCKSTEP_MODE", STR_CLOCKSTEP_MODE );
+        m_StringTable[i++].Init( "STR_DUNGEON_DOOR", STR_DUNGEON_DOOR );
+        m_StringTable[i++].Init( "STR_COMBAT_HAVE_SLAIN", STR_COMBAT_HAVE_SLAIN );
+        m_StringTable[i++].Init( "STR_COMBAT_HIT", STR_COMBAT_HIT );
+        m_StringTable[i++].Init( "STR_COMBAT_MISS", STR_COMBAT_MISS );
+        m_StringTable[i++].Init( "STR_DUNGEON_RUBBLE", STR_DUNGEON_RUBBLE );
+        m_StringTable[i++].Init( "STR_COMBAT_UNKNOWN", STR_COMBAT_UNKNOWN );
+        m_StringTable[i++].Init( "STR_DUNGEON_WALL", STR_DUNGEON_WALL );
+        m_StringTable[i++].Init( "STR_CONFLICTS", STR_CONFLICTS );
+        m_StringTable[i++].Init( "STR_DEPTH", STR_DEPTH );
+        m_StringTable[i++].Init( "STR_DMGAVG", STR_DMGAVG );
+        m_StringTable[i++].Init( "STR_DUNGEON_CREATION_COMPLETE", STR_DUNGEON_CREATION_COMPLETE );
+        m_StringTable[i++].Init( "STR_DUNGEON_LEVEL_FT", STR_DUNGEON_LEVEL_FT );
+        m_StringTable[i++].Init( "STR_DUNGEON_OPEN", STR_DUNGEON_OPEN );
+        m_StringTable[i++].Init( "STR_DUNGEON_SECRET", STR_DUNGEON_SECRET );
+        m_StringTable[i++].Init( "STR_ENDGAME_HIGH_SCORES", STR_ENDGAME_HIGH_SCORES );
+        m_StringTable[i++].Init( "STR_ENDGAME_PAST_PAGE", STR_ENDGAME_PAST_PAGE );
+        m_StringTable[i++].Init( "STR_ENTER_A_NUMBER", STR_ENTER_A_NUMBER );
+        m_StringTable[i++].Init( "STR_EQUIPMENT", STR_EQUIPMENT );
+        m_StringTable[i++].Init( "STR_ERROR_DUNGEON_NOT_INITIALIZED",
+                                 STR_ERROR_DUNGEON_NOT_INITIALIZED );
+        m_StringTable[i++].Init( "STR_FLAG_NAME", STR_FLAG_NAME );
+        m_StringTable[i++].Init( "STR_FMT_BRACKETED", STR_FMT_BRACKETED );
+        m_StringTable[i++].Init( "STR_FMT_STRING", STR_FMT_STRING );
+        m_StringTable[i++].Init( "STR_FMT_STRING_LF", STR_FMT_STRING_LF );
+        m_StringTable[i++].Init( "STR_FPS", STR_FPS );
+        m_StringTable[i++].Init( "STR_GENERATION_COMPLETE", STR_GENERATION_COMPLETE );
+        m_StringTable[i++].Init( "STR_HALLS", STR_HALLS );
+        m_StringTable[i++].Init( "STR_HIGH_SCORE", STR_HIGH_SCORE );
+        m_StringTable[i++].Init( "STR_HP_RANGE", STR_HP_RANGE );
+        m_StringTable[i++].Init( "STR_HP_RANGE_APPROX", STR_HP_RANGE_APPROX );
+        m_StringTable[i++].Init( "STR_INCORRECT_PASSWORD", STR_INCORRECT_PASSWORD );
+        m_StringTable[i++].Init( "STR_INDENT", STR_INDENT );
+        m_StringTable[i++].Init( "STR_INVENTORY", STR_INVENTORY );
+        m_StringTable[i++].Init( "STR_ITEM_AC_BONUS", STR_ITEM_AC_BONUS );
+        m_StringTable[i++].Init( "STR_ITEM_AMULET", STR_ITEM_AMULET );
+        m_StringTable[i++].Init( "STR_ITEM_AMULETS", STR_ITEM_AMULETS );
+        m_StringTable[i++].Init( "STR_ITEM_CHARGES", STR_ITEM_CHARGES );
+        m_StringTable[i++].Init( "STR_ITEM_CURSED", STR_ITEM_CURSED );
+        m_StringTable[i++].Init( "STR_ITEM_NAME", STR_ITEM_NAME );
+        m_StringTable[i++].Init( "STR_ITEM_POTION", STR_ITEM_POTION );
+        m_StringTable[i++].Init( "STR_ITEM_POTIONS", STR_ITEM_POTIONS );
+        m_StringTable[i++].Init( "STR_ITEM_RECALL", STR_ITEM_RECALL );
+        m_StringTable[i++].Init( "STR_ITEM_RING", STR_ITEM_RING );
+        m_StringTable[i++].Init( "STR_ITEM_RINGS", STR_ITEM_RINGS );
+        m_StringTable[i++].Init( "STR_ITEM_SCROLL", STR_ITEM_SCROLL );
+        m_StringTable[i++].Init( "STR_ITEM_SCROLLS", STR_ITEM_SCROLLS );
+        m_StringTable[i++].Init( "STR_ITEM_STAFF", STR_ITEM_STAFF );
+        m_StringTable[i++].Init( "STR_ITEM_STAVES", STR_ITEM_STAVES );
+        m_StringTable[i++].Init( "STR_ITEM_TRIED", STR_ITEM_TRIED );
+        m_StringTable[i++].Init( "STR_ITEM_WAND", STR_ITEM_WAND );
+        m_StringTable[i++].Init( "STR_ITEM_WANDS", STR_ITEM_WANDS );
+        m_StringTable[i++].Init( "STR_ITEM_WEAPON_BONUS", STR_ITEM_WEAPON_BONUS );
+        m_StringTable[i++].Init( "STR_ITEM_WITH_FLAVOR", STR_ITEM_WITH_FLAVOR );
+        m_StringTable[i++].Init( "STR_KILLED", STR_KILLED );
+        m_StringTable[i++].Init( "STR_LF", STR_LF );
+        m_StringTable[i++].Init( "STR_LIST_ITEM", STR_LIST_ITEM );
+        m_StringTable[i++].Init( "STR_LIST_ITEM_WITH_COUNT", STR_LIST_ITEM_WITH_COUNT );
+        m_StringTable[i++].Init( "STR_MAP", STR_MAP );
+        m_StringTable[i++].Init( "STR_MONSTER_BREATHES_ON", STR_MONSTER_BREATHES_ON );
+        m_StringTable[i++].Init( "STR_MONSTER_NAME", STR_MONSTER_NAME );
+        m_StringTable[i++].Init( "STR_SUMMON_MONSTERS", STR_SUMMON_MONSTERS );
+        m_StringTable[i++].Init( "STR_N_TAU", STR_N_TAU );
+        m_StringTable[i++].Init( "STR_NO_CURRENT_TARGET", STR_NO_CURRENT_TARGET );
+        m_StringTable[i++].Init( "STR_NO_KNOWLEDGE", STR_NO_KNOWLEDGE );
+        m_StringTable[i++].Init( "STR_NONE", STR_NONE );
+        m_StringTable[i++].Init( "STR_NOT_YET_IMPLEMENTED", STR_NOT_YET_IMPLEMENTED );
+        m_StringTable[i++].Init( "STR_NOTHING_STIRS", STR_NOTHING_STIRS );
+        m_StringTable[i++].Init( "STR_PASSWORD", STR_PASSWORD );
+        m_StringTable[i++].Init( "STR_POPULATE", STR_POPULATE );
+        m_StringTable[i++].Init( "STR_PLAYER_POS", STR_PLAYER_POS );
+        m_StringTable[i++].Init( "STR_START_PLAYING", STR_START_PLAYING );
+        m_StringTable[i++].Init( "STR_SPAWN_PLAYER", STR_SPAWN_PLAYER );
+        m_StringTable[i++].Init( "STR_DUNGEON_GENERATION_COMPLETE",
+                                 STR_DUNGEON_GENERATION_COMPLETE );
+        m_StringTable[i++].Init( "STR_STEPS_PER_SEC", STR_STEPS_PER_SEC );
+        m_StringTable[i++].Init( "STR_RECALL_MONSTER_HEADER", STR_RECALL_MONSTER_HEADER );
+        m_StringTable[i++].Init( "STR_ROOMS", STR_ROOMS );
+        m_StringTable[i++].Init( "STR_ROOMS_HALLS", STR_ROOMS_HALLS );
+        m_StringTable[i++].Init( "STR_SEED_U", STR_SEED_U );
+        m_StringTable[i++].Init( "STR_SEEN", STR_SEEN );
+        m_StringTable[i++].Init( "STR_SOMETHING_HAPPENED", STR_SOMETHING_HAPPENED );
+        m_StringTable[i++].Init( "STR_STACK", STR_STACK );
+        m_StringTable[i++].Init( "STR_STATS_GO_HERE", STR_STATS_GO_HERE );
+        m_StringTable[i++].Init( "STR_SUCCESS", STR_SUCCESS );
+        m_StringTable[i++].Init( "STR_THE_DOOR_CLICKS_SHUT", STR_THE_DOOR_CLICKS_SHUT );
+        m_StringTable[i++].Init( "STR_THE_EMITS_A_HORRIBLE_WAIL", STR_THE_EMITS_A_HORRIBLE_WAIL );
+        m_StringTable[i++].Init( "STR_THE_IS_AFFECTED", STR_THE_IS_AFFECTED );
+        m_StringTable[i++].Init( "STR_THE_LOOKS_ENRAGED", STR_THE_LOOKS_ENRAGED );
+        m_StringTable[i++].Init( "STR_TICK", STR_TICK );
+        m_StringTable[i++].Init( "STR_TIME_MS", STR_TIME_MS );
+        m_StringTable[i++].Init( "STR_TIME_MS_SEC", STR_TIME_MS_SEC );
+        m_StringTable[i++].Init( "STR_UNKNOWN_ITEM", STR_UNKNOWN_ITEM );
+        m_StringTable[i++].Init( "STR_UNKNOWN_MONSTER", STR_UNKNOWN_MONSTER );
+        m_StringTable[i++].Init( "STR_UNRECOGNIZED_COMMAND_0X", STR_UNRECOGNIZED_COMMAND_0X );
+        m_StringTable[i++].Init( "STR_VISIBLE_MONSTER", STR_VISIBLE_MONSTER );
+        m_StringTable[i++].Init( "STR_VISIBLE_MONSTERS", STR_VISIBLE_MONSTERS );
+        m_StringTable[i++].Init( "STR_WINDOW_TITLE", STR_WINDOW_TITLE );
+        m_StringTable[i++].Init( "STR_WIZARD_MODE_OFF_YOU_ARE", STR_WIZARD_MODE_OFF_YOU_ARE );
+        m_StringTable[i++].Init( "STR_N_TIMES", STR_N_TIMES );
+        m_StringTable[i++].Init( "STR_N_TIMESP", STR_N_TIMESP );
+        m_StringTable[i++].Init( "STR_YOU_ARE_AFFECTED", STR_YOU_ARE_AFFECTED );
+        m_StringTable[i++].Init( "STR_YOU_CANT_SEE_THAT_TARGET", STR_YOU_CANT_SEE_THAT_TARGET );
+        m_StringTable[i++].Init( "STR_YOU_HEAR_A_STIRRING_IN", STR_YOU_HEAR_A_STIRRING_IN );
+        m_StringTable[i++].Init( "STR_YOU_RECOGNIZE_IT_AS_A", STR_YOU_RECOGNIZE_IT_AS_A );
+        m_StringTable[i++].Init( "STR_YOU_WERE_WIELDING_THE", STR_YOU_WERE_WIELDING_THE );
+        m_StringTable[i++].Init( "STR_YOUR_OFFER", STR_YOUR_OFFER );
 
         if( i != NUM_STRINGS )
         {

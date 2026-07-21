@@ -14,6 +14,7 @@ GIVEN( "^I have a game$" )
     ScenarioScope<TestCtx> context;
     if( g_pGame != NULL )
     {
+        g_pGame->Term();
         g_pGame = NULL;
     }
     g_pGame = new CGame;

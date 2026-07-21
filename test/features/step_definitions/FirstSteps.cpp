@@ -4,7 +4,11 @@ using cucumber::ScenarioScope;
 AFTER_ALL() { JLog( LOG_LEVEL_ERROR, false, "-------------------- (After all scenarios)\n" ); }
 AFTER()
 {
-    g_pGame = NULL;
+    if( g_pGame != NULL )
+    {
+        g_pGame->Term();
+        g_pGame = NULL;
+    }
     JLog( LOG_LEVEL_ERROR, false, "-------------------- (After each scenario)\n" );
 }
 /*#######

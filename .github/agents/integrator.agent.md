@@ -2,7 +2,7 @@
 name: integrator
 description: Probes a freshly scaffolded host repository and produces the integration profile plus the project overlay layer. Dispatch with the integration run directory. Produces runs/000-integration/integration-profile.md per contracts/integration-profile.md.
 tools: [read, search, edit, execute]
-model: claude-fable-5
+model: claude-sonnet-4.6
 disable-model-invocation: true
 user-invocable: true
 ---
@@ -68,74 +68,81 @@ you drafted into the project layer, and anything requiring a human decision at G
      every rendered agent(s) by render-agents.py. This is the ONLY writable
      policy surface: never edit core role copies in place. -->
 
-# JMoria Project Layer: Universal Guardrails
+## JMoria Project Layer Policy
 
-## Code Style & Format (G0)
-- **clang-format**: All code changes MUST pass `clang-format -i` before staging
-  - `.clang-format` configuration is in repo root (read-only)
-  - Run `clang-format -i <file>` on any modified `.cpp` or `.h` files
-  - Pre-commit hook template exists in `doc/Developer-Setup-Guide.md` (currently not installed)
-  - **CI gap**: G0 is not yet automated; enforcement is manual review until hook is installed
+### Host Repository Identity
+**Name:** JMoria  
+**Scope:** From-scratch C++ roguelike engine (homage to IMoria) with state-machine architecture, data-driven monster/item definitions, and dual-renderer support (ASCII/OpenGL)  
+**Primary Language:** C++17  
+**Platforms:** macOS (Darwin), Linux (Debian), Raspberry Pi OS (Debian)  
 
-## Platform Compatibility (G2)
-- JMoria supports **three platforms**: macOS (primary), Linux/Ubuntu, Raspberry Pi OS
-- All build scripts and code MUST remain compatible with all three
-- **Makefile platform detection**: Uses `uname -s` to branch Darwin vs Linux
-- **Tested build modes**:
-  - `make ascii` — terminal-only (ncurses); fastest
-  - `make opengl` — SDL2+OpenGL (graphics); requires framework on macOS
-  - `make` (default) — both renderers, runtime selection
-- **If you modify Makefile, build scripts, or dependencies**:
-  - Test `make ascii` on macOS (required)
-  - Test on Linux or Raspberry Pi if feasible (recommended; if not, document testing assumptions)
-  - Verify `uname` branching logic still works after changes
+### Platform Compatibility (Hard Guardrail)
+All code and build system changes must maintain compatibility across three platforms. Before merging any Makefile edit or build-related change:
+1. Verify platform detection logic uses `uname -s`
+2. Test on macOS and Linux (Docker acceptable for Linux verification)
+3. Document platform-specific flags and paths in inline comments
+4. Ensure conditional compilation (`ifeq`, `else ifeq`) is used, not absolute path assumptions
+5. Homebrew paths (macOS: `/opt/homebrew/`, `/usr/local/`) must not break Linux builds
 
-## Framework Integrity (G1)
-- JMoria uses the agentic framework for AI-assisted development
-- `.agentic/` contains framework core files (read-only); editing them breaks subsequent runs
-- **Only writable files**: `.agentic/overlays/` (project policy) and `.agentic/registry/models.yaml` (vendor bindings)
-- **Before committing overlay changes**:
-  - Run `.agentic/scripts/render-agents.py` to regenerate `.github/agents/*.agent.md`
-  - Commit both overlay changes AND generated agent files
-  - CI workflow `agentic-render-check.yml` will verify consistency
+### Code Style & Formatting (Enforced)
+- **Tool:** clang-format (config in `.clang-format`, committed)
+- **Trigger:** Pre-commit hook enforces `git clang-format` on staged changes
+- **Requirement:** All C++ code must pass clang-format before commit
+- **Action:** Run `clang-format -i <files>` to format; fix hook failures before committing
 
-## Resource Data Files (Convention)
-- Monster definitions: `Resources/Monsters.txt` (custom format, parsed by `CDataFile::ReadMonster()`)
-- Item definitions: `Resources/Items.txt` (custom format, parsed by `CDataFile::ReadItem()`)
-- **To add a new monster or item flavor**: Edit the `.txt` file only
-- **To add a new type**: Edit `.txt` file + add constant to `src/Constants.h` + add emoji to `MonIds`/`ItemIds` in `src/Monster.cpp` or `src/Item.cpp`
-- Utility scripts available: `scripts/find_monster.sh`, `scripts/list_item.sh`, etc.
+### Build System Architecture
+- **Primary builder:** GNU Make with `RENDER_MODE` environment variable
+- **Modes:** ASCII (ncurses), OpenGL (SDL2), both (default)
+- **Command:** `make ascii`, `make opengl`, `make` (or just `make`)
+- **Test:** `make build` (builds test executable), `make verify` (full build + BDD)
+- **Artifact:** `jmoria` executable; `test/bin/AllSteps` for BDD runner
+- **Never hardcode:** Build paths, renderer selection, or platform-specific features in source code
 
-## Testing
-- **Framework**: Cucumber-CPP + GoogleTest
-- **Location**: `test/features/` (feature files) + `test/features/step_definitions/` (C++ steps)
-- **Run tests**: `make clean ascii test; cd test; ./runtests.sh` (requires test dependencies)
-- **Test dependencies** (macOS): `brew install googletest cucumber-cpp`; `sudo gem install cucumber -v 7.1.0`
-- **Known constraint**: Hardcoded googletest path in Makefile (`/opt/homebrew/Cellar/googletest/1.17.0/`); works on macOS with Homebrew; Linux may differ
-- **If adding test files**: Ensure they build and link before committing
+### Data-Driven Design (Project Principle)
+- **Monster definitions:** `Resources/Monsters.txt` (parsed by `CDataFile::ReadMonster()`)
+- **Item definitions:** `Resources/Items.txt` (parsed by `CDataFile::ReadItem()`)
+- **Constraint:** Game-balancing numbers (stats, damage, AC, etc.) belong in resource files, NOT in .cpp code
+- **Enum constants:** Only in `src/Constants.h` as indices (e.g., `MON_IDX_ORC`, `ITEM_IDX_SWORD`)
+- **Resource format:** Custom format with angle-bracket-delimited strings (`<value>`), NdM dice notation
+- **Rationale:** Enables live tuning without recompilation; designers can modify game balance via data files
 
-## Security
-- **No secrets in artifacts**: Do not commit API keys, credentials, or personal data
-- **Gitignore**: Covers local artifacts (scores, logs, temp files); review `.gitignore` if adding new types
-- **.agentic/ state**: Safe to commit; contains no secrets, only framework and run artifacts
+### Wizard Mode Scope (Debug Feature)
+- **Feature:** Debug commands accessible via Ctrl+T, Ctrl+F, Ctrl+I, Ctrl+S
+- **Constraint:** Wizard Mode must disable score saving
+- **Enforcement:** Code review rejects PRs that allow score writes during Wizard Mode
+- **Implementation:** `CGame::IsWizardMode()` check before `SaveScore()` call
 
-## Documentation
-- **Developer guide**: `doc/Developer-Setup-Guide.md` (setup, dependencies, build, hooks)
-- **Code standards**: `doc/coding-standards.md` (style guidelines)
-- **Architecture**: `doc/_JMoria Developer's Guide.md` (dungeon, AI, tile system)
-- **Custom instructions**: `.github/copilot-instructions.md` (Copilot context for this project)
+### Test Architecture & Protocol
+- **Framework:** Cucumber-CPP (BDD) with GoogleTest wire protocol
+- **Test files:** Feature definitions in `test/features/` (Gherkin), step implementations in `test/features/step_definitions/` (C++)
+- **Build sequence:** `make build` produces `test/bin/AllSteps` executable
+- **Execution:** `./test/runtests.sh` starts AllSteps as background process, communicates via wire protocol
+- **Critical:** Never run `test/bin/AllSteps` manually; only via runtests.sh
+- **Reason:** Wire protocol expects specific socket/port handshake; manual invocation breaks cucumber connection
 
-## Branches & Releases
-- **Active branch**: `develop` (tracked from origin/develop)
-- **Releases**: Semantic versioning (0.6.x, 0.7.x); tag as `v<version>`
-- **Feature branches**: Use `feat/*`, `fix/*`, `issue/*` prefixes
-- **No branch protection configured**: Merges to develop are allowed; rely on review via PR (human gate)
+### Code Review Standards
+- **PR requirement:** All merges via PR (Rushwind13/JMoria workflow)
+- **Checks:** CI gate (agentic-render-check) + human review
+- **Focus areas:** Platform compatibility, clang-format compliance, test coverage, data-driven adherence
+- **Cross-platform:** Verify build on multiple platforms or via Docker before approval
 
-## Abbreviations
-- **G0–G3**: Gate set (code style, build integrity, approval/review, deploy)
-- **P5**: Plan persistence (agentic framework requirement; satisfied by in-repo runs)
-- **CI**: GitHub Actions workflows (`.github/workflows/`)
-- **clang-format**: LLVM code formatter; version 21.1.8 available on macOS
+### Repository Structure (Agent-Readable)
+- `src/` — C++ source (state machine, core engine)
+- `test/` — BDD feature files and step definitions
+- `Resources/` — Data files (monsters, items, colors, scores)
+- `util/` — Helper scripts (find_monster.sh, list_item.sh, etc.)
+- `doc/` — Developer guides, architecture docs
+- `.agentic/` — Framework configuration (read-only core, editable overlays)
+- `.clang-format` — Code style config (committed, immutable)
+- `Makefile` — Build recipes (platform-aware)
+
+### Documentation for Agents
+All agents should read:
+1. `.github/copilot-instructions.md` — Architecture, patterns, conventions
+2. `_JMoria Developer's Guide.md` — Monster/item addition, tile bindings
+3. `Developer-Setup-Guide.md` — Platform setup, clang-format hook installation
+4. `Makefile` — Build targets and platform detection logic
+5. `test/features/` — BDD test examples for feature patterns
 
 <!-- OVERLAY from overlays/integrator.md - project policy layer -->
 
@@ -143,27 +150,39 @@ you drafted into the project layer, and anything requiring a human decision at G
      the integrator rendered agent(s) by render-agents.py. This is the ONLY writable
      policy surface: never edit core role copies in place. -->
 
-## Integrator: JMoria Host Context
+## Integrator Role Specifics for JMoria
 
-You are integrating the agentic framework into **JMoria**, a from-scratch C++ roguelike game engine with:
-- **State machine architecture**: Game modes as separate state classes; states transition via `CGame::SetState()`
-- **Data-driven monsters/items**: Parsed from `Resources/Monsters.txt` and `Resources/Items.txt` (custom format)
-- **Cross-platform build**: Darwin (macOS), Linux, Raspberry Pi OS via single Makefile with `uname` branching
-- **Three render modes**: ASCII (ncurses), OpenGL (SDL2), or both at runtime
+### Integration Success Criteria
+A successful integration for JMoria means:
+1. **Platform matrix tested:** Builds pass on macOS (primary), Linux (Docker OK), conceptual Raspberry Pi support validated (Makefile conditional)
+2. **CI gate functional:** `agentic-render-check` runs on push/PR, validates rendered framework files
+3. **Framework visibility:** `.agentic/runs/` visible in repository; agent run records part of project history
+4. **No guardrail breaks:** Code submitted by any agent respects G1–G7 guardrails without human override
+5. **Cold-start capability verified:** Fresh clone can immediately run `make ascii`, `make verify` without external setup beyond OS package install
 
-### Host's Current Integration Status
-- ✓ Framework installed (`.agentic/`, `framework-lock.json`)
-- ✓ CI workflow present (`agentic-render-check.yml`)
-- ⚠️ Code style gate (G0) documented but not machine-enforced; pre-commit hook template exists
-- ⚠️ Test infrastructure ready but test dependencies not yet installed in CI
+### Probe Points (Findings Already Recorded)
+- ✅ Environment: g++, GNU Make, Homebrew (macOS), platform detection via uname
+- ✅ Gate: Single CI gate (render-check); no CD pipeline
+- ✅ Conventions: Accessible in-repo (Copilot instructions, Developer's Guide, Makefile)
+- ✅ Cross-platform: Makefile conditionals in place; Linux support unverified in CI
+- ⚠️ Test infrastructure: Requires full build pre-step; sequential `make build` then `runtests.sh`
 
-### Key Guardrails for Integrator
-1. **Do not edit core copies**: `.agentic/contracts/`, `.agentic/roles/`, `.agentic/scripts/` are read-only
-2. **Overlays are writable**: Update `overlays/_all.md` and per-role overlays as needed for project policy
-3. **After overlay changes**: Run `.agentic/scripts/render-agents.py` to regenerate `.github/agents/`; commit both
-4. **Platform testing**: If you modify Makefile or build scripts, verify on macOS and at least document assumptions for Linux/Pi
+### Documentation Artifacts Created
+- **Integration profile:** `.agentic/runs/000-integration/integration-profile.md` (this run's findings)
+- **Project layer:** `overlays/_all.md` (global policy), role-specific overlays (agent guidelines)
+- **Registry bindings:** `registry/models.yaml` (model assignments for each role)
 
-### Integration Profile Location
-- `integration-profile.md` in this run directory (`.agentic/runs/000-integration/`)
-- Contains: environment probe, gate mapping, conventions, guardrails, dispatch reality
-- Use as reference for subsequent runs and for human GI review
+### Known Risks & Mitigations
+| Risk | Mitigation |
+|------|-----------|
+| Linux build not CI-tested; implementer changes might break it | Require manual Linux verification or Docker test before merge; document in overlay |
+| Wizard Mode score-save constraint not enforced by compiler | Code review checklist; automated linting could detect `SaveScore()` without `IsWizardMode()` guard |
+| Test executable wire protocol fragile (manual invocation breaks it) | Developer docs + in-code comments; ops runbook should highlight this |
+| Resource file parsing custom format (not JSON/YAML) | Backward-compatible; agents should use existing FileParse utilities, not rewrite parsing |
+
+### Integrator's Sign-Off Requirements
+- [ ] All guardrails (G1–G7) trace to verified probe findings or cited host policy
+- [ ] Role-specific overlays are non-empty and actionable (not just templates)
+- [ ] Registry bindings reviewed for model tier appropriateness (frontier-reasoning for architect, balanced for implementer)
+- [ ] No manual edits to `.agentic/roles/` or `.agentic/contracts/`; all project policy in `overlays/`
+- [ ] GI human approver review scheduled

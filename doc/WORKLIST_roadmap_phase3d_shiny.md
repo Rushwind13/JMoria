@@ -2,7 +2,7 @@
 
 **Repo**: `Rushwind13/JMoria`
 **Build**: `make build`
-**Test**: `make bdd`
+**Test**: `make verify`
 **Status**: Roadmap for upcoming phase 
 **Last Updated**: May 25, 2026 (session 2)
 **Total Issues**: 12
@@ -74,7 +74,7 @@ Net result: 5 private methods removed from `CPlayer`. Issue closed May 25, 2026.
 
 ## Priority 3: Visual Polish & Effects (P2)
 
-### [#289](https://github.com/Rushwind13/JMoria/issues/289) - Multicolor beam effects for wands
+### ~~[#289](https://github.com/Rushwind13/JMoria/issues/289) - Multicolor beam effects for wands~~ ✅ DONE
 **Type**: Enhancement | **Severity**: Low | **Components**: Rendering, Effects, Ranged  
 **Description**: Extend single-color beam support (added April 27, 2026) to support multicolor beams for visual distinction:
 - **Fire ray**: red, orange, yellow-red (wWw pattern, use alternating normal and bold colors)
@@ -109,7 +109,7 @@ Alternative: non-trail beam with flickering/pulsing effect.
 **Use Case**: Ranged monsters (warlocks, archers, etc.) that want to maintain distance
 **Related Code**: AIMgr.cpp, add MON_AI_SEEKRANGED to Constants.h
 
-### [#305](https://github.com/Rushwind13/JMoria/issues/305) - Display inventory upon player death ✅ DONE
+### ~~[#305](https://github.com/Rushwind13/JMoria/issues/305) - Display inventory upon player death~~ ✅ DONE
 **Type**: Enhancement | **Severity**: Low | **Components**: End Game, UI  
 **Description**: Improve post-death sequence:
 - Upon death, all inventory and equipment become fully identified

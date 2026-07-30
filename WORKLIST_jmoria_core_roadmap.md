@@ -37,7 +37,7 @@ The core roadmap prioritizes:
 ## 🎯 Priority 1: Core Mechanics & Foundation
 
 ### #39 - Implement Ranged Attacks
-**Status**: In progress (PR #144)
+**Status**: ✅ COMPLETE (PR #235)
 **Description**: Add bow-based ranged combat with targeting, ammunition management, and line-of-sight mechanics.
 **Impact**: Opens alternative playstyle, extends combat depth.
 **Dependencies**: None blocking
@@ -321,8 +321,8 @@ COMPLETE
 ✅ #197 (Stats)
    └─ No deps
 
-✅ #39 (Ranged Attacks) — PR #144 in progress
-   └─ No deps (pairs with targeting system)
+✅ #39 (Ranged Attacks) — PR #235 merged
+   └─ No deps
 
 ✅ #110 (Use command UX)
    └─ No deps
@@ -422,7 +422,7 @@ Low-effort, immediate player-facing improvements:
 
 ### **Phase 2: Gameplay Expansion & Exploration** ✅ COMPLETE
 Core P1 features that extend playstyle and unlock dungeon accessibility:
-- #39 (Ranged attacks) — *separate branch* (issue/39-ranged-weapon-system)
+- ✅ #39 (Ranged attacks) — PR #235 merged
 - ✅ #117 (Search command) — branch: phase2-gameplay-expansion
 - ✅ #121 (Lantern fuel) — branch: phase2-gameplay-expansion (wand recharging TBD)
 - ✅ #45 (MON_AI_SEEK target positions) — branch: phase2-gameplay-expansion (foundation)
